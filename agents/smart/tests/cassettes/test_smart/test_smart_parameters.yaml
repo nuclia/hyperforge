@@ -1,0 +1,2881 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      x-nuclia-nuakey:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+    method: GET
+    uri: https://europe-1.nuclia.cloud/api/authorizer/info
+  response:
+    body:
+      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"03d47998-f672-4a9b-a57b-bde3a9c3ee8c","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '227'
+      content-type:
+      - application/json
+      date:
+      - Tue, 02 Jun 2026 17:19:30 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '5'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner_plan-smart\",\"system\":\"You
+      are a strategic planning assistant that coordinates context-retrieval agents
+      to answer a user's question.\\n\\nYour job is to produce a high-level retrieval
+      plan describing WHAT information to gather and WHY.\\nYou do NOT call tools
+      yourself and do NOT specify exact tool names or arguments \u2014 an executor
+      LLM\\nwill decide how to carry out each step using the available tools.\\n\\nGuidelines:\\n-
+      Analyse what information has already been gathered (execution history) and what
+      is still missing.\\n- Produce a minimal, targeted plan: only include steps that
+      will meaningfully advance towards answering the question.\\n- If the information
+      gathered so far is already sufficient to answer the question, set status to
+      \\\"done\\\".\\n- Each step should describe the information to retrieve in plain
+      language.\\n- Provide a concise summary of what has been accomplished so far
+      for the executor to use as context.\",\"chat_history\":[],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a strategic planning assistant that coordinates context-retrieval agents
+      to answer a user's question.\\n\\nYour job is to produce a high-level retrieval
+      plan describing WHAT information to gather and WHY.\\nYou do NOT call tools
+      yourself and do NOT specify exact tool names or arguments \u2014 an executor
+      LLM\\nwill decide how to carry out each step using the available tools.\\n\\nGuidelines:\\n-
+      Analyse what information has already been gathered (execution history) and what
+      is still missing.\\n- Produce a minimal, targeted plan: only include steps that
+      will meaningfully advance towards answering the question.\\n- If the information
+      gathered so far is already sufficient to answer the question, set status to
+      \\\"done\\\".\\n- Each step should describe the information to retrieve in plain
+      language.\\n- Provide a concise summary of what has been accomplished so far
+      for the executor to use as context.\\n\\n## User question\\nWho is Snoopy and
+      can you tell me the stock price of the company where his owner works?\\n\\n##
+      Available retrieval capabilities\\n- **static_context__269192da-f5b6-4196-8c9a-bd77e32f237c**:
+      Provides information about Snoopy, Carmen's dog. \u2014 Provide static context
+      to answer questions.\\n    (no parameters)\\n\\n- **static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba**:
+      Provides information about RAO, the agentic RAG orchestrator. \u2014 Provide
+      static context to answer questions.\\n    (no parameters)\\n\\n- **internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f**:
+      A general-purpose agent that can answer questions using the Perplexity API.
+      \u2014 Performs an internet search using Perplexity Search to get context to
+      answer questions.\\n    - question (string): The question to search for on the
+      internet.\\n\\n\\n\\n\\n## Execution history\\nNo tools have been called yet.\\n\\n\\n\\n##
+      Extra instructions\\nIf the question is about Snoopy, use the dog context agent.
+      If the question is about RAO, use the RAO context agent. for general questions
+      use the perplexity agent. Always try to be as thorough as possible\\n\\n\\nBased
+      on the above, produce the next retrieval plan or declare completion.\"},\"citations\":false,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":2000,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":{\"title\":\"retrieval_plan\",\"description\":\"High-level
+      retrieval plan for the executor\",\"parameters\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"string\",\"enum\":[\"plan\",\"done\"],\"description\":\"'plan'
+      if more retrieval steps are needed, 'done' if enough context has been gathered
+      to answer the question.\"},\"reasoning\":{\"type\":\"string\",\"description\":\"Explanation
+      of why this plan was chosen or why retrieval is complete.\"},\"summary\":{\"type\":\"string\",\"description\":\"Concise
+      summary of what has been gathered so far across all iterations.\"},\"steps\":{\"type\":\"array\",\"description\":\"Ordered
+      list of retrieval steps for the executor. Empty when status is 'done'.\",\"items\":{\"type\":\"object\",\"properties\":{\"description\":{\"type\":\"string\",\"description\":\"Plain-language
+      description of what information to retrieve.\"},\"reason\":{\"type\":\"string\",\"description\":\"Why
+      this information is needed to answer the question.\"}},\"required\":[\"description\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"status\",\"reasoning\",\"summary\",\"steps\"],\"additionalProperties\":false}},\"format_prompt\":false,\"rerank_context\":false,\"tools\":[],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4530'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 129fa87d88884541b0838bab3973b86f
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"object","object":{"status":"plan","reasoning":"The
+        user is asking two things: (1) Who is Snoopy? and (2) What is the stock price
+        of the company where Snoopy''s owner works? To answer (1), we need to retrieve
+        information about Snoopy, specifically from the static context agent about
+        Snoopy. For (2), we need to identify Snoopy''s owner, determine where they
+        work, and then find the stock price of that company. This may require multiple
+        steps: first, use the static context to identify the owner and their workplace,
+        then use internet search to find the stock price of that company.","summary":"No
+        information has been gathered yet. The user wants to know who Snoopy is and
+        the stock price of the company where his owner works.","steps":[{"description":"Retrieve
+        information about Snoopy, including details about his owner and their workplace.","reason":"This
+        will provide context on who Snoopy is and may reveal where his owner works,
+        which is necessary for the next step."},{"description":"If the owner''s workplace
+        is identified, search for the current stock price of that company.","reason":"The
+        user wants to know the stock price of the company where Snoopy''s owner works,
+        so this information is required."}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":319,"output_tokens":405,"timings":{"generative":5.067923695998616},"input_nuclia_tokens":0.319,"output_nuclia_tokens":0.405}}
+
+        {"chunk":{"normalized_tokens":{"input":0.3192,"output":0.4048,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:19:31 GMT
+      nuclia-learning-id:
+      - 3bfdfc122ce84f1aac5c4822e25c3880
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '5074'
+      x-nuclia-trace-id:
+      - 2a5af407d8300f903a69d5e6080460e5
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is and the stock price of the company
+      where his owner works.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      information about Snoopy, including details about his owner and their workplace.\\n
+      \  Reason: This will provide context on who Snoopy is and may reveal where his
+      owner works, which is necessary for the next step.\\n\\n2. If the owner's workplace
+      is identified, search for the current stock price of that company.\\n   Reason:
+      The user wants to know the stock price of the company where Snoopy's owner works,
+      so this information is required.\\n\\n\\nCall the tools needed to fulfil this
+      plan. You may call multiple tools.\\nCall task_complete once you have executed
+      all planned retrieval steps.\\n\\nExtra instructions: If the question is about
+      Snoopy, use the dog context agent. If the question is about RAO, use the RAO
+      context agent. for general questions use the perplexity agent. Always try to
+      be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is and the stock price of the company
+      where his owner works.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      information about Snoopy, including details about his owner and their workplace.\\n
+      \  Reason: This will provide context on who Snoopy is and may reveal where his
+      owner works, which is necessary for the next step.\\n\\n2. If the owner's workplace
+      is identified, search for the current stock price of that company.\\n   Reason:
+      The user wants to know the stock price of the company where Snoopy's owner works,
+      so this information is required.\\n\\n\\nCall the tools needed to fulfil this
+      plan. You may call multiple tools.\\nCall task_complete once you have executed
+      all planned retrieval steps.\\n\\nExtra instructions: If the question is about
+      Snoopy, use the dog context agent. If the question is about RAO, use the RAO
+      context agent. for general questions use the perplexity agent. Always try to
+      be as thorough as possible\\n\\n\\nChoose the best tool or tools for the task.
+      Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
+      information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
+      to answer questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f\",\"description\":\"A
+      general-purpose agent that can answer questions using the Perplexity API. \u2014
+      Performs an internet search using Perplexity Search to get context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"The
+      question to search for on the internet.\"}},\"additionalProperties\":false}},{\"name\":\"task_complete\",\"description\":\"Call
+      this tool when you have gathered enough information to answer the question and
+      no more tools are needed.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4396'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 129fa87d88884541b0838bab3973b86f
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":321,"output_tokens":56,"timings":{"generative_first_chunk":1.5764208550026524,"generative":1.5778217350016348},"input_nuclia_tokens":0.321,"output_nuclia_tokens":0.056}}
+
+        {"chunk":{"normalized_tokens":{"input":0.3208,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:19:35 GMT
+      nuclia-learning-id:
+      - 53c6133d1b3a48519157392b77421b42
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1584'
+      x-nuclia-trace-id:
+      - 6d195df4fa51d6536a92dd9198e1dfdc
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is and the stock price of the company
+      where his owner works.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      information about Snoopy, including details about his owner and their workplace.\\n
+      \  Reason: This will provide context on who Snoopy is and may reveal where his
+      owner works, which is necessary for the next step.\\n\\n2. If the owner's workplace
+      is identified, search for the current stock price of that company.\\n   Reason:
+      The user wants to know the stock price of the company where Snoopy's owner works,
+      so this information is required.\\n\\n\\nCall the tools needed to fulfil this
+      plan. You may call multiple tools.\\nCall task_complete once you have executed
+      all planned retrieval steps.\\n\\nExtra instructions: If the question is about
+      Snoopy, use the dog context agent. If the question is about RAO, use the RAO
+      context agent. for general questions use the perplexity agent. Always try to
+      be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: 5222091d37f34d369a5208ad9f30c296\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is and the stock price of the company
+      where his owner works.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      information about Snoopy, including details about his owner and their workplace.\\n
+      \  Reason: This will provide context on who Snoopy is and may reveal where his
+      owner works, which is necessary for the next step.\\n\\n2. If the owner's workplace
+      is identified, search for the current stock price of that company.\\n   Reason:
+      The user wants to know the stock price of the company where Snoopy's owner works,
+      so this information is required.\\n\\n\\nCall the tools needed to fulfil this
+      plan. You may call multiple tools.\\nCall task_complete once you have executed
+      all planned retrieval steps.\\n\\nExtra instructions: If the question is about
+      Snoopy, use the dog context agent. If the question is about RAO, use the RAO
+      context agent. for general questions use the perplexity agent. Always try to
+      be as thorough as possible\\n\\n\\nChoose the best tool or tools for the task.
+      Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
+      information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
+      to answer questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f\",\"description\":\"A
+      general-purpose agent that can answer questions using the Perplexity API. \u2014
+      Performs an internet search using Perplexity Search to get context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"The
+      question to search for on the internet.\"}},\"additionalProperties\":false}},{\"name\":\"task_complete\",\"description\":\"Call
+      this tool when you have gathered enough information to answer the question and
+      no more tools are needed.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4744'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 129fa87d88884541b0838bab3973b86f
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}],"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f":[{"function":{"name":"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f","arguments":{"question":"current
+        stock price of Progress Software"}}}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":362,"output_tokens":155,"timings":{"generative_first_chunk":1.3218423229991458,"generative":1.3233401530014817},"input_nuclia_tokens":0.362,"output_nuclia_tokens":0.155}}
+
+        {"chunk":{"normalized_tokens":{"input":0.3616,"output":0.1552,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:19:37 GMT
+      nuclia-learning-id:
+      - 4ed77763549f417480b1ba6b4bb6274c
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1329'
+      x-nuclia-trace-id:
+      - b5dfcca2ab7b2dfb948d5afd281fb50e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages":[{"content":"Be precise and concise","role":"system"},{"content":"current
+      stock price of Progress Software","role":"user"}],"model":"sonar-pro","return_images":false,"return_related_questions":false,"search_domain_filter":[],"web_search_options":{"search_context_size":"low"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Bearer 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
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '288'
+      Content-Type:
+      - application/json
+      Host:
+      - api.perplexity.ai
+      User-Agent:
+      - AsyncPerplexity/Python 0.36.0
+      X-Source:
+      - perplexity-py
+      X-Stainless-Arch:
+      - arm64
+      X-Stainless-Async:
+      - async:asyncio
+      X-Stainless-Lang:
+      - python
+      X-Stainless-OS:
+      - MacOS
+      X-Stainless-Package-Version:
+      - 0.36.0
+      X-Stainless-Runtime:
+      - CPython
+      X-Stainless-Runtime-Version:
+      - 3.13.5
+      X-Title:
+      - Perplexity Python SDK
+      x-stainless-read-timeout:
+      - '900'
+      x-stainless-retry-count:
+      - '0'
+    method: POST
+    uri: https://api.perplexity.ai/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAA/6VWXW7bRhC+yoBw2kQVl6RISbT65LhoWrSOk6joi2MYK3JFbk3tMrtLya5hoNfo
+        Sfreo/QknSFFSYjcpkEFPc3/fPPtDB88mXszLxRJGudZ6idxOvWT08nIX4hp5kd8lPHT02TJI+4N
+        vZXORYXmVitu/NpolGVGcCcwSDRNw2QUTtPp0GssL4Q3e/DQZlW7G6dvhbJoE6EDSirhpFY78WQ8
+        9Jx2vNpJppOhZwU3WXmTaeXEnbux8lcM6VV6Q1m1dRRfqrrpw990wpCF+IuHnm7c08rTdOgZ8aER
+        1h2IJ30Ne9E0jB4fMZl0nOrFuq680rnazoLA6IVUpdY5w4aCxgZCBdbp7NYGb969mgdYZG+62WzY
+        ShslVWEdN63D1vROcRvUprDBh0Y78ZFTLQxCdSfdPeMyWErFVSba8B8ZFloXlWgD91YL4XgXtHWY
+        vT6bf3P21rve4WqEbSpHPT14TrqKwCVLmFNp8MbITMBbCgBfwGuxseCjUBfoZ2Gul27DjUDZux4I
+        rKkxRI/PgChH7qDHKByN/TD24whlFce5NHXe0Yp0Ez/E/wh1Vsm6Fjge76dSQNYYI5SDuq0VsVW5
+        Be7gJB6zKBlCXfEMQQdXkpa6+mrCxs+AL/RagNM5v//SAjIK0BP8kKXPQC+XrX0pi5IBZTlq+jlV
+        /wI9+/zO8JzyrHXVrARIC4wxqlY3JqP+NmLhPQ4PcD7C8VybGrrAiOnFni1HqH4Wm/b4EoB+mPwT
+        vlvdAb7bnr5XS21WLf/ha8RCrKVuLJxX2oqOJDPEO2TjBNUvZR6c2Vv48w+UJfiCUDYvsT8Ll41r
+        B4QxZ5CMWJheoPKCm1vh4JzXGCVicfoShT+3MAZn64ICnY7iYTiJPgkpUfcphhKy2nQNHFIbbXfP
+        60mQ//X17YE6zkh0EC0ROVhZKLmUGUea5NJmuiG+aJDOAu4fuaIpwJJLA2teNQL5BydjZGI8BImL
+        8p5mYHRTlNU9wYbsbVQuDBm3PXUcLXgN+OI3QqiWvT0z/xcPD9HarYBX7aqBbzs4ngTuv2+jQxwv
+        a4HNnMQxS1MkwXft+2tZRMz6UW86ZUTKi1vHIOM1g4glI+IMkoXR+2MwHSG5kh+O+8bVpxe/iIyS
+        ZSV3bH+J6KKUGvvs1qFEhO/wBODFQ3C2p8zoFjJurSQiu/YK4WlST5Pg+WDQNTkD6ngweEF7od8U
+        xI0FHigYDKip6XgwAOQbWHossOAWSaG7Ua7wHIERGY1z1T0XfLocZKfutjlstzm7iq7fq/fqElWm
+        92pxt73D1hJT0d4Dhf6LezBcFQI4Mg03YVcUIo1EpQmMQywvb0y7S2lr/vXb7xgA+yUCYsqr5Bp5
+        5eHXgeOfxIoskRfS0g3i+C1BXxRO1zihx78B6LpBX5AIAAA=
+    headers:
+      CF-RAY:
+      - a0581fd14e77dfe7-MAD
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 02 Jun 2026 17:19:47 GMT
+      Server:
+      - cloudflare
+      Strict-Transport-Security:
+      - max-age=15552000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      cf-cache-status:
+      - DYNAMIC
+      set-cookie:
+      - __cf_bm=lTYe_X69gAuErfTggc2ObXDybs0HV9PRBETWAmVWqsw-1780420779.7299914-1.0.1.1-sPh9OovR3PuY4eTLhqm8nLOPN2KXI_fLJyxKP6Dq0sJpN7qnKJWf12JJX53jZHUoKct2M8SHQxEm5Oo_fpKjGY742dXqIgjaDSlD24PJOIhFT_iM3zlkNc7pISS5lZYj;
+        HttpOnly; SameSite=None; Secure; Path=/; Domain=perplexity.ai; Expires=Tue,
+        02 Jun 2026 17:49:47 GMT
+      - __cflb=04dToWaRite5R1fQA5HfyWsXiTjNxDHeSBb5LrGFX3; HttpOnly; SameSite=None;
+        Secure; Path=/; Expires=Tue, 02 Jun 2026 17:49:47 GMT
+      x-ppl-region:
+      - us-east-1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is and the stock price of the company
+      where his owner works.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      information about Snoopy, including details about his owner and their workplace.\\n
+      \  Reason: This will provide context on who Snoopy is and may reveal where his
+      owner works, which is necessary for the next step.\\n\\n2. If the owner's workplace
+      is identified, search for the current stock price of that company.\\n   Reason:
+      The user wants to know the stock price of the company where Snoopy's owner works,
+      so this information is required.\\n\\n\\nCall the tools needed to fulfil this
+      plan. You may call multiple tools.\\nCall task_complete once you have executed
+      all planned retrieval steps.\\n\\nExtra instructions: If the question is about
+      Snoopy, use the dog context agent. If the question is about RAO, use the RAO
+      context agent. for general questions use the perplexity agent. Always try to
+      be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: 5222091d37f34d369a5208ad9f30c296\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: c3470b38e0164a2892119d9da598cee5\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\\n\\n[internet_search of 0f5487c8-432d-4205-b5e0-d5c06b7a638f with
+      parameters {'question': 'current stock price of Progress Software'}]:\\n\\n\\n\\n##
+      Chunk: f30994de952747cb83808b4c7bb8b766\\nURLs: https://robinhood.com/us/en/stocks/PRGS/,
+      https://www.morningstar.com/stocks/xnas/prgs/quote, https://www.perplexity.ai/finance/PRGS,
+      https://www.google.com/finance/beta/quote/PRGS:NASDAQ\\n``` Progress Software
+      (**NASDAQ: PRGS**) is trading at about **$33.75** per share based on the most
+      recent market data in the search results.[1]\\n\\nOther recent quotes in the
+      results show a nearby range around **$33.18 to $34.50** during today\u2019s
+      session.[1][4] ```\\n\\n\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is and the stock price of the company
+      where his owner works.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      information about Snoopy, including details about his owner and their workplace.\\n
+      \  Reason: This will provide context on who Snoopy is and may reveal where his
+      owner works, which is necessary for the next step.\\n\\n2. If the owner's workplace
+      is identified, search for the current stock price of that company.\\n   Reason:
+      The user wants to know the stock price of the company where Snoopy's owner works,
+      so this information is required.\\n\\n\\nCall the tools needed to fulfil this
+      plan. You may call multiple tools.\\nCall task_complete once you have executed
+      all planned retrieval steps.\\n\\nExtra instructions: If the question is about
+      Snoopy, use the dog context agent. If the question is about RAO, use the RAO
+      context agent. for general questions use the perplexity agent. Always try to
+      be as thorough as possible\\n\\n\\nChoose the best tool or tools for the task.
+      Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
+      information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
+      to answer questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f\",\"description\":\"A
+      general-purpose agent that can answer questions using the Perplexity API. \u2014
+      Performs an internet search using Perplexity Search to get context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"The
+      question to search for on the internet.\"}},\"additionalProperties\":false}},{\"name\":\"task_complete\",\"description\":\"Call
+      this tool when you have gathered enough information to answer the question and
+      no more tools are needed.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '5744'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 129fa87d88884541b0838bab3973b86f
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}],"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f":[{"function":{"name":"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f","arguments":{"question":"current
+        stock price of Progress Software"}}}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":480,"output_tokens":155,"timings":{"generative_first_chunk":2.0304371350066504,"generative":2.031995215002098},"input_nuclia_tokens":0.48,"output_nuclia_tokens":0.155}}
+
+        {"chunk":{"normalized_tokens":{"input":0.4804,"output":0.1552,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:19:47 GMT
+      nuclia-learning-id:
+      - 04dce848924e47498e846661f43ef394
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '2038'
+      x-nuclia-trace-id:
+      - fde3b768199996abb3b9c2aeae52cd6e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages":[{"content":"Be precise and concise","role":"system"},{"content":"current
+      stock price of Progress Software","role":"user"}],"model":"sonar-pro","return_images":false,"return_related_questions":false,"search_domain_filter":[],"web_search_options":{"search_context_size":"low"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Bearer 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
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '288'
+      Content-Type:
+      - application/json
+      Cookie:
+      - __cf_bm=lTYe_X69gAuErfTggc2ObXDybs0HV9PRBETWAmVWqsw-1780420779.7299914-1.0.1.1-sPh9OovR3PuY4eTLhqm8nLOPN2KXI_fLJyxKP6Dq0sJpN7qnKJWf12JJX53jZHUoKct2M8SHQxEm5Oo_fpKjGY742dXqIgjaDSlD24PJOIhFT_iM3zlkNc7pISS5lZYj;
+        __cflb=04dToWaRite5R1fQA5HfyWsXiTjNxDHeSBb5LrGFX3
+      Host:
+      - api.perplexity.ai
+      User-Agent:
+      - AsyncPerplexity/Python 0.36.0
+      X-Source:
+      - perplexity-py
+      X-Stainless-Arch:
+      - arm64
+      X-Stainless-Async:
+      - async:asyncio
+      X-Stainless-Lang:
+      - python
+      X-Stainless-OS:
+      - MacOS
+      X-Stainless-Package-Version:
+      - 0.36.0
+      X-Stainless-Runtime:
+      - CPython
+      X-Stainless-Runtime-Version:
+      - 3.13.5
+      X-Title:
+      - Perplexity Python SDK
+      x-stainless-read-timeout:
+      - '900'
+      x-stainless-retry-count:
+      - '0'
+    method: POST
+    uri: https://api.perplexity.ai/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAA/6VW227bRhD9lQGRtAkjUpRESbTy5KRIWrTOzUWBIA6MFbkit6Z2md2lJTUw4H9o
+        X/rWv+h7PsVf0rOkaCm2myKo4Qd7dq5nzszwoycyb+bNp8liFE9YwJI0DuI4ToOEj1mQDPg8Gx8c
+        ZPPRgdfzlirjJdSNkkwHlVaQpZozy+FkME2ieBhNDyY9rzYs597sowedZWVPrTrj0kBnAANISm6F
+        kjvxdNzzrLKs3IkSuDGc6bQ4TZW0fG1PjfgNTr1SrVxcZayLIGRVdwFOW2EURvgZ9TxV2zsfhxM8
+        av6h5sbuiSddEjtRMplcXCCYsMxljMTeeYW1lZn1+1rNhSyUykKU1K9Nn8u+sSo9M/1Xb54f95Fk
+        p7parcKl0lLI3FimG4Ot6loy0690bvofamX5DaNcqbzkjf5CSCZT3p9zy1rdJszsxeHxd4evb9hV
+        XAPktbCbkIlrU6fvvb/GVXNTl9bV9NGzwpYOXKdCxy41eqVFyum1i0Tf0Au+MhRAqHLYGTpWC7ti
+        mkP2pgMCSdTaEeQrIMrAHlgMo+E4iEbBaABZydCXuspaYrm3SRDhd4g3I0VVcbTH+7nglNZac2mp
+        anIFtjIzxCzdG43DQdyjqmQpQCdbuFdX1aNJOL5PbK7OOVmVsc23hsAogiUFUZjcJ7VYNPqFyIuQ
+        XJRbRT9w2T+EZRffapa5OOeqrJechPn0VxiGLl1V69QVuOJz76K3B/QtIJ8qXVHrGaAe7ehyC9av
+        otMOYIdgEMX/BvD2bQ/gbVE/yIXSy2YA6DHA4OdC1YaelsrwliUzAB6F4xjPT0TWPzRn9OlvyGKM
+        EGTHBeoz9LK2TYfgc0bxMIySIzweMX3GLT1lFbwMwlHyBMJfGhz7h+e5c3QwHPWiyeB/YrrP6ms+
+        P28GjJ61E3In0l8zgzvwXlZchoBgFCYJCvq+IVODiEPpJ7VqHwfu8ejMhpSyKqRBGA9d/Sg8dGQK
+        aToEUPGPX67bDe1ds+nKV7rt3H750L1eEHfW/IX9sV8k+jWeEl9XPAWTHhOowWXN6VEcDu7TW/X2
+        YQ+jpOq8wHyxcmO6SQVrc24NDJZMSFrxstzOZDdRJVyV5uryD3bONcsdD++Nh+E4gsjUeY7V/flg
+        4384cYPImxXA7qYL1p+a/4p8IUgLZsPdPXJXpVBIr12JQmZ8jTOAuwdQtwdNqwZxZoxwXLbNJcJ5
+        kt1GWuJ2oKzU1dAwxJApsF98/3Z7HliRnnE9o5ag3RJhWtXYRicnjiDT8dXl7+7PZpbQF7iDre9T
+        VusOgRKDjLAG3lFH+G7w/t3o/Yk8kU94ymrTQdRgj6VVMJkDaeQtZI1RLjeds2U7jGiZNq51wmCX
+        oXfEKpzytcAW4OTj5JeBFUvuk25czZnhGYFke8mwcyZKNsdwYc0wWuBLYOZS2rsXPVoVIi2oBJYG
+        CLEb+1wtHClqew0FqsYqauCCrbBFExBL/OryT9Plwu2Kc0na0Q6VtbaYM7bFNAaJHERELpnPF0CX
+        kWtZU7eQritss3XexPR9heF2HGt9J0mvORZb7xHujrsoXWDf75EAxzZNb8nt3pam2bZM0eLm+0uR
+        BY2V8f1w28FnqNe98jVLLdVVYFWA/wPD0b+thx5tVE0rVZcZSQ6/VoGCC5CtcAEFxmrb2KYV7UAQ
+        HM81Po0wXdwdSuu2fIjF4uErz7L/ZLvTxGYQxn1JMHwTui9DqyrM2MU/PH8hGVgKAAA=
+    headers:
+      CF-RAY:
+      - a05820104a58034d-MAD
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 02 Jun 2026 17:19:56 GMT
+      Server:
+      - cloudflare
+      Strict-Transport-Security:
+      - max-age=15552000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      cf-cache-status:
+      - DYNAMIC
+      x-ppl-region:
+      - us-east-1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is and the stock price of the company
+      where his owner works.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      information about Snoopy, including details about his owner and their workplace.\\n
+      \  Reason: This will provide context on who Snoopy is and may reveal where his
+      owner works, which is necessary for the next step.\\n\\n2. If the owner's workplace
+      is identified, search for the current stock price of that company.\\n   Reason:
+      The user wants to know the stock price of the company where Snoopy's owner works,
+      so this information is required.\\n\\n\\nCall the tools needed to fulfil this
+      plan. You may call multiple tools.\\nCall task_complete once you have executed
+      all planned retrieval steps.\\n\\nExtra instructions: If the question is about
+      Snoopy, use the dog context agent. If the question is about RAO, use the RAO
+      context agent. for general questions use the perplexity agent. Always try to
+      be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: 5222091d37f34d369a5208ad9f30c296\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: c3470b38e0164a2892119d9da598cee5\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\\n\\n[internet_search of 0f5487c8-432d-4205-b5e0-d5c06b7a638f with
+      parameters {'question': 'current stock price of Progress Software'}]:\\n\\n\\n\\n##
+      Chunk: f30994de952747cb83808b4c7bb8b766\\nURLs: https://robinhood.com/us/en/stocks/PRGS/,
+      https://www.morningstar.com/stocks/xnas/prgs/quote, https://www.perplexity.ai/finance/PRGS,
+      https://www.google.com/finance/beta/quote/PRGS:NASDAQ\\n``` Progress Software
+      (**NASDAQ: PRGS**) is trading at about **$33.75** per share based on the most
+      recent market data in the search results.[1]\\n\\nOther recent quotes in the
+      results show a nearby range around **$33.18 to $34.50** during today\u2019s
+      session.[1][4] ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n## Chunk: ccbeda62135649d2a33de7543d65a950\\n```
+      Snoopy is Carmen's dog. He is small and very cute but a bit moody. He was a
+      rescue dog. Carmen works at Progress Software, a company that provides software
+      for developing and managing applications. ```\\n\\n\\n\\n[internet_search of
+      0f5487c8-432d-4205-b5e0-d5c06b7a638f with parameters {'question': 'current stock
+      price of Progress Software'}]:\\n\\n\\n\\n## Chunk: b3a8175a1c8d4449b38110a4b0b9d2a5\\nURLs:
+      https://robinhood.com/us/en/stocks/PRGS/, https://www.morningstar.com/stocks/xnas/prgs/quote,
+      https://www.google.com/finance/beta/quote/PRGS:NASDAQ, https://www.perplexity.ai/finance/PRGS\\n```
+      The most recent quotes show **Progress Software (ticker: PRGS) trading around
+      \\\\$33.75\u2013\\\\$34.00 per share** during the latest session.[1][3]\\n\\nBecause
+      stock prices change continuously during market hours, this is an approximate
+      *real-time* range based on the latest available data from:\\n\\n- Robinhood,
+      which lists **a current price of about \\\\$33.75** for PRGS, with the day\u2019s
+      range between roughly \\\\$33.18 and \\\\$34.50.[1]  \\n- Google Finance, which
+      shows an intraday range with **open at \\\\$33.88, high \\\\$34.04, low \\\\$33.18**,
+      implying a last traded price in the **mid-\\\\$33s**.[3]\\n\\nFor the exact
+      up-to-the-second price, you would need to refresh a live market data source
+      or brokerage platform. ```\\n\\n\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is and the stock price of the company
+      where his owner works.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      information about Snoopy, including details about his owner and their workplace.\\n
+      \  Reason: This will provide context on who Snoopy is and may reveal where his
+      owner works, which is necessary for the next step.\\n\\n2. If the owner's workplace
+      is identified, search for the current stock price of that company.\\n   Reason:
+      The user wants to know the stock price of the company where Snoopy's owner works,
+      so this information is required.\\n\\n\\nCall the tools needed to fulfil this
+      plan. You may call multiple tools.\\nCall task_complete once you have executed
+      all planned retrieval steps.\\n\\nExtra instructions: If the question is about
+      Snoopy, use the dog context agent. If the question is about RAO, use the RAO
+      context agent. for general questions use the perplexity agent. Always try to
+      be as thorough as possible\\n\\n\\nChoose the best tool or tools for the task.
+      Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
+      information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
+      to answer questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f\",\"description\":\"A
+      general-purpose agent that can answer questions using the Perplexity API. \u2014
+      Performs an internet search using Perplexity Search to get context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"The
+      question to search for on the internet.\"}},\"additionalProperties\":false}},{\"name\":\"task_complete\",\"description\":\"Call
+      this tool when you have gathered enough information to answer the question and
+      no more tools are needed.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '7194'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 129fa87d88884541b0838bab3973b86f
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}],"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f":[{"function":{"name":"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f","arguments":{"question":"current
+        stock price of Progress Software"}}}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":646,"output_tokens":155,"timings":{"generative_first_chunk":1.2857033850013977,"generative":1.2875158450042363},"input_nuclia_tokens":0.646,"output_nuclia_tokens":0.155}}
+
+        {"chunk":{"normalized_tokens":{"input":0.6456,"output":0.1552,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:19:55 GMT
+      nuclia-learning-id:
+      - 35ec9c1f6ac347fc820458a657f659ed
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1293'
+      x-nuclia-trace-id:
+      - 41b806ed3d8d2b9205866d0ea1c14779
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages":[{"content":"Be precise and concise","role":"system"},{"content":"current
+      stock price of Progress Software","role":"user"}],"model":"sonar-pro","return_images":false,"return_related_questions":false,"search_domain_filter":[],"web_search_options":{"search_context_size":"low"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Bearer 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
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '288'
+      Content-Type:
+      - application/json
+      Cookie:
+      - __cf_bm=lTYe_X69gAuErfTggc2ObXDybs0HV9PRBETWAmVWqsw-1780420779.7299914-1.0.1.1-sPh9OovR3PuY4eTLhqm8nLOPN2KXI_fLJyxKP6Dq0sJpN7qnKJWf12JJX53jZHUoKct2M8SHQxEm5Oo_fpKjGY742dXqIgjaDSlD24PJOIhFT_iM3zlkNc7pISS5lZYj;
+        __cflb=04dToWaRite5R1fQA5HfyWsXiTjNxDHeSBb5LrGFX3
+      Host:
+      - api.perplexity.ai
+      User-Agent:
+      - AsyncPerplexity/Python 0.36.0
+      X-Source:
+      - perplexity-py
+      X-Stainless-Arch:
+      - arm64
+      X-Stainless-Async:
+      - async:asyncio
+      X-Stainless-Lang:
+      - python
+      X-Stainless-OS:
+      - MacOS
+      X-Stainless-Package-Version:
+      - 0.36.0
+      X-Stainless-Runtime:
+      - CPython
+      X-Stainless-Runtime-Version:
+      - 3.13.5
+      X-Title:
+      - Perplexity Python SDK
+      x-stainless-read-timeout:
+      - '900'
+      x-stainless-retry-count:
+      - '0'
+    method: POST
+    uri: https://api.perplexity.ai/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAA/6WWUVPcNhDHv8qOh7SJa8v22eaO6xOhTcq0JCR0+kIyjM6WbRWf5EgyhjJ8rr73
+        k3XXvoObQJtmyvByu6vV7l8/rXzrydJbehlf5PO4ysLVIs3DLDlIwoM8XoWralEkfJ7wOI+9wFvr
+        UrQYbrXiJuyMRlthBHcCkyTzRZzN4vnBQeD1ltfCW956GLPu3IXTl0JZjElwAVpa4aRW9+Z5GnhO
+        O97eWxZZ4FnBTdFcFFo5ce0urPwDU3qtHmhXbR3ll6rrt+kvJmPMYvzDjLp3TzqpCCM+9cK6Hev+
+        toQH0zxJ7+5wL+k4lYtlnXuNc51dRpHRK6karUuG/US9jYSKrNPFpY1O378+i7DGbegwDGytjZKq
+        to6bccEm9FpxG3WmttGnXjvx2aJOGFTqWrobxmVUScVVIcb0nwXWWtetGBNvo1bC8SnpuGD55vDs
+        h8N33sd7WY2wfeuop1vPSdeSthQJZ1QanBpZCHhHCeAbeCMGCyEadY3rLJzpyg3cCLS93wqBNfWG
+        6PgKiUpEB1fM4lkexmmYJmhrOZ5L35UTVeTbD2P8n6HPKtl1Ao/H+7URUPTGCOWgG2tFbVVpgTvY
+        S3OWZAF0LS9QdHANeamr7/ZZ/gz4Sl8JcLrkN99aQKAAV0IYs8Uz0FU1xjeybhjQLo+afk7Vv8CV
+        2/2d4SXtc6Xbfi1AWmCMUbW6NwX1N4iVdxfs6PxIxyNtOpgSo6YnD7Q8UvWraHrQlwQM4+yf9N34
+        dvTd9HSsKm3WI//wPWohrqTuLRy12ooJkiXqHbM8Q/dLWUaH9hL++hNtGd4gtJ012J+Ft70bDwhz
+        LiGbsXhxgs4Tbi6FgyPeYZaEpYuXaPxtlDE6vKop0cEsDeL95IuSErpPEUrKajM1sIs2xt5frydF
+        /tfb9yDU4x0JBzGCyMHKWslKFhwxKaUtdE+8aJDOAs4fuaZTgIpLA1e87QXyB3s5kpgGIHFO3tAZ
+        GN3XTXtDsiG9vSqFoeCxp4nRmneAN34QQo30bsn8XxzuqnU/Al6PowZeTXI8Kdx/n0a7Or7tBDaz
+        l6ZssUAIfhrv30gRkfWLHiZnQs6TS8eg4B2DhGUzYgZhYXT/GMxnCFf28+O+cfTp1e+ioM2Khjv2
+        8BDRg9Jo7HMahxIVvsYnAB88FGfzkhk9SsatlQSyGx8hfJnU0xA8933q1Pdf0DzYTghiYoXvEvg+
+        NTPPfR+QM7B0SQIYpGsQGiMKOjzDVb0ZU4TFtAT7R3xIlzz2fXaefPygPqjjCm50DwPWFcAxSqOA
+        t1ZDLXHQkYeg8P31dN1QOd8P8Pdp9COMV4N+aoNb+/7KSFFtRqpDiEosEUcAUDe03Xn2ERny8EPA
+        8S/qQpHIgLT03nD8bKCPB6c7PI27vwHmm/BLewgAAA==
+    headers:
+      CF-RAY:
+      - a058204299dd0b7a-MAD
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 02 Jun 2026 17:19:59 GMT
+      Server:
+      - cloudflare
+      Strict-Transport-Security:
+      - max-age=15552000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      cf-cache-status:
+      - DYNAMIC
+      x-ppl-region:
+      - us-east-1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is and the stock price of the company
+      where his owner works.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      information about Snoopy, including details about his owner and their workplace.\\n
+      \  Reason: This will provide context on who Snoopy is and may reveal where his
+      owner works, which is necessary for the next step.\\n\\n2. If the owner's workplace
+      is identified, search for the current stock price of that company.\\n   Reason:
+      The user wants to know the stock price of the company where Snoopy's owner works,
+      so this information is required.\\n\\n\\nCall the tools needed to fulfil this
+      plan. You may call multiple tools.\\nCall task_complete once you have executed
+      all planned retrieval steps.\\n\\nExtra instructions: If the question is about
+      Snoopy, use the dog context agent. If the question is about RAO, use the RAO
+      context agent. for general questions use the perplexity agent. Always try to
+      be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: 5222091d37f34d369a5208ad9f30c296\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: c3470b38e0164a2892119d9da598cee5\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\\n\\n[internet_search of 0f5487c8-432d-4205-b5e0-d5c06b7a638f with
+      parameters {'question': 'current stock price of Progress Software'}]:\\n\\n\\n\\n##
+      Chunk: f30994de952747cb83808b4c7bb8b766\\nURLs: https://robinhood.com/us/en/stocks/PRGS/,
+      https://www.morningstar.com/stocks/xnas/prgs/quote, https://www.perplexity.ai/finance/PRGS,
+      https://www.google.com/finance/beta/quote/PRGS:NASDAQ\\n``` Progress Software
+      (**NASDAQ: PRGS**) is trading at about **$33.75** per share based on the most
+      recent market data in the search results.[1]\\n\\nOther recent quotes in the
+      results show a nearby range around **$33.18 to $34.50** during today\u2019s
+      session.[1][4] ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n## Chunk: ccbeda62135649d2a33de7543d65a950\\n```
+      Snoopy is Carmen's dog. He is small and very cute but a bit moody. He was a
+      rescue dog. Carmen works at Progress Software, a company that provides software
+      for developing and managing applications. ```\\n\\n\\n\\n[internet_search of
+      0f5487c8-432d-4205-b5e0-d5c06b7a638f with parameters {'question': 'current stock
+      price of Progress Software'}]:\\n\\n\\n\\n## Chunk: b3a8175a1c8d4449b38110a4b0b9d2a5\\nURLs:
+      https://robinhood.com/us/en/stocks/PRGS/, https://www.morningstar.com/stocks/xnas/prgs/quote,
+      https://www.google.com/finance/beta/quote/PRGS:NASDAQ, https://www.perplexity.ai/finance/PRGS\\n```
+      The most recent quotes show **Progress Software (ticker: PRGS) trading around
+      \\\\$33.75\u2013\\\\$34.00 per share** during the latest session.[1][3]\\n\\nBecause
+      stock prices change continuously during market hours, this is an approximate
+      *real-time* range based on the latest available data from:\\n\\n- Robinhood,
+      which lists **a current price of about \\\\$33.75** for PRGS, with the day\u2019s
+      range between roughly \\\\$33.18 and \\\\$34.50.[1]  \\n- Google Finance, which
+      shows an intraday range with **open at \\\\$33.88, high \\\\$34.04, low \\\\$33.18**,
+      implying a last traded price in the **mid-\\\\$33s**.[3]\\n\\nFor the exact
+      up-to-the-second price, you would need to refresh a live market data source
+      or brokerage platform. ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n## Chunk: 5a704d0e11fd48159431a77f2d81f217\\n```
+      Snoopy is Carmen's dog. He is small and very cute but a bit moody. He was a
+      rescue dog. Carmen works at Progress Software, a company that provides software
+      for developing and managing applications. ```\\n\\n\\n\\n[internet_search of
+      0f5487c8-432d-4205-b5e0-d5c06b7a638f with parameters {'question': 'current stock
+      price of Progress Software'}]:\\n\\n\\n\\n## Chunk: 2f22942edcd549ec9cc429f0bc92e732\\nURLs:
+      https://robinhood.com/us/en/stocks/PRGS/, https://www.morningstar.com/stocks/xnas/prgs/quote,
+      https://www.perplexity.ai/finance/PRGS, https://www.google.com/finance/beta/quote/PRGS:NASDAQ\\n```
+      Progress Software (**PRGS**) is trading at about **$33.75** per share, with
+      a recent range today of **$33.18 to $34.50**.[1]\\n\\nIf you want, I can also
+      give you the **market cap**, **P/E ratio**, or a **brief price trend** for PRGS.[1][4]
+      ```\\n\\n\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is and the stock price of the company
+      where his owner works.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      information about Snoopy, including details about his owner and their workplace.\\n
+      \  Reason: This will provide context on who Snoopy is and may reveal where his
+      owner works, which is necessary for the next step.\\n\\n2. If the owner's workplace
+      is identified, search for the current stock price of that company.\\n   Reason:
+      The user wants to know the stock price of the company where Snoopy's owner works,
+      so this information is required.\\n\\n\\nCall the tools needed to fulfil this
+      plan. You may call multiple tools.\\nCall task_complete once you have executed
+      all planned retrieval steps.\\n\\nExtra instructions: If the question is about
+      Snoopy, use the dog context agent. If the question is about RAO, use the RAO
+      context agent. for general questions use the perplexity agent. Always try to
+      be as thorough as possible\\n\\n\\nChoose the best tool or tools for the task.
+      Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
+      information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
+      to answer questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f\",\"description\":\"A
+      general-purpose agent that can answer questions using the Perplexity API. \u2014
+      Performs an internet search using Perplexity Search to get context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"The
+      question to search for on the internet.\"}},\"additionalProperties\":false}},{\"name\":\"task_complete\",\"description\":\"Call
+      this tool when you have gathered enough information to answer the question and
+      no more tools are needed.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '8174'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 129fa87d88884541b0838bab3973b86f
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}],"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f":[{"function":{"name":"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f","arguments":{"question":"current
+        stock price of Progress Software"}}}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":769,"output_tokens":155,"timings":{"generative_first_chunk":1.3519340029888554,"generative":1.353563642987865},"input_nuclia_tokens":0.769,"output_nuclia_tokens":0.155}}
+
+        {"chunk":{"normalized_tokens":{"input":0.7688,"output":0.1552,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:19:59 GMT
+      nuclia-learning-id:
+      - 60c075cc677a4bd9a5690d476d053331
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1360'
+      x-nuclia-trace-id:
+      - f8c5e80ecaf8860707e94b627c876c27
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages":[{"content":"Be precise and concise","role":"system"},{"content":"current
+      stock price of Progress Software","role":"user"}],"model":"sonar-pro","return_images":false,"return_related_questions":false,"search_domain_filter":[],"web_search_options":{"search_context_size":"low"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Bearer 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
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '288'
+      Content-Type:
+      - application/json
+      Cookie:
+      - __cf_bm=lTYe_X69gAuErfTggc2ObXDybs0HV9PRBETWAmVWqsw-1780420779.7299914-1.0.1.1-sPh9OovR3PuY4eTLhqm8nLOPN2KXI_fLJyxKP6Dq0sJpN7qnKJWf12JJX53jZHUoKct2M8SHQxEm5Oo_fpKjGY742dXqIgjaDSlD24PJOIhFT_iM3zlkNc7pISS5lZYj;
+        __cflb=04dToWaRite5R1fQA5HfyWsXiTjNxDHeSBb5LrGFX3
+      Host:
+      - api.perplexity.ai
+      User-Agent:
+      - AsyncPerplexity/Python 0.36.0
+      X-Source:
+      - perplexity-py
+      X-Stainless-Arch:
+      - arm64
+      X-Stainless-Async:
+      - async:asyncio
+      X-Stainless-Lang:
+      - python
+      X-Stainless-OS:
+      - MacOS
+      X-Stainless-Package-Version:
+      - 0.36.0
+      X-Stainless-Runtime:
+      - CPython
+      X-Stainless-Runtime-Version:
+      - 3.13.5
+      X-Title:
+      - Perplexity Python SDK
+      x-stainless-read-timeout:
+      - '900'
+      x-stainless-retry-count:
+      - '0'
+    method: POST
+    uri: https://api.perplexity.ai/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAA/6VW224bNxD9lcEiaRNFS60uaynKk5MiSdE6NwcFAicwqF1ql9WK3JBcyW5gwL9Q
+        tC9961/0PZ/iL+khdY3jpAhqGAY8nBnOOXNmuB8imUfjqDudTEd5txdPDgY8HohUxPz+MI0zMU1F
+        2h+NJmk/akdznYsK7lYrbuLaaNgyI7gTSNIdjpJBL8GfdtRYXoho/CGCz7x2p07PhLLw6SIAlko4
+        qdXOnB60I6cdr3amg2E7soKbrDzNtHLizJ1a+RuSRpVe+nu1df4Gqepmc8HpypiwBD/9dqQbd+Nh
+        r48ajXjfCOv2zNsidqZRf3hxgcuk475iFHYSlc7VdtzpGD2RqtQ6Z4DUaWxHqI51OpvZzotXT447
+        KHLjulwu2VwbJVVhHTchYO16prjt1KawnfeNduJaUKF1UYngP5WKq0x0JsLxlW+4Zvzs8PiHw5fX
+        4mphQPKZdOeMy22o94/ebXk1wjaV85g+RE66ypPrXejYl0YvjMwEvfQ30Xf0TCwtxTDqAnGWjvXU
+        LbkRsL3aEIEiGuMF8g0U5VAPInpJL42TftzvwlZx9KWp85Ww/NlBnOC3hzOrZF0LtCd6XQrKGmOE
+        clSHWsGtyi1xR7f6KesO2lRXPAPp5Ep/6lHdO2DpbeITvRDkdM7Pv7cERREiKU7Y6Dbp6TT4l7Io
+        GflbPgN9x1d/F5Gb+53hub9noatmLkjaj38zxny5ujGZB7gUk+iivUf0Z0Q+0qamVWaQerSTy2e0
+        fpOcdgR7BuNk8CWC12d7BK9B/aim2szDANADkCEWUjeWHlXaipVKxiA8YekAxw9l3jm0M/r4D2wD
+        jBBsxyXwWXreuNAh5BzToMeS0REOj7iZCUePeI0sXdYfPYTxl8Bj53BR+ET3e/12ctD9n5zuq3qr
+        5ydhwOjxakJuZPpbZnBH3vNaKAYK+mw0AqCnQUyBEc/Sz3q5Ouz6w6OZY5TxmlGXDXoeP4AzLyZG
+        wx6IGvz0ddx+aG+aTQ9fm1Xn9uHDd7sgbsT8lf2xDxL9SockzmqRQUkPCNIQqhF0b8C6t+mNfnO3
+        jVHSTVFivnh1bjeTCtUWwlkEzLlUtBRVtZ7JzURVSFXZq8s/+UIYXngd3kp7LE1gsk1RYHV/Otj4
+        H0n8IIqwAvjNcsH605NfUS8MWckd271H/lUpNcpbrUSpcnGGZwDvHkhdP2hGB8a5tdJr2YWXCM+T
+        2mykVqvCVAFokEe+wttqEUYIZ19SqJPZTJgxBaXCWwJCjcfzTGLuRHWOUK+WYUroDFk/T60WO+m+
+        O+m/e6veqtclIqayaJARgMDAFC8v6OVV7CQmSWHl7/6l+WrosAA4WWEWHjS4BG22xDIMgtrsNG50
+        g+W4ruDq8o+g4larTUvpyt32Dyv003miiYYHiJQZD+3i1zY2entOWVgkTm9BbqHtb8Gry78s1WhD
+        KNESMoOKTZE5JlJWlu7Um/UUsrZpgn3E7ewuTRrnaUW3fOt8CaH8AHUifA4I0ctpLvOry9+x0CBP
+        rgrBTnqB48foILJn0qdt6tjpGO7xXKoGL6THgyRtOteNr7CpcvA9RbOhfark4hrpQZR0Z2LwcWI8
+        KjxVzu9ZwjWrgZO8IuXXlJVOYJKsVNlG7YE+oCl9hR4U6G0AG1LJG+PRrG9DJcYyrIsI326O/6eG
+        vSeul9Z/H3B86fnvPadrTM7Fvzq0tvsuCgAA
+    headers:
+      CF-RAY:
+      - a0582058abc1cbc0-MAD
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 02 Jun 2026 17:20:04 GMT
+      Server:
+      - cloudflare
+      Strict-Transport-Security:
+      - max-age=15552000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      cf-cache-status:
+      - DYNAMIC
+      x-ppl-region:
+      - us-east-1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner_plan-smart\",\"system\":\"You
+      are a strategic planning assistant that coordinates context-retrieval agents
+      to answer a user's question.\\n\\nYour job is to produce a high-level retrieval
+      plan describing WHAT information to gather and WHY.\\nYou do NOT call tools
+      yourself and do NOT specify exact tool names or arguments \u2014 an executor
+      LLM\\nwill decide how to carry out each step using the available tools.\\n\\nGuidelines:\\n-
+      Analyse what information has already been gathered (execution history) and what
+      is still missing.\\n- Produce a minimal, targeted plan: only include steps that
+      will meaningfully advance towards answering the question.\\n- If the information
+      gathered so far is already sufficient to answer the question, set status to
+      \\\"done\\\".\\n- Each step should describe the information to retrieve in plain
+      language.\\n- Provide a concise summary of what has been accomplished so far
+      for the executor to use as context.\",\"chat_history\":[],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a strategic planning assistant that coordinates context-retrieval agents
+      to answer a user's question.\\n\\nYour job is to produce a high-level retrieval
+      plan describing WHAT information to gather and WHY.\\nYou do NOT call tools
+      yourself and do NOT specify exact tool names or arguments \u2014 an executor
+      LLM\\nwill decide how to carry out each step using the available tools.\\n\\nGuidelines:\\n-
+      Analyse what information has already been gathered (execution history) and what
+      is still missing.\\n- Produce a minimal, targeted plan: only include steps that
+      will meaningfully advance towards answering the question.\\n- If the information
+      gathered so far is already sufficient to answer the question, set status to
+      \\\"done\\\".\\n- Each step should describe the information to retrieve in plain
+      language.\\n- Provide a concise summary of what has been accomplished so far
+      for the executor to use as context.\\n\\n## User question\\nWho is Snoopy and
+      can you tell me the stock price of the company where his owner works?\\n\\n##
+      Available retrieval capabilities\\n- **static_context__269192da-f5b6-4196-8c9a-bd77e32f237c**:
+      Provides information about Snoopy, Carmen's dog. \u2014 Provide static context
+      to answer questions.\\n    (no parameters)\\n\\n- **static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba**:
+      Provides information about RAO, the agentic RAG orchestrator. \u2014 Provide
+      static context to answer questions.\\n    (no parameters)\\n\\n- **internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f**:
+      A general-purpose agent that can answer questions using the Perplexity API.
+      \u2014 Performs an internet search using Perplexity Search to get context to
+      answer questions.\\n    - question (string): The question to search for on the
+      internet.\\n\\n\\n\\n\\n## Execution history (previous planning iterations)\\n\\n###
+      Iteration 1\\n**Plan:** 2 step(s): Retrieve information about Snoopy, including
+      details about his owner and their workplace.; If the owner's workplace is identified,
+      search for the current stock price of that company.\\n**Results summary:** [static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n## Chunk: 5222091d37f34d369a5208ad9f30c296\\nResult
+      of running: static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy
+      is Carmen's dog. He is small and very cute but a bit moody. He was a rescue
+      dog. Carmen works at Progress Software, a company that provides software for
+      developing and managing applications. ```\\n\\n\\n\\n[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: c3470b38e0164a2892119d9da598cee5\\nResult of running: static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\\n\\n[internet_search of 0f5487c8-432d-4205-b5e0-d5c06b7a638f with
+      parameters {'question': 'current stock price of Progress Software'}]:\\n\\n\\n\\n##
+      Chunk: f30994de952747cb83808b4c7bb8b766\\nResult of running: internet_search
+      of 0f5487c8-432d-4205-b5e0-d5c06b7a638f with parameters {'question': 'current
+      stock price of Progress Software'}\\nURLs: https://robinhood.com/us/en/stocks/PRGS/,
+      https://www.morningstar.com/stocks/xnas/prgs/quote, https://www.perplexity.ai/finance/PRGS,
+      https://www.google.com/finance/beta/quote/PRGS:NASDAQ\\n``` Progress Software
+      (**NASDAQ: PRGS**) is trading at about **$33.75** per share based on the most
+      recent market data in the search results.[1]\\n\\nOther recent quotes in the
+      results show a nearby range around **$33.18 to $34.50** during today\u2019s
+      session.[1][4] ```\\n\\n\\n\\n[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: ccbeda62135649d2a33de7543d65a950\\nResult of running: static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\\n\\n[internet_search of 0f5487c8-432d-4205-b5e0-d5c06b7a638f with
+      parameters {'question': 'current stock price of Progress Software'}]:\\n\\n\\n\\n##
+      Chunk: b3a8175a1c8d4449b38110a4b0b9d2a5\\nResult of running: internet_search
+      of 0f5487c8-432d-4205-b5e0-d5c06b7a638f with parameters {'question': 'current
+      stock price of Progress Software'}\\nURLs: https://robinhood.com/us/en/stocks/PRGS/,
+      https://www.morningstar.com/stocks/xnas/prgs/quote, https://www.google.com/finance/beta/quote/PRGS:NASDAQ,
+      https://www.perplexity.ai/finance/PRGS\\n``` The most recent quotes show **Progress
+      Software (ticker: PRGS) trading around \\\\$33.75\u2013\\\\$34.00 per share**
+      during the latest session.[1][3]\\n\\nBecause stock prices change continuously
+      during market hours, this is an approximate *real-time* range based on the latest
+      available data from:\\n\\n- Robinhood, which lists **a current price of about
+      \\\\$33.75** for PRGS, with the day\u2019s range between roughly \\\\$33.18
+      and \\\\$34.50.[1]  \\n- Google Finance, which shows an intraday range with
+      **open at \\\\$33.88, high \\\\$34.04, low \\\\$33.18**, implying a last traded
+      price in the **mid-\\\\$33s**.[3]\\n\\nFor the exact up-to-the-second price,
+      you would need to refresh a live market data source or brokerage platform. ```\\n\\n\\n\\n[static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n## Chunk: 5a704d0e11fd48159431a77f2d81f217\\nResult
+      of running: static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy
+      is Carmen's dog. He is small and very cute but a bit moody. He was a rescue
+      dog. Carmen works at Progress Software, a company that provides software for
+      developing and managing applications. ```\\n\\n\\n\\n[internet_search of 0f5487c8-432d-4205-b5e0-d5c06b7a638f
+      with parameters {'question': 'current stock price of Progress Software'}]:\\n\\n\\n\\n##
+      Chunk: 2f22942edcd549ec9cc429f0bc92e732\\nResult of running: internet_search
+      of 0f5487c8-432d-4205-b5e0-d5c06b7a638f with parameters {'question': 'current
+      stock price of Progress Software'}\\nURLs: https://robinhood.com/us/en/stocks/PRGS/,
+      https://www.morningstar.com/stocks/xnas/prgs/quote, https://www.perplexity.ai/finance/PRGS,
+      https://www.google.com/finance/beta/quote/PRGS:NASDAQ\\n``` Progress Software
+      (**PRGS**) is trading at about **$33.75** per share, with a recent range today
+      of **$33.18 to $34.50**.[1]\\n\\nIf you want, I can also give you the **market
+      cap**, **P/E ratio**, or a **brief price trend** for PRGS.[1][4] ```\\n\\n\\n\\n[static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n## Chunk: 73d10dd2fba7454aabff1fb6824e5962\\nResult
+      of running: static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy
+      is Carmen's dog. He is small and very cute but a bit moody. He was a rescue
+      dog. Carmen works at Progress Software, a company that provides software for
+      developing and managing applications. ```\\n\\n\\n\\n[internet_search of 0f5487c8-432d-4205-b5e0-d5c06b7a638f
+      with parameters {'question': 'current stock price of Progress Software'}]:\\n\\n\\n\\n##
+      Chunk: eb3f3e6f9f32434d8bdb347120773c01\\nResult of running: internet_search
+      of 0f5487c8-432d-4205-b5e0-d5c06b7a638f with parameters {'question': 'current
+      stock price of Progress Software'}\\nURLs: https://robinhood.com/us/en/stocks/PRGS/,
+      https://www.morningstar.com/stocks/xnas/prgs/quote, https://www.google.com/finance/beta/quote/PRGS:NASDAQ,
+      https://www.perplexity.ai/finance/PRGS\\n``` The **latest quoted price** for
+      **Progress Software Corp (ticker: PRGS)** is approximately **$33.75 per share**.[1][3]\\n\\nThis
+      figure comes from real-time/near real-time market data services that show PRGS
+      trading around **$33.7\u2013$34.0**, with Robinhood and Google Finance both
+      indicating a current price very close to **$33.75**.[1][3] Morningstar\u2019s
+      page shows other trading details (previous close, bid/ask) but is consistent
+      with PRGS being in the mid\u2011$30s range.[2]\\n\\nFor precise, up-to-the-minute
+      pricing, you should refresh a live market data source (brokerage platform or
+      financial news site), since stock prices change continuously during market hours.
+      ```\\n\\n\\n\\n\\n\\n\\n## Extra instructions\\nIf the question is about Snoopy,
+      use the dog context agent. If the question is about RAO, use the RAO context
+      agent. for general questions use the perplexity agent. Always try to be as thorough
+      as possible\\n\\n\\nBased on the above, produce the next retrieval plan or declare
+      completion.\"},\"citations\":false,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":2000,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":{\"title\":\"retrieval_plan\",\"description\":\"High-level
+      retrieval plan for the executor\",\"parameters\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"string\",\"enum\":[\"plan\",\"done\"],\"description\":\"'plan'
+      if more retrieval steps are needed, 'done' if enough context has been gathered
+      to answer the question.\"},\"reasoning\":{\"type\":\"string\",\"description\":\"Explanation
+      of why this plan was chosen or why retrieval is complete.\"},\"summary\":{\"type\":\"string\",\"description\":\"Concise
+      summary of what has been gathered so far across all iterations.\"},\"steps\":{\"type\":\"array\",\"description\":\"Ordered
+      list of retrieval steps for the executor. Empty when status is 'done'.\",\"items\":{\"type\":\"object\",\"properties\":{\"description\":{\"type\":\"string\",\"description\":\"Plain-language
+      description of what information to retrieve.\"},\"reason\":{\"type\":\"string\",\"description\":\"Why
+      this information is needed to answer the question.\"}},\"required\":[\"description\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"status\",\"reasoning\",\"summary\",\"steps\"],\"additionalProperties\":false}},\"format_prompt\":false,\"rerank_context\":false,\"tools\":[],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '10801'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 129fa87d88884541b0838bab3973b86f
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: "{\"chunk\":{\"type\":\"object\",\"object\":{\"status\":\"done\",\"reasoning\":\"All
+        necessary information has been gathered: Snoopy is Carmen's dog, and Carmen
+        works at Progress Software. The current stock price of Progress Software (PRGS)
+        has been retrieved multiple times, consistently showing it is around $33.75\u2013$34.00
+        per share. No further retrieval is needed.\",\"summary\":\"Snoopy is Carmen's
+        dog, and Carmen works at Progress Software. The current stock price of Progress
+        Software (PRGS) is approximately $33.75\u2013$34.00 per share, based on recent
+        market data.\",\"steps\":[]}}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":1073,\"output_tokens\":195,\"timings\":{\"generative\":6.179026141995564},\"input_nuclia_tokens\":1.073,\"output_nuclia_tokens\":0.195}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":1.0728,\"output\":0.1952,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:20:04 GMT
+      nuclia-learning-id:
+      - 3ed0bd10302146ac96e8f00c620f901c
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '6185'
+      x-nuclia-trace-id:
+      - 164f8293c0a82d01d5d55303e8f933d5
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"rao_answer_summary-smart\",\"system\":null,\"chat_history\":[],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"\\nBased
+      on the provided context and user question, perform the following tasks:\\n\\n1.
+      Select only information directly relevant to the question.\\n2. Break down compound
+      sentences into simple, single-idea statements. Preserve original phrasing when
+      possible.\\n3. For any named entity with descriptive details, separate those
+      details into distinct propositions.\\n4. Ensure clarity by replacing pronouns
+      (e.g., \\\"it\\\", \\\"he\\\", \\\"she\\\", \\\"they\\\", \\\"this\\\", \\\"that\\\")
+      with the full names of the entities they reference, and add necessary modifiers
+      to clarify meaning.\\n5. The context may be delimited by tags such as <START
+      OF CONTEXT> and <END OF CONTEXT>. Treat everything between these tags as context.\\n6.
+      Assess whether the context sufficiently answers the question. If it answers
+      it partially, provide the answer; if it does not answer it fully, specify what
+      information is missing to answer the question.\\n7. If the context does not
+      answer the question at all, just return the original question as the missing
+      information.\\n8. The `citations` field consists ONLY in a list of block IDs
+      that are relevant to the answer, following these rules:\\n  - Use the format:
+      block-AB\\n  - Just mention the block IDs, do NOT include any other text.\\n
+      \ - Just mention the blocks actually relevant and that contain information used
+      in the answer, do NOT include blocks that are not relevant.\\n  - No duplicates.\\n9.
+      Do NOT hallucinate block IDs. Only use those provided in the context.\\n10.
+      Your output must be a JSON object with the following fields:\\n    - \\\"reason\\\":
+      Explain your reasoning for the answer or validation.\\n    - \\\"answer\\\":
+      Provide a partial or complete answer to the user query strictly from the information
+      in the context. If there isn't enough information to even provide a partial
+      answer, leave 'answer' empty.\\n    - \\\"missing_info_query\\\": If the context
+      is insufficient, specify what information is missing in a query shape; otherwise,
+      leave it empty. Just return the query needed to retrieve the missing information.\\n
+      \   - \\\"useful\\\": Indicate if the context is useful to answer the question
+      (\\\"yes\\\" or \\\"no\\\").\\n    - \\\"citations\\\": List the IDs of the
+      blocks relevant to the answer, if any (e.g., [\\\"block-AB\\\", \\\"block-CD\\\"]).\\n11.
+      **IMPORTANT** If any extra instructions are provided, you MUST follow them carefully
+      when generating the answer field. These instructions may specify the format,
+      style, tools to use, or other requirements for the answer.\\n\\n<QUESTION>\\nWho
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\\n\\n<START OF CONTEXT>\\n\\nContext:\\n\\n**block-AA**\\n\\n## Chunk:
+      5222091d37f34d369a5208ad9f30c296\\nResult of running: static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n```
+      Snoopy is Carmen's dog. He is small and very cute but a bit moody. He was a
+      rescue dog. Carmen works at Progress Software, a company that provides software
+      for developing and managing applications. ```\\n\\n\\n---\\\"\\n\\n\\n**block-AB**\\n\\n##
+      Chunk: c3470b38e0164a2892119d9da598cee5\\nResult of running: static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\\n---\\\"\\n\\n\\n**block-AC**\\n\\n## Chunk: f30994de952747cb83808b4c7bb8b766\\nResult
+      of running: internet_search of 0f5487c8-432d-4205-b5e0-d5c06b7a638f with parameters
+      {'question': 'current stock price of Progress Software'}\\nURLs: https://robinhood.com/us/en/stocks/PRGS/,
+      https://www.morningstar.com/stocks/xnas/prgs/quote, https://www.perplexity.ai/finance/PRGS,
+      https://www.google.com/finance/beta/quote/PRGS:NASDAQ\\n``` Progress Software
+      (**NASDAQ: PRGS**) is trading at about **$33.75** per share based on the most
+      recent market data in the search results.[1]\\n\\nOther recent quotes in the
+      results show a nearby range around **$33.18 to $34.50** during today\u2019s
+      session.[1][4] ```\\n\\n\\n---\\\"\\n\\n\\n**block-AD**\\n\\n## Chunk: ccbeda62135649d2a33de7543d65a950\\nResult
+      of running: static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy
+      is Carmen's dog. He is small and very cute but a bit moody. He was a rescue
+      dog. Carmen works at Progress Software, a company that provides software for
+      developing and managing applications. ```\\n\\n\\n---\\\"\\n\\n\\n**block-AE**\\n\\n##
+      Chunk: b3a8175a1c8d4449b38110a4b0b9d2a5\\nResult of running: internet_search
+      of 0f5487c8-432d-4205-b5e0-d5c06b7a638f with parameters {'question': 'current
+      stock price of Progress Software'}\\nURLs: https://robinhood.com/us/en/stocks/PRGS/,
+      https://www.morningstar.com/stocks/xnas/prgs/quote, https://www.google.com/finance/beta/quote/PRGS:NASDAQ,
+      https://www.perplexity.ai/finance/PRGS\\n``` The most recent quotes show **Progress
+      Software (ticker: PRGS) trading around \\\\$33.75\u2013\\\\$34.00 per share**
+      during the latest session.[1][3]\\n\\nBecause stock prices change continuously
+      during market hours, this is an approximate *real-time* range based on the latest
+      available data from:\\n\\n- Robinhood, which lists **a current price of about
+      \\\\$33.75** for PRGS, with the day\u2019s range between roughly \\\\$33.18
+      and \\\\$34.50.[1]  \\n- Google Finance, which shows an intraday range with
+      **open at \\\\$33.88, high \\\\$34.04, low \\\\$33.18**, implying a last traded
+      price in the **mid-\\\\$33s**.[3]\\n\\nFor the exact up-to-the-second price,
+      you would need to refresh a live market data source or brokerage platform. ```\\n\\n\\n---\\\"\\n\\n\\n**block-AF**\\n\\n##
+      Chunk: 5a704d0e11fd48159431a77f2d81f217\\nResult of running: static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\\n---\\\"\\n\\n\\n**block-AG**\\n\\n## Chunk: 2f22942edcd549ec9cc429f0bc92e732\\nResult
+      of running: internet_search of 0f5487c8-432d-4205-b5e0-d5c06b7a638f with parameters
+      {'question': 'current stock price of Progress Software'}\\nURLs: https://robinhood.com/us/en/stocks/PRGS/,
+      https://www.morningstar.com/stocks/xnas/prgs/quote, https://www.perplexity.ai/finance/PRGS,
+      https://www.google.com/finance/beta/quote/PRGS:NASDAQ\\n``` Progress Software
+      (**PRGS**) is trading at about **$33.75** per share, with a recent range today
+      of **$33.18 to $34.50**.[1]\\n\\nIf you want, I can also give you the **market
+      cap**, **P/E ratio**, or a **brief price trend** for PRGS.[1][4] ```\\n\\n\\n---\\\"\\n\\n\\n**block-AH**\\n\\n##
+      Chunk: 73d10dd2fba7454aabff1fb6824e5962\\nResult of running: static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\\n---\\\"\\n\\n\\n**block-AI**\\n\\n## Chunk: eb3f3e6f9f32434d8bdb347120773c01\\nResult
+      of running: internet_search of 0f5487c8-432d-4205-b5e0-d5c06b7a638f with parameters
+      {'question': 'current stock price of Progress Software'}\\nURLs: https://robinhood.com/us/en/stocks/PRGS/,
+      https://www.morningstar.com/stocks/xnas/prgs/quote, https://www.google.com/finance/beta/quote/PRGS:NASDAQ,
+      https://www.perplexity.ai/finance/PRGS\\n``` The **latest quoted price** for
+      **Progress Software Corp (ticker: PRGS)** is approximately **$33.75 per share**.[1][3]\\n\\nThis
+      figure comes from real-time/near real-time market data services that show PRGS
+      trading around **$33.7\u2013$34.0**, with Robinhood and Google Finance both
+      indicating a current price very close to **$33.75**.[1][3] Morningstar\u2019s
+      page shows other trading details (previous close, bid/ask) but is consistent
+      with PRGS being in the mid\u2011$30s range.[2]\\n\\nFor precise, up-to-the-minute
+      pricing, you should refresh a live market data source (brokerage platform or
+      financial news site), since stock prices change continuously during market hours.
+      ```\\n\\n\\n---\\\"\\n\\n\\n\\n\\n<END OF CONTEXT>\\n\\n\"},\"citations\":false,\"citation_threshold\":null,\"generative_model\":\"chatgpt-azure-4o-mini\",\"max_tokens\":2000,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":{\"title\":\"validate_or_answer\",\"description\":\"Validate
+      or answer\",\"parameters\":{\"type\":\"object\",\"properties\":{\"reason\":{\"type\":\"string\",\"description\":\"Reasoning
+      for the answer or validation\"},\"answer\":{\"type\":\"string\",\"description\":\"Partial
+      or complete answer to the user query from the information in the context.\"},\"missing_info_query\":{\"type\":\"string\",\"description\":\"Query
+      needed to retrieve the missing information in case the context is not enough
+      to answer the question. If the context does not answer the question at all,
+      just return the original question.\"},\"useful\":{\"type\":\"string\",\"description\":\"Is
+      the context useful to answer the question?\",\"enum\":[\"yes\",\"no\"]},\"citations\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"description\":\"Block
+      ID cited in the answer, e.g. block-AB\"},\"description\":\"List of block IDs
+      cited in the answer, if any\"}},\"required\":[\"reason\",\"answer\",\"missing_info_query\",\"useful\",\"citations\"]}},\"format_prompt\":false,\"rerank_context\":false,\"tools\":[],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '9424'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-origin:
+      - RAO
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"object","object":{"reason":"The context provides
+        information about Snoopy being Carmen''s dog and details about Carmen''s employment
+        at Progress Software. It also includes the current stock price of Progress
+        Software, which is approximately $33.75 per share. Therefore, the context
+        sufficiently answers the question about who Snoopy is and provides the stock
+        price of the company where Carmen works.","answer":"Snoopy is Carmen''s dog.
+        He is small, very cute, and a bit moody. He was a rescue dog. Carmen works
+        at Progress Software. The current stock price of Progress Software is approximately
+        $33.75 per share.","missing_info_query":"","useful":"yes","citations":["block-AA","block-AC","block-AE","block-AI"]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":69,"output_tokens":18,"timings":{"generative":1.8466189539904008},"input_nuclia_tokens":0.069,"output_nuclia_tokens":0.018}}
+
+        {"chunk":{"normalized_tokens":{"input":0.06909,"output":0.018,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:20:10 GMT
+      nuclia-learning-id:
+      - 8d181a4d02cd4ce895095f014792bf66
+      nuclia-learning-model:
+      - chatgpt-azure-4o-mini
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1853'
+      x-nuclia-trace-id:
+      - 0399413eff9c899112bc37fcd5cd545a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"question":"","retrieval":true,"user_id":"summarize","system":"You are
+      a helpful AI assistant. Your role is to provide accurate, clear, and well-structured
+      answers based strictly on the information provided to you.\nKey principles:\n-
+      Answer only using the information in the provided context\n- Do not use external
+      knowledge, assumptions, or prior experience\n- Maintain a professional and informative
+      tone\n- Be concise yet thorough\n- If information is insufficient, acknowledge
+      this clearly\n\nAlways follow any additional instructions provided about format,
+      style, or domain-specific behavior.","chat_history":[],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"\n##
+      Question\nWho is Snoopy and can you tell me the stock price of the company where
+      his owner works?\n\n## Provided Context\n[START OF CONTEXT]\n## Smart Agent
+      Results\n\n# Who is Snoopy and can you tell me the stock price of the company
+      where his owner works?\n\n Snoopy is Carmen''s dog. He is small, very cute,
+      and a bit moody. He was a rescue dog. Carmen works at Progress Software. The
+      current stock price of Progress Software is approximately $33.75 per share.\n[END
+      OF CONTEXT]\n\n## Answering Guidelines\n- Carefully read all context; it may
+      be lengthy or detailed\n- Do not omit or overlook any relevant information\n-
+      If the context is incomplete or insufficient, state: \"Not enough data to answer
+      this.\"\n- Read carefully any extra instructions below if provided and use them
+      to answer\n\nNow provide your answer to the question: Who is Snoopy and can
+      you tell me the stock price of the company where his owner works?"},"citations":null,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":5000,"query_context_images":{},"prefer_markdown":null,"json_schema":null,"format_prompt":false,"rerank_context":false,"tools":[],"tool_choice":{"type":"auto"},"reasoning":false,"seed":null}'
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1939'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 129fa87d88884541b0838bab3973b86f
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"text","text":"S"}}
+
+        {"chunk":{"type":"text","text":"no"}}
+
+        {"chunk":{"type":"text","text":"opy"}}
+
+        {"chunk":{"type":"text","text":" is"}}
+
+        {"chunk":{"type":"text","text":" Carmen"}}
+
+        {"chunk":{"type":"text","text":"''s"}}
+
+        {"chunk":{"type":"text","text":" dog"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" described"}}
+
+        {"chunk":{"type":"text","text":" as"}}
+
+        {"chunk":{"type":"text","text":" small"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" very"}}
+
+        {"chunk":{"type":"text","text":" cute"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" and"}}
+
+        {"chunk":{"type":"text","text":" a"}}
+
+        {"chunk":{"type":"text","text":" bit"}}
+
+        {"chunk":{"type":"text","text":" mo"}}
+
+        {"chunk":{"type":"text","text":"ody"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" He"}}
+
+        {"chunk":{"type":"text","text":" is"}}
+
+        {"chunk":{"type":"text","text":" a"}}
+
+        {"chunk":{"type":"text","text":" rescue"}}
+
+        {"chunk":{"type":"text","text":" dog"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" Carmen"}}
+
+        {"chunk":{"type":"text","text":" works"}}
+
+        {"chunk":{"type":"text","text":" at"}}
+
+        {"chunk":{"type":"text","text":" Progress"}}
+
+        {"chunk":{"type":"text","text":" Software"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" and"}}
+
+        {"chunk":{"type":"text","text":" the"}}
+
+        {"chunk":{"type":"text","text":" current"}}
+
+        {"chunk":{"type":"text","text":" stock"}}
+
+        {"chunk":{"type":"text","text":" price"}}
+
+        {"chunk":{"type":"text","text":" of"}}
+
+        {"chunk":{"type":"text","text":" Progress"}}
+
+        {"chunk":{"type":"text","text":" Software"}}
+
+        {"chunk":{"type":"text","text":" is"}}
+
+        {"chunk":{"type":"text","text":" approximately"}}
+
+        {"chunk":{"type":"text","text":" $"}}
+
+        {"chunk":{"type":"text","text":"33"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":"75"}}
+
+        {"chunk":{"type":"text","text":" per"}}
+
+        {"chunk":{"type":"text","text":" share"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":9,"output_tokens":6,"timings":{"generative_first_chunk":0.41114518999529537,"generative":1.0811651309923036},"input_nuclia_tokens":0.009,"output_nuclia_tokens":0.006}}
+
+        {"chunk":{"normalized_tokens":{"input":0.00936,"output":0.00612,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:20:12 GMT
+      nuclia-learning-id:
+      - 8ed38bb0f4bf4f799079c018ac42530b
+      nuclia-learning-model:
+      - chatgpt-azure-4o-mini
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '417'
+      x-nuclia-trace-id:
+      - 966af1d300fcd139059163287b3310b5
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      x-nuclia-nuakey:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+    method: GET
+    uri: https://europe-1.nuclia.cloud/api/authorizer/info
+  response:
+    body:
+      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"03d47998-f672-4a9b-a57b-bde3a9c3ee8c","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '227'
+      content-type:
+      - application/json
+      date:
+      - Tue, 02 Jun 2026 17:20:13 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '6'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner_plan-smart\",\"system\":\"You
+      are a strategic planning assistant that coordinates context-retrieval agents
+      to answer a user's question.\\n\\nYour job is to produce a high-level retrieval
+      plan describing WHAT information to gather and WHY.\\nYou do NOT call tools
+      yourself and do NOT specify exact tool names or arguments \u2014 an executor
+      LLM\\nwill decide how to carry out each step using the available tools.\\n\\nGuidelines:\\n-
+      Analyse what information has already been gathered (execution history) and what
+      is still missing.\\n- Produce a minimal, targeted plan: only include steps that
+      will meaningfully advance towards answering the question.\\n- If the information
+      gathered so far is already sufficient to answer the question, set status to
+      \\\"done\\\".\\n- Each step should describe the information to retrieve in plain
+      language.\\n- Provide a concise summary of what has been accomplished so far
+      for the executor to use as context.\",\"chat_history\":[],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a strategic planning assistant that coordinates context-retrieval agents
+      to answer a user's question.\\n\\nYour job is to produce a high-level retrieval
+      plan describing WHAT information to gather and WHY.\\nYou do NOT call tools
+      yourself and do NOT specify exact tool names or arguments \u2014 an executor
+      LLM\\nwill decide how to carry out each step using the available tools.\\n\\nGuidelines:\\n-
+      Analyse what information has already been gathered (execution history) and what
+      is still missing.\\n- Produce a minimal, targeted plan: only include steps that
+      will meaningfully advance towards answering the question.\\n- If the information
+      gathered so far is already sufficient to answer the question, set status to
+      \\\"done\\\".\\n- Each step should describe the information to retrieve in plain
+      language.\\n- Provide a concise summary of what has been accomplished so far
+      for the executor to use as context.\\n\\n## User question\\nWho is Snoopy and
+      can you tell me the stock price of the company where his owner works?\\n\\n##
+      Available retrieval capabilities\\n- **static_context__269192da-f5b6-4196-8c9a-bd77e32f237c**:
+      Provides information about Snoopy, Carmen's dog. \u2014 Provide static context
+      to answer questions.\\n    (no parameters)\\n\\n- **static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba**:
+      Provides information about RAO, the agentic RAG orchestrator. \u2014 Provide
+      static context to answer questions.\\n    (no parameters)\\n\\n- **internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f**:
+      A general-purpose agent that can answer questions using the Perplexity API.
+      \u2014 Performs an internet search using Perplexity Search to get context to
+      answer questions.\\n    - question (string): The question to search for on the
+      internet.\\n\\n\\n\\n\\n## Execution history\\nNo tools have been called yet.\\n\\n\\n\\n##
+      Extra instructions\\nIf the question is about Snoopy, use the dog context agent.
+      If the question is about RAO, use the RAO context agent. for general questions
+      use the perplexity agent. Always try to be as thorough as possible\\n\\n\\nBased
+      on the above, produce the next retrieval plan or declare completion.\"},\"citations\":false,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":2000,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":{\"title\":\"retrieval_plan\",\"description\":\"High-level
+      retrieval plan for the executor\",\"parameters\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"string\",\"enum\":[\"plan\",\"done\"],\"description\":\"'plan'
+      if more retrieval steps are needed, 'done' if enough context has been gathered
+      to answer the question.\"},\"reasoning\":{\"type\":\"string\",\"description\":\"Explanation
+      of why this plan was chosen or why retrieval is complete.\"},\"summary\":{\"type\":\"string\",\"description\":\"Concise
+      summary of what has been gathered so far across all iterations.\"},\"steps\":{\"type\":\"array\",\"description\":\"Ordered
+      list of retrieval steps for the executor. Empty when status is 'done'.\",\"items\":{\"type\":\"object\",\"properties\":{\"description\":{\"type\":\"string\",\"description\":\"Plain-language
+      description of what information to retrieve.\"},\"reason\":{\"type\":\"string\",\"description\":\"Why
+      this information is needed to answer the question.\"}},\"required\":[\"description\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"status\",\"reasoning\",\"summary\",\"steps\"],\"additionalProperties\":false}},\"format_prompt\":false,\"rerank_context\":false,\"tools\":[],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4530'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 2db28fe8c10b4cc9933d4aa24d567fed
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"object","object":{"status":"plan","reasoning":"The
+        user is asking two things: (1) Who is Snoopy? and (2) What is the stock price
+        of the company where his owner works? To answer (1), we need to retrieve information
+        about Snoopy, specifically from the static context agent about Snoopy. For
+        (2), we need to determine who Snoopy''s owner is, identify the company where
+        the owner works, and then find the current stock price of that company. This
+        will likely require both static context retrieval and an internet search for
+        the stock price.","summary":"No information has been gathered yet. The user''s
+        question requires both background on Snoopy and a real-time stock price lookup
+        related to Snoopy''s owner''s employer.","steps":[{"description":"Retrieve
+        information about Snoopy from the static context agent dedicated to Snoopy.","reason":"This
+        will provide a clear answer to the first part of the user''s question about
+        who Snoopy is."},{"description":"Determine who Snoopy''s owner is and identify
+        the company where the owner works, using the static context agent if possible.","reason":"This
+        is necessary to know which company''s stock price to look up."},{"description":"Search
+        for the current stock price of the company where Snoopy''s owner works using
+        an internet search.","reason":"This will answer the second part of the user''s
+        question regarding the stock price."}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":319,"output_tokens":440,"timings":{"generative":3.0658295629982604},"input_nuclia_tokens":0.319,"output_nuclia_tokens":0.44}}
+
+        {"chunk":{"normalized_tokens":{"input":0.3192,"output":0.44,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:20:13 GMT
+      nuclia-learning-id:
+      - b02c07b3b4374966a454ddf79bfcc68e
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '3071'
+      x-nuclia-trace-id:
+      - 0431d19cb41ca9477ea02e30572d0b99
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user's question requires both background on Snoopy and a real-time
+      stock price lookup related to Snoopy's owner's employer.\\n\\n## Retrieval plan
+      for this iteration\\n\\n1. Retrieve information about Snoopy from the static
+      context agent dedicated to Snoopy.\\n   Reason: This will provide a clear answer
+      to the first part of the user's question about who Snoopy is.\\n\\n2. Determine
+      who Snoopy's owner is and identify the company where the owner works, using
+      the static context agent if possible.\\n   Reason: This is necessary to know
+      which company's stock price to look up.\\n\\n3. Search for the current stock
+      price of the company where Snoopy's owner works using an internet search.\\n
+      \  Reason: This will answer the second part of the user's question regarding
+      the stock price.\\n\\n\\nCall the tools needed to fulfil this plan. You may
+      call multiple tools.\\nCall task_complete once you have executed all planned
+      retrieval steps.\\n\\nExtra instructions: If the question is about Snoopy, use
+      the dog context agent. If the question is about RAO, use the RAO context agent.
+      for general questions use the perplexity agent. Always try to be as thorough
+      as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who is Snoopy
+      and can you tell me the stock price of the company where his owner works?\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user's question requires both background on Snoopy and a real-time
+      stock price lookup related to Snoopy's owner's employer.\\n\\n## Retrieval plan
+      for this iteration\\n\\n1. Retrieve information about Snoopy from the static
+      context agent dedicated to Snoopy.\\n   Reason: This will provide a clear answer
+      to the first part of the user's question about who Snoopy is.\\n\\n2. Determine
+      who Snoopy's owner is and identify the company where the owner works, using
+      the static context agent if possible.\\n   Reason: This is necessary to know
+      which company's stock price to look up.\\n\\n3. Search for the current stock
+      price of the company where Snoopy's owner works using an internet search.\\n
+      \  Reason: This will answer the second part of the user's question regarding
+      the stock price.\\n\\n\\nCall the tools needed to fulfil this plan. You may
+      call multiple tools.\\nCall task_complete once you have executed all planned
+      retrieval steps.\\n\\nExtra instructions: If the question is about Snoopy, use
+      the dog context agent. If the question is about RAO, use the RAO context agent.
+      for general questions use the perplexity agent. Always try to be as thorough
+      as possible\\n\\n\\nChoose the best tool or tools for the task. Call task_complete
+      when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
+      information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
+      to answer questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f\",\"description\":\"A
+      general-purpose agent that can answer questions using the Perplexity API. \u2014
+      Performs an internet search using Perplexity Search to get context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"The
+      question to search for on the internet.\"}},\"additionalProperties\":false}},{\"name\":\"task_complete\",\"description\":\"Call
+      this tool when you have gathered enough information to answer the question and
+      no more tools are needed.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4778'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 2db28fe8c10b4cc9933d4aa24d567fed
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":348,"output_tokens":56,"timings":{"generative_first_chunk":1.1260307159973308,"generative":1.1280190459947335},"input_nuclia_tokens":0.348,"output_nuclia_tokens":0.056}}
+
+        {"chunk":{"normalized_tokens":{"input":0.348,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:20:16 GMT
+      nuclia-learning-id:
+      - 7e61a9ce492243d6bf3c5262d80e5b08
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1133'
+      x-nuclia-trace-id:
+      - b104539e2e14f900ed480dab34c62db0
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user's question requires both background on Snoopy and a real-time
+      stock price lookup related to Snoopy's owner's employer.\\n\\n## Retrieval plan
+      for this iteration\\n\\n1. Retrieve information about Snoopy from the static
+      context agent dedicated to Snoopy.\\n   Reason: This will provide a clear answer
+      to the first part of the user's question about who Snoopy is.\\n\\n2. Determine
+      who Snoopy's owner is and identify the company where the owner works, using
+      the static context agent if possible.\\n   Reason: This is necessary to know
+      which company's stock price to look up.\\n\\n3. Search for the current stock
+      price of the company where Snoopy's owner works using an internet search.\\n
+      \  Reason: This will answer the second part of the user's question regarding
+      the stock price.\\n\\n\\nCall the tools needed to fulfil this plan. You may
+      call multiple tools.\\nCall task_complete once you have executed all planned
+      retrieval steps.\\n\\nExtra instructions: If the question is about Snoopy, use
+      the dog context agent. If the question is about RAO, use the RAO context agent.
+      for general questions use the perplexity agent. Always try to be as thorough
+      as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who is Snoopy
+      and can you tell me the stock price of the company where his owner works?\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n## Chunk: 8bb9f7c5bb3443c7820c5bd41bc3cf94\\n```
+      Snoopy is Carmen's dog. He is small and very cute but a bit moody. He was a
+      rescue dog. Carmen works at Progress Software, a company that provides software
+      for developing and managing applications. ```\\n\\n\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user's question requires both background on Snoopy and a real-time
+      stock price lookup related to Snoopy's owner's employer.\\n\\n## Retrieval plan
+      for this iteration\\n\\n1. Retrieve information about Snoopy from the static
+      context agent dedicated to Snoopy.\\n   Reason: This will provide a clear answer
+      to the first part of the user's question about who Snoopy is.\\n\\n2. Determine
+      who Snoopy's owner is and identify the company where the owner works, using
+      the static context agent if possible.\\n   Reason: This is necessary to know
+      which company's stock price to look up.\\n\\n3. Search for the current stock
+      price of the company where Snoopy's owner works using an internet search.\\n
+      \  Reason: This will answer the second part of the user's question regarding
+      the stock price.\\n\\n\\nCall the tools needed to fulfil this plan. You may
+      call multiple tools.\\nCall task_complete once you have executed all planned
+      retrieval steps.\\n\\nExtra instructions: If the question is about Snoopy, use
+      the dog context agent. If the question is about RAO, use the RAO context agent.
+      for general questions use the perplexity agent. Always try to be as thorough
+      as possible\\n\\n\\nChoose the best tool or tools for the task. Call task_complete
+      when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
+      information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
+      to answer questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f\",\"description\":\"A
+      general-purpose agent that can answer questions using the Perplexity API. \u2014
+      Performs an internet search using Perplexity Search to get context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"The
+      question to search for on the internet.\"}},\"additionalProperties\":false}},{\"name\":\"task_complete\",\"description\":\"Call
+      this tool when you have gathered enough information to answer the question and
+      no more tools are needed.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '5126'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 2db28fe8c10b4cc9933d4aa24d567fed
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}],"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f":[{"function":{"name":"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f","arguments":{"question":"current
+        stock price of Progress Software"}}}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":390,"output_tokens":155,"timings":{"generative_first_chunk":1.1930098849989008,"generative":1.1947717440052656},"input_nuclia_tokens":0.39,"output_nuclia_tokens":0.155}}
+
+        {"chunk":{"normalized_tokens":{"input":0.39,"output":0.1552,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:20:18 GMT
+      nuclia-learning-id:
+      - d5a9a0c8fd794f05bd8c2414994c3e31
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1200'
+      x-nuclia-trace-id:
+      - 7ab6edbf4da1c62d5165079d046337b8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"messages":[{"content":"Be precise and concise","role":"system"},{"content":"current
+      stock price of Progress Software","role":"user"}],"model":"sonar-pro","return_images":false,"return_related_questions":false,"search_domain_filter":[],"web_search_options":{"search_context_size":"low"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Bearer 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
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '288'
+      Content-Type:
+      - application/json
+      Host:
+      - api.perplexity.ai
+      User-Agent:
+      - AsyncPerplexity/Python 0.36.0
+      X-Source:
+      - perplexity-py
+      X-Stainless-Arch:
+      - arm64
+      X-Stainless-Async:
+      - async:asyncio
+      X-Stainless-Lang:
+      - python
+      X-Stainless-OS:
+      - MacOS
+      X-Stainless-Package-Version:
+      - 0.36.0
+      X-Stainless-Runtime:
+      - CPython
+      X-Stainless-Runtime-Version:
+      - 3.13.5
+      X-Title:
+      - Perplexity Python SDK
+      x-stainless-read-timeout:
+      - '900'
+      x-stainless-retry-count:
+      - '0'
+    method: POST
+    uri: https://api.perplexity.ai/chat/completions
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAA/6VW227bRhD9lQGRtKkqUpREybT65KRIUrTOzUVf4sBYkUtxa4rL7C4tu4EB/0Nf
+        2+/oez/FX9IzS8lSI7dpUEMPxuzsXM6cOcsPgcqDWZCM5jKV6STMRBKHSZ6k4byYpuE4H8ZZdjif
+        FvE86AdLncsK7lbXwoSN0bBlRgonEWR4kMbJKE5H437QWrGQwexDAJ9l486cPpe1hc8QF2CppFO6
+        3prTpB847US1NR1O+oGVwmTlWaZrJy/dmVW/IGhQ6RXn1dZxBlU37SbBWWeMoxh/KEO37t7D0cG0
+        Hxj5vpXW7ZinmyK2pvTg8PoayZQTXDEKexuUzjV2NhgYPVd1qXUeoaVBaweyHlins3M7ePXm2ckA
+        RW5cV6tVtNSmVvXCOmH8hbXrZS3soDELO3jfaic/utRIA7AulbuKhBoUqhZ1Jn34jxwXWi8q6QNv
+        vObSiS6ovzB7cXTy7dHr4N0drkbatnLc04fAKVcxuOxJJ1wavTIqk/SaA9AX9EKuLIUw6gXuWTrR
+        hVsJI2F7swECNbWGCfIZEOVgD26M4tEkjMfheAhbJTCXtsk7YvHZNIzxG+HM1qppJMYT/FhKylpj
+        ZO2o8bUC2zq3JBw9GE+iYdKnphIZQCdX8il39fU0mjwkMdcXkpzOxdWXlsAowk0K4yh9SLoovH+p
+        FmVEnGWv6Udc/Ve4ucnvjMg5z4Wu2qUkZSmKIq5Wtybj/lZyHlz3d3Dew/GJNg11gYHp8ZYte6h+
+        Fpu2+DKAYZz8E77rsx181z19VxfaLD3/6RtgIS+Ubi09qbSVHUlmwDuOJgmOH6t8cGTP6c8/YEuw
+        QbCdlOjP0svW+QEh5oySURSnxzg8FuZcOnoiGkQZRuP0MYw/eRgHRxcLDnQISYmnw09CytS9j6GM
+        rDZdA7vUhu/det0L8r9u3xao/YxMB+mJKMiqRa0KlQnQJFc20y3zRZNylqA/aslToEIoQxeiaiX4
+        Rw8mYOK4TwpSecUzMLpdlNUVwwb2tnUuDTv7njqOLkRD2PiVlLVn74aZ/4uHu2jdScAzLzX0tIPj
+        XuD+uxrt4viykWjmwXgcpSlI8Nzvn2cRM+sHveoOh3x4fO4iykQT0TBKRswZkCXi/YvoYARyJd/v
+        9w3p0/OfZcbJslK4aPsW8YtSavTZyaECwpd4AvDmAZz1Y2a0h0xYq5jIzr9CeJrqjRot8W6QkRnj
+        7lu1ZEtoS6+3D/Mjp7JzaWbUIb0REKbMHO8WnZ5yrwe3N7/yf8CAwEaEw91ej1Q35ArcQUqLyEyE
+        t8N3b5N3p/Vp/VhmorUbzfPqCLEqRb0AM1CzqlvsMAiVt4bTLrstLAGX7UMLr0Dbmqd8e/Pbmkm3
+        N7+vZRZUBtXIVhiQ4xiqKKQnm8iMRpMQFgFffaHAU+ulVVAhVwBoCTfr6zYRvemg6obUYTXj6nee
+        FKqAtWUEebvFHS6TXq9PK+VKRIaIk/GtYXW682F6B9wk9gWsOwRlSGCbYMGx5w7DRsRZ/85sXw9X
+        j+wa1NxGT1OM4L7kvd5e+jiB70cFwLMbsvf3RfR6EUbHZZzWT7XhrPJSZI7aJnQ6xLBDKzG5vCNW
+        n650SyvdVjnVEvoBQTGyAMW4JnySVSGURW6S+oF0MFOBTzK+bWhu8GFkiLNRt6ZKVAiHpvFuOlb9
+        CGIR4KPPiU8uAHsiirL8YSHwicgfik43WLvrvwBkX63tZwoAAA==
+    headers:
+      CF-RAY:
+      - a05820cdaaadd8ef-MAD
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 02 Jun 2026 17:20:23 GMT
+      Server:
+      - cloudflare
+      Strict-Transport-Security:
+      - max-age=15552000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      cf-cache-status:
+      - DYNAMIC
+      set-cookie:
+      - __cf_bm=6S.cf8ciVxVM6Ah3UbI00SXa1srlTzYmjb_ZxWrrEAo-1780420820.1037474-1.0.1.1-j0NzQH70KQpOKXVHQ3tfCY4lCA44DICmrfcPmkvnArcwugACbvgpmnxP7sBKn99X_lUGi1NqCEgdRe3Rh6MNVIBN2Pa0jxjPf.vorYiEq5lCf94m.KOu.EldOtMLqZjA;
+        HttpOnly; SameSite=None; Secure; Path=/; Domain=perplexity.ai; Expires=Tue,
+        02 Jun 2026 17:50:23 GMT
+      - __cflb=04dToWaRite5R1fQA5HfyWsXiTjNxDHmHwAeSRVBVF; HttpOnly; SameSite=None;
+        Secure; Path=/; Expires=Tue, 02 Jun 2026 17:50:23 GMT
+      x-ppl-region:
+      - us-east-1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user's question requires both background on Snoopy and a real-time
+      stock price lookup related to Snoopy's owner's employer.\\n\\n## Retrieval plan
+      for this iteration\\n\\n1. Retrieve information about Snoopy from the static
+      context agent dedicated to Snoopy.\\n   Reason: This will provide a clear answer
+      to the first part of the user's question about who Snoopy is.\\n\\n2. Determine
+      who Snoopy's owner is and identify the company where the owner works, using
+      the static context agent if possible.\\n   Reason: This is necessary to know
+      which company's stock price to look up.\\n\\n3. Search for the current stock
+      price of the company where Snoopy's owner works using an internet search.\\n
+      \  Reason: This will answer the second part of the user's question regarding
+      the stock price.\\n\\n\\nCall the tools needed to fulfil this plan. You may
+      call multiple tools.\\nCall task_complete once you have executed all planned
+      retrieval steps.\\n\\nExtra instructions: If the question is about Snoopy, use
+      the dog context agent. If the question is about RAO, use the RAO context agent.
+      for general questions use the perplexity agent. Always try to be as thorough
+      as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who is Snoopy
+      and can you tell me the stock price of the company where his owner works?\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n## Chunk: 8bb9f7c5bb3443c7820c5bd41bc3cf94\\n```
+      Snoopy is Carmen's dog. He is small and very cute but a bit moody. He was a
+      rescue dog. Carmen works at Progress Software, a company that provides software
+      for developing and managing applications. ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n## Chunk: 3bba7f68e9a84ff0b9492c0a9bc73a46\\n```
+      Snoopy is Carmen's dog. He is small and very cute but a bit moody. He was a
+      rescue dog. Carmen works at Progress Software, a company that provides software
+      for developing and managing applications. ```\\n\\n\\n\\n[internet_search of
+      0f5487c8-432d-4205-b5e0-d5c06b7a638f with parameters {'question': 'current stock
+      price of Progress Software'}]:\\n\\n\\n\\n## Chunk: 0e177fbd3b734386b16d5935c8e0f530\\nURLs:
+      https://robinhood.com/us/en/stocks/PRGS/, https://www.morningstar.com/stocks/xnas/prgs/quote,
+      https://www.perplexity.ai/finance/PRGS, https://www.google.com/finance/beta/quote/PRGS:NASDAQ\\n```
+      The most recent quotes show **Progress Software (ticker: PRGS) trading at about
+      \\\\$33.7\u2013\\\\$34.0 per share** in the latest session.[1][4]\\n\\nBecause
+      stock prices change continuously during market hours, any single \u201Ccurrent\u201D
+      price can be slightly different across data providers and a few moments later.
+      Recent sources show:\\n\\n- Robinhood lists **PRGS at \\\\$33.75**, with a day
+      range of \\\\$33.18\u2013\\\\$34.50 and market cap around \\\\$1.42B.[1]  \\n-
+      Google Finance shows an **open of \\\\$33.88** with a day range of **\\\\$33.18\u2013\\\\$34.04**
+      and market cap of about **\\\\$1.42B**.[4]  \\n\\nFor an exact up-to-the-second
+      quote, you would need to refresh a real-time market data source from your broker
+      or a financial news platform. ```\\n\\n\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user's question requires both background on Snoopy and a real-time
+      stock price lookup related to Snoopy's owner's employer.\\n\\n## Retrieval plan
+      for this iteration\\n\\n1. Retrieve information about Snoopy from the static
+      context agent dedicated to Snoopy.\\n   Reason: This will provide a clear answer
+      to the first part of the user's question about who Snoopy is.\\n\\n2. Determine
+      who Snoopy's owner is and identify the company where the owner works, using
+      the static context agent if possible.\\n   Reason: This is necessary to know
+      which company's stock price to look up.\\n\\n3. Search for the current stock
+      price of the company where Snoopy's owner works using an internet search.\\n
+      \  Reason: This will answer the second part of the user's question regarding
+      the stock price.\\n\\n\\nCall the tools needed to fulfil this plan. You may
+      call multiple tools.\\nCall task_complete once you have executed all planned
+      retrieval steps.\\n\\nExtra instructions: If the question is about Snoopy, use
+      the dog context agent. If the question is about RAO, use the RAO context agent.
+      for general questions use the perplexity agent. Always try to be as thorough
+      as possible\\n\\n\\nChoose the best tool or tools for the task. Call task_complete
+      when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
+      information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
+      to answer questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f\",\"description\":\"A
+      general-purpose agent that can answer questions using the Perplexity API. \u2014
+      Performs an internet search using Perplexity Search to get context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"The
+      question to search for on the internet.\"}},\"additionalProperties\":false}},{\"name\":\"task_complete\",\"description\":\"Call
+      this tool when you have gathered enough information to answer the question and
+      no more tools are needed.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '6595'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 2db28fe8c10b4cc9933d4aa24d567fed
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"tools","tools":{"task_complete":[{"function":{"name":"task_complete","arguments":{}}}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":560,"output_tokens":18,"timings":{"generative_first_chunk":0.9578413190029096,"generative":0.95933527899615},"input_nuclia_tokens":0.56,"output_nuclia_tokens":0.018}}
+
+        {"chunk":{"normalized_tokens":{"input":0.5604,"output":0.0176,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:20:22 GMT
+      nuclia-learning-id:
+      - 7b8b485bd661427f9506b2f95224a3de
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '966'
+      x-nuclia-trace-id:
+      - 880a005b09cfcdcf932f87c93c7295b2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner_plan-smart\",\"system\":\"You
+      are a strategic planning assistant that coordinates context-retrieval agents
+      to answer a user's question.\\n\\nYour job is to produce a high-level retrieval
+      plan describing WHAT information to gather and WHY.\\nYou do NOT call tools
+      yourself and do NOT specify exact tool names or arguments \u2014 an executor
+      LLM\\nwill decide how to carry out each step using the available tools.\\n\\nGuidelines:\\n-
+      Analyse what information has already been gathered (execution history) and what
+      is still missing.\\n- Produce a minimal, targeted plan: only include steps that
+      will meaningfully advance towards answering the question.\\n- If the information
+      gathered so far is already sufficient to answer the question, set status to
+      \\\"done\\\".\\n- Each step should describe the information to retrieve in plain
+      language.\\n- Provide a concise summary of what has been accomplished so far
+      for the executor to use as context.\",\"chat_history\":[],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a strategic planning assistant that coordinates context-retrieval agents
+      to answer a user's question.\\n\\nYour job is to produce a high-level retrieval
+      plan describing WHAT information to gather and WHY.\\nYou do NOT call tools
+      yourself and do NOT specify exact tool names or arguments \u2014 an executor
+      LLM\\nwill decide how to carry out each step using the available tools.\\n\\nGuidelines:\\n-
+      Analyse what information has already been gathered (execution history) and what
+      is still missing.\\n- Produce a minimal, targeted plan: only include steps that
+      will meaningfully advance towards answering the question.\\n- If the information
+      gathered so far is already sufficient to answer the question, set status to
+      \\\"done\\\".\\n- Each step should describe the information to retrieve in plain
+      language.\\n- Provide a concise summary of what has been accomplished so far
+      for the executor to use as context.\\n\\n## User question\\nWho is Snoopy and
+      can you tell me the stock price of the company where his owner works?\\n\\n##
+      Available retrieval capabilities\\n- **static_context__269192da-f5b6-4196-8c9a-bd77e32f237c**:
+      Provides information about Snoopy, Carmen's dog. \u2014 Provide static context
+      to answer questions.\\n    (no parameters)\\n\\n- **static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba**:
+      Provides information about RAO, the agentic RAG orchestrator. \u2014 Provide
+      static context to answer questions.\\n    (no parameters)\\n\\n- **internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f**:
+      A general-purpose agent that can answer questions using the Perplexity API.
+      \u2014 Performs an internet search using Perplexity Search to get context to
+      answer questions.\\n    - question (string): The question to search for on the
+      internet.\\n\\n\\n\\n\\n## Execution history (previous planning iterations)\\n\\n###
+      Iteration 1\\n**Plan:** 3 step(s): Retrieve information about Snoopy from the
+      static context agent dedicated to Snoopy.; Determine who Snoopy's owner is and
+      identify the company where the owner works, using the static context agent if
+      possible.; Search for the current stock price of the company where Snoopy's
+      owner works using an internet search.\\n**Results summary:** [static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n## Chunk: 8bb9f7c5bb3443c7820c5bd41bc3cf94\\nResult
+      of running: static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy
+      is Carmen's dog. He is small and very cute but a bit moody. He was a rescue
+      dog. Carmen works at Progress Software, a company that provides software for
+      developing and managing applications. ```\\n\\n\\n\\n[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: 3bba7f68e9a84ff0b9492c0a9bc73a46\\nResult of running: static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\\n\\n[internet_search of 0f5487c8-432d-4205-b5e0-d5c06b7a638f with
+      parameters {'question': 'current stock price of Progress Software'}]:\\n\\n\\n\\n##
+      Chunk: 0e177fbd3b734386b16d5935c8e0f530\\nResult of running: internet_search
+      of 0f5487c8-432d-4205-b5e0-d5c06b7a638f with parameters {'question': 'current
+      stock price of Progress Software'}\\nURLs: https://robinhood.com/us/en/stocks/PRGS/,
+      https://www.morningstar.com/stocks/xnas/prgs/quote, https://www.perplexity.ai/finance/PRGS,
+      https://www.google.com/finance/beta/quote/PRGS:NASDAQ\\n``` The most recent
+      quotes show **Progress Software (ticker: PRGS) trading at about \\\\$33.7\u2013\\\\$34.0
+      per share** in the latest session.[1][4]\\n\\nBecause stock prices change continuously
+      during market hours, any single \u201Ccurrent\u201D price can be slightly different
+      across data providers and a few moments later. Recent sources show:\\n\\n- Robinhood
+      lists **PRGS at \\\\$33.75**, with a day range of \\\\$33.18\u2013\\\\$34.50
+      and market cap around \\\\$1.42B.[1]  \\n- Google Finance shows an **open of
+      \\\\$33.88** with a day range of **\\\\$33.18\u2013\\\\$34.04** and market cap
+      of about **\\\\$1.42B**.[4]  \\n\\nFor an exact up-to-the-second quote, you
+      would need to refresh a real-time market data source from your broker or a financial
+      news platform. ```\\n\\n\\n\\n\\n\\n\\n## Extra instructions\\nIf the question
+      is about Snoopy, use the dog context agent. If the question is about RAO, use
+      the RAO context agent. for general questions use the perplexity agent. Always
+      try to be as thorough as possible\\n\\n\\nBased on the above, produce the next
+      retrieval plan or declare completion.\"},\"citations\":false,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":2000,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":{\"title\":\"retrieval_plan\",\"description\":\"High-level
+      retrieval plan for the executor\",\"parameters\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"string\",\"enum\":[\"plan\",\"done\"],\"description\":\"'plan'
+      if more retrieval steps are needed, 'done' if enough context has been gathered
+      to answer the question.\"},\"reasoning\":{\"type\":\"string\",\"description\":\"Explanation
+      of why this plan was chosen or why retrieval is complete.\"},\"summary\":{\"type\":\"string\",\"description\":\"Concise
+      summary of what has been gathered so far across all iterations.\"},\"steps\":{\"type\":\"array\",\"description\":\"Ordered
+      list of retrieval steps for the executor. Empty when status is 'done'.\",\"items\":{\"type\":\"object\",\"properties\":{\"description\":{\"type\":\"string\",\"description\":\"Plain-language
+      description of what information to retrieve.\"},\"reason\":{\"type\":\"string\",\"description\":\"Why
+      this information is needed to answer the question.\"}},\"required\":[\"description\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"status\",\"reasoning\",\"summary\",\"steps\"],\"additionalProperties\":false}},\"format_prompt\":false,\"rerank_context\":false,\"tools\":[],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '6969'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 2db28fe8c10b4cc9933d4aa24d567fed
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: "{\"chunk\":{\"type\":\"object\",\"object\":{\"status\":\"done\",\"reasoning\":\"All
+        necessary information has been gathered: Snoopy is Carmen's dog, and Carmen
+        works at Progress Software. The current stock price of Progress Software (PRGS)
+        has been retrieved from multiple sources, showing it is trading around $33.7\u2013$34.0
+        per share. No further retrieval is needed.\",\"summary\":\"Snoopy is Carmen's
+        dog. Carmen works at Progress Software. The current stock price of Progress
+        Software (PRGS) is approximately $33.7\u2013$34.0 per share, based on recent
+        market data.\",\"steps\":[]}}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":602,\"output_tokens\":194,\"timings\":{\"generative\":1.810770064999815},\"input_nuclia_tokens\":0.602,\"output_nuclia_tokens\":0.194}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.602,\"output\":0.1936,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:20:23 GMT
+      nuclia-learning-id:
+      - 0305c038cb744c0ca123cb87a5995ba8
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1816'
+      x-nuclia-trace-id:
+      - c1c0f845fb35aa582efea0a003b4eba0
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"rao_answer_summary-smart\",\"system\":null,\"chat_history\":[],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"\\nBased
+      on the provided context and user question, perform the following tasks:\\n\\n1.
+      Select only information directly relevant to the question.\\n2. Break down compound
+      sentences into simple, single-idea statements. Preserve original phrasing when
+      possible.\\n3. For any named entity with descriptive details, separate those
+      details into distinct propositions.\\n4. Ensure clarity by replacing pronouns
+      (e.g., \\\"it\\\", \\\"he\\\", \\\"she\\\", \\\"they\\\", \\\"this\\\", \\\"that\\\")
+      with the full names of the entities they reference, and add necessary modifiers
+      to clarify meaning.\\n5. The context may be delimited by tags such as <START
+      OF CONTEXT> and <END OF CONTEXT>. Treat everything between these tags as context.\\n6.
+      Assess whether the context sufficiently answers the question. If it answers
+      it partially, provide the answer; if it does not answer it fully, specify what
+      information is missing to answer the question.\\n7. If the context does not
+      answer the question at all, just return the original question as the missing
+      information.\\n8. The `citations` field consists ONLY in a list of block IDs
+      that are relevant to the answer, following these rules:\\n  - Use the format:
+      block-AB\\n  - Just mention the block IDs, do NOT include any other text.\\n
+      \ - Just mention the blocks actually relevant and that contain information used
+      in the answer, do NOT include blocks that are not relevant.\\n  - No duplicates.\\n9.
+      Do NOT hallucinate block IDs. Only use those provided in the context.\\n10.
+      Your output must be a JSON object with the following fields:\\n    - \\\"reason\\\":
+      Explain your reasoning for the answer or validation.\\n    - \\\"answer\\\":
+      Provide a partial or complete answer to the user query strictly from the information
+      in the context. If there isn't enough information to even provide a partial
+      answer, leave 'answer' empty.\\n    - \\\"missing_info_query\\\": If the context
+      is insufficient, specify what information is missing in a query shape; otherwise,
+      leave it empty. Just return the query needed to retrieve the missing information.\\n
+      \   - \\\"useful\\\": Indicate if the context is useful to answer the question
+      (\\\"yes\\\" or \\\"no\\\").\\n    - \\\"citations\\\": List the IDs of the
+      blocks relevant to the answer, if any (e.g., [\\\"block-AB\\\", \\\"block-CD\\\"]).\\n11.
+      **IMPORTANT** If any extra instructions are provided, you MUST follow them carefully
+      when generating the answer field. These instructions may specify the format,
+      style, tools to use, or other requirements for the answer.\\n\\n<QUESTION>\\nWho
+      is Snoopy and can you tell me the stock price of the company where his owner
+      works?\\n\\n<START OF CONTEXT>\\n\\nContext:\\n\\n**block-AA**\\n\\n## Chunk:
+      8bb9f7c5bb3443c7820c5bd41bc3cf94\\nResult of running: static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n```
+      Snoopy is Carmen's dog. He is small and very cute but a bit moody. He was a
+      rescue dog. Carmen works at Progress Software, a company that provides software
+      for developing and managing applications. ```\\n\\n\\n---\\\"\\n\\n\\n**block-AB**\\n\\n##
+      Chunk: 3bba7f68e9a84ff0b9492c0a9bc73a46\\nResult of running: static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\\n---\\\"\\n\\n\\n**block-AC**\\n\\n## Chunk: 0e177fbd3b734386b16d5935c8e0f530\\nResult
+      of running: internet_search of 0f5487c8-432d-4205-b5e0-d5c06b7a638f with parameters
+      {'question': 'current stock price of Progress Software'}\\nURLs: https://robinhood.com/us/en/stocks/PRGS/,
+      https://www.morningstar.com/stocks/xnas/prgs/quote, https://www.perplexity.ai/finance/PRGS,
+      https://www.google.com/finance/beta/quote/PRGS:NASDAQ\\n``` The most recent
+      quotes show **Progress Software (ticker: PRGS) trading at about \\\\$33.7\u2013\\\\$34.0
+      per share** in the latest session.[1][4]\\n\\nBecause stock prices change continuously
+      during market hours, any single \u201Ccurrent\u201D price can be slightly different
+      across data providers and a few moments later. Recent sources show:\\n\\n- Robinhood
+      lists **PRGS at \\\\$33.75**, with a day range of \\\\$33.18\u2013\\\\$34.50
+      and market cap around \\\\$1.42B.[1]  \\n- Google Finance shows an **open of
+      \\\\$33.88** with a day range of **\\\\$33.18\u2013\\\\$34.04** and market cap
+      of about **\\\\$1.42B**.[4]  \\n\\nFor an exact up-to-the-second quote, you
+      would need to refresh a real-time market data source from your broker or a financial
+      news platform. ```\\n\\n\\n---\\\"\\n\\n\\n\\n\\n<END OF CONTEXT>\\n\\n\"},\"citations\":false,\"citation_threshold\":null,\"generative_model\":\"chatgpt-azure-4o-mini\",\"max_tokens\":2000,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":{\"title\":\"validate_or_answer\",\"description\":\"Validate
+      or answer\",\"parameters\":{\"type\":\"object\",\"properties\":{\"reason\":{\"type\":\"string\",\"description\":\"Reasoning
+      for the answer or validation\"},\"answer\":{\"type\":\"string\",\"description\":\"Partial
+      or complete answer to the user query from the information in the context.\"},\"missing_info_query\":{\"type\":\"string\",\"description\":\"Query
+      needed to retrieve the missing information in case the context is not enough
+      to answer the question. If the context does not answer the question at all,
+      just return the original question.\"},\"useful\":{\"type\":\"string\",\"description\":\"Is
+      the context useful to answer the question?\",\"enum\":[\"yes\",\"no\"]},\"citations\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"description\":\"Block
+      ID cited in the answer, e.g. block-AB\"},\"description\":\"List of block IDs
+      cited in the answer, if any\"}},\"required\":[\"reason\",\"answer\",\"missing_info_query\",\"useful\",\"citations\"]}},\"format_prompt\":false,\"rerank_context\":false,\"tools\":[],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '5923'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-origin:
+      - RAO
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"object","object":{"reason":"The context provides
+        information about Snoopy being Carmen''s dog and details about Carmen''s employment
+        at Progress Software. Additionally, it includes the current stock price of
+        Progress Software. Therefore, the context sufficiently answers the question
+        about who Snoopy is and provides the stock price of the company where Carmen
+        works.","answer":"Snoopy is Carmen''s dog. He is small, very cute, and a bit
+        moody. He was a rescue dog. Carmen works at Progress Software. The current
+        stock price of Progress Software (ticker: PRGS) is approximately $33.75 per
+        share.","missing_info_query":"","useful":"yes","citations":["block-AA","block-AC"]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":38,"output_tokens":17,"timings":{"generative":2.072917523997603},"input_nuclia_tokens":0.038,"output_nuclia_tokens":0.017}}
+
+        {"chunk":{"normalized_tokens":{"input":0.03846,"output":0.01668,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:20:25 GMT
+      nuclia-learning-id:
+      - 0b58b67414c74eb1831ed51e200a329f
+      nuclia-learning-model:
+      - chatgpt-azure-4o-mini
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '2079'
+      x-nuclia-trace-id:
+      - 82bbc641cce99d3be5bb5f18fbc02081
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"question":"","retrieval":true,"user_id":"summarize","system":"You are
+      a helpful AI assistant. Your role is to provide accurate, clear, and well-structured
+      answers based strictly on the information provided to you.\nKey principles:\n-
+      Answer only using the information in the provided context\n- Do not use external
+      knowledge, assumptions, or prior experience\n- Maintain a professional and informative
+      tone\n- Be concise yet thorough\n- If information is insufficient, acknowledge
+      this clearly\n\nAlways follow any additional instructions provided about format,
+      style, or domain-specific behavior.","chat_history":[],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"\n##
+      Question\nWho is Snoopy and can you tell me the stock price of the company where
+      his owner works?\n\n## Provided Context\n[START OF CONTEXT]\n## Smart Agent
+      Results\n\n# Who is Snoopy and can you tell me the stock price of the company
+      where his owner works?\n\n Snoopy is Carmen''s dog. He is small, very cute,
+      and a bit moody. He was a rescue dog. Carmen works at Progress Software. The
+      current stock price of Progress Software (ticker: PRGS) is approximately $33.75
+      per share.\n[END OF CONTEXT]\n\n## Answering Guidelines\n- Carefully read all
+      context; it may be lengthy or detailed\n- Do not omit or overlook any relevant
+      information\n- If the context is incomplete or insufficient, state: \"Not enough
+      data to answer this.\"\n- Read carefully any extra instructions below if provided
+      and use them to answer\n\nNow provide your answer to the question: Who is Snoopy
+      and can you tell me the stock price of the company where his owner works?"},"citations":null,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":5000,"query_context_images":{},"prefer_markdown":null,"json_schema":null,"format_prompt":false,"rerank_context":false,"tools":[],"tool_choice":{"type":"auto"},"reasoning":false,"seed":null}'
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1954'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 2db28fe8c10b4cc9933d4aa24d567fed
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"text","text":"S"}}
+
+        {"chunk":{"type":"text","text":"no"}}
+
+        {"chunk":{"type":"text","text":"opy"}}
+
+        {"chunk":{"type":"text","text":" is"}}
+
+        {"chunk":{"type":"text","text":" Carmen"}}
+
+        {"chunk":{"type":"text","text":"''s"}}
+
+        {"chunk":{"type":"text","text":" dog"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" described"}}
+
+        {"chunk":{"type":"text","text":" as"}}
+
+        {"chunk":{"type":"text","text":" small"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" very"}}
+
+        {"chunk":{"type":"text","text":" cute"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" and"}}
+
+        {"chunk":{"type":"text","text":" a"}}
+
+        {"chunk":{"type":"text","text":" bit"}}
+
+        {"chunk":{"type":"text","text":" mo"}}
+
+        {"chunk":{"type":"text","text":"ody"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" He"}}
+
+        {"chunk":{"type":"text","text":" is"}}
+
+        {"chunk":{"type":"text","text":" a"}}
+
+        {"chunk":{"type":"text","text":" rescue"}}
+
+        {"chunk":{"type":"text","text":" dog"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" Carmen"}}
+
+        {"chunk":{"type":"text","text":" works"}}
+
+        {"chunk":{"type":"text","text":" at"}}
+
+        {"chunk":{"type":"text","text":" Progress"}}
+
+        {"chunk":{"type":"text","text":" Software"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" and"}}
+
+        {"chunk":{"type":"text","text":" the"}}
+
+        {"chunk":{"type":"text","text":" current"}}
+
+        {"chunk":{"type":"text","text":" stock"}}
+
+        {"chunk":{"type":"text","text":" price"}}
+
+        {"chunk":{"type":"text","text":" of"}}
+
+        {"chunk":{"type":"text","text":" Progress"}}
+
+        {"chunk":{"type":"text","text":" Software"}}
+
+        {"chunk":{"type":"text","text":" ("}}
+
+        {"chunk":{"type":"text","text":"ticker"}}
+
+        {"chunk":{"type":"text","text":":"}}
+
+        {"chunk":{"type":"text","text":" PR"}}
+
+        {"chunk":{"type":"text","text":"GS"}}
+
+        {"chunk":{"type":"text","text":")"}}
+
+        {"chunk":{"type":"text","text":" is"}}
+
+        {"chunk":{"type":"text","text":" approximately"}}
+
+        {"chunk":{"type":"text","text":" $"}}
+
+        {"chunk":{"type":"text","text":"33"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":"75"}}
+
+        {"chunk":{"type":"text","text":" per"}}
+
+        {"chunk":{"type":"text","text":" share"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":10,"output_tokens":7,"timings":{"generative_first_chunk":0.4651644760015188,"generative":1.174849702991196},"input_nuclia_tokens":0.01,"output_nuclia_tokens":0.007}}
+
+        {"chunk":{"normalized_tokens":{"input":0.00954,"output":0.00684,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:20:27 GMT
+      nuclia-learning-id:
+      - 4f72b60be5c047148a39adc87e34506c
+      nuclia-learning-model:
+      - chatgpt-azure-4o-mini
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '472'
+      x-nuclia-trace-id:
+      - af91b4533d70c5bdd229a1555afaa8e3
+    status:
+      code: 200
+      message: OK
+version: 1

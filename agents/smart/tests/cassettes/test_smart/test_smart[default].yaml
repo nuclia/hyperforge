@@ -1,0 +1,2202 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      x-nuclia-nuakey:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+    method: GET
+    uri: https://europe-1.nuclia.cloud/api/authorizer/info
+  response:
+    body:
+      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"03d47998-f672-4a9b-a57b-bde3a9c3ee8c","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '227'
+      content-type:
+      - application/json
+      date:
+      - Tue, 02 Jun 2026 17:18:42 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '93'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner_plan-smart\",\"system\":\"You
+      are a strategic planning assistant that coordinates context-retrieval agents
+      to answer a user's question.\\n\\nYour job is to produce a high-level retrieval
+      plan describing WHAT information to gather and WHY.\\nYou do NOT call tools
+      yourself and do NOT specify exact tool names or arguments \u2014 an executor
+      LLM\\nwill decide how to carry out each step using the available tools.\\n\\nGuidelines:\\n-
+      Analyse what information has already been gathered (execution history) and what
+      is still missing.\\n- Produce a minimal, targeted plan: only include steps that
+      will meaningfully advance towards answering the question.\\n- If the information
+      gathered so far is already sufficient to answer the question, set status to
+      \\\"done\\\".\\n- Each step should describe the information to retrieve in plain
+      language.\\n- Provide a concise summary of what has been accomplished so far
+      for the executor to use as context.\",\"chat_history\":[],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a strategic planning assistant that coordinates context-retrieval agents
+      to answer a user's question.\\n\\nYour job is to produce a high-level retrieval
+      plan describing WHAT information to gather and WHY.\\nYou do NOT call tools
+      yourself and do NOT specify exact tool names or arguments \u2014 an executor
+      LLM\\nwill decide how to carry out each step using the available tools.\\n\\nGuidelines:\\n-
+      Analyse what information has already been gathered (execution history) and what
+      is still missing.\\n- Produce a minimal, targeted plan: only include steps that
+      will meaningfully advance towards answering the question.\\n- If the information
+      gathered so far is already sufficient to answer the question, set status to
+      \\\"done\\\".\\n- Each step should describe the information to retrieve in plain
+      language.\\n- Provide a concise summary of what has been accomplished so far
+      for the executor to use as context.\\n\\n## User question\\nWho is Snoopy?\\n\\n##
+      Available retrieval capabilities\\n- **static_context__269192da-f5b6-4196-8c9a-bd77e32f237c**:
+      Provides information about Snoopy, Carmen's dog. \u2014 Provide static context
+      to answer questions.\\n    (no parameters)\\n\\n- **static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba**:
+      Provides information about RAO, the agentic RAG orchestrator. \u2014 Provide
+      static context to answer questions.\\n    (no parameters)\\n\\n- **internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f**:
+      A general-purpose agent that can answer questions using the Perplexity API.
+      \u2014 Performs an internet search using Perplexity Search to get context to
+      answer questions.\\n    - question (string): The question to search for on the
+      internet.\\n\\n\\n\\n\\n## Execution history\\nNo tools have been called yet.\\n\\n\\n\\n##
+      Extra instructions\\nIf the question is about Snoopy, use the dog context agent.
+      If the question is about RAO, use the RAO context agent. for general questions
+      use the perplexity agent. Always try to be as thorough as possible\\n\\n\\nBased
+      on the above, produce the next retrieval plan or declare completion.\"},\"citations\":false,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":2000,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":{\"title\":\"retrieval_plan\",\"description\":\"High-level
+      retrieval plan for the executor\",\"parameters\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"string\",\"enum\":[\"plan\",\"done\"],\"description\":\"'plan'
+      if more retrieval steps are needed, 'done' if enough context has been gathered
+      to answer the question.\"},\"reasoning\":{\"type\":\"string\",\"description\":\"Explanation
+      of why this plan was chosen or why retrieval is complete.\"},\"summary\":{\"type\":\"string\",\"description\":\"Concise
+      summary of what has been gathered so far across all iterations.\"},\"steps\":{\"type\":\"array\",\"description\":\"Ordered
+      list of retrieval steps for the executor. Empty when status is 'done'.\",\"items\":{\"type\":\"object\",\"properties\":{\"description\":{\"type\":\"string\",\"description\":\"Plain-language
+      description of what information to retrieve.\"},\"reason\":{\"type\":\"string\",\"description\":\"Why
+      this information is needed to answer the question.\"}},\"required\":[\"description\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"status\",\"reasoning\",\"summary\",\"steps\"],\"additionalProperties\":false}},\"format_prompt\":false,\"rerank_context\":false,\"tools\":[],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4457'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 1ac6a1a7a38b4360b4bb21f323cfb156
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"object","object":{"status":"plan","reasoning":"The
+        user asked about Snoopy. According to the extra instructions, if the question
+        is about Snoopy, the dog context agent should be used. No information has
+        been gathered yet, so the next step is to retrieve static context about Snoopy
+        from the relevant agent.","summary":"No information has been gathered yet.
+        The user wants to know who Snoopy is.","steps":[{"description":"Retrieve static
+        context about Snoopy, Carmen''s dog, from the dedicated context agent.","reason":"This
+        agent is specifically designed to provide information about Snoopy and is
+        recommended by the extra instructions for questions about Snoopy."}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":313,"output_tokens":210,"timings":{"generative":1.9016435619996628},"input_nuclia_tokens":0.313,"output_nuclia_tokens":0.21}}
+
+        {"chunk":{"normalized_tokens":{"input":0.3132,"output":0.2096,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:18:41 GMT
+      nuclia-learning-id:
+      - 6500121e0d88408bacfb37ac4bc062d9
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1908'
+      x-nuclia-trace-id:
+      - 35810179231ed35b6542adc92f6f547b
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
+      Retrieve static context about Snoopy, Carmen's dog, from the dedicated context
+      agent.\\n   Reason: This agent is specifically designed to provide information
+      about Snoopy and is recommended by the extra instructions for questions about
+      Snoopy.\\n\\n\\nCall the tools needed to fulfil this plan. You may call multiple
+      tools.\\nCall task_complete once you have executed all planned retrieval steps.\\n\\nExtra
+      instructions: If the question is about Snoopy, use the dog context agent. If
+      the question is about RAO, use the RAO context agent. for general questions
+      use the perplexity agent. Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
+      is Snoopy?\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
+      Retrieve static context about Snoopy, Carmen's dog, from the dedicated context
+      agent.\\n   Reason: This agent is specifically designed to provide information
+      about Snoopy and is recommended by the extra instructions for questions about
+      Snoopy.\\n\\n\\nCall the tools needed to fulfil this plan. You may call multiple
+      tools.\\nCall task_complete once you have executed all planned retrieval steps.\\n\\nExtra
+      instructions: If the question is about Snoopy, use the dog context agent. If
+      the question is about RAO, use the RAO context agent. for general questions
+      use the perplexity agent. Always try to be as thorough as possible\\n\\n\\nChoose
+      the best tool or tools for the task. Call task_complete when you have enough
+      information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
+      information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
+      to answer questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f\",\"description\":\"A
+      general-purpose agent that can answer questions using the Perplexity API. \u2014
+      Performs an internet search using Perplexity Search to get context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"The
+      question to search for on the internet.\"}},\"additionalProperties\":false}},{\"name\":\"task_complete\",\"description\":\"Call
+      this tool when you have gathered enough information to answer the question and
+      no more tools are needed.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '3657'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 1ac6a1a7a38b4360b4bb21f323cfb156
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":258,"output_tokens":56,"timings":{"generative_first_chunk":1.331394825989264,"generative":1.3328967859997647},"input_nuclia_tokens":0.258,"output_nuclia_tokens":0.056}}
+
+        {"chunk":{"normalized_tokens":{"input":0.258,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:18:43 GMT
+      nuclia-learning-id:
+      - 64614692a4f2477e9d64b8041b29cad4
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1338'
+      x-nuclia-trace-id:
+      - 17e78de81418a5db033f4c9b81dd159e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
+      Retrieve static context about Snoopy, Carmen's dog, from the dedicated context
+      agent.\\n   Reason: This agent is specifically designed to provide information
+      about Snoopy and is recommended by the extra instructions for questions about
+      Snoopy.\\n\\n\\nCall the tools needed to fulfil this plan. You may call multiple
+      tools.\\nCall task_complete once you have executed all planned retrieval steps.\\n\\nExtra
+      instructions: If the question is about Snoopy, use the dog context agent. If
+      the question is about RAO, use the RAO context agent. for general questions
+      use the perplexity agent. Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
+      is Snoopy?\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: e35937257f864e6abfdec3763217131b\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
+      Retrieve static context about Snoopy, Carmen's dog, from the dedicated context
+      agent.\\n   Reason: This agent is specifically designed to provide information
+      about Snoopy and is recommended by the extra instructions for questions about
+      Snoopy.\\n\\n\\nCall the tools needed to fulfil this plan. You may call multiple
+      tools.\\nCall task_complete once you have executed all planned retrieval steps.\\n\\nExtra
+      instructions: If the question is about Snoopy, use the dog context agent. If
+      the question is about RAO, use the RAO context agent. for general questions
+      use the perplexity agent. Always try to be as thorough as possible\\n\\n\\nChoose
+      the best tool or tools for the task. Call task_complete when you have enough
+      information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
+      information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
+      to answer questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f\",\"description\":\"A
+      general-purpose agent that can answer questions using the Perplexity API. \u2014
+      Performs an internet search using Perplexity Search to get context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"The
+      question to search for on the internet.\"}},\"additionalProperties\":false}},{\"name\":\"task_complete\",\"description\":\"Call
+      this tool when you have gathered enough information to answer the question and
+      no more tools are needed.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4005'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 1ac6a1a7a38b4360b4bb21f323cfb156
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":298,"output_tokens":56,"timings":{"generative_first_chunk":1.0315013369981898,"generative":1.0330350370059023},"input_nuclia_tokens":0.298,"output_nuclia_tokens":0.056}}
+
+        {"chunk":{"normalized_tokens":{"input":0.2976,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:18:45 GMT
+      nuclia-learning-id:
+      - ccb40b9a75204e70940033b006992c83
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1039'
+      x-nuclia-trace-id:
+      - 59397ae679c9c00fbdb6a9ac25b41e87
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
+      Retrieve static context about Snoopy, Carmen's dog, from the dedicated context
+      agent.\\n   Reason: This agent is specifically designed to provide information
+      about Snoopy and is recommended by the extra instructions for questions about
+      Snoopy.\\n\\n\\nCall the tools needed to fulfil this plan. You may call multiple
+      tools.\\nCall task_complete once you have executed all planned retrieval steps.\\n\\nExtra
+      instructions: If the question is about Snoopy, use the dog context agent. If
+      the question is about RAO, use the RAO context agent. for general questions
+      use the perplexity agent. Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
+      is Snoopy?\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: e35937257f864e6abfdec3763217131b\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: 8cb1bb1774804c6ba3d3a392708b2df7\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
+      Retrieve static context about Snoopy, Carmen's dog, from the dedicated context
+      agent.\\n   Reason: This agent is specifically designed to provide information
+      about Snoopy and is recommended by the extra instructions for questions about
+      Snoopy.\\n\\n\\nCall the tools needed to fulfil this plan. You may call multiple
+      tools.\\nCall task_complete once you have executed all planned retrieval steps.\\n\\nExtra
+      instructions: If the question is about Snoopy, use the dog context agent. If
+      the question is about RAO, use the RAO context agent. for general questions
+      use the perplexity agent. Always try to be as thorough as possible\\n\\n\\nChoose
+      the best tool or tools for the task. Call task_complete when you have enough
+      information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
+      information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
+      to answer questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f\",\"description\":\"A
+      general-purpose agent that can answer questions using the Perplexity API. \u2014
+      Performs an internet search using Perplexity Search to get context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"The
+      question to search for on the internet.\"}},\"additionalProperties\":false}},{\"name\":\"task_complete\",\"description\":\"Call
+      this tool when you have gathered enough information to answer the question and
+      no more tools are needed.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4353'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 1ac6a1a7a38b4360b4bb21f323cfb156
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":339,"output_tokens":56,"timings":{"generative_first_chunk":0.9391326459881384,"generative":0.9410636459942907},"input_nuclia_tokens":0.339,"output_nuclia_tokens":0.056}}
+
+        {"chunk":{"normalized_tokens":{"input":0.3392,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:18:46 GMT
+      nuclia-learning-id:
+      - 3a41104b7d674be189d5e2ba8f3bf71c
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '946'
+      x-nuclia-trace-id:
+      - d80f0d4f18dac43d75f22d4acbe43b47
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
+      Retrieve static context about Snoopy, Carmen's dog, from the dedicated context
+      agent.\\n   Reason: This agent is specifically designed to provide information
+      about Snoopy and is recommended by the extra instructions for questions about
+      Snoopy.\\n\\n\\nCall the tools needed to fulfil this plan. You may call multiple
+      tools.\\nCall task_complete once you have executed all planned retrieval steps.\\n\\nExtra
+      instructions: If the question is about Snoopy, use the dog context agent. If
+      the question is about RAO, use the RAO context agent. for general questions
+      use the perplexity agent. Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
+      is Snoopy?\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: e35937257f864e6abfdec3763217131b\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: 8cb1bb1774804c6ba3d3a392708b2df7\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: 0cbb138958c6445398f40796bb14fd07\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
+      Retrieve static context about Snoopy, Carmen's dog, from the dedicated context
+      agent.\\n   Reason: This agent is specifically designed to provide information
+      about Snoopy and is recommended by the extra instructions for questions about
+      Snoopy.\\n\\n\\nCall the tools needed to fulfil this plan. You may call multiple
+      tools.\\nCall task_complete once you have executed all planned retrieval steps.\\n\\nExtra
+      instructions: If the question is about Snoopy, use the dog context agent. If
+      the question is about RAO, use the RAO context agent. for general questions
+      use the perplexity agent. Always try to be as thorough as possible\\n\\n\\nChoose
+      the best tool or tools for the task. Call task_complete when you have enough
+      information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
+      information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
+      to answer questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f\",\"description\":\"A
+      general-purpose agent that can answer questions using the Perplexity API. \u2014
+      Performs an internet search using Perplexity Search to get context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"The
+      question to search for on the internet.\"}},\"additionalProperties\":false}},{\"name\":\"task_complete\",\"description\":\"Call
+      this tool when you have gathered enough information to answer the question and
+      no more tools are needed.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4701'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 1ac6a1a7a38b4360b4bb21f323cfb156
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":379,"output_tokens":56,"timings":{"generative_first_chunk":0.7410638889996335,"generative":0.7425100990003557},"input_nuclia_tokens":0.379,"output_nuclia_tokens":0.056}}
+
+        {"chunk":{"normalized_tokens":{"input":0.3792,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:18:47 GMT
+      nuclia-learning-id:
+      - d5cb15c266674ad685068bbc94a72813
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '748'
+      x-nuclia-trace-id:
+      - 01006013088d4a478f34e1d034a92c3c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
+      Retrieve static context about Snoopy, Carmen's dog, from the dedicated context
+      agent.\\n   Reason: This agent is specifically designed to provide information
+      about Snoopy and is recommended by the extra instructions for questions about
+      Snoopy.\\n\\n\\nCall the tools needed to fulfil this plan. You may call multiple
+      tools.\\nCall task_complete once you have executed all planned retrieval steps.\\n\\nExtra
+      instructions: If the question is about Snoopy, use the dog context agent. If
+      the question is about RAO, use the RAO context agent. for general questions
+      use the perplexity agent. Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
+      is Snoopy?\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: e35937257f864e6abfdec3763217131b\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: 8cb1bb1774804c6ba3d3a392708b2df7\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: 0cbb138958c6445398f40796bb14fd07\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: 18648b83fe354a38a071fbc758bb5532\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
+      Retrieve static context about Snoopy, Carmen's dog, from the dedicated context
+      agent.\\n   Reason: This agent is specifically designed to provide information
+      about Snoopy and is recommended by the extra instructions for questions about
+      Snoopy.\\n\\n\\nCall the tools needed to fulfil this plan. You may call multiple
+      tools.\\nCall task_complete once you have executed all planned retrieval steps.\\n\\nExtra
+      instructions: If the question is about Snoopy, use the dog context agent. If
+      the question is about RAO, use the RAO context agent. for general questions
+      use the perplexity agent. Always try to be as thorough as possible\\n\\n\\nChoose
+      the best tool or tools for the task. Call task_complete when you have enough
+      information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
+      information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
+      to answer questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f\",\"description\":\"A
+      general-purpose agent that can answer questions using the Perplexity API. \u2014
+      Performs an internet search using Perplexity Search to get context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"The
+      question to search for on the internet.\"}},\"additionalProperties\":false}},{\"name\":\"task_complete\",\"description\":\"Call
+      this tool when you have gathered enough information to answer the question and
+      no more tools are needed.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '5049'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 1ac6a1a7a38b4360b4bb21f323cfb156
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":419,"output_tokens":56,"timings":{"generative_first_chunk":0.8734792420000304,"generative":0.8750396620016545},"input_nuclia_tokens":0.419,"output_nuclia_tokens":0.056}}
+
+        {"chunk":{"normalized_tokens":{"input":0.4192,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:18:48 GMT
+      nuclia-learning-id:
+      - 306f8141483243fca69552729122652f
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '880'
+      x-nuclia-trace-id:
+      - a6dd1399ea8adca41ffe5ca494ef0920
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner_plan-smart\",\"system\":\"You
+      are a strategic planning assistant that coordinates context-retrieval agents
+      to answer a user's question.\\n\\nYour job is to produce a high-level retrieval
+      plan describing WHAT information to gather and WHY.\\nYou do NOT call tools
+      yourself and do NOT specify exact tool names or arguments \u2014 an executor
+      LLM\\nwill decide how to carry out each step using the available tools.\\n\\nGuidelines:\\n-
+      Analyse what information has already been gathered (execution history) and what
+      is still missing.\\n- Produce a minimal, targeted plan: only include steps that
+      will meaningfully advance towards answering the question.\\n- If the information
+      gathered so far is already sufficient to answer the question, set status to
+      \\\"done\\\".\\n- Each step should describe the information to retrieve in plain
+      language.\\n- Provide a concise summary of what has been accomplished so far
+      for the executor to use as context.\",\"chat_history\":[],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a strategic planning assistant that coordinates context-retrieval agents
+      to answer a user's question.\\n\\nYour job is to produce a high-level retrieval
+      plan describing WHAT information to gather and WHY.\\nYou do NOT call tools
+      yourself and do NOT specify exact tool names or arguments \u2014 an executor
+      LLM\\nwill decide how to carry out each step using the available tools.\\n\\nGuidelines:\\n-
+      Analyse what information has already been gathered (execution history) and what
+      is still missing.\\n- Produce a minimal, targeted plan: only include steps that
+      will meaningfully advance towards answering the question.\\n- If the information
+      gathered so far is already sufficient to answer the question, set status to
+      \\\"done\\\".\\n- Each step should describe the information to retrieve in plain
+      language.\\n- Provide a concise summary of what has been accomplished so far
+      for the executor to use as context.\\n\\n## User question\\nWho is Snoopy?\\n\\n##
+      Available retrieval capabilities\\n- **static_context__269192da-f5b6-4196-8c9a-bd77e32f237c**:
+      Provides information about Snoopy, Carmen's dog. \u2014 Provide static context
+      to answer questions.\\n    (no parameters)\\n\\n- **static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba**:
+      Provides information about RAO, the agentic RAG orchestrator. \u2014 Provide
+      static context to answer questions.\\n    (no parameters)\\n\\n- **internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f**:
+      A general-purpose agent that can answer questions using the Perplexity API.
+      \u2014 Performs an internet search using Perplexity Search to get context to
+      answer questions.\\n    - question (string): The question to search for on the
+      internet.\\n\\n\\n\\n\\n## Execution history (previous planning iterations)\\n\\n###
+      Iteration 1\\n**Plan:** 1 step(s): Retrieve static context about Snoopy, Carmen's
+      dog, from the dedicated context agent.\\n**Results summary:** [static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n## Chunk: e35937257f864e6abfdec3763217131b\\nResult
+      of running: static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy
+      is Carmen's dog. He is small and very cute but a bit moody. He was a rescue
+      dog. Carmen works at Progress Software, a company that provides software for
+      developing and managing applications. ```\\n\\n\\n\\n[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: 8cb1bb1774804c6ba3d3a392708b2df7\\nResult of running: static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\\n\\n[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: 0cbb138958c6445398f40796bb14fd07\\nResult of running: static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\\n\\n[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: 18648b83fe354a38a071fbc758bb5532\\nResult of running: static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\\n\\n[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
+      Chunk: af2f62eef1504f51804990e93dcc7237\\nResult of running: static_context
+      of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy is Carmen's dog. He is
+      small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\\n\\n\\n\\n\\n\\n\\n## Extra instructions\\nIf the question is about Snoopy,
+      use the dog context agent. If the question is about RAO, use the RAO context
+      agent. for general questions use the perplexity agent. Always try to be as thorough
+      as possible\\n\\n\\nBased on the above, produce the next retrieval plan or declare
+      completion.\"},\"citations\":false,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":2000,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":{\"title\":\"retrieval_plan\",\"description\":\"High-level
+      retrieval plan for the executor\",\"parameters\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"string\",\"enum\":[\"plan\",\"done\"],\"description\":\"'plan'
+      if more retrieval steps are needed, 'done' if enough context has been gathered
+      to answer the question.\"},\"reasoning\":{\"type\":\"string\",\"description\":\"Explanation
+      of why this plan was chosen or why retrieval is complete.\"},\"summary\":{\"type\":\"string\",\"description\":\"Concise
+      summary of what has been gathered so far across all iterations.\"},\"steps\":{\"type\":\"array\",\"description\":\"Ordered
+      list of retrieval steps for the executor. Empty when status is 'done'.\",\"items\":{\"type\":\"object\",\"properties\":{\"description\":{\"type\":\"string\",\"description\":\"Plain-language
+      description of what information to retrieve.\"},\"reason\":{\"type\":\"string\",\"description\":\"Why
+      this information is needed to answer the question.\"}},\"required\":[\"description\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"status\",\"reasoning\",\"summary\",\"steps\"],\"additionalProperties\":false}},\"format_prompt\":false,\"rerank_context\":false,\"tools\":[],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '6589'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 1ac6a1a7a38b4360b4bb21f323cfb156
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"object","object":{"status":"done","reasoning":"The
+        static context about Snoopy, Carmen''s dog, has been retrieved multiple times
+        and provides a clear and sufficient answer to the question ''Who is Snoopy?''.
+        No further information is needed to answer the question as posed.","summary":"Snoopy
+        is Carmen''s dog. He is small, cute, a bit moody, and was a rescue dog. Carmen
+        works at Progress Software.","steps":[]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":583,"output_tokens":144,"timings":{"generative":2.7636799729953054},"input_nuclia_tokens":0.583,"output_nuclia_tokens":0.144}}
+
+        {"chunk":{"normalized_tokens":{"input":0.5828,"output":0.144,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:18:49 GMT
+      nuclia-learning-id:
+      - c15efbf4815c4f5989e86cd062a648e9
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '2769'
+      x-nuclia-trace-id:
+      - af320ac2b715af1ee64fbf50a11fe3b4
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"question":"","retrieval":true,"user_id":"rao_answer_summary-smart","system":null,"chat_history":[],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"\nBased
+      on the provided context and user question, perform the following tasks:\n\n1.
+      Select only information directly relevant to the question.\n2. Break down compound
+      sentences into simple, single-idea statements. Preserve original phrasing when
+      possible.\n3. For any named entity with descriptive details, separate those
+      details into distinct propositions.\n4. Ensure clarity by replacing pronouns
+      (e.g., \"it\", \"he\", \"she\", \"they\", \"this\", \"that\") with the full
+      names of the entities they reference, and add necessary modifiers to clarify
+      meaning.\n5. The context may be delimited by tags such as <START OF CONTEXT>
+      and <END OF CONTEXT>. Treat everything between these tags as context.\n6. Assess
+      whether the context sufficiently answers the question. If it answers it partially,
+      provide the answer; if it does not answer it fully, specify what information
+      is missing to answer the question.\n7. If the context does not answer the question
+      at all, just return the original question as the missing information.\n8. The
+      `citations` field consists ONLY in a list of block IDs that are relevant to
+      the answer, following these rules:\n  - Use the format: block-AB\n  - Just mention
+      the block IDs, do NOT include any other text.\n  - Just mention the blocks actually
+      relevant and that contain information used in the answer, do NOT include blocks
+      that are not relevant.\n  - No duplicates.\n9. Do NOT hallucinate block IDs.
+      Only use those provided in the context.\n10. Your output must be a JSON object
+      with the following fields:\n    - \"reason\": Explain your reasoning for the
+      answer or validation.\n    - \"answer\": Provide a partial or complete answer
+      to the user query strictly from the information in the context. If there isn''t
+      enough information to even provide a partial answer, leave ''answer'' empty.\n    -
+      \"missing_info_query\": If the context is insufficient, specify what information
+      is missing in a query shape; otherwise, leave it empty. Just return the query
+      needed to retrieve the missing information.\n    - \"useful\": Indicate if the
+      context is useful to answer the question (\"yes\" or \"no\").\n    - \"citations\":
+      List the IDs of the blocks relevant to the answer, if any (e.g., [\"block-AB\",
+      \"block-CD\"]).\n11. **IMPORTANT** If any extra instructions are provided, you
+      MUST follow them carefully when generating the answer field. These instructions
+      may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWho
+      is Snoopy?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk: e35937257f864e6abfdec3763217131b\nResult
+      of running: static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c\n``` Snoopy
+      is Carmen''s dog. He is small and very cute but a bit moody. He was a rescue
+      dog. Carmen works at Progress Software, a company that provides software for
+      developing and managing applications. ```\n\n\n---\"\n\n\n**block-AB**\n\n##
+      Chunk: 8cb1bb1774804c6ba3d3a392708b2df7\nResult of running: static_context of
+      269192da-f5b6-4196-8c9a-bd77e32f237c\n``` Snoopy is Carmen''s dog. He is small
+      and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\n\n\n---\"\n\n\n**block-AC**\n\n## Chunk: 0cbb138958c6445398f40796bb14fd07\nResult
+      of running: static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c\n``` Snoopy
+      is Carmen''s dog. He is small and very cute but a bit moody. He was a rescue
+      dog. Carmen works at Progress Software, a company that provides software for
+      developing and managing applications. ```\n\n\n---\"\n\n\n**block-AD**\n\n##
+      Chunk: 18648b83fe354a38a071fbc758bb5532\nResult of running: static_context of
+      269192da-f5b6-4196-8c9a-bd77e32f237c\n``` Snoopy is Carmen''s dog. He is small
+      and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
+      Software, a company that provides software for developing and managing applications.
+      ```\n\n\n---\"\n\n\n**block-AE**\n\n## Chunk: af2f62eef1504f51804990e93dcc7237\nResult
+      of running: static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c\n``` Snoopy
+      is Carmen''s dog. He is small and very cute but a bit moody. He was a rescue
+      dog. Carmen works at Progress Software, a company that provides software for
+      developing and managing applications. ```\n\n\n---\"\n\n\n\n\n<END OF CONTEXT>\n\n"},"citations":false,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":2000,"query_context_images":{},"prefer_markdown":null,"json_schema":{"title":"validate_or_answer","description":"Validate
+      or answer","parameters":{"type":"object","properties":{"reason":{"type":"string","description":"Reasoning
+      for the answer or validation"},"answer":{"type":"string","description":"Partial
+      or complete answer to the user query from the information in the context."},"missing_info_query":{"type":"string","description":"Query
+      needed to retrieve the missing information in case the context is not enough
+      to answer the question. If the context does not answer the question at all,
+      just return the original question."},"useful":{"type":"string","description":"Is
+      the context useful to answer the question?","enum":["yes","no"]},"citations":{"type":"array","items":{"type":"string","description":"Block
+      ID cited in the answer, e.g. block-AB"},"description":"List of block IDs cited
+      in the answer, if any"}},"required":["reason","answer","missing_info_query","useful","citations"]}},"format_prompt":false,"rerank_context":false,"tools":[],"tool_choice":{"type":"required"},"reasoning":false,"seed":null}'
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '5765'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-origin:
+      - RAO
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"object","object":{"reason":"The context provides
+        clear information about Snoopy, including his relationship with Carmen, his
+        characteristics, and background as a rescue dog. This directly answers the
+        question about who Snoopy is.","answer":"Snoopy is Carmen''s dog. Snoopy is
+        small and very cute. Snoopy is a bit moody. Snoopy was a rescue dog.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":37,"output_tokens":11,"timings":{"generative":1.8119115959998453},"input_nuclia_tokens":0.037,"output_nuclia_tokens":0.011}}
+
+        {"chunk":{"normalized_tokens":{"input":0.03735,"output":0.01068,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:18:53 GMT
+      nuclia-learning-id:
+      - 059f7bd8979d4a8389351143c2293dd5
+      nuclia-learning-model:
+      - chatgpt-azure-4o-mini
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1817'
+      x-nuclia-trace-id:
+      - 21ea45aeaedeabad17a37c5eb9bf4814
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"question":"","retrieval":true,"user_id":"summarize","system":"You are
+      a helpful AI assistant. Your role is to provide accurate, clear, and well-structured
+      answers based strictly on the information provided to you.\nKey principles:\n-
+      Answer only using the information in the provided context\n- Do not use external
+      knowledge, assumptions, or prior experience\n- Maintain a professional and informative
+      tone\n- Be concise yet thorough\n- If information is insufficient, acknowledge
+      this clearly\n\nAlways follow any additional instructions provided about format,
+      style, or domain-specific behavior.","chat_history":[],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"\n##
+      Question\nWho is Snoopy?\n\n## Provided Context\n[START OF CONTEXT]\n## Smart
+      Agent Results\n\n# Who is Snoopy?\n\n Snoopy is Carmen''s dog. Snoopy is small
+      and very cute. Snoopy is a bit moody. Snoopy was a rescue dog.\n[END OF CONTEXT]\n\n##
+      Answering Guidelines\n- Carefully read all context; it may be lengthy or detailed\n-
+      Do not omit or overlook any relevant information\n- If the context is incomplete
+      or insufficient, state: \"Not enough data to answer this.\"\n- Read carefully
+      any extra instructions below if provided and use them to answer\n\nNow provide
+      your answer to the question: Who is Snoopy?"},"citations":null,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":5000,"query_context_images":{},"prefer_markdown":null,"json_schema":null,"format_prompt":false,"rerank_context":false,"tools":[],"tool_choice":{"type":"auto"},"reasoning":false,"seed":null}'
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1622'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - 1ac6a1a7a38b4360b4bb21f323cfb156
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"text","text":"S"}}
+
+        {"chunk":{"type":"text","text":"no"}}
+
+        {"chunk":{"type":"text","text":"opy"}}
+
+        {"chunk":{"type":"text","text":" is"}}
+
+        {"chunk":{"type":"text","text":" Carmen"}}
+
+        {"chunk":{"type":"text","text":"''s"}}
+
+        {"chunk":{"type":"text","text":" dog"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" He"}}
+
+        {"chunk":{"type":"text","text":" is"}}
+
+        {"chunk":{"type":"text","text":" small"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" very"}}
+
+        {"chunk":{"type":"text","text":" cute"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" and"}}
+
+        {"chunk":{"type":"text","text":" a"}}
+
+        {"chunk":{"type":"text","text":" bit"}}
+
+        {"chunk":{"type":"text","text":" mo"}}
+
+        {"chunk":{"type":"text","text":"ody"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" Additionally"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" Sno"}}
+
+        {"chunk":{"type":"text","text":"opy"}}
+
+        {"chunk":{"type":"text","text":" was"}}
+
+        {"chunk":{"type":"text","text":" a"}}
+
+        {"chunk":{"type":"text","text":" rescue"}}
+
+        {"chunk":{"type":"text","text":" dog"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":4,"timings":{"generative_first_chunk":0.3486898450064473,"generative":0.6855116610095138},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.004}}
+
+        {"chunk":{"normalized_tokens":{"input":0.00747,"output":0.00372,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:18:54 GMT
+      nuclia-learning-id:
+      - e117dac789054204ba443554d3ac3566
+      nuclia-learning-model:
+      - chatgpt-azure-4o-mini
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '356'
+      x-nuclia-trace-id:
+      - 3a8ade8e4179343c758436be0f7d8806
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      x-nuclia-nuakey:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+    method: GET
+    uri: https://europe-1.nuclia.cloud/api/authorizer/info
+  response:
+    body:
+      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"03d47998-f672-4a9b-a57b-bde3a9c3ee8c","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '227'
+      content-type:
+      - application/json
+      date:
+      - Tue, 02 Jun 2026 17:18:55 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '5'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner_plan-smart\",\"system\":\"You
+      are a strategic planning assistant that coordinates context-retrieval agents
+      to answer a user's question.\\n\\nYour job is to produce a high-level retrieval
+      plan describing WHAT information to gather and WHY.\\nYou do NOT call tools
+      yourself and do NOT specify exact tool names or arguments \u2014 an executor
+      LLM\\nwill decide how to carry out each step using the available tools.\\n\\nGuidelines:\\n-
+      Analyse what information has already been gathered (execution history) and what
+      is still missing.\\n- Produce a minimal, targeted plan: only include steps that
+      will meaningfully advance towards answering the question.\\n- If the information
+      gathered so far is already sufficient to answer the question, set status to
+      \\\"done\\\".\\n- Each step should describe the information to retrieve in plain
+      language.\\n- Provide a concise summary of what has been accomplished so far
+      for the executor to use as context.\",\"chat_history\":[],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a strategic planning assistant that coordinates context-retrieval agents
+      to answer a user's question.\\n\\nYour job is to produce a high-level retrieval
+      plan describing WHAT information to gather and WHY.\\nYou do NOT call tools
+      yourself and do NOT specify exact tool names or arguments \u2014 an executor
+      LLM\\nwill decide how to carry out each step using the available tools.\\n\\nGuidelines:\\n-
+      Analyse what information has already been gathered (execution history) and what
+      is still missing.\\n- Produce a minimal, targeted plan: only include steps that
+      will meaningfully advance towards answering the question.\\n- If the information
+      gathered so far is already sufficient to answer the question, set status to
+      \\\"done\\\".\\n- Each step should describe the information to retrieve in plain
+      language.\\n- Provide a concise summary of what has been accomplished so far
+      for the executor to use as context.\\n\\n## User question\\nWhat is RAO?\\n\\n##
+      Available retrieval capabilities\\n- **static_context__269192da-f5b6-4196-8c9a-bd77e32f237c**:
+      Provides information about Snoopy, Carmen's dog. \u2014 Provide static context
+      to answer questions.\\n    (no parameters)\\n\\n- **static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba**:
+      Provides information about RAO, the agentic RAG orchestrator. \u2014 Provide
+      static context to answer questions.\\n    (no parameters)\\n\\n- **internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f**:
+      A general-purpose agent that can answer questions using the Perplexity API.
+      \u2014 Performs an internet search using Perplexity Search to get context to
+      answer questions.\\n    - question (string): The question to search for on the
+      internet.\\n\\n\\n\\n\\n## Execution history\\nNo tools have been called yet.\\n\\n\\n\\n##
+      Extra instructions\\nIf the question is about Snoopy, use the dog context agent.
+      If the question is about RAO, use the RAO context agent. for general questions
+      use the perplexity agent. Always try to be as thorough as possible\\n\\n\\nBased
+      on the above, produce the next retrieval plan or declare completion.\"},\"citations\":false,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":2000,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":{\"title\":\"retrieval_plan\",\"description\":\"High-level
+      retrieval plan for the executor\",\"parameters\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"string\",\"enum\":[\"plan\",\"done\"],\"description\":\"'plan'
+      if more retrieval steps are needed, 'done' if enough context has been gathered
+      to answer the question.\"},\"reasoning\":{\"type\":\"string\",\"description\":\"Explanation
+      of why this plan was chosen or why retrieval is complete.\"},\"summary\":{\"type\":\"string\",\"description\":\"Concise
+      summary of what has been gathered so far across all iterations.\"},\"steps\":{\"type\":\"array\",\"description\":\"Ordered
+      list of retrieval steps for the executor. Empty when status is 'done'.\",\"items\":{\"type\":\"object\",\"properties\":{\"description\":{\"type\":\"string\",\"description\":\"Plain-language
+      description of what information to retrieve.\"},\"reason\":{\"type\":\"string\",\"description\":\"Why
+      this information is needed to answer the question.\"}},\"required\":[\"description\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"status\",\"reasoning\",\"summary\",\"steps\"],\"additionalProperties\":false}},\"format_prompt\":false,\"rerank_context\":false,\"tools\":[],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4455'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - a5a3c141eb10449c863d04fdad693d1b
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"object","object":{"status":"plan","reasoning":"The
+        user''s question is specifically about ''RAO.'' According to the extra instructions,
+        if the question is about RAO, the RAO context agent should be used. No information
+        has been gathered yet, so the next step is to retrieve static context about
+        RAO from the relevant agent. This will provide a focused and authoritative
+        answer.","summary":"No information has been gathered yet. The user''s question
+        is about RAO, and the appropriate context agent is available.","steps":[{"description":"Retrieve
+        static context about RAO, the agentic RAG orchestrator.","reason":"This will
+        provide authoritative and specific information to answer the user''s question
+        about RAO."}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":313,"output_tokens":224,"timings":{"generative":2.4786358470009873},"input_nuclia_tokens":0.313,"output_nuclia_tokens":0.224}}
+
+        {"chunk":{"normalized_tokens":{"input":0.3132,"output":0.224,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:18:56 GMT
+      nuclia-learning-id:
+      - 90abbc2fa35342219c56ecfd5e0a724e
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '2484'
+      x-nuclia-trace-id:
+      - d0b89ef249b2e64f801b651e9bf4a12e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWhat
+      is RAO?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user's question is about RAO, and the appropriate context agent is
+      available.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve static
+      context about RAO, the agentic RAG orchestrator.\\n   Reason: This will provide
+      authoritative and specific information to answer the user's question about RAO.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"What
+      is RAO?\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWhat
+      is RAO?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user's question is about RAO, and the appropriate context agent is
+      available.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve static
+      context about RAO, the agentic RAG orchestrator.\\n   Reason: This will provide
+      authoritative and specific information to answer the user's question about RAO.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\\n\\nChoose the best tool
+      or tools for the task. Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
+      information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
+      to answer questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f\",\"description\":\"A
+      general-purpose agent that can answer questions using the Perplexity API. \u2014
+      Performs an internet search using Perplexity Search to get context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"The
+      question to search for on the internet.\"}},\"additionalProperties\":false}},{\"name\":\"task_complete\",\"description\":\"Call
+      this tool when you have gathered enough information to answer the question and
+      no more tools are needed.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '3603'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - a5a3c141eb10449c863d04fdad693d1b
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"tools","tools":{"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba":[{"function":{"name":"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba","arguments":{}}}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":255,"output_tokens":56,"timings":{"generative_first_chunk":1.5974347320006927,"generative":1.5990174519974971},"input_nuclia_tokens":0.255,"output_nuclia_tokens":0.056}}
+
+        {"chunk":{"normalized_tokens":{"input":0.2548,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:18:58 GMT
+      nuclia-learning-id:
+      - 8e121faacf3647f9ad6befd638cec017
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1604'
+      x-nuclia-trace-id:
+      - 3cd1f6ed8385e103ff5227a4fbe16bae
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWhat
+      is RAO?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user's question is about RAO, and the appropriate context agent is
+      available.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve static
+      context about RAO, the agentic RAG orchestrator.\\n   Reason: This will provide
+      authoritative and specific information to answer the user's question about RAO.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"What
+      is RAO?\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba]:\\n\\n\\n\\n##
+      Chunk: 9b86b21c675a4955be7579e45110698b\\n``` RAO is a product of Progress agentic
+      RAG, it is a powerful agent orchestrator that you are using right now. ```\\n\\n\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWhat
+      is RAO?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user's question is about RAO, and the appropriate context agent is
+      available.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve static
+      context about RAO, the agentic RAG orchestrator.\\n   Reason: This will provide
+      authoritative and specific information to answer the user's question about RAO.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\\n\\nChoose the best tool
+      or tools for the task. Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
+      information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
+      to answer questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f\",\"description\":\"A
+      general-purpose agent that can answer questions using the Perplexity API. \u2014
+      Performs an internet search using Perplexity Search to get context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"The
+      question to search for on the internet.\"}},\"additionalProperties\":false}},{\"name\":\"task_complete\",\"description\":\"Call
+      this tool when you have gathered enough information to answer the question and
+      no more tools are needed.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '3861'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - a5a3c141eb10449c863d04fdad693d1b
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"tools","tools":{"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba":[{"function":{"name":"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba","arguments":{}}}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":289,"output_tokens":56,"timings":{"generative_first_chunk":1.2938789940089919,"generative":1.2953196040034527},"input_nuclia_tokens":0.289,"output_nuclia_tokens":0.056}}
+
+        {"chunk":{"normalized_tokens":{"input":0.2892,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:18:59 GMT
+      nuclia-learning-id:
+      - 6fab3d78192c40b8801a87a3e0e4543b
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1301'
+      x-nuclia-trace-id:
+      - 4ef1564734bd8f207b9ad01490719aa6
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWhat
+      is RAO?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user's question is about RAO, and the appropriate context agent is
+      available.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve static
+      context about RAO, the agentic RAG orchestrator.\\n   Reason: This will provide
+      authoritative and specific information to answer the user's question about RAO.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"What
+      is RAO?\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba]:\\n\\n\\n\\n##
+      Chunk: 9b86b21c675a4955be7579e45110698b\\n``` RAO is a product of Progress agentic
+      RAG, it is a powerful agent orchestrator that you are using right now. ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context
+      of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba]:\\n\\n\\n\\n## Chunk: 0eae6fcf503c42eaaa3842a29c9b95c5\\n```
+      RAO is a product of Progress agentic RAG, it is a powerful agent orchestrator
+      that you are using right now. ```\\n\\n\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWhat
+      is RAO?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user's question is about RAO, and the appropriate context agent is
+      available.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve static
+      context about RAO, the agentic RAG orchestrator.\\n   Reason: This will provide
+      authoritative and specific information to answer the user's question about RAO.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\\n\\nChoose the best tool
+      or tools for the task. Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
+      information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
+      to answer questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f\",\"description\":\"A
+      general-purpose agent that can answer questions using the Perplexity API. \u2014
+      Performs an internet search using Perplexity Search to get context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"The
+      question to search for on the internet.\"}},\"additionalProperties\":false}},{\"name\":\"task_complete\",\"description\":\"Call
+      this tool when you have gathered enough information to answer the question and
+      no more tools are needed.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4119'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - a5a3c141eb10449c863d04fdad693d1b
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"tools","tools":{"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba":[{"function":{"name":"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba","arguments":{}}}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":325,"output_tokens":56,"timings":{"generative_first_chunk":0.7432112140086247,"generative":0.7447075540112564},"input_nuclia_tokens":0.325,"output_nuclia_tokens":0.056}}
+
+        {"chunk":{"normalized_tokens":{"input":0.3248,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:19:02 GMT
+      nuclia-learning-id:
+      - 63046ccae6e64427bcf69a924b5df482
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '750'
+      x-nuclia-trace-id:
+      - 570644b85dc2ad724b0491387171a60c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWhat
+      is RAO?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user's question is about RAO, and the appropriate context agent is
+      available.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve static
+      context about RAO, the agentic RAG orchestrator.\\n   Reason: This will provide
+      authoritative and specific information to answer the user's question about RAO.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"What
+      is RAO?\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba]:\\n\\n\\n\\n##
+      Chunk: 9b86b21c675a4955be7579e45110698b\\n``` RAO is a product of Progress agentic
+      RAG, it is a powerful agent orchestrator that you are using right now. ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context
+      of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba]:\\n\\n\\n\\n## Chunk: 0eae6fcf503c42eaaa3842a29c9b95c5\\n```
+      RAO is a product of Progress agentic RAG, it is a powerful agent orchestrator
+      that you are using right now. ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context
+      of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba]:\\n\\n\\n\\n## Chunk: 9babbd2ed86e45faadcdaa52d8a8ef5d\\n```
+      RAO is a product of Progress agentic RAG, it is a powerful agent orchestrator
+      that you are using right now. ```\\n\\n\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWhat
+      is RAO?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user's question is about RAO, and the appropriate context agent is
+      available.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve static
+      context about RAO, the agentic RAG orchestrator.\\n   Reason: This will provide
+      authoritative and specific information to answer the user's question about RAO.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\\n\\nChoose the best tool
+      or tools for the task. Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
+      information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
+      to answer questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f\",\"description\":\"A
+      general-purpose agent that can answer questions using the Perplexity API. \u2014
+      Performs an internet search using Perplexity Search to get context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"The
+      question to search for on the internet.\"}},\"additionalProperties\":false}},{\"name\":\"task_complete\",\"description\":\"Call
+      this tool when you have gathered enough information to answer the question and
+      no more tools are needed.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4377'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - a5a3c141eb10449c863d04fdad693d1b
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"tools","tools":{"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba":[{"function":{"name":"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba","arguments":{}}}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":360,"output_tokens":56,"timings":{"generative_first_chunk":2.054790640999272,"generative":2.056285050999577},"input_nuclia_tokens":0.36,"output_nuclia_tokens":0.056}}
+
+        {"chunk":{"normalized_tokens":{"input":0.3596,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:19:02 GMT
+      nuclia-learning-id:
+      - 978e66bcf7f84de1a3b484ebb8bde04a
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '2062'
+      x-nuclia-trace-id:
+      - 079186937ee553db7695255dc2566e97
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWhat
+      is RAO?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user's question is about RAO, and the appropriate context agent is
+      available.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve static
+      context about RAO, the agentic RAG orchestrator.\\n   Reason: This will provide
+      authoritative and specific information to answer the user's question about RAO.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"What
+      is RAO?\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba]:\\n\\n\\n\\n##
+      Chunk: 9b86b21c675a4955be7579e45110698b\\n``` RAO is a product of Progress agentic
+      RAG, it is a powerful agent orchestrator that you are using right now. ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context
+      of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba]:\\n\\n\\n\\n## Chunk: 0eae6fcf503c42eaaa3842a29c9b95c5\\n```
+      RAO is a product of Progress agentic RAG, it is a powerful agent orchestrator
+      that you are using right now. ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context
+      of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba]:\\n\\n\\n\\n## Chunk: 9babbd2ed86e45faadcdaa52d8a8ef5d\\n```
+      RAO is a product of Progress agentic RAG, it is a powerful agent orchestrator
+      that you are using right now. ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context
+      of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba]:\\n\\n\\n\\n## Chunk: d017aad621034fff846fdfaf09d2eb45\\n```
+      RAO is a product of Progress agentic RAG, it is a powerful agent orchestrator
+      that you are using right now. ```\\n\\n\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a retrieval executor. Your job is to call the appropriate tools to gather
+      the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWhat
+      is RAO?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet. The user's question is about RAO, and the appropriate context agent is
+      available.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve static
+      context about RAO, the agentic RAG orchestrator.\\n   Reason: This will provide
+      authoritative and specific information to answer the user's question about RAO.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\\n\\nChoose the best tool
+      or tools for the task. Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
+      information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
+      to answer questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f\",\"description\":\"A
+      general-purpose agent that can answer questions using the Perplexity API. \u2014
+      Performs an internet search using Perplexity Search to get context to answer
+      questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"string\",\"description\":\"The
+      question to search for on the internet.\"}},\"additionalProperties\":false}},{\"name\":\"task_complete\",\"description\":\"Call
+      this tool when you have gathered enough information to answer the question and
+      no more tools are needed.\",\"parameters\":{\"type\":\"object\",\"properties\":{}}}],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4635'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - a5a3c141eb10449c863d04fdad693d1b
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"tools","tools":{"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba":[{"function":{"name":"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba","arguments":{}}}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":392,"output_tokens":56,"timings":{"generative_first_chunk":1.0132952210005897,"generative":1.0146699610013457},"input_nuclia_tokens":0.392,"output_nuclia_tokens":0.056}}
+
+        {"chunk":{"normalized_tokens":{"input":0.3924,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:19:04 GMT
+      nuclia-learning-id:
+      - d2beaaaf5baf4c84a3c72b521f9c322a
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1020'
+      x-nuclia-trace-id:
+      - 48370780bcf7f392141e9b308178e7b5
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner_plan-smart\",\"system\":\"You
+      are a strategic planning assistant that coordinates context-retrieval agents
+      to answer a user's question.\\n\\nYour job is to produce a high-level retrieval
+      plan describing WHAT information to gather and WHY.\\nYou do NOT call tools
+      yourself and do NOT specify exact tool names or arguments \u2014 an executor
+      LLM\\nwill decide how to carry out each step using the available tools.\\n\\nGuidelines:\\n-
+      Analyse what information has already been gathered (execution history) and what
+      is still missing.\\n- Produce a minimal, targeted plan: only include steps that
+      will meaningfully advance towards answering the question.\\n- If the information
+      gathered so far is already sufficient to answer the question, set status to
+      \\\"done\\\".\\n- Each step should describe the information to retrieve in plain
+      language.\\n- Provide a concise summary of what has been accomplished so far
+      for the executor to use as context.\",\"chat_history\":[],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
+      are a strategic planning assistant that coordinates context-retrieval agents
+      to answer a user's question.\\n\\nYour job is to produce a high-level retrieval
+      plan describing WHAT information to gather and WHY.\\nYou do NOT call tools
+      yourself and do NOT specify exact tool names or arguments \u2014 an executor
+      LLM\\nwill decide how to carry out each step using the available tools.\\n\\nGuidelines:\\n-
+      Analyse what information has already been gathered (execution history) and what
+      is still missing.\\n- Produce a minimal, targeted plan: only include steps that
+      will meaningfully advance towards answering the question.\\n- If the information
+      gathered so far is already sufficient to answer the question, set status to
+      \\\"done\\\".\\n- Each step should describe the information to retrieve in plain
+      language.\\n- Provide a concise summary of what has been accomplished so far
+      for the executor to use as context.\\n\\n## User question\\nWhat is RAO?\\n\\n##
+      Available retrieval capabilities\\n- **static_context__269192da-f5b6-4196-8c9a-bd77e32f237c**:
+      Provides information about Snoopy, Carmen's dog. \u2014 Provide static context
+      to answer questions.\\n    (no parameters)\\n\\n- **static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba**:
+      Provides information about RAO, the agentic RAG orchestrator. \u2014 Provide
+      static context to answer questions.\\n    (no parameters)\\n\\n- **internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f**:
+      A general-purpose agent that can answer questions using the Perplexity API.
+      \u2014 Performs an internet search using Perplexity Search to get context to
+      answer questions.\\n    - question (string): The question to search for on the
+      internet.\\n\\n\\n\\n\\n## Execution history (previous planning iterations)\\n\\n###
+      Iteration 1\\n**Plan:** 1 step(s): Retrieve static context about RAO, the agentic
+      RAG orchestrator.\\n**Results summary:** [static_context of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba]:\\n\\n\\n\\n##
+      Chunk: 9b86b21c675a4955be7579e45110698b\\nResult of running: static_context
+      of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba\\n``` RAO is a product of Progress agentic
+      RAG, it is a powerful agent orchestrator that you are using right now. ```\\n\\n\\n\\n[static_context
+      of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba]:\\n\\n\\n\\n## Chunk: 0eae6fcf503c42eaaa3842a29c9b95c5\\nResult
+      of running: static_context of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba\\n``` RAO
+      is a product of Progress agentic RAG, it is a powerful agent orchestrator that
+      you are using right now. ```\\n\\n\\n\\n[static_context of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba]:\\n\\n\\n\\n##
+      Chunk: 9babbd2ed86e45faadcdaa52d8a8ef5d\\nResult of running: static_context
+      of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba\\n``` RAO is a product of Progress agentic
+      RAG, it is a powerful agent orchestrator that you are using right now. ```\\n\\n\\n\\n[static_context
+      of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba]:\\n\\n\\n\\n## Chunk: d017aad621034fff846fdfaf09d2eb45\\nResult
+      of running: static_context of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba\\n``` RAO
+      is a product of Progress agentic RAG, it is a powerful agent orchestrator that
+      you are using right now. ```\\n\\n\\n\\n[static_context of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba]:\\n\\n\\n\\n##
+      Chunk: 8b14e1b9e51840d39b99794efd834b08\\nResult of running: static_context
+      of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba\\n``` RAO is a product of Progress agentic
+      RAG, it is a powerful agent orchestrator that you are using right now. ```\\n\\n\\n\\n\\n\\n\\n##
+      Extra instructions\\nIf the question is about Snoopy, use the dog context agent.
+      If the question is about RAO, use the RAO context agent. for general questions
+      use the perplexity agent. Always try to be as thorough as possible\\n\\n\\nBased
+      on the above, produce the next retrieval plan or declare completion.\"},\"citations\":false,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":2000,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":{\"title\":\"retrieval_plan\",\"description\":\"High-level
+      retrieval plan for the executor\",\"parameters\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"string\",\"enum\":[\"plan\",\"done\"],\"description\":\"'plan'
+      if more retrieval steps are needed, 'done' if enough context has been gathered
+      to answer the question.\"},\"reasoning\":{\"type\":\"string\",\"description\":\"Explanation
+      of why this plan was chosen or why retrieval is complete.\"},\"summary\":{\"type\":\"string\",\"description\":\"Concise
+      summary of what has been gathered so far across all iterations.\"},\"steps\":{\"type\":\"array\",\"description\":\"Ordered
+      list of retrieval steps for the executor. Empty when status is 'done'.\",\"items\":{\"type\":\"object\",\"properties\":{\"description\":{\"type\":\"string\",\"description\":\"Plain-language
+      description of what information to retrieve.\"},\"reason\":{\"type\":\"string\",\"description\":\"Why
+      this information is needed to answer the question.\"}},\"required\":[\"description\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"status\",\"reasoning\",\"summary\",\"steps\"],\"additionalProperties\":false}},\"format_prompt\":false,\"rerank_context\":false,\"tools\":[],\"tool_choice\":{\"type\":\"required\"},\"reasoning\":false,\"seed\":null}"
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '6116'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - a5a3c141eb10449c863d04fdad693d1b
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"object","object":{"status":"done","reasoning":"The
+        static context about RAO has been retrieved multiple times and clearly states
+        what RAO is: a product of Progress agentic RAG and a powerful agent orchestrator.
+        This directly answers the user''s question about what RAO is.","summary":"RAO
+        is a product of Progress agentic RAG and serves as a powerful agent orchestrator.
+        This information has been confirmed through multiple retrievals from the dedicated
+        RAO context agent.","steps":[]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":554,"output_tokens":157,"timings":{"generative":1.7042326189985033},"input_nuclia_tokens":0.554,"output_nuclia_tokens":0.157}}
+
+        {"chunk":{"normalized_tokens":{"input":0.5536,"output":0.1568,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:19:05 GMT
+      nuclia-learning-id:
+      - 11b20a37aad848b1a91e80289c6fd6bf
+      nuclia-learning-model:
+      - chatgpt-4.1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1710'
+      x-nuclia-trace-id:
+      - 743413d3db8f914f93dbb21c2ee66571
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"question":"","retrieval":true,"user_id":"rao_answer_summary-smart","system":null,"chat_history":[],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"\nBased
+      on the provided context and user question, perform the following tasks:\n\n1.
+      Select only information directly relevant to the question.\n2. Break down compound
+      sentences into simple, single-idea statements. Preserve original phrasing when
+      possible.\n3. For any named entity with descriptive details, separate those
+      details into distinct propositions.\n4. Ensure clarity by replacing pronouns
+      (e.g., \"it\", \"he\", \"she\", \"they\", \"this\", \"that\") with the full
+      names of the entities they reference, and add necessary modifiers to clarify
+      meaning.\n5. The context may be delimited by tags such as <START OF CONTEXT>
+      and <END OF CONTEXT>. Treat everything between these tags as context.\n6. Assess
+      whether the context sufficiently answers the question. If it answers it partially,
+      provide the answer; if it does not answer it fully, specify what information
+      is missing to answer the question.\n7. If the context does not answer the question
+      at all, just return the original question as the missing information.\n8. The
+      `citations` field consists ONLY in a list of block IDs that are relevant to
+      the answer, following these rules:\n  - Use the format: block-AB\n  - Just mention
+      the block IDs, do NOT include any other text.\n  - Just mention the blocks actually
+      relevant and that contain information used in the answer, do NOT include blocks
+      that are not relevant.\n  - No duplicates.\n9. Do NOT hallucinate block IDs.
+      Only use those provided in the context.\n10. Your output must be a JSON object
+      with the following fields:\n    - \"reason\": Explain your reasoning for the
+      answer or validation.\n    - \"answer\": Provide a partial or complete answer
+      to the user query strictly from the information in the context. If there isn''t
+      enough information to even provide a partial answer, leave ''answer'' empty.\n    -
+      \"missing_info_query\": If the context is insufficient, specify what information
+      is missing in a query shape; otherwise, leave it empty. Just return the query
+      needed to retrieve the missing information.\n    - \"useful\": Indicate if the
+      context is useful to answer the question (\"yes\" or \"no\").\n    - \"citations\":
+      List the IDs of the blocks relevant to the answer, if any (e.g., [\"block-AB\",
+      \"block-CD\"]).\n11. **IMPORTANT** If any extra instructions are provided, you
+      MUST follow them carefully when generating the answer field. These instructions
+      may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWhat
+      is RAO?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk: 9b86b21c675a4955be7579e45110698b\nResult
+      of running: static_context of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba\n``` RAO
+      is a product of Progress agentic RAG, it is a powerful agent orchestrator that
+      you are using right now. ```\n\n\n---\"\n\n\n**block-AB**\n\n## Chunk: 0eae6fcf503c42eaaa3842a29c9b95c5\nResult
+      of running: static_context of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba\n``` RAO
+      is a product of Progress agentic RAG, it is a powerful agent orchestrator that
+      you are using right now. ```\n\n\n---\"\n\n\n**block-AC**\n\n## Chunk: 9babbd2ed86e45faadcdaa52d8a8ef5d\nResult
+      of running: static_context of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba\n``` RAO
+      is a product of Progress agentic RAG, it is a powerful agent orchestrator that
+      you are using right now. ```\n\n\n---\"\n\n\n**block-AD**\n\n## Chunk: d017aad621034fff846fdfaf09d2eb45\nResult
+      of running: static_context of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba\n``` RAO
+      is a product of Progress agentic RAG, it is a powerful agent orchestrator that
+      you are using right now. ```\n\n\n---\"\n\n\n**block-AE**\n\n## Chunk: 8b14e1b9e51840d39b99794efd834b08\nResult
+      of running: static_context of 1d372a1a-8aaf-4dc7-bcf2-b8393751beba\n``` RAO
+      is a product of Progress agentic RAG, it is a powerful agent orchestrator that
+      you are using right now. ```\n\n\n---\"\n\n\n\n\n<END OF CONTEXT>\n\n"},"citations":false,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":2000,"query_context_images":{},"prefer_markdown":null,"json_schema":{"title":"validate_or_answer","description":"Validate
+      or answer","parameters":{"type":"object","properties":{"reason":{"type":"string","description":"Reasoning
+      for the answer or validation"},"answer":{"type":"string","description":"Partial
+      or complete answer to the user query from the information in the context."},"missing_info_query":{"type":"string","description":"Query
+      needed to retrieve the missing information in case the context is not enough
+      to answer the question. If the context does not answer the question at all,
+      just return the original question."},"useful":{"type":"string","description":"Is
+      the context useful to answer the question?","enum":["yes","no"]},"citations":{"type":"array","items":{"type":"string","description":"Block
+      ID cited in the answer, e.g. block-AB"},"description":"List of block IDs cited
+      in the answer, if any"}},"required":["reason","answer","missing_info_query","useful","citations"]}},"format_prompt":false,"rerank_context":false,"tools":[],"tool_choice":{"type":"required"},"reasoning":false,"seed":null}'
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '5313'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-origin:
+      - RAO
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"object","object":{"reason":"The context provides
+        a clear definition of RAO, stating that it is a product of Progress agentic
+        RAG and describing it as a powerful agent orchestrator. This directly answers
+        the question about what RAO is.","answer":"RAO is a product of Progress agentic
+        RAG. RAO is a powerful agent orchestrator that users are currently using.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":35,"output_tokens":11,"timings":{"generative":1.5339152260021365},"input_nuclia_tokens":0.035,"output_nuclia_tokens":0.011}}
+
+        {"chunk":{"normalized_tokens":{"input":0.03522,"output":0.01092,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:19:07 GMT
+      nuclia-learning-id:
+      - 7551411e148f48758828ac7d99cd0379
+      nuclia-learning-model:
+      - chatgpt-azure-4o-mini
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1543'
+      x-nuclia-trace-id:
+      - c34908746e790b4ec00f96ecacf07a58
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"question":"","retrieval":true,"user_id":"summarize","system":"You are
+      a helpful AI assistant. Your role is to provide accurate, clear, and well-structured
+      answers based strictly on the information provided to you.\nKey principles:\n-
+      Answer only using the information in the provided context\n- Do not use external
+      knowledge, assumptions, or prior experience\n- Maintain a professional and informative
+      tone\n- Be concise yet thorough\n- If information is insufficient, acknowledge
+      this clearly\n\nAlways follow any additional instructions provided about format,
+      style, or domain-specific behavior.","chat_history":[],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"\n##
+      Question\nWhat is RAO?\n\n## Provided Context\n[START OF CONTEXT]\n## Smart
+      Agent Results\n\n# What is RAO?\n\n RAO is a product of Progress agentic RAG.
+      RAO is a powerful agent orchestrator that users are currently using.\n[END OF
+      CONTEXT]\n\n## Answering Guidelines\n- Carefully read all context; it may be
+      lengthy or detailed\n- Do not omit or overlook any relevant information\n- If
+      the context is incomplete or insufficient, state: \"Not enough data to answer
+      this.\"\n- Read carefully any extra instructions below if provided and use them
+      to answer\n\nNow provide your answer to the question: What is RAO?"},"citations":null,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":5000,"query_context_images":{},"prefer_markdown":null,"json_schema":null,"format_prompt":false,"rerank_context":false,"tools":[],"tool_choice":{"type":"auto"},"reasoning":false,"seed":null}'
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1624'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      X-STF-NUAKEY:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      x-client-ident:
+      - default
+      x-message:
+      - a5a3c141eb10449c863d04fdad693d1b
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"text","text":"RA"}}
+
+        {"chunk":{"type":"text","text":"O"}}
+
+        {"chunk":{"type":"text","text":" is"}}
+
+        {"chunk":{"type":"text","text":" a"}}
+
+        {"chunk":{"type":"text","text":" product"}}
+
+        {"chunk":{"type":"text","text":" of"}}
+
+        {"chunk":{"type":"text","text":" Progress"}}
+
+        {"chunk":{"type":"text","text":" agent"}}
+
+        {"chunk":{"type":"text","text":"ic"}}
+
+        {"chunk":{"type":"text","text":" R"}}
+
+        {"chunk":{"type":"text","text":"AG"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" It"}}
+
+        {"chunk":{"type":"text","text":" is"}}
+
+        {"chunk":{"type":"text","text":" described"}}
+
+        {"chunk":{"type":"text","text":" as"}}
+
+        {"chunk":{"type":"text","text":" a"}}
+
+        {"chunk":{"type":"text","text":" powerful"}}
+
+        {"chunk":{"type":"text","text":" agent"}}
+
+        {"chunk":{"type":"text","text":" orchestr"}}
+
+        {"chunk":{"type":"text","text":"ator"}}
+
+        {"chunk":{"type":"text","text":" that"}}
+
+        {"chunk":{"type":"text","text":" users"}}
+
+        {"chunk":{"type":"text","text":" are"}}
+
+        {"chunk":{"type":"text","text":" currently"}}
+
+        {"chunk":{"type":"text","text":" utilizing"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":3,"timings":{"generative_first_chunk":0.4302475139993476,"generative":0.8778807089984184},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.003}}
+
+        {"chunk":{"normalized_tokens":{"input":0.00735,"output":0.00336,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 02 Jun 2026 17:19:08 GMT
+      nuclia-learning-id:
+      - 9f1b52aab2534490b7dc136f70dc631a
+      nuclia-learning-model:
+      - chatgpt-azure-4o-mini
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '437'
+      x-nuclia-trace-id:
+      - 18255c3c3e9501687b01de88d2f64670
+    status:
+      code: 200
+      message: OK
+version: 1

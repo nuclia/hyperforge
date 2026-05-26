@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hyperforge_smart"
+version = "1.0.0"
+license = "Apache-2.0"
+description = "Conditional Hyperforge agent"
+authors = [{ name = "Nuclia", email = "nucliadb@nuclia.com" }]
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.10, <4"
+dependencies = ["hyperforge"]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-benchmark",
+    "pytest-docker-fixtures>=1.4.2",
+    "pytest-lazy-fixtures",
+    "pytest-recording",
+    "pytest-asyncio",
+    "pytest-cov",
+    "pytest-mock",
+]
+
+[project.urls]
+Homepage = "https://progress.com"
+Repository = "https://github.com/nuclia/forge"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
