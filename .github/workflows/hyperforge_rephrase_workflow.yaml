@@ -1,0 +1,36 @@
+name: Rephrase Agents Tests
+
+on:
+    push:
+        branches:
+            - main
+            - dev
+        paths:
+            - "agents/rephrase/**"
+            - "hyperforge.mk"
+            - ".github/workflows/hyperforge_rephrase_workflow.yaml"
+            - ".github/workflows/hyperforge_agent_package_workflow.yaml"
+    pull_request:
+        branches:
+            - main
+            - dev
+        paths:
+            - "agents/rephrase/**"
+            - "hyperforge.mk"
+            - ".github/workflows/hyperforge_rephrase_workflow.yaml"
+            - ".github/workflows/hyperforge_agent_package_workflow.yaml"
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
+jobs:
+    package:
+        uses: ./.github/workflows/hyperforge_agent_package_workflow.yaml
+        with:
+            package: agents/rephrase
+        secrets:
+            PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}

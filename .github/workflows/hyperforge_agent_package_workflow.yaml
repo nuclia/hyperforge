@@ -1,0 +1,72 @@
+name: Agent Package Workflow
+
+on:
+    workflow_call:
+        inputs:
+            package:
+                required: true
+                type: string
+        secrets:
+            PYPI_TOKEN:
+                required: true
+
+permissions:
+    contents: read
+
+jobs:
+    test:
+        name: Test ${{ inputs.package }}
+        runs-on: ubuntu-24.04
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+            - name: Install uv
+              uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+              with:
+                  enable-cache: true
+                  python-version: "3.12"
+
+            - name: Install package dependencies with uv
+              working-directory: ${{ inputs.package }}
+              run: uv sync --group dev
+
+            - name: Run tests
+              working-directory: ${{ inputs.package }}
+              run: make test
+
+    build_wheels:
+        name: Build wheels
+        runs-on: ubuntu-24.04
+        if: github.event_name == 'push'
+        needs:
+            - test
+        steps:
+            - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+            - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+              with:
+                  python-version: 3.14.2
+
+            - name: Setup env
+              run: |
+                  pip install wheel
+                  pip install -U twine
+
+            - name: Set dependency versions in requirements
+              run: |
+                  python bump.py --package=${{ inputs.package }} --build=${{ github.run_number }}
+
+            - name: Install package
+              run: |
+                  pip install -e ./${{ inputs.package }}
+
+            - name: Build wheels
+              run: pip wheel --no-deps -w dist ./${{ inputs.package }}
+
+            - name: Upload to pypi
+              run: twine upload --verbose dist/*
+              env:
+                  TWINE_USERNAME: __token__
+                  TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
