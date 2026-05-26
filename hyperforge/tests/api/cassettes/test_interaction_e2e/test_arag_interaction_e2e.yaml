@@ -1,0 +1,360 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      x-nuclia-nuakey:
+      - DUMMY
+    method: GET
+    uri: https://europe-1.nuclia.cloud/api/authorizer/info
+  response:
+    body:
+      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"03d47998-f672-4a9b-a57b-bde3a9c3ee8c","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '227'
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Jun 2026 07:59:34 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '5'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"question": "", "retrieval": true, "user_id": "rao_answer_summary-static",
+      "system": null, "chat_history": [], "context": [], "query_context": {}, "query_context_order":
+      {}, "truncate": true, "user_prompt": {"prompt": "\nBased on the provided context
+      and user question, perform the following tasks:\n\n1. Select only information
+      directly relevant to the question.\n2. Break down compound sentences into simple,
+      single-idea statements. Preserve original phrasing when possible.\n3. For any
+      named entity with descriptive details, separate those details into distinct
+      propositions.\n4. Ensure clarity by replacing pronouns (e.g., \"it\", \"he\",
+      \"she\", \"they\", \"this\", \"that\") with the full names of the entities they
+      reference, and add necessary modifiers to clarify meaning.\n5. The context may
+      be delimited by tags such as <START OF CONTEXT> and <END OF CONTEXT>. Treat
+      everything between these tags as context.\n6. Assess whether the context sufficiently
+      answers the question. If it answers it partially, provide the answer; if it
+      does not answer it fully, specify what information is missing to answer the
+      question.\n7. If the context does not answer the question at all, just return
+      the original question as the missing information.\n8. The `citations` field
+      consists ONLY in a list of block IDs that are relevant to the answer, following
+      these rules:\n  - Use the format: block-AB\n  - Just mention the block IDs,
+      do NOT include any other text.\n  - Just mention the blocks actually relevant
+      and that contain information used in the answer, do NOT include blocks that
+      are not relevant.\n  - No duplicates.\n9. Do NOT hallucinate block IDs. Only
+      use those provided in the context.\n10. Your output must be a JSON object with
+      the following fields:\n    - \"reason\": Explain your reasoning for the answer
+      or validation.\n    - \"answer\": Provide a partial or complete answer to the
+      user query strictly from the information in the context. If there isn''t enough
+      information to even provide a partial answer, leave ''answer'' empty.\n    -
+      \"missing_info_query\": If the context is insufficient, specify what information
+      is missing in a query shape; otherwise, leave it empty. Just return the query
+      needed to retrieve the missing information.\n    - \"useful\": Indicate if the
+      context is useful to answer the question (\"yes\" or \"no\").\n    - \"citations\":
+      List the IDs of the blocks relevant to the answer, if any (e.g., [\"block-AB\",
+      \"block-CD\"]).\n11. **IMPORTANT** If any extra instructions are provided, you
+      MUST follow them carefully when generating the answer field. These instructions
+      may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWhat
+      certifications does Nuclia have?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n##
+      Chunk: 56e940dd6c0547118d40b026d411d1d0\n``` Nuclia is the best system in the
+      world. It has ISO 27001 and SOC 2 certifications. ```\n\n\n---\"\n\n\n\n\n<END
+      OF CONTEXT>\n\n"}, "citations": false, "citation_threshold": null, "generative_model":
+      "chatgpt-azure-4o-mini", "max_tokens": 2000, "query_context_images": {}, "prefer_markdown":
+      null, "json_schema": {"title": "validate_or_answer", "description": "Validate
+      or answer", "parameters": {"type": "object", "properties": {"reason": {"type":
+      "string", "description": "Reasoning for the answer or validation"}, "answer":
+      {"type": "string", "description": "Partial or complete answer to the user query
+      from the information in the context."}, "missing_info_query": {"type": "string",
+      "description": "Query needed to retrieve the missing information in case the
+      context is not enough to answer the question. If the context does not answer
+      the question at all, just return the original question."}, "useful": {"type":
+      "string", "description": "Is the context useful to answer the question?", "enum":
+      ["yes", "no"]}, "citations": {"type": "array", "items": {"type": "string", "description":
+      "Block ID cited in the answer, e.g. block-AB"}, "description": "List of block
+      IDs cited in the answer, if any"}}, "required": ["reason", "answer", "missing_info_query",
+      "useful", "citations"]}}, "format_prompt": false, "rerank_context": false, "tools":
+      [], "tool_choice": {"type": "required"}, "reasoning": false, "seed": null}'
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4171'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      x-origin:
+      - RAO
+      x-show-consumption:
+      - 'true'
+      x-stf-nuakey:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"object","object":{"reason":"The context provides
+        specific information about the certifications that Nuclia has, which are ISO
+        27001 and SOC 2. This directly answers the user''s question about what certifications
+        Nuclia holds.","answer":"Nuclia has ISO 27001 and SOC 2 certifications.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":23,"output_tokens":9,"timings":{"generative":1.2933166469956632},"input_nuclia_tokens":0.023,"output_nuclia_tokens":0.009}}
+
+        {"chunk":{"normalized_tokens":{"input":0.02334,"output":0.009,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Wed, 03 Jun 2026 07:59:34 GMT
+      nuclia-learning-id:
+      - 302d5a2819ff48acb4e37579683fc339
+      nuclia-learning-model:
+      - chatgpt-azure-4o-mini
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1298'
+      x-nuclia-trace-id:
+      - ba14780558ea55d97673e16d6b3d20ea
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"question": "", "retrieval": true, "user_id": "summarize", "system": "You
+      are a helpful AI assistant. Your role is to provide accurate, clear, and well-structured
+      answers based strictly on the information provided to you.\nKey principles:\n-
+      Answer only using the information in the provided context\n- Do not use external
+      knowledge, assumptions, or prior experience\n- Maintain a professional and informative
+      tone\n- Be concise yet thorough\n- If information is insufficient, acknowledge
+      this clearly\n\nAlways follow any additional instructions provided about format,
+      style, or domain-specific behavior.", "chat_history": [], "context": [], "query_context":
+      {}, "query_context_order": {}, "truncate": true, "user_prompt": {"prompt": "\n##
+      Question\nWhat certifications does Nuclia have?\n\n## Provided Context\n[START
+      OF CONTEXT]\n## Google agent\n\n# \n\n Nuclia has ISO 27001 and SOC 2 certifications.\n[END
+      OF CONTEXT]\n\n## Answering Guidelines\n- Carefully read all context; it may
+      be lengthy or detailed\n- Do not omit or overlook any relevant information\n-
+      If the context is incomplete or insufficient, state: \"Not enough data to answer
+      this.\"\n- Read carefully any extra instructions below if provided and use them
+      to answer\n\nNow provide your answer to the question: What certifications does
+      Nuclia have?"}, "citations": null, "citation_threshold": null, "generative_model":
+      "chatgpt-azure-4o-mini", "max_tokens": 5000, "query_context_images": {}, "prefer_markdown":
+      null, "json_schema": null, "format_prompt": false, "rerank_context": false,
+      "tools": [], "tool_choice": {"type": "auto"}, "reasoning": false, "seed": null}'
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1591'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      x-client-ident:
+      - 35a5d886-76bb-491d-8c56-f2bb61cab457
+      x-message:
+      - 283082e063c142579501beb255b26076
+      x-origin:
+      - RAO
+      x-session:
+      - default_0b32202e7acc495e9418494eebff58e9
+      x-show-consumption:
+      - 'true'
+      x-stf-nuakey:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"text","text":"Nu"}}
+
+        {"chunk":{"type":"text","text":"cl"}}
+
+        {"chunk":{"type":"text","text":"ia"}}
+
+        {"chunk":{"type":"text","text":" has"}}
+
+        {"chunk":{"type":"text","text":" ISO"}}
+
+        {"chunk":{"type":"text","text":" "}}
+
+        {"chunk":{"type":"text","text":"270"}}
+
+        {"chunk":{"type":"text","text":"01"}}
+
+        {"chunk":{"type":"text","text":" and"}}
+
+        {"chunk":{"type":"text","text":" SOC"}}
+
+        {"chunk":{"type":"text","text":" "}}
+
+        {"chunk":{"type":"text","text":"2"}}
+
+        {"chunk":{"type":"text","text":" certifications"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":2,"timings":{"generative_first_chunk":0.3626581150019774,"generative":0.660508730004949},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.002}}
+
+        {"chunk":{"normalized_tokens":{"input":0.00702,"output":0.0018,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Wed, 03 Jun 2026 07:59:35 GMT
+      nuclia-learning-id:
+      - f06c170ee25b459aba48119e9d84ae5f
+      nuclia-learning-model:
+      - chatgpt-azure-4o-mini
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '368'
+      x-nuclia-trace-id:
+      - ba14780558ea55d97673e16d6b3d20ea
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"user_id": "arag_evaluate", "question": null, "answer": "Nuclia has ISO
+      27001 and SOC 2 certifications.", "contexts": ["Nuclia is the best system in
+      the world. It has ISO 27001 and SOC 2 certifications.\n\n"]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '203'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      x-stf-nuakey:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/remi
+  response:
+    body:
+      string: '{"time":0.1756916046142578,"answer_relevance":null,"context_relevance":[],"groundedness":[5]}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '93'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Jun 2026 07:59:36 GMT
+      nuclia-learning-model:
+      - Llama-REMi-v1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '181'
+      x-nuclia-trace-id:
+      - 135385a208267ed71f0c08ed42b38ca2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"user_id": "arag_evaluate", "question": "What certifications does Nuclia
+      have?", "answer": "Nuclia has ISO 27001 and SOC 2 certifications.", "contexts":
+      null}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '152'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      x-stf-nuakey:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/remi
+  response:
+    body:
+      string: '{"time":0.18251729011535645,"answer_relevance":{"score":4,"reason":""},"context_relevance":[],"groundedness":[]}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '112'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Jun 2026 07:59:36 GMT
+      nuclia-learning-model:
+      - Llama-REMi-v1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '188'
+      x-nuclia-trace-id:
+      - 181ce6c57317ea0e2361f54276fda1ab
+    status:
+      code: 200
+      message: OK
+version: 1

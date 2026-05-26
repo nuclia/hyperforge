@@ -1,0 +1,133 @@
+"""
+Runtime settings for the standalone arag deployment.
+
+All values can be supplied via:
+  - Environment variables (prefixed with ARAG_, e.g. ARAG_EXTERNAL_NUA_API_KEY)
+  - A .env file
+  - CLI arguments when using the pydantic-settings CLI integration
+
+The agent pipeline definition (drivers, workflows, etc.) lives separately in
+a JSON config file pointed to by ``agents_config``.
+"""
+
+from pathlib import Path
+from typing import Optional
+
+from pydantic import AliasChoices, Field
+from pydantic_settings import BaseSettings
+
+
+class StandaloneSettings(BaseSettings):
+    # ------------------------------------------------------------------
+    # Agent config file
+    # ------------------------------------------------------------------
+
+    agents_config: Path = Field(
+        default=Path("agents_config.yaml"),
+        description="Path to the JSON file containing agent definitions.",
+    )
+
+    # ------------------------------------------------------------------
+    # HTTP server
+    # ------------------------------------------------------------------
+
+    host: str = Field(default="0.0.0.0", description="Listen host.")
+    port: int = Field(default=8080, description="Listen port.")
+    log_level: str = Field(default="INFO", description="Log level (uvicorn + app).")
+    debug: bool = Field(default=False, description="Enable debug mode.")
+
+    # ------------------------------------------------------------------
+    # Agent runner
+    # ------------------------------------------------------------------
+
+    question_timeout_seconds: int = Field(
+        default=300,
+        description="Maximum seconds allowed to answer a single question.",
+    )
+    pubsub_keepalive_seconds: float = Field(
+        default=20,
+        description="Interval between keepalive pings on the answer stream.",
+    )
+    broker_redis_dsn: Optional[str] = Field(
+        default=None,
+        description=(
+            "Redis DSN for the Pub/Sub broker. If not set, an in-memory broker is used, "
+            "which is not suitable for production but fine for local testing and development."
+        ),
+    )
+    broker_redis_activate_subject: str = Field(
+        default="arag:activations",
+        description="Redis stream subject for agent activations (only used if broker_redis_dsn is set).",
+    )
+    broker_redis_cluster_mode: bool = Field(
+        default=False,
+        description="Whether to use Redis Cluster mode (only used if broker_redis_dsn is set).",
+    )
+
+    # ------------------------------------------------------------------
+    # NUA / predict engine
+    # ------------------------------------------------------------------
+
+    external_nua_api_key: Optional[str] = Field(
+        default=None,
+        description=(
+            "NUA API key from https://nuclia.cloud/user/keys. "
+            "Required unless internal_nua=true or local_openai is set."
+        ),
+        # also allow external_nua_api_key and nua_api_key
+        # for backward compatibility with older env var names
+        validation_alias=AliasChoices(
+            "EXTERNAL_NUA_API_KEY",
+            "external_nua_api_key",
+            "NUA_API_KEY",
+            "nua_api_key",
+        ),
+    )
+    internal_nua: bool = Field(
+        default=False,
+        description="Connect to an internal NUA service instead of nuclia.cloud.",
+    )
+    internal_nua_api: str = Field(
+        default="http://predict.learning.svc.cluster.local:8080",
+        description="Internal NUA service address (only used when internal_nua=true).",
+    )
+    local_openai: Optional[str] = Field(
+        default=None,
+        description=(
+            "Base URL of a local OpenAI-compatible inference server "
+            "(e.g. http://localhost:11434/v1). "
+            "When set, requests are routed there instead of nuclia.cloud."
+        ),
+    )
+
+    in_memory_cache_size: int = 3000
+
+    cors_allow_origin: list[str] = Field(
+        default_factory=lambda: ["*"],
+        description=(
+            "List of allowed origins for CORS. Defaults to ['*'] which allows all origins. "
+            "In production, it's recommended to set this to the specific origins that should be allowed."
+        ),
+    )
+
+    load_modules: list[str] = []
+    # ------------------------------------------------------------------
+    # Pluggable module classes
+    # ------------------------------------------------------------------
+
+    session_cache_class: str | None = Field(
+        default=None,
+        description="Dotted-name of the session cache class to use.",
+    )
+    session_cache_size: int = Field(
+        default=3000,
+        description="Size of the session cache when using a custom session cache class.",
+    )
+    agent_manager_class: str = Field(
+        default="hyperforge.standalone.agent.StaticAgentManager",
+        description="Dotted-name of the AgentManager class to use.",
+    )
+    standalone_application_class: str = Field(
+        default="hyperforge.standalone.app.StandaloneApplication",
+        description="Dotted-name of the StandaloneApplication class to use.",
+    )

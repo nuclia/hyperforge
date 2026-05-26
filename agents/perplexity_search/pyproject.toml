@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hyperforge_perplexity_search"
+version = "1.0.0"
+license = "Apache-2.0"
+description = "Perplexity Search Hyperforge agent"
+authors = [{ name = "Nuclia", email = "nucliadb@nuclia.com" }]
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.10, <4"
+dependencies = [
+    "hyperforge",
+    "httpx",
+    "hyperforge_perplexity",
+    "perplexityai>=0.35.1",
+]
+
+[dependency-groups]
+dev = [
+    "mypy",
+    "pytest",
+    "pytest-asyncio",
+    "pytest-recording",
+    "ty",
+]
+
+[project.urls]
+Homepage = "https://progress.com"
+Repository = "https://github.com/nuclia/hyperforge"
+Changelog = "https://github.com/nuclia/hyperforge/blob/main/agents/perplexity_search/CHANGELOG.md"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.uv.build-backend]
+
+# Exclude specific files from being packaged
+source-exclude = ["tests/**", "*.pyc"]

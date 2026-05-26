@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hyperforge_google"
+version = "1.0.0"
+license = "Apache-2.0"
+description = "Google Search Hyperforge agent"
+authors = [{ name = "Nuclia", email = "nucliadb@nuclia.com" }]
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.10, <4"
+dependencies = ["hyperforge", "google-genai"]
+
+[dependency-groups]
+dev = [
+    "mypy",
+    "pytest",
+    "pytest-asyncio",
+    "pytest-recording",
+    "ty",
+]
+
+[project.urls]
+Homepage = "https://progress.com"
+Repository = "https://github.com/nuclia/hyperforge"
+Changelog = "https://github.com/nuclia/hyperforge/blob/main/agents/google/CHANGELOG.md"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.uv.build-backend]
+
+# Exclude specific files from being packaged
+source-exclude = ["tests/**", "*.pyc"]
