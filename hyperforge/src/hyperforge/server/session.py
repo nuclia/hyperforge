@@ -11,20 +11,14 @@ import nucliadb_telemetry.context
 import nucliadb_telemetry.metrics
 import prometheus_client
 from aiohttp.web import Server
-from hyperforge.db.agents import AgentManager
-from hyperforge.server import SERVICE_NAME, logger
-from hyperforge.server.cache import Cache
-from hyperforge.server.settings import Settings
-from hyperforge.server.utils import get_memory
-from hyperforge.server.web import start_health_check
 from lru import LRU
 from nucliadb_telemetry import errors
 from nucliadb_telemetry.utils import get_telemetry
 from opentelemetry import trace
 
-
 from hyperforge.broker import Broker
 from hyperforge.configure import load_all_configurations, scan
+from hyperforge.db.agents import AgentManager
 from hyperforge.engine import State, get_state
 from hyperforge.interaction import (
     AnswerOperation,
@@ -44,6 +38,11 @@ from hyperforge.pubsub import (
     StartInteraction,
     UserToAgentInteraction,
 )
+from hyperforge.server import SERVICE_NAME, logger
+from hyperforge.server.cache import Cache
+from hyperforge.server.settings import Settings
+from hyperforge.server.utils import get_memory
+from hyperforge.server.web import start_health_check
 
 HOSTNAME = os.environ.get("HOSTNAME", "arag-server").encode()
 
@@ -101,7 +100,7 @@ class SessionManager:
                 logger.exception("Error processing activation message")
                 errors.capture_exception()
 
-    async def initialize(self):
+    async def initialize(self, health_check: bool = True) -> None:
 
         for load_module in self.settings.load_modules:
             try:
@@ -111,7 +110,8 @@ class SessionManager:
                 logger.error(f"Module {load_module} could not be loaded")
 
         self.activation_task = asyncio.create_task(self.activation_listener())
-        self.server = await start_health_check()
+        if health_check:
+            self.server = await start_health_check()
 
     async def finalize(self):
 

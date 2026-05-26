@@ -14,11 +14,6 @@ import prometheus_client  # type: ignore
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from hyperforge.server.cache import InMemoryCache, ValkeyCache
-from hyperforge.server.session import SessionManager
-from hyperforge.server.settings import Settings as ServerSettings
-from hyperforge.standalone.settings import StandaloneSettings
-from hyperforge.standalone.ui_router import router as ui_router
 from lru import LRU
 from mcp.server.lowlevel.server import Server as MCPServer
 from mcp.server.streamable_http import StreamableHTTPServerTransport
@@ -39,6 +34,11 @@ from hyperforge.broker import Broker
 from hyperforge.broker.local import LocalBroker
 from hyperforge.broker.redis import RedisBroker
 from hyperforge.configure import resolve_dotted_name
+from hyperforge.server.cache import InMemoryCache, ValkeyCache
+from hyperforge.server.session import SessionManager
+from hyperforge.server.settings import Settings as ServerSettings
+from hyperforge.standalone.settings import StandaloneSettings
+from hyperforge.standalone.ui_router import router as ui_router
 
 from .const import STANDALONE_ACCOUNT
 
@@ -52,14 +52,8 @@ from .const import STANDALONE_ACCOUNT
 class StandaloneSessionManager(SessionManager):
     """SessionManager without the embedded aiohttp metrics/health server."""
 
-    async def initialize(self) -> None:
-
-        self.activation_task = asyncio.create_task(self.activation_listener())
-        from hyperforge.audit.auditor import get_auditor
-
-        self.audit = get_auditor()
-        if self.audit is not None:
-            await self.audit.initialize()
+    async def initialize(self, health_check: bool = False) -> None:
+        await super().initialize(health_check=health_check)
 
 
 router = APIRouter()

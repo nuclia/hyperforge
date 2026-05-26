@@ -1,21 +1,28 @@
+import os
 from typing import Any
 
 from httpx import AsyncClient
 from hyperforge.configure import get_driver_config_instance
 from hyperforge.llm import NUAConnection
 from hyperforge.manager import Manager
-from hyperforge.models import Rule, Rules
 from hyperforge.memory.memory import (
     MemoryConfig,
     SessionMemory,
 )
+from hyperforge.models import Rule, Rules
 from hyperforge.prompts import PromptConfig
-from hyperforge.workflows import WorkflowData
 from hyperforge.server.session import SessionManager
-from nucliadb_models.resource import KnowledgeBoxObj
-
+from hyperforge.workflows import WorkflowData
 from hyperforge_mcp.agent import MCPAgent
 from hyperforge_mcp.config import MCPAgentConfig, Transport
+from nucliadb_models.resource import KnowledgeBoxObj
+
+NUA_KEY = os.environ.get("NUA_KEY", "DUMMY")
+
+
+KB_2603EE3A_2EE0_46BA_85A7_A1A2EC5A8FFE = os.environ.get(
+    "KB_2603EE3A_2EE0_46BA_85A7_A1A2EC5A8FFE", "DUMMY"
+)
 
 DRIVERS = [
     {
@@ -36,25 +43,6 @@ DRIVERS = [
 
 DRIVERS_AGENT = [
     {
-        "provider": "sql",
-        "identifier": "sql-01",
-        "name": "sql",
-        "config": {
-            "name": "DB sales",
-            "dsn": "postgresql://xxx:yyy@10.10.10.10/db",
-            "schema": "",
-        },
-    },
-    {
-        "provider": "google",
-        "identifier": "google-01",
-        "name": "google",
-        "config": {
-            "vertexai": False,
-            "api_key": "AIzaSyDBBq0QwyVtYauiP0D7GkqQaWm8A92kHrM",
-        },
-    },
-    {
         "provider": "nucliadb",
         "identifier": "nucliadb-01",
         "name": "nucliadb",
@@ -62,7 +50,7 @@ DRIVERS_AGENT = [
             "description": "Products connection",
             "manager": "https://aws-us-east-2-1.rag.progress.cloud/api",
             "url": "https://aws-us-east-2-1.rag.progress.cloud/api",
-            "key": "eyJhbGciOiJSUzI1NiIsImtpZCI6InNhIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2F3cy11cy1lYXN0LTItMS5yYWcucHJvZ3Jlc3MuY2xvdWQvIiwiaWF0IjoxNzcwMTUwNzc0LCJzdWIiOiI4N2Q0YTQ1Ny04ZGUyLTRkMWItOWI4MC1jYWE3ZjcyNDcxOGQiLCJqdGkiOiI5MzZjYzYwMi03YzI4LTRlMzktYWUzMi05MDdjMzc4MjhhMTYiLCJleHAiOjE4MDE2ODY3NzIsImtleSI6IjQyMTJlOGVhLTc1ZjktNDI0OS04ZjlmLTAzZjI4ZWM2MWJmZCIsImtpZCI6ImRiZWVlMWRjLWYxMDktNDRjMC05Y2Q1LWI1Y2QxNDMxMDBjYSJ9.W2oSFp6CiUzdZLLqoc5SiCoXdonfz99pw9KrrWQ1zjlYfGB0iG-mTdbbG229C-bS_3oWT0Fs0ZZYpzLb5Oh4HTiUr7P0e18ckM449ILhviEQuoto14hOdwsNi30AWQMhJb6ljch-Ka8fb25u6dIL5q4D-3YY07HSX0sH7M3dqPI1tL89zYlIXHPcHBO6huvLBdSiKWnw7K1BXdyO18E15f9WXty4R3A__gCiSOJB4zY9fCyKp9QEi1-I1eebCtAGYceHbxAvTdriduoIfFgNwgYOFjHmdQXmQC6jOOMcZkenY2srXYZvs71y-VCiWMcWjMVHzu_nKXHUCKHl29cd-SLg7vxF7ZLbW_ywylA6LtjgNshafGMNlD3juuRMYqU43HoySgPcU9_suUKaAlFHcxlQTRNuWRVFOemfsF81zCPx-sO2Pzp-UQN0vnSAvBUuq_6RhQ4aUZfY4H6PN8IKGfolRDkM2K4xcSRz5wsnVURs9cgaaFEjP9BmFcL2ajYAnimoRqhGOTv3Y8AhiqI_KJYjJn2HthMgAYZJVlPtdG2VuUh6G-e266kWUSEiHW8Jx6hNNO0vdH86BjRK8uemLHCocBajXS-Qpf2MWxwVfeXLhsG8mxREOC4irBhcMfBDWJzyBb1tSawfHDThO3AcilEb8uRN1CL1RoPBqok8ogo",
+            "key": KB_2603EE3A_2EE0_46BA_85A7_A1A2EC5A8FFE,
             "kbid": "2603ee3a-2ee0-46ba-85a7-a1a2ec5a8ffe",
         },
     },
@@ -71,7 +59,7 @@ DRIVERS_AGENT = [
 MEMORY = {"nucliadb": {"url": "", "key": "", "kbid": ""}}
 
 ROUTER = {
-    "key": "eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ",
+    "key": NUA_KEY,
 }
 
 
@@ -195,12 +183,7 @@ async def test_mcp_full_workflow(
     arag_api_http_session: str,
     arag_server: SessionManager,
     disable_safe_transport,
-    pg_shoping_example,
 ):
-    # Create a session
-    for driver in DRIVERS_AGENT:
-        if driver["provider"] == "sql":
-            driver["config"]["dsn"] = pg_shoping_example  # type: ignore
 
     http_client = AsyncClient()
     HEADERS = {

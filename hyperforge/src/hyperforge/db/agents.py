@@ -6,7 +6,6 @@ import databases
 import sqlalchemy as sa
 from cryptography.fernet import Fernet
 from fastapi import UploadFile
-from hyperforge.db.settings import DataManagerSettings
 from nucliadb_telemetry.utils import get_telemetry, init_telemetry
 from pydantic import BaseModel, ValidationError
 from sqlalchemy.dialects import postgresql as pg_dialect
@@ -25,6 +24,7 @@ from hyperforge.db.encryption import (
     encrypt_fields,
     fernet_key_from_passphrase,
 )
+from hyperforge.db.settings import DataManagerSettings
 from hyperforge.driver import DriverConfig
 from hyperforge.models import MemoryConfig, NucliaDBMemoryConfig, Rules
 from hyperforge.prompts import PromptArgument, PromptConfig

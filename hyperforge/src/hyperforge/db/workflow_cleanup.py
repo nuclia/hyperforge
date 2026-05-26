@@ -2,13 +2,14 @@ import asyncio
 import datetime
 from importlib.metadata import version
 
-from hyperforge.db import logger
-from hyperforge.db.agents import WORKFLOW_PURGE_RETENTION, AgentManager
-from hyperforge.db.settings import DataManagerSettings
 from nucliadb_telemetry import errors
 from nucliadb_telemetry.errors import setup_error_handling
 from nucliadb_telemetry.logs import setup_logging
 from nucliadb_telemetry.settings import LogLevel, LogSettings
+
+from hyperforge.db import logger
+from hyperforge.db.agents import WORKFLOW_PURGE_RETENTION, AgentManager
+from hyperforge.db.settings import DataManagerSettings
 
 
 async def cleanup_deleted_workflows(

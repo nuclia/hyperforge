@@ -8,12 +8,11 @@ from hyperforge.api.models import InteractionRequest
 from hyperforge.context.agent import ContextAgent
 from hyperforge.context.config import ContextAgentConfig
 from hyperforge.engine import State
-from hyperforge.models import HistoryQuestionAnswer, MemoryConfig
 from hyperforge.memory.memory import (
     EphemeralSessionMemory,
 )
+from hyperforge.models import HistoryQuestionAnswer, MemoryConfig
 from hyperforge.retrieval.agent import RetrievalAgent
-from hyperforge.trace import trace_agent
 from hyperforge.server.cache import (
     CachedSessionQA,
     InMemoryCache,
@@ -21,6 +20,7 @@ from hyperforge.server.cache import (
 from hyperforge.standalone.app import StandaloneApplication
 from hyperforge.standalone.config import StandaloneConfig
 from hyperforge.standalone.settings import StandaloneSettings
+from hyperforge.trace import trace_agent
 
 pytestmark = pytest.mark.asyncio
 

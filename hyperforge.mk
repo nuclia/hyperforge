@@ -27,7 +27,7 @@ lint:
 
 .PHONY: test
 test:
-	uv run $(PYTEST) $(pytest_play_record_flags) tests/
+	uv run $(PYTEST) $(pytest_play_record_flags) tests/ $(ARGS)
 
 record:
-	uv run $(PYTEST) $(pytest_record_flags) tests/
+	uv run $(PYTEST) $(pytest_record_flags) tests/ $(ARGS)

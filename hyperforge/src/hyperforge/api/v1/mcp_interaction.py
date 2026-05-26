@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any, Iterable, Sequence
 
 import anyio
 from fastapi import Header
-from hyperforge.db.agents import AgentManager
 from mcp.server.fastmcp.exceptions import ResourceError
 from mcp.server.lowlevel.helper_types import ReadResourceContents
 from mcp.server.lowlevel.server import Server as MCPServer
@@ -35,6 +34,7 @@ from starlette.responses import Response
 from hyperforge.api.authentication import requires_one
 from hyperforge.api.models import InteractionRequest
 from hyperforge.api.v1.interaction import WebsocketReceiver, stream_response
+from hyperforge.db.agents import AgentManager
 from hyperforge.interaction import AnswerOperation
 from hyperforge.prompts import PromptConfig
 from hyperforge.pubsub import UserToAgentInteraction

@@ -23,10 +23,10 @@ from hyperforge.interaction import (
 from hyperforge.manager import Manager
 from hyperforge.memory import QuestionMemory
 from hyperforge.retrieval.agent import RetrievalAgent
-from hyperforge.trace import trace_agent
 from hyperforge.standalone.app import StandaloneApplication
 from hyperforge.standalone.config import StandaloneConfig
 from hyperforge.standalone.settings import StandaloneSettings
+from hyperforge.trace import trace_agent
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 from mcp.types import TextContent

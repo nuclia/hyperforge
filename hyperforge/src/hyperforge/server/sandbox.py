@@ -2,13 +2,13 @@ import asyncio
 from importlib.metadata import version
 
 import sentry_sdk
-from hyperforge.server.settings import Settings
 from nucliadb_telemetry.fastapi import application_metrics
 from nucliadb_telemetry.logs import setup_logging
 from nucliadb_telemetry.settings import LogLevel, LogSettings
 from sentry_sdk.integrations.excepthook import ExcepthookIntegration
 
 from agents.restricted.src.hyperforge_restricted import sandbox
+from hyperforge.server.settings import Settings
 
 
 def set_sentry(zone: str, environment: str, sentry_url: str):

@@ -1,10 +1,10 @@
 from fastapi import Header
-from hyperforge.db.agents import AgentManager
 from starlette.requests import Request
 
 from hyperforge.api.authentication import requires_one
 from hyperforge.api.models import PromptID, StashRoles
 from hyperforge.api.v1.router import router
+from hyperforge.db.agents import AgentManager
 from hyperforge.prompts import PromptConfig
 
 

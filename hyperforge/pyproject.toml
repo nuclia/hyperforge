@@ -15,6 +15,7 @@ classifiers = [
 ]
 license = "Apache-2.0"
 dependencies = [
+    "alembic",
     "pydantic",
     "nuclia>=4.9.25",
     "nuclia-models>=0.52.1",
@@ -56,6 +57,7 @@ dev = [
     "httpx[http2]",
     "hyperforge_rephrase",
     "inline_snapshot",
+    "sqlalchemy_utils",
 ]
 
 [tool.setuptools.packages.find]

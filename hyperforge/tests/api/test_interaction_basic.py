@@ -1,7 +1,7 @@
 import asyncio
 import json
 from typing import Any, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import hyperforge.engine
 import pytest
@@ -197,15 +197,6 @@ def feedback_agent():
         patch("hyperforge.server.session.get_state", return_value=state),
     ):
         yield
-
-
-@pytest.fixture
-def mock_audit():
-    audit = MagicMock()
-    audit.initialize = AsyncMock()
-    audit.finalize = AsyncMock()
-    with patch("hyperforge.server.session.get_auditor", return_value=audit):
-        yield audit
 
 
 async def test_arag_websocket_interaction(

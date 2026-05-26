@@ -1,10 +1,10 @@
 from typing import TYPE_CHECKING
 
-from hyperforge.db.agents import AgentManager
 from starlette.requests import Request
 
 from hyperforge.api.internal.router import router
 from hyperforge.api.models import InspectData
+from hyperforge.db.agents import AgentManager
 
 if TYPE_CHECKING:
     from hyperforge.api.app import HTTPApplication

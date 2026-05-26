@@ -1,33 +1,20 @@
 import asyncio
+import logging
 import os
 import pathlib
 import socket
-import uuid
-from typing import AsyncIterator
 from unittest.mock import patch
 
 import alembic.command
 import alembic.config
-import asyncpg  # type: ignore
 import databases
 import nucliadb_sdk
 import pytest
 import requests
 import uvicorn
 from cryptography.fernet import Fernet
-from grpc.aio import insecure_channel
 from httpx import AsyncClient
 from httpx._transports.asgi import ASGITransport
-from hyperforge.api.app import HTTPApplication
-from hyperforge.api.settings import Settings
-from hyperforge.broker.redis import RedisBroker
-from hyperforge.memory import MemoryConfig, NucliaDBMemoryConfig, Rules
-from hyperforge.utils.http import SafeTransport
-from hyperforge_database.agents import AgentManager
-from hyperforge_database.settings import DataManagerSettings
-from hyperforge_server.cache import ValkeyCache
-from hyperforge_server.session import SessionManager
-from hyperforge_server.settings import Settings as ServerSettings
 from nuclia.config import NuaKey, Selection
 from nuclia.data import get_auth
 from nuclia.sdk import NucliaPredict
@@ -35,10 +22,21 @@ from nucliadb_models.resource import KnowledgeBoxObj
 from nucliadb_sdk import NucliaDB, NucliaDBAsync
 from nucliadb_sdk.tests.fixtures import NucliaFixture
 from pytest_docker_fixtures import images  # type: ignore
-from pytest_docker_fixtures.containers._base import BaseImage  # type: ignore
-from pytest_docker_fixtures.containers.pg import pg_image  # type: ignore
 from pytest_docker_fixtures.containers.valkey import valkey_image  # type: ignore
 from redis.asyncio import Redis
+
+from hyperforge.api.app import HTTPApplication
+from hyperforge.api.settings import Settings
+from hyperforge.broker.redis import RedisBroker
+from hyperforge.db.agents import AgentManager
+from hyperforge.db.settings import DataManagerSettings
+from hyperforge.models import MemoryConfig, NucliaDBMemoryConfig, Rules
+from hyperforge.server.cache import ValkeyCache
+from hyperforge.server.session import SessionManager
+from hyperforge.server.settings import Settings as ServerSettings
+from hyperforge.utils.http import SafeTransport
+
+
 from sqlalchemy import create_engine
 from sqlalchemy_utils import (  # type: ignore
     create_database,
@@ -46,42 +44,20 @@ from sqlalchemy_utils import (  # type: ignore
     drop_database,
 )
 
+from pytest_docker_fixtures.containers.pg import pg_image  # type: ignore
+from pytest_docker_fixtures import images  # type: ignore
+
+
 _dir = pathlib.Path(__file__).parent.absolute()
 _package_path = _dir.parent.absolute()
 
-images.settings["nucliadb"]["env"]["NUCLIA_SERVICE_ACCOUNT"] = (
-    "eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ"
-)
-images.settings["nucliadb"]["env"]["NUA_API_KEY"] = (
-    "eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ"
-)
+NUA = os.environ.get("NUA_KEY", "DUMMY")
+
+images.settings["nucliadb"]["env"]["NUCLIA_SERVICE_ACCOUNT"] = NUA
+images.settings["nucliadb"]["env"]["NUA_API_KEY"] = NUA
 
 images.settings["nucliadb"]["env"]["DUMMY_PREDICT"] = "False"
 
-
-images.settings["postgresql"].update(
-    {
-        "version": "16.1",
-        "env": {
-            "POSTGRES_PASSWORD": "postgres",
-            "POSTGRES_DB": "postgres",
-            "POSTGRES_USER": "postgres",
-        },
-    }
-)
-
-
-images.settings["neo4j"] = {
-    "image": "neo4j",
-    "version": "latest",
-    "env": {},
-    "options": {
-        "ports": {"7474": ("0.0.0.0", 0), "7687": ("0.0.0.0", 0)},
-        "publish_all_ports": False,
-    },
-}
-
-NUA_NUCLIADB = "eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ"
 
 NUCLIA_Make_dataset = (
     "https://storage.googleapis.com/ncl-testbed-gcp-stage-1/test_nucliadb/make.export"
@@ -141,7 +117,7 @@ async def init_fixture(
                 client_id="nucliadb",
                 region="europe-1",
                 account="nuclia",
-                token=NUA_NUCLIADB,
+                token=NUA,
                 account_type="service",
             )
         ]
@@ -166,25 +142,6 @@ async def init_fixture(
     assert sdk.import_status(kbid=kbid, import_id=import_id).status.value == "finished"
 
     return kbid
-
-
-class Neo4jImage(BaseImage):
-    name = "neo4j"
-
-
-@pytest.fixture(scope="session")
-def neo4j():
-    neo4j = Neo4jImage()
-    host, port = neo4j.run()
-    yield host, port
-    neo4j.stop()
-
-
-@pytest.fixture(scope="session")
-def pg():
-    host, port = pg_image.run()
-    yield host, port
-    pg_image.stop()
 
 
 @pytest.fixture(scope="session")
@@ -216,6 +173,38 @@ def article_dataset(nucliadb: NucliaFixture):
     yield kbid
 
 
+@pytest.fixture
+async def arag_settings(sdk_async: NucliaDBAsync, valkey_url: str):
+    yield Settings(
+        running_environment="test",
+        valkey_url=valkey_url,
+        valkey_cluster_mode=False,
+        memory_reader_nucliadb=sdk_async.base_url,
+        memory_writer_nucliadb=sdk_async.base_url,
+        memory_search_nucliadb=sdk_async.base_url,
+        dummy_idp=True,
+    )
+
+
+images.settings["postgresql"].update(
+    {
+        "version": "16.1",
+        "env": {
+            "POSTGRES_PASSWORD": "postgres",
+            "POSTGRES_DB": "postgres",
+            "POSTGRES_USER": "postgres",
+        },
+    }
+)
+
+
+@pytest.fixture(scope="session")
+def pg():
+    host, port = pg_image.run()
+    yield host, port
+    pg_image.stop()
+
+
 @pytest.fixture(scope="session")
 def pg_dsn(pg):
     host, port = pg
@@ -228,84 +217,6 @@ def pg_dsn(pg):
     config.set_main_option("sqlalchemy.url", dsn)
     alembic.command.upgrade(config, "head")
     yield dsn
-
-
-@pytest.fixture(scope="function")
-def test_db(pg_dsn):
-    engine = create_engine(pg_dsn)
-    with engine.connect() as conn:
-        yield conn
-
-
-@pytest.fixture
-async def pg_example(pg):
-    host, port = pg
-    dsn = f"postgresql://postgres:postgres@{host}:{port}/test_db_sql"
-
-    if not database_exists(dsn):
-        create_database(dsn)
-
-    conn = await asyncpg.connect(dsn)
-    await conn.execute(
-        """
-CREATE TABLE cars (
-  brand VARCHAR(255),
-  model VARCHAR(255),
-  year INT
-);
-"""
-    )
-    await conn.execute(
-        """
-INSERT INTO cars (brand, model, year) VALUES ('peugeot', 'partner', 2020);
-INSERT INTO cars (brand, model, year) VALUES ('seat', 'toledo', 2021);
-"""
-    )
-    await conn.close()
-    yield dsn
-    drop_database(dsn)
-
-
-@pytest.fixture
-async def pg_shoping_example(pg):
-    host, port = pg
-    dsn = f"postgresql://postgres:postgres@{host}:{port}/test_db2_sql"
-
-    if not database_exists(dsn):
-        create_database(dsn)
-
-    conn = await asyncpg.connect(dsn)
-    await conn.execute(
-        """
-CREATE TABLE shopping (
-  userid VARCHAR(255),
-  product VARCHAR(255),
-  year INT
-);
-"""
-    )
-    await conn.execute(
-        """
-INSERT INTO shopping (userid, product, year) VALUES ('user1', 'iphone 17', 2020);
-INSERT INTO shopping (userid, product, year) VALUES ('user2', 'Samsung Galaxy S21', 2021);
-"""
-    )
-    await conn.close()
-    yield dsn
-    drop_database(dsn)
-
-
-@pytest.fixture
-async def arag_settings(sdk_async: NucliaDBAsync, audit, valkey_url: str):
-    yield Settings(
-        running_environment="test",
-        valkey_url=valkey_url,
-        valkey_cluster_mode=False,
-        memory_reader_nucliadb=sdk_async.base_url,
-        memory_writer_nucliadb=sdk_async.base_url,
-        memory_search_nucliadb=sdk_async.base_url,
-        dummy_idp=True,
-    )
 
 
 @pytest.fixture
@@ -454,7 +365,7 @@ async def arag_kb_legacy(create_arag_kb, delete_arag_kb, arag_api_app):
     kb = await create_arag_kb("test_basic_worker_legacy", "nuclia")
     # Go to the DB and set memory to null
     db: databases.Database = arag_api_app.agent_manager.database
-    from hyperforge_database.agents import retrieval_agent_config
+    from hyperforge.db.agents import retrieval_agent_config
 
     statement = (
         retrieval_agent_config.update()
@@ -481,7 +392,7 @@ async def arag_server(
         internal_nucliadb_url=sdk.base_url,
         internal_nua=False,
         local_openai=None,
-        external_nua_api_key=NUA_NUCLIADB,
+        external_nua_api_key=NUA,
     )
     agent_manager = await AgentManager.from_settings(settings=data_manager_settings)
     await agent_manager.initialize()
@@ -590,3 +501,61 @@ def setup_encryption_key():
 async def disable_safe_transport():
     with patch.object(SafeTransport, "is_private_address", return_value=False):
         yield
+
+
+class _VCRTaskExceptionFilter(logging.Filter):
+    """Suppress 'Task exception was never retrieved' asyncio errors from vcrpy.
+
+    vcrpy's httpx stub creates a background task (_record_responses) that can
+    fail with an AssertionError due to a vcrpy/httpx version incompatibility.
+    The exception is noisy but harmless in test runs.
+    """
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        return not (
+            record.levelno == logging.ERROR
+            and "Task exception was never retrieved" in record.getMessage()
+            and "_record_responses" in record.getMessage()
+        )
+
+
+@pytest.fixture(scope="module")
+def vcr_config():
+    return {
+        # Replaces the actual token with 'DUMMY' in the recorded YAML
+        "filter_headers": [
+            ("Authorization", "DUMMY"),
+            ("x-nuclia-nuakey", "DUMMY"),
+            ("x-stf-nuakey", "DUMMY"),
+        ],
+        # Redacts specific query parameters like API keys
+        "filter_query_parameters": ["api_key", "access_token"],
+        # Redacts fields in POST request bodies (e.g., login forms)
+        "filter_post_data_parameters": ["password", "client_secret"],
+        # Decodes compressed responses so they are human-readable in the cassette
+        "decode_compressed_response": True,
+    }
+
+
+@pytest.fixture(autouse=True, scope="session")
+def suppress_test_noise() -> None:
+    """Suppress known-noisy log lines that add no diagnostic value in tests."""
+    logging.getLogger("nucliadb_utils.utilities").setLevel(logging.ERROR)
+
+    logging.getLogger("hyperforge.memory").setLevel(logging.WARNING)
+    logging.getLogger("mcp.server.streamable_http").setLevel(logging.WARNING)
+    logging.getLogger("hyperforge.server").setLevel(logging.WARNING)
+
+    asyncio_logger = logging.getLogger("asyncio")
+    asyncio_logger.addFilter(_VCRTaskExceptionFilter())
+
+    # Silence noisy loggers
+    logging.getLogger("httpx").setLevel(logging.ERROR)
+    logging.getLogger("httpcore.connection").setLevel(logging.ERROR)
+    logging.getLogger("httpcore.http11").setLevel(logging.ERROR)
+    logging.getLogger("asyncio").setLevel(logging.INFO)
+
+    # Configure hyperforge.memory logger
+    hyperforge_logger = logging.getLogger("hyperforge.memory")
+    hyperforge_logger.setLevel(logging.DEBUG)
+    hyperforge_logger.propagate = True  # Ensures it bubbles up to root_logger

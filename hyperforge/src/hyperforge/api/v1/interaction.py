@@ -12,8 +12,6 @@ from fastapi import (
     WebSocketDisconnect,
 )
 from fastapi.responses import StreamingResponse
-from hyperforge.db import exceptions
-from hyperforge.db.agents import AgentManager
 from nucliadb_sdk import NucliaDBAsync
 from pydantic import ValidationError
 
@@ -26,6 +24,8 @@ from hyperforge.api.utils import agent_has_nucliadb_memory
 from hyperforge.api.v1.router import router
 from hyperforge.api.v1.utils import tracer
 from hyperforge.broker import AgentTimeoutError
+from hyperforge.db import exceptions
+from hyperforge.db.agents import AgentManager
 from hyperforge.interaction import (
     AnswerOperation,
     AragAnswer,

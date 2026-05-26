@@ -2,6 +2,10 @@ import uuid
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from hyperforge_nucliadb.basic_ask_agent import (
+    BasicAskAgent,
+    clean_citation_footnotes_from_answer,
+)
 from nucliadb_models.filters import (
     And,
     CatalogFilterExpression,
@@ -10,11 +14,6 @@ from nucliadb_models.filters import (
     Label,
     Or,
     Resource,
-)
-
-from hyperforge_nucliadb.basic_ask_agent import (
-    BasicAskAgent,
-    clean_citation_footnotes_from_answer,
 )
 
 

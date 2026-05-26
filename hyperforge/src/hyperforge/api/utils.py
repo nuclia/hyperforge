@@ -6,10 +6,11 @@ from typing import Any, Callable, List, TypeVar
 
 import pydantic
 from fastapi import HTTPException
-from hyperforge.db import exceptions
-from hyperforge.db.agents import AgentManager
 from starlette.requests import Request
 from typing_extensions import TypeGuard
+
+from hyperforge.db import exceptions
+from hyperforge.db.agents import AgentManager
 
 _T = TypeVar("_T")
 
