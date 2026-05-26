@@ -1,0 +1,103 @@
+[project]
+name = "hyperforge_workspace"
+requires-python = ">=3.10"
+version = "1.0.0"
+dependencies = [
+    "hyperforge",
+    "hyperforge_nucliadb",
+    "hyperforge_rephrase",
+    "hyperforge_summarize",
+    "hyperforge_static",
+    "hyperforge_conditional",
+    "hyperforge_external",
+    "hyperforge_generate",
+    "hyperforge_historical",
+    "hyperforge_http",
+    "hyperforge_mcp",
+    "hyperforge_passthrough",
+    "hyperforge_related",
+    "hyperforge_remi",
+    "hyperforge_restart",
+    "hyperforge_restricted",
+    "hyperforge_smart",
+    "hyperforge_static_string",
+]
+
+
+[tool.uv.workspace]
+members = [
+    "nucliadb_agentic_api",
+    "hyperforge",
+    "agents/nucliadb",
+    "agents/rephrase",
+    "agents/summarize",
+    "agents/static",
+    "agents/conditional",
+    "agents/external",
+    "agents/generate",
+    "agents/historical",
+    "agents/http",
+    "agents/mcp",
+    "agents/passthrough",
+    "agents/related",
+    "agents/remi",
+    "agents/restart",
+    "agents/restricted",
+    "agents/smart",
+    "agents/static_string",
+]
+
+[tool.uv]
+default-groups = "all"
+managed = true
+
+
+[tool.uv.sources]
+nucliadb-agentic-api = { workspace = true }
+hyperforge = { workspace = true }
+hyperforge_nucliadb = { workspace = true }
+hyperforge_rephrase = { workspace = true }
+hyperforge_summarize = { workspace = true }
+hyperforge_static = { workspace = true }
+hyperforge_conditional = { workspace = true }
+hyperforge_external = { workspace = true }
+hyperforge_generate = { workspace = true }
+hyperforge_historical = { workspace = true }
+hyperforge_http = { workspace = true }
+hyperforge_mcp = { workspace = true }
+hyperforge_passthrough = { workspace = true }
+hyperforge_related = { workspace = true }
+hyperforge_remi = { workspace = true }
+hyperforge_restart = { workspace = true }
+hyperforge_restricted = { workspace = true }
+hyperforge_smart = { workspace = true }
+hyperforge_static_string = { workspace = true }
+
+[dependency-groups]
+dev = [
+    # Linting
+    "mypy-protobuf>=3.6.0",
+    "mypy",
+    "pre-commit",
+    "ruff",
+    # Testing
+    "aioresponses",
+    "faker>=25.1.0",
+    "jsonschema",
+    "pdbpp>=0.10.3",
+    "pytest-asyncio>=0.23.0",
+    "pytest-benchmark",
+    "pytest-cov",
+    "pytest-docker-fixtures[pg]>=1.4.2",
+    "pytest-lazy-fixtures",
+    "pytest-mock",
+    "pytest-rerunfailures>=11.1.2",
+    "pytest-shard",
+    "pytest-xdist>=3.6.1",
+    "pytest-recording",
+    "pytest>=8.2.2",
+    "requests",
+    "requests-mock>=1.12.1",
+    "types-PyYAML>=6.0.12.20240808",
+    "ty>=0.0.34",
+]

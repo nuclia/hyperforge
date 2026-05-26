@@ -1,0 +1,66 @@
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+[lint]
+ignore = ["E302", "W292", "W391", "E722", "E501", "E203", "E203", "E741", "E712"]
+select = [
+    "I", "E", "F", "W",
+    "B003", # flake8-bugbear relevant warnings
+    "B004",
+    "B013", "B014",
+    "B015", "B016",
+    "B017", 
+    "B018",
+    "B020",
+    "B021",
+    "B025",
+    "B026",
+    "B035",
+    "B027",
+    "FAST",         # FastAPI rules
+    "ASYNC210",     # Async functions should not call blocking HTTP methods	
+    "ASYNC220",     # Async functions should not create subprocesses with blocking methods
+    "ASYNC221",     # Async functions should not run processes with blocking methods
+    "ASYNC222",     # Async functions should not wait on processes with blocking methods
+    "ASYNC230", 	# Async functions should not open files with blocking methods like open
+    "ASYNC251",     # Async functions should not call time.sleep,
+    "SIM102",       # Use a single if statement instead of nested if statements
+    "SIM101",       # Multiple isinstance calls for {name}, merge into a single call
+    "SIM103",       # Return the condition {condition} directly
+    "SIM113",       # Use enumerate() for index variable {index} in for loop
+    "SIM114",       # Combine if branches using logical or operator
+    "SIM117",       # Use a single with statement with multiple contexts instead of nested with statements
+    "SIM220", "SIM221", "SIM222", "SIM223", # Simplify boolean conditions
+    "SIM401",       # Checks for if statements that can be replaced with dict.get calls.
+    "SIM911",       # Checks for use of zip() to iterate over keys and values of a dictionary at once.
+    "RUF100",       # Unused noqa directive
+    "TRY401",       # Redundant exception object included in logging.exception call	
+    "T100",         # Breakpoints
+    "RUF012",       # Mutable class attributes should be annotated with ClassVar or initialized in __init__
+] 

@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools >= 64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+
+name = "nucliadb_agentic_api"
+version = "1.0.0"
+authors = [{ name = "AI Data Team", email = "learning@nuclia.com" }]
+description = "NucliaDB Agentic API for Hyperforge"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+license = "Apache-2.0"
+dependencies = [
+    "pydantic",
+    "nuclia>=4.9.25",
+    "nuclia-models>=0.52.1",
+    "nucliadb-models>=6.13.0.post6252",
+    "nucliadb-sdk>=6.13.0.post6252",
+    "nucliadb-telemetry",
+    "hyperforge",
+    "pydantic_settings",
+    "mcp>=1.26.0",
+    "prometheus_client",
+    "mrflagly>=0.2.11",
+    "aiodns",
+    "httpx",
+    "jinja2",
+    "databases[asyncpg]",
+    "sqlalchemy",
+    "cryptography",
+    "mmh3",
+    "psycopg2",
+    "tenacity",
+    "websockets",
+    "redis[hiredis]>=6.4.0",
+    "types-redis>=4.6.0.20241004",
+    "ruff>=0.15.10",
+]
+
+
+[tool.setuptools.packages.find]
+where = ["src/"]
+
+
+[project.urls]
+"Progress" = "https://progress.com"
+"Github" = "https://github.com/nuclia/forge"
+"API Reference" = "https://docs.rag.progress.cloud"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+
+[project.scripts]
+nucliadb-agentic-api = "nucliadb_agentic_api:run.run"
+hyperforge-extract-openapi = "hyperforge.nucliadb_agentic_api.commands:extract_openapi"

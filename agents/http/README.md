@@ -1,0 +1,1 @@
+# HTTP Static Hyperforge agents
