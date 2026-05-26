@@ -1,0 +1,36 @@
+name: Static String Agents Tests
+
+on:
+    push:
+        branches:
+            - main
+            - dev
+        paths:
+            - "agents/static_string/**"
+            - "hyperforge.mk"
+            - ".github/workflows/hyperforge_static_string_workflow.yaml"
+            - ".github/workflows/hyperforge_agent_package_workflow.yaml"
+    pull_request:
+        branches:
+            - main
+            - dev
+        paths:
+            - "agents/static_string/**"
+            - "hyperforge.mk"
+            - ".github/workflows/hyperforge_static_string_workflow.yaml"
+            - ".github/workflows/hyperforge_agent_package_workflow.yaml"
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
+jobs:
+    package:
+        uses: ./.github/workflows/hyperforge_agent_package_workflow.yaml
+        with:
+            package: agents/static_string
+        secrets:
+            PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
