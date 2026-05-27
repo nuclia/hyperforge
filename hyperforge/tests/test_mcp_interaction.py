@@ -108,9 +108,9 @@ CONFIG: dict[str, Any] = {
             ],
             "context": [
                 {
-                    "module": "google",
+                    "module": "static",
                     "title": "Google Agent",
-                    "source": "google-01",
+                    "context": "google-01",
                 }
             ],
             "generation": [
@@ -137,10 +137,10 @@ CONFIG: dict[str, Any] = {
             ),
             "context": [
                 {
-                    "module": "sql",
+                    "module": "static",
                     "title": "",
                     "description": "Database about history shopping",
-                    "source": "sql-01",
+                    "context": "sql-01",
                 }
             ],
             "generation": [

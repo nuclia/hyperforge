@@ -2,7 +2,7 @@ import asyncio
 import os
 from asyncio import Task
 from functools import partial
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union
 
 if TYPE_CHECKING:
     from hyperforge.standalone.agent import StaticAgentManager
@@ -64,6 +64,7 @@ def tracer():
 class SessionManager:
     server: Optional[Server] = None
     tasks: List[Task]
+    hooks: Optional[Dict[str, List[Callable]]] = None
 
     def __init__(
         self,
@@ -401,9 +402,20 @@ class SessionManager:
 
         try:
             await question_memory.save()
-            if self.audit is not None:
-                self.audit.interaction(account_id, question_memory)
+            self.process_event(
+                "memory_saved",
+                {"account_id": account_id, "question_memory": question_memory},
+            )
         except Exception as e:
             # Log memory errors but don't report them to the user
             logger.exception("Error saving memory")
             errors.capture_exception(e)
+
+    def process_event(self, event_name: str, data: dict):
+        if self.hooks is not None and event_name in self.hooks:
+            for hook in self.hooks[event_name]:
+                try:
+                    hook(**data)
+                except Exception as e:
+                    logger.exception("Error in hook for event %s", event_name)
+                    errors.capture_exception(e)
