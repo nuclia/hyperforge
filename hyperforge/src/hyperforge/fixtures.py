@@ -21,9 +21,16 @@ from nuclia.sdk import NucliaPredict
 from nucliadb_models.resource import KnowledgeBoxObj
 from nucliadb_sdk import NucliaDB, NucliaDBAsync
 from nucliadb_sdk.tests.fixtures import NucliaFixture
-from pytest_docker_fixtures import images  # type: ignore
+from pytest_docker_fixtures import images  # type: ignore  # type: ignore
+from pytest_docker_fixtures.containers.pg import pg_image  # type: ignore
 from pytest_docker_fixtures.containers.valkey import valkey_image  # type: ignore
 from redis.asyncio import Redis
+from sqlalchemy import create_engine
+from sqlalchemy_utils import (  # type: ignore
+    create_database,
+    database_exists,
+    drop_database,
+)
 
 from hyperforge.api.app import HTTPApplication
 from hyperforge.api.settings import Settings
@@ -36,20 +43,8 @@ from hyperforge.server.session import SessionManager
 from hyperforge.server.settings import Settings as ServerSettings
 from hyperforge.utils.http import SafeTransport
 
-
-from sqlalchemy import create_engine
-from sqlalchemy_utils import (  # type: ignore
-    create_database,
-    database_exists,
-    drop_database,
-)
-
-from pytest_docker_fixtures.containers.pg import pg_image  # type: ignore
-from pytest_docker_fixtures import images  # type: ignore
-
-
 _dir = pathlib.Path(__file__).parent.absolute()
-_package_path = _dir.parent.absolute()
+_package_path = _dir.parent.parent.absolute()
 
 NUA = os.environ.get("NUA_KEY", "DUMMY")
 
@@ -219,6 +214,13 @@ def pg_dsn(pg):
     yield dsn
 
 
+@pytest.fixture(scope="function")
+def test_db(pg_dsn):
+    engine = create_engine(pg_dsn)
+    with engine.connect() as conn:
+        yield conn
+
+
 @pytest.fixture
 async def data_manager_settings(pg_dsn):
     yield DataManagerSettings(postgresql_dsn=pg_dsn)
@@ -242,9 +244,7 @@ async def arag_api_app(
 
 
 @pytest.fixture
-async def arag_api(
-    arag_api_app: HTTPApplication,
-):
+async def arag_api(arag_api_app: HTTPApplication, load_agents):
     yield AsyncClient(transport=ASGITransport(app=arag_api_app), base_url="http://test")
 
 
@@ -378,9 +378,16 @@ async def arag_kb_legacy(create_arag_kb, delete_arag_kb, arag_api_app):
 
 
 @pytest.fixture
+async def agent_db(data_manager_settings: DataManagerSettings):
+    agent_manager = await AgentManager.from_settings(settings=data_manager_settings)
+    await agent_manager.initialize()
+    return agent_manager
+
+
+@pytest.fixture
 async def arag_server(
     sdk: NucliaDB,
-    data_manager_settings: DataManagerSettings,
+    agent_db: AgentManager,
     valkey,
 ):
     valkey_host, valkey_port = valkey
@@ -394,8 +401,6 @@ async def arag_server(
         local_openai=None,
         external_nua_api_key=NUA,
     )
-    agent_manager = await AgentManager.from_settings(settings=data_manager_settings)
-    await agent_manager.initialize()
     broker = RedisBroker.from_url(
         url=valkey_url,
         activate_subject=settings.activate_subject,
@@ -405,7 +410,7 @@ async def arag_server(
     session = SessionManager(
         settings=settings,
         broker=broker,
-        agent_manager=agent_manager,
+        agent_manager=agent_db,
         cache=ValkeyCache(
             Redis(host=valkey_host, port=valkey_port, decode_responses=True)
         ),
@@ -559,3 +564,62 @@ def suppress_test_noise() -> None:
     hyperforge_logger = logging.getLogger("hyperforge.memory")
     hyperforge_logger.setLevel(logging.DEBUG)
     hyperforge_logger.propagate = True  # Ensures it bubbles up to root_logger
+
+
+@pytest.fixture
+def delete_arag_kb(
+    sdk: NucliaDB,
+    agent_db: AgentManager,
+    arag_api,
+):
+    async def _delete_arag_kb(kbid: str, account: str) -> None:
+        sdk.delete_knowledge_box(kbid=kbid)
+        await agent_db.delete_agent(
+            account=account,
+            agent_id=kbid,
+        )
+
+    return _delete_arag_kb
+
+
+@pytest.fixture
+def create_arag_kb(
+    sdk: NucliaDB,
+    agent_db: AgentManager,
+    arag_api,
+):
+    async def _create_arag_kb(slug: str, account: str) -> KnowledgeBoxObj:
+        kb: KnowledgeBoxObj = sdk.create_knowledge_box(slug=slug)
+        await agent_db.add_agent(
+            account=account,
+            agent_id=kb.uuid,
+            rules=Rules(rules=[]),
+            memory=MemoryConfig(
+                nucliadb=NucliaDBMemoryConfig(
+                    url=sdk.base_url, kbid=kb.uuid, internal=True
+                )
+            ),
+        )
+
+        return kb
+
+    return _create_arag_kb
+
+
+@pytest.fixture
+def load_agents():
+    from hyperforge.configure import load_all_configurations, scan
+
+    for module in [
+        "hyperforge_external",
+        "hyperforge_conditional",
+        "hyperforge_nucliadb",
+        "hyperforge_smart",
+        "hyperforge_remi",
+        "hyperforge_restricted",
+        "hyperforge_summarize",
+        "hyperforge_static",
+        "hyperforge_rephrase",
+    ]:
+        scan(module)
+        load_all_configurations(module)

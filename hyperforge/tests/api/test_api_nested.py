@@ -16,9 +16,9 @@ async def test_arag_nested_context(arag_kb: KnowledgeBoxObj, arag_api: AsyncClie
             "prompt": "If the question is about Robin Hobb",
             "then": [
                 {
-                    "module": "sql",
+                    "module": "static",
                     "description": "Check Robin Hobb books in the DB",
-                    "source": "bf34f9e8-a320-4baa-8bdb-b79147a0fc1c",
+                    "context": "bf34f9e8-a320-4baa-8bdb-b79147a0fc1c",
                     "retries": 3,
                 }
             ],
@@ -45,4 +45,6 @@ async def test_arag_nested_context(arag_kb: KnowledgeBoxObj, arag_api: AsyncClie
     assert resp.status_code == 200
 
     assert len(resp.json()[0]["then"]) == 1
-    assert resp.json()[0]["then"][0]["source"] == "bf34f9e8-a320-4baa-8bdb-b79147a0fc1c"
+    assert (
+        resp.json()[0]["then"][0]["context"] == "bf34f9e8-a320-4baa-8bdb-b79147a0fc1c"
+    )

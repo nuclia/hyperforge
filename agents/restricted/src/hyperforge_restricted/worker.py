@@ -13,7 +13,7 @@ from RestrictedPython.Guards import (  # type: ignore
     safe_builtins,  # type: ignore
 )
 
-from agents.restricted.src.hyperforge_restricted.model import RestrictedPythonTask
+from hyperforge_restricted.model import RestrictedPythonTask
 
 EXAMPLES = {
     "discourse": """

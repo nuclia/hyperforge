@@ -8,36 +8,34 @@ from dataclasses import dataclass, field
 from time import time
 from typing import Any, Dict, List, Optional, cast
 
-from agents.conditional.src.hyperforge_conditional.config import (
-    ContextConditionalAgentConfig,
-)
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.context.agent import ContextAgent, build_context_agent
+from hyperforge.db.agents import SERVICE_NAME
 from hyperforge.definition import FunctionDefinition
 from hyperforge.interaction import Feedback
 from hyperforge.manager import Manager
 from hyperforge.memory import Context, QuestionMemory
-from hyperforge_database.agents import SERVICE_NAME
-from nuclia_agents import logger
+from hyperforge_conditional.context_agent import (
+    ContextConditional,
+    ContextConditionalAgentConfig,
+)
+from hyperforge_rephrase.agent import RephraseAgent
+from hyperforge_rephrase.config import RephraseAgentConfig
 from nuclia_models.predict.remi import RemiResponse
 from nucliadb_telemetry.utils import get_telemetry
 from opentelemetry import trace
 from RestrictedPython.Guards import safe_builtins  # type: ignore
 
-from agents.conditional.src.hyperforge_conditional.context_agent import (
-    ContextConditional,
-)
-from agents.rephrase.src.hyperforge_rephrase.agent import RephraseAgent
-from agents.rephrase.src.hyperforge_rephrase.config import RephraseAgentConfig
-from agents.restricted.src.hyperforge_restricted.config import PythonAgentConfig
-from agents.restricted.src.hyperforge_restricted.decision import (
+from hyperforge import logger
+from hyperforge_restricted.config import PythonAgentConfig
+from hyperforge_restricted.decision import (
     CHOOSE_AGENT_TEMPLATE,
     CHOOSE_SCHEMA,
     EXTRACT_AGENT_TEMPLATE,
     TRANSFORM_REPHRASE,
 )
-from agents.restricted.src.hyperforge_restricted.model import (
+from hyperforge_restricted.model import (
     RestrictedPythonTask,
     WorkerExecutionRequest,
     WorkerTypes,

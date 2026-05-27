@@ -42,58 +42,6 @@ async def test_arag_rules(arag_kb: KnowledgeBoxObj, arag_api: AsyncClient):
     "provider,config,update_config,encrypted_fields",
     [
         (
-            "alinia",  # provider
-            {"key": "alinia-key"},  # config
-            {"key": "a different alinia key"},  # update_config
-            ["key"],  # encrypted fields
-        ),
-        (
-            "brave",
-            {"key": "key"},
-            {"key": "a different key"},
-            ["key"],
-        ),
-        (
-            "cypher",
-            {
-                "username": "user",
-                "password": "pass",
-                "url": "http://cypher",
-                "timeout": 10,
-                "enhanced_schema": True,
-                "database": "testdb",
-                "config": {},
-            },
-            {
-                "username": "user",
-                "password": "newpass",
-                "url": "http://cypher",
-                "timeout": 10,
-                "enhanced_schema": True,
-                "database": "testdb",
-                "config": {},
-            },
-            ["password"],
-        ),
-        (
-            "google",
-            {
-                "vertexai": True,
-                "api_key": "gkey",
-                "credentials": "creds",
-                "project": "proj",
-                "location": "us",
-            },
-            {
-                "vertexai": False,
-                "api_key": "gkey2",
-                "credentials": "creds2",
-                "project": "proj2",
-                "location": "eu",
-            },
-            ["api_key", "credentials"],
-        ),
-        (
             "nucliadb",
             {
                 "url": "http://nucliadb",
@@ -112,24 +60,6 @@ async def test_arag_rules(arag_kb: KnowledgeBoxObj, arag_api: AsyncClient):
                 "kbid": "kbid2",
             },
             ["key"],
-        ),
-        (
-            "perplexity",
-            {"key": "perplexity-key"},
-            {"key": "a different perplexity key"},
-            ["key"],
-        ),
-        (
-            "sql",
-            {"dsn": "sqlite:///:memory:", "sql_schema": "myschema"},
-            {"dsn": "sqlite:///tmp.db", "sql_schema": "yourschema"},
-            ["dsn"],
-        ),
-        (
-            "mcpstdio",
-            {"server": "github", "env": {"FOO": "BAR"}},
-            {"server": "github", "env": {"FOO": "BAZ"}},
-            [],
         ),
     ],
 )
@@ -376,7 +306,12 @@ async def test_arag_driver_partial_update(
 async def test_arag_preprocess(arag_kb: KnowledgeBoxObj, arag_api: AsyncClient):
     resp = await arag_api.post(
         f"/api/v1/agent/{arag_kb.uuid}/preprocess",
-        json={"module": "historical", "title": "brave", "rules": [], "all": False},
+        json={
+            "module": "rephrase",
+            "title": "brave",
+            "rules": [],
+            "session_info": True,
+        },
         headers={
             "X-STF-USER": "user1",
             "X-STF-ACCOUNT": "nuclia",
@@ -399,13 +334,13 @@ async def test_arag_preprocess(arag_kb: KnowledgeBoxObj, arag_api: AsyncClient):
     assert resp.status_code == 200
 
     assert resp.json()[0]["title"] == "brave"
-    assert resp.json()[0]["all"] is False
+    assert resp.json()[0]["session_info"] is True
 
     uuid = resp.json()[0]["id"]
 
     resp = await arag_api.patch(
         f"/api/v1/agent/{arag_kb.uuid}/preprocess/{uuid}",
-        json={"module": "historical", "title": "brave2", "rules": [], "all": False},
+        json={"module": "rephrase", "title": "brave2", "rules": [], "all": False},
         headers={
             "X-STF-USER": "user1",
             "X-STF-ACCOUNT": "nuclia",

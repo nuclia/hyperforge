@@ -12,15 +12,15 @@ import nucliadb_telemetry.metrics
 import prometheus_client
 from pydantic_settings import BaseSettings
 
-from agents.restricted.src.hyperforge_restricted.model import (
+from hyperforge_restricted.model import (
     RestrictedPythonTask,
     SandboxMessage,
     WorkerExecutionRequest,
     WorkerTypes,
 )
-from agents.restricted.src.hyperforge_restricted.worker import PythonAgentWorker
+from hyperforge_restricted.worker import PythonAgentWorker
 
-logger = logging.getLogger("arag_sandbox")
+logger = logging.getLogger("hyperforge_restricted_sandbox")
 
 # Maximum time in seconds that the worker can execute CPU bound work. This is reset every time the worker
 # calls any RAO function (another agent, LLM questions, etc.). It should be kept really low to avoid

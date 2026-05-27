@@ -95,7 +95,7 @@ dev = [
     "pytest-shard",
     "pytest-xdist>=3.6.1",
     "pytest-recording",
-    "pytest>=8.2.2",
+    "pytest>=8.2.2,<9",
     "requests",
     "requests-mock>=1.12.1",
     "types-PyYAML>=6.0.12.20240808",

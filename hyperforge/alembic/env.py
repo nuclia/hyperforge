@@ -1,11 +1,10 @@
 import os
 from logging.config import fileConfig
 
-import hyperforge.downloads.manager  # noqa
-import hyperforge_database.agents  # noqa
+import hyperforge.db.agents  # noqa
 from alembic import context
 from hyperforge.database import metadata
-from hyperforge_database.settings import DataManagerSettings
+from hyperforge.db.settings import DataManagerSettings
 from sqlalchemy import engine_from_config, pool
 
 # this is the Alembic Config object, which provides
