@@ -620,6 +620,7 @@ def load_agents():
         "hyperforge_summarize",
         "hyperforge_static",
         "hyperforge_rephrase",
+        "hyperforge_mcp",
     ]:
         scan(module)
         load_all_configurations(module)

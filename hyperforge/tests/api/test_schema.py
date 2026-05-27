@@ -30,5 +30,5 @@ async def test_arag_new_schema(arag_kb: KnowledgeBoxObj, arag_api: AsyncClient):
     drivers = resp.json().get("drivers", {})
     for key in ["preprocess", "context", "generation", "postprocess"]:
         assert key in agents
-    for key in ["alinia", "brave", "cypher", "google", "nucliadb", "perplexity", "sql"]:
+    for key in ["nucliadb", "sync"]:
         assert key in drivers

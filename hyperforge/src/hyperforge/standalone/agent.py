@@ -11,10 +11,10 @@ agent configuration.
 import datetime
 from typing import Any, List
 
-from hyperforge_database import exceptions
-from hyperforge_standalone.config import StandAloneAgentConfig
+from hyperforge.db import exceptions
+from hyperforge.standalone.config import StandAloneAgentConfig
 
-from hyperforge.memory import MemoryConfig, Rules
+from hyperforge.models import MemoryConfig, Rules
 from hyperforge.prompts import PromptConfig
 from hyperforge.retrieval.config import RetrievalAgentConfig
 from hyperforge.workflows import RetrievalAgent, WorkflowData
