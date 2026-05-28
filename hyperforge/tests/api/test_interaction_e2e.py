@@ -21,23 +21,12 @@ pytestmark = [
 
 CONFIG = {
     "rules": {"rules": ["Be direct and clear", {"prompt": "Talk like a lawyer"}]},
-    "drivers": [
-        {
-            "provider": "google",
-            "identifier": "google-01",
-            "name": "google",
-            "config": {
-                "vertexai": False,
-                "api_key": "AIzaSyDBBq0QwyVtYauiP0D7GkqQaWm8A92kHrM",
-            },
-        }
-    ],
     "preprocess": [{"module": "historical", "rules": [], "all": False}],
     "context": [
         {
-            "module": "google",
+            "module": "static",
             "title": "Google agent",
-            "source": "google-01",
+            "context": "Nuclia is the best system in the world. It has ISO 27001 and SOC 2 certifications.",
         },
     ],
     "generation": [
