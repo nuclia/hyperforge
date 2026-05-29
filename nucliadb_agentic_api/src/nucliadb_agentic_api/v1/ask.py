@@ -2,6 +2,7 @@ import json
 from uuid import UUID
 
 from fastapi import Header, Request, Response
+from nucliadb_agentic_api.app import HTTPApplication
 from nucliadb_models.configuration import AskConfig
 from nucliadb_models.resource import NucliaDBRoles
 from nucliadb_models.search import (
@@ -44,6 +45,7 @@ async def ask_knowledgebox_endpoint(
     request: Request,
     kbid: str,
     item: AskRequest,
+    x_nucliadb_account: str = Header(default="", include_in_schema=False),
     x_ndb_client: NucliaDBClientType = Header(NucliaDBClientType.API),
     x_show_consumption: bool = Header(default=False),
     x_nucliadb_user: str = Header(""),
@@ -86,6 +88,13 @@ async def ask_knowledgebox_endpoint(
         except ValidationError as e:
             detail = json.loads(e.json())
             return HTTPClientError(status_code=422, detail=detail)
+
+    if item.agentic_config_id is not None:
+        app: HTTPApplication = request.app
+        config = await app.agent_manager.get_agentic_config(
+            account=x_nucliadb_account, kbid=kbid, agentic_id=item.agentic_config_id
+        )  # raises if not found
+        config.config
 
     return await create_ask_response(
         kbid=kbid,

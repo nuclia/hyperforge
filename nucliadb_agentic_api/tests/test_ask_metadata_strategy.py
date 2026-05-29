@@ -7,9 +7,9 @@ from nucliadb_protos import resources_pb2
 from nucliadb_protos.writer_pb2 import BrokerMessage
 from nucliadb_protos.writer_pb2_grpc import WriterStub
 
-from nucliadb_agentic_api.tests.utils import inject_message
-from nucliadb_agentic_api.tests.utils.broker_messages import BrokerMessageBuilder
-from nucliadb_agentic_api.tests.utils.dirty_index import wait_for_sync
+from .utils import inject_message
+from .utils.broker_messages import BrokerMessageBuilder
+from .utils.dirty_index import wait_for_sync
 
 
 async def test_ask_rag_strategy_metadata_extension(

@@ -1,24 +1,25 @@
+import os
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from hyperforge.configure import get_driver_config_instance
 from hyperforge.llm import NUAConnection
 from hyperforge.manager import Manager
-from hyperforge.memory import Rule, Rules
 from hyperforge.memory.memory import EphemeralSessionMemory, MemoryConfig
+from hyperforge.models import Rule, Rules
+from hyperforge_mcp.agent import MCPAgent
+from hyperforge_mcp.config import MCPAgentConfig, Transport
 from mcp.server.fastmcp.exceptions import ResourceError
 from mcp.types import TextContent
 from nuclia import REGIONAL
-from nucliadb_sdk.v2.exceptions import NotFoundError, RateLimitError
-from nucliadb_utils.settings import nuclia_settings
-
-from agents.mcp.src.hyperforge_mcp.agent import MCPAgent
-from agents.mcp.src.hyperforge_mcp.config import MCPAgentConfig, Transport
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.predict import (
+from nucliadb_agentic_api.ask.predict import (
     start_predict_engine,
     stop_predict_engine,
 )
-from tests.arag import NUA_KEY
+from nucliadb_sdk.v2.exceptions import NotFoundError, RateLimitError
+from nucliadb_utils.settings import nuclia_settings
+
+NUA_KEY = os.environ.get("NUA_KEY", "DUMMY")
 
 pytestmark = [
     pytest.mark.vcr(

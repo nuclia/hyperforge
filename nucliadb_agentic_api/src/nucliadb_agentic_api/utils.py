@@ -1,14 +1,9 @@
 from __future__ import annotations
 
 import inspect
-from functools import wraps
-from typing import Any, Callable, List, TypeVar
+from typing import Any, List, TypeVar
 
 import pydantic
-from fastapi import HTTPException
-from hyperforge_database import exceptions
-from hyperforge_database.agents import AgentManager
-from starlette.requests import Request
 from typing_extensions import TypeGuard
 
 _T = TypeVar("_T")
@@ -201,33 +196,6 @@ def is_dict(obj: object) -> TypeGuard[dict[str, object]]:
     return isinstance(obj, dict)
 
 
-async def agent_has_nucliadb_memory(
-    agent_manager: AgentManager,
-    account: str,
-    agent_id: str,
-    workflow_id: str = "default",
-) -> bool:
-    """Check if an agent has NucliaDB memory configured.
-
-    Args:
-        agent_manager: The agent manager instance
-        account: The account ID
-        agent_id: The agent ID
-        workflow_id: The workflow ID (default: "default")
-    Returns:
-        True if the agent has NucliaDB memory configured, False otherwise
-    """
-    # XXX: add a placeholder internal_nucliadb_url to populate legacy null memory values
-    # we don't care about the actual URL here
-    agent = await agent_manager.get_agent_config(
-        account=account,
-        agent_id=agent_id,
-        internal_nucliadb_url="fake",
-        workflow_id=workflow_id,
-    )
-    return agent.memory.nucliadb is not None
-
-
 async def clean_up_items(items: dict[str, Any], filtered: list[str]) -> dict[str, Any]:
     """Cleans up the items section of the schema by removing filtered agents and drivers from the references."""
     if "discriminator" in items and "mapping" in items["discriminator"]:
@@ -314,40 +282,3 @@ async def cleanup_definitions(
         definitions[item] = item_schema
 
     return definitions
-
-
-def requires_nucliadb_memory(func: Callable) -> Callable:
-    """Decorator to ensure the agent has NucliaDB memory configured."""
-
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        # Extract required parameters from kwargs
-        request: Request = kwargs.get("request")
-        agent_id: str = kwargs.get("agent_id")
-        workflow_id: str = kwargs.get("workflow_id", "default")
-        x_stf_account: str = kwargs.get("x_stf_account")
-
-        if not request or not agent_id or not x_stf_account:
-            raise HTTPException(
-                status_code=500,
-                detail="Missing required parameters for memory check",
-            )
-
-        agent_manager: AgentManager = request.app.agent_manager
-        try:
-            if not await agent_has_nucliadb_memory(
-                agent_manager, x_stf_account, agent_id, workflow_id
-            ):
-                raise HTTPException(
-                    status_code=400,
-                    detail="Sessions are currently only supported for Retrieval Agents Orchestrators with a Memory Knowledge Box associated",
-                )
-        except exceptions.NotFoundError:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Agent '{agent_id}' or Workflow '{workflow_id}' not found for account '{x_stf_account}'",
-            )
-
-        return await func(*args, **kwargs)
-
-    return wrapper

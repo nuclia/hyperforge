@@ -4,7 +4,7 @@ requires-python = ">=3.10"
 version = "1.0.0"
 dependencies = [
     "hyperforge",
-    "nucliadb-agentic-api",
+    "nucliadb_agentic_api",
     "hyperforge_nucliadb",
     "hyperforge_rephrase",
     "hyperforge_summarize",
@@ -54,7 +54,7 @@ managed = true
 
 
 [tool.uv.sources]
-nucliadb-agentic-api = { workspace = true }
+nucliadb_agentic_api = { workspace = true }
 hyperforge = { workspace = true }
 hyperforge_nucliadb = { workspace = true }
 hyperforge_rephrase = { workspace = true }

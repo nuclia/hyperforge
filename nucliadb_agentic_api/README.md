@@ -43,5 +43,93 @@ Pydantic settings. Common settings include:
 Run the package tests from the workspace root:
 
 ```bash
-uv run pytest nucliadb_agentic_api
+make test
 ```
+
+
+# Objective
+Enhance the RAG experience by offering RAO features directly in a KB.
+
+# How?
+The same way we store search configs in the KB, we could store agentic configs, and when calling the `/ask` endpoint we can refer to a given agentic config.
+
+# Scope
+
+The corresponding RAO workflow will be:
+- a Rephrase (optionally)
+- a SmartAgent
+- a Summarize
+
+Possible sources for the SmartAgent:
+- The current KB (possibly several times with different filters)
+- Sync service (using connections defined in the current KB)
+- Google
+- Perplexity
+- MCP
+
+Out of scope
+- Other KBs
+- SQL
+- Snowflake (?)
+- Sitefinity (?)
+
+# Config spec
+
+```json
+{
+  "rephrase": { // optional
+    "ask_to": <filter_expression>, //optional
+    "prompt": <string>, // optional
+    "model": <model>, // optional
+  },
+  "smart_agent": {
+    "mode": <reactive | plan_execute>,
+    "extra_prompt": <string>, // optional
+    "models": { // optional
+      "context_validation": <model>, // optional
+      "planner": <model>, // optional
+      "executor": <model>, // optional
+    },
+    "sources": [<source list>]
+  },
+  "summarize": { // optional
+    "user_prompt": <string>, // optional
+    "system_prompt": <string>, // optional
+    "conversational": <boolean>,
+    "model": <model>, // optional
+    // and citations must be forced to chunk-level
+  }
+}
+```
+
+And sources can be:
+
+```json
+{
+  "type": "nucliadb",
+  "description": <string>,
+  "filter_expression": <filter_expression>, //optional
+}
+
+{
+  "type": "sync",
+  "description": <string>,
+  "connection": <connection_id>
+}
+
+{
+  "type": "google",
+  "description": <string>
+}
+
+{
+  "type": "perplexity",
+  "description": <string>
+}
+
+{
+  "type": "mcp",
+  "description": <string>,
+  <...the MCP driver params>
+}
+````

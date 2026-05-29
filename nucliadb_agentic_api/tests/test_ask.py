@@ -12,6 +12,10 @@ from nuclia_models.predict.generative_responses import (
     JSONGenerativeResponse,
     StatusGenerativeResponse,
 )
+from nucliadb_agentic_api.ask.predict import (
+    AnswerStatusCode,
+    get_predict,
+)
 from nucliadb_models.search import (
     AskRequest,
     AskResponseItem,
@@ -32,15 +36,11 @@ from nucliadb_protos import resources_pb2 as rpb2
 from nucliadb_protos import writer_pb2 as wpb2
 from nucliadb_protos.writer_pb2_grpc import WriterStub
 
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.predict import (
-    AnswerStatusCode,
-    get_predict,
-)
-from nucliadb_agentic_api.tests.fixtures.predict import DummyPredictEngine
-from nucliadb_agentic_api.tests.fixtures.resources import cookie_tale_resource
-from nucliadb_agentic_api.tests.utils import inject_message
-from nucliadb_agentic_api.tests.utils.broker_messages import BrokerMessageBuilder
-from nucliadb_agentic_api.tests.utils.dirty_index import mark_dirty, wait_for_sync
+from .fixtures.predict import DummyPredictEngine
+from .fixtures.resources import cookie_tale_resource
+from .utils import inject_message
+from .utils.broker_messages import BrokerMessageBuilder
+from .utils.dirty_index import mark_dirty, wait_for_sync
 
 
 async def test_ask(

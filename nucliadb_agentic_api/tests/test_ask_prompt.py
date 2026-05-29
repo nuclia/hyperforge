@@ -5,6 +5,12 @@ from uuid import uuid4
 
 import pytest
 from httpx import AsyncClient
+from nucliadb_agentic_api.ask.search import (
+    prompt as chat_prompt,
+)
+from nucliadb_agentic_api.ask.search import rpc
+from nucliadb_agentic_api.ask.search.metrics import Metrics
+from nucliadb_agentic_api.ask.utils.ids import ParagraphId
 from nucliadb_models.augment import AugmentedParagraph, AugmentRequest, AugmentResponse
 from nucliadb_models.search import (
     SCORE_TYPE,
@@ -21,13 +27,6 @@ from nucliadb_models.search import (
     TableImageStrategy,
 )
 from nucliadb_protos import resources_pb2 as rpb2
-
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search import (
-    prompt as chat_prompt,
-)
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search import rpc
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.metrics import Metrics
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.utils.ids import ParagraphId
 
 
 @pytest.fixture()

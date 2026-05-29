@@ -7,18 +7,18 @@ from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 from hyperforge.api.app import HTTPApplication
 from hyperforge.api.settings import Settings
-from hyperforge_database.settings import DataManagerSettings
+from nucliadb_agentic_api.ask.audit import StreamAuditStorage
+from nucliadb_agentic_api.ask.search.rpc import __SDK
+from nucliadb_agentic_api.ask.settings import (
+    settings as ask_settings,
+)
+from nucliadb_agentic_api.db.settings import DataManagerSettings
 from nucliadb_models.resource import NucliaDBRoles
 from nucliadb_sdk.tests.fixtures import NucliaFixture
 from nucliadb_utils.settings import nuclia_settings
 from nucliadb_utils.storages.storage import Storage
 
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.audit import StreamAuditStorage
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.rpc import __SDK
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.settings import (
-    settings as ask_settings,
-)
-from nucliadb_agentic_api.tests.fixtures.predict import DummyPredictEngine
+from .predict import DummyPredictEngine
 
 # Main fixture
 

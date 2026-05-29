@@ -26,11 +26,10 @@ from httpx import AsyncClient
 from hyperforge.feature_flag import get_flag_service
 from nats.aio.client import Client
 from nats.js import JetStreamContext
+from nucliadb_agentic_api.ask.audit import StreamAuditStorage
 from nucliadb_models.search import AskRequest
 from nucliadb_protos.audit_pb2 import AuditRequest
 from nucliadb_utils.settings import audit_settings
-
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.audit import StreamAuditStorage
 
 
 async def get_audit_messages(sub):

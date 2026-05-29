@@ -1,8 +1,9 @@
 from enum import Enum
 from typing import Any, Dict, List, Literal, Optional
+from hyperforge.models import MemoryConfig, Rules
+from typing_extensions import Annotated
 
 from hyperforge.driver import DriverConfig
-from hyperforge.memory import Rules
 from nucliadb_models import TextFormat
 from pydantic import BaseModel, Field
 
@@ -126,3 +127,88 @@ class InteractionRequest(BaseModel):
     arguments: Dict[str, str] = {}
     operation: InteractionOperation = InteractionOperation.QUESTION
     streaming: bool = False
+
+
+class AgenticRephraseConfiguration(BaseModel):
+    ask_to: Optional[str] = None
+    prompt: Optional[str] = None
+    model: Optional[str] = None
+
+
+class AgenticSmartAgentMode(str, Enum):
+    REACTIVE = "reactive"
+    PLAN_EXECUTE = "plan_execute"
+
+
+class AgenticSmartAgentModels(BaseModel):
+    context_validation: Optional[str] = None
+    planner: Optional[str] = None
+    executor: Optional[str] = None
+
+
+class NucliaDBAgenticSource(BaseModel):
+    type: Literal["nucliadb"] = "nucliadb"
+    description: Optional[str] = None
+    filter_expression: Optional[str] = None
+    connection: Optional[str] = None
+    params: Optional[Dict[str, Any]] = None
+
+
+class GoogleAgenticSource(BaseModel):
+    type: Literal["google"] = "google"
+    description: Optional[str] = None
+    params: Optional[Dict[str, Any]] = None
+
+
+class PerplexityAgenticSource(BaseModel):
+    type: Literal["perplexity"] = "perplexity"
+    description: Optional[str] = None
+    params: Optional[Dict[str, Any]] = None
+
+
+class MCPAgenticSource(BaseModel):
+    type: Literal["mcp"] = "mcp"
+    description: Optional[str] = None
+    params: Optional[Dict[str, Any]] = None
+
+
+class SyncAgenticSource(BaseModel):
+    type: Literal["sync"] = "sync"
+    description: Optional[str] = None
+    connection: Optional[str] = None
+    params: Optional[Dict[str, Any]] = None
+
+
+AgenticSource = Annotated[
+    NucliaDBAgenticSource
+    | GoogleAgenticSource
+    | PerplexityAgenticSource
+    | MCPAgenticSource
+    | SyncAgenticSource,
+    Field(discriminator="type"),
+]
+
+
+class AgenticSmartAgentConfiguration(BaseModel):
+    mode: AgenticSmartAgentMode = AgenticSmartAgentMode.REACTIVE
+    extra_prompt: Optional[str] = None
+    models: Optional[AgenticSmartAgentModels] = None
+    sources: List[AgenticSource] = Field(default_factory=list)
+
+
+class AgenticSummarizeConfiguration(BaseModel):
+    user_prompt: Optional[str] = None
+    system_prompt: Optional[str] = None
+    conversational: bool = False
+    model: Optional[str] = None
+
+
+class AgenticConfiguration(BaseModel):
+    rephrase: Optional[AgenticRephraseConfiguration] = None
+    smart_agent: Optional[AgenticSmartAgentConfiguration] = None
+    summarize: Optional[AgenticSummarizeConfiguration] = None
+
+
+class AgenticConfigSchema(BaseModel):
+    title: Optional[str] = None
+    config: Optional[AgenticConfiguration] = None

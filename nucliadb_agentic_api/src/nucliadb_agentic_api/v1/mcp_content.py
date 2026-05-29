@@ -11,7 +11,7 @@ from typing import Any, Sequence
 
 import pydantic_core
 from hyperforge.interaction import AragAnswer
-from hyperforge.memory import Answer, Chunk
+from hyperforge.models import Answer, Chunk
 from mcp.server.fastmcp.utilities.types import Image
 from mcp.types import (
     Annotations,

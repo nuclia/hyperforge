@@ -9,11 +9,6 @@ class Settings(BaseSettings):
     http_host: str = "0.0.0.0"
     http_port: int = 8080
 
-    memory_apikey_nucliadb: Optional[str] = None
-    memory_reader_nucliadb: str = "reader.nucliadb.svc.cluster.local:8080"
-    memory_writer_nucliadb: str = "writer.nucliadb.svc.cluster.local:8080"
-    memory_search_nucliadb: str = "search.nucliadb.svc.cluster.local:8080"
-
     idp_regional_grpc: str = "idp-grpc.idp-regional.svc.cluster.local:9090"
     dummy_idp: bool = False
 
@@ -31,7 +26,11 @@ class Settings(BaseSettings):
     activate_subject: str = "arag.activate"
     pubsub_keepalive_seconds: float = 20
 
-    load_modules: list[str] = []
+    load_modules: list[str] = [
+        "hyperforge_rephrase",
+        "hyperforge_nucliadb",
+        "hyperforge_summarize",
+    ]
 
     # Hydra settings for MCP Oauth
     hydra_public_url: str = "https://oauth.progress.cloud"

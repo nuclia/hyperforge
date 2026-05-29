@@ -2,23 +2,18 @@ from typing import Tuple
 
 import prometheus_client  # type: ignore
 from fastapi import APIRouter, FastAPI
-from grpc import aio  # type: ignore
 from hyperforge.api import internal, logger
 from hyperforge.api.authentication import RaoAuthenticationBackend
 from hyperforge.api.logging import set_sentry
 from hyperforge.broker import Broker
 from hyperforge.broker.redis import RedisBroker
 from hyperforge.configure import GLOBAL_REGISTRY, load_all_configurations, scan
-from hyperforge.db.agents import AgentManager
-from hyperforge.db.settings import DataManagerSettings
 from hyperforge.feature_flag import get_flag_service
 from lru import LRU
 from mcp.server.lowlevel.server import Server as MCPServer
 from mcp.server.streamable_http import (
     StreamableHTTPServerTransport,
 )
-from nucliadb_sdk.v2.sdk import NucliaDBAsync
-from nucliadb_telemetry.grpc import OpenTelemetryGRPC
 from nucliadb_telemetry.logs import setup_logging
 from nucliadb_telemetry.settings import LogLevel, LogSettings
 from nucliadb_telemetry.utils import clean_telemetry, setup_telemetry
@@ -36,6 +31,8 @@ from nucliadb_agentic_api.ask.predict import (
     start_predict_engine,
     stop_predict_engine,
 )
+from nucliadb_agentic_api.db.agentic_configs import AgenticConfigs
+from nucliadb_agentic_api.db.settings import DataManagerSettings
 from nucliadb_agentic_api.settings import Settings
 
 router = APIRouter()
@@ -60,11 +57,7 @@ async def health_alive():
 
 
 class HTTPApplication(FastAPI):
-    agent_manager: AgentManager
-    arag_search: NucliaDBAsync
-    arag_writer: NucliaDBAsync
-    arag_reader: NucliaDBAsync
-    server: aio.Server
+    agent_manager: AgenticConfigs
     broker: Broker
 
     def __init__(
@@ -77,6 +70,12 @@ class HTTPApplication(FastAPI):
         super().__init__(*args, **kwargs)
         self.settings = settings
         self.data_manager_settings = data_manager_settings
+        for load_module in self.settings.load_modules:
+            try:
+                scan(load_module)
+                load_all_configurations(load_module)
+            except ImportError:
+                logger.error(f"Module {load_module} could not be loaded")
         self.include_router(internal.router)
         self.include_router(v1.router)
         self.include_router(router)
@@ -103,6 +102,7 @@ class HTTPApplication(FastAPI):
                 },
             )
         )
+        setup_telemetry(SERVICE_NAME)  # type: ignore
         if self.settings.sentry_url is not None:
             set_sentry(
                 self.settings.zone,
@@ -112,44 +112,8 @@ class HTTPApplication(FastAPI):
 
         get_flag_service()  # precache the flag service
 
-        tracer_provider = await setup_telemetry(SERVICE_NAME)
-
-        if tracer_provider is not None:
-            telemetry_grpc = OpenTelemetryGRPC(SERVICE_NAME, tracer_provider)
-
-            self.idp_regional_channel = telemetry_grpc.init_client(
-                self.settings.idp_regional_grpc
-            )
-        else:
-            self.idp_regional_channel = aio.insecure_channel(
-                self.settings.idp_regional_grpc
-            )
-
-        if self.settings.memory_apikey_nucliadb is None:
-            api_key = None
-            headers = {"X-NUCLIADB-ROLES": "WRITER;READER"}
-        else:
-            api_key = self.settings.memory_apikey_nucliadb
-            headers = None
-
         await start_predict_engine()
         await start_audit_utility(SERVICE_NAME)
-
-        self.arag_writer = NucliaDBAsync(
-            url=self.settings.memory_writer_nucliadb,
-            api_key=api_key,
-            headers=headers,
-        )
-        self.arag_reader = NucliaDBAsync(
-            url=self.settings.memory_reader_nucliadb,
-            api_key=api_key,
-            headers=headers,
-        )
-        self.arag_search = NucliaDBAsync(
-            url=self.settings.memory_search_nucliadb,
-            api_key=api_key,
-            headers=headers,
-        )
 
         self.broker = RedisBroker.from_url(
             url=self.settings.valkey_url,
@@ -161,7 +125,7 @@ class HTTPApplication(FastAPI):
         self.sses: LRU[Tuple[str, str], StreamableHTTPServerTransport] = LRU(size=100)
         self.mcp_servers: LRU[str, MCPServer] = LRU(size=100)
 
-        self.agent_manager = await AgentManager.from_settings(
+        self.agent_manager = await AgenticConfigs.from_settings(
             settings=self.data_manager_settings
         )
         await self.agent_manager.initialize()

@@ -6,7 +6,7 @@ from nucliadb_models.search import (
 )
 from nucliadb_protos.writer_pb2_grpc import WriterStub
 
-from nucliadb_agentic_api.tests.fixtures.resources import cookie_tale_resource
+from .fixtures.resources import cookie_tale_resource
 
 
 async def test_ask_paragraph_image_rag_strategy(

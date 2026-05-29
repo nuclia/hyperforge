@@ -25,6 +25,15 @@ from unittest.mock import patch
 
 import nucliadb_models.labels
 import pytest
+from nucliadb_agentic_api.ask.exceptions import (
+    InvalidQueryError,
+)
+from nucliadb_agentic_api.ask.search.parsers.fetcher import (
+    Fetcher,
+)
+from nucliadb_agentic_api.ask.search.parsers.find import (
+    FindParser,
+)
 from nucliadb_models import retrieval as retrieval_models
 from nucliadb_models.common import FieldTypeName
 from nucliadb_models.filters import (
@@ -41,16 +50,6 @@ from nucliadb_models.filters import (
 )
 from nucliadb_models.labels import KnowledgeBoxLabels, LabelSet, LabelSetKind
 from nucliadb_models.search import FindRequest
-
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.exceptions import (
-    InvalidQueryError,
-)
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.parsers.fetcher import (
-    Fetcher,
-)
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.parsers.find import (
-    FindParser,
-)
 
 now = datetime.datetime.now()
 rid = uuid.uuid4().hex

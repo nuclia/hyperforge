@@ -1,9 +1,8 @@
+from nucliadb_agentic_api.ask.utils.ids import ParagraphId
 from nucliadb_models.retrieval import Score
 from nucliadb_models.search import SCORE_TYPE, Relations, TextPosition
 from nucliadb_protos import resources_pb2
 from pydantic import BaseModel
-
-from nucliadb_agentic_api.ask.utils.ids import ParagraphId
 
 # /k/ocr
 _OCR_LABEL = f"/k/{resources_pb2.Paragraph.TypeParagraph.Name(resources_pb2.Paragraph.TypeParagraph.OCR).lower()}"

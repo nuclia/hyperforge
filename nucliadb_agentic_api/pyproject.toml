@@ -44,6 +44,8 @@ dependencies = [
     "redis[hiredis]>=6.4.0",
     "types-redis>=4.6.0.20241004",
     "ruff>=0.15.10",
+    "alembic>=1.18.4",
+    "fastapi",
 ]
 
 
