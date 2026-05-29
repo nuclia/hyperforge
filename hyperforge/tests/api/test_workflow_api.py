@@ -245,7 +245,7 @@ async def test_arag_workflow_preprocess(
 ):
     resp = await arag_api.post(
         f"/api/v1/agent/{arag_kb.uuid}/workflow/{WORKFLOW_ID}/preprocess",
-        json={"module": "rephrase", "title": "brave", "rules": []},
+        json={"module": "rephrase", "title": "brave", "rules": [], "extend": False},
         headers=HEADERS,
     )
     assert resp.status_code == 200
@@ -256,13 +256,13 @@ async def test_arag_workflow_preprocess(
     )
     assert resp.status_code == 200
     assert resp.json()[0]["title"] == "brave"
-    assert resp.json()[0]["all"] is False
+    assert resp.json()[0]["extend"] is False
 
     uuid = resp.json()[0]["id"]
 
     resp = await arag_api.patch(
         f"/api/v1/agent/{arag_kb.uuid}/workflow/{WORKFLOW_ID}/preprocess/{uuid}",
-        json={"module": "rephrase", "title": "brave2", "rules": []},
+        json={"module": "rephrase", "title": "brave2", "rules": [], "extend": True},
         headers=HEADERS,
     )
     assert resp.status_code == 200
@@ -273,6 +273,7 @@ async def test_arag_workflow_preprocess(
     )
     assert resp.status_code == 200
     assert resp.json()[0]["title"] == "brave2"
+    assert resp.json()[0]["extend"] is True
 
     resp = await arag_api.delete(
         f"/api/v1/agent/{arag_kb.uuid}/workflow/{WORKFLOW_ID}/preprocess/{uuid}",
