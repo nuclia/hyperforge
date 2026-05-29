@@ -7,11 +7,11 @@ from hyperforge.memory import Chunk, Context, QuestionMemory
 from hyperforge.trace import trace_agent
 from nuclia_models.predict.remi import RemiResponse
 
-from agents.remi.src.hyperforge_remi.config import (
+from hyperforge import logger
+from hyperforge_remi.config import (
     ContextGranularity,
     RemiAgentConfig,
 )
-from hyperforge import logger
 
 MAX_CONTEXTS_REMI = 60
 

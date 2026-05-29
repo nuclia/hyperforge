@@ -12,11 +12,10 @@ import datetime
 from typing import Any, List
 
 from hyperforge.db import exceptions
-from hyperforge.standalone.config import StandAloneAgentConfig
-
 from hyperforge.models import MemoryConfig, Rules
 from hyperforge.prompts import PromptConfig
 from hyperforge.retrieval.config import RetrievalAgentConfig
+from hyperforge.standalone.config import StandAloneAgentConfig
 from hyperforge.workflows import RetrievalAgent, WorkflowData
 
 _EPOCH = datetime.datetime.now()

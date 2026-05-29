@@ -200,7 +200,6 @@ def feedback_agent():
 
 
 async def test_arag_websocket_interaction(
-    mock_audit,
     arag_kb: KnowledgeBoxObj,
     arag_api_http: str,
     arag_api_session: str,
@@ -258,19 +257,6 @@ async def test_arag_websocket_interaction(
                     print(
                         "No feedback, step, possible_answer, context or generated_text in response"
                     )
-
-        # Its Flacky @lferran
-        # # Test that interactions are audited
-        # interaction_audited = False
-        # for _ in range(8):
-        #     # Try several times, as auditing may be async
-        #     await asyncio.sleep(0.1)
-        #     try:
-        #         mock_audit.interaction.assert_called_once()
-        #         interaction_audited = True
-        #     except AssertionError:
-        #         break
-        # assert interaction_audited, "Audit interaction was not called"
 
 
 async def test_arag_websocket_interaction_fails(

@@ -21,7 +21,7 @@ pytestmark = [
 
 CONFIG = {
     "rules": {"rules": ["Be direct and clear", {"prompt": "Talk like a lawyer"}]},
-    "preprocess": [{"module": "historical", "rules": [], "all": False}],
+    "preprocess": [],
     "context": [
         {
             "module": "static",

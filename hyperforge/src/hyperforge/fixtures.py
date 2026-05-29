@@ -48,9 +48,7 @@ _package_path = _dir.parent.parent.absolute()
 
 NUA = os.environ.get("NUA_KEY", "DUMMY")
 
-images.settings["nucliadb"]["env"]["NUCLIA_SERVICE_ACCOUNT"] = NUA
 images.settings["nucliadb"]["env"]["NUA_API_KEY"] = NUA
-
 images.settings["nucliadb"]["env"]["DUMMY_PREDICT"] = "False"
 
 
@@ -343,10 +341,12 @@ async def arag(
 
 
 @pytest.fixture
-async def arag_kb(create_arag_kb, delete_arag_kb):
-    kb = await create_arag_kb("test_basic_worker", "nuclia")
+async def arag_kb(sdk: NucliaDB, arag_api_app: HTTPApplication):
+    kb = await create_arag_kb(
+        arag_api_app.agent_manager, sdk, "test_basic_worker", "nuclia"
+    )
     yield kb
-    await delete_arag_kb(kb.uuid, "nuclia")
+    await delete_arag_kb(arag_api_app.agent_manager, sdk, kb.uuid, "nuclia")
 
 
 @pytest.fixture
@@ -357,12 +357,14 @@ async def arag_no_memory(create_arag_no_memory, delete_arag_no_memory):
 
 
 @pytest.fixture
-async def arag_kb_legacy(create_arag_kb, delete_arag_kb, arag_api_app):
+async def arag_kb_legacy(sdk: NucliaDB, arag_api_app: HTTPApplication):
     """
     We have some rows that have memory set to null but actually have a memory KB.
     (Legacy from before we added the no KB option)
     """
-    kb = await create_arag_kb("test_basic_worker_legacy", "nuclia")
+    kb = await create_arag_kb(
+        arag_api_app.agent_manager, sdk, "test_basic_worker_legacy", "nuclia"
+    )
     # Go to the DB and set memory to null
     db: databases.Database = arag_api_app.agent_manager.database
     from hyperforge.db.agents import retrieval_agent_config
@@ -374,11 +376,11 @@ async def arag_kb_legacy(create_arag_kb, delete_arag_kb, arag_api_app):
     )
     await db.execute(statement)
     yield kb
-    await delete_arag_kb(kb.uuid, "nuclia")
+    await delete_arag_kb(arag_api_app.agent_manager, sdk, kb.uuid, "nuclia")
 
 
 @pytest.fixture
-async def agent_db(data_manager_settings: DataManagerSettings):
+async def agent_db_server(data_manager_settings: DataManagerSettings):
     agent_manager = await AgentManager.from_settings(settings=data_manager_settings)
     await agent_manager.initialize()
     return agent_manager
@@ -387,7 +389,7 @@ async def agent_db(data_manager_settings: DataManagerSettings):
 @pytest.fixture
 async def arag_server(
     sdk: NucliaDB,
-    agent_db: AgentManager,
+    agent_db_server: AgentManager,
     valkey,
 ):
     valkey_host, valkey_port = valkey
@@ -410,7 +412,7 @@ async def arag_server(
     session = SessionManager(
         settings=settings,
         broker=broker,
-        agent_manager=agent_db,
+        agent_manager=agent_db_server,
         cache=ValkeyCache(
             Redis(host=valkey_host, port=valkey_port, decode_responses=True)
         ),
@@ -566,44 +568,30 @@ def suppress_test_noise() -> None:
     hyperforge_logger.propagate = True  # Ensures it bubbles up to root_logger
 
 
-@pytest.fixture
-def delete_arag_kb(
-    sdk: NucliaDB,
-    agent_db: AgentManager,
-    arag_api,
-):
-    async def _delete_arag_kb(kbid: str, account: str) -> None:
-        sdk.delete_knowledge_box(kbid=kbid)
-        await agent_db.delete_agent(
-            account=account,
-            agent_id=kbid,
-        )
-
-    return _delete_arag_kb
+async def delete_arag_kb(
+    agent_db: AgentManager, sdk: NucliaDB, kbid: str, account: str
+) -> None:
+    sdk.delete_knowledge_box(kbid=kbid)
+    await agent_db.delete_agent(
+        account=account,
+        agent_id=kbid,
+    )
 
 
-@pytest.fixture
-def create_arag_kb(
-    sdk: NucliaDB,
-    agent_db: AgentManager,
-    arag_api,
-):
-    async def _create_arag_kb(slug: str, account: str) -> KnowledgeBoxObj:
-        kb: KnowledgeBoxObj = sdk.create_knowledge_box(slug=slug)
-        await agent_db.add_agent(
-            account=account,
-            agent_id=kb.uuid,
-            rules=Rules(rules=[]),
-            memory=MemoryConfig(
-                nucliadb=NucliaDBMemoryConfig(
-                    url=sdk.base_url, kbid=kb.uuid, internal=True
-                )
-            ),
-        )
+async def create_arag_kb(
+    agent_db: AgentManager, sdk: NucliaDB, slug: str, account: str
+) -> KnowledgeBoxObj:
+    kb: KnowledgeBoxObj = sdk.create_knowledge_box(slug=slug)
+    await agent_db.add_agent(
+        account=account,
+        agent_id=kb.uuid,
+        rules=Rules(rules=[]),
+        memory=MemoryConfig(
+            nucliadb=NucliaDBMemoryConfig(url=sdk.base_url, kbid=kb.uuid, internal=True)
+        ),
+    )
 
-        return kb
-
-    return _create_arag_kb
+    return kb
 
 
 @pytest.fixture
@@ -621,6 +609,7 @@ def load_agents():
         "hyperforge_static",
         "hyperforge_rephrase",
         "hyperforge_mcp",
+        "hyperforge_remi",
     ]:
         scan(module)
         load_all_configurations(module)

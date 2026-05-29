@@ -1254,8 +1254,8 @@ requires-dist = [
     { name = "mrflagly", specifier = ">=0.2.11" },
     { name = "nuclia", specifier = ">=4.9.25" },
     { name = "nuclia-models", specifier = ">=0.52.1" },
-    { name = "nucliadb-models", specifier = ">=6.13.0.post6252" },
-    { name = "nucliadb-sdk", specifier = ">=6.13.0.post6252" },
+    { name = "nucliadb-models", specifier = ">=6.13.1.post6414" },
+    { name = "nucliadb-sdk", specifier = ">=6.13.1.post6414" },
     { name = "nucliadb-telemetry", extras = ["otel"] },
     { name = "prometheus-client" },
     { name = "psycopg2" },
@@ -2784,18 +2784,18 @@ requires-dist = [
 
 [[package]]
 name = "nucliadb-models"
-version = "6.13.0.post6252"
+version = "6.13.1.post6414"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d6/ac/144447a88afdc28d95c67038ff88a2a83845e7b034738d465b46aade15e2/nucliadb_models-6.13.0.post6252-py3-none-any.whl", hash = "sha256:ad333dce33856c65e488a35d77f4c363bd533484627c94d40ff6b1a445d995a5", size = 79521, upload-time = "2026-05-11T16:32:06.814Z" },
+    { url = "https://files.pythonhosted.org/packages/c3/c9/ba5b925b955eb290279c4096659862f6d8d7770dc33354437d70973404e8/nucliadb_models-6.13.1.post6414-py3-none-any.whl", hash = "sha256:039ed3ecb02deced8751be7e8cc42792d234694f7599ea01c30c983ad7668e6f", size = 81883, upload-time = "2026-05-29T05:10:57.821Z" },
 ]
 
 [[package]]
 name = "nucliadb-sdk"
-version = "6.13.0.post6252"
+version = "6.13.1.post6414"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
@@ -2805,7 +2805,7 @@ dependencies = [
     { name = "pydantic" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ce/a8/fdbd3a54c649c28ea7c373bbcb6f3cea11c0c11ba92223647c840779fde4/nucliadb_sdk-6.13.0.post6252-py3-none-any.whl", hash = "sha256:7d1892d7cd2fa730d07a52edee2dc97f7c05ef1e98093f4519e75b923f141cd5", size = 17847, upload-time = "2026-05-11T16:32:11.088Z" },
+    { url = "https://files.pythonhosted.org/packages/44/6f/8b4923e68a10d5f4127b7fdea5867946b3150a4252aeec6b2a2ff0463d76/nucliadb_sdk-6.13.1.post6414-py3-none-any.whl", hash = "sha256:88ea8ebf21d546d8318f85b3ee4a2c9f37223af6210a413e44f3cf16f8fcce5d", size = 18020, upload-time = "2026-05-29T05:11:03.66Z" },
 ]
 
 [[package]]
