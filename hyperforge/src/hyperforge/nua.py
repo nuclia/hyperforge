@@ -231,7 +231,11 @@ class AsyncInternalNuaClient:
         return result
 
     async def generate_stream(
-        self, body: ChatModel, model: Optional[str] = None, timeout: int = 300
+        self,
+        body: ChatModel,
+        model: Optional[str] = None,
+        timeout: int = 300,
+        extra_headers: Optional[dict[str, str]] = None,
     ) -> AsyncIterator[GenerativeChunk]:
         endpoint = f"{self.url}{CHAT_PREDICT}"
         if model:

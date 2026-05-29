@@ -527,46 +527,11 @@ class _VCRTaskExceptionFilter(logging.Filter):
         )
 
 
-@pytest.fixture(scope="module")
-def vcr_config():
-    return {
-        # Replaces the actual token with 'DUMMY' in the recorded YAML
-        "filter_headers": [
-            ("Authorization", "DUMMY"),
-            ("x-nuclia-nuakey", "DUMMY"),
-            ("x-stf-nuakey", "DUMMY"),
-        ],
-        # Redacts specific query parameters like API keys
-        "filter_query_parameters": ["api_key", "access_token"],
-        # Redacts fields in POST request bodies (e.g., login forms)
-        "filter_post_data_parameters": ["password", "client_secret"],
-        # Decodes compressed responses so they are human-readable in the cassette
-        "decode_compressed_response": True,
-    }
-
-
-@pytest.fixture(autouse=True, scope="session")
-def suppress_test_noise() -> None:
-    """Suppress known-noisy log lines that add no diagnostic value in tests."""
-    logging.getLogger("nucliadb_utils.utilities").setLevel(logging.ERROR)
-
-    logging.getLogger("hyperforge.memory").setLevel(logging.WARNING)
-    logging.getLogger("mcp.server.streamable_http").setLevel(logging.WARNING)
-    logging.getLogger("hyperforge.server").setLevel(logging.WARNING)
-
-    asyncio_logger = logging.getLogger("asyncio")
-    asyncio_logger.addFilter(_VCRTaskExceptionFilter())
-
-    # Silence noisy loggers
-    logging.getLogger("httpx").setLevel(logging.ERROR)
-    logging.getLogger("httpcore.connection").setLevel(logging.ERROR)
-    logging.getLogger("httpcore.http11").setLevel(logging.ERROR)
-    logging.getLogger("asyncio").setLevel(logging.INFO)
-
-    # Configure hyperforge.memory logger
-    hyperforge_logger = logging.getLogger("hyperforge.memory")
-    hyperforge_logger.setLevel(logging.DEBUG)
-    hyperforge_logger.propagate = True  # Ensures it bubbles up to root_logger
+# Import vcr_config and suppress_test_noise from minimal_fixtures (single source of truth)
+from hyperforge.minimal_fixtures import (  # noqa: E402, F401
+    suppress_test_noise,
+    vcr_config,
+)
 
 
 async def delete_arag_kb(
