@@ -2,7 +2,7 @@ from nucliadb_models.search import AskRequest, MaxTokens
 from pydantic import BaseModel
 from typing_extensions import assert_never
 
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.parsers.fetcher import (
+from nucliadb_agentic_api.ask.search.parsers.fetcher import (
     Fetcher,
 )
 

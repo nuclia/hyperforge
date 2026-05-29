@@ -12,17 +12,20 @@ readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
 license = "Apache-2.0"
 dependencies = [
     "pydantic",
+    "backoff",
+    "nats-py",
     "nuclia>=4.9.25",
     "nuclia-models>=0.52.1",
     "nucliadb-models>=6.13.0.post6252",
+    "nucliadb-protos",
     "nucliadb-sdk>=6.13.0.post6252",
     "nucliadb-telemetry",
+    "nucliadb-utils",
     "hyperforge",
     "pydantic_settings",
     "mcp>=1.26.0",
@@ -58,5 +61,5 @@ asyncio_mode = "auto"
 
 
 [project.scripts]
-nucliadb-agentic-api = "nucliadb_agentic_api:run.run"
-hyperforge-extract-openapi = "hyperforge.nucliadb_agentic_api.commands:extract_openapi"
+nucliadb-agentic-api = "nucliadb_agentic_api.commands:run"
+nucliadb-agentic-api-extract-openapi = "nucliadb_agentic_api.commands:extract_openapi"

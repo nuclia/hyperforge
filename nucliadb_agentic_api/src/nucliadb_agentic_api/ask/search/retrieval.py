@@ -44,39 +44,39 @@ from nucliadb_models.search import (
 from nucliadb_sdk.v2 import NucliaDBAsync
 from nucliadb_telemetry.errors import capture_exception
 
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask import logger
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.audit import get_audit
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.exceptions import (
+from nucliadb_agentic_api.ask import logger
+from nucliadb_agentic_api.ask.audit import get_audit
+from nucliadb_agentic_api.ask.exceptions import (
     IncompleteFindResultsError,
     NoRetrievalResultsError,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.predict import (
+from nucliadb_agentic_api.ask.predict import (
     RephraseResponse,
     SendToPredictError,
     get_predict,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search import rpc
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.highlight import (
+from nucliadb_agentic_api.ask.search import rpc
+from nucliadb_agentic_api.ask.search.highlight import (
     highlight_paragraph,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.hydrator import (
+from nucliadb_agentic_api.ask.search.hydrator import (
     ResourceHydrationOptions,
     TextBlockHydrationOptions,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.metrics import Metrics
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.parsers.fetcher import (
+from nucliadb_agentic_api.ask.search.metrics import Metrics
+from nucliadb_agentic_api.ask.search.parsers.fetcher import (
     Fetcher,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.parsers.find import (
+from nucliadb_agentic_api.ask.search.parsers.find import (
     parse_find,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.rerankers import (
+from nucliadb_agentic_api.ask.search.rerankers import (
     RerankableItem,
     Reranker,
     RerankingOptions,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.utils.ids import ParagraphId
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.utils.text_blocks import (
+from nucliadb_agentic_api.ask.utils.ids import ParagraphId
+from nucliadb_agentic_api.ask.utils.text_blocks import (
     TextBlockMatch,
 )
 

@@ -21,13 +21,13 @@ from nucliadb_sdk.v2.exceptions import NotFoundError, UnknownError
 from pydantic import TypeAdapter
 from typing_extensions import assert_never
 
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask import logger
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.exceptions import (
+from nucliadb_agentic_api.ask import logger
+from nucliadb_agentic_api.ask.exceptions import (
     KnowledgeBoxNotFound,
     NucliaDBError,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.settings import settings
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.utils.ids import FieldId
+from nucliadb_agentic_api.ask.settings import settings
+from nucliadb_agentic_api.ask.utils.ids import FieldId
 
 
 async def get_resource_uuid_from_slug(

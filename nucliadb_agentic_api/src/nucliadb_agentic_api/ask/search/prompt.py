@@ -48,10 +48,10 @@ from nucliadb_protos.resources_pb2 import FieldComputedMetadata
 from nucliadb_sdk import NucliaDBAsync
 from pydantic import BaseModel
 
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask import logger
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search import rpc
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.metrics import Metrics
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.utils.ids import (
+from nucliadb_agentic_api.ask import logger
+from nucliadb_agentic_api.ask.search import rpc
+from nucliadb_agentic_api.ask.search.metrics import Metrics
+from nucliadb_agentic_api.ask.utils.ids import (
     FIELD_TYPE_STR_TO_NAME,
     FieldId,
     ParagraphId,

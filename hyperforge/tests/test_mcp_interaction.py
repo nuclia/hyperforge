@@ -183,6 +183,7 @@ async def test_mcp_full_workflow(
     arag_api_http_session: str,
     arag_server: SessionManager,
     disable_safe_transport,
+    load_agents,
 ):
 
     http_client = AsyncClient()

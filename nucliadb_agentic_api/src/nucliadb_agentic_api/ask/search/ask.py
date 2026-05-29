@@ -75,9 +75,9 @@ from nucliadb_utils.exceptions import LimitsExceededError
 from pydantic_core import ValidationError
 from typing_extensions import assert_never
 
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask import logger, predict
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.audit import ChatAuditor
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.exceptions import (
+from nucliadb_agentic_api.ask import logger, predict
+from nucliadb_agentic_api.ask.audit import ChatAuditor
+from nucliadb_agentic_api.ask.exceptions import (
     AnswerJsonSchemaTooLong,
     IncompleteFindResultsError,
     InvalidQueryError,
@@ -85,33 +85,33 @@ from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.exceptions import (
     NoRetrievalResultsError,
     NucliaDBError,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.predict import (
+from nucliadb_agentic_api.ask.predict import (
     AnswerStatusCode,
     RephraseMissingContextError,
     RephraseResponse,
     get_predict,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.graph_strategy import (
+from nucliadb_agentic_api.ask.search.graph_strategy import (
     get_graph_results,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.metrics import (
+from nucliadb_agentic_api.ask.search.metrics import (
     AskMetrics,
     Metrics,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.parsers.ask import (
+from nucliadb_agentic_api.ask.search.parsers.ask import (
     fetcher_for_ask,
     parse_ask,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.parsers.fetcher import (
+from nucliadb_agentic_api.ask.search.parsers.fetcher import (
     Fetcher,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.prompt import (
+from nucliadb_agentic_api.ask.search.prompt import (
     PromptContextBuilder,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.rank_fusion import (
+from nucliadb_agentic_api.ask.search.rank_fusion import (
     WeightedCombSum,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.retrieval import (
+from nucliadb_agentic_api.ask.search.retrieval import (
     NOT_ENOUGH_CONTEXT_ANSWER,
     add_resource_filter,
     get_answer_stream,
@@ -119,11 +119,11 @@ from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.retrieval import (
     get_relations_results,
     sorted_prompt_context_list,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.utils.ids import ParagraphId
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.utils.responses import (
+from nucliadb_agentic_api.ask.utils.ids import ParagraphId
+from nucliadb_agentic_api.ask.utils.responses import (
     HTTPClientError,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.utils.text_blocks import (
+from nucliadb_agentic_api.ask.utils.text_blocks import (
     ScoredTextBlock,
 )
 

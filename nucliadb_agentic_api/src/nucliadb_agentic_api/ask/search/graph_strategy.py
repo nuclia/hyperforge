@@ -59,28 +59,28 @@ from nucliadb_sdk.v2 import NucliaDBAsync
 from pydantic import BaseModel
 from sentry_sdk import capture_exception
 
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask import logger
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.predict import get_predict
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search import rpc
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.hydrator import (
+from nucliadb_agentic_api.ask import logger
+from nucliadb_agentic_api.ask.predict import get_predict
+from nucliadb_agentic_api.ask.search import rpc
+from nucliadb_agentic_api.ask.search.hydrator import (
     ResourceHydrationOptions,
     TextBlockHydrationOptions,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.metrics import Metrics
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.rerankers import (
+from nucliadb_agentic_api.ask.search.metrics import Metrics
+from nucliadb_agentic_api.ask.search.rerankers import (
     Reranker,
     RerankingOptions,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.retrieval import (
+from nucliadb_agentic_api.ask.search.retrieval import (
     compose_find_resources,
     find_request_from_ask_request,
     hydrate_and_rerank,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.utils.ids import (
+from nucliadb_agentic_api.ask.utils.ids import (
     FieldId,
     ParagraphId,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.utils.text_blocks import (
+from nucliadb_agentic_api.ask.utils.text_blocks import (
     TextBlockMatch,
 )
 

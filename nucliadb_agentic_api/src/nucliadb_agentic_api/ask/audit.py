@@ -32,8 +32,8 @@ from starlette.background import BackgroundTask
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
 
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.predict import AnswerStatusCode
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.utils.proto import client_type
+from nucliadb_agentic_api.ask.predict import AnswerStatusCode
+from nucliadb_agentic_api.ask.utils.proto import client_type
 
 
 class RequestContext:

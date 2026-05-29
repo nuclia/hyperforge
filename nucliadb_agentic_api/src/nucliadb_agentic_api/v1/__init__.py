@@ -1,7 +1,5 @@
-from ...v1 import ask, mcp_nucliadb
-from . import (
+from hyperforge.api.v1 import (
     agents,
-    audit,
     interaction,
     mcp_interaction,
     oauth,
@@ -10,12 +8,13 @@ from . import (
     session,
     workflows,
 )
+
+from . import ask, mcp_nucliadb
 from .router import router
 
 __all__ = [
     "agents",
     "ask",
-    "audit",
     "interaction",
     "mcp_interaction",
     "mcp_nucliadb",

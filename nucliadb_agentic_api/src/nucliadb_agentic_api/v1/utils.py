@@ -1,7 +1,7 @@
 from nucliadb_telemetry.utils import get_telemetry
 from opentelemetry import trace
 
-from nucliadb_agentic_api.api import SERVICE_NAME
+from nucliadb_agentic_api import SERVICE_NAME
 
 
 def tracer():

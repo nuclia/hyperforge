@@ -3,17 +3,14 @@ from typing import Tuple
 import prometheus_client  # type: ignore
 from fastapi import APIRouter, FastAPI
 from grpc import aio  # type: ignore
-from hyperforge.api import SERVICE_NAME, internal, logger, v1
+from hyperforge.api import internal, logger
 from hyperforge.api.authentication import RaoAuthenticationBackend
-from hyperforge.api.grpc_service import AragServiceServicer
 from hyperforge.api.logging import set_sentry
-from hyperforge.api.settings import Settings
 from hyperforge.broker import Broker
 from hyperforge.broker.redis import RedisBroker
 from hyperforge.configure import GLOBAL_REGISTRY, load_all_configurations, scan
 from hyperforge.db.agents import AgentManager
 from hyperforge.db.settings import DataManagerSettings
-from hyperforge.downloads.manager import DownloadRequestsManager
 from hyperforge.feature_flag import get_flag_service
 from lru import LRU
 from mcp.server.lowlevel.server import Server as MCPServer
@@ -29,15 +26,17 @@ from prometheus_client import CONTENT_TYPE_LATEST  # type: ignore
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.responses import PlainTextResponse
 
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.audit import (
+from nucliadb_agentic_api import SERVICE_NAME, v1
+from nucliadb_agentic_api.ask.audit import (
     AuditMiddleware,
     start_audit_utility,
     stop_audit_utility,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.predict import (
+from nucliadb_agentic_api.ask.predict import (
     start_predict_engine,
     stop_predict_engine,
 )
+from nucliadb_agentic_api.settings import Settings
 
 router = APIRouter()
 
@@ -66,7 +65,6 @@ class HTTPApplication(FastAPI):
     arag_writer: NucliaDBAsync
     arag_reader: NucliaDBAsync
     server: aio.Server
-    idp_regional: idp_pb2_grpc.IDPRegionalStub
     broker: Broker
 
     def __init__(

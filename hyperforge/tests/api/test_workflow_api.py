@@ -245,7 +245,7 @@ async def test_arag_workflow_preprocess(
 ):
     resp = await arag_api.post(
         f"/api/v1/agent/{arag_kb.uuid}/workflow/{WORKFLOW_ID}/preprocess",
-        json={"module": "historical", "title": "brave", "rules": [], "all": False},
+        json={"module": "rephrase", "title": "brave", "rules": []},
         headers=HEADERS,
     )
     assert resp.status_code == 200
@@ -262,7 +262,7 @@ async def test_arag_workflow_preprocess(
 
     resp = await arag_api.patch(
         f"/api/v1/agent/{arag_kb.uuid}/workflow/{WORKFLOW_ID}/preprocess/{uuid}",
-        json={"module": "historical", "title": "brave2", "rules": [], "all": False},
+        json={"module": "rephrase", "title": "brave2", "rules": []},
         headers=HEADERS,
     )
     assert resp.status_code == 200

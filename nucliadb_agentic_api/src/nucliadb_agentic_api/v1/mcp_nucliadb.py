@@ -62,12 +62,12 @@ from nucliadb_models.search import (
     NucliaDBClientType,
 )
 
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.exceptions import (
+from nucliadb_agentic_api.ask.exceptions import (
     InvalidQueryError,
     KnowledgeBoxNotFound,
     NoRetrievalResultsError,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.ask import AskResult, ask
+from nucliadb_agentic_api.ask.search.ask import AskResult, ask
 
 BATCH_GET_DOCUMENTS_MAX = 20
 

@@ -6,8 +6,8 @@ from nucliadb_models.retrieval import Score, WeightedCombSumScore
 from nucliadb_models.search import SCORE_TYPE
 from nucliadb_telemetry.metrics import Observer
 
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.utils.ids import ParagraphId
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.utils.text_blocks import (
+from nucliadb_agentic_api.ask.utils.ids import ParagraphId
+from nucliadb_agentic_api.ask.utils.text_blocks import (
     ScoredTextBlock,
 )
 

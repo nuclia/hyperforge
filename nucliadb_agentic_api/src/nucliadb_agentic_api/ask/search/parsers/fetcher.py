@@ -4,17 +4,17 @@ from nucliadb_models.search import Image, MaxTokens
 from nucliadb_protos import knowledgebox_pb2, utils_pb2
 from nucliadb_sdk import NucliaDBAsync
 
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask import logger
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.exceptions import (
+from nucliadb_agentic_api.ask import logger
+from nucliadb_agentic_api.ask.exceptions import (
     InvalidQueryError,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.predict import (
+from nucliadb_agentic_api.ask.predict import (
     SendToPredictError,
     convert_relations,
     get_predict,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.predict_models import QueryModel
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search import rpc
+from nucliadb_agentic_api.ask.predict_models import QueryModel
+from nucliadb_agentic_api.ask.search import rpc
 
 
 class Fetcher:

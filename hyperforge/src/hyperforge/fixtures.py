@@ -4,6 +4,7 @@ import os
 import pathlib
 import socket
 from unittest.mock import patch
+from uuid import uuid4
 
 import alembic.command
 import alembic.config
@@ -350,10 +351,10 @@ async def arag_kb(sdk: NucliaDB, arag_api_app: HTTPApplication):
 
 
 @pytest.fixture
-async def arag_no_memory(create_arag_no_memory, delete_arag_no_memory):
-    arag_id = await create_arag_no_memory("nuclia")
+async def arag_no_memory(arag_api_app: HTTPApplication):
+    arag_id = await create_arag_no_memory(arag_api_app.agent_manager, "nuclia")
     yield arag_id
-    await delete_arag_no_memory(arag_id, "nuclia")
+    await delete_arag_no_memory(arag_api_app.agent_manager, arag_id, "nuclia")
 
 
 @pytest.fixture
@@ -592,6 +593,27 @@ async def create_arag_kb(
     )
 
     return kb
+
+
+async def create_arag_no_memory(agent_db: AgentManager, account: str) -> str:
+    uuid = str(uuid4())
+    await agent_db.add_agent(
+        account=account,
+        agent_id=uuid,
+        rules=Rules(rules=[]),
+        memory=MemoryConfig(),
+    )
+
+    return uuid
+
+
+async def delete_arag_no_memory(
+    agent_db: AgentManager, agent_id: str, account: str
+) -> None:
+    await agent_db.delete_agent(
+        account=account,
+        agent_id=agent_id,
+    )
 
 
 @pytest.fixture

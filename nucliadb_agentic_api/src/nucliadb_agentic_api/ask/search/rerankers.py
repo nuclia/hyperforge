@@ -7,7 +7,7 @@ from nucliadb_models.search import (
 )
 from nucliadb_telemetry.metrics import Observer
 
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.predict import (
+from nucliadb_agentic_api.ask.predict import (
     ProxiedPredictAPIError,
     SendToPredictError,
     get_predict,

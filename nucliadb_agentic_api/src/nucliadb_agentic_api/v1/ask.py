@@ -16,19 +16,19 @@ from nucliadb_utils.authentication import NucliaUser, requires
 from pydantic import ValidationError
 from starlette.responses import StreamingResponse
 
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.exceptions import (
+from nucliadb_agentic_api.ask.exceptions import (
     AnswerJsonSchemaTooLong,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search import rpc
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.search.ask import (
+from nucliadb_agentic_api.ask.search import rpc
+from nucliadb_agentic_api.ask.search.ask import (
     AskResult,
     ask,
     handled_ask_exceptions,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.ask.utils.responses import (
+from nucliadb_agentic_api.ask.utils.responses import (
     HTTPClientError,
 )
-from nucliadb_agentic_api.src.nucliadb_agentic_api.v1.router import router
+from nucliadb_agentic_api.v1.router import router
 
 
 @router.post(
