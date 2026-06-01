@@ -15,7 +15,10 @@ from hyperforge_google.config import GoogleAgentConfig
 NUA_KEY = os.environ.get("NUA_KEY", "DUMMY")
 
 pytestmark = [
-    pytest.mark.vcr(ignore_localhost=True),
+    pytest.mark.vcr(
+        ignore_localhost=True,
+        match_on=["method", "scheme", "host", "port", "path"],
+    ),
     pytest.mark.asyncio,
 ]
 
