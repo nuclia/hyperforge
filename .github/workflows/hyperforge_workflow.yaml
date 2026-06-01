@@ -30,9 +30,9 @@ jobs:
     name: Testing
     runs-on: learning-simple-arc-runners
     permissions:
-      id-token: write        # google-github-actions/auth (OIDC)
-      contents: read         # actions/checkout ×2
-      pull-requests: write   # orgoro/coverage
+      id-token: write # google-github-actions/auth (OIDC)
+      contents: read # actions/checkout ×2
+      pull-requests: write # orgoro/coverage
     outputs:
       component: ${{ steps.param.outputs.component }}
       hash: ${{ steps.param.outputs.hash }}
@@ -42,7 +42,6 @@ jobs:
       chart-version: ${{ steps.param.outputs.chart-version }}
 
     steps:
-      
       - name: Generate a token
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
@@ -190,7 +189,7 @@ jobs:
     needs: test
     if: (failure() || cancelled()) && github.event_name == 'push'
     runs-on: nuclia-base
-    permissions: {}   # slackapi/slack-github-action uses webhook secret, not GITHUB_TOKEN
+    permissions: {} # slackapi/slack-github-action uses webhook secret, not GITHUB_TOKEN
     steps:
       - name: Build failed slack message
         id: build_message
@@ -232,7 +231,7 @@ jobs:
     needs:
       - test
     permissions:
-      contents: read   # actions/checkout
+      contents: read # actions/checkout
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -271,7 +270,7 @@ jobs:
     needs: [test]
     if: |
       !failure() && !cancelled() && github.event_name == 'push'
-    permissions: {}   # all API calls use GitHub App token, not GITHUB_TOKEN
+    permissions: {} # all API calls use GitHub App token, not GITHUB_TOKEN
     steps:
       - name: Generate a token
         id: app-token
