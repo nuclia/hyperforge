@@ -21,6 +21,8 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+              with:
+                  persist-credentials: false
 
             - name: Install uv
               uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
@@ -44,6 +46,8 @@ jobs:
             - test
         steps:
             - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+              with:
+                  persist-credentials: false
 
             - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
               with:
@@ -56,16 +60,26 @@ jobs:
 
             - name: Set dependency versions in requirements
               run: |
-                  python bump.py --package=${{ inputs.package }} --build=${{ github.run_number }}
+                  python bump.py --package=${INPUTS_PACKAGE} --build=${{ github.run_number }}
+              env:
+                  INPUTS_PACKAGE: ${{ inputs.package }}
 
             - name: Install package
               run: |
-                  pip install -e ./${{ inputs.package }}
+                  pip install -e ./${INPUTS_PACKAGE}
+              env:
+                  INPUTS_PACKAGE: ${{ inputs.package }}
 
             - name: Build wheels
-              run: pip wheel --no-deps -w dist ./${{ inputs.package }}
+              run: pip wheel --no-deps -w dist ./${INPUTS_PACKAGE}
+              env:
+                  INPUTS_PACKAGE: ${{ inputs.package }}
 
             - name: Upload to pypi
+              # zizmor: ignore[use-trusted-publishing] -- PYPI_TOKEN is a scoped
+              # API token stored as a repo secret. Migration to OIDC Trusted
+              # Publishing is tracked separately and requires PyPI-side setup for
+              # all 17 agent packages before the secret can be removed.
               run: twine upload --verbose dist/*
               env:
                   TWINE_USERNAME: __token__

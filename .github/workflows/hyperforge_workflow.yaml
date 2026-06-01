@@ -25,16 +25,14 @@ env:
   GCP_WORKLOAD_IDENTITY_PROVIDER: "projects/224545243904/locations/global/workloadIdentityPools/gh-nuclia/providers/gh-nuclia-provider"
   GCP_SERVICE_ACCOUNT: "github-actions@nuclia-internal.iam.gserviceaccount.com"
 
-permissions:
-  id-token: write
-  contents: read
-  actions: read
-  packages: write
-
 jobs:
   test:
     name: Testing
     runs-on: learning-simple-arc-runners
+    permissions:
+      id-token: write # google-github-actions/auth (OIDC)
+      contents: read # actions/checkout ×2
+      pull-requests: write # orgoro/coverage
     outputs:
       component: ${{ steps.param.outputs.component }}
       hash: ${{ steps.param.outputs.hash }}
@@ -44,11 +42,32 @@ jobs:
       chart-version: ${{ steps.param.outputs.chart-version }}
 
     steps:
+      - name: Generate a token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.GHAPP_ID_NUCLIABOT }}
+          private-key: ${{ secrets.PK_GHAPP_NUCLIABOT }}
+          owner: nuclia
+          repositories: tooling
+          permission-contents: read
+
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Checkout tooling repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: nuclia/tooling
+          ref: main
+          path: tooling
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 
       - name: Parameter generator
-        uses: nuclia/tooling/.github/actions/parameter-generator@e3b8787755f131d70b5346b2704b66cd0accb7cb
+        uses: ./tooling/.github/actions/parameter-generator
         id: param
         with:
           component: forge
@@ -83,7 +102,7 @@ jobs:
           make test
 
       - name: Get Cover
-        uses: orgoro/coverage@v3.1
+        uses: orgoro/coverage@ca0c362dc1a4f100447309405e6dfea47e251495 # v3.3.1
         if: github.event_name == 'pull_request'
         with:
           coverageFile: forge_cov.xml
@@ -127,7 +146,7 @@ jobs:
           password: ${{ steps.gcp-auth-registry.outputs.access_token }}
 
       - name: Push image to registries
-        uses: nuclia/tooling/.github/actions/build-img-regcache@1c637a038d11b783a7ae1f3752b666c16466314e
+        uses: ./tooling/.github/actions/build-img-regcache
         with:
           file: RAO.Dockerfile
           image-name: ${{ steps.param.outputs.component }}
@@ -142,7 +161,7 @@ jobs:
         if: github.event_name == 'push'
 
       - name: Build and push helm chart
-        uses: nuclia/tooling/.github/actions/build-helm-chart@e3b8787755f131d70b5346b2704b66cd0accb7cb
+        uses: ./tooling/.github/actions/build-helm-chart
         with:
           component: ${{ steps.param.outputs.component }}
           chart-version: ${{ steps.param.outputs.chart-version }}
@@ -170,17 +189,20 @@ jobs:
     needs: test
     if: (failure() || cancelled()) && github.event_name == 'push'
     runs-on: nuclia-base
+    permissions: {} # slackapi/slack-github-action uses webhook secret, not GITHUB_TOKEN
     steps:
       - name: Build failed slack message
         id: build_message
         run: |
-          SLACK_MESSAGE="Testing for component ${{ needs.test.outputs.component }} in main/master has failed for SHA ${{ github.sha }}. Promotion can't be executed if a component is not passing tests."
+          SLACK_MESSAGE="Testing for component ${NEEDS_TEST_OUTPUTS_COMPONENT} in main/master has failed for SHA ${{ github.sha }}. Promotion can't be executed if a component is not passing tests."
           COLOR="danger"
 
           echo "color=$COLOR" >> $GITHUB_OUTPUT
           echo "message=$SLACK_MESSAGE" >> $GITHUB_OUTPUT
 
         shell: bash
+        env:
+          NEEDS_TEST_OUTPUTS_COMPONENT: ${{ needs.test.outputs.component }}
 
       - name: Slack notification
         id: slack
@@ -208,8 +230,12 @@ jobs:
     if: github.event_name == 'push'
     needs:
       - test
+    permissions:
+      contents: read # actions/checkout
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
@@ -233,6 +259,7 @@ jobs:
         run: pip wheel --no-deps -w dist ./hyperforge
 
       - name: Upload to pypi
+        # zizmor: ignore[use-trusted-publishing] -- migrating to OIDC trusted publishing is tracked separately; PYPI_TOKEN is a scoped API token
         run: twine upload --verbose dist/*
         env:
           TWINE_USERNAME: __token__
@@ -243,6 +270,7 @@ jobs:
     needs: [test]
     if: |
       !failure() && !cancelled() && github.event_name == 'push'
+    permissions: {} # all API calls use GitHub App token, not GITHUB_TOKEN
     steps:
       - name: Generate a token
         id: app-token
@@ -251,6 +279,8 @@ jobs:
           app-id: ${{ vars.GHAPP_NUCLIA_SERVICE_BOT_ID }}
           private-key: ${{ secrets.GHAPP_NUCLIA_SERVICE_BOT_PK }}
           owner: nuclia
+          repositories: core-apps
+          permission-contents: write
 
       - name: Create components promotion summary. Trigger1
         env:
@@ -260,6 +290,8 @@ jobs:
           PROMO_PRODUCTION: ${{ env.PROMO_PRODUCTION }}
           TEAM: "learning"
           SLACK_TEAM: "S06B50DM2FL"
+          COMPONENT: ${{ needs.test.outputs.component }}
+          CHART_VERSION: ${{ needs.test.outputs.chart-version }}
         run: |
           MERGED_JSON=$(jq -cs \
             --arg environment "$ENVIRONMENT" \
@@ -269,6 +301,8 @@ jobs:
             --arg slack_team "$SLACK_TEAM" \
             --arg promo_production "$PROMO_PRODUCTION" \
             --arg commit_sha "${{ github.sha }}" \
+            --arg component "$COMPONENT" \
+            --arg chart_version "$CHART_VERSION" \
             '{
               components: map(.components) | add
             } + {
@@ -293,8 +327,8 @@ jobs:
             } + {
               "components": [
                 {
-                  "component": "${{ needs.test.outputs.component }}",
-                  "chart-version": "${{ needs.test.outputs.chart-version }}",
+                  "component": $component,
+                  "chart-version": $chart_version,
                   "component-type": "regional"
                 }
               ]
