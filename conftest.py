@@ -27,9 +27,10 @@ def vcr_config():
             ("Authorization", "DUMMY"),
             ("x-nuclia-nuakey", "DUMMY"),
             ("x-stf-nuakey", "DUMMY"),
+            ("x-goog-api-key", "DUMMY"),
         ],
         # Redacts specific query parameters like API keys
-        "filter_query_parameters": ["api_key", "access_token"],
+        "filter_query_parameters": ["api_key", "access_token", "key"],
         # Redacts fields in POST request bodies (e.g., login forms)
         "filter_post_data_parameters": ["password", "client_secret"],
         # Decodes compressed responses so they are human-readable in the cassette
