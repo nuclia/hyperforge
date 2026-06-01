@@ -83,10 +83,8 @@ class GenerateAgent(Agent[GenerateAgentConfig]):
 
         memory.generated_texts[uuid4().hex] = generated_text
 
-        await memory.add_answer(
-            generated_text,
-            module="generate",
-            agent_path=agent_path,
+        await memory.add_generated_text(
+            generated_text, self.config.id if self.config.id else "default"
         )
         # We assume that JSON generation always produces an answer
         memory.is_answered = True

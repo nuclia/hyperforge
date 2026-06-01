@@ -1,11 +1,13 @@
 from enum import Enum
-from typing import Any, Dict, List, Literal, Optional
-from hyperforge.models import MemoryConfig, Rules
-from typing_extensions import Annotated
+from typing import Any, AsyncGenerator, Dict, List, Literal, Optional
 
 from hyperforge.driver import DriverConfig
+from hyperforge.interaction import AragAnswer
+from hyperforge.models import Rules
+from nucliadb_agentic_api.ask.search.ask import AskResult
 from nucliadb_models import TextFormat
 from pydantic import BaseModel, Field
+from typing_extensions import Annotated
 
 
 class StashRoles(str, Enum):
@@ -169,7 +171,10 @@ class PerplexityAgenticSource(BaseModel):
 class MCPAgenticSource(BaseModel):
     type: Literal["mcp"] = "mcp"
     description: Optional[str] = None
-    params: Optional[Dict[str, Any]] = None
+    uri: str
+    headers: Optional[Dict[str, Any]] = None
+    tool_choice_model: Optional[str] = None
+    valid_headers: Optional[List[str]] = None
 
 
 class SyncAgenticSource(BaseModel):
@@ -211,4 +216,4 @@ class AgenticConfiguration(BaseModel):
 
 class AgenticConfigSchema(BaseModel):
     title: Optional[str] = None
-    config: Optional[AgenticConfiguration] = None
+    config: AgenticConfiguration

@@ -9,11 +9,12 @@ from hyperforge.api.v1 import (
     workflows,
 )
 
-from . import ask, mcp_nucliadb
+from . import agentic_configs, ask, mcp_nucliadb
 from .router import router
 
 __all__ = [
     "agents",
+    "agentic_configs",
     "ask",
     "interaction",
     "mcp_interaction",

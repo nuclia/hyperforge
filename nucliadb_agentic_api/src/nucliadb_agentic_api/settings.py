@@ -35,3 +35,7 @@ class Settings(BaseSettings):
     # Hydra settings for MCP Oauth
     hydra_public_url: str = "https://oauth.progress.cloud"
     hydra_scopes_supported: list[str] = ["offline_access", "openid"]
+
+    hyperforge_google_key: Optional[str] = None
+    hyperforge_perplexity_key: Optional[str] = None
+    internal_nua_api: str = "http://predict.learning.svc.cluster.local:8080"

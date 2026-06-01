@@ -8,7 +8,10 @@ from hyperforge.api.logging import set_sentry
 from hyperforge.broker import Broker
 from hyperforge.broker.redis import RedisBroker
 from hyperforge.configure import GLOBAL_REGISTRY, load_all_configurations, scan
+from hyperforge.driver import Driver
 from hyperforge.feature_flag import get_flag_service
+from hyperforge.llm import NUAConnection
+from hyperforge.manager import Manager
 from lru import LRU
 from mcp.server.lowlevel.server import Server as MCPServer
 from mcp.server.streamable_http import (
@@ -59,6 +62,7 @@ async def health_alive():
 class HTTPApplication(FastAPI):
     agent_manager: AgenticConfigs
     broker: Broker
+    hyperforge_drivers: dict[str, "Driver"]
 
     def __init__(
         self,
@@ -129,6 +133,20 @@ class HTTPApplication(FastAPI):
             settings=self.data_manager_settings
         )
         await self.agent_manager.initialize()
+
+        self.hyperforge_drivers = {}
+        if self.settings.hyperforge_google_key:
+            from hyperforge_google.driver import GoogleDriver
+
+            self.hyperforge_drivers["google"] = GoogleDriver(
+                api_key=self.settings.hyperforge_google_key
+            )
+        if self.settings.hyperforge_perplexity_key:
+            from hyperforge_perplexity.driver import PerplexityDriver
+
+            self.hyperforge_drivers["perplexity"] = PerplexityDriver(
+                api_key=self.settings.hyperforge_perplexity_key
+            )
 
         for load_module in self.settings.load_modules:
             try:
