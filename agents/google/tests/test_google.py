@@ -17,7 +17,7 @@ NUA_KEY = os.environ.get("NUA_KEY", "DUMMY")
 pytestmark = [
     pytest.mark.vcr(
         ignore_localhost=True,
-        match_on=["method", "scheme", "host", "port", "path"],
+        match_on=["scheme", "host", "port", "path"],
     ),
     pytest.mark.asyncio,
 ]

@@ -12,7 +12,7 @@ interactions:
       - google-genai-sdk/2.7.0 gl-python/3.12.9
       x-goog-api-key:
       - DUMMY
-    method: post
+    method: POST
     uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
   response:
     body:
