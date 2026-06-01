@@ -1,5 +1,496 @@
 interactions:
 - request:
+    body: '{"contents": [{"parts": [{"text": "What is Nuclia?"}], "role": "user"}],
+      "tools": [{"googleSearch": {}}], "generationConfig": {"responseModalities":
+      ["TEXT"], "thinkingConfig": {"include_thoughts": true}}}'
+    headers:
+      Content-Type:
+      - application/json
+      user-agent:
+      - google-genai-sdk/2.7.0 gl-python/3.12.9
+      x-goog-api-client:
+      - google-genai-sdk/2.7.0 gl-python/3.12.9
+      x-goog-api-key:
+      - AIzaSyDBBq0QwyVtYauiP0D7GkqQaWm8A92kHrM
+    method: post
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\":
+        [\n          {\n            \"text\": \"**Gathering Nuclia Information**\\n\\nI've
+        initiated a Google search for \\\"What is Nuclia?\\\" to begin collecting
+        data on the company and its services. My next step will be to synthesize this
+        information into a concise and comprehensive response to the user's inquiry.
+        I intend to provide a clear and easy-to-understand explanation based on my
+        findings.\\n\\n\\n\",\n            \"thought\": true\n          },\n          {\n
+        \           \"text\": \"**Defining Nuclia's Features**\\n\\nI've established
+        a solid grasp of Nuclia. I understand it as a GenAI API platform, offering
+        RAG-as-a-Service, its capabilities, uses, key features, and relationship to
+        the Progress Agentic RAG platform. Now I know everything needed to respond
+        to the request.\\n\\n\\n\",\n            \"thought\": true\n          },\n
+        \         {\n            \"text\": \"Nuclia, now integrated into the Progress
+        Agentic RAG platform, is a Generative AI (GenAI) API that provides Retrieval-Augmented
+        Generation (RAG) as a service for both internal and product use. It is designed
+        to help organizations accelerate their GenAI journey by efficiently managing
+        and extracting insights from unstructured data.\\n\\nKey aspects and features
+        of Nuclia include:\\n*   **Data Ingestion and Processing** It can ingest over
+        60 file formats of unstructured data from any source and supports over 100
+        languages. This includes transcribing video and audio, converting images to
+        text with OCR, and analyzing documents.\\n*   **RAG-as-a-Service** Nuclia
+        offers a full-stack Agentic RAG-as-a-Service platform that automatically indexes
+        and retrieves unstructured data to deliver trustworthy, generative answers.
+        This platform is built for enterprise-grade performance, offering verifiable
+        and highly scalable GenAI.\\n*   **Multilingual and Multi-format Support**
+        The platform works across any language and media format, ensuring universal
+        accessibility.\\n*   **Security and Control** Nuclia provides world-class
+        security, including ISO27001 and SOC Types 1 and 2 compliance. It also offers
+        granular security, allowing enterprises to choose where their data resides
+        and ensuring full data governance and control with zero vendor lock-in.\\n*
+        \  **NucliaDB** At its core, Nuclia utilizes NucliaDB, an open-source database
+        that can be self-hosted or run in the cloud. This database is designed for
+        efficient indexing and semantic search over unstructured data, unifying blob
+        storage, key-value metadata, and vector indexing.\\n*   **Customization and
+        Integration** Nuclia offers customizable pipelines for chunking, retrieval,
+        entity recognition, and answer generation. It also provides flexible model
+        integration, allowing users to plug in their choice of Large Language Models
+        (LLMs) and embedding models. Developer-friendly tools such as SDKs, REST APIs,
+        CLI tools, and a Sync Agent facilitate integration into existing workflows.\\n*
+        \  **Applications** Nuclia is used for generative AI, productivity, data discovery,
+        and enterprise AI search. It enables the creation of \\\"ChatGPT\\\" for internal
+        data, providing context-aware and unbiased answers from an organization's
+        own information.\"\n          }\n        ],\n        \"role\": \"model\"\n
+        \     },\n      \"finishReason\": \"STOP\",\n      \"index\": 0,\n      \"groundingMetadata\":
+        {\n        \"searchEntryPoint\": {\n          \"renderedContent\": \"\\u003cstyle\\u003e\\n.container
+        {\\n  align-items: center;\\n  border-radius: 8px;\\n  display: flex;\\n  font-family:
+        Google Sans, Roboto, sans-serif;\\n  font-size: 14px;\\n  line-height: 20px;\\n
+        \ padding: 8px 12px;\\n}\\n.chip {\\n  display: inline-block;\\n  border:
+        solid 1px;\\n  border-radius: 16px;\\n  min-width: 14px;\\n  padding: 5px
+        16px;\\n  text-align: center;\\n  user-select: none;\\n  margin: 0 8px;\\n
+        \ -webkit-tap-highlight-color: transparent;\\n}\\n.carousel {\\n  overflow:
+        auto;\\n  scrollbar-width: none;\\n  white-space: nowrap;\\n  margin-right:
+        -12px;\\n}\\n.headline {\\n  display: flex;\\n  margin-right: 4px;\\n}\\n.gradient-container
+        {\\n  position: relative;\\n}\\n.gradient {\\n  position: absolute;\\n  transform:
+        translate(3px, -9px);\\n  height: 36px;\\n  width: 9px;\\n}\\n@media (prefers-color-scheme:
+        light) {\\n  .container {\\n    background-color: #fafafa;\\n    box-shadow:
+        0 0 0 1px #0000000f;\\n  }\\n  .headline-label {\\n    color: #1f1f1f;\\n
+        \ }\\n  .chip {\\n    background-color: #ffffff;\\n    border-color: #d2d2d2;\\n
+        \   color: #5e5e5e;\\n    text-decoration: none;\\n  }\\n  .chip:hover {\\n
+        \   background-color: #f2f2f2;\\n  }\\n  .chip:focus {\\n    background-color:
+        #f2f2f2;\\n  }\\n  .chip:active {\\n    background-color: #d8d8d8;\\n    border-color:
+        #b6b6b6;\\n  }\\n  .logo-dark {\\n    display: none;\\n  }\\n  .gradient {\\n
+        \   background: linear-gradient(90deg, #fafafa 15%, #fafafa00 100%);\\n  }\\n}\\n@media
+        (prefers-color-scheme: dark) {\\n  .container {\\n    background-color: #1f1f1f;\\n
+        \   box-shadow: 0 0 0 1px #ffffff26;\\n  }\\n  .headline-label {\\n    color:
+        #fff;\\n  }\\n  .chip {\\n    background-color: #2c2c2c;\\n    border-color:
+        #3c4043;\\n    color: #fff;\\n    text-decoration: none;\\n  }\\n  .chip:hover
+        {\\n    background-color: #353536;\\n  }\\n  .chip:focus {\\n    background-color:
+        #353536;\\n  }\\n  .chip:active {\\n    background-color: #464849;\\n    border-color:
+        #53575b;\\n  }\\n  .logo-light {\\n    display: none;\\n  }\\n  .gradient
+        {\\n    background: linear-gradient(90deg, #1f1f1f 15%, #1f1f1f00 100%);\\n
+        \ }\\n}\\n\\u003c/style\\u003e\\n\\u003cdiv class=\\\"container\\\"\\u003e\\n
+        \ \\u003cdiv class=\\\"headline\\\"\\u003e\\n    \\u003csvg class=\\\"logo-light\\\"
+        width=\\\"18\\\" height=\\\"18\\\" viewBox=\\\"9 9 35 35\\\" fill=\\\"none\\\"
+        xmlns=\\\"http://www.w3.org/2000/svg\\\"\\u003e\\n      \\u003cpath fill-rule=\\\"evenodd\\\"
+        clip-rule=\\\"evenodd\\\" d=\\\"M42.8622 27.0064C42.8622 25.7839 42.7525 24.6084
+        42.5487 23.4799H26.3109V30.1568H35.5897C35.1821 32.3041 33.9596 34.1222 32.1258
+        35.3448V39.6864H37.7213C40.9814 36.677 42.8622 32.2571 42.8622 27.0064V27.0064Z\\\"
+        fill=\\\"#4285F4\\\"/\\u003e\\n      \\u003cpath fill-rule=\\\"evenodd\\\"
+        clip-rule=\\\"evenodd\\\" d=\\\"M26.3109 43.8555C30.9659 43.8555 34.8687 42.3195
+        37.7213 39.6863L32.1258 35.3447C30.5898 36.3792 28.6306 37.0061 26.3109 37.0061C21.8282
+        37.0061 18.0195 33.9811 16.6559 29.906H10.9194V34.3573C13.7563 39.9841 19.5712
+        43.8555 26.3109 43.8555V43.8555Z\\\" fill=\\\"#34A853\\\"/\\u003e\\n      \\u003cpath
+        fill-rule=\\\"evenodd\\\" clip-rule=\\\"evenodd\\\" d=\\\"M16.6559 29.8904C16.3111
+        28.8559 16.1074 27.7588 16.1074 26.6146C16.1074 25.4704 16.3111 24.3733 16.6559
+        23.3388V18.8875H10.9194C9.74388 21.2072 9.06992 23.8247 9.06992 26.6146C9.06992
+        29.4045 9.74388 32.022 10.9194 34.3417L15.3864 30.8621L16.6559 29.8904V29.8904Z\\\"
+        fill=\\\"#FBBC05\\\"/\\u003e\\n      \\u003cpath fill-rule=\\\"evenodd\\\"
+        clip-rule=\\\"evenodd\\\" d=\\\"M26.3109 16.2386C28.85 16.2386 31.107 17.1164
+        32.9095 18.8091L37.8466 13.8719C34.853 11.082 30.9659 9.3736 26.3109 9.3736C19.5712
+        9.3736 13.7563 13.245 10.9194 18.8875L16.6559 23.3388C18.0195 19.2636 21.8282
+        16.2386 26.3109 16.2386V16.2386Z\\\" fill=\\\"#EA4335\\\"/\\u003e\\n    \\u003c/svg\\u003e\\n
+        \   \\u003csvg class=\\\"logo-dark\\\" width=\\\"18\\\" height=\\\"18\\\"
+        viewBox=\\\"0 0 48 48\\\" xmlns=\\\"http://www.w3.org/2000/svg\\\"\\u003e\\n
+        \     \\u003ccircle cx=\\\"24\\\" cy=\\\"23\\\" fill=\\\"#FFF\\\" r=\\\"22\\\"/\\u003e\\n
+        \     \\u003cpath d=\\\"M33.76 34.26c2.75-2.56 4.49-6.37 4.49-11.26 0-.89-.08-1.84-.29-3H24.01v5.99h8.03c-.4
+        2.02-1.5 3.56-3.07 4.56v.75l3.91 2.97h.88z\\\" fill=\\\"#4285F4\\\"/\\u003e\\n
+        \     \\u003cpath d=\\\"M15.58 25.77A8.845 8.845 0 0 0 24 31.86c1.92 0 3.62-.46
+        4.97-1.31l4.79 3.71C31.14 36.7 27.65 38 24 38c-5.93 0-11.01-3.4-13.45-8.36l.17-1.01
+        4.06-2.85h.8z\\\" fill=\\\"#34A853\\\"/\\u003e\\n      \\u003cpath d=\\\"M15.59
+        20.21a8.864 8.864 0 0 0 0 5.58l-5.03 3.86c-.98-2-1.53-4.25-1.53-6.64 0-2.39.55-4.64
+        1.53-6.64l1-.22 3.81 2.98.22 1.08z\\\" fill=\\\"#FBBC05\\\"/\\u003e\\n      \\u003cpath
+        d=\\\"M24 14.14c2.11 0 4.02.75 5.52 1.98l4.36-4.36C31.22 9.43 27.81 8 24 8c-5.93
+        0-11.01 3.4-13.45 8.36l5.03 3.85A8.86 8.86 0 0 1 24 14.14z\\\" fill=\\\"#EA4335\\\"/\\u003e\\n
+        \   \\u003c/svg\\u003e\\n    \\u003cdiv class=\\\"gradient-container\\\"\\u003e\\u003cdiv
+        class=\\\"gradient\\\"\\u003e\\u003c/div\\u003e\\u003c/div\\u003e\\n  \\u003c/div\\u003e\\n
+        \ \\u003cdiv class=\\\"carousel\\\"\\u003e\\n    \\u003ca class=\\\"chip\\\"
+        href=\\\"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGBTgvAr9QAc7aiA_e3SayDSS0yAxxjXGmg8jPw0WywhayH-sC9rh-Cmt181Q3izdjfmPpgw35KGjXRlTVaHKnSUuNbNdhonjB6ZBf5TsBq85oHf28e3y5PnZ5PRkXqwLzh9JFvGkzopz3vxQCrNRzBDKIoe2iTCOMQNgnT2jIzeCZHM9SdngVE3LiD_U-OehgRbcJR\\\"\\u003eWhat
+        is Nuclia?\\u003c/a\\u003e\\n  \\u003c/div\\u003e\\n\\u003c/div\\u003e\\n\"\n
+        \       },\n        \"groundingChunks\": [\n          {\n            \"web\":
+        {\n              \"uri\": \"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFQicVaRhRrRukE6PibKhDM4Zi9WMtP4u0_FzbB60GcEWejCppegNxsCGQ9leX8VnHO4vhafi8mLlCuwLgY4GyqJQW61jcNtLclpO3Wmiu6ELDzYC36owMxYllXN6EgmzUnh2lWKPw=\",\n
+        \             \"title\": \"capterra.com\"\n            }\n          },\n          {\n
+        \           \"web\": {\n              \"uri\": \"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEOjDcALcQcoUJ5CekDe6owAsym0ODzkuKDKVuuM_Rpi-zrzo63GHBJe75txjxI6cTCM-T3VeI1GwUkqSrK4fl8mviuV5b_rq4gzd6TDmcQiVWGeRLTsu8X6g22FoQUePoin3tweCPw7UGXW7dXOQ==\",\n
+        \             \"title\": \"enstacked.com\"\n            }\n          },\n
+        \         {\n            \"web\": {\n              \"uri\": \"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH0i9oEt4t7HgsG7cU58X_ZZXHkG9adLGedasuYlkF8jNEmBhj6O0qpyD0oi-O98uEHCXCyIgF9OcITO-_-fR_RM-YxLdij-JqAWipkW-YyifsdKO9HZx-iTsZLbWc9BwGQPY9NZEE=\",\n
+        \             \"title\": \"progress.com\"\n            }\n          },\n          {\n
+        \           \"web\": {\n              \"uri\": \"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEF_UW-q0KMBMDqtIbBhrN9Yik7a012ZwWTBQQr51_rkl6QojBMVcc_7zPjHAWrCOEH9mMF4UQ2flF4nk9VYi3t1V8rjloPk2XRvoRWq4g_0mhx8r59gZh7epSUFS2z\",\n
+        \             \"title\": \"n8n.io\"\n            }\n          },\n          {\n
+        \           \"web\": {\n              \"uri\": \"https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHXJdHbExni3fR5etD2VQldzPen4lDKCehJgyHzZo4jkDIJtDdsNK4AoQXDKEmR41W2Gj0nwG2U--aQJZGIDWmLhBb3lzOAIDLaKBDlKUgGGLz8eTztluRIiiu3tBNFSoyNe4VY1NS0qihk7Zebb5vEJl0q2oOsM75Q05InodpjujBGJqVbmv4daGRELhGbIyAKy-YLvSJ_pgGQITe4OdX9xqsctiVRL8Wa\",\n
+        \             \"title\": \"reddit.com\"\n            }\n          }\n        ],\n
+        \       \"groundingSupports\": [\n          {\n            \"segment\": {\n
+        \             \"endIndex\": 192,\n              \"text\": \"Nuclia, now integrated
+        into the Progress Agentic RAG platform, is a Generative AI (GenAI) API that
+        provides Retrieval-Augmented Generation (RAG) as a service for both internal
+        and product use.\"\n            },\n            \"groundingChunkIndices\":
+        [\n              0,\n              1,\n              2\n            ]\n          },\n
+        \         {\n            \"segment\": {\n              \"startIndex\": 193,\n
+        \             \"endIndex\": 332,\n              \"text\": \"It is designed
+        to help organizations accelerate their GenAI journey by efficiently managing
+        and extracting insights from unstructured data.\"\n            },\n            \"groundingChunkIndices\":
+        [\n              0\n            ]\n          },\n          {\n            \"segment\":
+        {\n              \"startIndex\": 334,\n              \"endIndex\": 520,\n
+        \             \"text\": \"Key aspects and features of Nuclia include:\\n*
+        \  **Data Ingestion and Processing** It can ingest over 60 file formats of
+        unstructured data from any source and supports over 100 languages.\"\n            },\n
+        \           \"groundingChunkIndices\": [\n              0\n            ]\n
+        \         },\n          {\n            \"segment\": {\n              \"startIndex\":
+        521,\n              \"endIndex\": 625,\n              \"text\": \"This includes
+        transcribing video and audio, converting images to text with OCR, and analyzing
+        documents.\"\n            },\n            \"groundingChunkIndices\": [\n              3\n
+        \           ]\n          },\n          {\n            \"segment\": {\n              \"startIndex\":
+        626,\n              \"endIndex\": 814,\n              \"text\": \"*   **RAG-as-a-Service**
+        Nuclia offers a full-stack Agentic RAG-as-a-Service platform that automatically
+        indexes and retrieves unstructured data to deliver trustworthy, generative
+        answers.\"\n            },\n            \"groundingChunkIndices\": [\n              4\n
+        \           ]\n          },\n          {\n            \"segment\": {\n              \"startIndex\":
+        815,\n              \"endIndex\": 918,\n              \"text\": \"This platform
+        is built for enterprise-grade performance, offering verifiable and highly
+        scalable GenAI.\"\n            },\n            \"groundingChunkIndices\":
+        [\n              1\n            ]\n          },\n          {\n            \"segment\":
+        {\n              \"startIndex\": 919,\n              \"endIndex\": 1055,\n
+        \             \"text\": \"*   **Multilingual and Multi-format Support** The
+        platform works across any language and media format, ensuring universal accessibility.\"\n
+        \           },\n            \"groundingChunkIndices\": [\n              4\n
+        \           ]\n          },\n          {\n            \"segment\": {\n              \"startIndex\":
+        1056,\n              \"endIndex\": 1175,\n              \"text\": \"*   **Security
+        and Control** Nuclia provides world-class security, including ISO27001 and
+        SOC Types 1 and 2 compliance.\"\n            },\n            \"groundingChunkIndices\":
+        [\n              0\n            ]\n          },\n          {\n            \"segment\":
+        {\n              \"startIndex\": 1176,\n              \"endIndex\": 1337,\n
+        \             \"text\": \"It also offers granular security, allowing enterprises
+        to choose where their data resides and ensuring full data governance and control
+        with zero vendor lock-in.\"\n            },\n            \"groundingChunkIndices\":
+        [\n              4\n            ]\n          },\n          {\n            \"segment\":
+        {\n              \"startIndex\": 1338,\n              \"endIndex\": 1462,\n
+        \             \"text\": \"*   **NucliaDB** At its core, Nuclia utilizes NucliaDB,
+        an open-source database that can be self-hosted or run in the cloud.\"\n            },\n
+        \           \"groundingChunkIndices\": [\n              4,\n              2\n
+        \           ]\n          },\n          {\n            \"segment\": {\n              \"startIndex\":
+        1463,\n              \"endIndex\": 1619,\n              \"text\": \"This database
+        is designed for efficient indexing and semantic search over unstructured data,
+        unifying blob storage, key-value metadata, and vector indexing.\"\n            },\n
+        \           \"groundingChunkIndices\": [\n              2\n            ]\n
+        \         },\n          {\n            \"segment\": {\n              \"startIndex\":
+        1620,\n              \"endIndex\": 1762,\n              \"text\": \"*   **Customization
+        and Integration** Nuclia offers customizable pipelines for chunking, retrieval,
+        entity recognition, and answer generation.\"\n            },\n            \"groundingChunkIndices\":
+        [\n              4\n            ]\n          },\n          {\n            \"segment\":
+        {\n              \"startIndex\": 1763,\n              \"endIndex\": 1900,\n
+        \             \"text\": \"It also provides flexible model integration, allowing
+        users to plug in their choice of Large Language Models (LLMs) and embedding
+        models.\"\n            },\n            \"groundingChunkIndices\": [\n              4\n
+        \           ]\n          },\n          {\n            \"segment\": {\n              \"startIndex\":
+        1901,\n              \"endIndex\": 2026,\n              \"text\": \"Developer-friendly
+        tools such as SDKs, REST APIs, CLI tools, and a Sync Agent facilitate integration
+        into existing workflows.\"\n            },\n            \"groundingChunkIndices\":
+        [\n              4\n            ]\n          },\n          {\n            \"segment\":
+        {\n              \"startIndex\": 2027,\n              \"endIndex\": 2137,\n
+        \             \"text\": \"*   **Applications** Nuclia is used for generative
+        AI, productivity, data discovery, and enterprise AI search.\"\n            },\n
+        \           \"groundingChunkIndices\": [\n              0,\n              1\n
+        \           ]\n          },\n          {\n            \"segment\": {\n              \"startIndex\":
+        2138,\n              \"endIndex\": 2278,\n              \"text\": \"It enables
+        the creation of \\\"ChatGPT\\\" for internal data, providing context-aware
+        and unbiased answers from an organization's own information.\"\n            },\n
+        \           \"groundingChunkIndices\": [\n              2\n            ]\n
+        \         }\n        ],\n        \"webSearchQueries\": [\n          \"What
+        is Nuclia?\"\n        ]\n      }\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\":
+        6,\n    \"candidatesTokenCount\": 487,\n    \"totalTokenCount\": 773,\n    \"promptTokensDetails\":
+        [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 6\n      }\n
+        \   ],\n    \"toolUsePromptTokenCount\": 66,\n    \"toolUsePromptTokensDetails\":
+        [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 66\n
+        \     }\n    ],\n    \"thoughtsTokenCount\": 214,\n    \"serviceTier\": \"standard\"\n
+        \ },\n  \"modelVersion\": \"gemini-2.5-flash\",\n  \"responseId\": \"i4sdaoC_GrX6vdIPu6KIyQM\"\n}\n"
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Mon, 01 Jun 2026 13:39:30 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=6886
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Gemini-Service-Tier:
+      - standard
+      X-XSS-Protection:
+      - '0'
+      content-length:
+      - '16810'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - vertexaisearch.cloud.google.com
+      User-Agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFQicVaRhRrRukE6PibKhDM4Zi9WMtP4u0_FzbB60GcEWejCppegNxsCGQ9leX8VnHO4vhafi8mLlCuwLgY4GyqJQW61jcNtLclpO3Wmiu6ELDzYC36owMxYllXN6EgmzUnh2lWKPw=
+  response:
+    body:
+      string: "<HTML><HEAD><meta http-equiv=\"content-type\" content=\"text/html;charset=utf-8\">\n<TITLE>302
+        Moved</TITLE></HEAD><BODY>\n<H1>302 Moved</H1>\nThe document has moved\n<A
+        HREF=\"https://www.capterra.com/p/10009691/Nuclia/\">here</A>.\r\n</BODY></HTML>\r\n"
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '240'
+      Content-Security-Policy-Report-Only:
+      - script-src 'none'; form-action 'none'; frame-src 'none'; report-uri https://csp.withgoogle.com/csp/scaffolding/cdmldeutrc:183:0
+      Content-Type:
+      - text/html; charset=UTF-8
+      Cross-Origin-Opener-Policy-Report-Only:
+      - same-origin; report-to=cdmldeutrc:183:0
+      Date:
+      - Mon, 01 Jun 2026 13:39:30 GMT
+      Location:
+      - https://www.capterra.com/p/10009691/Nuclia/
+      Report-To:
+      - '{"group":"cdmldeutrc:183:0","max_age":2592000,"endpoints":[{"url":"https://csp.withgoogle.com/csp/report-to/scaffolding/cdmldeutrc:183:0"}],}'
+      Server:
+      - scaffolding on HTTPServer2
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Robots-Tag:
+      - noindex
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 302
+      message: Found
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - vertexaisearch.cloud.google.com
+      User-Agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEOjDcALcQcoUJ5CekDe6owAsym0ODzkuKDKVuuM_Rpi-zrzo63GHBJe75txjxI6cTCM-T3VeI1GwUkqSrK4fl8mviuV5b_rq4gzd6TDmcQiVWGeRLTsu8X6g22FoQUePoin3tweCPw7UGXW7dXOQ==
+  response:
+    body:
+      string: "<HTML><HEAD><meta http-equiv=\"content-type\" content=\"text/html;charset=utf-8\">\n<TITLE>302
+        Moved</TITLE></HEAD><BODY>\n<H1>302 Moved</H1>\nThe document has moved\n<A
+        HREF=\"https://enstacked.com/case-study/nuclia-case-study/\">here</A>.\r\n</BODY></HTML>\r\n"
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '248'
+      Content-Security-Policy-Report-Only:
+      - script-src 'none'; form-action 'none'; frame-src 'none'; report-uri https://csp.withgoogle.com/csp/scaffolding/cdmldeutrc:183:0
+      Content-Type:
+      - text/html; charset=UTF-8
+      Cross-Origin-Opener-Policy-Report-Only:
+      - same-origin; report-to=cdmldeutrc:183:0
+      Date:
+      - Mon, 01 Jun 2026 13:39:30 GMT
+      Location:
+      - https://enstacked.com/case-study/nuclia-case-study/
+      Report-To:
+      - '{"group":"cdmldeutrc:183:0","max_age":2592000,"endpoints":[{"url":"https://csp.withgoogle.com/csp/report-to/scaffolding/cdmldeutrc:183:0"}],}'
+      Server:
+      - scaffolding on HTTPServer2
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Robots-Tag:
+      - noindex
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 302
+      message: Found
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - vertexaisearch.cloud.google.com
+      User-Agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH0i9oEt4t7HgsG7cU58X_ZZXHkG9adLGedasuYlkF8jNEmBhj6O0qpyD0oi-O98uEHCXCyIgF9OcITO-_-fR_RM-YxLdij-JqAWipkW-YyifsdKO9HZx-iTsZLbWc9BwGQPY9NZEE=
+  response:
+    body:
+      string: "<HTML><HEAD><meta http-equiv=\"content-type\" content=\"text/html;charset=utf-8\">\n<TITLE>302
+        Moved</TITLE></HEAD><BODY>\n<H1>302 Moved</H1>\nThe document has moved\n<A
+        HREF=\"https://www.progress.com/blogs/why-nucliadb\">here</A>.\r\n</BODY></HTML>\r\n"
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '240'
+      Content-Security-Policy-Report-Only:
+      - script-src 'none'; form-action 'none'; frame-src 'none'; report-uri https://csp.withgoogle.com/csp/scaffolding/cdmldeutrc:183:0
+      Content-Type:
+      - text/html; charset=UTF-8
+      Cross-Origin-Opener-Policy-Report-Only:
+      - same-origin; report-to=cdmldeutrc:183:0
+      Date:
+      - Mon, 01 Jun 2026 13:39:31 GMT
+      Location:
+      - https://www.progress.com/blogs/why-nucliadb
+      Report-To:
+      - '{"group":"cdmldeutrc:183:0","max_age":2592000,"endpoints":[{"url":"https://csp.withgoogle.com/csp/report-to/scaffolding/cdmldeutrc:183:0"}],}'
+      Server:
+      - scaffolding on HTTPServer2
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Robots-Tag:
+      - noindex
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 302
+      message: Found
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - vertexaisearch.cloud.google.com
+      User-Agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEF_UW-q0KMBMDqtIbBhrN9Yik7a012ZwWTBQQr51_rkl6QojBMVcc_7zPjHAWrCOEH9mMF4UQ2flF4nk9VYi3t1V8rjloPk2XRvoRWq4g_0mhx8r59gZh7epSUFS2z
+  response:
+    body:
+      string: "<HTML><HEAD><meta http-equiv=\"content-type\" content=\"text/html;charset=utf-8\">\n<TITLE>302
+        Moved</TITLE></HEAD><BODY>\n<H1>302 Moved</H1>\nThe document has moved\n<A
+        HREF=\"https://n8n.io/integrations/nuclia/\">here</A>.\r\n</BODY></HTML>\r\n"
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '232'
+      Content-Security-Policy-Report-Only:
+      - script-src 'none'; form-action 'none'; frame-src 'none'; report-uri https://csp.withgoogle.com/csp/scaffolding/cdmldeutrc:183:0
+      Content-Type:
+      - text/html; charset=UTF-8
+      Cross-Origin-Opener-Policy-Report-Only:
+      - same-origin; report-to=cdmldeutrc:183:0
+      Date:
+      - Mon, 01 Jun 2026 13:39:31 GMT
+      Location:
+      - https://n8n.io/integrations/nuclia/
+      Report-To:
+      - '{"group":"cdmldeutrc:183:0","max_age":2592000,"endpoints":[{"url":"https://csp.withgoogle.com/csp/report-to/scaffolding/cdmldeutrc:183:0"}],}'
+      Server:
+      - scaffolding on HTTPServer2
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Robots-Tag:
+      - noindex
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 302
+      message: Found
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - vertexaisearch.cloud.google.com
+      User-Agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHXJdHbExni3fR5etD2VQldzPen4lDKCehJgyHzZo4jkDIJtDdsNK4AoQXDKEmR41W2Gj0nwG2U--aQJZGIDWmLhBb3lzOAIDLaKBDlKUgGGLz8eTztluRIiiu3tBNFSoyNe4VY1NS0qihk7Zebb5vEJl0q2oOsM75Q05InodpjujBGJqVbmv4daGRELhGbIyAKy-YLvSJ_pgGQITe4OdX9xqsctiVRL8Wa
+  response:
+    body:
+      string: "<HTML><HEAD><meta http-equiv=\"content-type\" content=\"text/html;charset=utf-8\">\n<TITLE>302
+        Moved</TITLE></HEAD><BODY>\n<H1>302 Moved</H1>\nThe document has moved\n<A
+        HREF=\"https://www.reddit.com/r/Discover_AI_Tools/comments/1mw35dj/ai_tool_of_the_day_nuclia_enterprisegrade_agentic/\">here</A>.\r\n</BODY></HTML>\r\n"
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '307'
+      Content-Security-Policy-Report-Only:
+      - script-src 'none'; form-action 'none'; frame-src 'none'; report-uri https://csp.withgoogle.com/csp/scaffolding/cdmldeutrc:183:0
+      Content-Type:
+      - text/html; charset=UTF-8
+      Cross-Origin-Opener-Policy-Report-Only:
+      - same-origin; report-to=cdmldeutrc:183:0
+      Date:
+      - Mon, 01 Jun 2026 13:39:31 GMT
+      Location:
+      - https://www.reddit.com/r/Discover_AI_Tools/comments/1mw35dj/ai_tool_of_the_day_nuclia_enterprisegrade_agentic/
+      Report-To:
+      - '{"group":"cdmldeutrc:183:0","max_age":2592000,"endpoints":[{"url":"https://csp.withgoogle.com/csp/report-to/scaffolding/cdmldeutrc:183:0"}],}'
+      Server:
+      - scaffolding on HTTPServer2
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Robots-Tag:
+      - noindex
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 302
+      message: Found
+- request:
     body: '{"question": "", "retrieval": true, "user_id": "rao_answer_summary-google",
       "system": null, "chat_history": [], "context": [], "query_context": {}, "query_context_order":
       {}, "truncate": true, "user_prompt": {"prompt": "\nBased on the provided context
@@ -34,76 +525,77 @@ interactions:
       \"block-CD\"]).\n11. **IMPORTANT** If any extra instructions are provided, you
       MUST follow them carefully when generating the answer field. These instructions
       may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWhat
-      is Nuclia?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk: f85b78a634fc4395af9c459a5ed43c06\nURLs:
-      https://store.hypergpt.ai/nuclia, https://www.capterra.com/p/10009691/Nuclia/,
+      is Nuclia?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk: 2a48e72aa407443e8a6db26b17e5bebd\nURLs:
+      https://www.capterra.com/p/10009691/Nuclia/, https://enstacked.com/case-study/nuclia-case-study/,
+      https://www.progress.com/blogs/why-nucliadb\n``` Nuclia, now integrated into
+      the Progress Agentic RAG platform, is a Generative AI (GenAI) API that provides
+      Retrieval-Augmented Generation (RAG) as a service for both internal and product
+      use. ```\n\n\n---\"\n\n\n**block-AB**\n\n## Chunk: 00dc5ee5608f436d8aced55b507b40e6\nURLs:
+      https://www.capterra.com/p/10009691/Nuclia/\n``` It is designed to help organizations
+      accelerate their GenAI journey by efficiently managing and extracting insights
+      from unstructured data. ```\n\n\n---\"\n\n\n**block-AC**\n\n## Chunk: 1235f25515a243efaf05800aa43a43a1\nURLs:
+      https://www.capterra.com/p/10009691/Nuclia/\n``` Key aspects and features of
+      Nuclia include:\n*   **Data Ingestion and Processing** It can ingest over 60
+      file formats of unstructured data from any source and supports over 100 languages.
+      ```\n\n\n---\"\n\n\n**block-AD**\n\n## Chunk: 19ee03651c5c4a02ad766768a6971323\nURLs:
+      https://n8n.io/integrations/nuclia/\n``` This includes transcribing video and
+      audio, converting images to text with OCR, and analyzing documents. ```\n\n\n---\"\n\n\n**block-AE**\n\n##
+      Chunk: 245a9a9f05b9492fb7dd667f038d7ca7\nURLs: https://www.reddit.com/r/Discover_AI_Tools/comments/1mw35dj/ai_tool_of_the_day_nuclia_enterprisegrade_agentic/\n```
+      *   **RAG-as-a-Service** Nuclia offers a full-stack Agentic RAG-as-a-Service
+      platform that automatically indexes and retrieves unstructured data to deliver
+      trustworthy, generative answers. ```\n\n\n---\"\n\n\n**block-AF**\n\n## Chunk:
+      0327086634c1435eaa9cd1853bd5ce7a\nURLs: https://enstacked.com/case-study/nuclia-case-study/\n```
+      This platform is built for enterprise-grade performance, offering verifiable
+      and highly scalable GenAI. ```\n\n\n---\"\n\n\n**block-AG**\n\n## Chunk: 71027deadfc54340b33f3dcf372fa8cc\nURLs:
       https://www.reddit.com/r/Discover_AI_Tools/comments/1mw35dj/ai_tool_of_the_day_nuclia_enterprisegrade_agentic/\n```
-      Nuclia is an AI-powered search engine and a Generative AI (GenAI) API that provides
-      Retrieval-Augmented Generation (RAG) as a service for enterprises ```\n\n\n---\"\n\n\n**block-AB**\n\n##
-      Chunk: 33d4e4b307af4f43989019adadc1c24a\nURLs: https://store.hypergpt.ai/nuclia,
+      *   **Multilingual and Multi-format Support** The platform works across any
+      language and media format, ensuring universal accessibility. ```\n\n\n---\"\n\n\n**block-AH**\n\n##
+      Chunk: 7b58229dc44747b3bdbc59307a8841a8\nURLs: https://www.capterra.com/p/10009691/Nuclia/\n```
+      *   **Security and Control** Nuclia provides world-class security, including
+      ISO27001 and SOC Types 1 and 2 compliance. ```\n\n\n---\"\n\n\n**block-AI**\n\n##
+      Chunk: 18c170f69a804f05a218cb5cfa124ee1\nURLs: https://www.reddit.com/r/Discover_AI_Tools/comments/1mw35dj/ai_tool_of_the_day_nuclia_enterprisegrade_agentic/\n```
+      It also offers granular security, allowing enterprises to choose where their
+      data resides and ensuring full data governance and control with zero vendor
+      lock-in. ```\n\n\n---\"\n\n\n**block-AJ**\n\n## Chunk: 6e97d961d3864ae6bb6259cbfb89148c\nURLs:
       https://www.reddit.com/r/Discover_AI_Tools/comments/1mw35dj/ai_tool_of_the_day_nuclia_enterprisegrade_agentic/,
-      https://n8n.io/integrations/nuclia/\n``` It specializes in automatically indexing
-      and retrieving unstructured data from virtually any source, including documents,
-      videos, audio files, and images ```\n\n\n---\"\n\n\n**block-AC**\n\n## Chunk:
-      af2e4e6d4a2340a4aa4da05df1fc450e\nURLs: https://store.hypergpt.ai/nuclia, https://www.capterra.com/p/10009691/Nuclia/\n```
-      *   **Unstructured Data Processing** It can ingest and process over 60 different
-      file formats in over 100 languages, automatically syncing and indexing content
-      from various sources like Dropbox, Google Drive, Amazon S3, Google Cloud, and
-      other file systems ```\n\n\n---\"\n\n\n**block-AD**\n\n## Chunk: 3bb6cc94687d4a8d961d564d46d18d7b\nURLs:
-      https://store.hypergpt.ai/nuclia, https://www.reddit.com/r/Discover_AI_Tools/comments/1mw35dj/ai_tool_of_the_day_nuclia_enterprisegrade_agentic/\n```
-      This capability allows organizations to transform diverse and messy data into
-      intelligent insights and answers ```\n\n\n---\"\n\n\n**block-AE**\n\n## Chunk:
-      9c0c75158bfe42788c699ed3057eb033\nURLs: https://store.hypergpt.ai/nuclia\n```
-      *   **AI-Powered Search and Insights** Nuclia provides an intelligent search
-      engine that allows users to query data using traditional keywords or natural
-      language, delivering precise answers ```\n\n\n---\"\n\n\n**block-AF**\n\n##
-      Chunk: 497580008f6d4c229fb75a6aa2913e83\nURLs: https://store.hypergpt.ai/nuclia\n```
-      Its AI capabilities extend to entity detection and 15 built-in insight detectors
-      that automatically extract meaningful information ```\n\n\n---\"\n\n\n**block-AG**\n\n##
-      Chunk: 023eeebdcb8c4f59b89f091ceb0d0bf1\nURLs: https://store.hypergpt.ai/nuclia\n```
-      Search results and detection can be customized to specific organizational needs
-      ```\n\n\n---\"\n\n\n**block-AH**\n\n## Chunk: 9482560006034aeb89e311a4e03520a9\nURLs:
-      https://www.reddit.com/r/Discover_AI_Tools/comments/1mw35dj/ai_tool_of_the_day_nuclia_enterprisegrade_agentic/\n```
-      *   **RAG-as-a-Service** The platform offers a full-stack Agentic RAG-as-a-Service,
-      enabling the deployment of AI agents for reliable and scalable retrieval-augmented
-      generation workflows ```\n\n\n---\"\n\n\n**block-AI**\n\n## Chunk: c24e262447c04a5d9219c132a424bb54\nURLs:
-      https://www.capterra.com/p/10009691/Nuclia/\n``` This helps accelerate organizations''
-      GenAI journeys ```\n\n\n---\"\n\n\n**block-AJ**\n\n## Chunk: 5c7aa28938644b9fb167f3b91672c704\nURLs:
-      https://enstacked.com/case-study/nuclia-case-study/\n``` Nuclia is now part
-      of the Progress Agentic RAG platform ```\n\n\n---\"\n\n\n**block-AK**\n\n##
-      Chunk: 24b91c63f7b44e97b074ebe2e78d1ae1\nURLs: https://store.hypergpt.ai/nuclia\n```
-      *   **Flexible Integration and Deployment** Nuclia offers multiple deployment
-      options, including web apps, desktop applications, REST APIs, and Chrome extensions
-      ```\n\n\n---\"\n\n\n**block-AL**\n\n## Chunk: d4b8725043d14c0c877f0ed7c931d628\nURLs:
-      https://store.hypergpt.ai/nuclia, https://n8n.io/integrations/nuclia/\n``` It
-      provides a complete API layer and open SDKs, allowing developers to build custom
-      front-end applications and integrate with over 1000 other services ```\n\n\n---\"\n\n\n**block-AM**\n\n##
-      Chunk: 319e971a080142c3989724d4617c18eb\nURLs: https://www.reddit.com/r/Discover_AI_Tools/comments/1mw35dj/ai_tool_of_the_day_nuclia_enterprisegrade_agentic/\n```
-      NucliaDB, its underlying database, is open-source, offering options for self-hosting
-      or cloud deployment, ensuring data governance and control ```\n\n\n---\"\n\n\n**block-AN**\n\n##
-      Chunk: 893054cc76734206804c2aa2c7b8c3ff\nURLs: https://www.reddit.com/r/Discover_AI_Tools/comments/1mw35dj/ai_tool_of_the_day_nuclia_enterprisegrade_agentic/\n```
-      *   **Security and Control** Nuclia emphasizes granular security, allowing enterprises
-      to choose where their data resides and ensuring privacy and sovereignty ```\n\n\n---\"\n\n\n**block-AO**\n\n##
-      Chunk: 944051455e5548b4a8ff1600386938f6\nURLs: https://www.capterra.com/p/10009691/Nuclia/\n```
-      It is compliant with ISO27001 and SOC Types 1 and 2 ```\n\n\n---\"\n\n\n**block-AP**\n\n##
-      Chunk: b9822ecd27da447cbf8cdd25505f2f3e\nURLs: https://www.reddit.com/r/Discover_AI_Tools/comments/1mw35dj/ai_tool_of_the_day_nuclia_enterprisegrade_agentic/\n```
-      The platform also provides flexibility in integrating various Large Language
-      Models (LLMs) and embedding models, with customizable prompts ```\n\n\n---\"\n\n\n\n\n<END
-      OF CONTEXT>\n\n"}, "citations": false, "citation_threshold": null, "generative_model":
-      "chatgpt-azure-4o-mini", "max_tokens": 2000, "query_context_images": {}, "prefer_markdown":
-      null, "json_schema": {"title": "validate_or_answer", "description": "Validate
-      or answer", "parameters": {"type": "object", "properties": {"reason": {"type":
-      "string", "description": "Reasoning for the answer or validation"}, "answer":
-      {"type": "string", "description": "Partial or complete answer to the user query
-      from the information in the context."}, "missing_info_query": {"type": "string",
-      "description": "Query needed to retrieve the missing information in case the
-      context is not enough to answer the question. If the context does not answer
-      the question at all, just return the original question."}, "useful": {"type":
-      "string", "description": "Is the context useful to answer the question?", "enum":
-      ["yes", "no"]}, "citations": {"type": "array", "items": {"type": "string", "description":
-      "Block ID cited in the answer, e.g. block-AB"}, "description": "List of block
-      IDs cited in the answer, if any"}}, "required": ["reason", "answer", "missing_info_query",
-      "useful", "citations"]}}, "format_prompt": false, "rerank_context": false, "tools":
-      [], "tool_choice": {"type": "required"}, "reasoning": false, "seed": null}'
+      https://www.progress.com/blogs/why-nucliadb\n``` *   **NucliaDB** At its core,
+      Nuclia utilizes NucliaDB, an open-source database that can be self-hosted or
+      run in the cloud. ```\n\n\n---\"\n\n\n**block-AK**\n\n## Chunk: a78051611d614a42a118b26e70ba479f\nURLs:
+      https://www.progress.com/blogs/why-nucliadb\n``` This database is designed for
+      efficient indexing and semantic search over unstructured data, unifying blob
+      storage, key-value metadata, and vector indexing. ```\n\n\n---\"\n\n\n**block-AL**\n\n##
+      Chunk: 41e07c5c6b034cdeb4735d273b09cb24\nURLs: https://www.reddit.com/r/Discover_AI_Tools/comments/1mw35dj/ai_tool_of_the_day_nuclia_enterprisegrade_agentic/\n```
+      *   **Customization and Integration** Nuclia offers customizable pipelines for
+      chunking, retrieval, entity recognition, and answer generation. ```\n\n\n---\"\n\n\n**block-AM**\n\n##
+      Chunk: e857cb0ca5a1453bbef96500f23c3a75\nURLs: https://www.reddit.com/r/Discover_AI_Tools/comments/1mw35dj/ai_tool_of_the_day_nuclia_enterprisegrade_agentic/\n```
+      It also provides flexible model integration, allowing users to plug in their
+      choice of Large Language Models (LLMs) and embedding models. ```\n\n\n---\"\n\n\n**block-AN**\n\n##
+      Chunk: 859ef0e69f954492bbeedb3b0041e120\nURLs: https://www.reddit.com/r/Discover_AI_Tools/comments/1mw35dj/ai_tool_of_the_day_nuclia_enterprisegrade_agentic/\n```
+      Developer-friendly tools such as SDKs, REST APIs, CLI tools, and a Sync Agent
+      facilitate integration into existing workflows. ```\n\n\n---\"\n\n\n**block-AO**\n\n##
+      Chunk: aa2785338df4467995f351dbc31b9b00\nURLs: https://www.capterra.com/p/10009691/Nuclia/,
+      https://enstacked.com/case-study/nuclia-case-study/\n``` *   **Applications**
+      Nuclia is used for generative AI, productivity, data discovery, and enterprise
+      AI search. ```\n\n\n---\"\n\n\n**block-AP**\n\n## Chunk: 16dadc34fd164edb86bb336c31058c0b\nURLs:
+      https://www.progress.com/blogs/why-nucliadb\n``` It enables the creation of
+      \"ChatGPT\" for internal data, providing context-aware and unbiased answers
+      from an organization''s own information. ```\n\n\n---\"\n\n\n\n\n<END OF CONTEXT>\n\n"},
+      "citations": false, "citation_threshold": null, "generative_model": "chatgpt-azure-4o-mini",
+      "max_tokens": 2000, "query_context_images": {}, "prefer_markdown": null, "json_schema":
+      {"title": "validate_or_answer", "description": "Validate or answer", "parameters":
+      {"type": "object", "properties": {"reason": {"type": "string", "description":
+      "Reasoning for the answer or validation"}, "answer": {"type": "string", "description":
+      "Partial or complete answer to the user query from the information in the context."},
+      "missing_info_query": {"type": "string", "description": "Query needed to retrieve
+      the missing information in case the context is not enough to answer the question.
+      If the context does not answer the question at all, just return the original
+      question."}, "useful": {"type": "string", "description": "Is the context useful
+      to answer the question?", "enum": ["yes", "no"]}, "citations": {"type": "array",
+      "items": {"type": "string", "description": "Block ID cited in the answer, e.g.
+      block-AB"}, "description": "List of block IDs cited in the answer, if any"}},
+      "required": ["reason", "answer", "missing_info_query", "useful", "citations"]}},
+      "format_prompt": false, "rerank_context": false, "tools": [], "tool_choice":
+      {"type": "required"}, "reasoning": false, "seed": null}'
     headers:
       Accept:
       - application/x-ndjson
@@ -112,7 +604,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '8995'
+      - '9088'
       Content-Type:
       - application/json
       Host:
@@ -132,13 +624,13 @@ interactions:
       string: '{"detail":"JWT decoding error"}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Content-Length:
       - '31'
       content-type:
       - application/json
       date:
-      - Mon, 01 Jun 2026 11:46:30 GMT
+      - Mon, 01 Jun 2026 13:39:31 GMT
       server:
       - uvicorn
       via:
