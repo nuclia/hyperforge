@@ -10,6 +10,7 @@ on:
       - main
     paths:
       - '**/*.lock'
+  workflow_call:    
 
 jobs:
   blackduck-sca-scan:
