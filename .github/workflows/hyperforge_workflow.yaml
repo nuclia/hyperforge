@@ -44,11 +44,31 @@ jobs:
       chart-version: ${{ steps.param.outputs.chart-version }}
 
     steps:
+      
+      - name: Generate a token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.GHAPP_ID_NUCLIABOT }}
+          private-key: ${{ secrets.PK_GHAPP_NUCLIABOT }}
+          owner: nuclia
+
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Checkout tooling repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: nuclia/tooling
+          ref: main
+          path: tooling
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 
       - name: Parameter generator
-        uses: nuclia/tooling/.github/actions/parameter-generator@e3b8787755f131d70b5346b2704b66cd0accb7cb
+        uses: ./tooling/.github/actions/parameter-generator
         id: param
         with:
           component: forge
@@ -83,7 +103,7 @@ jobs:
           make test
 
       - name: Get Cover
-        uses: orgoro/coverage@v3.1
+        uses: orgoro/coverage@ca0c362dc1a4f100447309405e6dfea47e251495 # v3.3.1
         if: github.event_name == 'pull_request'
         with:
           coverageFile: forge_cov.xml
@@ -127,7 +147,7 @@ jobs:
           password: ${{ steps.gcp-auth-registry.outputs.access_token }}
 
       - name: Push image to registries
-        uses: nuclia/tooling/.github/actions/build-img-regcache@1c637a038d11b783a7ae1f3752b666c16466314e
+        uses: ./tooling/.github/actions/build-img-regcache
         with:
           file: RAO.Dockerfile
           image-name: ${{ steps.param.outputs.component }}
@@ -142,7 +162,7 @@ jobs:
         if: github.event_name == 'push'
 
       - name: Build and push helm chart
-        uses: nuclia/tooling/.github/actions/build-helm-chart@e3b8787755f131d70b5346b2704b66cd0accb7cb
+        uses: ./tooling/.github/actions/build-helm-chart
         with:
           component: ${{ steps.param.outputs.component }}
           chart-version: ${{ steps.param.outputs.chart-version }}
@@ -174,13 +194,15 @@ jobs:
       - name: Build failed slack message
         id: build_message
         run: |
-          SLACK_MESSAGE="Testing for component ${{ needs.test.outputs.component }} in main/master has failed for SHA ${{ github.sha }}. Promotion can't be executed if a component is not passing tests."
+          SLACK_MESSAGE="Testing for component ${NEEDS_TEST_OUTPUTS_COMPONENT} in main/master has failed for SHA ${{ github.sha }}. Promotion can't be executed if a component is not passing tests."
           COLOR="danger"
 
           echo "color=$COLOR" >> $GITHUB_OUTPUT
           echo "message=$SLACK_MESSAGE" >> $GITHUB_OUTPUT
 
         shell: bash
+        env:
+          NEEDS_TEST_OUTPUTS_COMPONENT: ${{ needs.test.outputs.component }}
 
       - name: Slack notification
         id: slack
@@ -210,6 +232,8 @@ jobs:
       - test
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
