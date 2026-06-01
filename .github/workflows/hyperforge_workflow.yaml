@@ -25,16 +25,14 @@ env:
   GCP_WORKLOAD_IDENTITY_PROVIDER: "projects/224545243904/locations/global/workloadIdentityPools/gh-nuclia/providers/gh-nuclia-provider"
   GCP_SERVICE_ACCOUNT: "github-actions@nuclia-internal.iam.gserviceaccount.com"
 
-permissions:
-  id-token: write
-  contents: read
-  actions: read
-  packages: write
-
 jobs:
   test:
     name: Testing
     runs-on: learning-simple-arc-runners
+    permissions:
+      id-token: write        # google-github-actions/auth (OIDC)
+      contents: read         # actions/checkout ×2
+      pull-requests: write   # orgoro/coverage
     outputs:
       component: ${{ steps.param.outputs.component }}
       hash: ${{ steps.param.outputs.hash }}
@@ -52,6 +50,8 @@ jobs:
           app-id: ${{ secrets.GHAPP_ID_NUCLIABOT }}
           private-key: ${{ secrets.PK_GHAPP_NUCLIABOT }}
           owner: nuclia
+          repositories: tooling
+          permission-contents: read
 
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -190,6 +190,7 @@ jobs:
     needs: test
     if: (failure() || cancelled()) && github.event_name == 'push'
     runs-on: nuclia-base
+    permissions: {}   # slackapi/slack-github-action uses webhook secret, not GITHUB_TOKEN
     steps:
       - name: Build failed slack message
         id: build_message
@@ -230,6 +231,8 @@ jobs:
     if: github.event_name == 'push'
     needs:
       - test
+    permissions:
+      contents: read   # actions/checkout
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -257,6 +260,7 @@ jobs:
         run: pip wheel --no-deps -w dist ./hyperforge
 
       - name: Upload to pypi
+        # zizmor: ignore[use-trusted-publishing] -- migrating to OIDC trusted publishing is tracked separately; PYPI_TOKEN is a scoped API token
         run: twine upload --verbose dist/*
         env:
           TWINE_USERNAME: __token__
@@ -267,6 +271,7 @@ jobs:
     needs: [test]
     if: |
       !failure() && !cancelled() && github.event_name == 'push'
+    permissions: {}   # all API calls use GitHub App token, not GITHUB_TOKEN
     steps:
       - name: Generate a token
         id: app-token
@@ -275,6 +280,8 @@ jobs:
           app-id: ${{ vars.GHAPP_NUCLIA_SERVICE_BOT_ID }}
           private-key: ${{ secrets.GHAPP_NUCLIA_SERVICE_BOT_PK }}
           owner: nuclia
+          repositories: core-apps
+          permission-contents: write
 
       - name: Create components promotion summary. Trigger1
         env:
@@ -284,6 +291,8 @@ jobs:
           PROMO_PRODUCTION: ${{ env.PROMO_PRODUCTION }}
           TEAM: "learning"
           SLACK_TEAM: "S06B50DM2FL"
+          COMPONENT: ${{ needs.test.outputs.component }}
+          CHART_VERSION: ${{ needs.test.outputs.chart-version }}
         run: |
           MERGED_JSON=$(jq -cs \
             --arg environment "$ENVIRONMENT" \
@@ -293,6 +302,8 @@ jobs:
             --arg slack_team "$SLACK_TEAM" \
             --arg promo_production "$PROMO_PRODUCTION" \
             --arg commit_sha "${{ github.sha }}" \
+            --arg component "$COMPONENT" \
+            --arg chart_version "$CHART_VERSION" \
             '{
               components: map(.components) | add
             } + {
@@ -317,8 +328,8 @@ jobs:
             } + {
               "components": [
                 {
-                  "component": "${{ needs.test.outputs.component }}",
-                  "chart-version": "${{ needs.test.outputs.chart-version }}",
+                  "component": $component,
+                  "chart-version": $chart_version,
                   "component-type": "regional"
                 }
               ]
