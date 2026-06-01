@@ -22,6 +22,9 @@ dependencies = [
     "hyperforge_restricted",
     "hyperforge_smart",
     "hyperforge_static_string",
+    "hyperforge_google",
+    "hyperforge_perplexity",
+    "hyperforge_perplexity_search",
 ]
 
 
@@ -46,6 +49,9 @@ members = [
     "agents/restricted",
     "agents/smart",
     "agents/static_string",
+    "agents/google",
+    "agents/perplexity",
+    "agents/perplexity_search",
 ]
 
 [tool.uv]
@@ -73,6 +79,9 @@ hyperforge_restart = { workspace = true }
 hyperforge_restricted = { workspace = true }
 hyperforge_smart = { workspace = true }
 hyperforge_static_string = { workspace = true }
+hyperforge_google = { workspace = true }
+hyperforge_perplexity = { workspace = true }
+hyperforge_perplexity_search = { workspace = true }
 
 [dependency-groups]
 dev = [

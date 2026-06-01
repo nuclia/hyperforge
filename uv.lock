@@ -14,11 +14,14 @@ members = [
     "hyperforge-conditional",
     "hyperforge-external",
     "hyperforge-generate",
+    "hyperforge-google",
     "hyperforge-historical",
     "hyperforge-http",
     "hyperforge-mcp",
     "hyperforge-nucliadb",
     "hyperforge-passthrough",
+    "hyperforge-perplexity",
+    "hyperforge-perplexity-search",
     "hyperforge-related",
     "hyperforge-remi",
     "hyperforge-rephrase",
@@ -706,6 +709,15 @@ wheels = [
 ]
 
 [[package]]
+name = "distro"
+version = "1.9.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fc/f8/98eea607f65de6527f8a2e8885fc8015d3e6f5775df186e443e0964a11c3/distro-1.9.0.tar.gz", hash = "sha256:2fa77c6fd8940f116ee1d6b94a2f90b13b5ea8d019b98bc8bafdcabcdd9bdbed", size = 60722, upload-time = "2023-12-24T09:54:32.31Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/12/b3/231ffd4ab1fc9d679809f356cebee130ac7daa00d6d6f3206dd4fd137e9e/distro-1.9.0-py3-none-any.whl", hash = "sha256:7bffd925d65168f85027d8da9af6bddab658135b840670a223589bc0c8ef02b2", size = 20277, upload-time = "2023-12-24T09:54:30.421Z" },
+]
+
+[[package]]
 name = "dnspython"
 version = "2.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -935,6 +947,45 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/bb/2c/ee21987c3a175b49d0b827b1e45394a7a5d08c7de5b766ed6d0889d30568/frozenlist-1.6.2-cp313-cp313t-win32.whl", hash = "sha256:76857098ee17258df1a61f934f2bae052b8542c9ea6b187684a737b2e3383a65", size = 44644, upload-time = "2025-06-03T21:47:34.514Z" },
     { url = "https://files.pythonhosted.org/packages/65/46/fce60f65b1fb17a90c4bf410a5c90cb3b40616cc229e75866f8be97c112c/frozenlist-1.6.2-cp313-cp313t-win_amd64.whl", hash = "sha256:c06a88daba7e891add42f9278cdf7506a49bc04df9b1648be54da1bf1c79b4c6", size = 50607, upload-time = "2025-06-03T21:47:36.227Z" },
     { url = "https://files.pythonhosted.org/packages/13/be/0ebbb283f2d91b72beaee2d07760b2c47dab875c49c286f5591d3d157198/frozenlist-1.6.2-py3-none-any.whl", hash = "sha256:947abfcc8c42a329bbda6df97a4b9c9cdb4e12c85153b3b57b9d2f02aa5877dc", size = 12582, upload-time = "2025-06-03T21:48:03.201Z" },
+]
+
+[[package]]
+name = "google-auth"
+version = "2.53.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cryptography" },
+    { name = "pyasn1-modules" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c6/ad/ff781329bbbdc0974a098d996e89c9e1f7024262f9e3eec442fbb9ad1ac6/google_auth-2.53.0.tar.gz", hash = "sha256:e7e6aa16f6bee7b2b264830fd04f08087a1d5a836df516251a5d15327b246c9c", size = 335844, upload-time = "2026-05-15T20:53:07.928Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4a/c9/db44165ba7c581268c6d46017ef63339110378305062830104fc7fa144cb/google_auth-2.53.0-py3-none-any.whl", hash = "sha256:6e7449917c599b35126a99ec268ec6880301f2fea41dce198fe8fd83ff642b68", size = 246071, upload-time = "2026-05-15T20:53:05.609Z" },
+]
+
+[package.optional-dependencies]
+requests = [
+    { name = "requests" },
+]
+
+[[package]]
+name = "google-genai"
+version = "2.7.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "distro" },
+    { name = "google-auth", extra = ["requests"] },
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "requests" },
+    { name = "sniffio" },
+    { name = "tenacity" },
+    { name = "typing-extensions" },
+    { name = "websockets" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a7/7b/6eb3b3d545b6bb4c374acba1ccf91b0f33b605e551536a6243cfcef2f07f/google_genai-2.7.0.tar.gz", hash = "sha256:3c6f32f5ced9877ededd1b384b5e5b7f09c20046ec3390b662b16d8cd1882ac5", size = 555853, upload-time = "2026-05-28T15:39:24.58Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3c/dd/7a8be39e9d698e80e9db796514efbc6083dbd787bdb9a101e8ba47248e5e/google_genai-2.7.0-py3-none-any.whl", hash = "sha256:21cac381e09a869151706aba797b6a4f96cfe92c484e13204d092caee7ff11cb", size = 822545, upload-time = "2026-05-28T15:39:22.907Z" },
 ]
 
 [[package]]
@@ -1414,6 +1465,39 @@ dev = [
 ]
 
 [[package]]
+name = "hyperforge-google"
+version = "1.0.0"
+source = { editable = "agents/google" }
+dependencies = [
+    { name = "google-genai" },
+    { name = "hyperforge" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-recording" },
+    { name = "ty" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "google-genai" },
+    { name = "hyperforge", editable = "hyperforge" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-recording" },
+    { name = "ty" },
+]
+
+[[package]]
 name = "hyperforge-historical"
 version = "1.0.0"
 source = { editable = "agents/historical" }
@@ -1587,6 +1671,78 @@ dev = [
     { name = "pytest-lazy-fixtures" },
     { name = "pytest-mock" },
     { name = "pytest-recording" },
+]
+
+[[package]]
+name = "hyperforge-perplexity"
+version = "1.0.0"
+source = { editable = "agents/perplexity" }
+dependencies = [
+    { name = "httpx" },
+    { name = "hyperforge" },
+    { name = "perplexityai" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-recording" },
+    { name = "ty" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx" },
+    { name = "hyperforge", editable = "hyperforge" },
+    { name = "perplexityai", specifier = ">=0.35.1" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-recording" },
+    { name = "ty" },
+]
+
+[[package]]
+name = "hyperforge-perplexity-search"
+version = "1.0.0"
+source = { editable = "agents/perplexity_search" }
+dependencies = [
+    { name = "httpx" },
+    { name = "hyperforge" },
+    { name = "hyperforge-perplexity" },
+    { name = "perplexityai" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-recording" },
+    { name = "ty" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "httpx" },
+    { name = "hyperforge", editable = "hyperforge" },
+    { name = "hyperforge-perplexity", editable = "agents/perplexity" },
+    { name = "perplexityai", specifier = ">=0.35.1" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-recording" },
+    { name = "ty" },
 ]
 
 [[package]]
@@ -1873,11 +2029,14 @@ dependencies = [
     { name = "hyperforge-conditional" },
     { name = "hyperforge-external" },
     { name = "hyperforge-generate" },
+    { name = "hyperforge-google" },
     { name = "hyperforge-historical" },
     { name = "hyperforge-http" },
     { name = "hyperforge-mcp" },
     { name = "hyperforge-nucliadb" },
     { name = "hyperforge-passthrough" },
+    { name = "hyperforge-perplexity" },
+    { name = "hyperforge-perplexity-search" },
     { name = "hyperforge-related" },
     { name = "hyperforge-remi" },
     { name = "hyperforge-rephrase" },
@@ -1923,11 +2082,14 @@ requires-dist = [
     { name = "hyperforge-conditional", editable = "agents/conditional" },
     { name = "hyperforge-external", editable = "agents/external" },
     { name = "hyperforge-generate", editable = "agents/generate" },
+    { name = "hyperforge-google", editable = "agents/google" },
     { name = "hyperforge-historical", editable = "agents/historical" },
     { name = "hyperforge-http", editable = "agents/http" },
     { name = "hyperforge-mcp", editable = "agents/mcp" },
     { name = "hyperforge-nucliadb", editable = "agents/nucliadb" },
     { name = "hyperforge-passthrough", editable = "agents/passthrough" },
+    { name = "hyperforge-perplexity", editable = "agents/perplexity" },
+    { name = "hyperforge-perplexity-search", editable = "agents/perplexity_search" },
     { name = "hyperforge-related", editable = "agents/related" },
     { name = "hyperforge-remi", editable = "agents/remi" },
     { name = "hyperforge-rephrase", editable = "agents/rephrase" },
@@ -3244,6 +3406,23 @@ wheels = [
 ]
 
 [[package]]
+name = "perplexityai"
+version = "0.36.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "distro" },
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "sniffio" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/44/19/d1535dafc485754173fe8d88b16918918c20ffe8565b97dd9f2660e1266a/perplexityai-0.36.0.tar.gz", hash = "sha256:597ed0cb9ab70824e06e3abad54378e24799317f803643504e0f5bdf6bfc52c1", size = 139816, upload-time = "2026-05-30T22:59:03.93Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bc/dd/67e14657eeab752bd93dbcbfe27b22e9a62966b835563d3fb8b28fffed1c/perplexityai-0.36.0-py3-none-any.whl", hash = "sha256:1676522bc049ad6fbdc1d7b9317502d5f03d7225afc96a9804b3a0ba32c8eccd", size = 133388, upload-time = "2026-05-30T22:59:02.645Z" },
+]
+
+[[package]]
 name = "platformdirs"
 version = "4.3.8"
 source = { registry = "https://pypi.org/simple" }
@@ -3479,6 +3658,27 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/37/a8/d832f7293ebb21690860d2e01d8115e5ff6f2ae8bbdc953f0eb0fa4bd2c7/py-cpuinfo-9.0.0.tar.gz", hash = "sha256:3cdbbf3fac90dc6f118bfd64384f309edeadd902d7c8fb17f02ffa1fc3f49690", size = 104716, upload-time = "2022-10-25T20:38:06.303Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e0/a9/023730ba63db1e494a271cb018dcd361bd2c917ba7004c3e49d5daf795a2/py_cpuinfo-9.0.0-py3-none-any.whl", hash = "sha256:859625bc251f64e21f077d099d4162689c762b5d6a4c3c97553d56241c9674d5", size = 22335, upload-time = "2022-10-25T20:38:27.636Z" },
+]
+
+[[package]]
+name = "pyasn1"
+version = "0.6.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/5c/5f/6583902b6f79b399c9c40674ac384fd9cd77805f9e6205075f828ef11fb2/pyasn1-0.6.3.tar.gz", hash = "sha256:697a8ecd6d98891189184ca1fa05d1bb00e2f84b5977c481452050549c8a72cf", size = 148685, upload-time = "2026-03-17T01:06:53.382Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5d/a0/7d793dce3fa811fe047d6ae2431c672364b462850c6235ae306c0efd025f/pyasn1-0.6.3-py3-none-any.whl", hash = "sha256:a80184d120f0864a52a073acc6fc642847d0be408e7c7252f31390c0f4eadcde", size = 83997, upload-time = "2026-03-17T01:06:52.036Z" },
+]
+
+[[package]]
+name = "pyasn1-modules"
+version = "0.4.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyasn1" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e9/e6/78ebbb10a8c8e4b61a59249394a4a594c1a7af95593dc933a349c8d00964/pyasn1_modules-0.4.2.tar.gz", hash = "sha256:677091de870a80aae844b1ca6134f54652fa2c8c5a52aa396440ac3106e941e6", size = 307892, upload-time = "2025-03-28T02:41:22.17Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/47/8d/d529b5d697919ba8c11ad626e835d4039be708a35b0d22de83a269a6682c/pyasn1_modules-0.4.2-py3-none-any.whl", hash = "sha256:29253a9207ce32b64c3ac6600edc75368f98473906e8fd1043bd6b5b1de2c14a", size = 181259, upload-time = "2025-03-28T02:41:19.028Z" },
 ]
 
 [[package]]

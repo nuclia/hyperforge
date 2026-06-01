@@ -1,0 +1,363 @@
+interactions:
+- request:
+    body: '{"query": "What is Marklogic?", "max_results": 5, "max_tokens_per_page":
+      4096, "search_domain_filter": ["progress.com"]}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - DUMMY
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '113'
+      Content-Type:
+      - application/json
+      Host:
+      - api.perplexity.ai
+      User-Agent:
+      - AsyncPerplexity/Python 0.36.0
+      X-Source:
+      - perplexity-py
+      X-Stainless-Arch:
+      - arm64
+      X-Stainless-Async:
+      - async:asyncio
+      X-Stainless-Lang:
+      - python
+      X-Stainless-OS:
+      - MacOS
+      X-Stainless-Package-Version:
+      - 0.36.0
+      X-Stainless-Runtime:
+      - CPython
+      X-Stainless-Runtime-Version:
+      - 3.12.9
+      X-Title:
+      - Perplexity Python SDK
+      x-stainless-read-timeout:
+      - '900'
+      x-stainless-retry-count:
+      - '0'
+    method: POST
+    uri: https://api.perplexity.ai/search
+  response:
+    body:
+      string: "{\"id\":\"e1f8b7e3-b905-4df4-9063-29a8da5fc734\",\"results\":[{\"date\":\"2023-01-25\",\"last_updated\":\"2026-05-30\",\"snippet\":\"Unlock
+        data value, accelerate insightful decisions, and securely achieve data agility
+        with the MarkLogic data platform.\\nCombine your data with everything known
+        about it (metadata) in a single service and reveal smarter decisions faster.\\n...\\n##
+        The Single Platform that Unlocks Data AgilityleGet a faster, trusted way to
+        securely connect data and metadata, create and interpret meaning, and consume
+        high-quality contextualized data across the enterprise with the MarkLogic
+        data platform.\\n...\\n## Achieve Data Agility With a Single Data PlatformtoDon\u2019t
+        waste time stitching together components.\\nMarkLogic combines the power of
+        a multi-model\u202Fdatabase, search, and semantic AI in a single platform
+        with mastering, metadata management,\u202Fgovernment-grade security and more.\\nContact
+        Us\",\"title\":\"Database Platform to Simplify Complex Data | Progress Marklogic\",\"url\":\"https://www.progress.com/marklogic\"},{\"date\":\"2026-05-18\",\"last_updated\":\"2026-05-31\",\"snippet\":\"MarkLogic
+        is a database designed from the ground up to make massive quantities of heterogenous
+        data easily accessible through search.\\n...\\nMarkLogic fuses together database
+        internals, search-style indexing, and application server behaviors into a
+        unified system.\\nIt uses XML and JSON documents as its data model, and stores
+        the documents within a transactional repository.\\nIt indexes the words and
+        values from each of the loaded documents, as well as the document structure.\\nAnd,
+        because of its unique Universal Index, MarkLogic does not require advance
+        knowledge of the document structure and adherence to a particular schema.\\nThrough
+        its application server capabilities, it is programmable and extensible.\\nMarkLogic
+        clusters on commodity hardware using a shared-nothing architecture and supports
+        massive scale, high-availability, and very high performance.\",\"title\":\"Overview
+        of MarkLogic Server\",\"url\":\"https://docs.progress.com/bundle/marklogic-server-understand-concepts-12/page/topics/overview.html\"},{\"last_updated\":\"2025-11-16\",\"snippet\":\"WHAT
+        IS MARKLOGIC SERVER?\\nMarkLogic Server is the Enterprise NoSQL Database1
+        that combines database \\ninternals, search-style indexing, and application
+        server behaviors into a unified system.\\nIt is a multi-model database management
+        system (DBMS) that combines a document \\nmodel with a semantic triple model.\\nIt
+        stores all of its data within a fully ACID-\\ncompliant transactional repository.\\nIt
+        indexes the words and values from each of the \\nloaded documents, as well
+        as the document structure.\\nBecause of its unique Universal \\nIndex, MarkLogic
+        doesn't require advance knowledge of the document structure (its \\n\\\"schema\\\")
+        nor complete adherence to a particular schema.\\nAnd through its application
+        \\nserver capabilities, it's programmable and extensible.\\nMarkLogic Server
+        (referred to from here on as \\\"MarkLogic\\\") clusters on commodity \\nhardware
+        using a shared-nothing architecture and differentiates itself in the market
+        \\nby supporting massive scale and exceptional performance, all while maintaining
+        the \\nenterprise capabilities required for mission-critical applications.\\n...\\n\u201C\\n\u201C
+        MarkLogic is a document-centric, multi-model, \\ntransactional, search-enabled,
+        structure-aware, \\nschema-agnostic, programmable,  \\nhigh-performance, clustered
+        database server.\u201D\\n1 \",\"title\":\"[PDF] MARKLOGIC SERVER - Progress
+        Software\",\"url\":\"https://www.progress.com/docs/default-source/marklogic-docs/inside-marklogic-server.pdf?sfvrsn=243546da_8\"},{\"date\":\"2023-07-07\",\"last_updated\":\"2026-04-20\",\"snippet\":\"MarkLogic
+        provides a semantic data platform that lets you connect, create and consume
+        all types of data, ready for immediate use by informed search, contextual
+        applications, grounded analytics and facts-based intelligence.\\nThe platform
+        is purpose-built with a multi-model database and semantic AI technology to
+        provide a comprehensive data layer with strong security, integration, scale
+        and with configuration choices of a semantic knowledge graph, as a data hub
+        or as metadata management.\\n...\\nMarkLogic solves complex data problems.\\nAlmost
+        every organization is facing challenges in managing and getting value from
+        data because of data and knowledge silos.\\nOur platform eliminates the effect
+        of these silos and delivers data agility by coupling data with its meaning
+        and definitions.\\n...\\nMarkLogic Data Hub is a unified solution for integrating
+        and managing your multi-structured data.\\n...\\nMarkLogic Server is an enterprise-grade
+        multi-model database.\\nIt is designed with both modern NoSQL and trusted
+        enterprise capabilities to power transactional, operational, and analytical
+        applications.\\n...\\nBroadly speaking, MarkLogic is used to make high-quality,
+        unified, contextualized data available for immediate use by informed search,
+        contextual applications, grounded analytics and facts-based intelligence..\\nThe
+        platform can be configured as a semantic knowledge graph, a data hub, or metadata
+        management.\\n...\\nWe are a data platform company, not an application software
+        company.\\nThat said, our solutions engineers and consultants can work with
+        you to develop the applications that your business needs or to serve up integrated
+        data to applications you already use, like BI tools or GIS.\",\"title\":\"MarkLogic
+        FAQs - Progress Software\",\"url\":\"https://www.progress.com/marklogic/faqs\"},{\"last_updated\":\"2025-05-05\",\"snippet\":\"MarkLogic
+        Overview\\nData integration.\\nSimplified.\\nData integration is one of the
+        most complex IT challenges \\nand the MarkLogic Data Hub Platform simplifies
+        it.\\nMarkLogic removes friction at every step in the process so \\nthat organizations
+        can achieve a 360\xBA view faster than ever.\\n...\\nWith \\nMarkLogic, it
+        only takes days or weeks \u2013 not months or years \\n\u2013 to integrate
+        data and build secure data services that enable\\nIT to keep pace with the
+        speed of business.\\nThe MarkLogic Data Hub Platform\\nThe MarkLogic Data
+        Hub is a comprehensive data platform that excels at multi-model data integration.\\nIt
+        enables you to load \\ndata as is, curate that data to form a unified, actionable
+        360\xB0 view \u2013 and provide easy ways to access that 360\xB0 view.\\nDocuments,\\ngraphs,
+        relational data \u2013 it handles it all at enterprise scale and security.\\n...\\nengine,
+        ETL tools, mastering capability, and more \u2013 all \\naccessible through
+        a simple user interface.\\n...\\n\u2022 Advanced security \u2013 MarkLogic
+        is the most secure \\nmulti-model database, having the most granular security
+        \\ncontrols and highest level of certifications.\\n...\\nMarkLogic is a trademark
+        or registered trademark of MarkLogic Corporation in the United States and/or
+        other\\ncountries.\\n...\\nMARKLOGIC CORPORATION  \\n999 Skyway Road, Suite
+        200 San Carlos, CA 94070   \\n+1 650 655 2300  |  +1 877 992 8885  |  www.marklogic.com
+        \ |  sales@marklogic.com\\nThe MarkLogic Data Hub Platform\\n...\\nMarkLogic
+        Data Hub Service is a fully automated cloud service that allows you to focus
+        on your business and leave database \\ninfrastructure and operations to the
+        experts at MarkLogic.\\n...\\nAbout MarkLogic\\nBy simplifying data integration,
+        MarkLogic helps organizations gain agility, lower IT costs, and safely share
+        their data.\\nHeadquartered in Silicon Valley, MarkLogic has offices throughout
+        the U.S., Europe, Asia, and Australia.\\nACCESS\",\"title\":\"MarkLogic Overview
+        Datasheet\",\"url\":\"https://www.progress.com/docs/default-source/marklogic-docs/marklogic-overview-datasheet.pdf\"}]}\n"
+    headers:
+      CF-RAY:
+      - a04e782a5c160642-MAD
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 01 Jun 2026 13:12:21 GMT
+      Server:
+      - cloudflare
+      Strict-Transport-Security:
+      - max-age=15552000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      cf-cache-status:
+      - DYNAMIC
+      content-length:
+      - '7540'
+      set-cookie:
+      - __cf_bm=XuqLBxZlJCywA.Qq2E4NMGsZ4z.BseWs93dACQLDruM-1780319540.8538673-1.0.1.1-Oy9GooG5zWy4sHTADMM4NXjUD5WhbXECoOUeomL3HY4anpYRD_4_eCpM0pDdxvKk62mGFKUhmKNVHSqBP32q_lOQK05mZyd5XRoC.8BtRwArW1b.Gsqq2VnJuUyd8AxN;
+        HttpOnly; SameSite=None; Secure; Path=/; Domain=perplexity.ai; Expires=Mon,
+        01 Jun 2026 13:42:21 GMT
+      - __cflb=04dToWaRite5R1fQA5HfyWsXiTjNxDHfvd3AJ9EhEM; HttpOnly; SameSite=None;
+        Secure; Path=/; Expires=Mon, 01 Jun 2026 13:42:21 GMT
+      x-ratelimit-limit:
+      - '50'
+      x-ratelimit-remaining:
+      - '48'
+      x-ratelimit-reset:
+      - '1780319542'
+      x-ratelimit-used:
+      - '2'
+      x-request-id:
+      - e1f8b7e3-b905-4df4-9063-29a8da5fc734
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"question": "", "retrieval": true, "user_id": "rao_answer_summary-perplexity_search",
+      "system": null, "chat_history": [], "context": [], "query_context": {}, "query_context_order":
+      {}, "truncate": true, "user_prompt": {"prompt": "\nBased on the provided context
+      and user question, perform the following tasks:\n\n1. Select only information
+      directly relevant to the question.\n2. Break down compound sentences into simple,
+      single-idea statements. Preserve original phrasing when possible.\n3. For any
+      named entity with descriptive details, separate those details into distinct
+      propositions.\n4. Ensure clarity by replacing pronouns (e.g., \"it\", \"he\",
+      \"she\", \"they\", \"this\", \"that\") with the full names of the entities they
+      reference, and add necessary modifiers to clarify meaning.\n5. The context may
+      be delimited by tags such as <START OF CONTEXT> and <END OF CONTEXT>. Treat
+      everything between these tags as context.\n6. Assess whether the context sufficiently
+      answers the question. If it answers it partially, provide the answer; if it
+      does not answer it fully, specify what information is missing to answer the
+      question.\n7. If the context does not answer the question at all, just return
+      the original question as the missing information.\n8. The `citations` field
+      consists ONLY in a list of block IDs that are relevant to the answer, following
+      these rules:\n  - Use the format: block-AB\n  - Just mention the block IDs,
+      do NOT include any other text.\n  - Just mention the blocks actually relevant
+      and that contain information used in the answer, do NOT include blocks that
+      are not relevant.\n  - No duplicates.\n9. Do NOT hallucinate block IDs. Only
+      use those provided in the context.\n10. Your output must be a JSON object with
+      the following fields:\n    - \"reason\": Explain your reasoning for the answer
+      or validation.\n    - \"answer\": Provide a partial or complete answer to the
+      user query strictly from the information in the context. If there isn''t enough
+      information to even provide a partial answer, leave ''answer'' empty.\n    -
+      \"missing_info_query\": If the context is insufficient, specify what information
+      is missing in a query shape; otherwise, leave it empty. Just return the query
+      needed to retrieve the missing information.\n    - \"useful\": Indicate if the
+      context is useful to answer the question (\"yes\" or \"no\").\n    - \"citations\":
+      List the IDs of the blocks relevant to the answer, if any (e.g., [\"block-AB\",
+      \"block-CD\"]).\n11. **IMPORTANT** If any extra instructions are provided, you
+      MUST follow them carefully when generating the answer field. These instructions
+      may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWhat
+      is Marklogic?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk:
+      Database Platform to Simplify Complex Data | Progress Marklogic\nURLs: https://www.progress.com/marklogic\n```
+      Unlock data value, accelerate insightful decisions, and securely achieve data
+      agility with the MarkLogic data platform.\nCombine your data with everything
+      known about it (metadata) in a single service and reveal smarter decisions faster.\n...\n##
+      The Single Platform that Unlocks Data AgilityleGet a faster, trusted way to
+      securely connect data and metadata, create and interpret meaning, and consume
+      high-quality contextualized data across the enterprise with the MarkLogic data
+      platform.\n...\n## Achieve Data Agility With a Single Data PlatformtoDon\u2019t
+      waste time stitching together components.\nMarkLogic combines the power of a
+      multi-model\u202fdatabase, search, and semantic AI in a single platform with
+      mastering, metadata management,\u202fgovernment-grade security and more.\nContact
+      Us ```\n\n\n---\"\n\n\n**block-AB**\n\n## Chunk: Overview of MarkLogic Server\nURLs:
+      https://docs.progress.com/bundle/marklogic-server-understand-concepts-12/page/topics/overview.html\n```
+      MarkLogic is a database designed from the ground up to make massive quantities
+      of heterogenous data easily accessible through search.\n...\nMarkLogic fuses
+      together database internals, search-style indexing, and application server behaviors
+      into a unified system.\nIt uses XML and JSON documents as its data model, and
+      stores the documents within a transactional repository.\nIt indexes the words
+      and values from each of the loaded documents, as well as the document structure.\nAnd,
+      because of its unique Universal Index, MarkLogic does not require advance knowledge
+      of the document structure and adherence to a particular schema.\nThrough its
+      application server capabilities, it is programmable and extensible.\nMarkLogic
+      clusters on commodity hardware using a shared-nothing architecture and supports
+      massive scale, high-availability, and very high performance. ```\n\n\n---\"\n\n\n**block-AC**\n\n##
+      Chunk: [PDF] MARKLOGIC SERVER - Progress Software\nURLs: https://www.progress.com/docs/default-source/marklogic-docs/inside-marklogic-server.pdf?sfvrsn=243546da_8\n```
+      WHAT IS MARKLOGIC SERVER?\nMarkLogic Server is the Enterprise NoSQL Database1
+      that combines database \ninternals, search-style indexing, and application server
+      behaviors into a unified system.\nIt is a multi-model database management system
+      (DBMS) that combines a document \nmodel with a semantic triple model.\nIt stores
+      all of its data within a fully ACID-\ncompliant transactional repository.\nIt
+      indexes the words and values from each of the \nloaded documents, as well as
+      the document structure.\nBecause of its unique Universal \nIndex, MarkLogic
+      doesn''t require advance knowledge of the document structure (its \n\"schema\")
+      nor complete adherence to a particular schema.\nAnd through its application
+      \nserver capabilities, it''s programmable and extensible.\nMarkLogic Server
+      (referred to from here on as \"MarkLogic\") clusters on commodity \nhardware
+      using a shared-nothing architecture and differentiates itself in the market
+      \nby supporting massive scale and exceptional performance, all while maintaining
+      the \nenterprise capabilities required for mission-critical applications.\n...\n\u201c\n\u201c
+      MarkLogic is a document-centric, multi-model, \ntransactional, search-enabled,
+      structure-aware, \nschema-agnostic, programmable,  \nhigh-performance, clustered
+      database server.\u201d\n1  ```\n\n\n---\"\n\n\n**block-AD**\n\n## Chunk: MarkLogic
+      FAQs - Progress Software\nURLs: https://www.progress.com/marklogic/faqs\n```
+      MarkLogic provides a semantic data platform that lets you connect, create and
+      consume all types of data, ready for immediate use by informed search, contextual
+      applications, grounded analytics and facts-based intelligence.\nThe platform
+      is purpose-built with a multi-model database and semantic AI technology to provide
+      a comprehensive data layer with strong security, integration, scale and with
+      configuration choices of a semantic knowledge graph, as a data hub or as metadata
+      management.\n...\nMarkLogic solves complex data problems.\nAlmost every organization
+      is facing challenges in managing and getting value from data because of data
+      and knowledge silos.\nOur platform eliminates the effect of these silos and
+      delivers data agility by coupling data with its meaning and definitions.\n...\nMarkLogic
+      Data Hub is a unified solution for integrating and managing your multi-structured
+      data.\n...\nMarkLogic Server is an enterprise-grade multi-model database.\nIt
+      is designed with both modern NoSQL and trusted enterprise capabilities to power
+      transactional, operational, and analytical applications.\n...\nBroadly speaking,
+      MarkLogic is used to make high-quality, unified, contextualized data available
+      for immediate use by informed search, contextual applications, grounded analytics
+      and facts-based intelligence..\nThe platform can be configured as a semantic
+      knowledge graph, a data hub, or metadata management.\n...\nWe are a data platform
+      company, not an application software company.\nThat said, our solutions engineers
+      and consultants can work with you to develop the applications that your business
+      needs or to serve up integrated data to applications you already use, like BI
+      tools or GIS. ```\n\n\n---\"\n\n\n**block-AE**\n\n## Chunk: MarkLogic Overview
+      Datasheet\nURLs: https://www.progress.com/docs/default-source/marklogic-docs/marklogic-overview-datasheet.pdf\n```
+      MarkLogic Overview\nData integration.\nSimplified.\nData integration is one
+      of the most complex IT challenges \nand the MarkLogic Data Hub Platform simplifies
+      it.\nMarkLogic removes friction at every step in the process so \nthat organizations
+      can achieve a 360\u00ba view faster than ever.\n...\nWith \nMarkLogic, it only
+      takes days or weeks \u2013 not months or years \n\u2013 to integrate data and
+      build secure data services that enable\nIT to keep pace with the speed of business.\nThe
+      MarkLogic Data Hub Platform\nThe MarkLogic Data Hub is a comprehensive data
+      platform that excels at multi-model data integration.\nIt enables you to load
+      \ndata as is, curate that data to form a unified, actionable 360\u00b0 view
+      \u2013 and provide easy ways to access that 360\u00b0 view.\nDocuments,\ngraphs,
+      relational data \u2013 it handles it all at enterprise scale and security.\n...\nengine,
+      ETL tools, mastering capability, and more \u2013 all \naccessible through a
+      simple user interface.\n...\n\u2022 Advanced security \u2013 MarkLogic is the
+      most secure \nmulti-model database, having the most granular security \ncontrols
+      and highest level of certifications.\n...\nMarkLogic is a trademark or registered
+      trademark of MarkLogic Corporation in the United States and/or other\ncountries.\n...\nMARKLOGIC
+      CORPORATION  \n999 Skyway Road, Suite 200 San Carlos, CA 94070   \n+1 650 655
+      2300  |  +1 877 992 8885  |  www.marklogic.com  |  sales@marklogic.com\nThe
+      MarkLogic Data Hub Platform\n...\nMarkLogic Data Hub Service is a fully automated
+      cloud service that allows you to focus on your business and leave database \ninfrastructure
+      and operations to the experts at MarkLogic.\n...\nAbout MarkLogic\nBy simplifying
+      data integration, MarkLogic helps organizations gain agility, lower IT costs,
+      and safely share their data.\nHeadquartered in Silicon Valley, MarkLogic has
+      offices throughout the U.S., Europe, Asia, and Australia.\nACCESS ```\n\n\n---\"\n\n\n\n\n<END
+      OF CONTEXT>\n\n"}, "citations": false, "citation_threshold": null, "generative_model":
+      "chatgpt-azure-4o-mini", "max_tokens": 2000, "query_context_images": {}, "prefer_markdown":
+      null, "json_schema": {"title": "validate_or_answer", "description": "Validate
+      or answer", "parameters": {"type": "object", "properties": {"reason": {"type":
+      "string", "description": "Reasoning for the answer or validation"}, "answer":
+      {"type": "string", "description": "Partial or complete answer to the user query
+      from the information in the context."}, "missing_info_query": {"type": "string",
+      "description": "Query needed to retrieve the missing information in case the
+      context is not enough to answer the question. If the context does not answer
+      the question at all, just return the original question."}, "useful": {"type":
+      "string", "description": "Is the context useful to answer the question?", "enum":
+      ["yes", "no"]}, "citations": {"type": "array", "items": {"type": "string", "description":
+      "Block ID cited in the answer, e.g. block-AB"}, "description": "List of block
+      IDs cited in the answer, if any"}}, "required": ["reason", "answer", "missing_info_query",
+      "useful", "citations"]}}, "format_prompt": false, "rerank_context": false, "tools":
+      [], "tool_choice": {"type": "required"}, "reasoning": false, "seed": null}'
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '11408'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.rag.progress.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      x-origin:
+      - RAO
+      x-show-consumption:
+      - 'true'
+      x-stf-nuakey:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.rag.progress.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"detail":"JWT decoding error"}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '31'
+      content-type:
+      - application/json
+      date:
+      - Mon, 01 Jun 2026 13:12:21 GMT
+      server:
+      - uvicorn
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '5'
+    status:
+      code: 400
+      message: Bad Request
+version: 1

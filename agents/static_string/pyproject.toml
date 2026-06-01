@@ -21,4 +21,4 @@ keyring-provider = "subprocess"
 package = true
 
 [project.urls]
-Homepage = "https://nuclia.com"
+Homepage = "https://progress.com"
