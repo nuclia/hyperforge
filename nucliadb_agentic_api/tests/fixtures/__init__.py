@@ -1,1 +1,0 @@
-"""NucliaDB fixtures (simplified version)"""
