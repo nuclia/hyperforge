@@ -51,6 +51,8 @@ jobs:
       - name: Run tests
         working-directory: hyperforge
         run: make test
+        env: # Or as an environment variable
+          NUA_KEY: ${{ secrets.NUA_KEY }}
 
   build_wheels:
     name: Build wheels

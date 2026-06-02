@@ -27,11 +27,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 29 May 2026 13:33:17 GMT
+      - Tue, 02 Jun 2026 18:19:35 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '3'
+      - '8'
     status:
       code: 200
       message: OK
@@ -71,7 +71,7 @@ interactions:
       MUST follow them carefully when generating the answer field. These instructions
       may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWhat
       certifications does Nuclia have?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n##
-      Chunk: 925f3b4837c64320bdda6704311221ff\n``` Nuclia is the best system in the
+      Chunk: ee34e271a52d4cca98045bb0306d8a9b\n``` Nuclia is the best system in the
       world. It has ISO 27001 and SOC 2 certifications. ```\n\n\n---\"\n\n\n\n\n<END
       OF CONTEXT>\n\n"}, "citations": false, "citation_threshold": null, "generative_model":
       "chatgpt-azure-4o-mini", "max_tokens": 2000, "query_context_images": {}, "prefer_markdown":
@@ -115,15 +115,15 @@ interactions:
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
-        specific information about the certifications that Nuclia has, which are ISO
+        specific information about the certifications that Nuclia has, namely ISO
         27001 and SOC 2. This directly answers the user''s question about what certifications
-        Nuclia holds.","answer":"Nuclia has ISO 27001 and SOC 2 certifications.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
+        Nuclia possesses.","answer":"Nuclia has ISO 27001 and SOC 2 certifications.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":23,"output_tokens":9,"timings":{"generative":1.9370905369978573},"input_nuclia_tokens":0.023,"output_nuclia_tokens":0.009}}
+        {"chunk":{"type":"meta","input_tokens":23,"output_tokens":9,"timings":{"generative":1.964797967000095},"input_nuclia_tokens":0.023,"output_nuclia_tokens":0.009}}
 
-        {"chunk":{"normalized_tokens":{"input":0.02325,"output":0.009,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02331,"output":0.00888,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -136,17 +136,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Fri, 29 May 2026 13:33:17 GMT
+      - Tue, 02 Jun 2026 18:19:35 GMT
       nuclia-learning-id:
-      - a93817e3284349a98bc9fe8d896eb47d
+      - 5e3a933bc9874d4984e4cc29274efa39
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1946'
+      - '1996'
       x-nuclia-trace-id:
-      - ddc15fea465ed71cf2141943a6a7b899
+      - 6c79ab5aaaac33207e7d0da4aaa6c790
     status:
       code: 200
       message: OK
@@ -187,13 +187,13 @@ interactions:
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
-      - b7276458-2122-4f3c-b6bb-ad56bb7ad466
+      - 019424b4-c6e2-4122-9cd9-502fb765e1e9
       x-message:
-      - c318555d927e4ad8a1e88e62ab343886
+      - b42fc08fe5f1405a947fe56bb92aa03b
       x-origin:
       - RAO
       x-session:
-      - default_3871a7fd4c53463ebdcce46d87285f3e
+      - default_c7bf185605674475932e43e27c534c48
       x-show-consumption:
       - 'true'
       x-stf-nuakey:
@@ -232,14 +232,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":2,"timings":{"generative_first_chunk":0.4729015060001984,"generative":0.6974300920264795},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.002}}
+        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":2,"timings":{"generative_first_chunk":0.5291805389999809,"generative":0.7720078160000412},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.002}}
 
         {"chunk":{"normalized_tokens":{"input":0.00702,"output":0.0018,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -247,17 +247,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Fri, 29 May 2026 13:33:20 GMT
+      - Tue, 02 Jun 2026 18:19:37 GMT
       nuclia-learning-id:
-      - b39945184bde4ad38dc188754e7ca0e5
+      - 52af54c7e9754ab69a4dceb44b49f2bc
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '480'
+      - '553'
       x-nuclia-trace-id:
-      - 31047fe594d078750f400233de5ae238
+      - 859ab0a842035f3d3e2186b8cf6f5163
     status:
       code: 200
       message: OK
@@ -286,26 +286,26 @@ interactions:
     uri: https://europe-1.nuclia.cloud/api/v1/predict/remi
   response:
     body:
-      string: '{"time":18.30948519706726,"answer_relevance":null,"context_relevance":[],"groundedness":[5]}'
+      string: '{"time":0.17911410331726074,"answer_relevance":null,"context_relevance":[],"groundedness":[5]}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
-      - '92'
+      - '94'
       access-control-expose-headers:
       - X-NUCLIA-TRACE-ID
       content-type:
       - application/json
       date:
-      - Fri, 29 May 2026 13:33:21 GMT
+      - Tue, 02 Jun 2026 18:19:38 GMT
       nuclia-learning-model:
       - Llama-REMi-v1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '18316'
+      - '185'
       x-nuclia-trace-id:
-      - 52f62332a5c8f1b1a9595b80fc610473
+      - 5a55b813436659b606ba0d71c1c5f1d4
     status:
       code: 200
       message: OK
@@ -334,26 +334,26 @@ interactions:
     uri: https://europe-1.nuclia.cloud/api/v1/predict/remi
   response:
     body:
-      string: '{"time":19.12929940223694,"answer_relevance":{"score":4,"reason":""},"context_relevance":[],"groundedness":[]}'
+      string: '{"time":0.18843936920166016,"answer_relevance":{"score":4,"reason":""},"context_relevance":[],"groundedness":[]}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000
       Content-Length:
-      - '110'
+      - '112'
       access-control-expose-headers:
       - X-NUCLIA-TRACE-ID
       content-type:
       - application/json
       date:
-      - Fri, 29 May 2026 13:33:20 GMT
+      - Tue, 02 Jun 2026 18:19:39 GMT
       nuclia-learning-model:
       - Llama-REMi-v1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '19137'
+      - '198'
       x-nuclia-trace-id:
-      - 6ff8a5bb21fd6cf42985fca82be33a05
+      - 567b6c1404a193cf42178908d2cd15d9
     status:
       code: 200
       message: OK
