@@ -68,20 +68,11 @@ jobs:
               with:
                   enable-cache: true
                   python-version: "3.12"
-
-            - name: Setup env
-              run: |
-                  uv tool install twine
-
             - name: Set dependency versions in requirements
               run: |
                   python bump.py --package=${INPUTS_PACKAGE} --build=${{ github.run_number }}
               env:
                   INPUTS_PACKAGE: agents/conditional
-
-            - name: Install package
-              run: |
-                  uv sync
 
             - name: Build wheels
               run: uv build ./${INPUTS_PACKAGE}
