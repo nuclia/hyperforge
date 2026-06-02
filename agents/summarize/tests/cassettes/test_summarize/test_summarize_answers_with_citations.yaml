@@ -21,61 +21,17 @@ interactions:
       string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"03d47998-f672-4a9b-a57b-bde3a9c3ee8c","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Content-Length:
       - '227'
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 14:35:05 GMT
+      - Tue, 02 Jun 2026 14:34:55 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '6'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"prefixes":[{"prefix":"/l","depth":2}]}'
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '40'
-      Host:
-      - europe-1.nuclia.cloud
-      User-Agent:
-      - nucliadb-sdk/6.13.1.post6414
-      X-STF-SERVICEACCOUNT:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InNhIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3NTkyNTQ3NjQsInN1YiI6ImUwNGUwMzcyLTYwNDgtNDY5ZC04NWExLWI1ZTM1MjBmMzdlZiIsImp0aSI6IjgzMzRhY2NlLTIwMTUtNGY0MS05M2U5LTczNzk1MTg2NDdiZiIsImV4cCI6MTc5MDc5MDc2MCwia2V5IjoiMmYxMzYyNTItNjNiMy00NzA1LTg1MjQtMDhmYWJjOWUzMjUyIiwia2lkIjoiN2RmMzY2NDctOTdiOC00NzU0LWExNjUtZWZkY2ZlMDRkMzI2In0.kwHAfx9RRTI-G3S64X0iisr0iAyXRKNRhnN4C67MkLSxeu1AOAnVV8EIQuu4jpXW7O4FkSsthFXEv9ZxlRRh_CaS0z_TjPzIzDPeE6eIKskZ70Q7c-pDe949WE9DZiDyy9_dwKsdX5cnvYpKorp0ROm-GvRXrdHaTZKDSYWht3gvEtm6-0j9C1gx2BzKr2coizUAIde_qjSpLOojO4S-k8P8I9dsQFagdcrjxgGWgrAzjhAs_qkqlRmP0QP6S7ToN0nrbHmtKKb0lWmcpVvlAfH95CM20YUs7IAqU_t7-_V6mm43FstRgGeiHkoapo8nPVJtXMBSlaM7GSz0Kxf2TWQwi94mTEQLdA8CblX0skMCfIHFwbcbm1Vf-2C6LywAsSmTYAwsVPpqeQcVZdrfLMhddCjZKUFCNLSurCSb4TuN79GZicPCJDT-VEBMlNH8ayHOyRib5RyqvgXUwGN9zyM-ma7RrVk4eEwSk7923bn_9GTk-s5tYw_exbYsQ1Qa84GA6NzgJ_kNQmgJwb2zW1V5ddCpYd5k6lNEdPRk0JQKlCC2zTmSvnRcLxfDPi4SZFdLLdtG0j2hIl_QNTEC_3VtqJds4FMofy7TkmUObdbEmXjdAsOxkqj2ntGOsaBNiCI_w47BbPvG_V1LsBHDrrIo0Wo1fgAhUbtWV7Dd5J4
-      content-type:
-      - application/json
-    method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/catalog/facets
-  response:
-    body:
-      string: '{"facets":{}}'
-    headers:
-      Alt-Svc:
-      - h3=":443"; ma=2592000
-      Content-Length:
-      - '13'
-      access-control-expose-headers:
-      - X-NUCLIA-TRACE-ID
-      content-type:
-      - application/json
-      date:
-      - Tue, 02 Jun 2026 14:35:06 GMT
-      via:
-      - 1.1 google
-      x-envoy-upstream-service-time:
-      - '9'
-      x-nuclia-trace-id:
-      - b5f21fbb87864c6d81d55ae40cf926a2
+      - '4'
     status:
       code: 200
       message: OK
@@ -112,101 +68,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 14:35:05 GMT
+      - Tue, 02 Jun 2026 14:34:55 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '8'
+      - '11'
       x-nuclia-trace-id:
-      - d2781a885e621816670013b44f7c77a8
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"prefixes":[{"prefix":"/n/i","depth":2}]}'
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '42'
-      Host:
-      - europe-1.nuclia.cloud
-      User-Agent:
-      - nucliadb-sdk/6.13.1.post6414
-      X-STF-SERVICEACCOUNT:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InNhIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3NTkyNTQ3NjQsInN1YiI6ImUwNGUwMzcyLTYwNDgtNDY5ZC04NWExLWI1ZTM1MjBmMzdlZiIsImp0aSI6IjgzMzRhY2NlLTIwMTUtNGY0MS05M2U5LTczNzk1MTg2NDdiZiIsImV4cCI6MTc5MDc5MDc2MCwia2V5IjoiMmYxMzYyNTItNjNiMy00NzA1LTg1MjQtMDhmYWJjOWUzMjUyIiwia2lkIjoiN2RmMzY2NDctOTdiOC00NzU0LWExNjUtZWZkY2ZlMDRkMzI2In0.kwHAfx9RRTI-G3S64X0iisr0iAyXRKNRhnN4C67MkLSxeu1AOAnVV8EIQuu4jpXW7O4FkSsthFXEv9ZxlRRh_CaS0z_TjPzIzDPeE6eIKskZ70Q7c-pDe949WE9DZiDyy9_dwKsdX5cnvYpKorp0ROm-GvRXrdHaTZKDSYWht3gvEtm6-0j9C1gx2BzKr2coizUAIde_qjSpLOojO4S-k8P8I9dsQFagdcrjxgGWgrAzjhAs_qkqlRmP0QP6S7ToN0nrbHmtKKb0lWmcpVvlAfH95CM20YUs7IAqU_t7-_V6mm43FstRgGeiHkoapo8nPVJtXMBSlaM7GSz0Kxf2TWQwi94mTEQLdA8CblX0skMCfIHFwbcbm1Vf-2C6LywAsSmTYAwsVPpqeQcVZdrfLMhddCjZKUFCNLSurCSb4TuN79GZicPCJDT-VEBMlNH8ayHOyRib5RyqvgXUwGN9zyM-ma7RrVk4eEwSk7923bn_9GTk-s5tYw_exbYsQ1Qa84GA6NzgJ_kNQmgJwb2zW1V5ddCpYd5k6lNEdPRk0JQKlCC2zTmSvnRcLxfDPi4SZFdLLdtG0j2hIl_QNTEC_3VtqJds4FMofy7TkmUObdbEmXjdAsOxkqj2ntGOsaBNiCI_w47BbPvG_V1LsBHDrrIo0Wo1fgAhUbtWV7Dd5J4
-      content-type:
-      - application/json
-    method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/catalog/facets
-  response:
-    body:
-      string: '{"facets":{"/n/i":974,"/n/i/text":974,"/n/i/text/markdown":974}}'
-    headers:
-      Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
-      Content-Length:
-      - '64'
-      access-control-expose-headers:
-      - X-NUCLIA-TRACE-ID
-      content-type:
-      - application/json
-      date:
-      - Tue, 02 Jun 2026 14:35:05 GMT
-      via:
-      - 1.1 google
-      x-envoy-upstream-service-time:
-      - '13'
-      x-nuclia-trace-id:
-      - 35105e4ea4bb7d7fc8cac71888f04c69
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"prefixes":[{"prefix":"/s/p","depth":2}]}'
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '42'
-      Host:
-      - europe-1.nuclia.cloud
-      User-Agent:
-      - nucliadb-sdk/6.13.1.post6414
-      X-STF-SERVICEACCOUNT:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InNhIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3NTkyNTQ3NjQsInN1YiI6ImUwNGUwMzcyLTYwNDgtNDY5ZC04NWExLWI1ZTM1MjBmMzdlZiIsImp0aSI6IjgzMzRhY2NlLTIwMTUtNGY0MS05M2U5LTczNzk1MTg2NDdiZiIsImV4cCI6MTc5MDc5MDc2MCwia2V5IjoiMmYxMzYyNTItNjNiMy00NzA1LTg1MjQtMDhmYWJjOWUzMjUyIiwia2lkIjoiN2RmMzY2NDctOTdiOC00NzU0LWExNjUtZWZkY2ZlMDRkMzI2In0.kwHAfx9RRTI-G3S64X0iisr0iAyXRKNRhnN4C67MkLSxeu1AOAnVV8EIQuu4jpXW7O4FkSsthFXEv9ZxlRRh_CaS0z_TjPzIzDPeE6eIKskZ70Q7c-pDe949WE9DZiDyy9_dwKsdX5cnvYpKorp0ROm-GvRXrdHaTZKDSYWht3gvEtm6-0j9C1gx2BzKr2coizUAIde_qjSpLOojO4S-k8P8I9dsQFagdcrjxgGWgrAzjhAs_qkqlRmP0QP6S7ToN0nrbHmtKKb0lWmcpVvlAfH95CM20YUs7IAqU_t7-_V6mm43FstRgGeiHkoapo8nPVJtXMBSlaM7GSz0Kxf2TWQwi94mTEQLdA8CblX0skMCfIHFwbcbm1Vf-2C6LywAsSmTYAwsVPpqeQcVZdrfLMhddCjZKUFCNLSurCSb4TuN79GZicPCJDT-VEBMlNH8ayHOyRib5RyqvgXUwGN9zyM-ma7RrVk4eEwSk7923bn_9GTk-s5tYw_exbYsQ1Qa84GA6NzgJ_kNQmgJwb2zW1V5ddCpYd5k6lNEdPRk0JQKlCC2zTmSvnRcLxfDPi4SZFdLLdtG0j2hIl_QNTEC_3VtqJds4FMofy7TkmUObdbEmXjdAsOxkqj2ntGOsaBNiCI_w47BbPvG_V1LsBHDrrIo0Wo1fgAhUbtWV7Dd5J4
-      content-type:
-      - application/json
-    method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/catalog/facets
-  response:
-    body:
-      string: '{"facets":{"/s/p":974,"/s/p/ca":3,"/s/p/cy":1,"/s/p/da":1,"/s/p/en":955,"/s/p/eo":4,"/s/p/la":7,"/s/p/nb":1,"/s/p/tl":1,"/s/p/yo":1}}'
-    headers:
-      Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
-      Content-Length:
-      - '133'
-      access-control-expose-headers:
-      - X-NUCLIA-TRACE-ID
-      content-type:
-      - application/json
-      date:
-      - Tue, 02 Jun 2026 14:35:06 GMT
-      via:
-      - 1.1 google
-      x-envoy-upstream-service-time:
-      - '14'
-      x-nuclia-trace-id:
-      - 9366c05ee31b43dd4cceeda73ccb8264
+      - fa13f39dfbe75a71cac14337b115e543
     status:
       code: 200
       message: OK
@@ -238,7 +106,7 @@ interactions:
         Materials 2026","related":"","text":"","uri":""}]}}}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Content-Length:
       - '575'
       access-control-expose-headers:
@@ -246,13 +114,145 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 14:35:05 GMT
+      - Tue, 02 Jun 2026 14:34:56 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '25'
+      - '20'
       x-nuclia-trace-id:
-      - 4eb2527c8ddf252cfe693e0c6d87d85a
+      - 665d235862676fc3fd506acbcb3ab003
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"prefixes":[{"prefix":"/l","depth":2}]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '40'
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nucliadb-sdk/6.13.1.post6414
+      X-STF-SERVICEACCOUNT:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InNhIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3NTkyNTQ3NjQsInN1YiI6ImUwNGUwMzcyLTYwNDgtNDY5ZC04NWExLWI1ZTM1MjBmMzdlZiIsImp0aSI6IjgzMzRhY2NlLTIwMTUtNGY0MS05M2U5LTczNzk1MTg2NDdiZiIsImV4cCI6MTc5MDc5MDc2MCwia2V5IjoiMmYxMzYyNTItNjNiMy00NzA1LTg1MjQtMDhmYWJjOWUzMjUyIiwia2lkIjoiN2RmMzY2NDctOTdiOC00NzU0LWExNjUtZWZkY2ZlMDRkMzI2In0.kwHAfx9RRTI-G3S64X0iisr0iAyXRKNRhnN4C67MkLSxeu1AOAnVV8EIQuu4jpXW7O4FkSsthFXEv9ZxlRRh_CaS0z_TjPzIzDPeE6eIKskZ70Q7c-pDe949WE9DZiDyy9_dwKsdX5cnvYpKorp0ROm-GvRXrdHaTZKDSYWht3gvEtm6-0j9C1gx2BzKr2coizUAIde_qjSpLOojO4S-k8P8I9dsQFagdcrjxgGWgrAzjhAs_qkqlRmP0QP6S7ToN0nrbHmtKKb0lWmcpVvlAfH95CM20YUs7IAqU_t7-_V6mm43FstRgGeiHkoapo8nPVJtXMBSlaM7GSz0Kxf2TWQwi94mTEQLdA8CblX0skMCfIHFwbcbm1Vf-2C6LywAsSmTYAwsVPpqeQcVZdrfLMhddCjZKUFCNLSurCSb4TuN79GZicPCJDT-VEBMlNH8ayHOyRib5RyqvgXUwGN9zyM-ma7RrVk4eEwSk7923bn_9GTk-s5tYw_exbYsQ1Qa84GA6NzgJ_kNQmgJwb2zW1V5ddCpYd5k6lNEdPRk0JQKlCC2zTmSvnRcLxfDPi4SZFdLLdtG0j2hIl_QNTEC_3VtqJds4FMofy7TkmUObdbEmXjdAsOxkqj2ntGOsaBNiCI_w47BbPvG_V1LsBHDrrIo0Wo1fgAhUbtWV7Dd5J4
+      content-type:
+      - application/json
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/catalog/facets
+  response:
+    body:
+      string: '{"facets":{}}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '13'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Tue, 02 Jun 2026 14:34:56 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '16'
+      x-nuclia-trace-id:
+      - 17fa25f8bc3e7f8e83cf96f076426406
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"prefixes":[{"prefix":"/n/i","depth":2}]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '42'
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nucliadb-sdk/6.13.1.post6414
+      X-STF-SERVICEACCOUNT:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InNhIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3NTkyNTQ3NjQsInN1YiI6ImUwNGUwMzcyLTYwNDgtNDY5ZC04NWExLWI1ZTM1MjBmMzdlZiIsImp0aSI6IjgzMzRhY2NlLTIwMTUtNGY0MS05M2U5LTczNzk1MTg2NDdiZiIsImV4cCI6MTc5MDc5MDc2MCwia2V5IjoiMmYxMzYyNTItNjNiMy00NzA1LTg1MjQtMDhmYWJjOWUzMjUyIiwia2lkIjoiN2RmMzY2NDctOTdiOC00NzU0LWExNjUtZWZkY2ZlMDRkMzI2In0.kwHAfx9RRTI-G3S64X0iisr0iAyXRKNRhnN4C67MkLSxeu1AOAnVV8EIQuu4jpXW7O4FkSsthFXEv9ZxlRRh_CaS0z_TjPzIzDPeE6eIKskZ70Q7c-pDe949WE9DZiDyy9_dwKsdX5cnvYpKorp0ROm-GvRXrdHaTZKDSYWht3gvEtm6-0j9C1gx2BzKr2coizUAIde_qjSpLOojO4S-k8P8I9dsQFagdcrjxgGWgrAzjhAs_qkqlRmP0QP6S7ToN0nrbHmtKKb0lWmcpVvlAfH95CM20YUs7IAqU_t7-_V6mm43FstRgGeiHkoapo8nPVJtXMBSlaM7GSz0Kxf2TWQwi94mTEQLdA8CblX0skMCfIHFwbcbm1Vf-2C6LywAsSmTYAwsVPpqeQcVZdrfLMhddCjZKUFCNLSurCSb4TuN79GZicPCJDT-VEBMlNH8ayHOyRib5RyqvgXUwGN9zyM-ma7RrVk4eEwSk7923bn_9GTk-s5tYw_exbYsQ1Qa84GA6NzgJ_kNQmgJwb2zW1V5ddCpYd5k6lNEdPRk0JQKlCC2zTmSvnRcLxfDPi4SZFdLLdtG0j2hIl_QNTEC_3VtqJds4FMofy7TkmUObdbEmXjdAsOxkqj2ntGOsaBNiCI_w47BbPvG_V1LsBHDrrIo0Wo1fgAhUbtWV7Dd5J4
+      content-type:
+      - application/json
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/catalog/facets
+  response:
+    body:
+      string: '{"facets":{"/n/i":974,"/n/i/text":974,"/n/i/text/markdown":974}}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '64'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Tue, 02 Jun 2026 14:34:56 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '26'
+      x-nuclia-trace-id:
+      - d9b9f311da220b2f4a0bab05f813881a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"prefixes":[{"prefix":"/s/p","depth":2}]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '42'
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nucliadb-sdk/6.13.1.post6414
+      X-STF-SERVICEACCOUNT:
+      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InNhIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3NTkyNTQ3NjQsInN1YiI6ImUwNGUwMzcyLTYwNDgtNDY5ZC04NWExLWI1ZTM1MjBmMzdlZiIsImp0aSI6IjgzMzRhY2NlLTIwMTUtNGY0MS05M2U5LTczNzk1MTg2NDdiZiIsImV4cCI6MTc5MDc5MDc2MCwia2V5IjoiMmYxMzYyNTItNjNiMy00NzA1LTg1MjQtMDhmYWJjOWUzMjUyIiwia2lkIjoiN2RmMzY2NDctOTdiOC00NzU0LWExNjUtZWZkY2ZlMDRkMzI2In0.kwHAfx9RRTI-G3S64X0iisr0iAyXRKNRhnN4C67MkLSxeu1AOAnVV8EIQuu4jpXW7O4FkSsthFXEv9ZxlRRh_CaS0z_TjPzIzDPeE6eIKskZ70Q7c-pDe949WE9DZiDyy9_dwKsdX5cnvYpKorp0ROm-GvRXrdHaTZKDSYWht3gvEtm6-0j9C1gx2BzKr2coizUAIde_qjSpLOojO4S-k8P8I9dsQFagdcrjxgGWgrAzjhAs_qkqlRmP0QP6S7ToN0nrbHmtKKb0lWmcpVvlAfH95CM20YUs7IAqU_t7-_V6mm43FstRgGeiHkoapo8nPVJtXMBSlaM7GSz0Kxf2TWQwi94mTEQLdA8CblX0skMCfIHFwbcbm1Vf-2C6LywAsSmTYAwsVPpqeQcVZdrfLMhddCjZKUFCNLSurCSb4TuN79GZicPCJDT-VEBMlNH8ayHOyRib5RyqvgXUwGN9zyM-ma7RrVk4eEwSk7923bn_9GTk-s5tYw_exbYsQ1Qa84GA6NzgJ_kNQmgJwb2zW1V5ddCpYd5k6lNEdPRk0JQKlCC2zTmSvnRcLxfDPi4SZFdLLdtG0j2hIl_QNTEC_3VtqJds4FMofy7TkmUObdbEmXjdAsOxkqj2ntGOsaBNiCI_w47BbPvG_V1LsBHDrrIo0Wo1fgAhUbtWV7Dd5J4
+      content-type:
+      - application/json
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/catalog/facets
+  response:
+    body:
+      string: '{"facets":{"/s/p":974,"/s/p/ca":3,"/s/p/cy":1,"/s/p/da":1,"/s/p/en":955,"/s/p/eo":4,"/s/p/la":7,"/s/p/nb":1,"/s/p/tl":1,"/s/p/yo":1}}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '133'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Tue, 02 Jun 2026 14:34:56 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '21'
+      x-nuclia-trace-id:
+      - 8275ed9e5cdc083ab268afd780f15ffe
     status:
       code: 200
       message: OK
@@ -291,13 +291,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 14:35:05 GMT,Tue, 02 Jun 2026 14:35:05 GMT
+      - Tue, 02 Jun 2026 14:34:56 GMT,Tue, 02 Jun 2026 14:34:56 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '54'
+      - '41'
       x-nuclia-trace-id:
-      - 8b8275f8cdf68e0d6e9ef7b59eff4d10
+      - fdcbeb93190bb3d9c1cd272741ea91b7
     status:
       code: 200
       message: OK
@@ -398,13 +398,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 14:35:06 GMT
+      - Tue, 02 Jun 2026 14:34:56 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '121'
+      - '132'
       x-nuclia-trace-id:
-      - 76ac39bddbbdf91647c1cf353493a21b
+      - aa46350f36dcb191e9bc6161810a187d
     status:
       code: 200
       message: OK
@@ -436,7 +436,7 @@ interactions:
         Materials 2026","related":"","text":"","uri":""}]}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
       - '507'
       access-control-expose-headers:
@@ -444,13 +444,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 14:35:05 GMT
+      - Tue, 02 Jun 2026 14:34:56 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '11'
+      - '8'
       x-nuclia-trace-id:
-      - 18e9a7cac66eec6174ad6571eb14a77d
+      - dfb8879b2b3858947d328aecbc943c21
     status:
       code: 200
       message: OK
@@ -546,7 +546,7 @@ interactions:
         > develop > js sdk > type aliases > KVValue\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":48},\"fuzzy_result\":false}],\"facets\":{\"/k\":{\"/k/text\":4965}},\"query\":\"\",\"total\":4965,\"page_number\":0,\"page_size\":20,\"next_page\":true,\"min_score\":0.0},\"fulltext\":{\"results\":[{\"score\":0.0,\"rid\":\"256f6b95e3fb476c8f47b6b057d02fa0\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"256f6b95e3fb476c8f47b6b057d02fa0\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"f539dfaa013a45d6a0e319bc7288ff07\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"f539dfaa013a45d6a0e319bc7288ff07\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"af442e9be6484c44a4a1dbc396e38dca\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"af442e9be6484c44a4a1dbc396e38dca\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"701e9133181a4002bc373eaa1254daf8\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"701e9133181a4002bc373eaa1254daf8\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"e88f4784ecb144bf87be0b7e543cb7ef\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"e88f4784ecb144bf87be0b7e543cb7ef\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"7d409453a7584981beaeb2944e4560f5\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"7d409453a7584981beaeb2944e4560f5\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"97fa1944fdbe4e99a9e482179dc344ed\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"97fa1944fdbe4e99a9e482179dc344ed\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"1ea50c5c8e1c43ba8dfc2afe8c5d94ee\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"1ea50c5c8e1c43ba8dfc2afe8c5d94ee\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"57864b149f254f4aba34905a895c1927\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"57864b149f254f4aba34905a895c1927\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"8798b24b72a74c63a79ec0e2f10a1423\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"8798b24b72a74c63a79ec0e2f10a1423\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]}],\"facets\":{},\"query\":\"\",\"total\":1949,\"page_number\":0,\"page_size\":20,\"next_page\":true,\"min_score\":0.0},\"shards\":[\"0492d4f0-3034-4392-869f-f204c3865fa4\"]}"
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
       - '15653'
       access-control-expose-headers:
@@ -554,13 +554,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 14:35:06 GMT
+      - Tue, 02 Jun 2026 14:34:56 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
       - '140'
       x-nuclia-trace-id:
-      - 55b701b3294a882baed0864820726553
+      - c0c0264a2d120cb158d17c1b357af7e8
     status:
       code: 200
       message: OK
@@ -3617,7 +3617,7 @@ interactions:
         usar max_tokens.magic  y dime como cambiar\xE1 este parametro en el futuro\",\"rephrased_query\":null,\"total\":143,\"page_number\":0,\"page_size\":20,\"next_page\":true,\"shards\":[\"0492d4f0-3034-4392-869f-f204c3865fa4\"],\"min_score\":{\"semantic\":0.4,\"bm25\":0.0},\"best_matches\":[\"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412\",\"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011\",\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\",\"e8525e64c5b44982b958d32cf6090613/t/page/2450-2808\",\"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60\",\"43004f553e534ffe9c9e735856bd9b23/t/page/480-703\",\"89cc367c149e4f6eab0e06a743d1edba/t/page/2202-2575\",\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221\",\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/739-977\",\"89cc367c149e4f6eab0e06a743d1edba/t/page/2804-3043\",\"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\",\"66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833\",\"1cf976a5ca5947cd89a2f2a047b71ce9/t/page/963-1239\",\"89cc367c149e4f6eab0e06a743d1edba/t/page/3043-3250\",\"43004f553e534ffe9c9e735856bd9b23/t/page/212-480\",\"99410c96c6d24e66aa0bdfea25afe20d/a/title/0-27\",\"828a119645574efd908c8ecb5ee6c013/t/page/48955-49830\",\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276\",\"666b3a9d01f74323b6ca6c9939834bec/t/page/0-1386\",\"53b91ad0dd5f48a7ac8b59f9775ed7e0/t/page/257-334\"]}"
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
       - '375488'
       access-control-expose-headers:
@@ -3625,13 +3625,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 14:35:06 GMT
+      - Tue, 02 Jun 2026 14:34:57 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '241'
+      - '268'
       x-nuclia-trace-id:
-      - 54841c0f41905429ea6ac99d0f19759f
+      - d19317c3b8be2d80bba8396a5f429302
     status:
       code: 200
       message: OK
@@ -3683,13 +3683,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 14:35:06 GMT
+      - Tue, 02 Jun 2026 14:34:57 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '139'
+      - '132'
       x-nuclia-trace-id:
-      - f7be0367dd80da68c107e179d1853aae
+      - 2e311c37cf50f76af2013f65c53bdc90
     status:
       code: 200
       message: OK
@@ -3842,15 +3842,15 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 14:35:07 GMT
+      - Tue, 02 Jun 2026 14:34:58 GMT
       nuclia-learning-model:
       - bge-reranker-v2-m3
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '139'
+      - '116'
       x-nuclia-trace-id:
-      - afa0659044ade69c98b41651d3be735b
+      - 81d637926dedcfaa301e62269d8fc14a
     status:
       code: 200
       message: OK
@@ -3947,7 +3947,7 @@ interactions:
         Additionally, the max_output_tokens parameter sets the maximum number of tokens
         to generate. Enabling reasoning may require increasing max_tokens to accommodate
         additional tokens needed for reasoning.\",\"missing_info_query\":\"\xBFC\xF3mo
-        cambiar\xE1 el par\xE1metro max_tokens en el futuro?\",\"useful\":\"yes\",\"citations\":[\"block-AA\",\"block-AB\",\"block-AC\"]}}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":30,\"output_tokens\":19,\"timings\":{\"generative\":2.106070951995207},\"input_nuclia_tokens\":0.03,\"output_nuclia_tokens\":0.019}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.02997,\"output\":0.01944,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+        cambiar\xE1 el par\xE1metro max_tokens en el futuro?\",\"useful\":\"yes\",\"citations\":[\"block-AA\",\"block-AB\",\"block-AC\"]}}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":30,\"output_tokens\":19,\"timings\":{\"generative\":2.2289046489895554},\"input_nuclia_tokens\":0.03,\"output_nuclia_tokens\":0.019}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.02997,\"output\":0.01944,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -3958,17 +3958,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 14:35:07 GMT
+      - Tue, 02 Jun 2026 14:34:58 GMT
       nuclia-learning-id:
-      - 66beb36ebd804779bc3b09020b8e75be
+      - 63a685f2f81241faab27c412df020326
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '2112'
+      - '2234'
       x-nuclia-trace-id:
-      - e18f55197c6ca75c9430025ac36a89d3
+      - 5973af8cb0b07e1385d20a0dba967f8d
     status:
       code: 200
       message: OK
@@ -7024,7 +7024,7 @@ interactions:
         usar max_tokens.magic  y dime como cambiar\xE1 este parametro en el futuro\",\"rephrased_query\":null,\"total\":143,\"page_number\":0,\"page_size\":20,\"next_page\":true,\"shards\":[\"0492d4f0-3034-4392-869f-f204c3865fa4\"],\"min_score\":{\"semantic\":0.4,\"bm25\":0.0},\"best_matches\":[\"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412\",\"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011\",\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\",\"e8525e64c5b44982b958d32cf6090613/t/page/2450-2808\",\"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60\",\"43004f553e534ffe9c9e735856bd9b23/t/page/480-703\",\"89cc367c149e4f6eab0e06a743d1edba/t/page/2202-2575\",\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221\",\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/739-977\",\"89cc367c149e4f6eab0e06a743d1edba/t/page/2804-3043\",\"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\",\"66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833\",\"1cf976a5ca5947cd89a2f2a047b71ce9/t/page/963-1239\",\"89cc367c149e4f6eab0e06a743d1edba/t/page/3043-3250\",\"43004f553e534ffe9c9e735856bd9b23/t/page/212-480\",\"99410c96c6d24e66aa0bdfea25afe20d/a/title/0-27\",\"828a119645574efd908c8ecb5ee6c013/t/page/48955-49830\",\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276\",\"666b3a9d01f74323b6ca6c9939834bec/t/page/0-1386\",\"53b91ad0dd5f48a7ac8b59f9775ed7e0/t/page/257-334\"]}"
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Content-Length:
       - '375488'
       access-control-expose-headers:
@@ -7032,13 +7032,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 14:35:10 GMT
+      - Tue, 02 Jun 2026 14:35:00 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '235'
+      - '256'
       x-nuclia-trace-id:
-      - 6444b870e5a8ec2c00f652a0face1385
+      - 09778233cb2c14cba2277bdb2e5e27dc
     status:
       code: 200
       message: OK
@@ -7065,21 +7065,21 @@ interactions:
     uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/hydrate
   response:
     body:
-      string: '{"resources":{"89cc367c149e4f6eab0e06a743d1edba":{"id":"89cc367c149e4f6eab0e06a743d1edba","slug":"docs-rag-advanced-openai-api-compatible-models-md","title":"docs
-        > rag > advanced > openai api compatible models","summary":null,"origin":null,"security":null},"220eb37c167f4eb9bb8e9454e7ba8cf5":{"id":"220eb37c167f4eb9bb8e9454e7ba8cf5","slug":"docs-develop-python-sdk-05-search-md","title":"docs
-        > develop > python sdk > 05 search","summary":null,"origin":null,"security":null},"99410c96c6d24e66aa0bdfea25afe20d":{"id":"99410c96c6d24e66aa0bdfea25afe20d","slug":"docs-rag-how-to-boost-md","title":"docs
-        > rag > how to > boost","summary":null,"origin":null,"security":null},"53b91ad0dd5f48a7ac8b59f9775ed7e0":{"id":"53b91ad0dd5f48a7ac8b59f9775ed7e0","slug":"docs-api-mdx","title":"docs
+      string: '{"resources":{"666b3a9d01f74323b6ca6c9939834bec":{"id":"666b3a9d01f74323b6ca6c9939834bec","slug":"docs-develop-js-sdk-enums-StatsType-md","title":"docs
+        > develop > js sdk > enums > StatsType","summary":null,"origin":null,"security":null},"89cc367c149e4f6eab0e06a743d1edba":{"id":"89cc367c149e4f6eab0e06a743d1edba","slug":"docs-rag-advanced-openai-api-compatible-models-md","title":"docs
+        > rag > advanced > openai api compatible models","summary":null,"origin":null,"security":null},"828a119645574efd908c8ecb5ee6c013":{"id":"828a119645574efd908c8ecb5ee6c013","slug":"docs-develop-js-sdk-classes-RetrievalAgent-md","title":"docs
+        > develop > js sdk > classes > RetrievalAgent","summary":null,"origin":null,"security":null},"50aac6f34b6d47de8e3b01f8b2de6e9c":{"id":"50aac6f34b6d47de8e3b01f8b2de6e9c","slug":"docs-develop-js-sdk-interfaces-PredictAnswerOptions-md","title":"docs
+        > develop > js sdk > interfaces > PredictAnswerOptions","summary":null,"origin":null,"security":null},"220eb37c167f4eb9bb8e9454e7ba8cf5":{"id":"220eb37c167f4eb9bb8e9454e7ba8cf5","slug":"docs-develop-python-sdk-05-search-md","title":"docs
+        > develop > python sdk > 05 search","summary":null,"origin":null,"security":null},"66b6f0dbd883413e98fbbf5b59f049b9":{"id":"66b6f0dbd883413e98fbbf5b59f049b9","slug":"docs-develop-js-sdk-enumerations-UsageType-md","title":"docs
+        > develop > js sdk > enumerations > UsageType","summary":null,"origin":null,"security":null},"ecabb0862fa24c8fb8e01d4930a3f7a2":{"id":"ecabb0862fa24c8fb8e01d4930a3f7a2","slug":"docs-develop-js-sdk-variables-MAX_FACETS_PER_REQUEST-md","title":"docs
+        > develop > js sdk > variables > MAX_FACETS_PER_REQUEST","summary":null,"origin":null,"security":null},"53b91ad0dd5f48a7ac8b59f9775ed7e0":{"id":"53b91ad0dd5f48a7ac8b59f9775ed7e0","slug":"docs-api-mdx","title":"docs
         > api.","summary":null,"origin":null,"security":null},"43004f553e534ffe9c9e735856bd9b23":{"id":"43004f553e534ffe9c9e735856bd9b23","slug":"docs-develop-js-sdk-interfaces-ModelConfig-md","title":"docs
-        > develop > js sdk > interfaces > ModelConfig","summary":null,"origin":null,"security":null},"9f7036a7a6694700b72d52eb58a8326c":{"id":"9f7036a7a6694700b72d52eb58a8326c","slug":"docs-rag-advanced-widget-features-md","title":"docs
-        > rag > advanced > widget > features","summary":null,"origin":null,"security":null},"ecabb0862fa24c8fb8e01d4930a3f7a2":{"id":"ecabb0862fa24c8fb8e01d4930a3f7a2","slug":"docs-develop-js-sdk-variables-MAX_FACETS_PER_REQUEST-md","title":"docs
-        > develop > js sdk > variables > MAX_FACETS_PER_REQUEST","summary":null,"origin":null,"security":null},"4039d76b0fff4962900836ab3fdec9f7":{"id":"4039d76b0fff4962900836ab3fdec9f7","slug":"docs-rag-advanced-consumption-mdx","title":"docs
-        > rag > advanced > consumption.","summary":null,"origin":null,"security":null},"66b6f0dbd883413e98fbbf5b59f049b9":{"id":"66b6f0dbd883413e98fbbf5b59f049b9","slug":"docs-develop-js-sdk-enumerations-UsageType-md","title":"docs
-        > develop > js sdk > enumerations > UsageType","summary":null,"origin":null,"security":null},"e8525e64c5b44982b958d32cf6090613":{"id":"e8525e64c5b44982b958d32cf6090613","slug":"docs-develop-js-sdk-interfaces-ChatOptions-md","title":"docs
-        > develop > js sdk > interfaces > ChatOptions","summary":null,"origin":null,"security":null},"666b3a9d01f74323b6ca6c9939834bec":{"id":"666b3a9d01f74323b6ca6c9939834bec","slug":"docs-develop-js-sdk-enums-StatsType-md","title":"docs
-        > develop > js sdk > enums > StatsType","summary":null,"origin":null,"security":null},"50aac6f34b6d47de8e3b01f8b2de6e9c":{"id":"50aac6f34b6d47de8e3b01f8b2de6e9c","slug":"docs-develop-js-sdk-interfaces-PredictAnswerOptions-md","title":"docs
-        > develop > js sdk > interfaces > PredictAnswerOptions","summary":null,"origin":null,"security":null},"828a119645574efd908c8ecb5ee6c013":{"id":"828a119645574efd908c8ecb5ee6c013","slug":"docs-develop-js-sdk-classes-RetrievalAgent-md","title":"docs
-        > develop > js sdk > classes > RetrievalAgent","summary":null,"origin":null,"security":null},"1cf976a5ca5947cd89a2f2a047b71ce9":{"id":"1cf976a5ca5947cd89a2f2a047b71ce9","slug":"docs-ingestion-how-to-split-strategies-md","title":"docs
-        > ingestion > how to > split strategies","summary":null,"origin":null,"security":null}},"fields":{"89cc367c149e4f6eab0e06a743d1edba/t/page":{"id":"89cc367c149e4f6eab0e06a743d1edba/t/page","resource":"89cc367c149e4f6eab0e06a743d1edba","field_type":"text"},"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page":{"id":"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page","resource":"220eb37c167f4eb9bb8e9454e7ba8cf5","field_type":"text"},"99410c96c6d24e66aa0bdfea25afe20d/a/title":{"id":"99410c96c6d24e66aa0bdfea25afe20d/a/title","resource":"99410c96c6d24e66aa0bdfea25afe20d","field_type":"generic"},"53b91ad0dd5f48a7ac8b59f9775ed7e0/t/page":{"id":"53b91ad0dd5f48a7ac8b59f9775ed7e0/t/page","resource":"53b91ad0dd5f48a7ac8b59f9775ed7e0","field_type":"text"},"43004f553e534ffe9c9e735856bd9b23/t/page":{"id":"43004f553e534ffe9c9e735856bd9b23/t/page","resource":"43004f553e534ffe9c9e735856bd9b23","field_type":"text"},"9f7036a7a6694700b72d52eb58a8326c/t/page":{"id":"9f7036a7a6694700b72d52eb58a8326c/t/page","resource":"9f7036a7a6694700b72d52eb58a8326c","field_type":"text"},"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title":{"id":"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title","resource":"ecabb0862fa24c8fb8e01d4930a3f7a2","field_type":"generic"},"4039d76b0fff4962900836ab3fdec9f7/t/page":{"id":"4039d76b0fff4962900836ab3fdec9f7/t/page","resource":"4039d76b0fff4962900836ab3fdec9f7","field_type":"text"},"66b6f0dbd883413e98fbbf5b59f049b9/t/page":{"id":"66b6f0dbd883413e98fbbf5b59f049b9/t/page","resource":"66b6f0dbd883413e98fbbf5b59f049b9","field_type":"text"},"e8525e64c5b44982b958d32cf6090613/t/page":{"id":"e8525e64c5b44982b958d32cf6090613/t/page","resource":"e8525e64c5b44982b958d32cf6090613","field_type":"text"},"666b3a9d01f74323b6ca6c9939834bec/t/page":{"id":"666b3a9d01f74323b6ca6c9939834bec/t/page","resource":"666b3a9d01f74323b6ca6c9939834bec","field_type":"text"},"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page":{"id":"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page","resource":"50aac6f34b6d47de8e3b01f8b2de6e9c","field_type":"text"},"828a119645574efd908c8ecb5ee6c013/t/page":{"id":"828a119645574efd908c8ecb5ee6c013/t/page","resource":"828a119645574efd908c8ecb5ee6c013","field_type":"text"},"1cf976a5ca5947cd89a2f2a047b71ce9/t/page":{"id":"1cf976a5ca5947cd89a2f2a047b71ce9/t/page","resource":"1cf976a5ca5947cd89a2f2a047b71ce9","field_type":"text"}},"paragraphs":{"89cc367c149e4f6eab0e06a743d1edba/t/page/2202-2575":{"id":"89cc367c149e4f6eab0e06a743d1edba/t/page/2202-2575","field":"89cc367c149e4f6eab0e06a743d1edba/t/page","resource":"89cc367c149e4f6eab0e06a743d1edba","image":{},"table":{},"page":{}},"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276":{"id":"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276","field":"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page","resource":"220eb37c167f4eb9bb8e9454e7ba8cf5","image":{},"table":{},"page":{}},"99410c96c6d24e66aa0bdfea25afe20d/a/title/0-27":{"id":"99410c96c6d24e66aa0bdfea25afe20d/a/title/0-27","field":"99410c96c6d24e66aa0bdfea25afe20d/a/title","resource":"99410c96c6d24e66aa0bdfea25afe20d","image":{},"table":{},"page":{}},"53b91ad0dd5f48a7ac8b59f9775ed7e0/t/page/257-334":{"id":"53b91ad0dd5f48a7ac8b59f9775ed7e0/t/page/257-334","field":"53b91ad0dd5f48a7ac8b59f9775ed7e0/t/page","resource":"53b91ad0dd5f48a7ac8b59f9775ed7e0","image":{},"table":{},"page":{}},"89cc367c149e4f6eab0e06a743d1edba/t/page/2804-3043":{"id":"89cc367c149e4f6eab0e06a743d1edba/t/page/2804-3043","field":"89cc367c149e4f6eab0e06a743d1edba/t/page","resource":"89cc367c149e4f6eab0e06a743d1edba","image":{},"table":{},"page":{}},"43004f553e534ffe9c9e735856bd9b23/t/page/212-480":{"id":"43004f553e534ffe9c9e735856bd9b23/t/page/212-480","field":"43004f553e534ffe9c9e735856bd9b23/t/page","resource":"43004f553e534ffe9c9e735856bd9b23","image":{},"table":{},"page":{}},"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412":{"id":"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412","field":"9f7036a7a6694700b72d52eb58a8326c/t/page","resource":"9f7036a7a6694700b72d52eb58a8326c","image":{},"table":{},"page":{}},"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60":{"id":"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60","field":"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title","resource":"ecabb0862fa24c8fb8e01d4930a3f7a2","image":{},"table":{},"page":{}},"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340":{"id":"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340","field":"4039d76b0fff4962900836ab3fdec9f7/t/page","resource":"4039d76b0fff4962900836ab3fdec9f7","image":{},"table":{},"page":{}},"66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833":{"id":"66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833","field":"66b6f0dbd883413e98fbbf5b59f049b9/t/page","resource":"66b6f0dbd883413e98fbbf5b59f049b9","image":{},"table":{},"page":{}},"43004f553e534ffe9c9e735856bd9b23/t/page/480-703":{"id":"43004f553e534ffe9c9e735856bd9b23/t/page/480-703","field":"43004f553e534ffe9c9e735856bd9b23/t/page","resource":"43004f553e534ffe9c9e735856bd9b23","image":{},"table":{},"page":{}},"e8525e64c5b44982b958d32cf6090613/t/page/2450-2808":{"id":"e8525e64c5b44982b958d32cf6090613/t/page/2450-2808","field":"e8525e64c5b44982b958d32cf6090613/t/page","resource":"e8525e64c5b44982b958d32cf6090613","image":{},"table":{},"page":{}},"89cc367c149e4f6eab0e06a743d1edba/t/page/3043-3250":{"id":"89cc367c149e4f6eab0e06a743d1edba/t/page/3043-3250","field":"89cc367c149e4f6eab0e06a743d1edba/t/page","resource":"89cc367c149e4f6eab0e06a743d1edba","image":{},"table":{},"page":{}},"666b3a9d01f74323b6ca6c9939834bec/t/page/0-1386":{"id":"666b3a9d01f74323b6ca6c9939834bec/t/page/0-1386","field":"666b3a9d01f74323b6ca6c9939834bec/t/page","resource":"666b3a9d01f74323b6ca6c9939834bec","image":{},"table":{},"page":{}},"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709":{"id":"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709","field":"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page","resource":"220eb37c167f4eb9bb8e9454e7ba8cf5","image":{},"table":{},"page":{}},"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/739-977":{"id":"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/739-977","field":"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page","resource":"50aac6f34b6d47de8e3b01f8b2de6e9c","image":{},"table":{},"page":{}},"828a119645574efd908c8ecb5ee6c013/t/page/48955-49830":{"id":"828a119645574efd908c8ecb5ee6c013/t/page/48955-49830","field":"828a119645574efd908c8ecb5ee6c013/t/page","resource":"828a119645574efd908c8ecb5ee6c013","image":{},"table":{},"page":{}},"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221":{"id":"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221","field":"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page","resource":"50aac6f34b6d47de8e3b01f8b2de6e9c","image":{},"table":{},"page":{}},"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011":{"id":"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011","field":"e8525e64c5b44982b958d32cf6090613/t/page","resource":"e8525e64c5b44982b958d32cf6090613","image":{},"table":{},"page":{}},"1cf976a5ca5947cd89a2f2a047b71ce9/t/page/963-1239":{"id":"1cf976a5ca5947cd89a2f2a047b71ce9/t/page/963-1239","field":"1cf976a5ca5947cd89a2f2a047b71ce9/t/page","resource":"1cf976a5ca5947cd89a2f2a047b71ce9","image":{},"table":{},"page":{}}}}'
+        > develop > js sdk > interfaces > ModelConfig","summary":null,"origin":null,"security":null},"1cf976a5ca5947cd89a2f2a047b71ce9":{"id":"1cf976a5ca5947cd89a2f2a047b71ce9","slug":"docs-ingestion-how-to-split-strategies-md","title":"docs
+        > ingestion > how to > split strategies","summary":null,"origin":null,"security":null},"e8525e64c5b44982b958d32cf6090613":{"id":"e8525e64c5b44982b958d32cf6090613","slug":"docs-develop-js-sdk-interfaces-ChatOptions-md","title":"docs
+        > develop > js sdk > interfaces > ChatOptions","summary":null,"origin":null,"security":null},"99410c96c6d24e66aa0bdfea25afe20d":{"id":"99410c96c6d24e66aa0bdfea25afe20d","slug":"docs-rag-how-to-boost-md","title":"docs
+        > rag > how to > boost","summary":null,"origin":null,"security":null},"9f7036a7a6694700b72d52eb58a8326c":{"id":"9f7036a7a6694700b72d52eb58a8326c","slug":"docs-rag-advanced-widget-features-md","title":"docs
+        > rag > advanced > widget > features","summary":null,"origin":null,"security":null},"4039d76b0fff4962900836ab3fdec9f7":{"id":"4039d76b0fff4962900836ab3fdec9f7","slug":"docs-rag-advanced-consumption-mdx","title":"docs
+        > rag > advanced > consumption.","summary":null,"origin":null,"security":null}},"fields":{"666b3a9d01f74323b6ca6c9939834bec/t/page":{"id":"666b3a9d01f74323b6ca6c9939834bec/t/page","resource":"666b3a9d01f74323b6ca6c9939834bec","field_type":"text"},"89cc367c149e4f6eab0e06a743d1edba/t/page":{"id":"89cc367c149e4f6eab0e06a743d1edba/t/page","resource":"89cc367c149e4f6eab0e06a743d1edba","field_type":"text"},"828a119645574efd908c8ecb5ee6c013/t/page":{"id":"828a119645574efd908c8ecb5ee6c013/t/page","resource":"828a119645574efd908c8ecb5ee6c013","field_type":"text"},"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page":{"id":"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page","resource":"50aac6f34b6d47de8e3b01f8b2de6e9c","field_type":"text"},"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page":{"id":"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page","resource":"220eb37c167f4eb9bb8e9454e7ba8cf5","field_type":"text"},"66b6f0dbd883413e98fbbf5b59f049b9/t/page":{"id":"66b6f0dbd883413e98fbbf5b59f049b9/t/page","resource":"66b6f0dbd883413e98fbbf5b59f049b9","field_type":"text"},"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title":{"id":"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title","resource":"ecabb0862fa24c8fb8e01d4930a3f7a2","field_type":"generic"},"53b91ad0dd5f48a7ac8b59f9775ed7e0/t/page":{"id":"53b91ad0dd5f48a7ac8b59f9775ed7e0/t/page","resource":"53b91ad0dd5f48a7ac8b59f9775ed7e0","field_type":"text"},"43004f553e534ffe9c9e735856bd9b23/t/page":{"id":"43004f553e534ffe9c9e735856bd9b23/t/page","resource":"43004f553e534ffe9c9e735856bd9b23","field_type":"text"},"1cf976a5ca5947cd89a2f2a047b71ce9/t/page":{"id":"1cf976a5ca5947cd89a2f2a047b71ce9/t/page","resource":"1cf976a5ca5947cd89a2f2a047b71ce9","field_type":"text"},"e8525e64c5b44982b958d32cf6090613/t/page":{"id":"e8525e64c5b44982b958d32cf6090613/t/page","resource":"e8525e64c5b44982b958d32cf6090613","field_type":"text"},"99410c96c6d24e66aa0bdfea25afe20d/a/title":{"id":"99410c96c6d24e66aa0bdfea25afe20d/a/title","resource":"99410c96c6d24e66aa0bdfea25afe20d","field_type":"generic"},"9f7036a7a6694700b72d52eb58a8326c/t/page":{"id":"9f7036a7a6694700b72d52eb58a8326c/t/page","resource":"9f7036a7a6694700b72d52eb58a8326c","field_type":"text"},"4039d76b0fff4962900836ab3fdec9f7/t/page":{"id":"4039d76b0fff4962900836ab3fdec9f7/t/page","resource":"4039d76b0fff4962900836ab3fdec9f7","field_type":"text"}},"paragraphs":{"666b3a9d01f74323b6ca6c9939834bec/t/page/0-1386":{"id":"666b3a9d01f74323b6ca6c9939834bec/t/page/0-1386","field":"666b3a9d01f74323b6ca6c9939834bec/t/page","resource":"666b3a9d01f74323b6ca6c9939834bec","image":{},"table":{},"page":{}},"89cc367c149e4f6eab0e06a743d1edba/t/page/2804-3043":{"id":"89cc367c149e4f6eab0e06a743d1edba/t/page/2804-3043","field":"89cc367c149e4f6eab0e06a743d1edba/t/page","resource":"89cc367c149e4f6eab0e06a743d1edba","image":{},"table":{},"page":{}},"828a119645574efd908c8ecb5ee6c013/t/page/48955-49830":{"id":"828a119645574efd908c8ecb5ee6c013/t/page/48955-49830","field":"828a119645574efd908c8ecb5ee6c013/t/page","resource":"828a119645574efd908c8ecb5ee6c013","image":{},"table":{},"page":{}},"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/739-977":{"id":"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/739-977","field":"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page","resource":"50aac6f34b6d47de8e3b01f8b2de6e9c","image":{},"table":{},"page":{}},"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709":{"id":"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709","field":"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page","resource":"220eb37c167f4eb9bb8e9454e7ba8cf5","image":{},"table":{},"page":{}},"89cc367c149e4f6eab0e06a743d1edba/t/page/2202-2575":{"id":"89cc367c149e4f6eab0e06a743d1edba/t/page/2202-2575","field":"89cc367c149e4f6eab0e06a743d1edba/t/page","resource":"89cc367c149e4f6eab0e06a743d1edba","image":{},"table":{},"page":{}},"66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833":{"id":"66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833","field":"66b6f0dbd883413e98fbbf5b59f049b9/t/page","resource":"66b6f0dbd883413e98fbbf5b59f049b9","image":{},"table":{},"page":{}},"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60":{"id":"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60","field":"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title","resource":"ecabb0862fa24c8fb8e01d4930a3f7a2","image":{},"table":{},"page":{}},"89cc367c149e4f6eab0e06a743d1edba/t/page/3043-3250":{"id":"89cc367c149e4f6eab0e06a743d1edba/t/page/3043-3250","field":"89cc367c149e4f6eab0e06a743d1edba/t/page","resource":"89cc367c149e4f6eab0e06a743d1edba","image":{},"table":{},"page":{}},"53b91ad0dd5f48a7ac8b59f9775ed7e0/t/page/257-334":{"id":"53b91ad0dd5f48a7ac8b59f9775ed7e0/t/page/257-334","field":"53b91ad0dd5f48a7ac8b59f9775ed7e0/t/page","resource":"53b91ad0dd5f48a7ac8b59f9775ed7e0","image":{},"table":{},"page":{}},"43004f553e534ffe9c9e735856bd9b23/t/page/480-703":{"id":"43004f553e534ffe9c9e735856bd9b23/t/page/480-703","field":"43004f553e534ffe9c9e735856bd9b23/t/page","resource":"43004f553e534ffe9c9e735856bd9b23","image":{},"table":{},"page":{}},"43004f553e534ffe9c9e735856bd9b23/t/page/212-480":{"id":"43004f553e534ffe9c9e735856bd9b23/t/page/212-480","field":"43004f553e534ffe9c9e735856bd9b23/t/page","resource":"43004f553e534ffe9c9e735856bd9b23","image":{},"table":{},"page":{}},"1cf976a5ca5947cd89a2f2a047b71ce9/t/page/963-1239":{"id":"1cf976a5ca5947cd89a2f2a047b71ce9/t/page/963-1239","field":"1cf976a5ca5947cd89a2f2a047b71ce9/t/page","resource":"1cf976a5ca5947cd89a2f2a047b71ce9","image":{},"table":{},"page":{}},"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011":{"id":"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011","field":"e8525e64c5b44982b958d32cf6090613/t/page","resource":"e8525e64c5b44982b958d32cf6090613","image":{},"table":{},"page":{}},"99410c96c6d24e66aa0bdfea25afe20d/a/title/0-27":{"id":"99410c96c6d24e66aa0bdfea25afe20d/a/title/0-27","field":"99410c96c6d24e66aa0bdfea25afe20d/a/title","resource":"99410c96c6d24e66aa0bdfea25afe20d","image":{},"table":{},"page":{}},"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412":{"id":"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412","field":"9f7036a7a6694700b72d52eb58a8326c/t/page","resource":"9f7036a7a6694700b72d52eb58a8326c","image":{},"table":{},"page":{}},"e8525e64c5b44982b958d32cf6090613/t/page/2450-2808":{"id":"e8525e64c5b44982b958d32cf6090613/t/page/2450-2808","field":"e8525e64c5b44982b958d32cf6090613/t/page","resource":"e8525e64c5b44982b958d32cf6090613","image":{},"table":{},"page":{}},"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340":{"id":"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340","field":"4039d76b0fff4962900836ab3fdec9f7/t/page","resource":"4039d76b0fff4962900836ab3fdec9f7","image":{},"table":{},"page":{}},"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221":{"id":"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221","field":"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page","resource":"50aac6f34b6d47de8e3b01f8b2de6e9c","image":{},"table":{},"page":{}},"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276":{"id":"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276","field":"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page","resource":"220eb37c167f4eb9bb8e9454e7ba8cf5","image":{},"table":{},"page":{}}}}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -7090,13 +7090,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 14:35:10 GMT
+      - Tue, 02 Jun 2026 14:35:01 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '169'
+      - '141'
       x-nuclia-trace-id:
-      - ff2dee984afd6d47844edcd5d19b0415
+      - 0df704932a684de545ed5a9e6091429c
     status:
       code: 200
       message: OK
@@ -7241,7 +7241,7 @@ interactions:
       string: '{"context_scores":{"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412":0.16079242527484894,"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340":0.09170696139335632,"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276":0.03934250399470329,"89cc367c149e4f6eab0e06a743d1edba/t/page/3043-3250":0.026405517011880875,"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221":0.02400774508714676,"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011":0.023509452119469643,"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709":0.019756918773055077,"e8525e64c5b44982b958d32cf6090613/t/page/2450-2808":0.011508149094879627,"89cc367c149e4f6eab0e06a743d1edba/t/page/2804-3043":0.008187910541892052,"43004f553e534ffe9c9e735856bd9b23/t/page/212-480":0.008061991073191166,"89cc367c149e4f6eab0e06a743d1edba/t/page/2202-2575":0.006984650157392025,"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/739-977":0.006121281534433365,"66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833":0.005797401536256075,"43004f553e534ffe9c9e735856bd9b23/t/page/480-703":0.0035380858462303877,"666b3a9d01f74323b6ca6c9939834bec/t/page/0-1386":0.0019342610612511635,"828a119645574efd908c8ecb5ee6c013/t/page/48955-49830":0.0007014083093963563,"1cf976a5ca5947cd89a2f2a047b71ce9/t/page/963-1239":0.000539980421308428,"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60":0.0003668626013677567,"53b91ad0dd5f48a7ac8b59f9775ed7e0/t/page/257-334":2.7535690605873242e-05,"99410c96c6d24e66aa0bdfea25afe20d/a/title/0-27":2.0785171727766283e-05}}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Content-Length:
       - '1462'
       access-control-expose-headers:
@@ -7249,15 +7249,15 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 14:35:10 GMT
+      - Tue, 02 Jun 2026 14:35:01 GMT
       nuclia-learning-model:
       - bge-reranker-v2-m3
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '128'
+      - '124'
       x-nuclia-trace-id:
-      - faa53e1a8bcd8f97fba228a48c7ebbd7
+      - 39704771b3e2ad38a6648a808775318c
     status:
       code: 200
       message: OK
@@ -7343,10 +7343,10 @@ interactions:
         provides information about the max_tokens parameter, including its current
         function and considerations for its use. However, it does not specify how
         the max_tokens parameter will change in the future.\",\"answer\":\"\",\"missing_info_query\":\"\xBFC\xF3mo
-        cambiar\xE1 el par\xE1metro max_tokens en el futuro?\",\"useful\":\"no\",\"citations\":[]}}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":27,\"output_tokens\":8,\"timings\":{\"generative\":1.5129719830001704},\"input_nuclia_tokens\":0.027,\"output_nuclia_tokens\":0.008}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.02721,\"output\":0.0084,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+        cambiar\xE1 el par\xE1metro max_tokens en el futuro?\",\"useful\":\"no\",\"citations\":[]}}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":27,\"output_tokens\":8,\"timings\":{\"generative\":0.9844929199898615},\"input_nuclia_tokens\":0.027,\"output_nuclia_tokens\":0.008}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.02721,\"output\":0.0084,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -7354,17 +7354,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 14:35:10 GMT
+      - Tue, 02 Jun 2026 14:35:01 GMT
       nuclia-learning-id:
-      - 35378e10bad54c44920104883c548165
+      - 4cbe4c4b1b384e09b6135fea6faf1ffb
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1518'
+      - '990'
       x-nuclia-trace-id:
-      - e6b236f682967c3b3a91b6db36c09ae4
+      - adcec0ba0bdb01ff2ec91a1f1215770b
     status:
       code: 200
       message: OK
@@ -7379,48 +7379,43 @@ interactions:
       about format, style, or domain-specific behavior.\",\"chat_history\":[],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"\\n##
       Question\\nComo usar max_tokens.magic  y dime como cambiar\xE1 este parametro
       en el futuro\\n\\n## Provided Context\\n[START OF CONTEXT]\\n## [block-AA] Retrieval
-      on nucliadb-2 Knowledge Box\\n\\n\\n\\n\\n## Chunk: [block-AA-0] 4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\\n```
-      \ Use the max_tokens parameter on the /ask endpoint to set hard limits on: \\n
-      - Context size: Limits the amount of retrieved information sent to the LLM \\n
-      - Answer length: Limits the length of the generated response \\n Important Considerations
-      \\n Context Limitations: \\n\\n ```\\n\\n\\n## Chunk: [block-AA-1] 9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412\\n```
-      \ max_tokens: the maximum number of input tokens to put in the final context
-      (including the prompt, the retrieved results and the user question). \\n max_output_tokens:
-      the maximum number of tokens to generate. \\n\\n ```\\n\\n\\n## Chunk: [block-AA-2]
-      220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\\n```  ::: \\n :::warning
-      \\n Enabling reasoning can use additional tokens, which may increase your usage
-      costs. \\n You may need to increase max_tokens to give the LLM enough room to
-      reason and generate an answer. \\n\\n ```\\n\\n\\n[END OF CONTEXT]\\n\\n## Answering
-      Guidelines\\n- Carefully read all context; it may be lengthy or detailed\\n-
-      Do not omit or overlook any relevant information\\n- If the context is incomplete
-      or insufficient, try to provide a partial answer and encourage the user to clarify
-      their question\\n- Read carefully any extra instructions below if provided and
-      use them to answer\\n\\nNow provide your answer to the question: Como usar max_tokens.magic
-      \ y dime como cambiar\xE1 este parametro en el futuro\\nYou are given source
-      blocks with IDs like: block-AB, block-BA, block-CD, etc. or block-AB-1, block-BA-2,
-      block-CD-3, etc.\\nWhen producing an answer, cite these sources precisely using
-      markdown footnotes.\\n\\nCITATION RULES\\n\\n1. In the main body, cite sources
-      only with bracketed Arabic numerals: [1], [2], [3], etc.\\n  - Never put a block
-      ID directly in brackets (e.g. NO: [AB], [block-AB], [BA]).\\n  - Never mix styles
-      (no superscripts, no inline block names, no [Ref 1], etc.).\\n2. Numbering is
-      assigned in order of FIRST USE of a unique block ID.\\n  - The first time you
-      need info from a block, assign it [1].\\n  - The first time you need info from
-      a never-before-used block, assign it the next unused number (e.g. [2]).\\n  -
-      If you later cite the SAME block again, REUSE its existing number (do NOT create
-      a new one).\\n  - This guarantees there are no duplicate footnote definitions
-      and no gaps.\\n3. If facts in a sentence come from different blocks, you may
-      concatenate citations WITH spaces: like [1] [3]. Do NOT merge them (no ranges
-      like [1-3]) or output them without spaces (no [1][3]).\\n4. At the end, output
-      section consisting ONLY of the unique citation mappings, one per line, in ascending
-      numeric order\\n  - Don't title this section or add any extra text, just the
-      mappings.\\n  - No duplicates.\\n  - No skipped numbers.\\n  - ONLY include
-      blocks actually cited in the body.\\n5. Do NOT hallucinate block IDs. Only use
-      those provided in the context.\\n\\nFORMATTING CONTRACT\\n\\n* Body: free text
-      with numeric citations as specified.\\n* A blank line.\\n* References section
-      (if any) exactly as described, no heading.\\n\\n\\nExample format:\\n\\n---\\n\\\"The
-      OP-1 has a built-in tape feature with 6 minutes of recording time [1] [2]. You
-      can record to any of the 4 individual tracks [1].\\\"\\n\\n[1]: block-AB\\n[2]:
-      block-FZ-2\\n---\\n\\n\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-azure-4o-mini\",\"max_tokens\":5000,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[],\"tool_choice\":{\"type\":\"auto\"},\"reasoning\":false,\"seed\":null}"
+      on nucliadb-2 Knowledge Box\\n\\n# Como usar max_tokens.magic  y dime como cambiar\xE1
+      este parametro en el futuro\\n\\n Use the max_tokens parameter on the /ask endpoint
+      to set hard limits on context size and answer length. The max_tokens parameter
+      defines the maximum number of input tokens in the final context, which includes
+      the prompt, retrieved results, and user question. Additionally, the max_output_tokens
+      parameter sets the maximum number of tokens to generate. Enabling reasoning
+      may require increasing max_tokens to accommodate additional tokens needed for
+      reasoning.\\n[END OF CONTEXT]\\n\\n## Answering Guidelines\\n- Carefully read
+      all context; it may be lengthy or detailed\\n- Do not omit or overlook any relevant
+      information\\n- If the context is incomplete or insufficient, try to provide
+      a partial answer and encourage the user to clarify their question\\n- Read carefully
+      any extra instructions below if provided and use them to answer\\n\\nNow provide
+      your answer to the question: Como usar max_tokens.magic  y dime como cambiar\xE1
+      este parametro en el futuro\\nYou are given source blocks with IDs like: block-AB,
+      block-BA, block-CD, etc. or block-AB-1, block-BA-2, block-CD-3, etc.\\nWhen
+      producing an answer, cite these sources precisely using markdown footnotes.\\n\\nCITATION
+      RULES\\n\\n1. In the main body, cite sources only with bracketed Arabic numerals:
+      [1], [2], [3], etc.\\n  - Never put a block ID directly in brackets (e.g. NO:
+      [AB], [block-AB], [BA]).\\n  - Never mix styles (no superscripts, no inline
+      block names, no [Ref 1], etc.).\\n2. Numbering is assigned in order of FIRST
+      USE of a unique block ID.\\n  - The first time you need info from a block, assign
+      it [1].\\n  - The first time you need info from a never-before-used block, assign
+      it the next unused number (e.g. [2]).\\n  - If you later cite the SAME block
+      again, REUSE its existing number (do NOT create a new one).\\n  - This guarantees
+      there are no duplicate footnote definitions and no gaps.\\n3. If facts in a
+      sentence come from different blocks, you may concatenate citations WITH spaces:
+      like [1] [3]. Do NOT merge them (no ranges like [1-3]) or output them without
+      spaces (no [1][3]).\\n4. At the end, output section consisting ONLY of the unique
+      citation mappings, one per line, in ascending numeric order\\n  - Don't title
+      this section or add any extra text, just the mappings.\\n  - No duplicates.\\n
+      \ - No skipped numbers.\\n  - ONLY include blocks actually cited in the body.\\n5.
+      Do NOT hallucinate block IDs. Only use those provided in the context.\\n\\nFORMATTING
+      CONTRACT\\n\\n* Body: free text with numeric citations as specified.\\n* A blank
+      line.\\n* References section (if any) exactly as described, no heading.\\n\\n\\nExample
+      format:\\n\\n---\\n\\\"The OP-1 has a built-in tape feature with 6 minutes of
+      recording time [1] [2]. You can record to any of the 4 individual tracks [1].\\\"\\n\\n[1]:
+      block-AB\\n[2]: block-FZ-2\\n---\\n\\n\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-azure-4o-mini\",\"max_tokens\":5000,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[],\"tool_choice\":{\"type\":\"auto\"},\"reasoning\":false,\"seed\":null}"
     headers:
       Accept:
       - application/x-ndjson
@@ -7429,7 +7424,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '4489'
+      - '4069'
       Content-Type:
       - application/json
       Host:
@@ -7441,7 +7436,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 8cb54a03cbfe410eb195cf109d50af89
+      - 6b17dbfff0e24cf580385d3166f971c5
       x-origin:
       - RAO
       x-session:
@@ -7455,68 +7450,52 @@ interactions:
       string: "{\"chunk\":{\"type\":\"text\",\"text\":\"Para\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         usar\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         par\xE1\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"metro\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        `\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"max\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"`,\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        max\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\",\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         debes\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" aplic\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"arlo\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        endpoint\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" `/\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ask\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"`\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        endpoint\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" /\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ask\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         para\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" establecer\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         l\xEDmites\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        dos\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" aspectos\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\":\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" tama\xF1o\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         del\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" contexto\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         y\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         longitud\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" de\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" respuesta\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        gener\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ada\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        Es\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"pec\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"\xED\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ficamente\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\",\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        `\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"max\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"`\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        limita\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        cantidad\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" de\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" de\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        entrada\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" que\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        se\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" incluir\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"\xE1n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" respuesta\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        El\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" par\xE1\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"metro\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        max\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        define\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        n\xFAmero\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" m\xE1ximo\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        de\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        de\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" entrada\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         contexto\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" final\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\",\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        que\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" ab\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"arca\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        que\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" incluye\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" prompt\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\",\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         los\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" resultados\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         recuper\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ados\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         y\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         pregunta\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" del\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         usuario\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        Por\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" otro\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        lado\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\",\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        `\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"max\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_output\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"`\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        define\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        Adem\xE1s\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\",\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" par\xE1\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"metro\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        max\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_output\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        establece\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         n\xFAmero\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" m\xE1ximo\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         de\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         que\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" se\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        gener\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ar\xE1n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        respuesta\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" [\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"1\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"]\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        [\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"2\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"].\\n\\n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"Es\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        importante\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" tener\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" cuenta\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        que\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" habil\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"itar\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        gener\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ar\xE1n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        Es\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" importante\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        tener\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        cuenta\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" que\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        habil\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"itar\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" razon\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"amiento\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        puede\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" utilizar\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" adicionales\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\",\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        lo\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" que\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        podr\xEDa\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" aumentar\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        tus\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" costos\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        de\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" uso\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        Por\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" lo\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        tanto\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\",\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        es\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" posible\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        que\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" neces\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ites\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        aumentar\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" `\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"max\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"`\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        para\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" proporcionar\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        suficiente\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" espacio\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        al\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" modelo\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        para\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" raz\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"onar\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        y\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" generar\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        una\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" respuesta\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        adecuada\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" [\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"3\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"].\\n\\n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"Respect\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"o\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        puede\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" requer\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ir\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        aumentar\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" max\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        para\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" acomod\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ar\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        los\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        adicionales\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" necesarios\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        para\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" este\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        proceso\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" [\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"1\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"].\\n\\n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"Respect\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"o\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         a\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" c\xF3mo\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         cambiar\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"\xE1\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         este\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" par\xE1\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"metro\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
@@ -7524,21 +7503,19 @@ interactions:
         futuro\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\",\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" informaci\xF3n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         proporcion\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ada\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        no\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" menc\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"iona\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        cambios\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" espec\xEDficos\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\",\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        por\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" lo\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        que\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" no\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        se\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" puede\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        ofrecer\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" una\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        respuesta\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" clara\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        sobre\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" su\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        evoluci\xF3n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\\n\\n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"[\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"1\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"]:\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        block\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"-AA\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"-\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"1\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        \ \\n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"[\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"2\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"]:\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        block\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"-AA\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"-\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"0\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        \ \\n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"[\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"3\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"]:\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        block\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"-AA\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"-\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"2\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        \ \"}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":30,\"output_tokens\":27,\"timings\":{\"generative_first_chunk\":0.37616667899419554,\"generative\":2.7063086419948377},\"input_nuclia_tokens\":0.03,\"output_nuclia_tokens\":0.027}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.02955,\"output\":0.027,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+        no\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" especific\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"a\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        cambios\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" futuros\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        uso\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" de\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        max\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        Por\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" lo\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        tanto\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\",\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        no\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" se\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        puede\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" ofrecer\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        una\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" respuesta\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        concreta\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" sobre\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        su\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" evoluci\xF3n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\\n\\n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"[\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"1\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"]:\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        block\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"-AA\"}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":25,\"output_tokens\":20,\"timings\":{\"generative_first_chunk\":0.3013660360011272,\"generative\":2.4989539480011445},\"input_nuclia_tokens\":0.025,\"output_nuclia_tokens\":0.02}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.02454,\"output\":0.01956,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -7549,17 +7526,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 14:35:12 GMT
+      - Tue, 02 Jun 2026 14:35:02 GMT
       nuclia-learning-id:
-      - 3b855f3a9a264749bedb7086968f317e
+      - f21a5bbcd8b6465292876d7b48e683ff
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '384'
+      - '308'
       x-nuclia-trace-id:
-      - d959039e3cfa6cbe8ad344c54cc23622
+      - abaca1f15fa0b6ad69f17c621673ec60
     status:
       code: 200
       message: OK

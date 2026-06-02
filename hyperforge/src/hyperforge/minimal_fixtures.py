@@ -7,9 +7,23 @@ nucliadb deps. Safe to use as a pytest plugin in any agent repo:
     pytest_plugins = ["hyperforge.minimal_fixtures"]
 """
 
+import base64
+import json
 import logging
 
 import pytest
+
+
+def cassette_nua_key(iss: str) -> str:
+    """Return a minimal parseable JWT stub for cassette-replay runs.
+
+    validate_nua() decodes the middle part of the JWT to extract the ``iss``
+    field before making any HTTP call.  When cassettes are present VCR
+    intercepts that HTTP call, so the key doesn't need to be real — it just
+    needs to parse.
+    """
+    payload = base64.b64encode(json.dumps({"iss": iss}).encode()).decode().rstrip("=")
+    return f"cassette.{payload}.stub"
 
 
 class _VCRTaskExceptionFilter(logging.Filter):
