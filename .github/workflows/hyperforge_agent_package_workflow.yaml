@@ -66,9 +66,7 @@ jobs:
 
             - name: Install package
               run: |
-                  pip install -e ./${INPUTS_PACKAGE}
-              env:
-                  INPUTS_PACKAGE: ${{ inputs.package }}
+                  uv sync
 
             - name: Build wheels
               run: uv build ./${INPUTS_PACKAGE}
