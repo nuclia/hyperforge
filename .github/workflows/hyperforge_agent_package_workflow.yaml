@@ -31,7 +31,6 @@ jobs:
                   python-version: "3.12"
 
             - name: Install package dependencies with uv
-              working-directory: ${{ inputs.package }}
               run: uv sync --group dev
 
             - name: Run tests
