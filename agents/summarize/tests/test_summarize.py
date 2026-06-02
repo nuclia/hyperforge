@@ -13,12 +13,12 @@ NUA_KEY = os.environ.get(
 pytestmark = [pytest.mark.vcr(ignore_localhost=True), pytest.mark.asyncio]
 
 DE48CFAA_3209_4041_BB64_8604AFF061FB = os.environ.get(
-    "KB_DE48CFAA_3209_4041_BB64_8604AFF061FB", "DUMMY"
-)
+    "KB_DE48CFAA_3209_4041_BB64_8604AFF061FB"
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 
 DF8B4C24_2807_4888_AD6C_AE97357A638B = os.environ.get(
-    "KB_DF8B4C24_2807_4888_AD6C_AE97357A638B", "DUMMY"
-)
+    "KB_DF8B4C24_2807_4888_AD6C_AE97357A638B"
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 
 CONFIG = {
     "drivers": [

@@ -3,9 +3,13 @@ import re
 
 import pytest
 from hyperforge.engine import main as arag_main
+from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge_remi.config import ContextGranularity
 
-NUA_KEY = os.environ.get("NUA_KEY", "DUMMY")
+NUA_KEY = os.environ.get(
+    "NUA_KEY",
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+
 
 pytestmark = [
     pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["europe-1.nuclia.cloud"]),

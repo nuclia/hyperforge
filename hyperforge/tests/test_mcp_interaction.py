@@ -9,6 +9,7 @@ from hyperforge.memory.memory import (
     MemoryConfig,
     SessionMemory,
 )
+from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.models import Rule, Rules
 from hyperforge.prompts import PromptConfig
 from hyperforge.server.session import SessionManager
@@ -17,12 +18,14 @@ from hyperforge_mcp.agent import MCPAgent
 from hyperforge_mcp.config import MCPAgentConfig, Transport
 from nucliadb_models.resource import KnowledgeBoxObj
 
-NUA_KEY = os.environ.get("NUA_KEY", "DUMMY")
+NUA_KEY = os.environ.get(
+    "NUA_KEY",
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 
 
 KB_2603EE3A_2EE0_46BA_85A7_A1A2EC5A8FFE = os.environ.get(
-    "KB_2603EE3A_2EE0_46BA_85A7_A1A2EC5A8FFE", "DUMMY"
-)
+    "KB_2603EE3A_2EE0_46BA_85A7_A1A2EC5A8FFE"
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 
 DRIVERS = [
     {

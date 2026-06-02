@@ -61,7 +61,9 @@ async def test_static_agent():
     )
 
     # 8. Assertions on the memory state and missing questions
-    assert missing == []  # Since no validation/fallback model is used, should return empty list
+    assert (
+        missing == []
+    )  # Since no validation/fallback model is used, should return empty list
 
     # Check that context is saved to memory under the given flow_id
     saved_contexts = memory.get_agent_contexts(flow_id=flow_id, agent_id="test-static")

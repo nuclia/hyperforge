@@ -6,7 +6,6 @@ process, connected via a LocalBroker.  No Redis, no gRPC, no PostgreSQL, no
 NucliaDB required.
 """
 
-import asyncio
 from pathlib import Path
 from typing import Any, Tuple
 

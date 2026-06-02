@@ -3,12 +3,16 @@ import os
 import pytest
 from hyperforge.engine import main as arag_main
 from hyperforge.interaction import AragAnswer
+from hyperforge.minimal_fixtures import cassette_nua_key
 
-NUA_KEY = os.environ.get("NUA_KEY", "DUMMY")
+NUA_KEY = os.environ.get(
+    "NUA_KEY",
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+
 
 KB_DF8B4C24_2807_4888_AD6C_AE97357A638B = os.environ.get(
-    "KB_DF8B4C24_2807_4888_AD6C_AE97357A638B", "DUMMY"
-)
+    "KB_DF8B4C24_2807_4888_AD6C_AE97357A638B"
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 
 CONFIG = {
     "drivers": [

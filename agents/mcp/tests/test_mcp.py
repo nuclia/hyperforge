@@ -5,6 +5,7 @@ from unittest.mock import patch
 import pytest
 from hyperforge.engine import main as arag_main
 from hyperforge.interaction import AragAnswer
+from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.utils.http import SafeTransport
 
 from .mcp_server import run
@@ -15,7 +16,9 @@ from .mcp_server_token import (
     run_mcp_server_with_token_auth,
 )
 
-NUA_KEY = os.environ.get("NUA_KEY", "DUMMY")
+NUA_KEY = os.environ.get(
+    "NUA_KEY",
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 pytestmark = [pytest.mark.vcr(ignore_localhost=True), pytest.mark.asyncio]
 
 

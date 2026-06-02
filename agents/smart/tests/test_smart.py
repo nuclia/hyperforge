@@ -5,9 +5,13 @@ from unittest.mock import patch
 import pytest
 from hyperforge.engine import main as arag_main
 from hyperforge.interaction import AragAnswer
+from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.pubsub import UserToAgentInteraction
 
-NUA_KEY = os.environ.get("NUA_KEY", "DUMMY")
+NUA_KEY = os.environ.get(
+    "NUA_KEY",
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+
 DOG_AGENT_ID = "269192da-f5b6-4196-8c9a-bd77e32f237c"
 hyperforge_ID = "1d372a1a-8aaf-4dc7-bcf2-b8393751beba"
 PERPLEXITY_AGENT_ID = "0f5487c8-432d-4205-b5e0-d5c06b7a638f"

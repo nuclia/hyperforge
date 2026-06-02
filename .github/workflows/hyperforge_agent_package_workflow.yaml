@@ -73,12 +73,15 @@ jobs:
               env:
                   INPUTS_PACKAGE: ${{ inputs.package }}
 
-            - name: Upload to pypi
-              # zizmor: ignore[use-trusted-publishing] -- PYPI_TOKEN is a scoped
-              # API token stored as a repo secret. Migration to OIDC Trusted
-              # Publishing is tracked separately and requires PyPI-side setup for
-              # all 17 agent packages before the secret can be removed.
-              run: twine upload --verbose dist/*
-              env:
-                  TWINE_USERNAME: __token__
-                  TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+            # - name: Upload to pypi
+            #   # zizmor: ignore[use-trusted-publishing] -- PYPI_TOKEN is a scoped
+            #   # API token stored as a repo secret. Migration to OIDC Trusted
+            #   # Publishing is tracked separately and requires PyPI-side setup for
+            #   # all 17 agent packages before the secret can be removed.
+            #   run: twine upload --verbose dist/*
+            #   env:
+            #       TWINE_USERNAME: __token__
+            #       TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+
+            - name: Publish package to PyPI
+              uses: pypa/gh-action-pypi-publish@release/v1

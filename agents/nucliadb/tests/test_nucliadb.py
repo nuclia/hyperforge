@@ -5,6 +5,7 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 from hyperforge.engine import main as arag_main
 from hyperforge.interaction import AragAnswer
+from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.models import Context
 from hyperforge.utils.http import PrivateUrlError
 from hyperforge_nucliadb.advanced_ask_agent import build_ask_request
@@ -24,17 +25,19 @@ from nucliadb_models.hydration import (
 )
 from nucliadb_models.search import AskRequest, Image
 
-NUA_KEY = os.environ.get("NUA_KEY", "DUMMY")
+NUA_KEY = os.environ.get(
+    "NUA_KEY",
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 KB_DE48CFAA_3209_4041_BB64_8604AFF061FB = os.environ.get(
-    "KB_DE48CFAA_3209_4041_BB64_8604AFF061FB", "DUMMY"
-)
+    "KB_DE48CFAA_3209_4041_BB64_8604AFF061FB"
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 KB_DF8B4C24_2807_4888_AD6C_AE97357A638B = os.environ.get(
-    "KB_DF8B4C24_2807_4888_AD6C_AE97357A638B", "DUMMY"
-)
+    "KB_DF8B4C24_2807_4888_AD6C_AE97357A638B"
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 
 KB_F718BA84_2973_462F_9B15_F300BD260134 = os.environ.get(
-    "KB_F718BA84_2973_462F_9B15_F300BD260134", "DUMMY"
-)
+    "KB_F718BA84_2973_462F_9B15_F300BD260134"
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 
 
 CONFIG = {

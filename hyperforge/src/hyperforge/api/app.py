@@ -80,6 +80,7 @@ class HTTPApplication(FastAPI):
 
     async def startup(self) -> None:
         GLOBAL_REGISTRY.clear()
+        await setup_telemetry(SERVICE_NAME)
         setup_logging(
             settings=LogSettings(
                 debug=self.settings.debug,

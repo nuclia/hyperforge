@@ -6,12 +6,15 @@ from hyperforge.configure import get_driver_config_instance, load_all_configurat
 from hyperforge.manager import Manager
 from hyperforge.memory import Context
 from hyperforge.memory.memory import EphemeralSessionMemory
+from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.models import MemoryConfig, Rules
 from hyperforge_google.agent import GoogleAgent
 from hyperforge_google.config import GoogleAgentConfig
 from nuclia.lib.nua import AsyncNuaClient
 
-NUA_KEY = os.environ.get("NUA_KEY", "DUMMY")
+NUA_KEY = os.environ.get(
+    "NUA_KEY",
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 
 pytestmark = [
     pytest.mark.vcr(

@@ -3,16 +3,20 @@ from copy import deepcopy
 
 import pytest
 from hyperforge.engine import main as arag_main
+from hyperforge.minimal_fixtures import cassette_nua_key
 
-NUA_KEY = os.environ.get("NUA_KEY", "DUMMY")
+NUA_KEY = os.environ.get(
+    "NUA_KEY",
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+
 
 DE48CFAA_3209_4041_BB64_8604AFF061FB = os.environ.get(
-    "KB_DE48CFAA_3209_4041_BB64_8604AFF061FB", "DUMMY"
-)
+    "KB_DE48CFAA_3209_4041_BB64_8604AFF061FB"
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 
 DF8B4C24_2807_4888_AD6C_AE97357A638B = os.environ.get(
-    "KB_DF8B4C24_2807_4888_AD6C_AE97357A638B", "DUMMY"
-)
+    "KB_DF8B4C24_2807_4888_AD6C_AE97357A638B"
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 pytestmark = [
     pytest.mark.vcr(
         ignore_localhost=True, ignore_hosts=["test", "europe-1.nuclia.cloud"]

@@ -5,11 +5,15 @@ from hyperforge.configure import get_driver_config_instance
 from hyperforge.llm import NUAConnection
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import EphemeralSessionMemory, MemoryConfig
+from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.models import Rule, Rules
 from hyperforge_smart.agent import SmartAgent
 from hyperforge_smart.config import SmartAgentConfig
 
-NUA_KEY = os.environ.get("NUA_KEY", "DUMMY")
+NUA_KEY = os.environ.get(
+    "NUA_KEY",
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+
 
 PERPLEXITY_KEY = os.environ.get("PERPLEXITY_API_KEY", "DUMMY_PERPLEXITY_KEY")
 

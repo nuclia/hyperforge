@@ -7,8 +7,12 @@ from hyperforge.engine import main as arag_main
 from hyperforge.memory.memory import (
     EphemeralSessionMemory,
 )
+from hyperforge.minimal_fixtures import cassette_nua_key
 
-NUA_KEY = os.environ.get("NUA_KEY", "DUMMY")
+NUA_KEY = os.environ.get(
+    "NUA_KEY",
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+
 
 _dir = pathlib.Path(__file__).parent.absolute()
 _package_path = _dir.parent.absolute()
