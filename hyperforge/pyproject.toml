@@ -68,7 +68,7 @@ hyperforge = ["frontend/dist/*"]
 
 [project.urls]
 "Progress" = "https://progress.com"
-"Github" = "https://github.com/nuclia/forge"
+"Github" = "https://github.com/nuclia/hyperforge"
 "API Reference" = "https://docs.rag.progress.cloud"
 
 [tool.pytest.ini_options]
@@ -78,8 +78,7 @@ asyncio_mode = "auto"
 [project.scripts]
 hyperforge-api = "hyperforge.api:commands.run"
 hyperforge-server = "hyperforge.server:run.run"
-hyperforge-sandbox = "hyperforge.sandbox:run.run"
+hyperforge-sandbox = "hyperforge.server:sandbox.run"
 hyperforge-extract-openapi = "hyperforge.api.commands:extract_openapi"
-hyperforge-downloads-cronjob = "hyperforge.downloads.command:run"
 hyperforge-workflows-cleanup-cronjob = "hyperforge.agents.workflow_cleanup:run"
 hyperforge-standalone = "hyperforge.standalone:run.run"
