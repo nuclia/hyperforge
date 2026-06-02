@@ -26,8 +26,6 @@ concurrency:
 
 permissions:
   contents: read
-  id-token: write
-  packages: write
 
 jobs:
   test:
@@ -43,7 +41,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
-          enable-cache: true
+          enable-cache: false
           python-version: "3.12"
 
       - name: Install package dependencies with uv
@@ -61,6 +59,9 @@ jobs:
     if: github.event_name == 'push'
     needs:
       - test
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -69,7 +70,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
-          enable-cache: true
+          enable-cache: false
           python-version: "3.12"
 
       - name: Setup env
@@ -92,7 +93,7 @@ jobs:
           INPUTS_PACKAGE: hyperforge
 
       - name: Publish package to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
 
   build_and_push_docker_image:
     name: Build and push Docker image
@@ -100,6 +101,9 @@ jobs:
     if: github.event_name == 'push'
     needs:
       - build_wheels
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -107,12 +111,23 @@ jobs:
           persist-credentials: false
 
       - name: Log in to GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
 
       - name: Build Docker image
-        run: docker build -f HYPERFORGE.Dockerfile -t ghcr.io/${{ github.repository_owner }}/hyperforge:${{ github.sha }} -t ghcr.io/${{ github.repository_owner }}/hyperforge:${{ github.ref_name }} .
+        env:
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+          IMAGE_SHA_TAG: ${{ github.sha }}
+          IMAGE_REF_TAG: ${{ github.ref_name }}
+        run: docker build -f HYPERFORGE.Dockerfile -t "ghcr.io/$REPOSITORY_OWNER/hyperforge:$IMAGE_SHA_TAG" -t "ghcr.io/$REPOSITORY_OWNER/hyperforge:$IMAGE_REF_TAG" .
 
       - name: Push Docker image
+        env:
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+          IMAGE_SHA_TAG: ${{ github.sha }}
+          IMAGE_REF_TAG: ${{ github.ref_name }}
         run: |
-          docker push ghcr.io/${{ github.repository_owner }}/hyperforge:${{ github.sha }}
-          docker push ghcr.io/${{ github.repository_owner }}/hyperforge:${{ github.ref_name }}
+          docker push "ghcr.io/$REPOSITORY_OWNER/hyperforge:$IMAGE_SHA_TAG"
+          docker push "ghcr.io/$REPOSITORY_OWNER/hyperforge:$IMAGE_REF_TAG"
