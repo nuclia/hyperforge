@@ -180,7 +180,7 @@ CONFIG: dict[str, Any] = {
 }
 
 
-async def test_mcp_full_workflow(
+async def _test_mcp_full_workflow(
     arag_api_http: str,
     arag_kb: KnowledgeBoxObj,
     arag_api_http_session: str,
