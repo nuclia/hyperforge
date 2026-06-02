@@ -27,11 +27,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 26 May 2026 09:14:00 GMT
+      - Tue, 02 Jun 2026 16:49:26 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '4'
+      - '5'
     status:
       code: 200
       message: OK
@@ -61,7 +61,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 4aca62743b534f3a96181d64dd82d027
+      - e6d75997d2274cfb8edd92093ff5d60a
       x-origin:
       - RAO
       x-session:
@@ -76,14 +76,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":40,"output_tokens":11,"timings":{"generative":0.7244698180584237},"input_nuclia_tokens":0.04,"output_nuclia_tokens":0.011}}
+        {"chunk":{"type":"meta","input_tokens":40,"output_tokens":11,"timings":{"generative":0.8543426590040326},"input_nuclia_tokens":0.04,"output_nuclia_tokens":0.011}}
 
         {"chunk":{"normalized_tokens":{"input":0.0396,"output":0.0112,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -91,17 +91,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 26 May 2026 09:14:00 GMT
+      - Tue, 02 Jun 2026 16:49:26 GMT
       nuclia-learning-id:
-      - a35fe98ff48741fc9a992775b1814105
+      - a80056efd78d4543ba1270ee6c81c9a9
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '731'
+      - '860'
       x-nuclia-trace-id:
-      - 865a667a58524af9b44d828ed84f56a2
+      - 1cacd5efed74649311ec9f319b0120dc
     status:
       code: 200
       message: OK
@@ -146,7 +146,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 4aca62743b534f3a96181d64dd82d027
+      - e6d75997d2274cfb8edd92093ff5d60a
       x-origin:
       - RAO
       x-session:
@@ -161,14 +161,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":208,"output_tokens":29,"timings":{"generative_first_chunk":0.8891027310164645,"generative":0.8905379499774426},"input_nuclia_tokens":0.208,"output_nuclia_tokens":0.029}}
+        {"chunk":{"type":"meta","input_tokens":208,"output_tokens":29,"timings":{"generative_first_chunk":3.659329144000367,"generative":3.6607858930001385},"input_nuclia_tokens":0.208,"output_nuclia_tokens":0.029}}
 
         {"chunk":{"normalized_tokens":{"input":0.2076,"output":0.0288,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -176,17 +176,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 26 May 2026 09:14:01 GMT
+      - Tue, 02 Jun 2026 16:49:27 GMT
       nuclia-learning-id:
-      - 8ffb257191f04fafb5dd66383414eeb6
+      - 1a21f70ad107403f8790f08690543aff
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '898'
+      - '3667'
       x-nuclia-trace-id:
-      - 27824f16b45e994921ff1749ef86ae43
+      - bc25219f578debfaeeab4b72d30a816b
     status:
       code: 200
       message: OK
@@ -233,7 +233,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 4aca62743b534f3a96181d64dd82d027
+      - e6d75997d2274cfb8edd92093ff5d60a
       x-origin:
       - RAO
       x-session:
@@ -248,7 +248,7 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":222,"output_tokens":18,"timings":{"generative_first_chunk":0.8965942569775507,"generative":0.8980809560744092},"input_nuclia_tokens":0.222,"output_nuclia_tokens":0.018}}
+        {"chunk":{"type":"meta","input_tokens":222,"output_tokens":18,"timings":{"generative_first_chunk":0.9640684219921241,"generative":0.965820741999778},"input_nuclia_tokens":0.222,"output_nuclia_tokens":0.018}}
 
         {"chunk":{"normalized_tokens":{"input":0.2216,"output":0.0176,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
@@ -263,17 +263,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 26 May 2026 09:14:02 GMT
+      - Tue, 02 Jun 2026 16:49:31 GMT
       nuclia-learning-id:
-      - 9c52466c98fc46838b20e405e23fcca5
+      - 75dce4a1f0f2481f8343b2e7fef7cb37
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '904'
+      - '971'
       x-nuclia-trace-id:
-      - 82296839265f3b8d348d53b156177e48
+      - 8c860e78c043579a317144b67001ba65
     status:
       code: 200
       message: OK
@@ -353,14 +353,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":23,"output_tokens":8,"timings":{"generative":6.913694559014402},"input_nuclia_tokens":0.023,"output_nuclia_tokens":0.008}}
+        {"chunk":{"type":"meta","input_tokens":23,"output_tokens":8,"timings":{"generative":1.0765746389988635},"input_nuclia_tokens":0.023,"output_nuclia_tokens":0.008}}
 
         {"chunk":{"normalized_tokens":{"input":0.0228,"output":0.0078,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -368,17 +368,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 26 May 2026 09:14:03 GMT
+      - Tue, 02 Jun 2026 16:49:32 GMT
       nuclia-learning-id:
-      - 1d7a8350c29e4beab03b59a15c67e9f5
+      - 0f956a4482af4ab5b9553da0d4151f13
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '6919'
+      - '1081'
       x-nuclia-trace-id:
-      - 3796a0d33915433e73387047b4494109
+      - e6329b9aeb32469b871da7f90537481f
     status:
       code: 200
       message: OK
@@ -418,7 +418,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 4aca62743b534f3a96181d64dd82d027
+      - e6d75997d2274cfb8edd92093ff5d60a
       x-origin:
       - RAO
       x-session:
@@ -459,7 +459,7 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":2,"timings":{"generative_first_chunk":0.4486624690471217,"generative":1.3715641460148618},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.002}}
+        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":2,"timings":{"generative_first_chunk":0.3602766359981615,"generative":0.6002232930040918},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.002}}
 
         {"chunk":{"normalized_tokens":{"input":0.0072,"output":0.0018,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
@@ -474,17 +474,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 26 May 2026 09:14:10 GMT
+      - Tue, 02 Jun 2026 16:49:33 GMT
       nuclia-learning-id:
-      - fd954662851a492d8919e708542601a9
+      - 164bee64642447d4b1fe370b09d2380f
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '456'
+      - '368'
       x-nuclia-trace-id:
-      - 7abce98dfa13e59f7bf2412574d3eb3f
+      - 8433029f53880ab461385b2cefe1bf0a
     status:
       code: 200
       message: OK

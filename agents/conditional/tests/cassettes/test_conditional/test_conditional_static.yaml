@@ -21,17 +21,17 @@ interactions:
       string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"03d47998-f672-4a9b-a57b-bde3a9c3ee8c","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
       - '227'
       content-type:
       - application/json
       date:
-      - Mon, 25 May 2026 21:59:54 GMT
+      - Tue, 02 Jun 2026 16:46:33 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '73'
+      - '80'
     status:
       code: 200
       message: OK
@@ -65,7 +65,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - eb42cb459b0440dd853f4f8ca9d47a2d
+      - c666f6fa4ad248afad0d8f2546516494
       x-origin:
       - RAO
       x-session:
@@ -76,15 +76,16 @@ interactions:
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"object","object":{"yes":true,"reason":"The text clearly
-        asks the question ''Who is Atlas?'', which fulfills the condition as it directly
-        references Atlas."}}}
+      string: '{"chunk":{"type":"object","object":{"yes":true,"reason":"The given
+        text ''Who is Atlas?'' directly relates to the question about Atlas, fulfilling
+        the required condition. Additionally, the instructions to be polite and include
+        the provided documentation link do not conflict with the condition."}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":35,"output_tokens":300,"timings":{"generative":1.789582484983839},"input_nuclia_tokens":0.035,"output_nuclia_tokens":0.3}}
+        {"chunk":{"type":"meta","input_tokens":35,"output_tokens":298,"timings":{"generative":5.24491562199546},"input_nuclia_tokens":0.035,"output_nuclia_tokens":0.298}}
 
-        {"chunk":{"normalized_tokens":{"input":0.0352,"output":0.30008,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.0352,"output":0.29832,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -97,17 +98,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 21:59:55 GMT
+      - Tue, 02 Jun 2026 16:46:33 GMT
       nuclia-learning-id:
-      - 8646d8b0dcb24da49ffff8de193fad5f
+      - 1c364439851246edbe4e455318ceeb64
       nuclia-learning-model:
       - chatgpt-o3-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1799'
+      - '5255'
       x-nuclia-trace-id:
-      - 0a8bcf9bdafd2355607683a537cdaf87
+      - b187e98ded527102e7e9c400dfb2e831
     status:
       code: 200
       message: OK
@@ -144,7 +145,7 @@ interactions:
       \"block-CD\"]).\n11. **IMPORTANT** If any extra instructions are provided, you
       MUST follow them carefully when generating the answer field. These instructions
       may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWho
-      is Atlas?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk: f99d6fd3b6274ceaa41822d80944c3f3\n```
+      is Atlas?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk: 99388c5daad8481d8bd063c38ff44f02\n```
       Atlas is Carmen''s dog. He is small and very cute but a bit moody. He was a
       rescue dog. ```\n\n\n---\"\n\n\n\n\n<END OF CONTEXT>\n\n"},"citations":false,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":2000,"query_context_images":{},"prefer_markdown":null,"json_schema":{"title":"validate_or_answer","description":"Validate
       or answer","parameters":{"type":"object","properties":{"reason":{"type":"string","description":"Reasoning
@@ -183,20 +184,20 @@ interactions:
     body:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
         specific information about Atlas, identifying him as Carmen''s dog and describing
-        his characteristics. However, it does not provide any additional context or
-        background about Atlas beyond being Carmen''s dog.","answer":"Atlas is Carmen''s
-        dog. Atlas is small and very cute but a bit moody. Atlas was a rescue dog.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
+        his characteristics. This directly answers the question about who Atlas is.","answer":"Atlas
+        is Carmen''s dog. Atlas is small and very cute but a bit moody. Atlas was
+        a rescue dog.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":23,"output_tokens":10,"timings":{"generative":2.48517419595737},"input_nuclia_tokens":0.023,"output_nuclia_tokens":0.01}}
+        {"chunk":{"type":"meta","input_tokens":23,"output_tokens":9,"timings":{"generative":1.5528334760019789},"input_nuclia_tokens":0.023,"output_nuclia_tokens":0.009}}
 
-        {"chunk":{"normalized_tokens":{"input":0.02325,"output":0.01008,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02319,"output":0.009,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -204,17 +205,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 21:59:57 GMT
+      - Tue, 02 Jun 2026 16:46:38 GMT
       nuclia-learning-id:
-      - 626a926a6a1a463c8d081fad65a8fcd4
+      - 4c26ba3b677840bdbc678f4b11feedcf
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '2492'
+      - '1566'
       x-nuclia-trace-id:
-      - 6d15066bd3b6a1e327adb2fe62cc788a
+      - 996cc63111048dd02d93818778cc8676
     status:
       code: 200
       message: OK
@@ -255,7 +256,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - eb42cb459b0440dd853f4f8ca9d47a2d
+      - c666f6fa4ad248afad0d8f2546516494
       x-origin:
       - RAO
       x-session:
@@ -292,7 +293,7 @@ interactions:
 
         {"chunk":{"type":"text","text":","}}
 
-        {"chunk":{"type":"text","text":" and"}}
+        {"chunk":{"type":"text","text":" but"}}
 
         {"chunk":{"type":"text","text":" a"}}
 
@@ -318,7 +319,7 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":3,"timings":{"generative_first_chunk":0.4081090459949337,"generative":0.9721007199841551},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.003}}
+        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":3,"timings":{"generative_first_chunk":0.4439088350045495,"generative":0.7254928210022626},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.003}}
 
         {"chunk":{"normalized_tokens":{"input":0.00708,"output":0.00312,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
@@ -333,17 +334,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 21:59:59 GMT
+      - Tue, 02 Jun 2026 16:46:40 GMT
       nuclia-learning-id:
-      - bfe90658630b48f8be9a1a979b763133
+      - 62f015a73b4344d98f9b47c4bb164364
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '418'
+      - '454'
       x-nuclia-trace-id:
-      - 645e49df11a5b8f5c8a17daae997a5d9
+      - afad96f88e4f319bcc31bbb4f17f331a
     status:
       code: 200
       message: OK
@@ -375,11 +376,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 May 2026 22:00:00 GMT
+      - Tue, 02 Jun 2026 16:46:41 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '4'
+      - '8'
     status:
       code: 200
       message: OK
@@ -413,7 +414,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 46336c56f0ef4b2fa15efd9cfbdaac4e
+      - 7fd1576bcd3f4d1082400802455ecbe0
       x-origin:
       - RAO
       x-session:
@@ -424,20 +425,20 @@ interactions:
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"object","object":{"yes":false,"reason":"The condition
-        is that the question must be about Atlas, but the text \"What is RAO?\" does
-        not mention Atlas."}}}
+      string: '{"chunk":{"type":"object","object":{"yes":false,"reason":"The text
+        does not mention or refer to Atlas, instead it asks about RAO. Hence, the
+        condition is not fulfilled."}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":35,"output_tokens":299,"timings":{"generative":1.9996835789643228},"input_nuclia_tokens":0.035,"output_nuclia_tokens":0.299}}
+        {"chunk":{"type":"meta","input_tokens":35,"output_tokens":97,"timings":{"generative":1.4123676720046205},"input_nuclia_tokens":0.035,"output_nuclia_tokens":0.097}}
 
-        {"chunk":{"normalized_tokens":{"input":0.03542,"output":0.2992,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.03542,"output":0.0968,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -445,17 +446,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 22:00:01 GMT
+      - Tue, 02 Jun 2026 16:46:41 GMT
       nuclia-learning-id:
-      - 6776cb2bb9b947609b64052d3cd1cef2
+      - 434988d4582d4125a1bf747bbadc7612
       nuclia-learning-model:
       - chatgpt-o3-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '2005'
+      - '1419'
       x-nuclia-trace-id:
-      - c91d120bcf8f130aef16470618eae96b
+      - cd7c82ea232778c281bf5edca17f0402
     status:
       code: 200
       message: OK
@@ -492,7 +493,7 @@ interactions:
       \"block-CD\"]).\n11. **IMPORTANT** If any extra instructions are provided, you
       MUST follow them carefully when generating the answer field. These instructions
       may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWhat
-      is RAO?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk: 40b977c9894548b09772109ef9af2406\n```
+      is RAO?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk: dc03c94ecdcb4a8ab3b638bc27f3ebef\n```
       RAO is a product of Progress agentic RAG, it is a powerful agent orchestrator
       that you are using right now. ```\n\n\n---\"\n\n\n\n\n<END OF CONTEXT>\n\n"},"citations":false,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":2000,"query_context_images":{},"prefer_markdown":null,"json_schema":{"title":"validate_or_answer","description":"Validate
       or answer","parameters":{"type":"object","properties":{"reason":{"type":"string","description":"Reasoning
@@ -537,14 +538,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":23,"output_tokens":10,"timings":{"generative":1.8989062950131483},"input_nuclia_tokens":0.023,"output_nuclia_tokens":0.01}}
+        {"chunk":{"type":"meta","input_tokens":23,"output_tokens":10,"timings":{"generative":1.4543466720060678},"input_nuclia_tokens":0.023,"output_nuclia_tokens":0.01}}
 
-        {"chunk":{"normalized_tokens":{"input":0.02325,"output":0.00972,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02331,"output":0.00972,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -552,17 +553,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 22:00:03 GMT
+      - Tue, 02 Jun 2026 16:46:43 GMT
       nuclia-learning-id:
-      - acc0de05ff63478c86fb77eb144f268c
+      - 894126878df44c7987b5115aff2092c0
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1909'
+      - '1459'
       x-nuclia-trace-id:
-      - 6fb5b52df74fb64101c230c2b65c90fa
+      - ab69f2f99f3e7b80085b4fb04bb10335
     status:
       code: 200
       message: OK
@@ -603,7 +604,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 46336c56f0ef4b2fa15efd9cfbdaac4e
+      - 7fd1576bcd3f4d1082400802455ecbe0
       x-origin:
       - RAO
       x-session:
@@ -668,14 +669,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":3,"timings":{"generative_first_chunk":0.49111489299684763,"generative":1.0062564508989453},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.003}}
+        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":3,"timings":{"generative_first_chunk":0.3199647860019468,"generative":0.655244911002228},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.003}}
 
         {"chunk":{"normalized_tokens":{"input":0.0072,"output":0.00324,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -683,17 +684,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 22:00:05 GMT
+      - Tue, 02 Jun 2026 16:46:45 GMT
       nuclia-learning-id:
-      - eebdb79b44bf45d1939f0e3a8358ae6f
+      - 59519414b1b544ab87307819e6d6c067
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '498'
+      - '326'
       x-nuclia-trace-id:
-      - b782e8389120a59545999fcb07807816
+      - 47b1dab369533c311e478606841edef6
     status:
       code: 200
       message: OK

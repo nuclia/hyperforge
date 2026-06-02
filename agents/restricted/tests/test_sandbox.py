@@ -5,8 +5,8 @@ from unittest.mock import patch
 import pytest
 from hyperforge.definition import FunctionDefinition
 
-from agents.restricted.src.hyperforge_restricted import sandbox
-from agents.restricted.src.hyperforge_restricted.model import (
+from hyperforge_restricted import sandbox
+from hyperforge_restricted.model import (
     RestrictedPythonTask,
     SandboxMessage,
     WorkerExecutionRequest,
@@ -18,7 +18,7 @@ async def sandbox_conn():
     with tempfile.TemporaryDirectory() as path:
         socket = f"{path}/sandbox.sock"
         with patch(
-            "nuclia_agents.agents.context.restricted.sandbox.settings.sandbox_socket",
+            "hyperforge_restricted.sandbox.settings.sandbox_socket",
             socket,
         ):
             task = asyncio.create_task(sandbox.run_sandbox_server())
@@ -37,7 +37,7 @@ async def long_timeout():
     timeout under coverage. Use a larger limit here to avoid flaky failures.
     """
     with patch(
-        "nuclia_agents.agents.context.restricted.sandbox.WORKER_CPU_LIMIT",
+        "hyperforge_restricted.sandbox.WORKER_CPU_LIMIT",
         15,
     ):
         yield

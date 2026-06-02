@@ -27,11 +27,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 May 2026 22:00:07 GMT
+      - Tue, 02 Jun 2026 16:46:46 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '8'
+      - '10'
     status:
       code: 200
       message: OK
@@ -69,7 +69,7 @@ interactions:
       MUST follow them carefully when generating the answer field. These instructions
       may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWhere
       can I find good cardamom buns? give me as much info as possible\n\n<START OF
-      CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk: 4002d1b8da1343db8e9d59ae0631700a\n```
+      CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk: e703b2c2247544cb93bcd0f322f3323e\n```
       The best cardamom buns are in Denmark, the most famous place is a bakery called
       Juno. ```\n\n\n---\"\n\n\n\n\n<END OF CONTEXT>\n\n"},"citations":false,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":2000,"query_context_images":{},"prefer_markdown":null,"json_schema":{"title":"validate_or_answer","description":"Validate
       or answer","parameters":{"type":"object","properties":{"reason":{"type":"string","description":"Reasoning
@@ -108,20 +108,20 @@ interactions:
     body:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
         specific information about where to find good cardamom buns, mentioning Denmark
-        and a bakery called Juno as the most famous place for them.","answer":"The
-        best cardamom buns are in Denmark. The most famous place to find them is a
-        bakery called Juno.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
+        and a bakery called Juno as the most famous place for them.","answer":"Good
+        cardamom buns can be found in Denmark. The most famous place for cardamom
+        buns is a bakery called Juno.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":24,"output_tokens":9,"timings":{"generative":2.3153198750223964},"input_nuclia_tokens":0.024,"output_nuclia_tokens":0.009}}
+        {"chunk":{"type":"meta","input_tokens":24,"output_tokens":10,"timings":{"generative":1.5823058700043475},"input_nuclia_tokens":0.024,"output_nuclia_tokens":0.01}}
 
-        {"chunk":{"normalized_tokens":{"input":0.02361,"output":0.00924,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02355,"output":0.0096,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -129,17 +129,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 22:00:07 GMT
+      - Tue, 02 Jun 2026 16:46:46 GMT
       nuclia-learning-id:
-      - 6b5e4b2b76ec4a748b7d27b28706a0b5
+      - b5e8b1710ae84792895b32dea4203af8
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '2320'
+      - '1587'
       x-nuclia-trace-id:
-      - 97974ec2157f46cb7c2a6cfe15789751
+      - 5248955753593249178c6c777aa27db3
     status:
       code: 200
       message: OK
@@ -160,9 +160,9 @@ interactions:
       your reasoning for rephrasing or not the question.\n\nHere you have the question,
       the contexts from previous agents and the description of the current agent:\n\n\n<CURRENT
       AGENT DESCRIPTION>\nAgent that provides context to answer questions.\n\n\n\n\n<PREVIOUS
-      CONTEXTS>\n\nContext:\n\n- The best cardamom buns are in Denmark. The most famous
-      place to find them is a bakery called Juno.\n\n\n\n<QUESTION>\nWhere can I find
-      good cardamom buns? give me as much info as possible\n"},"citations":false,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":2000,"query_context_images":{},"prefer_markdown":null,"json_schema":{"title":"next_rephrase","description":"Rephrase
+      CONTEXTS>\n\nContext:\n\n- Good cardamom buns can be found in Denmark. The most
+      famous place for cardamom buns is a bakery called Juno.\n\n\n\n<QUESTION>\nWhere
+      can I find good cardamom buns? give me as much info as possible\n"},"citations":false,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":2000,"query_context_images":{},"prefer_markdown":null,"json_schema":{"title":"next_rephrase","description":"Rephrase
       the question if needed given info about previous contexts and the current agent","parameters":{"type":"object","properties":{"rephrased_question":{"type":"string","description":"Rephrased
       question if needed. If the question does not need to be rephrased, return an
       empty string."},"needed":{"type":"boolean","description":"Is rephrasing needed?"},"reason":{"type":"string","description":"Reasoning
@@ -175,7 +175,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2510'
+      - '2520'
       Content-Type:
       - application/json
       Host:
@@ -192,17 +192,16 @@ interactions:
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"object","object":{"rephrased_question":"Can you provide
-        detailed information on where to find good cardamom buns?","needed":true,"reason":"The
-        original question is somewhat vague and could benefit from a more specific
-        request for detailed information, which aligns with the agent''s capability
-        to provide context."}}}
+      string: '{"chunk":{"type":"object","object":{"rephrased_question":"","needed":false,"reason":"The
+        question can be answered directly based on the previous context, which mentions
+        that good cardamom buns can be found in Denmark, specifically at a bakery
+        called Juno."}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":13,"output_tokens":7,"timings":{"generative":1.7276973109692335},"input_nuclia_tokens":0.013,"output_nuclia_tokens":0.007}}
+        {"chunk":{"type":"meta","input_tokens":13,"output_tokens":6,"timings":{"generative":1.13237546000164},"input_nuclia_tokens":0.013,"output_nuclia_tokens":0.006}}
 
-        {"chunk":{"normalized_tokens":{"input":0.01305,"output":0.00708,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.01314,"output":0.00576,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -215,27 +214,27 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 22:00:10 GMT
+      - Tue, 02 Jun 2026 16:46:47 GMT
       nuclia-learning-id:
-      - 0ef26e77d795429e83770d4398a3f342
+      - 9b199b7c031b4ec1ae53860563680ae0
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1733'
+      - '1138'
       x-nuclia-trace-id:
-      - 712f7dc802221c2cc1779bb3ed132136
+      - 748d1e4314128593a9a8d014be597f06
     status:
       code: 200
       message: OK
 - request:
     body: '{"question":"","retrieval":true,"user_id":"conditional","system":null,"chat_history":[],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"\nGiven
       a prompt that indicates a condition , assess whether a given text fulfills it
-      or not.\n# PROMPT:\nThe context mentions Juno\n\n\n# TEXT:\nThe best cardamom
-      buns are in Denmark. The most famous place to find them is a bakery called Juno.\n\n\n\n#
-      Important rules to follow\n\n\nprompt=''Be polite''\n\nprompt=''The documentation
-      of Nuclia is hosted at https://docs.nuclia.dev''\n# Output definition:\n\nYour
+      or not.\n# PROMPT:\nThe context mentions Juno\n\n\n# TEXT:\nGood cardamom buns
+      can be found in Denmark. The most famous place for cardamom buns is a bakery
+      called Juno.\n\n\n\n# Important rules to follow\n\n\nprompt=''Be polite''\n\nprompt=''The
+      documentation of Nuclia is hosted at https://docs.nuclia.dev''\n# Output definition:\n\nYour
       output should always follow the following schema in a JSON format (Not markdon,
       please, start with b...).\n\n"},"citations":false,"citation_threshold":null,"generative_model":"chatgpt-o3-mini","max_tokens":2000,"query_context_images":{},"prefer_markdown":null,"json_schema":{"title":"yes_no","description":"Choose
       yes or no, depending on whether the condition is fulfilled","parameters":{"type":"object","properties":{"yes":{"type":"boolean"},"reason":{"type":"string","description":"reasoning
@@ -248,7 +247,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1234'
+      - '1244'
       Content-Type:
       - application/json
       Host:
@@ -260,7 +259,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 9518cd3a874b4832a5e5253d3166a221
+      - c7b7886aaf194b96bf8caaaa7516a353
       x-origin:
       - RAO
       x-session:
@@ -271,19 +270,20 @@ interactions:
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"object","object":{"yes":true,"reason":"The text explicitly
-        mentions the name Juno, as described by the statement ''a bakery called Juno''."}}}
+      string: '{"chunk":{"type":"object","object":{"yes":true,"reason":"The text directly
+        mentions Juno when referring to a bakery renowned for cardamom buns. Therefore,
+        the condition ''The context mentions Juno'' is fulfilled."}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":40,"output_tokens":175,"timings":{"generative":1.6431919150054455},"input_nuclia_tokens":0.04,"output_nuclia_tokens":0.175}}
+        {"chunk":{"type":"meta","input_tokens":40,"output_tokens":316,"timings":{"generative":4.0802857450034935},"input_nuclia_tokens":0.04,"output_nuclia_tokens":0.316}}
 
-        {"chunk":{"normalized_tokens":{"input":0.0396,"output":0.17512,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.04026,"output":0.31592,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -291,17 +291,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 22:00:11 GMT
+      - Tue, 02 Jun 2026 16:46:48 GMT
       nuclia-learning-id:
-      - 9d94facb02944f279ffc0ec8fed5f73a
+      - 923f3edf66b64a1a89ef6232fc6936a3
       nuclia-learning-model:
       - chatgpt-o3-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1650'
+      - '4085'
       x-nuclia-trace-id:
-      - 4dc0ca71e264172b0a6d0513eb7ebd7e
+      - bcdd182e6d3d4f825caa746653c80c01
     status:
       code: 200
       message: OK
@@ -337,9 +337,9 @@ interactions:
       List the IDs of the blocks relevant to the answer, if any (e.g., [\"block-AB\",
       \"block-CD\"]).\n11. **IMPORTANT** If any extra instructions are provided, you
       MUST follow them carefully when generating the answer field. These instructions
-      may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nCan
-      you provide detailed information on where to find good cardamom buns?\n\n<START
-      OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk: 00460c8c13b5454eb0ca197cb0d2f984\n```
+      may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWhere
+      can I find good cardamom buns? give me as much info as possible\n\n<START OF
+      CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk: be700eaf77fa4cfe90db553ee25ea29b\n```
       Juno is a bakery in Denmark famous for its cardamom buns. They are the best
       in the world. The also have a wide variety of other delicious pastries. And
       great coffee. ```\n\n\n---\"\n\n\n\n\n<END OF CONTEXT>\n\n"},"citations":false,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":2000,"query_context_images":{},"prefer_markdown":null,"json_schema":{"title":"validate_or_answer","description":"Validate
@@ -360,7 +360,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '4290'
+      - '4286'
       Content-Type:
       - application/json
       Host:
@@ -380,15 +380,19 @@ interactions:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
         specific information about Juno, a bakery in Denmark known for its cardamom
         buns, which are described as the best in the world. This directly answers
-        the user''s question about where to find good cardamom buns.","answer":"Juno
-        is a bakery in Denmark famous for its cardamom buns. They are considered the
-        best in the world.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
+        the user''s question about where to find good cardamom buns. However, it lacks
+        additional details such as location, hours, or other recommendations.","answer":"Juno
+        is a bakery in Denmark famous for its cardamom buns. They are described as
+        the best in the world. Juno also offers a wide variety of other delicious
+        pastries and great coffee.","missing_info_query":"What is the location and
+        operating hours of Juno bakery in Denmark? Are there any other places to find
+        good cardamom buns?","useful":"yes","citations":["block-AA"]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":24,"output_tokens":11,"timings":{"generative":2.7195262530003674},"input_nuclia_tokens":0.024,"output_nuclia_tokens":0.011}}
+        {"chunk":{"type":"meta","input_tokens":24,"output_tokens":18,"timings":{"generative":2.1572449960003723},"input_nuclia_tokens":0.024,"output_nuclia_tokens":0.018}}
 
-        {"chunk":{"normalized_tokens":{"input":0.024,"output":0.01116,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.024,"output":0.01836,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -401,17 +405,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 22:00:13 GMT
+      - Tue, 02 Jun 2026 16:46:53 GMT
       nuclia-learning-id:
-      - 3431b3b9307b49f8b7e123882b51e46a
+      - b74d4a7fc5e44cd5836d59aa3b81e074
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '2726'
+      - '2180'
       x-nuclia-trace-id:
-      - b3c2367ba40df400fb09957416196dc1
+      - 3b059963d26fb82cb71c4f93f63d55f7
     status:
       code: 200
       message: OK
@@ -425,16 +429,17 @@ interactions:
       this clearly\n\nAlways follow any additional instructions provided about format,
       style, or domain-specific behavior.","chat_history":[],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"\n##
       Question\nWhere can I find good cardamom buns? give me as much info as possible\n\n##
-      Provided Context\n[START OF CONTEXT]\n## Static Agent\n\n# \n\n The best cardamom
-      buns are in Denmark. The most famous place to find them is a bakery called Juno.\n\n##
-      Static Agent\n\n# \n\n Juno is a bakery in Denmark famous for its cardamom buns.
-      They are considered the best in the world.\n[END OF CONTEXT]\n\n## Answering
-      Guidelines\n- Carefully read all context; it may be lengthy or detailed\n- Do
-      not omit or overlook any relevant information\n- If the context is incomplete
-      or insufficient, state: \"Not enough data to answer this.\"\n- Read carefully
-      any extra instructions below if provided and use them to answer\n\nNow provide
-      your answer to the question: Where can I find good cardamom buns? give me as
-      much info as possible"},"citations":null,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":5000,"query_context_images":{},"prefer_markdown":null,"json_schema":null,"format_prompt":false,"rerank_context":false,"tools":[],"tool_choice":{"type":"auto"},"reasoning":false,"seed":null}'
+      Provided Context\n[START OF CONTEXT]\n## Static Agent\n\n# \n\n Good cardamom
+      buns can be found in Denmark. The most famous place for cardamom buns is a bakery
+      called Juno.\n\n## Static Agent\n\n# \n\n Juno is a bakery in Denmark famous
+      for its cardamom buns. They are described as the best in the world. Juno also
+      offers a wide variety of other delicious pastries and great coffee.\n[END OF
+      CONTEXT]\n\n## Answering Guidelines\n- Carefully read all context; it may be
+      lengthy or detailed\n- Do not omit or overlook any relevant information\n- If
+      the context is incomplete or insufficient, state: \"Not enough data to answer
+      this.\"\n- Read carefully any extra instructions below if provided and use them
+      to answer\n\nNow provide your answer to the question: Where can I find good
+      cardamom buns? give me as much info as possible"},"citations":null,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":5000,"query_context_images":{},"prefer_markdown":null,"json_schema":null,"format_prompt":false,"rerank_context":false,"tools":[],"tool_choice":{"type":"auto"},"reasoning":false,"seed":null}'
     headers:
       Accept:
       - application/x-ndjson
@@ -443,7 +448,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1837'
+      - '1927'
       Content-Type:
       - application/json
       Host:
@@ -455,7 +460,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 9518cd3a874b4832a5e5253d3166a221
+      - c7b7886aaf194b96bf8caaaa7516a353
       x-origin:
       - RAO
       x-session:
@@ -466,13 +471,7 @@ interactions:
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"text","text":"You"}}
-
-        {"chunk":{"type":"text","text":" can"}}
-
-        {"chunk":{"type":"text","text":" find"}}
-
-        {"chunk":{"type":"text","text":" good"}}
+      string: '{"chunk":{"type":"text","text":"Good"}}
 
         {"chunk":{"type":"text","text":" card"}}
 
@@ -482,13 +481,19 @@ interactions:
 
         {"chunk":{"type":"text","text":" buns"}}
 
+        {"chunk":{"type":"text","text":" can"}}
+
+        {"chunk":{"type":"text","text":" be"}}
+
+        {"chunk":{"type":"text","text":" found"}}
+
         {"chunk":{"type":"text","text":" in"}}
 
         {"chunk":{"type":"text","text":" Denmark"}}
 
         {"chunk":{"type":"text","text":","}}
 
-        {"chunk":{"type":"text","text":" specifically"}}
+        {"chunk":{"type":"text","text":" particularly"}}
 
         {"chunk":{"type":"text","text":" at"}}
 
@@ -530,7 +535,9 @@ interactions:
 
         {"chunk":{"type":"text","text":" are"}}
 
-        {"chunk":{"type":"text","text":" considered"}}
+        {"chunk":{"type":"text","text":" described"}}
+
+        {"chunk":{"type":"text","text":" as"}}
 
         {"chunk":{"type":"text","text":" the"}}
 
@@ -544,16 +551,60 @@ interactions:
 
         {"chunk":{"type":"text","text":"."}}
 
+        {"chunk":{"type":"text","text":" In"}}
+
+        {"chunk":{"type":"text","text":" addition"}}
+
+        {"chunk":{"type":"text","text":" to"}}
+
+        {"chunk":{"type":"text","text":" card"}}
+
+        {"chunk":{"type":"text","text":"am"}}
+
+        {"chunk":{"type":"text","text":"om"}}
+
+        {"chunk":{"type":"text","text":" buns"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" J"}}
+
+        {"chunk":{"type":"text","text":"uno"}}
+
+        {"chunk":{"type":"text","text":" offers"}}
+
+        {"chunk":{"type":"text","text":" a"}}
+
+        {"chunk":{"type":"text","text":" wide"}}
+
+        {"chunk":{"type":"text","text":" variety"}}
+
+        {"chunk":{"type":"text","text":" of"}}
+
+        {"chunk":{"type":"text","text":" other"}}
+
+        {"chunk":{"type":"text","text":" delicious"}}
+
+        {"chunk":{"type":"text","text":" pastries"}}
+
+        {"chunk":{"type":"text","text":" and"}}
+
+        {"chunk":{"type":"text","text":" great"}}
+
+        {"chunk":{"type":"text","text":" coffee"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":9,"output_tokens":5,"timings":{"generative_first_chunk":0.43344474502373487,"generative":1.1968683170271106},"input_nuclia_tokens":0.009,"output_nuclia_tokens":0.005}}
+        {"chunk":{"type":"meta","input_tokens":9,"output_tokens":8,"timings":{"generative_first_chunk":0.3482740100007504,"generative":0.9890578110025672},"input_nuclia_tokens":0.009,"output_nuclia_tokens":0.008}}
 
-        {"chunk":{"normalized_tokens":{"input":0.00879,"output":0.0048,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.00936,"output":0.00756,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -561,17 +612,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 22:00:17 GMT
+      - Tue, 02 Jun 2026 16:46:56 GMT
       nuclia-learning-id:
-      - b14b9dc0e3fd470ea60a14ca7a529956
+      - f8987ad3e7c043f59a8477b2e41f0d82
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '442'
+      - '359'
       x-nuclia-trace-id:
-      - c25c71fd85497e56d72ef3a1b32e50ea
+      - 135bcdd5eaadd1290f0e1df72b6aa1db
     status:
       code: 200
       message: OK
@@ -597,17 +648,17 @@ interactions:
       string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"03d47998-f672-4a9b-a57b-bde3a9c3ee8c","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
       - '227'
       content-type:
       - application/json
       date:
-      - Mon, 25 May 2026 22:00:17 GMT
+      - Tue, 02 Jun 2026 16:46:56 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '6'
+      - '4'
     status:
       code: 200
       message: OK
@@ -645,7 +696,7 @@ interactions:
       MUST follow them carefully when generating the answer field. These instructions
       may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWhere
       can I find good cardamom buns?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n##
-      Chunk: 348ab772ee7c433493cb11c30a51180c\n``` Cardamom buns are a type of sweet
+      Chunk: a7835633b7c042aeac9487dd1f175f9d\n``` Cardamom buns are a type of sweet
       roll that is flavored with cardamom. They are popular in many countries, including
       Sweden, Denmark, and Finland. They are often enjoyed with coffee or tea. ```\n\n\n---\"\n\n\n\n\n<END
       OF CONTEXT>\n\n"},"citations":false,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":2000,"query_context_images":{},"prefer_markdown":null,"json_schema":{"title":"validate_or_answer","description":"Validate
@@ -684,20 +735,21 @@ interactions:
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
-        information about cardamom buns, including their flavor and popularity in
-        certain countries, but it does not specify where to find them.","answer":"","missing_info_query":"Where
+        a definition and description of cardamom buns, including their popularity
+        in certain countries, but it does not provide specific locations or recommendations
+        for where to find good cardamom buns.","answer":"","missing_info_query":"Where
         can I find good cardamom buns?","useful":"no","citations":[]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":24,"output_tokens":7,"timings":{"generative":2.0264534290181473},"input_nuclia_tokens":0.024,"output_nuclia_tokens":0.007}}
+        {"chunk":{"type":"meta","input_tokens":24,"output_tokens":8,"timings":{"generative":0.9744276220008032},"input_nuclia_tokens":0.024,"output_nuclia_tokens":0.008}}
 
-        {"chunk":{"normalized_tokens":{"input":0.02388,"output":0.00708,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02394,"output":0.00828,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -705,17 +757,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 22:00:18 GMT
+      - Tue, 02 Jun 2026 16:46:56 GMT
       nuclia-learning-id:
-      - 95d39eb8e396405b8d6eb0908993301f
+      - ce109e223db144a7953aa1446519e1ef
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '2032'
+      - '979'
       x-nuclia-trace-id:
-      - 24db8c58bd953919197bb7ef725a1a5f
+      - 6923a8547c993f023050a0411e02b880
     status:
       code: 200
       message: OK
@@ -770,14 +822,14 @@ interactions:
       string: '{"chunk":{"type":"object","object":{"rephrased_question":"What are
         some recommended places to find good cardamom buns?","needed":true,"reason":"The
         original question is vague and does not specify a location or context. Rephrasing
-        it to ask for recommendations will provide a clearer direction for the agent
-        to give a useful answer."}}}
+        it to ask for recommendations clarifies the request and makes it easier for
+        the agent to provide a useful answer."}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":12,"output_tokens":8,"timings":{"generative":1.4803260429762304},"input_nuclia_tokens":0.012,"output_nuclia_tokens":0.008}}
+        {"chunk":{"type":"meta","input_tokens":12,"output_tokens":8,"timings":{"generative":1.3561526929988759},"input_nuclia_tokens":0.012,"output_nuclia_tokens":0.008}}
 
-        {"chunk":{"normalized_tokens":{"input":0.01212,"output":0.00768,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.01212,"output":0.00804,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -790,17 +842,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 22:00:20 GMT
+      - Tue, 02 Jun 2026 16:46:58 GMT
       nuclia-learning-id:
-      - c0de708c0d7440aa8ac838880808829b
+      - 467a7c9d56bc49dab1d32179fb25e5b2
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1486'
+      - '1365'
       x-nuclia-trace-id:
-      - 6e74e181da9076049067b4549b18cb93
+      - 777ec7a9cb725ae1bc486af003292793
     status:
       code: 200
       message: OK
@@ -834,7 +886,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 89e657d2b38a4b5daae54f20854dbaa7
+      - e41f4861d48a475bab5e958442e8a288
       x-origin:
       - RAO
       x-session:
@@ -845,19 +897,19 @@ interactions:
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"object","object":{"yes":false,"reason":"The provided
-        text is empty and does not contain any mention of Juno."}}}
+      string: '{"chunk":{"type":"object","object":{"yes":false,"reason":"The given
+        text is empty, so it does not mention Juno."}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":35,"output_tokens":162,"timings":{"generative":2.2310160549823195},"input_nuclia_tokens":0.035,"output_nuclia_tokens":0.162}}
+        {"chunk":{"type":"meta","input_tokens":35,"output_tokens":299,"timings":{"generative":1.8671893760038074},"input_nuclia_tokens":0.035,"output_nuclia_tokens":0.299}}
 
-        {"chunk":{"normalized_tokens":{"input":0.03454,"output":0.16192,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.03454,"output":0.2992,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -865,17 +917,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 22:00:21 GMT
+      - Tue, 02 Jun 2026 16:46:59 GMT
       nuclia-learning-id:
-      - 1ea755e801ea4d699cd9dc6f1a57f8b0
+      - 13ab3a7081f543e197c8e67a950a3e9e
       nuclia-learning-model:
       - chatgpt-o3-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '2239'
+      - '1873'
       x-nuclia-trace-id:
-      - b926c9ce556e1f8cc528c129f60797e2
+      - c149111e4e6147456f6029c1bada26a2
     status:
       code: 200
       message: OK
@@ -913,7 +965,7 @@ interactions:
       MUST follow them carefully when generating the answer field. These instructions
       may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWhat
       are some recommended places to find good cardamom buns?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n##
-      Chunk: 5849b41ce8e14e4685bea1801ec7048a\n``` You can find good cardamom buns
+      Chunk: a90d3e0d75a14e11b0384bb17de6352c\n``` You can find good cardamom buns
       in many places. Some people say the best ones are in Fabrique in New York, but
       that is subjective. The best way to find good cardamom buns is to try them in
       different bakeries and see which one you like the most. ```\n\n\n---\"\n\n\n\n\n<END
@@ -953,19 +1005,19 @@ interactions:
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
-        specific recommendations for finding good cardamom buns, mentioning Fabrique
-        in New York as a notable place. It also suggests trying different bakeries
-        to determine personal preferences. This directly addresses the user''s question
-        about recommended places.","answer":"Some recommended places to find good
-        cardamom buns include Fabrique in New York. However, it is subjective, and
-        the best way to find good cardamom buns is to try them in different bakeries
-        to see which one you like the most.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
+        information about where to find good cardamom buns, specifically mentioning
+        Fabrique in New York as a subjective recommendation. It also suggests trying
+        different bakeries to find personal favorites. This directly addresses the
+        user''s question about recommended places.","answer":"Good cardamom buns can
+        be found in many places. Some people recommend Fabrique in New York, but this
+        is subjective. It is suggested to try different bakeries to find the best
+        cardamom buns for personal preference.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":25,"output_tokens":14,"timings":{"generative":3.0974558100569993},"input_nuclia_tokens":0.025,"output_nuclia_tokens":0.014}}
+        {"chunk":{"type":"meta","input_tokens":25,"output_tokens":14,"timings":{"generative":1.64877141100078},"input_nuclia_tokens":0.025,"output_nuclia_tokens":0.014}}
 
-        {"chunk":{"normalized_tokens":{"input":0.02451,"output":0.01428,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02457,"output":0.01392,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -978,17 +1030,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 22:00:24 GMT
+      - Tue, 02 Jun 2026 16:47:02 GMT
       nuclia-learning-id:
-      - f6bb61a845f3474496a85a3c2dcbe054
+      - 5c0c8a764e0f4acfbf5e030d6fb8a8d3
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '3107'
+      - '1654'
       x-nuclia-trace-id:
-      - 36266fa3e894661e3579cf4afb6b2d8a
+      - 5f824aa6f3b174259f38fd8a175552e5
     status:
       code: 200
       message: OK
@@ -1002,13 +1054,13 @@ interactions:
       this clearly\n\nAlways follow any additional instructions provided about format,
       style, or domain-specific behavior.","chat_history":[],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"\n##
       Question\nWhere can I find good cardamom buns?\n\n## Provided Context\n[START
-      OF CONTEXT]\n## Static Agent\n\n# \n\n Some recommended places to find good
-      cardamom buns include Fabrique in New York. However, it is subjective, and the
-      best way to find good cardamom buns is to try them in different bakeries to
-      see which one you like the most.\n[END OF CONTEXT]\n\n## Answering Guidelines\n-
-      Carefully read all context; it may be lengthy or detailed\n- Do not omit or
-      overlook any relevant information\n- If the context is incomplete or insufficient,
-      state: \"Not enough data to answer this.\"\n- Read carefully any extra instructions
+      OF CONTEXT]\n## Static Agent\n\n# \n\n Good cardamom buns can be found in many
+      places. Some people recommend Fabrique in New York, but this is subjective.
+      It is suggested to try different bakeries to find the best cardamom buns for
+      personal preference.\n[END OF CONTEXT]\n\n## Answering Guidelines\n- Carefully
+      read all context; it may be lengthy or detailed\n- Do not omit or overlook any
+      relevant information\n- If the context is incomplete or insufficient, state:
+      \"Not enough data to answer this.\"\n- Read carefully any extra instructions
       below if provided and use them to answer\n\nNow provide your answer to the question:
       Where can I find good cardamom buns?"},"citations":null,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":5000,"query_context_images":{},"prefer_markdown":null,"json_schema":null,"format_prompt":false,"rerank_context":false,"tools":[],"tool_choice":{"type":"auto"},"reasoning":false,"seed":null}'
     headers:
@@ -1019,7 +1071,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1767'
+      - '1756'
       Content-Type:
       - application/json
       Host:
@@ -1031,7 +1083,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 89e657d2b38a4b5daae54f20854dbaa7
+      - e41f4861d48a475bab5e958442e8a288
       x-origin:
       - RAO
       x-session:
@@ -1042,13 +1094,7 @@ interactions:
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"text","text":"You"}}
-
-        {"chunk":{"type":"text","text":" can"}}
-
-        {"chunk":{"type":"text","text":" find"}}
-
-        {"chunk":{"type":"text","text":" good"}}
+      string: '{"chunk":{"type":"text","text":"Good"}}
 
         {"chunk":{"type":"text","text":" card"}}
 
@@ -1058,7 +1104,27 @@ interactions:
 
         {"chunk":{"type":"text","text":" buns"}}
 
+        {"chunk":{"type":"text","text":" can"}}
+
+        {"chunk":{"type":"text","text":" be"}}
+
+        {"chunk":{"type":"text","text":" found"}}
+
         {"chunk":{"type":"text","text":" at"}}
+
+        {"chunk":{"type":"text","text":" various"}}
+
+        {"chunk":{"type":"text","text":" baker"}}
+
+        {"chunk":{"type":"text","text":"ies"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" One"}}
+
+        {"chunk":{"type":"text","text":" recommendation"}}
+
+        {"chunk":{"type":"text","text":" is"}}
 
         {"chunk":{"type":"text","text":" Fab"}}
 
@@ -1070,35 +1136,27 @@ interactions:
 
         {"chunk":{"type":"text","text":" York"}}
 
-        {"chunk":{"type":"text","text":"."}}
-
-        {"chunk":{"type":"text","text":" However"}}
-
         {"chunk":{"type":"text","text":","}}
 
-        {"chunk":{"type":"text","text":" since"}}
+        {"chunk":{"type":"text","text":" though"}}
 
         {"chunk":{"type":"text","text":" preferences"}}
 
-        {"chunk":{"type":"text","text":" are"}}
+        {"chunk":{"type":"text","text":" may"}}
 
-        {"chunk":{"type":"text","text":" subjective"}}
+        {"chunk":{"type":"text","text":" vary"}}
 
-        {"chunk":{"type":"text","text":","}}
+        {"chunk":{"type":"text","text":"."}}
 
-        {"chunk":{"type":"text","text":" it"}}
+        {"chunk":{"type":"text","text":" It"}}
 
         {"chunk":{"type":"text","text":" is"}}
 
-        {"chunk":{"type":"text","text":" recommended"}}
+        {"chunk":{"type":"text","text":" suggested"}}
 
         {"chunk":{"type":"text","text":" to"}}
 
         {"chunk":{"type":"text","text":" try"}}
-
-        {"chunk":{"type":"text","text":" them"}}
-
-        {"chunk":{"type":"text","text":" at"}}
 
         {"chunk":{"type":"text","text":" different"}}
 
@@ -1108,27 +1166,35 @@ interactions:
 
         {"chunk":{"type":"text","text":" to"}}
 
-        {"chunk":{"type":"text","text":" determine"}}
-
-        {"chunk":{"type":"text","text":" which"}}
-
-        {"chunk":{"type":"text","text":" one"}}
-
-        {"chunk":{"type":"text","text":" you"}}
-
-        {"chunk":{"type":"text","text":" like"}}
+        {"chunk":{"type":"text","text":" discover"}}
 
         {"chunk":{"type":"text","text":" the"}}
 
-        {"chunk":{"type":"text","text":" most"}}
+        {"chunk":{"type":"text","text":" best"}}
+
+        {"chunk":{"type":"text","text":" card"}}
+
+        {"chunk":{"type":"text","text":"am"}}
+
+        {"chunk":{"type":"text","text":"om"}}
+
+        {"chunk":{"type":"text","text":" buns"}}
+
+        {"chunk":{"type":"text","text":" for"}}
+
+        {"chunk":{"type":"text","text":" your"}}
+
+        {"chunk":{"type":"text","text":" personal"}}
+
+        {"chunk":{"type":"text","text":" taste"}}
 
         {"chunk":{"type":"text","text":"."}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":8,"output_tokens":5,"timings":{"generative_first_chunk":0.3216965519823134,"generative":1.1226258949609473},"input_nuclia_tokens":0.008,"output_nuclia_tokens":0.005}}
+        {"chunk":{"type":"meta","input_tokens":8,"output_tokens":6,"timings":{"generative_first_chunk":0.428605734006851,"generative":1.094068115009577},"input_nuclia_tokens":0.008,"output_nuclia_tokens":0.006}}
 
-        {"chunk":{"normalized_tokens":{"input":0.00825,"output":0.00504,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.0081,"output":0.00588,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -1141,17 +1207,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 22:00:28 GMT
+      - Tue, 02 Jun 2026 16:47:03 GMT
       nuclia-learning-id:
-      - c0cc8c84acf84a948b864e10047eeda6
+      - 29191117642d42d08b074ed1444af685
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '328'
+      - '436'
       x-nuclia-trace-id:
-      - 256d8040fc4e33f5a1d1f563d548bb4f
+      - d98d8c19799dfe7862d904d5eb8fba31
     status:
       code: 200
       message: OK

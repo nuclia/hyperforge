@@ -5,7 +5,7 @@ from hyperforge.manager import Manager
 from hyperforge.memory import QuestionMemory
 from hyperforge.trace import trace_agent
 
-from agents.related.src.hyperforge_related.config import RelatedAgentConfig
+from hyperforge_related.config import RelatedAgentConfig
 from hyperforge import PROMPT_ENVIRONMENT
 
 ASK_JSON_SCHEMA = {
@@ -91,7 +91,7 @@ class RelatedAgent(Agent[RelatedAgentConfig]):
 
         if related is not None:
             for related_question in related.get("related", []):
-                memory.add_future_questions(related_question)
+                memory.add_future_questions([related_question])
             await memory.add_step(
                 step_module=self.config.module,
                 step_title=self.step_title("Related questions"),

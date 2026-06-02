@@ -21,17 +21,17 @@ interactions:
       string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"03d47998-f672-4a9b-a57b-bde3a9c3ee8c","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
       - '227'
       content-type:
       - application/json
       date:
-      - Tue, 26 May 2026 09:03:49 GMT
+      - Tue, 02 Jun 2026 16:48:44 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '89'
+      - '76'
     status:
       code: 200
       message: OK
@@ -69,7 +69,7 @@ interactions:
       MUST follow them carefully when generating the answer field. These instructions
       may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWhat
       is the best way to wake up relaxed?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n##
-      Chunk: ab6a8cada8104ef3b11ae6fa44238802\n``` Experts from the University of
+      Chunk: fe1a002044ec4e95b166522e20a7f9f2\n``` Experts from the University of
       Nuclia have found that waking up relaxed can be achieved by following a consistent
       sleep schedule, creating a calming bedtime routine, and ensuring a comfortable
       sleep environment. Also, if your alarm is a an BetterStack call, it will help
@@ -111,18 +111,17 @@ interactions:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
         specific strategies for waking up relaxed, including maintaining a consistent
         sleep schedule, creating a calming bedtime routine, and ensuring a comfortable
-        sleep environment. It also mentions that using a BetterStack call as an alarm
-        can help clear the mind. This information directly addresses the user''s question
-        about the best way to wake up relaxed.","answer":"The best way to wake up
-        relaxed includes following a consistent sleep schedule, creating a calming
-        bedtime routine, and ensuring a comfortable sleep environment. Additionally,
-        using a BetterStack call as an alarm can help clear your mind.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
+        sleep environment. These points directly address the user''s question about
+        the best way to wake up relaxed.","answer":"The best way to wake up relaxed
+        includes following a consistent sleep schedule, creating a calming bedtime
+        routine, and ensuring a comfortable sleep environment. Additionally, using
+        an alarm that is a BetterStack call can help clear your mind.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":24,"output_tokens":15,"timings":{"generative":9.81739722500788},"input_nuclia_tokens":0.024,"output_nuclia_tokens":0.015}}
+        {"chunk":{"type":"meta","input_tokens":24,"output_tokens":13,"timings":{"generative":1.3640419610019308},"input_nuclia_tokens":0.024,"output_nuclia_tokens":0.013}}
 
-        {"chunk":{"normalized_tokens":{"input":0.0243,"output":0.01548,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02439,"output":0.01344,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -135,17 +134,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 26 May 2026 09:03:53 GMT
+      - Tue, 02 Jun 2026 16:48:45 GMT
       nuclia-learning-id:
-      - 58c0cf8909a14fad879eef03104f9e96
+      - 2adc8a6adb7040feb1627930e9ca4346
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '9827'
+      - '1370'
       x-nuclia-trace-id:
-      - 369a2f49aabe9580a34fcbc03d4141ae
+      - a37786f1a2a9686c52a01ad4da2ffa65
     status:
       code: 200
       message: OK
@@ -162,9 +161,9 @@ interactions:
       OF CONTEXT]\n## HTTP Context\n\n# What is the best way to wake up relaxed?\n\n
       The best way to wake up relaxed includes following a consistent sleep schedule,
       creating a calming bedtime routine, and ensuring a comfortable sleep environment.
-      Additionally, using a BetterStack call as an alarm can help clear your mind.\n[END
-      OF CONTEXT]\n\n## Answering Guidelines\n- Carefully read all context; it may
-      be lengthy or detailed\n- Do not omit or overlook any relevant information\n-
+      Additionally, using an alarm that is a BetterStack call can help clear your
+      mind.\n[END OF CONTEXT]\n\n## Answering Guidelines\n- Carefully read all context;
+      it may be lengthy or detailed\n- Do not omit or overlook any relevant information\n-
       If the context is incomplete or insufficient, state: \"Not enough data to answer
       this.\"\n- Read carefully any extra instructions below if provided and use them
       to answer\n\nNow provide your answer to the question: What is the best way to
@@ -177,7 +176,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1829'
+      - '1834'
       Content-Type:
       - application/json
       Host:
@@ -189,7 +188,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 39a79b7fa36b4a58bff4528e8dbd81dc
+      - 783abc46db1840e3b29779fb70a48b05
       x-origin:
       - RAO
       x-session:
@@ -296,9 +295,13 @@ interactions:
 
         {"chunk":{"type":"text","text":" that"}}
 
-        {"chunk":{"type":"text","text":" promotes"}}
+        {"chunk":{"type":"text","text":" helps"}}
 
-        {"chunk":{"type":"text","text":" relaxation"}}
+        {"chunk":{"type":"text","text":" you"}}
+
+        {"chunk":{"type":"text","text":" wind"}}
+
+        {"chunk":{"type":"text","text":" down"}}
 
         {"chunk":{"type":"text","text":" before"}}
 
@@ -334,15 +337,11 @@ interactions:
 
         {"chunk":{"type":"text","text":" is"}}
 
-        {"chunk":{"type":"text","text":" comfortable"}}
-
-        {"chunk":{"type":"text","text":" and"}}
-
         {"chunk":{"type":"text","text":" conducive"}}
 
         {"chunk":{"type":"text","text":" to"}}
 
-        {"chunk":{"type":"text","text":" rest"}}
+        {"chunk":{"type":"text","text":" relaxation"}}
 
         {"chunk":{"type":"text","text":".\n"}}
 
@@ -352,21 +351,9 @@ interactions:
 
         {"chunk":{"type":"text","text":" **"}}
 
-        {"chunk":{"type":"text","text":"Use"}}
+        {"chunk":{"type":"text","text":"Gent"}}
 
-        {"chunk":{"type":"text","text":" of"}}
-
-        {"chunk":{"type":"text","text":" a"}}
-
-        {"chunk":{"type":"text","text":" Better"}}
-
-        {"chunk":{"type":"text","text":"Stack"}}
-
-        {"chunk":{"type":"text","text":" Call"}}
-
-        {"chunk":{"type":"text","text":" as"}}
-
-        {"chunk":{"type":"text","text":" an"}}
+        {"chunk":{"type":"text","text":"le"}}
 
         {"chunk":{"type":"text","text":" Alarm"}}
 
@@ -374,9 +361,25 @@ interactions:
 
         {"chunk":{"type":"text","text":":"}}
 
-        {"chunk":{"type":"text","text":" This"}}
+        {"chunk":{"type":"text","text":" Use"}}
 
-        {"chunk":{"type":"text","text":" can"}}
+        {"chunk":{"type":"text","text":" an"}}
+
+        {"chunk":{"type":"text","text":" alarm"}}
+
+        {"chunk":{"type":"text","text":" that"}}
+
+        {"chunk":{"type":"text","text":" is"}}
+
+        {"chunk":{"type":"text","text":" a"}}
+
+        {"chunk":{"type":"text","text":" Better"}}
+
+        {"chunk":{"type":"text","text":"Stack"}}
+
+        {"chunk":{"type":"text","text":" call"}}
+
+        {"chunk":{"type":"text","text":" to"}}
 
         {"chunk":{"type":"text","text":" help"}}
 
@@ -416,14 +419,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":8,"output_tokens":13,"timings":{"generative_first_chunk":0.8226598360342905,"generative":8.433743161032908},"input_nuclia_tokens":0.008,"output_nuclia_tokens":0.013}}
+        {"chunk":{"type":"meta","input_tokens":8,"output_tokens":13,"timings":{"generative_first_chunk":0.44180672500806395,"generative":1.4971858310018433},"input_nuclia_tokens":0.008,"output_nuclia_tokens":0.013}}
 
-        {"chunk":{"normalized_tokens":{"input":0.00828,"output":0.01296,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.00831,"output":0.0132,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -431,17 +434,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 26 May 2026 09:04:15 GMT
+      - Tue, 02 Jun 2026 16:48:47 GMT
       nuclia-learning-id:
-      - ee36dc72d5644e1f95cb1e436e7344a6
+      - 9d43080592ef4650993ac3fc22c3171f
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '832'
+      - '448'
       x-nuclia-trace-id:
-      - 8971551439b6dbb0c742d5376a91c099
+      - 2efc1304509dd31cc06c4e383caa036f
     status:
       code: 200
       message: OK

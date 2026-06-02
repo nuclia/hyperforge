@@ -27,11 +27,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 25 May 2026 22:00:29 GMT
+      - Tue, 02 Jun 2026 16:47:04 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '3'
+      - '4'
     status:
       code: 200
       message: OK
@@ -65,7 +65,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 1f2360e5b73843fe826e80fcdabf3892
+      - 962ce1188f0242379085cfab84917fab
       x-origin:
       - RAO
       x-session:
@@ -76,15 +76,14 @@ interactions:
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"object","object":{"yes":false,"reason":"The text
-        does not relate to Atlas in any way. It talks about having cookies, which
-        is not relevant to Atlas."}}}
+      string: '{"chunk":{"type":"object","object":{"yes":false,"reason":"The given
+        text is asking about cookies, not relating to Atlas as indicated in the prompt."}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":36,"output_tokens":215,"timings":{"generative":2.2027309180703014},"input_nuclia_tokens":0.036,"output_nuclia_tokens":0.215}}
+        {"chunk":{"type":"meta","input_tokens":36,"output_tokens":175,"timings":{"generative":2.45135671800017},"input_nuclia_tokens":0.036,"output_nuclia_tokens":0.175}}
 
-        {"chunk":{"normalized_tokens":{"input":0.03586,"output":0.21472,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.03586,"output":0.17512,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -97,17 +96,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 22:00:29 GMT
+      - Tue, 02 Jun 2026 16:47:05 GMT
       nuclia-learning-id:
-      - 9048bbdc5b4d411589f17db696422bfd
+      - 7f3c9aa60e0d40c8b44d8c191748d60a
       nuclia-learning-model:
       - chatgpt-o3-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '2208'
+      - '2460'
       x-nuclia-trace-id:
-      - 0b8090647de1159447ac37482994ef71
+      - 20bf6b03745845bf19b501681d9c4221
     status:
       code: 200
       message: OK
@@ -145,7 +144,7 @@ interactions:
       MUST follow them carefully when generating the answer field. These instructions
       may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWhere
       to have the best cookies?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n##
-      Chunk: 47007303800b412ab3d8696a77ad3564\n``` RAO is a product of Progress agentic
+      Chunk: fca42d0da10b4834943531eb6e1e5985\n``` RAO is a product of Progress agentic
       RAG, it is a powerful agent orchestrator that you are using right now. ```\n\n\n---\"\n\n\n\n\n<END
       OF CONTEXT>\n\n"},"citations":false,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":2000,"query_context_images":{},"prefer_markdown":null,"json_schema":{"title":"validate_or_answer","description":"Validate
       or answer","parameters":{"type":"object","properties":{"reason":{"type":"string","description":"Reasoning
@@ -189,9 +188,9 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":23,"output_tokens":7,"timings":{"generative":1.3739476160262711},"input_nuclia_tokens":0.023,"output_nuclia_tokens":0.007}}
+        {"chunk":{"type":"meta","input_tokens":23,"output_tokens":7,"timings":{"generative":2.4634343679936137},"input_nuclia_tokens":0.023,"output_nuclia_tokens":0.007}}
 
-        {"chunk":{"normalized_tokens":{"input":0.02331,"output":0.00696,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02337,"output":0.00696,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -204,17 +203,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 22:00:31 GMT
+      - Tue, 02 Jun 2026 16:47:07 GMT
       nuclia-learning-id:
-      - 210945ba4a9f4a77982aea9e5f29792d
+      - 1bed84275d514ebebd240b6806e094a7
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1382'
+      - '2469'
       x-nuclia-trace-id:
-      - a566f50b112bab139e606fd374214071
+      - 67bed055275351cc594b781d1d537392
     status:
       code: 200
       message: OK
@@ -287,15 +286,14 @@ interactions:
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"reason":"The context does not
-        provide any information about where to find the best cookies. Therefore, it
-        does not answer the question at all.","answer":"","missing_info_query":"Where
+        provide any information about where to find the best cookies.","answer":"","missing_info_query":"Where
         can I find the best cookies?","useful":"no","citations":[]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":22,"output_tokens":6,"timings":{"generative":1.7852058249991387},"input_nuclia_tokens":0.022,"output_nuclia_tokens":0.006}}
+        {"chunk":{"type":"meta","input_tokens":22,"output_tokens":5,"timings":{"generative":0.7878773100092076},"input_nuclia_tokens":0.022,"output_nuclia_tokens":0.005}}
 
-        {"chunk":{"normalized_tokens":{"input":0.02154,"output":0.00648,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02154,"output":0.00516,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -308,17 +306,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 22:00:33 GMT
+      - Tue, 02 Jun 2026 16:47:10 GMT
       nuclia-learning-id:
-      - 0609143aa24b41d28e966516db26da5c
+      - 2a53247ed0d24730af9439447507f911
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1790'
+      - '793'
       x-nuclia-trace-id:
-      - 38aab5272e01f269464dda879d873919
+      - db85b260af765dc0f6be6861637ba69c
     status:
       code: 200
       message: OK
@@ -356,7 +354,7 @@ interactions:
       MUST follow them carefully when generating the answer field. These instructions
       may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWhere
       can I find the best cookies?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n##
-      Chunk: 1cae1c4eb5ec46c09ced2374ca22df21\n``` You are probably asking about where
+      Chunk: 88f42025121340f7b31fd4680d2a2e2b\n``` You are probably asking about where
       to find the best cookies in the world. The best cookies are the ones made at
       home with love, but if you want to buy them, you can find great cookies in many
       bakeries around the world. Some famous ones are Levain Bakery in New York, Lune
@@ -399,20 +397,20 @@ interactions:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
         specific locations known for their cookies, including Levain Bakery in New
         York, Lune Croissanterie in Melbourne, and Maison Pichard in Paris. This directly
-        answers the question about where to find the best cookies.","answer":"You
-        can find the best cookies at Levain Bakery in New York, Lune Croissanterie
-        in Melbourne, and Maison Pichard in Paris.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
+        answers the user''s question about where to find the best cookies.","answer":"You
+        can find great cookies at Levain Bakery in New York, Lune Croissanterie in
+        Melbourne, and Maison Pichard in Paris.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":25,"output_tokens":12,"timings":{"generative":2.1121488070348278},"input_nuclia_tokens":0.025,"output_nuclia_tokens":0.012}}
+        {"chunk":{"type":"meta","input_tokens":25,"output_tokens":12,"timings":{"generative":1.341175503010163},"input_nuclia_tokens":0.025,"output_nuclia_tokens":0.012}}
 
-        {"chunk":{"normalized_tokens":{"input":0.02493,"output":0.01212,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02496,"output":0.01212,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -420,17 +418,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 22:00:35 GMT
+      - Tue, 02 Jun 2026 16:47:11 GMT
       nuclia-learning-id:
-      - b2dbbba1e4b046ae9a0f056558c0e082
+      - 2a844c401d5e411d944f6391b22b03ca
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '2120'
+      - '1349'
       x-nuclia-trace-id:
-      - 54823557311fb5816156af59a272a455
+      - dbb2984d23a3d06f43116e81fed8203a
     status:
       code: 200
       message: OK
@@ -444,8 +442,8 @@ interactions:
       this clearly\n\nAlways follow any additional instructions provided about format,
       style, or domain-specific behavior.","chat_history":[],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"\n##
       Question\nWhere to have the best cookies?\n\n## Provided Context\n[START OF
-      CONTEXT]\n## Fallback Agent\n\n# \n\n You can find the best cookies at Levain
-      Bakery in New York, Lune Croissanterie in Melbourne, and Maison Pichard in Paris.\n[END
+      CONTEXT]\n## Fallback Agent\n\n# \n\n You can find great cookies at Levain Bakery
+      in New York, Lune Croissanterie in Melbourne, and Maison Pichard in Paris.\n[END
       OF CONTEXT]\n\n## Answering Guidelines\n- Carefully read all context; it may
       be lengthy or detailed\n- Do not omit or overlook any relevant information\n-
       If the context is incomplete or insufficient, state: \"Not enough data to answer
@@ -460,7 +458,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1656'
+      - '1653'
       Content-Type:
       - application/json
       Host:
@@ -472,7 +470,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 1f2360e5b73843fe826e80fcdabf3892
+      - 962ce1188f0242379085cfab84917fab
       x-origin:
       - RAO
       x-session:
@@ -483,19 +481,27 @@ interactions:
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"text","text":"The"}}
-
-        {"chunk":{"type":"text","text":" best"}}
-
-        {"chunk":{"type":"text","text":" cookies"}}
+      string: '{"chunk":{"type":"text","text":"You"}}
 
         {"chunk":{"type":"text","text":" can"}}
 
-        {"chunk":{"type":"text","text":" be"}}
+        {"chunk":{"type":"text","text":" find"}}
 
-        {"chunk":{"type":"text","text":" found"}}
+        {"chunk":{"type":"text","text":" great"}}
+
+        {"chunk":{"type":"text","text":" cookies"}}
 
         {"chunk":{"type":"text","text":" at"}}
+
+        {"chunk":{"type":"text","text":" the"}}
+
+        {"chunk":{"type":"text","text":" following"}}
+
+        {"chunk":{"type":"text","text":" locations"}}
+
+        {"chunk":{"type":"text","text":":\n\n"}}
+
+        {"chunk":{"type":"text","text":"-"}}
 
         {"chunk":{"type":"text","text":" Lev"}}
 
@@ -509,7 +515,9 @@ interactions:
 
         {"chunk":{"type":"text","text":" York"}}
 
-        {"chunk":{"type":"text","text":","}}
+        {"chunk":{"type":"text","text":"\n"}}
+
+        {"chunk":{"type":"text","text":"-"}}
 
         {"chunk":{"type":"text","text":" L"}}
 
@@ -527,9 +535,9 @@ interactions:
 
         {"chunk":{"type":"text","text":" Melbourne"}}
 
-        {"chunk":{"type":"text","text":","}}
+        {"chunk":{"type":"text","text":"\n"}}
 
-        {"chunk":{"type":"text","text":" and"}}
+        {"chunk":{"type":"text","text":"-"}}
 
         {"chunk":{"type":"text","text":" Maison"}}
 
@@ -543,18 +551,16 @@ interactions:
 
         {"chunk":{"type":"text","text":" Paris"}}
 
-        {"chunk":{"type":"text","text":"."}}
-
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":8,"output_tokens":4,"timings":{"generative_first_chunk":0.5179182780557312,"generative":1.579953745007515},"input_nuclia_tokens":0.008,"output_nuclia_tokens":0.004}}
+        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":4,"timings":{"generative_first_chunk":0.3295494129997678,"generative":0.7002058840007521},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.004}}
 
-        {"chunk":{"normalized_tokens":{"input":0.0075,"output":0.00384,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.00747,"output":0.00432,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -562,17 +568,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 25 May 2026 22:00:37 GMT
+      - Tue, 02 Jun 2026 16:47:13 GMT
       nuclia-learning-id:
-      - de9189c4a8a945b0872cc40f9843f5a4
+      - 62472c4c3bde428caf063f38e37147b7
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '525'
+      - '340'
       x-nuclia-trace-id:
-      - 3adb293091476a737166cd4702578ea2
+      - 2da310054e65ffaffdee33745ce935f3
     status:
       code: 200
       message: OK

@@ -36,7 +36,7 @@ interactions:
       X-Stainless-Runtime:
       - CPython
       X-Stainless-Runtime-Version:
-      - 3.12.9
+      - 3.13.5
       X-Title:
       - Perplexity Python SDK
       x-stainless-read-timeout:
@@ -47,13 +47,10 @@ interactions:
     uri: https://api.perplexity.ai/chat/completions
   response:
     body:
-      string: "{\"id\":\"1a5b8254-b10c-4d21-86c9-cf035247ac4c\",\"model\":\"sonar-pro\",\"created\":1780319241,\"usage\":{\"prompt_tokens\":11,\"completion_tokens\":503,\"total_tokens\":514,\"search_context_size\":\"low\",\"cost\":{\"input_tokens_cost\":0.00003,\"output_tokens_cost\":0.00755,\"request_cost\":0.006,\"total_cost\":0.01358}},\"citations\":[\"https://nuclia.com/company/\",\"https://nuclia.com/developers/architecture-of-nucliadb/\",\"https://nuclia.com/ai/why-nuclia-nucliadb/\",\"https://nuclia.com/rag-database/\",\"https://nuclia.com/generative-ai/\",\"https://nuclia.com/developers/how-to-build-generative-ai-search-for-your-data/\",\"https://nuclia.com/ai/ai-agents-rag/\",\"https://nuclia.com\",\"https://nuclia.com/building-nuclia/first-release/\",\"https://nuclia.com/developers/remi-open-source-rag-evaluation-model/\"],\"search_results\":[{\"title\":\"AI-Powered
-        Apps & Digital Experiences Company - Progress Software\",\"url\":\"https://nuclia.com/company/\",\"date\":\"2024-03-21\",\"last_updated\":\"2026-03-30\",\"snippet\":\"Progress
-        Software provides customers with AI-powered applications and digital experiences
-        to develop, deploy and manage high-impact business applications.\",\"source\":\"web\"},{\"title\":\"Architecture
+      string: "{\"id\":\"71a34114-1b69-4d22-8ba3-05d20bd74153\",\"model\":\"sonar-pro\",\"created\":1780420336,\"usage\":{\"prompt_tokens\":11,\"completion_tokens\":460,\"total_tokens\":471,\"search_context_size\":\"low\",\"cost\":{\"input_tokens_cost\":0.00003,\"output_tokens_cost\":0.0069,\"request_cost\":0.006,\"total_cost\":0.01293}},\"citations\":[\"https://nuclia.com/developers/architecture-of-nucliadb/\",\"https://nuclia.com/ai/why-nuclia-nucliadb/\",\"https://nuclia.com/rag-database/\",\"https://nuclia.com/generative-ai/\",\"https://nuclia.com/developers/how-to-build-generative-ai-search-for-your-data/\",\"https://nuclia.com/ai/ai-agents-rag/\",\"https://nuclia.com/rag-quality/\",\"https://nuclia.com\",\"https://nuclia.com/2024/06/24/\",\"https://nuclia.com/developers/remi-open-source-rag-evaluation-model/\"],\"search_results\":[{\"title\":\"Architecture
         of the Progress Hybrid AI Search DB: NucliaDB\",\"url\":\"https://nuclia.com/developers/architecture-of-nucliadb/\",\"date\":\"2025-11-11\",\"last_updated\":\"2026-02-04\",\"snippet\":\"NucliaDB
         is the open source distributed database engine designed for the Nuclia AI
-        Search platform to efficiently scale to diverse workloads and ...\",\"source\":\"web\"},{\"title\":\"The
+        Search platform to efficiently scale to diverse workloads and\_...\",\"source\":\"web\"},{\"title\":\"The
         \u201CWhys\u201D and \u201CHows\u201D of NucliaDB - Progress Software\",\"url\":\"https://nuclia.com/ai/why-nuclia-nucliadb/\",\"date\":\"2025-10-21\",\"last_updated\":\"2026-03-04\",\"snippet\":\"Nuclia
         built its software to enable companies to search their unstructured data using
         AI and provide answers based on internal data.\",\"source\":\"web\"},{\"title\":\"RAG
@@ -63,63 +60,64 @@ interactions:
         AI for Your RAG Pipeline - Progress Agentic RAG\",\"url\":\"https://nuclia.com/generative-ai/\",\"date\":\"2023-08-04\",\"last_updated\":\"2026-03-14\",\"snippet\":\"A
         secure, verifiable AI backbone that adapts to your models, your workflows
         and your compliance needs today and in the future. LLM-Agnostic Architecture.
-        Use a ...\",\"source\":\"web\"},{\"title\":\"How to Build Generative AI Search
+        Use a\_...\",\"source\":\"web\"},{\"title\":\"How to Build Generative AI Search
         for Your Data - Progress Software\",\"url\":\"https://nuclia.com/developers/how-to-build-generative-ai-search-for-your-data/\",\"date\":\"2025-10-23\",\"last_updated\":\"2025-11-14\",\"snippet\":\"Nuclia
-        is the all-in-one platform that seamlessly indexes unstructured data from
-        internal and external sources while facilitating 100% data ...\",\"source\":\"web\"},{\"title\":\"Exploring
+        offers a RAG-as-a-Service solution to build a generative search for your data.
+        It covers data extraction from files, indexing and search.\",\"source\":\"web\"},{\"title\":\"Exploring
         AI Agents in RAG: Types and Uses - Progress Software\",\"url\":\"https://nuclia.com/ai/ai-agents-rag/\",\"date\":\"2025-10-20\",\"last_updated\":\"2025-10-13\",\"snippet\":\"Nuclia
         is now Progress Agentic RAG. What is an AI Agent? An AI agent refers to a
-        software entity that performs automated tasks on behalf of ...\",\"source\":\"web\"},{\"title\":\"The
+        software entity that performs automated tasks on behalf of\_...\",\"source\":\"web\"},{\"title\":\"REMi
+        - RAG Evaluation Model | Progress Agentic RAG\",\"url\":\"https://nuclia.com/rag-quality/\",\"date\":\"2026-02-03\",\"last_updated\":\"2026-02-25\",\"snippet\":\"What
+        Is REMi? REMi gives business leaders clear, objective confidence in AI responses
+        by measuring how relevant, grounded and contextually accurate each answer\_...\",\"source\":\"web\"},{\"title\":\"The
         #1 Agentic RAG-as-a-Service - Progress Software\",\"url\":\"https://nuclia.com\",\"date\":\"2025-07-28\",\"last_updated\":\"2026-05-31\",\"snippet\":\"Extract
         actionable insights from diverse data sources to transform unstructured data
-        into usable business intelligence. Accelerate your AI-Readiness by 95%.\",\"source\":\"web\"},{\"title\":\"World,
-        meet Nuclia Nuclia, meet the world | Making the ...\",\"url\":\"https://nuclia.com/building-nuclia/first-release/\",\"date\":\"2026-04-29\",\"last_updated\":\"2026-05-05\",\"snippet\":\"Nuclia
-        is an end-to-end API that enables developers to integrate AI-powered search
-        for any data and source. It uses AI and Natural Language Processing to ...\",\"source\":\"web\"},{\"title\":\"Introducing
+        into usable business intelligence. Accelerate your AI-Readiness by 95%.\",\"source\":\"web\"},{\"title\":\"June
+        24, 2024 - Nuclia | The Agentic RAG-as-a-Service company\",\"url\":\"https://nuclia.com/2024/06/24/\",\"date\":\"2014-12-01\",\"last_updated\":\"2026-05-28\",\"snippet\":\"Nuclia
+        is part of the Progress product portfolio. Progress is the leading provider
+        of application development and digital experience technologies. About Us\_...\",\"source\":\"web\"},{\"title\":\"Introducing
         REMi, the first ever open-source RAG evaluation model\",\"url\":\"https://nuclia.com/developers/remi-open-source-rag-evaluation-model/\",\"date\":\"2024-08-09\",\"last_updated\":\"2025-09-20\",\"snippet\":\"Previously
         published on Nuclia.com. Nuclia is now Progress Agentic RAG. Retrieval Augmented
-        Generation (RAG) methods have become the go-to ...\",\"source\":\"web\"}],\"related_questions\":[\"How
-        does Nuclia's RAG-as-a-Service work\",\"What makes NucliaDB different from
-        other databases\",\"Can Nuclia integrate with existing AI models\",\"How secure
-        is Nuclia's generative AI solution\",\"What types of unstructured data can
-        Nuclia process\"],\"object\":\"chat.completion\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Nuclia
-        is a **RAG-as-a-Service platform** (Retrieval-Augmented Generation) that provides
-        an end\u2011to\u2011end stack to search over unstructured data and deliver
-        AI\u2011generated answers, built around its own open\u2011source hybrid search
-        database, **NucliaDB**.[1][2][6][8]\\n\\nMore concretely:\\n\\n- **What it
-        does**  \\n  - Lets you ingest and index unstructured data (documents, PDFs,
-        text, video, audio, web pages, conversations, etc.) and turn it into searchable
-        knowledge.[1][3][6]  \\n  - Provides **AI search and generative answers**
-        so users can ask natural\u2011language questions and get natural\u2011language
-        answers grounded in their own data (a full RAG pipeline).[2][4][6]  \\n  -
-        Exposes this as an **API / SaaS** so developers can integrate generative search
-        into applications without building all the RAG infrastructure themselves.[3][6][9]\\n\\n-
-        **Core components**  \\n  - **NucliaDB**: an open\u2011source, distributed
-        **hybrid search database** (vectors + keyword + knowledge graph) designed
-        specifically for RAG and unstructured data search, not just as a simple vector
-        DB.[2][3][4]  \\n  - **Processing & enrichment layer**: handles extraction
-        and enrichment for text, docs, video, and audio, including embeddings and
-        knowledge graph construction.[2][3]  \\n  - **Generative AI layer**: supports
-        multiple LLMs (Nuclia\u2019s own models, plus external ones like ChatGPT,
-        Anthropic, Gemini, Cohere, Mistral, Llama 2) with a multi\u2011model selection
-        interface.[5]  \\n  - **Tools & interfaces**: REST API, UI, and desktop app
-        to manage ingestion, indexing, and search, usable as a no\u2011code solution
-        or as a developer toolset.[1][2]\\n\\n- **Positioning / mission**  \\n  -
-        Describes itself as \u201Cthe **Agentic RAG\u2011as\u2011a\u2011Service**\u201D
-        and \u201Cthe RAG\u2011as\u2011a\u2011Service company reshaping traditional
-        Search,\u201D focused on delivering **answers rather than document lists**.[1][4][8]
-        \ \\n  - Mission is to help organizations unlock the value of their internal
-        data by making it easily searchable and answerable via AI, establishing a
-        standard way to deploy RAG in production.[1][6]\"},\"delta\":{\"role\":\"assistant\",\"content\":\"\"},\"finish_reason\":\"stop\"}]}"
+        Generation (RAG) methods have become the go-to\_...\",\"source\":\"web\"}],\"related_questions\":[\"How
+        does NucliaDB differ from traditional vector databases\",\"What are the main
+        features of Nuclia's full stack cloud offering\",\"Can you explain how Nuclia's
+        generative AI multi-model selection works\",\"What is the role of REMi in
+        ensuring the quality of AI responses in Nuclia\",\"How does Nuclia handle
+        data privacy and confidentiality\"],\"object\":\"chat.completion\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Nuclia
+        is a **RAG-as-a-Service / Agentic RAG platform** and **AI knowledge engine**
+        that lets organizations index their unstructured data (documents, video, audio,
+        etc.) and build semantic search and generative AI experiences on top of it
+        via APIs.[1][5][8]\\n\\nEssential points:\\n\\n- **What it does**  \\n  -
+        Automatically **ingests and enriches unstructured data** from many sources
+        (files, links, conversations, PDFs, video, audio, etc.).[2][5][8]  \\n  -
+        Provides **semantic and hybrid search** plus **generative answers** on top
+        of that data (Retrieval-Augmented Generation, RAG).[1][3][5]  \\n  - Exposes
+        this as a **service/API** so developers can build AI search, chat over data,
+        and agentic workflows without assembling all components themselves.[2][5][8]\\n\\n-
+        **Core technology**  \\n  - Built on **NucliaDB**, an open\u2011source **hybrid
+        RAG database / AI knowledge engine** that stores text, vectors, and relations
+        and performs advanced retrieval, not just vector similarity.[1][2][3]  \\n
+        \ - Designed specifically for **RAG workloads**, connecting unstructured and
+        structured information into a \u201Cliving knowledge network\u201D for better
+        answers.[3]\\n\\n- **Features and positioning**  \\n  - Offers **RAG-as-a-Service**:
+        covers extraction, enrichment, indexing, retrieval, and generative answering
+        in one stack.[1][3][5][8]  \\n  - Supports **multi\u2011model generative AI**
+        (Nuclia\u2019s own model or external LLMs like ChatGPT, Anthropic, Gemini,
+        Cohere, Mistral, Llama 2) so users can choose the model that fits their needs
+        and privacy constraints.[4]  \\n  - Includes **quality evaluation for RAG**
+        via REMi, providing metrics on how relevant and grounded the answers are.[7][10]\\n\\n-
+        **Company context / branding**  \\n  - Nuclia\u2019s technology is now part
+        of **Progress Agentic RAG**, a Progress Software product focused on agentic,
+        RAG-based AI applications.[6][7][8][9]\"},\"delta\":{\"role\":\"assistant\",\"content\":\"\"},\"finish_reason\":\"stop\"}]}"
     headers:
       CF-RAY:
-      - a04e70ad2fa403dd-MAD
+      - a05814dc49773c8a-MAD
       Connection:
       - keep-alive
       Content-Type:
       - application/json
       Date:
-      - Mon, 01 Jun 2026 13:07:21 GMT
+      - Tue, 02 Jun 2026 17:12:16 GMT
       Server:
       - cloudflare
       Strict-Transport-Security:
@@ -129,13 +127,13 @@ interactions:
       cf-cache-status:
       - DYNAMIC
       content-length:
-      - '6776'
+      - '6648'
       set-cookie:
-      - __cf_bm=_LZveIRFzmqHYJ5FBXDBsF5OvYH3NS.dcXYdjTlFR18-1780319234.1061954-1.0.1.1-3QkVMaVQwLZrK56U73LaDWXPPLK6rLMXWegYY_IwAfHPJpWnn0CiTiYioOk.CJ2CjeZFcV6EaHKd4bTsnUQzA1shktp3HQUpVsI_aYRxLE2EXbnPYjwBid8zquvnoxPA;
-        HttpOnly; SameSite=None; Secure; Path=/; Domain=perplexity.ai; Expires=Mon,
-        01 Jun 2026 13:37:21 GMT
-      - __cflb=04dToWaRite5R1fQA5HfyWsXiTjNxDHXZV1WCEvTYh; HttpOnly; SameSite=None;
-        Secure; Path=/; Expires=Mon, 01 Jun 2026 13:37:21 GMT
+      - __cf_bm=z.bDdSY3.BS9ne4ZEZlgWuOvfp5be._ZYH4n3ATjRRc-1780420330.9305685-1.0.1.1-5SjLbEApL1Hqn9_itCIAOKoeRwyUtf2m6Ws_YMyKEgDnVI9JaGwO0xouZVAU9Zz9dy_HnLTtUo9IacyZ638oSRkUk1OFd.gR7kOncxwncE_H.VahCJxxFzJin.eWRoXY;
+        HttpOnly; SameSite=None; Secure; Path=/; Domain=perplexity.ai; Expires=Tue,
+        02 Jun 2026 17:42:16 GMT
+      - __cflb=04dToWaRite5R1fQA5HfyWsXiTjNxDHpyDB2iX2tm3; HttpOnly; SameSite=None;
+        Secure; Path=/; Expires=Tue, 02 Jun 2026 17:42:16 GMT
       x-ppl-region:
       - us-east-1
     status:
@@ -176,38 +174,35 @@ interactions:
       \"block-CD\"]).\n11. **IMPORTANT** If any extra instructions are provided, you
       MUST follow them carefully when generating the answer field. These instructions
       may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWhat
-      is Nuclia?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk: 5c0c7eeda2c54eb8837be84d89458399\nURLs:
-      https://nuclia.com/company/, https://nuclia.com/developers/architecture-of-nucliadb/,
-      https://nuclia.com/ai/why-nuclia-nucliadb/, https://nuclia.com/rag-database/,
-      https://nuclia.com/generative-ai/, https://nuclia.com/developers/how-to-build-generative-ai-search-for-your-data/,
-      https://nuclia.com/ai/ai-agents-rag/, https://nuclia.com, https://nuclia.com/building-nuclia/first-release/,
-      https://nuclia.com/developers/remi-open-source-rag-evaluation-model/\n``` Nuclia
-      is a **RAG-as-a-Service platform** (Retrieval-Augmented Generation) that provides
-      an end\u2011to\u2011end stack to search over unstructured data and deliver AI\u2011generated
-      answers, built around its own open\u2011source hybrid search database, **NucliaDB**.[1][2][6][8]\n\nMore
-      concretely:\n\n- **What it does**  \n  - Lets you ingest and index unstructured
-      data (documents, PDFs, text, video, audio, web pages, conversations, etc.) and
-      turn it into searchable knowledge.[1][3][6]  \n  - Provides **AI search and
-      generative answers** so users can ask natural\u2011language questions and get
-      natural\u2011language answers grounded in their own data (a full RAG pipeline).[2][4][6]  \n  -
-      Exposes this as an **API / SaaS** so developers can integrate generative search
-      into applications without building all the RAG infrastructure themselves.[3][6][9]\n\n-
-      **Core components**  \n  - **NucliaDB**: an open\u2011source, distributed **hybrid
-      search database** (vectors + keyword + knowledge graph) designed specifically
-      for RAG and unstructured data search, not just as a simple vector DB.[2][3][4]  \n  -
-      **Processing & enrichment layer**: handles extraction and enrichment for text,
-      docs, video, and audio, including embeddings and knowledge graph construction.[2][3]  \n  -
-      **Generative AI layer**: supports multiple LLMs (Nuclia\u2019s own models, plus
-      external ones like ChatGPT, Anthropic, Gemini, Cohere, Mistral, Llama 2) with
-      a multi\u2011model selection interface.[5]  \n  - **Tools & interfaces**: REST
-      API, UI, and desktop app to manage ingestion, indexing, and search, usable as
-      a no\u2011code solution or as a developer toolset.[1][2]\n\n- **Positioning
-      / mission**  \n  - Describes itself as \u201cthe **Agentic RAG\u2011as\u2011a\u2011Service**\u201d
-      and \u201cthe RAG\u2011as\u2011a\u2011Service company reshaping traditional
-      Search,\u201d focused on delivering **answers rather than document lists**.[1][4][8]  \n  -
-      Mission is to help organizations unlock the value of their internal data by
-      making it easily searchable and answerable via AI, establishing a standard way
-      to deploy RAG in production.[1][6] ```\n\n\n---\"\n\n\n\n\n<END OF CONTEXT>\n\n"},
+      is Nuclia?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk: 0c2ecf9b77bd40d6b9085a8dde7388df\nURLs:
+      https://nuclia.com/developers/architecture-of-nucliadb/, https://nuclia.com/ai/why-nuclia-nucliadb/,
+      https://nuclia.com/rag-database/, https://nuclia.com/generative-ai/, https://nuclia.com/developers/how-to-build-generative-ai-search-for-your-data/,
+      https://nuclia.com/ai/ai-agents-rag/, https://nuclia.com/rag-quality/, https://nuclia.com,
+      https://nuclia.com/2024/06/24/, https://nuclia.com/developers/remi-open-source-rag-evaluation-model/\n```
+      Nuclia is a **RAG-as-a-Service / Agentic RAG platform** and **AI knowledge engine**
+      that lets organizations index their unstructured data (documents, video, audio,
+      etc.) and build semantic search and generative AI experiences on top of it via
+      APIs.[1][5][8]\n\nEssential points:\n\n- **What it does**  \n  - Automatically
+      **ingests and enriches unstructured data** from many sources (files, links,
+      conversations, PDFs, video, audio, etc.).[2][5][8]  \n  - Provides **semantic
+      and hybrid search** plus **generative answers** on top of that data (Retrieval-Augmented
+      Generation, RAG).[1][3][5]  \n  - Exposes this as a **service/API** so developers
+      can build AI search, chat over data, and agentic workflows without assembling
+      all components themselves.[2][5][8]\n\n- **Core technology**  \n  - Built on
+      **NucliaDB**, an open\u2011source **hybrid RAG database / AI knowledge engine**
+      that stores text, vectors, and relations and performs advanced retrieval, not
+      just vector similarity.[1][2][3]  \n  - Designed specifically for **RAG workloads**,
+      connecting unstructured and structured information into a \u201cliving knowledge
+      network\u201d for better answers.[3]\n\n- **Features and positioning**  \n  -
+      Offers **RAG-as-a-Service**: covers extraction, enrichment, indexing, retrieval,
+      and generative answering in one stack.[1][3][5][8]  \n  - Supports **multi\u2011model
+      generative AI** (Nuclia\u2019s own model or external LLMs like ChatGPT, Anthropic,
+      Gemini, Cohere, Mistral, Llama 2) so users can choose the model that fits their
+      needs and privacy constraints.[4]  \n  - Includes **quality evaluation for RAG**
+      via REMi, providing metrics on how relevant and grounded the answers are.[7][10]\n\n-
+      **Company context / branding**  \n  - Nuclia\u2019s technology is now part of
+      **Progress Agentic RAG**, a Progress Software product focused on agentic, RAG-based
+      AI applications.[6][7][8][9] ```\n\n\n---\"\n\n\n\n\n<END OF CONTEXT>\n\n"},
       "citations": false, "citation_threshold": null, "generative_model": "chatgpt-azure-4o-mini",
       "max_tokens": 2000, "query_context_images": {}, "prefer_markdown": null, "json_schema":
       {"title": "validate_or_answer", "description": "Validate or answer", "parameters":
@@ -232,7 +227,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '6604'
+      - '6393'
       Content-Type:
       - application/json
       Host:
@@ -251,19 +246,23 @@ interactions:
     body:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
         a detailed description of Nuclia, including its function as a RAG-as-a-Service
-        platform, its core components, and its mission. This information directly
-        answers the question about what Nuclia is.","answer":"Nuclia is a RAG-as-a-Service
-        platform (Retrieval-Augmented Generation). It provides an end-to-end stack
-        to search over unstructured data and deliver AI-generated answers. Nuclia
-        is built around its own open-source hybrid search database, NucliaDB. It allows
-        users to ingest and index unstructured data, provides AI search and generative
-        answers, and exposes these capabilities as an API/SaaS for developers.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
+        platform and AI knowledge engine. It explains what Nuclia does, its core technology,
+        features, and its positioning in the market. This information directly answers
+        the question about what Nuclia is.","answer":"Nuclia is a RAG-as-a-Service
+        / Agentic RAG platform and AI knowledge engine. It allows organizations to
+        index their unstructured data, such as documents, video, and audio. Nuclia
+        provides semantic search and generative AI experiences through APIs. It automatically
+        ingests and enriches unstructured data from various sources. Nuclia offers
+        semantic and hybrid search, along with generative answers based on that data.
+        The platform is built on NucliaDB, an open-source hybrid RAG database that
+        performs advanced retrieval. Nuclia supports multi-model generative AI and
+        includes quality evaluation for RAG via REMi.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":42,"output_tokens":18,"timings":{"generative":4.37246681900433},"input_nuclia_tokens":0.042,"output_nuclia_tokens":0.018}}
+        {"chunk":{"type":"meta","input_tokens":41,"output_tokens":25,"timings":{"generative":2.6483582660002867},"input_nuclia_tokens":0.041,"output_nuclia_tokens":0.025}}
 
-        {"chunk":{"normalized_tokens":{"input":0.04191,"output":0.01848,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.04059,"output":0.02544,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -276,17 +275,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 01 Jun 2026 13:07:21 GMT
+      - Tue, 02 Jun 2026 17:12:15 GMT
       nuclia-learning-id:
-      - 3f8ad771b3274d03aa2624c0d1598339
+      - 66c8e2af1c2349b38e720a24225e6478
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '4382'
+      - '2655'
       x-nuclia-trace-id:
-      - 28510589539a0857812a501a8b286b87
+      - 5eca4fe87b8535b6a36a20ab6b82bf7f
     status:
       code: 200
       message: OK

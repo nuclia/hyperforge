@@ -21,17 +21,17 @@ interactions:
       string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"03d47998-f672-4a9b-a57b-bde3a9c3ee8c","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
       - '227'
       content-type:
       - application/json
       date:
-      - Tue, 26 May 2026 08:30:49 GMT
+      - Tue, 02 Jun 2026 16:47:36 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '85'
+      - '5'
     status:
       code: 200
       message: OK
@@ -69,7 +69,7 @@ interactions:
       MUST follow them carefully when generating the answer field. These instructions
       may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nQue
       modelos de coche salieron el 2020\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n##
-      Chunk: add87550f3b44be4a214efb7276fa4b3\n``` Partner cars include brands like
+      Chunk: 41b9613217de481d8fab1a2b3a11be48\n``` Partner cars include brands like
       Peugeot, Citroen, Renault, etc. ```\n\n\n---\"\n\n\n\n\n<END OF CONTEXT>\n\n"},"citations":false,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":2000,"query_context_images":{},"prefer_markdown":null,"json_schema":{"title":"validate_or_answer","description":"Validate
       or answer","parameters":{"type":"object","properties":{"reason":{"type":"string","description":"Reasoning
       for the answer or validation"},"answer":{"type":"string","description":"Partial
@@ -109,10 +109,10 @@ interactions:
         does not provide any specific information about car models that were released
         in 2020. It only mentions partner car brands without detailing any models
         or their release years.\",\"answer\":\"\",\"missing_info_query\":\"\xBFQu\xE9
-        modelos de coche salieron en 2020?\",\"useful\":\"no\",\"citations\":[]}}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":23,\"output_tokens\":8,\"timings\":{\"generative\":11.62777412997093},\"input_nuclia_tokens\":0.023,\"output_nuclia_tokens\":0.008}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.02313,\"output\":0.00792,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+        modelos de coche salieron en el 2020?\",\"useful\":\"no\",\"citations\":[]}}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":23,\"output_tokens\":8,\"timings\":{\"generative\":1.2389935440005502},\"input_nuclia_tokens\":0.023,\"output_nuclia_tokens\":0.008}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.02316,\"output\":0.00804,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -120,17 +120,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 26 May 2026 08:30:50 GMT
+      - Tue, 02 Jun 2026 16:47:36 GMT
       nuclia-learning-id:
-      - e1a95e624f9f45acaeb3942f760a7b36
+      - e71ac5dc93a8467db5be988ce40536bb
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '11633'
+      - '1245'
       x-nuclia-trace-id:
-      - 49f8b59ecbd45c20b06a29eb0316ab9a
+      - d1559ad1a720896c1bb23d647bd546fc
     status:
       code: 200
       message: OK
@@ -161,7 +161,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - caf33e069b4b49d89bf57703e59bd9f0
+      - 7ab3f4c3aa1545009346382f9c4ea33b
       x-origin:
       - RAO
       x-session:
@@ -172,18 +172,18 @@ interactions:
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"object","object":{"brand":"all"}}}
+      string: '{"chunk":{"type":"object","object":{"brand":""}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":24,"output_tokens":841,"timings":{"generative":7.947561449022032},"input_nuclia_tokens":0.024,"output_nuclia_tokens":0.841}}
+        {"chunk":{"type":"meta","input_tokens":24,"output_tokens":525,"timings":{"generative":5.288373807998141},"input_nuclia_tokens":0.024,"output_nuclia_tokens":0.525}}
 
-        {"chunk":{"normalized_tokens":{"input":0.02354,"output":0.84128,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02354,"output":0.52536,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -191,17 +191,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 26 May 2026 08:31:02 GMT
+      - Tue, 02 Jun 2026 16:47:38 GMT
       nuclia-learning-id:
-      - 13b5eaf72280416d86117ce5b1406902
+      - 6cbbdac3e7ad44e5b26019306e934d64
       nuclia-learning-model:
       - chatgpt-o3-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '7954'
+      - '5294'
       x-nuclia-trace-id:
-      - f9ae932b21d222c55b884328e1d8175a
+      - c360e83d21cf657803097fb4bb7e63fb
     status:
       code: 200
       message: OK

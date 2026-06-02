@@ -136,15 +136,15 @@ async def test_sync_agent(arag_api: AsyncClient):
     GLOBAL_REGISTRY.clear()
     with (
         patch(
-            "nuclia_agents.drivers.sync.driver.sync_connect",
+            "hyperforge_nucliadb.sync.driver.sync_connect",
             new=mock_sync_connect,
         ),
         patch(
-            "nuclia_agents.drivers.sync.driver.SyncDriver.get_oauth_url",
+            "hyperforge_nucliadb.sync.driver.SyncDriver.get_oauth_url",
             new=mock_get_oauth_url,
         ),
         patch(
-            "nuclia_agents.drivers.sync.driver.SyncDriver.validate_resources",
+            "hyperforge_nucliadb.sync.driver.SyncDriver.validate_resources",
             new=mock_validate_resources,
         ),
     ):
@@ -154,6 +154,7 @@ async def test_sync_agent(arag_api: AsyncClient):
             internal_nua=False,
             external_nua_api_key=NUA_KEY,
             memory_klass=EphemeralSessionMemory,
+            loaded_modules=["hyperforge_nucliadb", "hyperforge_summarize"],
         )
 
         answers = []

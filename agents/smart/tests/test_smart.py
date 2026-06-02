@@ -111,6 +111,12 @@ async def test_smart(executor_model, planner_model):
         question="Who is Snoopy?",
         config=config,
         callback=callback,
+        loaded_modules=[
+            "hyperforge_smart",
+            "hyperforge_static",
+            "hyperforge_perplexity",
+            "hyperforge_summarize",
+        ],
     )
 
     keywords = ["Snoopy", "Carmen", "dog"]
@@ -127,6 +133,12 @@ async def test_smart(executor_model, planner_model):
         question="What is RAO?",
         config=config,
         callback=callback,
+        loaded_modules=[
+            "hyperforge_smart",
+            "hyperforge_static",
+            "hyperforge_perplexity",
+            "hyperforge_summarize",
+        ],
     )
 
     keywords = ["RAO", "powerful", "agent", "orchestrator"]
@@ -147,6 +159,12 @@ async def test_smart_parameters():
         external_nua_api_key=NUA_KEY,
         question=question,
         config=CONFIG,
+        loaded_modules=[
+            "hyperforge_smart",
+            "hyperforge_static",
+            "hyperforge_perplexity",
+            "hyperforge_summarize",
+        ],
     )
     keywords = [
         "Snoopy",
@@ -185,6 +203,12 @@ async def test_smart_parameters():
         external_nua_api_key=NUA_KEY,
         question=question,
         config=config,
+        loaded_modules=[
+            "hyperforge_smart",
+            "hyperforge_static",
+            "hyperforge_perplexity",
+            "hyperforge_summarize",
+        ],
     )
     assert question_memory.final_answer
     assert all(
@@ -224,6 +248,12 @@ async def test_smart_calls_correct_agent():
         external_nua_api_key=NUA_KEY,
         question="Is Snoopy a rescue dog?",
         config=CONFIG,
+        loaded_modules=[
+            "hyperforge_smart",
+            "hyperforge_static",
+            "hyperforge_perplexity",
+            "hyperforge_summarize",
+        ],
     )
 
     assert question_memory.final_answer
@@ -256,6 +286,12 @@ async def test_smart_with_history():
         external_nua_api_key=NUA_KEY,
         question="Who is Snoopy?",
         config=config,
+        loaded_modules=[
+            "hyperforge_smart",
+            "hyperforge_static",
+            "hyperforge_perplexity",
+            "hyperforge_summarize",
+        ],
     )
 
     assert question_memory.final_answer
@@ -305,6 +341,12 @@ async def test_smart_with_user_feedback():
             question="Tell me about Snoopy",
             config=config,
             callback=callback,
+            loaded_modules=[
+                "hyperforge_smart",
+                "hyperforge_static",
+                "hyperforge_perplexity",
+                "hyperforge_summarize",
+            ],
         )
 
     assert question_memory.final_answer

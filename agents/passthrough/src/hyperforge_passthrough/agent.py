@@ -12,7 +12,7 @@ from hyperforge.manager import Manager
 from hyperforge.memory import QuestionMemory
 from hyperforge.trace import trace_agent
 
-from agents.passthrough.src.hyperforge_passthrough.config import PassthroughAgentConfig
+from hyperforge_passthrough.config import PassthroughAgentConfig
 
 
 @agent(

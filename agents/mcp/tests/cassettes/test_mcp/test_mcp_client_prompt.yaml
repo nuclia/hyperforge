@@ -27,11 +27,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 26 May 2026 09:13:41 GMT
+      - Tue, 02 Jun 2026 16:49:18 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '4'
+      - '5'
     status:
       code: 200
       message: OK
@@ -66,7 +66,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 1c8aee5fc0014e34a836470e980a92a9
+      - 45e0c23b2e9e43d7a86bc244669202e4
       x-origin:
       - RAO
       x-session:
@@ -81,7 +81,7 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":75,"output_tokens":18,"timings":{"generative":1.271294625941664},"input_nuclia_tokens":0.075,"output_nuclia_tokens":0.018}}
+        {"chunk":{"type":"meta","input_tokens":75,"output_tokens":18,"timings":{"generative":0.8288004390051356},"input_nuclia_tokens":0.075,"output_nuclia_tokens":0.018}}
 
         {"chunk":{"normalized_tokens":{"input":0.0748,"output":0.0176,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
@@ -96,17 +96,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 26 May 2026 09:13:42 GMT
+      - Tue, 02 Jun 2026 16:49:18 GMT
       nuclia-learning-id:
-      - 86c2b3248ec640e49581a81853d42076
+      - 86fede325102481f80707fbedeb5b66b
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1277'
+      - '835'
       x-nuclia-trace-id:
-      - c53736b16d75d2f45fe29721ce5cfd18
+      - 457596e41c6429c18d1548d7501e7cf1
     status:
       code: 200
       message: OK
@@ -155,7 +155,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 1c8aee5fc0014e34a836470e980a92a9
+      - 45e0c23b2e9e43d7a86bc244669202e4
       x-origin:
       - RAO
       x-session:
@@ -170,7 +170,7 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":232,"output_tokens":29,"timings":{"generative_first_chunk":0.8619604079285637,"generative":0.8634626480052248},"input_nuclia_tokens":0.232,"output_nuclia_tokens":0.029}}
+        {"chunk":{"type":"meta","input_tokens":232,"output_tokens":29,"timings":{"generative_first_chunk":0.8037598889932269,"generative":0.8052308289916255},"input_nuclia_tokens":0.232,"output_nuclia_tokens":0.029}}
 
         {"chunk":{"normalized_tokens":{"input":0.2324,"output":0.0288,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
@@ -185,17 +185,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 26 May 2026 09:13:43 GMT
+      - Tue, 02 Jun 2026 16:49:19 GMT
       nuclia-learning-id:
-      - dc37bb507c8d4f6fbd53f4b1d917ff51
+      - 027bef2c901148c3a1eb033eca500360
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '869'
+      - '810'
       x-nuclia-trace-id:
-      - c55b633c55c88a41a8f8c6597a0acb26
+      - 970159dd90c49f9ad6f8d92ae3c6acb6
     status:
       code: 200
       message: OK
@@ -246,7 +246,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 1c8aee5fc0014e34a836470e980a92a9
+      - 45e0c23b2e9e43d7a86bc244669202e4
       x-origin:
       - RAO
       x-session:
@@ -261,14 +261,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":246,"output_tokens":18,"timings":{"generative_first_chunk":1.2699479049770162,"generative":1.2713393740123138},"input_nuclia_tokens":0.246,"output_nuclia_tokens":0.018}}
+        {"chunk":{"type":"meta","input_tokens":246,"output_tokens":18,"timings":{"generative_first_chunk":1.7784970790089574,"generative":1.7803844780137297},"input_nuclia_tokens":0.246,"output_nuclia_tokens":0.018}}
 
         {"chunk":{"normalized_tokens":{"input":0.2464,"output":0.0176,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -276,17 +276,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 26 May 2026 09:13:43 GMT
+      - Tue, 02 Jun 2026 16:49:20 GMT
       nuclia-learning-id:
-      - 685601bf6a6246378490aa7200a92f61
+      - a323f6f861d1495198641793e1b78bd9
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1277'
+      - '1786'
       x-nuclia-trace-id:
-      - b75f555476560ca75b55f04bf6494351
+      - f4dda5f9b38bcd34812573688e749339
     status:
       code: 200
       message: OK
@@ -373,17 +373,20 @@ interactions:
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
-        the result of the multiplication of 2 and 5, which is 10.0. This directly
-        answers the question about the multiplication of these two numbers.","answer":"The
-        result of multiplying 2 by 5 is 10.0. Imagine you have 2 baskets of bananas,
-        and each basket contains 5 bananas. If you count all the bananas, you would
-        have a total of 10 bananas!","missing_info_query":"","useful":"yes","citations":["block-AB"]}}}
+        the result of the multiplication of 2 and 5, which is 10.0. However, it does
+        not explicitly state the multiplication process or relate it to the fruit
+        example as instructed. Therefore, I will provide the answer based on the context
+        while incorporating the fruit example as required.","answer":"When you have
+        2 baskets of bananas and each basket contains 5 bananas, you can find the
+        total number of bananas by multiplying the number of baskets by the number
+        of bananas in each basket. So, 2 baskets multiplied by 5 bananas equals 10
+        bananas in total!","missing_info_query":"","useful":"yes","citations":["block-AB"]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":29,"output_tokens":13,"timings":{"generative":7.829223673965316},"input_nuclia_tokens":0.029,"output_nuclia_tokens":0.013}}
+        {"chunk":{"type":"meta","input_tokens":29,"output_tokens":17,"timings":{"generative":1.855628956007422},"input_nuclia_tokens":0.029,"output_nuclia_tokens":0.017}}
 
-        {"chunk":{"normalized_tokens":{"input":0.02901,"output":0.01296,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02901,"output":0.01692,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -396,17 +399,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 26 May 2026 09:13:45 GMT
+      - Tue, 02 Jun 2026 16:49:22 GMT
       nuclia-learning-id:
-      - ac72824970ed4ecab9737ae49f6f55c3
+      - e6cb62346ffa438fb74992f36429565e
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '7837'
+      - '1860'
       x-nuclia-trace-id:
-      - 2b0ec358b0c42367859c808b387d445d
+      - 76d323f177a25c99307e9de809286cfe
     status:
       code: 200
       message: OK
@@ -420,26 +423,27 @@ interactions:
       this clearly\n\nAlways follow any additional instructions provided about format,
       style, or domain-specific behavior.","chat_history":[],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"\n##
       Question\nHow much is 2 * 5?\n\n## Provided Context\n[START OF CONTEXT]\n# How
-      much is 2 * 5?\n\n The result of multiplying 2 by 5 is 10.0. Imagine you have
-      2 baskets of bananas, and each basket contains 5 bananas. If you count all the
-      bananas, you would have a total of 10 bananas!\n[END OF CONTEXT]\n\n## Answering
-      Guidelines\n- Carefully read all context; it may be lengthy or detailed\n- Do
-      not omit or overlook any relevant information\n- If the context is incomplete
-      or insufficient, state: \"Not enough data to answer this.\"\n- Read carefully
-      any extra instructions below if provided and use them to answer\n\n## Extra
-      Prompts to consider for generating the answer\nThis information was used to
-      generate the context.\nUse it to help generate a better answer and follow any
-      specific instructions it may contain about the format or style of the answer.\n-
-      ## Prompt\nDescription: \nWhen you need to multiply two numbers, use the ''multiply''
-      tool.\nFor example, if you want to find out how many apples you have in total\nwhen
-      you have ''a'' baskets and each basket contains ''b'' apples,\nyou should use
-      the ''multiply'' tool to calculate a * b. and when generating the answer, explain
-      it using this fruit example.\n\n```PROMPT\nWhen faced with a multiplication
-      problem, such as having some baskets with some apples each, you should use the
-      ''multiply'' tool to find the total number of apples. Simply multiply the number
-      of baskets by the number of apples to get the answer.Always generate the answer
-      using funny fruit examples!\n\n```\n\nNow provide your answer to the question:
-      How much is 2 * 5?"},"citations":null,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":5000,"query_context_images":{},"prefer_markdown":null,"json_schema":null,"format_prompt":false,"rerank_context":false,"tools":[],"tool_choice":{"type":"auto"},"reasoning":false,"seed":null}'
+      much is 2 * 5?\n\n When you have 2 baskets of bananas and each basket contains
+      5 bananas, you can find the total number of bananas by multiplying the number
+      of baskets by the number of bananas in each basket. So, 2 baskets multiplied
+      by 5 bananas equals 10 bananas in total!\n[END OF CONTEXT]\n\n## Answering Guidelines\n-
+      Carefully read all context; it may be lengthy or detailed\n- Do not omit or
+      overlook any relevant information\n- If the context is incomplete or insufficient,
+      state: \"Not enough data to answer this.\"\n- Read carefully any extra instructions
+      below if provided and use them to answer\n\n## Extra Prompts to consider for
+      generating the answer\nThis information was used to generate the context.\nUse
+      it to help generate a better answer and follow any specific instructions it
+      may contain about the format or style of the answer.\n- ## Prompt\nDescription:
+      \nWhen you need to multiply two numbers, use the ''multiply'' tool.\nFor example,
+      if you want to find out how many apples you have in total\nwhen you have ''a''
+      baskets and each basket contains ''b'' apples,\nyou should use the ''multiply''
+      tool to calculate a * b. and when generating the answer, explain it using this
+      fruit example.\n\n```PROMPT\nWhen faced with a multiplication problem, such
+      as having some baskets with some apples each, you should use the ''multiply''
+      tool to find the total number of apples. Simply multiply the number of baskets
+      by the number of apples to get the answer.Always generate the answer using funny
+      fruit examples!\n\n```\n\nNow provide your answer to the question: How much
+      is 2 * 5?"},"citations":null,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":5000,"query_context_images":{},"prefer_markdown":null,"json_schema":null,"format_prompt":false,"rerank_context":false,"tools":[],"tool_choice":{"type":"auto"},"reasoning":false,"seed":null}'
     headers:
       Accept:
       - application/x-ndjson
@@ -448,7 +452,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2608'
+      - '2679'
       Content-Type:
       - application/json
       Host:
@@ -460,7 +464,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 1c8aee5fc0014e34a836470e980a92a9
+      - 45e0c23b2e9e43d7a86bc244669202e4
       x-origin:
       - RAO
       x-session:
@@ -471,39 +475,7 @@ interactions:
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"text","text":"The"}}
-
-        {"chunk":{"type":"text","text":" result"}}
-
-        {"chunk":{"type":"text","text":" of"}}
-
-        {"chunk":{"type":"text","text":" multiplying"}}
-
-        {"chunk":{"type":"text","text":" "}}
-
-        {"chunk":{"type":"text","text":"2"}}
-
-        {"chunk":{"type":"text","text":" by"}}
-
-        {"chunk":{"type":"text","text":" "}}
-
-        {"chunk":{"type":"text","text":"5"}}
-
-        {"chunk":{"type":"text","text":" is"}}
-
-        {"chunk":{"type":"text","text":" "}}
-
-        {"chunk":{"type":"text","text":"10"}}
-
-        {"chunk":{"type":"text","text":"."}}
-
-        {"chunk":{"type":"text","text":"0"}}
-
-        {"chunk":{"type":"text","text":"."}}
-
-        {"chunk":{"type":"text","text":" \n\n"}}
-
-        {"chunk":{"type":"text","text":"Imagine"}}
+      string: '{"chunk":{"type":"text","text":"When"}}
 
         {"chunk":{"type":"text","text":" you"}}
 
@@ -518,8 +490,6 @@ interactions:
         {"chunk":{"type":"text","text":" of"}}
 
         {"chunk":{"type":"text","text":" bananas"}}
-
-        {"chunk":{"type":"text","text":","}}
 
         {"chunk":{"type":"text","text":" and"}}
 
@@ -535,103 +505,61 @@ interactions:
 
         {"chunk":{"type":"text","text":" bananas"}}
 
-        {"chunk":{"type":"text","text":"."}}
-
-        {"chunk":{"type":"text","text":" If"}}
-
-        {"chunk":{"type":"text","text":" you"}}
-
-        {"chunk":{"type":"text","text":" count"}}
-
-        {"chunk":{"type":"text","text":" all"}}
-
-        {"chunk":{"type":"text","text":" the"}}
-
-        {"chunk":{"type":"text","text":" bananas"}}
-
         {"chunk":{"type":"text","text":","}}
 
         {"chunk":{"type":"text","text":" you"}}
 
-        {"chunk":{"type":"text","text":" would"}}
+        {"chunk":{"type":"text","text":" can"}}
 
-        {"chunk":{"type":"text","text":" have"}}
+        {"chunk":{"type":"text","text":" find"}}
 
-        {"chunk":{"type":"text","text":" a"}}
+        {"chunk":{"type":"text","text":" the"}}
 
         {"chunk":{"type":"text","text":" total"}}
 
+        {"chunk":{"type":"text","text":" number"}}
+
         {"chunk":{"type":"text","text":" of"}}
-
-        {"chunk":{"type":"text","text":" "}}
-
-        {"chunk":{"type":"text","text":"10"}}
 
         {"chunk":{"type":"text","text":" bananas"}}
 
-        {"chunk":{"type":"text","text":"!"}}
+        {"chunk":{"type":"text","text":" by"}}
+
+        {"chunk":{"type":"text","text":" using"}}
+
+        {"chunk":{"type":"text","text":" the"}}
+
+        {"chunk":{"type":"text","text":" ''"}}
+
+        {"chunk":{"type":"text","text":"multiply"}}
+
+        {"chunk":{"type":"text","text":"''"}}
+
+        {"chunk":{"type":"text","text":" tool"}}
+
+        {"chunk":{"type":"text","text":"."}}
 
         {"chunk":{"type":"text","text":" So"}}
 
         {"chunk":{"type":"text","text":","}}
 
-        {"chunk":{"type":"text","text":" when"}}
+        {"chunk":{"type":"text","text":" "}}
 
-        {"chunk":{"type":"text","text":" you"}}
-
-        {"chunk":{"type":"text","text":" multiply"}}
-
-        {"chunk":{"type":"text","text":" the"}}
-
-        {"chunk":{"type":"text","text":" number"}}
-
-        {"chunk":{"type":"text","text":" of"}}
+        {"chunk":{"type":"text","text":"2"}}
 
         {"chunk":{"type":"text","text":" baskets"}}
 
-        {"chunk":{"type":"text","text":" ("}}
-
-        {"chunk":{"type":"text","text":"2"}}
-
-        {"chunk":{"type":"text","text":")"}}
+        {"chunk":{"type":"text","text":" multiplied"}}
 
         {"chunk":{"type":"text","text":" by"}}
 
-        {"chunk":{"type":"text","text":" the"}}
+        {"chunk":{"type":"text","text":" "}}
 
-        {"chunk":{"type":"text","text":" number"}}
-
-        {"chunk":{"type":"text","text":" of"}}
+        {"chunk":{"type":"text","text":"5"}}
 
         {"chunk":{"type":"text","text":" bananas"}}
 
-        {"chunk":{"type":"text","text":" in"}}
-
-        {"chunk":{"type":"text","text":" each"}}
-
-        {"chunk":{"type":"text","text":" basket"}}
-
-        {"chunk":{"type":"text","text":" ("}}
-
-        {"chunk":{"type":"text","text":"5"}}
-
-        {"chunk":{"type":"text","text":"),"}}
-
-        {"chunk":{"type":"text","text":" you"}}
-
-        {"chunk":{"type":"text","text":" get"}}
-
-        {"chunk":{"type":"text","text":" "}}
-
-        {"chunk":{"type":"text","text":"2"}}
-
-        {"chunk":{"type":"text","text":" *"}}
-
-        {"chunk":{"type":"text","text":" "}}
-
-        {"chunk":{"type":"text","text":"5"}}
-
-        {"chunk":{"type":"text","text":" ="}}
+        {"chunk":{"type":"text","text":" equals"}}
 
         {"chunk":{"type":"text","text":" "}}
 
@@ -639,18 +567,86 @@ interactions:
 
         {"chunk":{"type":"text","text":" bananas"}}
 
-        {"chunk":{"type":"text","text":"."}}
+        {"chunk":{"type":"text","text":" in"}}
+
+        {"chunk":{"type":"text","text":" total"}}
+
+        {"chunk":{"type":"text","text":"!"}}
+
+        {"chunk":{"type":"text","text":" \n\n"}}
+
+        {"chunk":{"type":"text","text":"In"}}
+
+        {"chunk":{"type":"text","text":" this"}}
+
+        {"chunk":{"type":"text","text":" fruity"}}
+
+        {"chunk":{"type":"text","text":" example"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" if"}}
+
+        {"chunk":{"type":"text","text":" you"}}
+
+        {"chunk":{"type":"text","text":" were"}}
+
+        {"chunk":{"type":"text","text":" to"}}
+
+        {"chunk":{"type":"text","text":" imagine"}}
+
+        {"chunk":{"type":"text","text":" each"}}
+
+        {"chunk":{"type":"text","text":" banana"}}
+
+        {"chunk":{"type":"text","text":" wearing"}}
+
+        {"chunk":{"type":"text","text":" a"}}
+
+        {"chunk":{"type":"text","text":" tiny"}}
+
+        {"chunk":{"type":"text","text":" party"}}
+
+        {"chunk":{"type":"text","text":" hat"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" you''d"}}
+
+        {"chunk":{"type":"text","text":" have"}}
+
+        {"chunk":{"type":"text","text":" a"}}
+
+        {"chunk":{"type":"text","text":" delightful"}}
+
+        {"chunk":{"type":"text","text":" party"}}
+
+        {"chunk":{"type":"text","text":" of"}}
+
+        {"chunk":{"type":"text","text":" "}}
+
+        {"chunk":{"type":"text","text":"10"}}
+
+        {"chunk":{"type":"text","text":" bananas"}}
+
+        {"chunk":{"type":"text","text":" ready"}}
+
+        {"chunk":{"type":"text","text":" to"}}
+
+        {"chunk":{"type":"text","text":" celebrate"}}
+
+        {"chunk":{"type":"text","text":"!"}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":14,"output_tokens":10,"timings":{"generative_first_chunk":0.7141471089562401,"generative":6.520027659949847},"input_nuclia_tokens":0.014,"output_nuclia_tokens":0.01}}
+        {"chunk":{"type":"meta","input_tokens":14,"output_tokens":10,"timings":{"generative_first_chunk":0.47460524199414067,"generative":1.3920412890001899},"input_nuclia_tokens":0.014,"output_nuclia_tokens":0.01}}
 
-        {"chunk":{"normalized_tokens":{"input":0.01398,"output":0.01032,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.01419,"output":0.00984,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -658,17 +654,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 26 May 2026 09:13:53 GMT
+      - Tue, 02 Jun 2026 16:49:24 GMT
       nuclia-learning-id:
-      - dd9ae06e93e743ab886c406596392a57
+      - 81bd4ea7c1d94d719937086f2b2772c4
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '721'
+      - '482'
       x-nuclia-trace-id:
-      - 453c67d5fece29c56db49108118c16bb
+      - e9f73f19945a196d8c5e9afc9b236126
     status:
       code: 200
       message: OK

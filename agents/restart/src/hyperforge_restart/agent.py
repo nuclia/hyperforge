@@ -6,7 +6,7 @@ from hyperforge.manager import Manager
 from hyperforge.memory import QuestionMemory
 from hyperforge.trace import trace_agent
 
-from agents.restart.src.hyperforge_restart.config import RestartAgentConfig
+from hyperforge_restart.config import RestartAgentConfig
 from hyperforge import PROMPT_ENVIRONMENT, logger
 
 REPHRASE_PROMPT = """

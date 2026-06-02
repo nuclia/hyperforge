@@ -16,6 +16,11 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
+migrations_dir = os.path.dirname(current_dir)
+
+config.set_main_option("script_location", migrations_dir)
+
 # Configure Alembic to use our DATABASE_URL and our table definitions...
 if os.environ.get("POSTGRESQL_DSN") or os.environ.get("postgresql_dsn"):
     url = DataManagerSettings().postgresql_dsn.split("?")[0]
