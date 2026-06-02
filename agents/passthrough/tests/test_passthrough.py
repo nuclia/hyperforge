@@ -47,6 +47,7 @@ async def test_passthrough_rich_context_emits_possible_answer_from_pipeline():
         question="Return the static context",
         config=CONFIG,
         callback=callback,
+        loaded_modules=["hyperforge_passthrough"],
     )
 
     context_msg = next(

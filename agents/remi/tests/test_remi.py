@@ -79,6 +79,11 @@ async def test_remi(granularity: ContextGranularity):
         external_nua_api_key=NUA_KEY,
         question=ANSWERED_QUESTION,
         config=CONFIG,
+        loaded_modules=[
+            "hyperforge_remi",
+            "hyperforge_summarize",
+            "hyperforge_nucliadb",
+        ],
     )
 
     assert question_memory.final_answer is not None
@@ -154,6 +159,11 @@ async def test_remi_not_enough_data(granularity: ContextGranularity):
         external_nua_api_key=NUA_KEY,
         question=UNANSWERED_QUESTION,
         config=CONFIG,
+        loaded_modules=[
+            "hyperforge_remi",
+            "hyperforge_summarize",
+            "hyperforge_nucliadb",
+        ],
     )
     assert question_memory.final_answer is not None
     assert "not enough data to answer this" in question_memory.final_answer.lower()
