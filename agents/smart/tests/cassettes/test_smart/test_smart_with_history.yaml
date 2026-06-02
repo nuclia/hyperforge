@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 17:16:35 GMT
+      - Tue, 02 Jun 2026 17:20:41 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
@@ -105,7 +105,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 49de46afe6974cbc86509aad2e42b455
+      - 29789dbec057444790b5d27911061612
       x-origin:
       - RAO
       x-session:
@@ -116,26 +116,27 @@ interactions:
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"object","object":{"status":"plan","reasoning":"No
-        information has been gathered yet. The question is specifically about Snoopy,
-        and there is a dedicated static context agent for Snoopy (Carmen''s dog).
-        According to the extra instructions, this agent should be used for questions
-        about Snoopy. No other context is needed unless the information proves insufficient.","summary":"No
-        context has been gathered yet. The user wants to know who Snoopy is.","steps":[{"description":"Retrieve
-        static context about Snoopy, Carmen''s dog, using the dedicated agent.","reason":"This
-        agent is specifically designed to provide information about Snoopy and should
-        be used for questions about him."}]}}}
+      string: '{"chunk":{"type":"object","object":{"status":"plan","reasoning":"The
+        user asked ''Who is Snoopy?'' and there is a dedicated static context agent
+        that provides information about Snoopy, Carmen''s dog. According to the extra
+        instructions, if the question is about Snoopy, I should use the dog context
+        agent. No information has been gathered yet, so the next step is to retrieve
+        the static context about Snoopy from the relevant agent.","summary":"No information
+        has been gathered yet about Snoopy.","steps":[{"description":"Retrieve static
+        context about Snoopy, Carmen''s dog, from the dedicated agent.","reason":"This
+        agent is specifically designed to provide information about Snoopy and is
+        the most direct and authoritative source for this question."}]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":329,"output_tokens":213,"timings":{"generative":1.685717719999957},"input_nuclia_tokens":0.329,"output_nuclia_tokens":0.213}}
+        {"chunk":{"type":"meta","input_tokens":329,"output_tokens":230,"timings":{"generative":2.380139400003827},"input_nuclia_tokens":0.329,"output_nuclia_tokens":0.23}}
 
-        {"chunk":{"normalized_tokens":{"input":0.3288,"output":0.2128,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.3288,"output":0.2304,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -143,17 +144,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 17:16:35 GMT
+      - Tue, 02 Jun 2026 17:20:41 GMT
       nuclia-learning-id:
-      - 9a182c52b9364ec89663851a9fbebd0f
+      - c7dd010aa89e4eda8af96115cea4764b
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1691'
+      - '2385'
       x-nuclia-trace-id:
-      - 82e9d43608d51ee87532c73e4dcba761
+      - 1acb5eb72846c233e228c4bcbd994cae
     status:
       code: 200
       message: OK
@@ -161,30 +162,30 @@ interactions:
     body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
       are a retrieval executor. Your job is to call the appropriate tools to gather
       the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
-      is Snoopy?\\n\\n## What has been gathered so far\\nNo context has been gathered
-      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
-      Retrieve static context about Snoopy, Carmen's dog, using the dedicated agent.\\n
-      \  Reason: This agent is specifically designed to provide information about
-      Snoopy and should be used for questions about him.\\n\\n\\nCall the tools needed
-      to fulfil this plan. You may call multiple tools.\\nCall task_complete once
-      you have executed all planned retrieval steps.\\n\\nExtra instructions: If the
-      question is about Snoopy, use the dog context agent. If the question is about
-      RAO, use the RAO context agent. for general questions use the perplexity agent.
-      Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet about Snoopy.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      static context about Snoopy, Carmen's dog, from the dedicated agent.\\n   Reason:
+      This agent is specifically designed to provide information about Snoopy and
+      is the most direct and authoritative source for this question.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
       is Snoopy?\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
       are a retrieval executor. Your job is to call the appropriate tools to gather
       the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
-      is Snoopy?\\n\\n## What has been gathered so far\\nNo context has been gathered
-      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
-      Retrieve static context about Snoopy, Carmen's dog, using the dedicated agent.\\n
-      \  Reason: This agent is specifically designed to provide information about
-      Snoopy and should be used for questions about him.\\n\\n\\nCall the tools needed
-      to fulfil this plan. You may call multiple tools.\\nCall task_complete once
-      you have executed all planned retrieval steps.\\n\\nExtra instructions: If the
-      question is about Snoopy, use the dog context agent. If the question is about
-      RAO, use the RAO context agent. for general questions use the perplexity agent.
-      Always try to be as thorough as possible\\n\\n\\nChoose the best tool or tools
-      for the task. Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet about Snoopy.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      static context about Snoopy, Carmen's dog, from the dedicated agent.\\n   Reason:
+      This agent is specifically designed to provide information about Snoopy and
+      is the most direct and authoritative source for this question.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\\n\\nChoose the best tool
+      or tools for the task. Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
       information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
       questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
       information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
@@ -203,7 +204,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '3577'
+      - '3579'
       Content-Type:
       - application/json
       Host:
@@ -215,7 +216,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 49de46afe6974cbc86509aad2e42b455
+      - 29789dbec057444790b5d27911061612
       x-origin:
       - RAO
       x-session:
@@ -230,9 +231,9 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":254,"output_tokens":56,"timings":{"generative_first_chunk":2.2389296119945357,"generative":2.2403659819974564},"input_nuclia_tokens":0.254,"output_nuclia_tokens":0.056}}
+        {"chunk":{"type":"meta","input_tokens":251,"output_tokens":56,"timings":{"generative_first_chunk":1.3771383299972513,"generative":1.3786079399978917},"input_nuclia_tokens":0.251,"output_nuclia_tokens":0.056}}
 
-        {"chunk":{"normalized_tokens":{"input":0.254,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.2508,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -245,17 +246,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 17:16:37 GMT
+      - Tue, 02 Jun 2026 17:20:43 GMT
       nuclia-learning-id:
-      - 7069315d3134485fa77341550571889a
+      - 33beda9757c34f04bd0e940e56593bf9
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '2245'
+      - '1383'
       x-nuclia-trace-id:
-      - bdf5515f983c9aec9c43117ce45f2c1a
+      - ff2fae1f4f350411dd21a4a0ef9cefd7
     status:
       code: 200
       message: OK
@@ -263,34 +264,34 @@ interactions:
     body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
       are a retrieval executor. Your job is to call the appropriate tools to gather
       the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
-      is Snoopy?\\n\\n## What has been gathered so far\\nNo context has been gathered
-      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
-      Retrieve static context about Snoopy, Carmen's dog, using the dedicated agent.\\n
-      \  Reason: This agent is specifically designed to provide information about
-      Snoopy and should be used for questions about him.\\n\\n\\nCall the tools needed
-      to fulfil this plan. You may call multiple tools.\\nCall task_complete once
-      you have executed all planned retrieval steps.\\n\\nExtra instructions: If the
-      question is about Snoopy, use the dog context agent. If the question is about
-      RAO, use the RAO context agent. for general questions use the perplexity agent.
-      Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet about Snoopy.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      static context about Snoopy, Carmen's dog, from the dedicated agent.\\n   Reason:
+      This agent is specifically designed to provide information about Snoopy and
+      is the most direct and authoritative source for this question.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
       is Snoopy?\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
-      Chunk: c018e8b1799241688bdb2c4df568d736\\n``` Snoopy is Carmen's dog. He is
+      Chunk: 5f932e5cd9ff4ee0af8387d867bf987c\\n``` Snoopy is Carmen's dog. He is
       small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
       Software, a company that provides software for developing and managing applications.
       ```\\n\\n\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
       are a retrieval executor. Your job is to call the appropriate tools to gather
       the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
-      is Snoopy?\\n\\n## What has been gathered so far\\nNo context has been gathered
-      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
-      Retrieve static context about Snoopy, Carmen's dog, using the dedicated agent.\\n
-      \  Reason: This agent is specifically designed to provide information about
-      Snoopy and should be used for questions about him.\\n\\n\\nCall the tools needed
-      to fulfil this plan. You may call multiple tools.\\nCall task_complete once
-      you have executed all planned retrieval steps.\\n\\nExtra instructions: If the
-      question is about Snoopy, use the dog context agent. If the question is about
-      RAO, use the RAO context agent. for general questions use the perplexity agent.
-      Always try to be as thorough as possible\\n\\n\\nChoose the best tool or tools
-      for the task. Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet about Snoopy.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      static context about Snoopy, Carmen's dog, from the dedicated agent.\\n   Reason:
+      This agent is specifically designed to provide information about Snoopy and
+      is the most direct and authoritative source for this question.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\\n\\nChoose the best tool
+      or tools for the task. Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
       information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
       questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
       information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
@@ -309,7 +310,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '3925'
+      - '3927'
       Content-Type:
       - application/json
       Host:
@@ -321,7 +322,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 49de46afe6974cbc86509aad2e42b455
+      - 29789dbec057444790b5d27911061612
       x-origin:
       - RAO
       x-session:
@@ -336,9 +337,9 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":294,"output_tokens":56,"timings":{"generative_first_chunk":0.8550296589965001,"generative":0.8564327089989092},"input_nuclia_tokens":0.294,"output_nuclia_tokens":0.056}}
+        {"chunk":{"type":"meta","input_tokens":292,"output_tokens":56,"timings":{"generative_first_chunk":1.2903657039860263,"generative":1.2918629639898427},"input_nuclia_tokens":0.292,"output_nuclia_tokens":0.056}}
 
-        {"chunk":{"normalized_tokens":{"input":0.2944,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.292,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -351,17 +352,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 17:16:39 GMT
+      - Tue, 02 Jun 2026 17:20:45 GMT
       nuclia-learning-id:
-      - 50595209079f48638677bd0e3dd93962
+      - 33dc8b3afbe244108b4029b720d49804
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '862'
+      - '1297'
       x-nuclia-trace-id:
-      - 2d883d8d3d8849e8e6e60ea3f4616d39
+      - 09afb591fe41834c6410a1a86acaca58
     status:
       code: 200
       message: OK
@@ -369,38 +370,38 @@ interactions:
     body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
       are a retrieval executor. Your job is to call the appropriate tools to gather
       the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
-      is Snoopy?\\n\\n## What has been gathered so far\\nNo context has been gathered
-      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
-      Retrieve static context about Snoopy, Carmen's dog, using the dedicated agent.\\n
-      \  Reason: This agent is specifically designed to provide information about
-      Snoopy and should be used for questions about him.\\n\\n\\nCall the tools needed
-      to fulfil this plan. You may call multiple tools.\\nCall task_complete once
-      you have executed all planned retrieval steps.\\n\\nExtra instructions: If the
-      question is about Snoopy, use the dog context agent. If the question is about
-      RAO, use the RAO context agent. for general questions use the perplexity agent.
-      Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet about Snoopy.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      static context about Snoopy, Carmen's dog, from the dedicated agent.\\n   Reason:
+      This agent is specifically designed to provide information about Snoopy and
+      is the most direct and authoritative source for this question.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
       is Snoopy?\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
-      Chunk: c018e8b1799241688bdb2c4df568d736\\n``` Snoopy is Carmen's dog. He is
+      Chunk: 5f932e5cd9ff4ee0af8387d867bf987c\\n``` Snoopy is Carmen's dog. He is
       small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
       Software, a company that provides software for developing and managing applications.
       ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
-      Chunk: 3fc2637023da4847a434843f485ee6a3\\n``` Snoopy is Carmen's dog. He is
+      Chunk: ed240ebf10124e05ac7bb852151ec22d\\n``` Snoopy is Carmen's dog. He is
       small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
       Software, a company that provides software for developing and managing applications.
       ```\\n\\n\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
       are a retrieval executor. Your job is to call the appropriate tools to gather
       the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
-      is Snoopy?\\n\\n## What has been gathered so far\\nNo context has been gathered
-      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
-      Retrieve static context about Snoopy, Carmen's dog, using the dedicated agent.\\n
-      \  Reason: This agent is specifically designed to provide information about
-      Snoopy and should be used for questions about him.\\n\\n\\nCall the tools needed
-      to fulfil this plan. You may call multiple tools.\\nCall task_complete once
-      you have executed all planned retrieval steps.\\n\\nExtra instructions: If the
-      question is about Snoopy, use the dog context agent. If the question is about
-      RAO, use the RAO context agent. for general questions use the perplexity agent.
-      Always try to be as thorough as possible\\n\\n\\nChoose the best tool or tools
-      for the task. Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet about Snoopy.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      static context about Snoopy, Carmen's dog, from the dedicated agent.\\n   Reason:
+      This agent is specifically designed to provide information about Snoopy and
+      is the most direct and authoritative source for this question.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\\n\\nChoose the best tool
+      or tools for the task. Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
       information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
       questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
       information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
@@ -419,7 +420,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '4273'
+      - '4275'
       Content-Type:
       - application/json
       Host:
@@ -431,7 +432,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 49de46afe6974cbc86509aad2e42b455
+      - 29789dbec057444790b5d27911061612
       x-origin:
       - RAO
       x-session:
@@ -446,14 +447,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":335,"output_tokens":56,"timings":{"generative_first_chunk":1.0176864770037355,"generative":1.019260626999312},"input_nuclia_tokens":0.335,"output_nuclia_tokens":0.056}}
+        {"chunk":{"type":"meta","input_tokens":332,"output_tokens":56,"timings":{"generative_first_chunk":3.061974990996532,"generative":3.0638810219970765},"input_nuclia_tokens":0.332,"output_nuclia_tokens":0.056}}
 
-        {"chunk":{"normalized_tokens":{"input":0.3348,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.3316,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -461,17 +462,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 17:16:40 GMT
+      - Tue, 02 Jun 2026 17:20:46 GMT
       nuclia-learning-id:
-      - 97a390ace7c643728852b9bcae60cdff
+      - bbed53632f2b44ab89fb9ac69279a1ea
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1024'
+      - '3069'
       x-nuclia-trace-id:
-      - 3c1510afb4b7b7009eaec7dfa115d621
+      - 4b16d3ef51228d17b92285625e431cb2
     status:
       code: 200
       message: OK
@@ -479,42 +480,42 @@ interactions:
     body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
       are a retrieval executor. Your job is to call the appropriate tools to gather
       the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
-      is Snoopy?\\n\\n## What has been gathered so far\\nNo context has been gathered
-      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
-      Retrieve static context about Snoopy, Carmen's dog, using the dedicated agent.\\n
-      \  Reason: This agent is specifically designed to provide information about
-      Snoopy and should be used for questions about him.\\n\\n\\nCall the tools needed
-      to fulfil this plan. You may call multiple tools.\\nCall task_complete once
-      you have executed all planned retrieval steps.\\n\\nExtra instructions: If the
-      question is about Snoopy, use the dog context agent. If the question is about
-      RAO, use the RAO context agent. for general questions use the perplexity agent.
-      Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet about Snoopy.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      static context about Snoopy, Carmen's dog, from the dedicated agent.\\n   Reason:
+      This agent is specifically designed to provide information about Snoopy and
+      is the most direct and authoritative source for this question.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
       is Snoopy?\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
-      Chunk: c018e8b1799241688bdb2c4df568d736\\n``` Snoopy is Carmen's dog. He is
+      Chunk: 5f932e5cd9ff4ee0af8387d867bf987c\\n``` Snoopy is Carmen's dog. He is
       small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
       Software, a company that provides software for developing and managing applications.
       ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
-      Chunk: 3fc2637023da4847a434843f485ee6a3\\n``` Snoopy is Carmen's dog. He is
+      Chunk: ed240ebf10124e05ac7bb852151ec22d\\n``` Snoopy is Carmen's dog. He is
       small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
       Software, a company that provides software for developing and managing applications.
       ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
-      Chunk: 3b20affefcae43d68931284a10cce483\\n``` Snoopy is Carmen's dog. He is
+      Chunk: 998d282a80124560b96b77dd57aec74a\\n``` Snoopy is Carmen's dog. He is
       small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
       Software, a company that provides software for developing and managing applications.
       ```\\n\\n\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
       are a retrieval executor. Your job is to call the appropriate tools to gather
       the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
-      is Snoopy?\\n\\n## What has been gathered so far\\nNo context has been gathered
-      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
-      Retrieve static context about Snoopy, Carmen's dog, using the dedicated agent.\\n
-      \  Reason: This agent is specifically designed to provide information about
-      Snoopy and should be used for questions about him.\\n\\n\\nCall the tools needed
-      to fulfil this plan. You may call multiple tools.\\nCall task_complete once
-      you have executed all planned retrieval steps.\\n\\nExtra instructions: If the
-      question is about Snoopy, use the dog context agent. If the question is about
-      RAO, use the RAO context agent. for general questions use the perplexity agent.
-      Always try to be as thorough as possible\\n\\n\\nChoose the best tool or tools
-      for the task. Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet about Snoopy.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      static context about Snoopy, Carmen's dog, from the dedicated agent.\\n   Reason:
+      This agent is specifically designed to provide information about Snoopy and
+      is the most direct and authoritative source for this question.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\\n\\nChoose the best tool
+      or tools for the task. Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
       information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
       questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
       information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
@@ -533,7 +534,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '4621'
+      - '4623'
       Content-Type:
       - application/json
       Host:
@@ -545,7 +546,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 49de46afe6974cbc86509aad2e42b455
+      - 29789dbec057444790b5d27911061612
       x-origin:
       - RAO
       x-session:
@@ -560,9 +561,9 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":375,"output_tokens":56,"timings":{"generative_first_chunk":2.7627726350037847,"generative":2.7642770950042177},"input_nuclia_tokens":0.375,"output_nuclia_tokens":0.056}}
+        {"chunk":{"type":"meta","input_tokens":372,"output_tokens":56,"timings":{"generative_first_chunk":1.5756797030044254,"generative":1.577169843003503},"input_nuclia_tokens":0.372,"output_nuclia_tokens":0.056}}
 
-        {"chunk":{"normalized_tokens":{"input":0.3752,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.3716,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -575,17 +576,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 17:16:41 GMT
+      - Tue, 02 Jun 2026 17:20:49 GMT
       nuclia-learning-id:
-      - a7d51c623f9a4f06b5bb912f91c03a19
+      - 01a8b0bf561b4b5f9dce5da4e0ba2d1d
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '2770'
+      - '1582'
       x-nuclia-trace-id:
-      - 5e0e5ea5b483104a5692641299630bf1
+      - 588d36f67e3754d3abab328c41062560
     status:
       code: 200
       message: OK
@@ -593,46 +594,46 @@ interactions:
     body: "{\"question\":\"\",\"retrieval\":true,\"user_id\":\"smart_planner-smart\",\"system\":\"You
       are a retrieval executor. Your job is to call the appropriate tools to gather
       the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
-      is Snoopy?\\n\\n## What has been gathered so far\\nNo context has been gathered
-      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
-      Retrieve static context about Snoopy, Carmen's dog, using the dedicated agent.\\n
-      \  Reason: This agent is specifically designed to provide information about
-      Snoopy and should be used for questions about him.\\n\\n\\nCall the tools needed
-      to fulfil this plan. You may call multiple tools.\\nCall task_complete once
-      you have executed all planned retrieval steps.\\n\\nExtra instructions: If the
-      question is about Snoopy, use the dog context agent. If the question is about
-      RAO, use the RAO context agent. for general questions use the perplexity agent.
-      Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet about Snoopy.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      static context about Snoopy, Carmen's dog, from the dedicated agent.\\n   Reason:
+      This agent is specifically designed to provide information about Snoopy and
+      is the most direct and authoritative source for this question.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\",\"chat_history\":[{\"author\":\"USER\",\"text\":\"Who
       is Snoopy?\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
-      Chunk: c018e8b1799241688bdb2c4df568d736\\n``` Snoopy is Carmen's dog. He is
+      Chunk: 5f932e5cd9ff4ee0af8387d867bf987c\\n``` Snoopy is Carmen's dog. He is
       small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
       Software, a company that provides software for developing and managing applications.
       ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
-      Chunk: 3fc2637023da4847a434843f485ee6a3\\n``` Snoopy is Carmen's dog. He is
+      Chunk: ed240ebf10124e05ac7bb852151ec22d\\n``` Snoopy is Carmen's dog. He is
       small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
       Software, a company that provides software for developing and managing applications.
       ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
-      Chunk: 3b20affefcae43d68931284a10cce483\\n``` Snoopy is Carmen's dog. He is
+      Chunk: 998d282a80124560b96b77dd57aec74a\\n``` Snoopy is Carmen's dog. He is
       small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
       Software, a company that provides software for developing and managing applications.
       ```\\n\\n\"},{\"author\":\"NUCLIA\",\"text\":\"[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
-      Chunk: bd3c5d2db2c1479887f03918c0c5a475\\n``` Snoopy is Carmen's dog. He is
+      Chunk: 6b512c429a3949f895eb15f3e6f8c932\\n``` Snoopy is Carmen's dog. He is
       small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
       Software, a company that provides software for developing and managing applications.
       ```\\n\\n\"}],\"context\":[],\"query_context\":{},\"query_context_order\":{},\"truncate\":true,\"user_prompt\":{\"prompt\":\"You
       are a retrieval executor. Your job is to call the appropriate tools to gather
       the information\\ndescribed in the retrieval plan below.\\n\\n## User question\\nWho
-      is Snoopy?\\n\\n## What has been gathered so far\\nNo context has been gathered
-      yet. The user wants to know who Snoopy is.\\n\\n## Retrieval plan for this iteration\\n\\n1.
-      Retrieve static context about Snoopy, Carmen's dog, using the dedicated agent.\\n
-      \  Reason: This agent is specifically designed to provide information about
-      Snoopy and should be used for questions about him.\\n\\n\\nCall the tools needed
-      to fulfil this plan. You may call multiple tools.\\nCall task_complete once
-      you have executed all planned retrieval steps.\\n\\nExtra instructions: If the
-      question is about Snoopy, use the dog context agent. If the question is about
-      RAO, use the RAO context agent. for general questions use the perplexity agent.
-      Always try to be as thorough as possible\\n\\n\\nChoose the best tool or tools
-      for the task. Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
+      is Snoopy?\\n\\n## What has been gathered so far\\nNo information has been gathered
+      yet about Snoopy.\\n\\n## Retrieval plan for this iteration\\n\\n1. Retrieve
+      static context about Snoopy, Carmen's dog, from the dedicated agent.\\n   Reason:
+      This agent is specifically designed to provide information about Snoopy and
+      is the most direct and authoritative source for this question.\\n\\n\\nCall
+      the tools needed to fulfil this plan. You may call multiple tools.\\nCall task_complete
+      once you have executed all planned retrieval steps.\\n\\nExtra instructions:
+      If the question is about Snoopy, use the dog context agent. If the question
+      is about RAO, use the RAO context agent. for general questions use the perplexity
+      agent. Always try to be as thorough as possible\\n\\n\\nChoose the best tool
+      or tools for the task. Call task_complete when you have enough information.\"},\"citations\":null,\"citation_threshold\":null,\"generative_model\":\"chatgpt-4.1\",\"max_tokens\":null,\"query_context_images\":{},\"prefer_markdown\":null,\"json_schema\":null,\"format_prompt\":false,\"rerank_context\":false,\"tools\":[{\"name\":\"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c\",\"description\":\"Provides
       information about Snoopy, Carmen's dog. \u2014 Provide static context to answer
       questions.\",\"parameters\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"static_context__1d372a1a-8aaf-4dc7-bcf2-b8393751beba\",\"description\":\"Provides
       information about RAO, the agentic RAG orchestrator. \u2014 Provide static context
@@ -651,7 +652,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '4969'
+      - '4971'
       Content-Type:
       - application/json
       Host:
@@ -663,7 +664,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 49de46afe6974cbc86509aad2e42b455
+      - 29789dbec057444790b5d27911061612
       x-origin:
       - RAO
       x-session:
@@ -678,14 +679,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":417,"output_tokens":56,"timings":{"generative_first_chunk":0.8133117289980873,"generative":0.8148874399921624},"input_nuclia_tokens":0.417,"output_nuclia_tokens":0.056}}
+        {"chunk":{"type":"meta","input_tokens":413,"output_tokens":56,"timings":{"generative_first_chunk":0.9217742929977248,"generative":0.9231925530002627},"input_nuclia_tokens":0.413,"output_nuclia_tokens":0.056}}
 
-        {"chunk":{"normalized_tokens":{"input":0.4168,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.4132,"output":0.056,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -693,17 +694,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 17:16:44 GMT
+      - Tue, 02 Jun 2026 17:20:51 GMT
       nuclia-learning-id:
-      - e3703945e7e141eaa90f061a9e4b79df
+      - 5e6748cf63634ed09ce1e3db16c5a148
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '820'
+      - '928'
       x-nuclia-trace-id:
-      - 27c5beae10285cca10bd3cc7fd8a75f3
+      - 2864ae7aeef6e4d07064a928c4faea0f
     status:
       code: 200
       message: OK
@@ -745,29 +746,29 @@ interactions:
       that may be relevant to the question and can be used to rephrase the question
       or guide retrieval:\\n## Previous questions and answers in this session:\\n\\n\\n\\n\\n##
       Execution history (previous planning iterations)\\n\\n### Iteration 1\\n**Plan:**
-      1 step(s): Retrieve static context about Snoopy, Carmen's dog, using the dedicated
+      1 step(s): Retrieve static context about Snoopy, Carmen's dog, from the dedicated
       agent.\\n**Results summary:** [static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
-      Chunk: c018e8b1799241688bdb2c4df568d736\\nResult of running: static_context
+      Chunk: 5f932e5cd9ff4ee0af8387d867bf987c\\nResult of running: static_context
       of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy is Carmen's dog. He is
       small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
       Software, a company that provides software for developing and managing applications.
       ```\\n\\n\\n\\n[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
-      Chunk: 3fc2637023da4847a434843f485ee6a3\\nResult of running: static_context
+      Chunk: ed240ebf10124e05ac7bb852151ec22d\\nResult of running: static_context
       of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy is Carmen's dog. He is
       small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
       Software, a company that provides software for developing and managing applications.
       ```\\n\\n\\n\\n[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
-      Chunk: 3b20affefcae43d68931284a10cce483\\nResult of running: static_context
+      Chunk: 998d282a80124560b96b77dd57aec74a\\nResult of running: static_context
       of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy is Carmen's dog. He is
       small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
       Software, a company that provides software for developing and managing applications.
       ```\\n\\n\\n\\n[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
-      Chunk: bd3c5d2db2c1479887f03918c0c5a475\\nResult of running: static_context
+      Chunk: 6b512c429a3949f895eb15f3e6f8c932\\nResult of running: static_context
       of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy is Carmen's dog. He is
       small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
       Software, a company that provides software for developing and managing applications.
       ```\\n\\n\\n\\n[static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c]:\\n\\n\\n\\n##
-      Chunk: 8a6462826b5f40a0b8b58ac128f9f532\\nResult of running: static_context
+      Chunk: f611e26693dc49e2b54ac9f9d5d6b575\\nResult of running: static_context
       of 269192da-f5b6-4196-8c9a-bd77e32f237c\\n``` Snoopy is Carmen's dog. He is
       small and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
       Software, a company that provides software for developing and managing applications.
@@ -792,7 +793,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '6795'
+      - '6794'
       Content-Type:
       - application/json
       Host:
@@ -804,7 +805,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 49de46afe6974cbc86509aad2e42b455
+      - 29789dbec057444790b5d27911061612
       x-origin:
       - RAO
       x-session:
@@ -824,14 +825,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":602,"output_tokens":144,"timings":{"generative":3.337484162999317},"input_nuclia_tokens":0.602,"output_nuclia_tokens":0.144}}
+        {"chunk":{"type":"meta","input_tokens":601,"output_tokens":146,"timings":{"generative":1.5428241660010826},"input_nuclia_tokens":0.601,"output_nuclia_tokens":0.146}}
 
-        {"chunk":{"normalized_tokens":{"input":0.602,"output":0.144,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.6012,"output":0.1456,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -839,17 +840,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 17:16:45 GMT
+      - Tue, 02 Jun 2026 17:20:52 GMT
       nuclia-learning-id:
-      - ced81ce433f24b87a6d358836cfa3098
+      - 7bb38203de4248cb995efb02e5a9f130
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '3342'
+      - '1548'
       x-nuclia-trace-id:
-      - fbbf6310d6545cd51dadd9ea76054a09
+      - 6da0ecea72d2cfb428ab4c5a12e02116
     status:
       code: 200
       message: OK
@@ -886,25 +887,25 @@ interactions:
       \"block-CD\"]).\n11. **IMPORTANT** If any extra instructions are provided, you
       MUST follow them carefully when generating the answer field. These instructions
       may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWho
-      is Snoopy?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk: c018e8b1799241688bdb2c4df568d736\nResult
+      is Snoopy?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk: 5f932e5cd9ff4ee0af8387d867bf987c\nResult
       of running: static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c\n``` Snoopy
       is Carmen''s dog. He is small and very cute but a bit moody. He was a rescue
       dog. Carmen works at Progress Software, a company that provides software for
       developing and managing applications. ```\n\n\n---\"\n\n\n**block-AB**\n\n##
-      Chunk: 3fc2637023da4847a434843f485ee6a3\nResult of running: static_context of
+      Chunk: ed240ebf10124e05ac7bb852151ec22d\nResult of running: static_context of
       269192da-f5b6-4196-8c9a-bd77e32f237c\n``` Snoopy is Carmen''s dog. He is small
       and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
       Software, a company that provides software for developing and managing applications.
-      ```\n\n\n---\"\n\n\n**block-AC**\n\n## Chunk: 3b20affefcae43d68931284a10cce483\nResult
+      ```\n\n\n---\"\n\n\n**block-AC**\n\n## Chunk: 998d282a80124560b96b77dd57aec74a\nResult
       of running: static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c\n``` Snoopy
       is Carmen''s dog. He is small and very cute but a bit moody. He was a rescue
       dog. Carmen works at Progress Software, a company that provides software for
       developing and managing applications. ```\n\n\n---\"\n\n\n**block-AD**\n\n##
-      Chunk: bd3c5d2db2c1479887f03918c0c5a475\nResult of running: static_context of
+      Chunk: 6b512c429a3949f895eb15f3e6f8c932\nResult of running: static_context of
       269192da-f5b6-4196-8c9a-bd77e32f237c\n``` Snoopy is Carmen''s dog. He is small
       and very cute but a bit moody. He was a rescue dog. Carmen works at Progress
       Software, a company that provides software for developing and managing applications.
-      ```\n\n\n---\"\n\n\n**block-AE**\n\n## Chunk: 8a6462826b5f40a0b8b58ac128f9f532\nResult
+      ```\n\n\n---\"\n\n\n**block-AE**\n\n## Chunk: f611e26693dc49e2b54ac9f9d5d6b575\nResult
       of running: static_context of 269192da-f5b6-4196-8c9a-bd77e32f237c\n``` Snoopy
       is Carmen''s dog. He is small and very cute but a bit moody. He was a rescue
       dog. Carmen works at Progress Software, a company that provides software for
@@ -944,21 +945,22 @@ interactions:
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
-        clear information about Snoopy, including his relationship to Carmen, his
-        characteristics, and his background as a rescue dog. This directly answers
-        the question about who Snoopy is.","answer":"Snoopy is Carmen''s dog. Snoopy
-        is small and very cute. Snoopy is a bit moody. Snoopy was a rescue dog.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
+        clear information about Snoopy, identifying him as Carmen''s dog and describing
+        his characteristics. It also mentions that he was a rescue dog. Therefore,
+        the context is sufficient to answer the question about who Snoopy is.","answer":"Snoopy
+        is Carmen''s dog. Snoopy is small and very cute but a bit moody. Snoopy was
+        a rescue dog.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":38,"output_tokens":11,"timings":{"generative":1.6094577769981697},"input_nuclia_tokens":0.038,"output_nuclia_tokens":0.011}}
+        {"chunk":{"type":"meta","input_tokens":38,"output_tokens":12,"timings":{"generative":1.5330490399937844},"input_nuclia_tokens":0.038,"output_nuclia_tokens":0.012}}
 
-        {"chunk":{"normalized_tokens":{"input":0.03765,"output":0.0108,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.03759,"output":0.01152,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -966,17 +968,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 17:16:48 GMT
+      - Tue, 02 Jun 2026 17:20:54 GMT
       nuclia-learning-id:
-      - 55a3aff3262b49d28bbb6c630156adf2
+      - 3c319c3ff029476da53ba686f2405978
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1615'
+      - '1538'
       x-nuclia-trace-id:
-      - fbbf6310d6545cd51dadd9ea76054a09
+      - 9f47f7fde91c4df5b4b97bcdc0ee3645
     status:
       code: 200
       message: OK
@@ -991,7 +993,7 @@ interactions:
       style, or domain-specific behavior.","chat_history":[],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"\n##
       Question\nWho is Snoopy?\n\n## Provided Context\n[START OF CONTEXT]\n## Smart
       Agent Results\n\n# Who is Snoopy?\n\n Snoopy is Carmen''s dog. Snoopy is small
-      and very cute. Snoopy is a bit moody. Snoopy was a rescue dog.\n[END OF CONTEXT]\n\n##
+      and very cute but a bit moody. Snoopy was a rescue dog.\n[END OF CONTEXT]\n\n##
       Answering Guidelines\n- Carefully read all context; it may be lengthy or detailed\n-
       Do not omit or overlook any relevant information\n- If the context is incomplete
       or insufficient, state: \"Not enough data to answer this.\"\n- Read carefully
@@ -1005,7 +1007,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1622'
+      - '1615'
       Content-Type:
       - application/json
       Host:
@@ -1017,7 +1019,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 49de46afe6974cbc86509aad2e42b455
+      - 29789dbec057444790b5d27911061612
       x-origin:
       - RAO
       x-session:
@@ -1047,6 +1049,10 @@ interactions:
         {"chunk":{"type":"text","text":" He"}}
 
         {"chunk":{"type":"text","text":" is"}}
+
+        {"chunk":{"type":"text","text":" described"}}
+
+        {"chunk":{"type":"text","text":" as"}}
 
         {"chunk":{"type":"text","text":" small"}}
 
@@ -1090,14 +1096,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":4,"timings":{"generative_first_chunk":0.4245293380008661,"generative":0.784013328000583},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.004}}
+        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":4,"timings":{"generative_first_chunk":0.45839062600862235,"generative":0.7877004120091442},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.004}}
 
-        {"chunk":{"normalized_tokens":{"input":0.00747,"output":0.00372,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.00738,"output":0.00396,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -1105,17 +1111,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 17:16:50 GMT
+      - Tue, 02 Jun 2026 17:20:55 GMT
       nuclia-learning-id:
-      - d6f1ee597dfa4e799894fac3eaac7431
+      - 7af92e5d4d0d413a93ec88cbf0151ada
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '431'
+      - '465'
       x-nuclia-trace-id:
-      - 86f00f087da3f9e8aabb1c4311a1ef44
+      - 1bae7ac832e287a7f940833fe50d1f31
     status:
       code: 200
       message: OK
