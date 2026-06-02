@@ -33,5 +33,3 @@ jobs:
         uses: ./.github/workflows/hyperforge_agent_package_workflow.yaml
         with:
             package: agents/external
-        secrets:
-            PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}

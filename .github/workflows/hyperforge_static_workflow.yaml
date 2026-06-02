@@ -32,5 +32,3 @@ jobs:
         uses: ./.github/workflows/hyperforge_agent_package_workflow.yaml
         with:
             package: agents/static
-        secrets:
-            PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
