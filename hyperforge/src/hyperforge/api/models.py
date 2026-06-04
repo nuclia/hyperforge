@@ -5,7 +5,7 @@ from nucliadb_models import TextFormat
 from pydantic import BaseModel, Field
 
 from hyperforge.driver import DriverConfig
-from hyperforge.models import Rules
+from hyperforge.models import HistoryQuestionAnswer, Rules
 
 
 class StashRoles(str, Enum):
@@ -125,5 +125,9 @@ class InteractionRequest(BaseModel):
     question: str
     headers: Dict[str, str] = {}
     arguments: Dict[str, str] = {}
+    chat_history: Optional[List[HistoryQuestionAnswer]] = Field(
+        default=None,
+        description="Client-managed chat history. When set (even to an empty list), overrides any server-side session history for agents that use previous Q&A context (rephrase, summarize, smart, etc.). Omit the field entirely to use server-side session history.",
+    )
     operation: InteractionOperation = InteractionOperation.QUESTION
     streaming: bool = False

@@ -54,6 +54,26 @@ logger = logging.getLogger("arag.memory")
 
 # NucliaDB storage
 QUESTION_ANSWERS_FIELD: str = "qas"
+
+
+def _qa_list_to_context_string(history: List[HistoryQuestionAnswer]) -> Tuple[str, int]:
+    """Format a list of Q&A pairs into the prompt context string used by agents."""
+    result = "".join(
+        f"- Question: {qa.question}\n- Answer: {qa.answer}\n" for qa in history
+    )
+    return result, len(history)
+
+
+def _qa_list_to_chat_messages(history: List[HistoryQuestionAnswer]) -> List[Message]:
+    """Convert a list of Q&A pairs into the alternating User/Nuclia Message list used by LLMs."""
+    return [
+        msg
+        for qa in history
+        for msg in (
+            Message(author=Author.USER, text=qa.question),
+            Message(author=Author.NUCLIA, text=qa.answer),
+        )
+    ]
 CONTEXT_FIELD: str = "context"
 STEPS_FIELD: str = "steps"
 USER_INFO_FIELD: str = "user_info"
@@ -112,34 +132,13 @@ class BaseSessionMemory:
         return KnowledgeboxFindResults(total=0, resources={})
 
     async def get_chat_history(self) -> List[Message]:
-        qas = await self.qa_history()
-        result = []
-        for qa in qas:
-            result.append(
-                Message(
-                    author=Author.USER,
-                    text=qa.question,
-                )
-            )
-            result.append(
-                Message(
-                    author=Author.NUCLIA,
-                    text=qa.answer,
-                )
-            )
-        return result
+        return _qa_list_to_chat_messages(await self.qa_history())
 
     async def qa_history(self) -> list[HistoryQuestionAnswer]:
         return []
 
     async def context_history(self) -> Tuple[str, int]:
-        result = ""
-        interactions = 0
-        for qa in await self.qa_history():
-            result += f"- Question: {qa.question}\n"
-            result += f"- Answer: {qa.answer}\n"
-            interactions += 1
-        return result, interactions
+        return _qa_list_to_context_string(await self.qa_history())
 
     def start_question(
         self,
@@ -149,6 +148,7 @@ class BaseSessionMemory:
         headers: Dict[str, str] = {},
         arguments: Dict[str, str] = {},
         streaming: bool = False,
+        chat_history: Optional[List[HistoryQuestionAnswer]] = None,
     ) -> "QuestionMemory":
         return QuestionMemory(
             self,
@@ -158,6 +158,7 @@ class BaseSessionMemory:
             headers=headers,
             arguments=arguments,
             streaming=streaming,
+            chat_history=chat_history,
         )
 
     async def save(self, question: "QuestionMemory") -> None:
@@ -183,6 +184,7 @@ class NoMemorySessionMemory(BaseSessionMemory):
         headers: Dict[str, str] = {},
         arguments: Dict[str, str] = {},
         streaming: bool = False,
+        chat_history: Optional[List[HistoryQuestionAnswer]] = None,
     ) -> "QuestionMemory":
         return QuestionMemory(
             self,
@@ -192,6 +194,7 @@ class NoMemorySessionMemory(BaseSessionMemory):
             headers=headers,
             arguments=arguments,
             streaming=streaming,
+            chat_history=chat_history,
         )
 
     async def save(self, question: "QuestionMemory") -> None:
@@ -250,6 +253,7 @@ class EphemeralSessionMemory(BaseSessionMemory):
         headers: Dict[str, str] = {},
         arguments: Dict[str, str] = {},
         streaming: bool = False,
+        chat_history: Optional[List[HistoryQuestionAnswer]] = None,
     ) -> "QuestionMemory":
         return QuestionMemory(
             self,
@@ -259,6 +263,7 @@ class EphemeralSessionMemory(BaseSessionMemory):
             headers=headers,
             arguments=arguments,
             streaming=streaming,
+            chat_history=chat_history,
         )
 
     async def save(self, question: "QuestionMemory") -> None:
@@ -580,9 +585,20 @@ class QuestionMemory:
         headers: Dict[str, str] | None = None,
         arguments: Dict[str, str] | None = None,
         streaming: bool = False,
+        chat_history: Optional[List[HistoryQuestionAnswer]] = None,
     ):
         self.session = session
         self.started_at = datetime.now(timezone.utc)
+
+        # Client-managed chat history. When set (even to an empty list), overrides
+        # server-side session history for agents that use previous Q&A context
+        # (rephrase, summarize, smart, etc.). None means "not set — use server-side
+        # history". [] means "override with no history". Intended for ephemeral
+        # sessions where the client is responsible for maintaining conversation state.
+        # Note: search_in_questions() performs semantic search over NucliaDB-stored
+        # conversation history and is NOT affected by this field. The HistoricalAgent
+        # uses that method and therefore does not benefit from client-managed history.
+        self._client_chat_history: Optional[List[HistoryQuestionAnswer]] = chat_history
 
         # Start of a new question by the user
         self.original_question = question
@@ -649,11 +665,19 @@ class QuestionMemory:
         return await self.session.get_source(source_id)
 
     async def context_history(self) -> Tuple[str, int]:
-        """Returns a string with the context history of the conversation. This can include information such as previous questions and answers, relevant information that has been previously discussed in the conversation, or any other relevant information that can help the agent to generate a more accurate and personalized response."""
+        """Returns a string with the context history of the conversation. This can include information such as previous questions and answers, relevant information that has been previously discussed in the conversation, or any other relevant information that can help the agent to generate a more accurate and personalized response.
+
+        When the client sets chat_history in the request (even to an empty list), it overrides any server-side session history. None means "not set — use server-side history"."""
+        if self._client_chat_history is not None:
+            return _qa_list_to_context_string(self._client_chat_history)
         return await self.session.context_history()
 
     async def get_chat_history(self) -> list[Message]:
-        """Returns a list of tuples with the chat history of the conversation. Each tuple contains a question and an answer. This can be used to keep track of the conversation history in a more structured way, and to provide more context to the agent when generating a response."""
+        """Returns a list of tuples with the chat history of the conversation. Each tuple contains a question and an answer. This can be used to keep track of the conversation history in a more structured way, and to provide more context to the agent when generating a response.
+
+        When the client sets chat_history in the request (even to an empty list), it overrides any server-side session history. None means "not set — use server-side history"."""
+        if self._client_chat_history is not None:
+            return _qa_list_to_chat_messages(self._client_chat_history)
         return await self.session.get_chat_history()
 
     def stats(self):
