@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - nuclia.py/4.9.25
       x-nuclia-nuakey:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      - DUMMY
     method: GET
     uri: https://europe-1.nuclia.cloud/api/authorizer/info
   response:
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 16:49:18 GMT
+      - Wed, 03 Jun 2026 07:32:53 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
@@ -36,16 +36,22 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"question":"","retrieval":true,"user_id":"mcp_no_feedback","system":null,"chat_history":[],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"\nChoose
-      proper prompt to solve the task. If none of the prompts is suitable, do not
-      choose any. Make sure to choose only one prompt.\n\n\n<prompt name=\"multiplication_tool_advice\">\nWhen
+    body: '{"question": "", "retrieval": true, "user_id": "mcp_no_feedback", "system":
+      null, "chat_history": [], "context": [], "query_context": {}, "query_context_order":
+      {}, "truncate": true, "user_prompt": {"prompt": "\nChoose proper prompt to solve
+      the task. If none of the prompts is suitable, do not choose any. Make sure to
+      choose only one prompt.\n\n\n<prompt name=\"multiplication_tool_advice\">\nWhen
       you need to multiply two numbers, use the ''multiply'' tool.\nFor example, if
       you want to find out how many apples you have in total\nwhen you have ''a''
       baskets and each basket contains ''b'' apples,\nyou should use the ''multiply''
       tool to calculate a * b. and when generating the answer, explain it using this
-      fruit example.\n</prompt>\n"},"citations":false,"citation_threshold":null,"generative_model":"chatgpt-4.1","max_tokens":2000,"query_context_images":{},"prefer_markdown":null,"json_schema":{"type":"object","title":"PromptSelection","description":"Select
-      the most appropriate prompt for the task","properties":{"prompt_id":{"type":"string","description":"id
-      of the prompt to use"}}},"format_prompt":false,"rerank_context":false,"tools":[],"tool_choice":{"type":"required"},"reasoning":false,"seed":null}'
+      fruit example.\n</prompt>\n"}, "citations": false, "citation_threshold": null,
+      "generative_model": "chatgpt-4.1", "max_tokens": 2000, "query_context_images":
+      {}, "prefer_markdown": null, "json_schema": {"type": "object", "title": "PromptSelection",
+      "description": "Select the most appropriate prompt for the task", "properties":
+      {"prompt_id": {"type": "string", "description": "id of the prompt to use"}}},
+      "format_prompt": false, "rerank_context": false, "tools": [], "tool_choice":
+      {"type": "required"}, "reasoning": false, "seed": null}'
     headers:
       Accept:
       - application/x-ndjson
@@ -61,18 +67,18 @@ interactions:
       - europe-1.nuclia.cloud
       User-Agent:
       - nuclia.py/4.9.25
-      X-STF-NUAKEY:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
       x-client-ident:
       - default
       x-message:
-      - 45e0c23b2e9e43d7a86bc244669202e4
+      - 84d0898fc8ae43fa9947a6f62de033c0
       x-origin:
       - RAO
       x-session:
       - default_default_session
       x-show-consumption:
       - 'true'
+      x-stf-nuakey:
+      - DUMMY
     method: POST
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
@@ -81,14 +87,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":75,"output_tokens":18,"timings":{"generative":0.8288004390051356},"input_nuclia_tokens":0.075,"output_nuclia_tokens":0.018}}
+        {"chunk":{"type":"meta","input_tokens":75,"output_tokens":18,"timings":{"generative":0.8805767399971955},"input_nuclia_tokens":0.075,"output_nuclia_tokens":0.018}}
 
         {"chunk":{"normalized_tokens":{"input":0.0748,"output":0.0176,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -96,45 +102,77 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 16:49:18 GMT
+      - Wed, 03 Jun 2026 07:32:53 GMT
       nuclia-learning-id:
-      - 86fede325102481f80707fbedeb5b66b
+      - b51430adf0794dd180a0c2f2f96c4765
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '835'
+      - '885'
       x-nuclia-trace-id:
-      - 457596e41c6429c18d1548d7501e7cf1
+      - 6bde169ea8e1960007f897b90a6ae3c3
     status:
       code: 200
       message: OK
 - request:
-    body: '{"question":"","retrieval":true,"user_id":"mcp_agent","system":"\"You are
-      an agent that must choose the best tools to perform a task. If more than one
-      tool is needed, return them all.\"\n","chat_history":[{"author":"USER","text":"\n<reminderInstructions>\nYou
-      are an agent - you must keep going until the user''s query is completely resolved,
-      before ending your turn and yielding back to the user. ONLY terminate your turn
-      when you are sure that the problem is solved, or you absolutely cannot continue.\nYou
-      take action when possible- the user is expecting YOU to take action and go to
-      work for them. Don''t ask unnecessary questions about the details if you can
-      simply DO something useful instead.\n</reminderInstructions>\n\n\n\n\n<userRequest>\nHow
-      much is 2 * 5?\n\n</userRequest>\n"},{"author":"NUCLIA","text":"When faced with
-      a multiplication problem, such as having some baskets with some apples each,
-      you should use the ''multiply'' tool to find the total number of apples. Simply
-      multiply the number of baskets by the number of apples to get the answer.Always
-      generate the answer using funny fruit examples!"}],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"Choose
-      the best tool or tools for the task, select task_complete if no more tools are
-      needed according to the user request and previous interactions"},"citations":null,"citation_threshold":null,"generative_model":"chatgpt-4.1","max_tokens":null,"query_context_images":[],"prefer_markdown":null,"json_schema":null,"format_prompt":false,"rerank_context":false,"tools":[{"name":"add","description":"Add
-      two numbers","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"addArguments","type":"object"}},{"name":"subtract","description":"Subtract
-      second number from first number","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"subtractArguments","type":"object"}},{"name":"multiply","description":"Multiply
-      two numbers","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"multiplyArguments","type":"object"}},{"name":"divide","description":"Divide
-      first number by second number","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"divideArguments","type":"object"}},{"name":"power","description":"Raise
-      first number to the power of second number","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"powerArguments","type":"object"}},{"name":"percentage","description":"Calculate
-      percentage of a value (e.g., 15% of 100)","parameters":{"properties":{"value":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Value"},"percent":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Percent"}},"required":["value","percent"],"title":"percentageArguments","type":"object"}},{"name":"percentage_increase","description":"Calculate
-      value with percentage increase (e.g., 100 + 15%)","parameters":{"properties":{"value":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Value"},"percent":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Percent"}},"required":["value","percent"],"title":"percentage_increaseArguments","type":"object"}},{"name":"percentage_decrease","description":"Calculate
-      value with percentage decrease (e.g., 100 - 15%)","parameters":{"properties":{"value":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Value"},"percent":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Percent"}},"required":["value","percent"],"title":"percentage_decreaseArguments","type":"object"}}],"tool_choice":{"type":"required"},"reasoning":false,"seed":null}'
+    body: '{"question": "", "retrieval": true, "user_id": "mcp_agent", "system": "\"You
+      are an agent that must choose the best tools to perform a task. If more than
+      one tool is needed, return them all.\"\n", "chat_history": [{"author": "USER",
+      "text": "\n<reminderInstructions>\nYou are an agent - you must keep going until
+      the user''s query is completely resolved, before ending your turn and yielding
+      back to the user. ONLY terminate your turn when you are sure that the problem
+      is solved, or you absolutely cannot continue.\nYou take action when possible-
+      the user is expecting YOU to take action and go to work for them. Don''t ask
+      unnecessary questions about the details if you can simply DO something useful
+      instead.\n</reminderInstructions>\n\n\n\n\n<userRequest>\nHow much is 2 * 5?\n\n</userRequest>\n"},
+      {"author": "NUCLIA", "text": "When faced with a multiplication problem, such
+      as having some baskets with some apples each, you should use the ''multiply''
+      tool to find the total number of apples. Simply multiply the number of baskets
+      by the number of apples to get the answer.Always generate the answer using funny
+      fruit examples!"}], "context": [], "query_context": {}, "query_context_order":
+      {}, "truncate": true, "user_prompt": {"prompt": "Choose the best tool or tools
+      for the task, select task_complete if no more tools are needed according to
+      the user request and previous interactions"}, "citations": null, "citation_threshold":
+      null, "generative_model": "chatgpt-4.1", "max_tokens": null, "query_context_images":
+      [], "prefer_markdown": null, "json_schema": null, "format_prompt": false, "rerank_context":
+      false, "tools": [{"name": "add", "description": "Add two numbers", "parameters":
+      {"properties": {"a": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title":
+      "A"}, "b": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "B"}},
+      "required": ["a", "b"], "title": "addArguments", "type": "object"}}, {"name":
+      "subtract", "description": "Subtract second number from first number", "parameters":
+      {"properties": {"a": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title":
+      "A"}, "b": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "B"}},
+      "required": ["a", "b"], "title": "subtractArguments", "type": "object"}}, {"name":
+      "multiply", "description": "Multiply two numbers", "parameters": {"properties":
+      {"a": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "A"}, "b":
+      {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "B"}}, "required":
+      ["a", "b"], "title": "multiplyArguments", "type": "object"}}, {"name": "divide",
+      "description": "Divide first number by second number", "parameters": {"properties":
+      {"a": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "A"}, "b":
+      {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "B"}}, "required":
+      ["a", "b"], "title": "divideArguments", "type": "object"}}, {"name": "power",
+      "description": "Raise first number to the power of second number", "parameters":
+      {"properties": {"a": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title":
+      "A"}, "b": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "B"}},
+      "required": ["a", "b"], "title": "powerArguments", "type": "object"}}, {"name":
+      "percentage", "description": "Calculate percentage of a value (e.g., 15% of
+      100)", "parameters": {"properties": {"value": {"anyOf": [{"type": "integer"},
+      {"type": "number"}], "title": "Value"}, "percent": {"anyOf": [{"type": "integer"},
+      {"type": "number"}], "title": "Percent"}}, "required": ["value", "percent"],
+      "title": "percentageArguments", "type": "object"}}, {"name": "percentage_increase",
+      "description": "Calculate value with percentage increase (e.g., 100 + 15%)",
+      "parameters": {"properties": {"value": {"anyOf": [{"type": "integer"}, {"type":
+      "number"}], "title": "Value"}, "percent": {"anyOf": [{"type": "integer"}, {"type":
+      "number"}], "title": "Percent"}}, "required": ["value", "percent"], "title":
+      "percentage_increaseArguments", "type": "object"}}, {"name": "percentage_decrease",
+      "description": "Calculate value with percentage decrease (e.g., 100 - 15%)",
+      "parameters": {"properties": {"value": {"anyOf": [{"type": "integer"}, {"type":
+      "number"}], "title": "Value"}, "percent": {"anyOf": [{"type": "integer"}, {"type":
+      "number"}], "title": "Percent"}}, "required": ["value", "percent"], "title":
+      "percentage_decreaseArguments", "type": "object"}}], "tool_choice": {"type":
+      "required"}, "reasoning": false, "seed": null}'
     headers:
       Accept:
       - application/x-ndjson
@@ -150,18 +188,18 @@ interactions:
       - europe-1.nuclia.cloud
       User-Agent:
       - nuclia.py/4.9.25
-      X-STF-NUAKEY:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
       x-client-ident:
       - default
       x-message:
-      - 45e0c23b2e9e43d7a86bc244669202e4
+      - 84d0898fc8ae43fa9947a6f62de033c0
       x-origin:
       - RAO
       x-session:
       - default_default_session
       x-show-consumption:
       - 'true'
+      x-stf-nuakey:
+      - DUMMY
     method: POST
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
@@ -170,7 +208,7 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":232,"output_tokens":29,"timings":{"generative_first_chunk":0.8037598889932269,"generative":0.8052308289916255},"input_nuclia_tokens":0.232,"output_nuclia_tokens":0.029}}
+        {"chunk":{"type":"meta","input_tokens":232,"output_tokens":29,"timings":{"generative_first_chunk":0.7099894049970317,"generative":0.7114816249959404},"input_nuclia_tokens":0.232,"output_nuclia_tokens":0.029}}
 
         {"chunk":{"normalized_tokens":{"input":0.2324,"output":0.0288,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
@@ -185,47 +223,80 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 16:49:19 GMT
+      - Wed, 03 Jun 2026 07:32:54 GMT
       nuclia-learning-id:
-      - 027bef2c901148c3a1eb033eca500360
+      - 21e590c85b714060bdade4dce2053e38
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '810'
+      - '717'
       x-nuclia-trace-id:
-      - 970159dd90c49f9ad6f8d92ae3c6acb6
+      - ef84460f5202a33d4348aa711531c041
     status:
       code: 200
       message: OK
 - request:
-    body: '{"question":"","retrieval":true,"user_id":"mcp_agent","system":"\"You are
-      an agent that must choose the best tools to perform a task. If more than one
-      tool is needed, return them all.\"\n","chat_history":[{"author":"USER","text":"\n<reminderInstructions>\nYou
-      are an agent - you must keep going until the user''s query is completely resolved,
-      before ending your turn and yielding back to the user. ONLY terminate your turn
-      when you are sure that the problem is solved, or you absolutely cannot continue.\nYou
-      take action when possible- the user is expecting YOU to take action and go to
-      work for them. Don''t ask unnecessary questions about the details if you can
-      simply DO something useful instead.\n</reminderInstructions>\n\n\n\n\n<userRequest>\nHow
-      much is 2 * 5?\n\n</userRequest>\n"},{"author":"NUCLIA","text":"When faced with
-      a multiplication problem, such as having some baskets with some apples each,
-      you should use the ''multiply'' tool to find the total number of apples. Simply
-      multiply the number of baskets by the number of apples to get the answer.Always
-      generate the answer using funny fruit examples!"},{"author":"NUCLIA","text":"Tool
-      multiply executed"},{"author":"NUCLIA","text":"10.0"}],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"Choose
-      the best tool or tools for the task, select task_complete if no more tools are
-      needed according to the user request and previous interactions"},"citations":null,"citation_threshold":null,"generative_model":"chatgpt-4.1","max_tokens":null,"query_context_images":[],"prefer_markdown":null,"json_schema":null,"format_prompt":false,"rerank_context":false,"tools":[{"name":"add","description":"Add
-      two numbers","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"addArguments","type":"object"}},{"name":"subtract","description":"Subtract
-      second number from first number","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"subtractArguments","type":"object"}},{"name":"multiply","description":"Multiply
-      two numbers","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"multiplyArguments","type":"object"}},{"name":"divide","description":"Divide
-      first number by second number","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"divideArguments","type":"object"}},{"name":"power","description":"Raise
-      first number to the power of second number","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"powerArguments","type":"object"}},{"name":"percentage","description":"Calculate
-      percentage of a value (e.g., 15% of 100)","parameters":{"properties":{"value":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Value"},"percent":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Percent"}},"required":["value","percent"],"title":"percentageArguments","type":"object"}},{"name":"percentage_increase","description":"Calculate
-      value with percentage increase (e.g., 100 + 15%)","parameters":{"properties":{"value":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Value"},"percent":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Percent"}},"required":["value","percent"],"title":"percentage_increaseArguments","type":"object"}},{"name":"percentage_decrease","description":"Calculate
-      value with percentage decrease (e.g., 100 - 15%)","parameters":{"properties":{"value":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Value"},"percent":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Percent"}},"required":["value","percent"],"title":"percentage_decreaseArguments","type":"object"}},{"name":"task_complete","description":"Call
-      this tool when the task given by the user is complete","parameters":{"type":"object","properties":{}}}],"tool_choice":{"type":"required"},"reasoning":false,"seed":null}'
+    body: '{"question": "", "retrieval": true, "user_id": "mcp_agent", "system": "\"You
+      are an agent that must choose the best tools to perform a task. If more than
+      one tool is needed, return them all.\"\n", "chat_history": [{"author": "USER",
+      "text": "\n<reminderInstructions>\nYou are an agent - you must keep going until
+      the user''s query is completely resolved, before ending your turn and yielding
+      back to the user. ONLY terminate your turn when you are sure that the problem
+      is solved, or you absolutely cannot continue.\nYou take action when possible-
+      the user is expecting YOU to take action and go to work for them. Don''t ask
+      unnecessary questions about the details if you can simply DO something useful
+      instead.\n</reminderInstructions>\n\n\n\n\n<userRequest>\nHow much is 2 * 5?\n\n</userRequest>\n"},
+      {"author": "NUCLIA", "text": "When faced with a multiplication problem, such
+      as having some baskets with some apples each, you should use the ''multiply''
+      tool to find the total number of apples. Simply multiply the number of baskets
+      by the number of apples to get the answer.Always generate the answer using funny
+      fruit examples!"}, {"author": "NUCLIA", "text": "Tool multiply executed"}, {"author":
+      "NUCLIA", "text": "10.0"}], "context": [], "query_context": {}, "query_context_order":
+      {}, "truncate": true, "user_prompt": {"prompt": "Choose the best tool or tools
+      for the task, select task_complete if no more tools are needed according to
+      the user request and previous interactions"}, "citations": null, "citation_threshold":
+      null, "generative_model": "chatgpt-4.1", "max_tokens": null, "query_context_images":
+      [], "prefer_markdown": null, "json_schema": null, "format_prompt": false, "rerank_context":
+      false, "tools": [{"name": "add", "description": "Add two numbers", "parameters":
+      {"properties": {"a": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title":
+      "A"}, "b": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "B"}},
+      "required": ["a", "b"], "title": "addArguments", "type": "object"}}, {"name":
+      "subtract", "description": "Subtract second number from first number", "parameters":
+      {"properties": {"a": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title":
+      "A"}, "b": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "B"}},
+      "required": ["a", "b"], "title": "subtractArguments", "type": "object"}}, {"name":
+      "multiply", "description": "Multiply two numbers", "parameters": {"properties":
+      {"a": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "A"}, "b":
+      {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "B"}}, "required":
+      ["a", "b"], "title": "multiplyArguments", "type": "object"}}, {"name": "divide",
+      "description": "Divide first number by second number", "parameters": {"properties":
+      {"a": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "A"}, "b":
+      {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "B"}}, "required":
+      ["a", "b"], "title": "divideArguments", "type": "object"}}, {"name": "power",
+      "description": "Raise first number to the power of second number", "parameters":
+      {"properties": {"a": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title":
+      "A"}, "b": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "B"}},
+      "required": ["a", "b"], "title": "powerArguments", "type": "object"}}, {"name":
+      "percentage", "description": "Calculate percentage of a value (e.g., 15% of
+      100)", "parameters": {"properties": {"value": {"anyOf": [{"type": "integer"},
+      {"type": "number"}], "title": "Value"}, "percent": {"anyOf": [{"type": "integer"},
+      {"type": "number"}], "title": "Percent"}}, "required": ["value", "percent"],
+      "title": "percentageArguments", "type": "object"}}, {"name": "percentage_increase",
+      "description": "Calculate value with percentage increase (e.g., 100 + 15%)",
+      "parameters": {"properties": {"value": {"anyOf": [{"type": "integer"}, {"type":
+      "number"}], "title": "Value"}, "percent": {"anyOf": [{"type": "integer"}, {"type":
+      "number"}], "title": "Percent"}}, "required": ["value", "percent"], "title":
+      "percentage_increaseArguments", "type": "object"}}, {"name": "percentage_decrease",
+      "description": "Calculate value with percentage decrease (e.g., 100 - 15%)",
+      "parameters": {"properties": {"value": {"anyOf": [{"type": "integer"}, {"type":
+      "number"}], "title": "Value"}, "percent": {"anyOf": [{"type": "integer"}, {"type":
+      "number"}], "title": "Percent"}}, "required": ["value", "percent"], "title":
+      "percentage_decreaseArguments", "type": "object"}}, {"name": "task_complete",
+      "description": "Call this tool when the task given by the user is complete",
+      "parameters": {"type": "object", "properties": {}}}], "tool_choice": {"type":
+      "required"}, "reasoning": false, "seed": null}'
     headers:
       Accept:
       - application/x-ndjson
@@ -241,18 +312,18 @@ interactions:
       - europe-1.nuclia.cloud
       User-Agent:
       - nuclia.py/4.9.25
-      X-STF-NUAKEY:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
       x-client-ident:
       - default
       x-message:
-      - 45e0c23b2e9e43d7a86bc244669202e4
+      - 84d0898fc8ae43fa9947a6f62de033c0
       x-origin:
       - RAO
       x-session:
       - default_default_session
       x-show-consumption:
       - 'true'
+      x-stf-nuakey:
+      - DUMMY
     method: POST
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
@@ -261,7 +332,7 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":246,"output_tokens":18,"timings":{"generative_first_chunk":1.7784970790089574,"generative":1.7803844780137297},"input_nuclia_tokens":0.246,"output_nuclia_tokens":0.018}}
+        {"chunk":{"type":"meta","input_tokens":246,"output_tokens":18,"timings":{"generative_first_chunk":0.916592926994781,"generative":0.917965076994733},"input_nuclia_tokens":0.246,"output_nuclia_tokens":0.018}}
 
         {"chunk":{"normalized_tokens":{"input":0.2464,"output":0.0176,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
@@ -276,45 +347,47 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 16:49:20 GMT
+      - Wed, 03 Jun 2026 07:32:55 GMT
       nuclia-learning-id:
-      - a323f6f861d1495198641793e1b78bd9
+      - f55164ba5a4c4a31adf373fc4a1c4683
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1786'
+      - '923'
       x-nuclia-trace-id:
-      - f4dda5f9b38bcd34812573688e749339
+      - c0512f013152c4ca0480898bb98854a7
     status:
       code: 200
       message: OK
 - request:
-    body: '{"question":"","retrieval":true,"user_id":"rao_answer_summary-mcp","system":null,"chat_history":[],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"\nBased
-      on the provided context and user question, perform the following tasks:\n\n1.
-      Select only information directly relevant to the question.\n2. Break down compound
-      sentences into simple, single-idea statements. Preserve original phrasing when
-      possible.\n3. For any named entity with descriptive details, separate those
-      details into distinct propositions.\n4. Ensure clarity by replacing pronouns
-      (e.g., \"it\", \"he\", \"she\", \"they\", \"this\", \"that\") with the full
-      names of the entities they reference, and add necessary modifiers to clarify
-      meaning.\n5. The context may be delimited by tags such as <START OF CONTEXT>
-      and <END OF CONTEXT>. Treat everything between these tags as context.\n6. Assess
-      whether the context sufficiently answers the question. If it answers it partially,
-      provide the answer; if it does not answer it fully, specify what information
-      is missing to answer the question.\n7. If the context does not answer the question
-      at all, just return the original question as the missing information.\n8. The
-      `citations` field consists ONLY in a list of block IDs that are relevant to
-      the answer, following these rules:\n  - Use the format: block-AB\n  - Just mention
-      the block IDs, do NOT include any other text.\n  - Just mention the blocks actually
-      relevant and that contain information used in the answer, do NOT include blocks
-      that are not relevant.\n  - No duplicates.\n9. Do NOT hallucinate block IDs.
-      Only use those provided in the context.\n10. Your output must be a JSON object
-      with the following fields:\n    - \"reason\": Explain your reasoning for the
-      answer or validation.\n    - \"answer\": Provide a partial or complete answer
-      to the user query strictly from the information in the context. If there isn''t
-      enough information to even provide a partial answer, leave ''answer'' empty.\n    -
+    body: '{"question": "", "retrieval": true, "user_id": "rao_answer_summary-mcp",
+      "system": null, "chat_history": [], "context": [], "query_context": {}, "query_context_order":
+      {}, "truncate": true, "user_prompt": {"prompt": "\nBased on the provided context
+      and user question, perform the following tasks:\n\n1. Select only information
+      directly relevant to the question.\n2. Break down compound sentences into simple,
+      single-idea statements. Preserve original phrasing when possible.\n3. For any
+      named entity with descriptive details, separate those details into distinct
+      propositions.\n4. Ensure clarity by replacing pronouns (e.g., \"it\", \"he\",
+      \"she\", \"they\", \"this\", \"that\") with the full names of the entities they
+      reference, and add necessary modifiers to clarify meaning.\n5. The context may
+      be delimited by tags such as <START OF CONTEXT> and <END OF CONTEXT>. Treat
+      everything between these tags as context.\n6. Assess whether the context sufficiently
+      answers the question. If it answers it partially, provide the answer; if it
+      does not answer it fully, specify what information is missing to answer the
+      question.\n7. If the context does not answer the question at all, just return
+      the original question as the missing information.\n8. The `citations` field
+      consists ONLY in a list of block IDs that are relevant to the answer, following
+      these rules:\n  - Use the format: block-AB\n  - Just mention the block IDs,
+      do NOT include any other text.\n  - Just mention the blocks actually relevant
+      and that contain information used in the answer, do NOT include blocks that
+      are not relevant.\n  - No duplicates.\n9. Do NOT hallucinate block IDs. Only
+      use those provided in the context.\n10. Your output must be a JSON object with
+      the following fields:\n    - \"reason\": Explain your reasoning for the answer
+      or validation.\n    - \"answer\": Provide a partial or complete answer to the
+      user query strictly from the information in the context. If there isn''t enough
+      information to even provide a partial answer, leave ''answer'' empty.\n    -
       \"missing_info_query\": If the context is insufficient, specify what information
       is missing in a query shape; otherwise, leave it empty. Just return the query
       needed to retrieve the missing information.\n    - \"useful\": Indicate if the
@@ -337,16 +410,23 @@ interactions:
       generate the answer using funny fruit examples!\n\n```\n\n\n<END OF ADDITIONAL
       INSTRUCTIONS>\n<QUESTION>\nHow much is 2 * 5?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n##
       Chunk: Calling multiply\n``` 10.0 ```\n\n\n---\"\n\n\n**block-AB**\n\n{\n  \"result\":
-      10.0\n}\n\n---\"\n\n\n\n\n<END OF CONTEXT>\n\n"},"citations":false,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":2000,"query_context_images":{},"prefer_markdown":null,"json_schema":{"title":"validate_or_answer","description":"Validate
-      or answer","parameters":{"type":"object","properties":{"reason":{"type":"string","description":"Reasoning
-      for the answer or validation"},"answer":{"type":"string","description":"Partial
-      or complete answer to the user query from the information in the context."},"missing_info_query":{"type":"string","description":"Query
-      needed to retrieve the missing information in case the context is not enough
-      to answer the question. If the context does not answer the question at all,
-      just return the original question."},"useful":{"type":"string","description":"Is
-      the context useful to answer the question?","enum":["yes","no"]},"citations":{"type":"array","items":{"type":"string","description":"Block
-      ID cited in the answer, e.g. block-AB"},"description":"List of block IDs cited
-      in the answer, if any"}},"required":["reason","answer","missing_info_query","useful","citations"]}},"format_prompt":false,"rerank_context":false,"tools":[],"tool_choice":{"type":"required"},"reasoning":false,"seed":null}'
+      10.0\n}\n\n---\"\n\n\n\n\n<END OF CONTEXT>\n\n"}, "citations": false, "citation_threshold":
+      null, "generative_model": "chatgpt-azure-4o-mini", "max_tokens": 2000, "query_context_images":
+      {}, "prefer_markdown": null, "json_schema": {"title": "validate_or_answer",
+      "description": "Validate or answer", "parameters": {"type": "object", "properties":
+      {"reason": {"type": "string", "description": "Reasoning for the answer or validation"},
+      "answer": {"type": "string", "description": "Partial or complete answer to the
+      user query from the information in the context."}, "missing_info_query": {"type":
+      "string", "description": "Query needed to retrieve the missing information in
+      case the context is not enough to answer the question. If the context does not
+      answer the question at all, just return the original question."}, "useful":
+      {"type": "string", "description": "Is the context useful to answer the question?",
+      "enum": ["yes", "no"]}, "citations": {"type": "array", "items": {"type": "string",
+      "description": "Block ID cited in the answer, e.g. block-AB"}, "description":
+      "List of block IDs cited in the answer, if any"}}, "required": ["reason", "answer",
+      "missing_info_query", "useful", "citations"]}}, "format_prompt": false, "rerank_context":
+      false, "tools": [], "tool_choice": {"type": "required"}, "reasoning": false,
+      "seed": null}'
     headers:
       Accept:
       - application/x-ndjson
@@ -362,31 +442,28 @@ interactions:
       - europe-1.nuclia.cloud
       User-Agent:
       - nuclia.py/4.9.25
-      X-STF-NUAKEY:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
       x-origin:
       - RAO
       x-show-consumption:
       - 'true'
+      x-stf-nuakey:
+      - DUMMY
     method: POST
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
-        the result of the multiplication of 2 and 5, which is 10.0. However, it does
-        not explicitly state the multiplication process or relate it to the fruit
-        example as instructed. Therefore, I will provide the answer based on the context
-        while incorporating the fruit example as required.","answer":"When you have
-        2 baskets of bananas and each basket contains 5 bananas, you can find the
-        total number of bananas by multiplying the number of baskets by the number
-        of bananas in each basket. So, 2 baskets multiplied by 5 bananas equals 10
-        bananas in total!","missing_info_query":"","useful":"yes","citations":["block-AB"]}}}
+        the result of the multiplication of 2 and 5, which is 10.0. This directly
+        answers the question about the multiplication problem.","answer":"The result
+        of multiplying 2 by 5 is 10.0. Imagine you have 2 baskets of bananas, and
+        each basket contains 5 bananas. When you count all the bananas together, you
+        have a total of 10 bananas!","missing_info_query":"","useful":"yes","citations":["block-AB"]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":29,"output_tokens":17,"timings":{"generative":1.855628956007422},"input_nuclia_tokens":0.029,"output_nuclia_tokens":0.017}}
+        {"chunk":{"type":"meta","input_tokens":29,"output_tokens":13,"timings":{"generative":2.9217233050003415},"input_nuclia_tokens":0.029,"output_nuclia_tokens":0.013}}
 
-        {"chunk":{"normalized_tokens":{"input":0.02901,"output":0.01692,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02901,"output":0.0126,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -399,51 +476,54 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 16:49:22 GMT
+      - Wed, 03 Jun 2026 07:32:56 GMT
       nuclia-learning-id:
-      - e6cb62346ffa438fb74992f36429565e
+      - 37108d4154614af79ddc62e60d38acb4
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1860'
+      - '2926'
       x-nuclia-trace-id:
-      - 76d323f177a25c99307e9de809286cfe
+      - 61e94255b988cb93635440f01a40c8ec
     status:
       code: 200
       message: OK
 - request:
-    body: '{"question":"","retrieval":true,"user_id":"summarize","system":"You are
-      a helpful AI assistant. Your role is to provide accurate, clear, and well-structured
+    body: '{"question": "", "retrieval": true, "user_id": "summarize", "system": "You
+      are a helpful AI assistant. Your role is to provide accurate, clear, and well-structured
       answers based strictly on the information provided to you.\nKey principles:\n-
       Answer only using the information in the provided context\n- Do not use external
       knowledge, assumptions, or prior experience\n- Maintain a professional and informative
       tone\n- Be concise yet thorough\n- If information is insufficient, acknowledge
       this clearly\n\nAlways follow any additional instructions provided about format,
-      style, or domain-specific behavior.","chat_history":[],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"\n##
+      style, or domain-specific behavior.", "chat_history": [], "context": [], "query_context":
+      {}, "query_context_order": {}, "truncate": true, "user_prompt": {"prompt": "\n##
       Question\nHow much is 2 * 5?\n\n## Provided Context\n[START OF CONTEXT]\n# How
-      much is 2 * 5?\n\n When you have 2 baskets of bananas and each basket contains
-      5 bananas, you can find the total number of bananas by multiplying the number
-      of baskets by the number of bananas in each basket. So, 2 baskets multiplied
-      by 5 bananas equals 10 bananas in total!\n[END OF CONTEXT]\n\n## Answering Guidelines\n-
-      Carefully read all context; it may be lengthy or detailed\n- Do not omit or
-      overlook any relevant information\n- If the context is incomplete or insufficient,
-      state: \"Not enough data to answer this.\"\n- Read carefully any extra instructions
-      below if provided and use them to answer\n\n## Extra Prompts to consider for
-      generating the answer\nThis information was used to generate the context.\nUse
-      it to help generate a better answer and follow any specific instructions it
-      may contain about the format or style of the answer.\n- ## Prompt\nDescription:
-      \nWhen you need to multiply two numbers, use the ''multiply'' tool.\nFor example,
-      if you want to find out how many apples you have in total\nwhen you have ''a''
-      baskets and each basket contains ''b'' apples,\nyou should use the ''multiply''
-      tool to calculate a * b. and when generating the answer, explain it using this
-      fruit example.\n\n```PROMPT\nWhen faced with a multiplication problem, such
-      as having some baskets with some apples each, you should use the ''multiply''
-      tool to find the total number of apples. Simply multiply the number of baskets
-      by the number of apples to get the answer.Always generate the answer using funny
-      fruit examples!\n\n```\n\nNow provide your answer to the question: How much
-      is 2 * 5?"},"citations":null,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":5000,"query_context_images":{},"prefer_markdown":null,"json_schema":null,"format_prompt":false,"rerank_context":false,"tools":[],"tool_choice":{"type":"auto"},"reasoning":false,"seed":null}'
+      much is 2 * 5?\n\n The result of multiplying 2 by 5 is 10.0. Imagine you have
+      2 baskets of bananas, and each basket contains 5 bananas. When you count all
+      the bananas together, you have a total of 10 bananas!\n[END OF CONTEXT]\n\n##
+      Answering Guidelines\n- Carefully read all context; it may be lengthy or detailed\n-
+      Do not omit or overlook any relevant information\n- If the context is incomplete
+      or insufficient, state: \"Not enough data to answer this.\"\n- Read carefully
+      any extra instructions below if provided and use them to answer\n\n## Extra
+      Prompts to consider for generating the answer\nThis information was used to
+      generate the context.\nUse it to help generate a better answer and follow any
+      specific instructions it may contain about the format or style of the answer.\n-
+      ## Prompt\nDescription: \nWhen you need to multiply two numbers, use the ''multiply''
+      tool.\nFor example, if you want to find out how many apples you have in total\nwhen
+      you have ''a'' baskets and each basket contains ''b'' apples,\nyou should use
+      the ''multiply'' tool to calculate a * b. and when generating the answer, explain
+      it using this fruit example.\n\n```PROMPT\nWhen faced with a multiplication
+      problem, such as having some baskets with some apples each, you should use the
+      ''multiply'' tool to find the total number of apples. Simply multiply the number
+      of baskets by the number of apples to get the answer.Always generate the answer
+      using funny fruit examples!\n\n```\n\nNow provide your answer to the question:
+      How much is 2 * 5?"}, "citations": null, "citation_threshold": null, "generative_model":
+      "chatgpt-azure-4o-mini", "max_tokens": 5000, "query_context_images": {}, "prefer_markdown":
+      null, "json_schema": null, "format_prompt": false, "rerank_context": false,
+      "tools": [], "tool_choice": {"type": "auto"}, "reasoning": false, "seed": null}'
     headers:
       Accept:
       - application/x-ndjson
@@ -452,30 +532,62 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2679'
+      - '2613'
       Content-Type:
       - application/json
       Host:
       - europe-1.nuclia.cloud
       User-Agent:
       - nuclia.py/4.9.25
-      X-STF-NUAKEY:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
       x-client-ident:
       - default
       x-message:
-      - 45e0c23b2e9e43d7a86bc244669202e4
+      - 84d0898fc8ae43fa9947a6f62de033c0
       x-origin:
       - RAO
       x-session:
       - default_default_session
       x-show-consumption:
       - 'true'
+      x-stf-nuakey:
+      - DUMMY
     method: POST
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"text","text":"When"}}
+      string: '{"chunk":{"type":"text","text":"The"}}
+
+        {"chunk":{"type":"text","text":" result"}}
+
+        {"chunk":{"type":"text","text":" of"}}
+
+        {"chunk":{"type":"text","text":" multiplying"}}
+
+        {"chunk":{"type":"text","text":" "}}
+
+        {"chunk":{"type":"text","text":"2"}}
+
+        {"chunk":{"type":"text","text":" by"}}
+
+        {"chunk":{"type":"text","text":" "}}
+
+        {"chunk":{"type":"text","text":"5"}}
+
+        {"chunk":{"type":"text","text":" is"}}
+
+        {"chunk":{"type":"text","text":" "}}
+
+        {"chunk":{"type":"text","text":"10"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":"0"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" \n\n"}}
+
+        {"chunk":{"type":"text","text":"Imagine"}}
 
         {"chunk":{"type":"text","text":" you"}}
 
@@ -491,6 +603,8 @@ interactions:
 
         {"chunk":{"type":"text","text":" bananas"}}
 
+        {"chunk":{"type":"text","text":","}}
+
         {"chunk":{"type":"text","text":" and"}}
 
         {"chunk":{"type":"text","text":" each"}}
@@ -505,25 +619,45 @@ interactions:
 
         {"chunk":{"type":"text","text":" bananas"}}
 
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" When"}}
+
+        {"chunk":{"type":"text","text":" you"}}
+
+        {"chunk":{"type":"text","text":" count"}}
+
+        {"chunk":{"type":"text","text":" all"}}
+
+        {"chunk":{"type":"text","text":" the"}}
+
+        {"chunk":{"type":"text","text":" bananas"}}
+
+        {"chunk":{"type":"text","text":" together"}}
+
         {"chunk":{"type":"text","text":","}}
 
         {"chunk":{"type":"text","text":" you"}}
 
-        {"chunk":{"type":"text","text":" can"}}
+        {"chunk":{"type":"text","text":" have"}}
 
-        {"chunk":{"type":"text","text":" find"}}
-
-        {"chunk":{"type":"text","text":" the"}}
+        {"chunk":{"type":"text","text":" a"}}
 
         {"chunk":{"type":"text","text":" total"}}
 
-        {"chunk":{"type":"text","text":" number"}}
-
         {"chunk":{"type":"text","text":" of"}}
+
+        {"chunk":{"type":"text","text":" "}}
+
+        {"chunk":{"type":"text","text":"10"}}
 
         {"chunk":{"type":"text","text":" bananas"}}
 
-        {"chunk":{"type":"text","text":" by"}}
+        {"chunk":{"type":"text","text":"!"}}
+
+        {"chunk":{"type":"text","text":" So"}}
+
+        {"chunk":{"type":"text","text":","}}
 
         {"chunk":{"type":"text","text":" using"}}
 
@@ -536,10 +670,6 @@ interactions:
         {"chunk":{"type":"text","text":"''"}}
 
         {"chunk":{"type":"text","text":" tool"}}
-
-        {"chunk":{"type":"text","text":"."}}
-
-        {"chunk":{"type":"text","text":" So"}}
 
         {"chunk":{"type":"text","text":","}}
 
@@ -559,7 +689,13 @@ interactions:
 
         {"chunk":{"type":"text","text":" bananas"}}
 
-        {"chunk":{"type":"text","text":" equals"}}
+        {"chunk":{"type":"text","text":" per"}}
+
+        {"chunk":{"type":"text","text":" basket"}}
+
+        {"chunk":{"type":"text","text":" gives"}}
+
+        {"chunk":{"type":"text","text":" you"}}
 
         {"chunk":{"type":"text","text":" "}}
 
@@ -571,77 +707,13 @@ interactions:
 
         {"chunk":{"type":"text","text":" total"}}
 
-        {"chunk":{"type":"text","text":"!"}}
-
-        {"chunk":{"type":"text","text":" \n\n"}}
-
-        {"chunk":{"type":"text","text":"In"}}
-
-        {"chunk":{"type":"text","text":" this"}}
-
-        {"chunk":{"type":"text","text":" fruity"}}
-
-        {"chunk":{"type":"text","text":" example"}}
-
-        {"chunk":{"type":"text","text":","}}
-
-        {"chunk":{"type":"text","text":" if"}}
-
-        {"chunk":{"type":"text","text":" you"}}
-
-        {"chunk":{"type":"text","text":" were"}}
-
-        {"chunk":{"type":"text","text":" to"}}
-
-        {"chunk":{"type":"text","text":" imagine"}}
-
-        {"chunk":{"type":"text","text":" each"}}
-
-        {"chunk":{"type":"text","text":" banana"}}
-
-        {"chunk":{"type":"text","text":" wearing"}}
-
-        {"chunk":{"type":"text","text":" a"}}
-
-        {"chunk":{"type":"text","text":" tiny"}}
-
-        {"chunk":{"type":"text","text":" party"}}
-
-        {"chunk":{"type":"text","text":" hat"}}
-
-        {"chunk":{"type":"text","text":","}}
-
-        {"chunk":{"type":"text","text":" you''d"}}
-
-        {"chunk":{"type":"text","text":" have"}}
-
-        {"chunk":{"type":"text","text":" a"}}
-
-        {"chunk":{"type":"text","text":" delightful"}}
-
-        {"chunk":{"type":"text","text":" party"}}
-
-        {"chunk":{"type":"text","text":" of"}}
-
-        {"chunk":{"type":"text","text":" "}}
-
-        {"chunk":{"type":"text","text":"10"}}
-
-        {"chunk":{"type":"text","text":" bananas"}}
-
-        {"chunk":{"type":"text","text":" ready"}}
-
-        {"chunk":{"type":"text","text":" to"}}
-
-        {"chunk":{"type":"text","text":" celebrate"}}
-
-        {"chunk":{"type":"text","text":"!"}}
+        {"chunk":{"type":"text","text":"."}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":14,"output_tokens":10,"timings":{"generative_first_chunk":0.47460524199414067,"generative":1.3920412890001899},"input_nuclia_tokens":0.014,"output_nuclia_tokens":0.01}}
+        {"chunk":{"type":"meta","input_tokens":14,"output_tokens":9,"timings":{"generative_first_chunk":0.360358518002613,"generative":1.2979075430048397},"input_nuclia_tokens":0.014,"output_nuclia_tokens":0.009}}
 
-        {"chunk":{"normalized_tokens":{"input":0.01419,"output":0.00984,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.01398,"output":0.00936,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -654,17 +726,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 16:49:24 GMT
+      - Wed, 03 Jun 2026 07:32:59 GMT
       nuclia-learning-id:
-      - 81bd4ea7c1d94d719937086f2b2772c4
+      - cbd353be78c34c67b82ed45e4448501b
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '482'
+      - '366'
       x-nuclia-trace-id:
-      - e9f73f19945a196d8c5e9afc9b236126
+      - 071d33b9da723b7d0a6754a0393b2d56
     status:
       code: 200
       message: OK

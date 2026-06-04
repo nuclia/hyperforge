@@ -40,3 +40,8 @@ Repository = "https://github.com/nuclia/forge"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+
+[tool.uv.build-backend]
+
+# Exclude specific files from being packaged
+source-exclude = ["tests/**", "*.pyc"]

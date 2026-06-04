@@ -13,7 +13,7 @@ interactions:
       User-Agent:
       - nuclia.py/4.9.25
       x-nuclia-nuakey:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
+      - DUMMY
     method: GET
     uri: https://europe-1.nuclia.cloud/api/authorizer/info
   response:
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 16:49:12 GMT
+      - Wed, 03 Jun 2026 07:32:47 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
@@ -36,11 +36,17 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"question":"","retrieval":true,"user_id":"mcp_no_feedback","system":null,"chat_history":[],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"\nChoose
-      proper prompt to solve the task. If none of the prompts is suitable, do not
-      choose any. Make sure to choose only one prompt.\n\n"},"citations":false,"citation_threshold":null,"generative_model":"chatgpt-4.1","max_tokens":2000,"query_context_images":{},"prefer_markdown":null,"json_schema":{"type":"object","title":"PromptSelection","description":"Select
-      the most appropriate prompt for the task","properties":{"prompt_id":{"type":"string","description":"id
-      of the prompt to use"}}},"format_prompt":false,"rerank_context":false,"tools":[],"tool_choice":{"type":"required"},"reasoning":false,"seed":null}'
+    body: '{"question": "", "retrieval": true, "user_id": "mcp_no_feedback", "system":
+      null, "chat_history": [], "context": [], "query_context": {}, "query_context_order":
+      {}, "truncate": true, "user_prompt": {"prompt": "\nChoose proper prompt to solve
+      the task. If none of the prompts is suitable, do not choose any. Make sure to
+      choose only one prompt.\n\n"}, "citations": false, "citation_threshold": null,
+      "generative_model": "chatgpt-4.1", "max_tokens": 2000, "query_context_images":
+      {}, "prefer_markdown": null, "json_schema": {"type": "object", "title": "PromptSelection",
+      "description": "Select the most appropriate prompt for the task", "properties":
+      {"prompt_id": {"type": "string", "description": "id of the prompt to use"}}},
+      "format_prompt": false, "rerank_context": false, "tools": [], "tool_choice":
+      {"type": "required"}, "reasoning": false, "seed": null}'
     headers:
       Accept:
       - application/x-ndjson
@@ -56,34 +62,34 @@ interactions:
       - europe-1.nuclia.cloud
       User-Agent:
       - nuclia.py/4.9.25
-      X-STF-NUAKEY:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
       x-client-ident:
       - default
       x-message:
-      - 0e61cdd729fc469badae20c8fa2fb106
+      - 6455d327b03d463ab73059e75f09d46e
       x-origin:
       - RAO
       x-session:
       - default_default_session
       x-show-consumption:
       - 'true'
+      x-stf-nuakey:
+      - DUMMY
     method: POST
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"object","object":{"prompt_id":""}}}
+      string: '{"chunk":{"type":"object","object":{"prompt_id":"none"}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":40,"output_tokens":11,"timings":{"generative":0.7562431909900624},"input_nuclia_tokens":0.04,"output_nuclia_tokens":0.011}}
+        {"chunk":{"type":"meta","input_tokens":40,"output_tokens":11,"timings":{"generative":1.0405454360006843},"input_nuclia_tokens":0.04,"output_nuclia_tokens":0.011}}
 
         {"chunk":{"normalized_tokens":{"input":0.0396,"output":0.0112,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -91,40 +97,68 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 16:49:13 GMT
+      - Wed, 03 Jun 2026 07:32:47 GMT
       nuclia-learning-id:
-      - 9a3bac65bc1140bcb19c3f0fdc4bcf51
+      - 2bcaf3e6f48046ea99228cf7f35a870e
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '761'
+      - '1045'
       x-nuclia-trace-id:
-      - a2ddc6c5ab174a4743cf267af3ead44c
+      - c6bfdbd55c2c308cf2c4510eaa79ccac
     status:
       code: 200
       message: OK
 - request:
-    body: '{"question":"","retrieval":true,"user_id":"mcp_agent","system":"\"You are
-      an agent that must choose the best tools to perform a task. If more than one
-      tool is needed, return them all.\"\n","chat_history":[{"author":"USER","text":"\n<reminderInstructions>\nYou
-      are an agent - you must keep going until the user''s query is completely resolved,
-      before ending your turn and yielding back to the user. ONLY terminate your turn
-      when you are sure that the problem is solved, or you absolutely cannot continue.\nYou
-      take action when possible- the user is expecting YOU to take action and go to
-      work for them. Don''t ask unnecessary questions about the details if you can
-      simply DO something useful instead.\n</reminderInstructions>\n\n\n\n\n<userRequest>\nHow
-      much is 2 + 2?\n\n</userRequest>\n"}],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"Choose
-      the best tool or tools for the task, select task_complete if no more tools are
-      needed according to the user request and previous interactions"},"citations":null,"citation_threshold":null,"generative_model":"chatgpt-4.1","max_tokens":null,"query_context_images":[],"prefer_markdown":null,"json_schema":null,"format_prompt":false,"rerank_context":false,"tools":[{"name":"add","description":"Add
-      two numbers","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"addArguments","type":"object"}},{"name":"subtract","description":"Subtract
-      second number from first number","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"subtractArguments","type":"object"}},{"name":"multiply","description":"Multiply
-      two numbers","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"multiplyArguments","type":"object"}},{"name":"divide","description":"Divide
-      first number by second number","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"divideArguments","type":"object"}},{"name":"power","description":"Raise
-      first number to the power of second number","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"powerArguments","type":"object"}},{"name":"percentage","description":"Calculate
-      percentage of a value (e.g., 15% of 100)","parameters":{"properties":{"value":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Value"},"percent":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Percent"}},"required":["value","percent"],"title":"percentageArguments","type":"object"}},{"name":"percentage_increase","description":"Calculate
-      value with percentage increase (e.g., 100 + 15%)","parameters":{"properties":{"value":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Value"},"percent":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Percent"}},"required":["value","percent"],"title":"percentage_increaseArguments","type":"object"}}],"tool_choice":{"type":"required"},"reasoning":false,"seed":null}'
+    body: '{"question": "", "retrieval": true, "user_id": "mcp_agent", "system": "\"You
+      are an agent that must choose the best tools to perform a task. If more than
+      one tool is needed, return them all.\"\n", "chat_history": [{"author": "USER",
+      "text": "\n<reminderInstructions>\nYou are an agent - you must keep going until
+      the user''s query is completely resolved, before ending your turn and yielding
+      back to the user. ONLY terminate your turn when you are sure that the problem
+      is solved, or you absolutely cannot continue.\nYou take action when possible-
+      the user is expecting YOU to take action and go to work for them. Don''t ask
+      unnecessary questions about the details if you can simply DO something useful
+      instead.\n</reminderInstructions>\n\n\n\n\n<userRequest>\nHow much is 2 + 2?\n\n</userRequest>\n"}],
+      "context": [], "query_context": {}, "query_context_order": {}, "truncate": true,
+      "user_prompt": {"prompt": "Choose the best tool or tools for the task, select
+      task_complete if no more tools are needed according to the user request and
+      previous interactions"}, "citations": null, "citation_threshold": null, "generative_model":
+      "chatgpt-4.1", "max_tokens": null, "query_context_images": [], "prefer_markdown":
+      null, "json_schema": null, "format_prompt": false, "rerank_context": false,
+      "tools": [{"name": "add", "description": "Add two numbers", "parameters": {"properties":
+      {"a": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "A"}, "b":
+      {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "B"}}, "required":
+      ["a", "b"], "title": "addArguments", "type": "object"}}, {"name": "subtract",
+      "description": "Subtract second number from first number", "parameters": {"properties":
+      {"a": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "A"}, "b":
+      {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "B"}}, "required":
+      ["a", "b"], "title": "subtractArguments", "type": "object"}}, {"name": "multiply",
+      "description": "Multiply two numbers", "parameters": {"properties": {"a": {"anyOf":
+      [{"type": "integer"}, {"type": "number"}], "title": "A"}, "b": {"anyOf": [{"type":
+      "integer"}, {"type": "number"}], "title": "B"}}, "required": ["a", "b"], "title":
+      "multiplyArguments", "type": "object"}}, {"name": "divide", "description": "Divide
+      first number by second number", "parameters": {"properties": {"a": {"anyOf":
+      [{"type": "integer"}, {"type": "number"}], "title": "A"}, "b": {"anyOf": [{"type":
+      "integer"}, {"type": "number"}], "title": "B"}}, "required": ["a", "b"], "title":
+      "divideArguments", "type": "object"}}, {"name": "power", "description": "Raise
+      first number to the power of second number", "parameters": {"properties": {"a":
+      {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "A"}, "b": {"anyOf":
+      [{"type": "integer"}, {"type": "number"}], "title": "B"}}, "required": ["a",
+      "b"], "title": "powerArguments", "type": "object"}}, {"name": "percentage",
+      "description": "Calculate percentage of a value (e.g., 15% of 100)", "parameters":
+      {"properties": {"value": {"anyOf": [{"type": "integer"}, {"type": "number"}],
+      "title": "Value"}, "percent": {"anyOf": [{"type": "integer"}, {"type": "number"}],
+      "title": "Percent"}}, "required": ["value", "percent"], "title": "percentageArguments",
+      "type": "object"}}, {"name": "percentage_increase", "description": "Calculate
+      value with percentage increase (e.g., 100 + 15%)", "parameters": {"properties":
+      {"value": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "Value"},
+      "percent": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "Percent"}},
+      "required": ["value", "percent"], "title": "percentage_increaseArguments", "type":
+      "object"}}], "tool_choice": {"type": "required"}, "reasoning": false, "seed":
+      null}'
     headers:
       Accept:
       - application/x-ndjson
@@ -140,18 +174,18 @@ interactions:
       - europe-1.nuclia.cloud
       User-Agent:
       - nuclia.py/4.9.25
-      X-STF-NUAKEY:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
       x-client-ident:
       - default
       x-message:
-      - 0e61cdd729fc469badae20c8fa2fb106
+      - 6455d327b03d463ab73059e75f09d46e
       x-origin:
       - RAO
       x-session:
       - default_default_session
       x-show-consumption:
       - 'true'
+      x-stf-nuakey:
+      - DUMMY
     method: POST
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
@@ -160,14 +194,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":188,"output_tokens":29,"timings":{"generative_first_chunk":0.8520825190062169,"generative":0.853499988996191},"input_nuclia_tokens":0.188,"output_nuclia_tokens":0.029}}
+        {"chunk":{"type":"meta","input_tokens":188,"output_tokens":29,"timings":{"generative_first_chunk":1.115787677001208,"generative":1.1171912569989217},"input_nuclia_tokens":0.188,"output_nuclia_tokens":0.029}}
 
         {"chunk":{"normalized_tokens":{"input":0.188,"output":0.0288,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -175,41 +209,71 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 16:49:14 GMT
+      - Wed, 03 Jun 2026 07:32:49 GMT
       nuclia-learning-id:
-      - 2850ad481dc140a6b56ca3b22774a875
+      - 1e865b80d5b744c9b7e6e015350b6c2f
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '858'
+      - '1124'
       x-nuclia-trace-id:
-      - a2ddc6c5ab174a4743cf267af3ead44c
+      - 69b4c150292567713dade97e432d814c
     status:
       code: 200
       message: OK
 - request:
-    body: '{"question":"","retrieval":true,"user_id":"mcp_agent","system":"\"You are
-      an agent that must choose the best tools to perform a task. If more than one
-      tool is needed, return them all.\"\n","chat_history":[{"author":"USER","text":"\n<reminderInstructions>\nYou
-      are an agent - you must keep going until the user''s query is completely resolved,
-      before ending your turn and yielding back to the user. ONLY terminate your turn
-      when you are sure that the problem is solved, or you absolutely cannot continue.\nYou
-      take action when possible- the user is expecting YOU to take action and go to
-      work for them. Don''t ask unnecessary questions about the details if you can
-      simply DO something useful instead.\n</reminderInstructions>\n\n\n\n\n<userRequest>\nHow
-      much is 2 + 2?\n\n</userRequest>\n"},{"author":"NUCLIA","text":"Tool add executed"},{"author":"NUCLIA","text":"4.0"}],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"Choose
-      the best tool or tools for the task, select task_complete if no more tools are
-      needed according to the user request and previous interactions"},"citations":null,"citation_threshold":null,"generative_model":"chatgpt-4.1","max_tokens":null,"query_context_images":[],"prefer_markdown":null,"json_schema":null,"format_prompt":false,"rerank_context":false,"tools":[{"name":"add","description":"Add
-      two numbers","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"addArguments","type":"object"}},{"name":"subtract","description":"Subtract
-      second number from first number","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"subtractArguments","type":"object"}},{"name":"multiply","description":"Multiply
-      two numbers","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"multiplyArguments","type":"object"}},{"name":"divide","description":"Divide
-      first number by second number","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"divideArguments","type":"object"}},{"name":"power","description":"Raise
-      first number to the power of second number","parameters":{"properties":{"a":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"A"},"b":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"B"}},"required":["a","b"],"title":"powerArguments","type":"object"}},{"name":"percentage","description":"Calculate
-      percentage of a value (e.g., 15% of 100)","parameters":{"properties":{"value":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Value"},"percent":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Percent"}},"required":["value","percent"],"title":"percentageArguments","type":"object"}},{"name":"percentage_increase","description":"Calculate
-      value with percentage increase (e.g., 100 + 15%)","parameters":{"properties":{"value":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Value"},"percent":{"anyOf":[{"type":"integer"},{"type":"number"}],"title":"Percent"}},"required":["value","percent"],"title":"percentage_increaseArguments","type":"object"}},{"name":"task_complete","description":"Call
-      this tool when the task given by the user is complete","parameters":{"type":"object","properties":{}}}],"tool_choice":{"type":"required"},"reasoning":false,"seed":null}'
+    body: '{"question": "", "retrieval": true, "user_id": "mcp_agent", "system": "\"You
+      are an agent that must choose the best tools to perform a task. If more than
+      one tool is needed, return them all.\"\n", "chat_history": [{"author": "USER",
+      "text": "\n<reminderInstructions>\nYou are an agent - you must keep going until
+      the user''s query is completely resolved, before ending your turn and yielding
+      back to the user. ONLY terminate your turn when you are sure that the problem
+      is solved, or you absolutely cannot continue.\nYou take action when possible-
+      the user is expecting YOU to take action and go to work for them. Don''t ask
+      unnecessary questions about the details if you can simply DO something useful
+      instead.\n</reminderInstructions>\n\n\n\n\n<userRequest>\nHow much is 2 + 2?\n\n</userRequest>\n"},
+      {"author": "NUCLIA", "text": "Tool add executed"}, {"author": "NUCLIA", "text":
+      "4.0"}], "context": [], "query_context": {}, "query_context_order": {}, "truncate":
+      true, "user_prompt": {"prompt": "Choose the best tool or tools for the task,
+      select task_complete if no more tools are needed according to the user request
+      and previous interactions"}, "citations": null, "citation_threshold": null,
+      "generative_model": "chatgpt-4.1", "max_tokens": null, "query_context_images":
+      [], "prefer_markdown": null, "json_schema": null, "format_prompt": false, "rerank_context":
+      false, "tools": [{"name": "add", "description": "Add two numbers", "parameters":
+      {"properties": {"a": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title":
+      "A"}, "b": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "B"}},
+      "required": ["a", "b"], "title": "addArguments", "type": "object"}}, {"name":
+      "subtract", "description": "Subtract second number from first number", "parameters":
+      {"properties": {"a": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title":
+      "A"}, "b": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "B"}},
+      "required": ["a", "b"], "title": "subtractArguments", "type": "object"}}, {"name":
+      "multiply", "description": "Multiply two numbers", "parameters": {"properties":
+      {"a": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "A"}, "b":
+      {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "B"}}, "required":
+      ["a", "b"], "title": "multiplyArguments", "type": "object"}}, {"name": "divide",
+      "description": "Divide first number by second number", "parameters": {"properties":
+      {"a": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "A"}, "b":
+      {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "B"}}, "required":
+      ["a", "b"], "title": "divideArguments", "type": "object"}}, {"name": "power",
+      "description": "Raise first number to the power of second number", "parameters":
+      {"properties": {"a": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title":
+      "A"}, "b": {"anyOf": [{"type": "integer"}, {"type": "number"}], "title": "B"}},
+      "required": ["a", "b"], "title": "powerArguments", "type": "object"}}, {"name":
+      "percentage", "description": "Calculate percentage of a value (e.g., 15% of
+      100)", "parameters": {"properties": {"value": {"anyOf": [{"type": "integer"},
+      {"type": "number"}], "title": "Value"}, "percent": {"anyOf": [{"type": "integer"},
+      {"type": "number"}], "title": "Percent"}}, "required": ["value", "percent"],
+      "title": "percentageArguments", "type": "object"}}, {"name": "percentage_increase",
+      "description": "Calculate value with percentage increase (e.g., 100 + 15%)",
+      "parameters": {"properties": {"value": {"anyOf": [{"type": "integer"}, {"type":
+      "number"}], "title": "Value"}, "percent": {"anyOf": [{"type": "integer"}, {"type":
+      "number"}], "title": "Percent"}}, "required": ["value", "percent"], "title":
+      "percentage_increaseArguments", "type": "object"}}, {"name": "task_complete",
+      "description": "Call this tool when the task given by the user is complete",
+      "parameters": {"type": "object", "properties": {}}}], "tool_choice": {"type":
+      "required"}, "reasoning": false, "seed": null}'
     headers:
       Accept:
       - application/x-ndjson
@@ -225,18 +289,18 @@ interactions:
       - europe-1.nuclia.cloud
       User-Agent:
       - nuclia.py/4.9.25
-      X-STF-NUAKEY:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
       x-client-ident:
       - default
       x-message:
-      - 0e61cdd729fc469badae20c8fa2fb106
+      - 6455d327b03d463ab73059e75f09d46e
       x-origin:
       - RAO
       x-session:
       - default_default_session
       x-show-consumption:
       - 'true'
+      x-stf-nuakey:
+      - DUMMY
     method: POST
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
@@ -245,14 +309,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":202,"output_tokens":18,"timings":{"generative_first_chunk":0.8447210820013424,"generative":0.8463334819971351},"input_nuclia_tokens":0.202,"output_nuclia_tokens":0.018}}
+        {"chunk":{"type":"meta","input_tokens":202,"output_tokens":18,"timings":{"generative_first_chunk":0.7342535739953746,"generative":0.7356990139960544},"input_nuclia_tokens":0.202,"output_nuclia_tokens":0.018}}
 
         {"chunk":{"normalized_tokens":{"input":0.202,"output":0.0176,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -260,45 +324,47 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 16:49:14 GMT
+      - Wed, 03 Jun 2026 07:32:49 GMT
       nuclia-learning-id:
-      - b4563ed9579d4809afa999c34ef9af31
+      - f562fd0b83fb49b2beeaf7b42769d254
       nuclia-learning-model:
       - chatgpt-4.1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '852'
+      - '741'
       x-nuclia-trace-id:
-      - c0a9ea24553f21b80aeeaa8ddc6b6bea
+      - 5ebdc852803269075f30fdeb61d35ff0
     status:
       code: 200
       message: OK
 - request:
-    body: '{"question":"","retrieval":true,"user_id":"rao_answer_summary-mcp","system":null,"chat_history":[],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"\nBased
-      on the provided context and user question, perform the following tasks:\n\n1.
-      Select only information directly relevant to the question.\n2. Break down compound
-      sentences into simple, single-idea statements. Preserve original phrasing when
-      possible.\n3. For any named entity with descriptive details, separate those
-      details into distinct propositions.\n4. Ensure clarity by replacing pronouns
-      (e.g., \"it\", \"he\", \"she\", \"they\", \"this\", \"that\") with the full
-      names of the entities they reference, and add necessary modifiers to clarify
-      meaning.\n5. The context may be delimited by tags such as <START OF CONTEXT>
-      and <END OF CONTEXT>. Treat everything between these tags as context.\n6. Assess
-      whether the context sufficiently answers the question. If it answers it partially,
-      provide the answer; if it does not answer it fully, specify what information
-      is missing to answer the question.\n7. If the context does not answer the question
-      at all, just return the original question as the missing information.\n8. The
-      `citations` field consists ONLY in a list of block IDs that are relevant to
-      the answer, following these rules:\n  - Use the format: block-AB\n  - Just mention
-      the block IDs, do NOT include any other text.\n  - Just mention the blocks actually
-      relevant and that contain information used in the answer, do NOT include blocks
-      that are not relevant.\n  - No duplicates.\n9. Do NOT hallucinate block IDs.
-      Only use those provided in the context.\n10. Your output must be a JSON object
-      with the following fields:\n    - \"reason\": Explain your reasoning for the
-      answer or validation.\n    - \"answer\": Provide a partial or complete answer
-      to the user query strictly from the information in the context. If there isn''t
-      enough information to even provide a partial answer, leave ''answer'' empty.\n    -
+    body: '{"question": "", "retrieval": true, "user_id": "rao_answer_summary-mcp",
+      "system": null, "chat_history": [], "context": [], "query_context": {}, "query_context_order":
+      {}, "truncate": true, "user_prompt": {"prompt": "\nBased on the provided context
+      and user question, perform the following tasks:\n\n1. Select only information
+      directly relevant to the question.\n2. Break down compound sentences into simple,
+      single-idea statements. Preserve original phrasing when possible.\n3. For any
+      named entity with descriptive details, separate those details into distinct
+      propositions.\n4. Ensure clarity by replacing pronouns (e.g., \"it\", \"he\",
+      \"she\", \"they\", \"this\", \"that\") with the full names of the entities they
+      reference, and add necessary modifiers to clarify meaning.\n5. The context may
+      be delimited by tags such as <START OF CONTEXT> and <END OF CONTEXT>. Treat
+      everything between these tags as context.\n6. Assess whether the context sufficiently
+      answers the question. If it answers it partially, provide the answer; if it
+      does not answer it fully, specify what information is missing to answer the
+      question.\n7. If the context does not answer the question at all, just return
+      the original question as the missing information.\n8. The `citations` field
+      consists ONLY in a list of block IDs that are relevant to the answer, following
+      these rules:\n  - Use the format: block-AB\n  - Just mention the block IDs,
+      do NOT include any other text.\n  - Just mention the blocks actually relevant
+      and that contain information used in the answer, do NOT include blocks that
+      are not relevant.\n  - No duplicates.\n9. Do NOT hallucinate block IDs. Only
+      use those provided in the context.\n10. Your output must be a JSON object with
+      the following fields:\n    - \"reason\": Explain your reasoning for the answer
+      or validation.\n    - \"answer\": Provide a partial or complete answer to the
+      user query strictly from the information in the context. If there isn''t enough
+      information to even provide a partial answer, leave ''answer'' empty.\n    -
       \"missing_info_query\": If the context is insufficient, specify what information
       is missing in a query shape; otherwise, leave it empty. Just return the query
       needed to retrieve the missing information.\n    - \"useful\": Indicate if the
@@ -309,16 +375,22 @@ interactions:
       may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nHow
       much is 2 + 2?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk:
       Calling add\n``` 4.0 ```\n\n\n---\"\n\n\n**block-AB**\n\n{\n  \"result\": 4.0\n}\n\n---\"\n\n\n\n\n<END
-      OF CONTEXT>\n\n"},"citations":false,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":2000,"query_context_images":{},"prefer_markdown":null,"json_schema":{"title":"validate_or_answer","description":"Validate
-      or answer","parameters":{"type":"object","properties":{"reason":{"type":"string","description":"Reasoning
-      for the answer or validation"},"answer":{"type":"string","description":"Partial
-      or complete answer to the user query from the information in the context."},"missing_info_query":{"type":"string","description":"Query
-      needed to retrieve the missing information in case the context is not enough
-      to answer the question. If the context does not answer the question at all,
-      just return the original question."},"useful":{"type":"string","description":"Is
-      the context useful to answer the question?","enum":["yes","no"]},"citations":{"type":"array","items":{"type":"string","description":"Block
-      ID cited in the answer, e.g. block-AB"},"description":"List of block IDs cited
-      in the answer, if any"}},"required":["reason","answer","missing_info_query","useful","citations"]}},"format_prompt":false,"rerank_context":false,"tools":[],"tool_choice":{"type":"required"},"reasoning":false,"seed":null}'
+      OF CONTEXT>\n\n"}, "citations": false, "citation_threshold": null, "generative_model":
+      "chatgpt-azure-4o-mini", "max_tokens": 2000, "query_context_images": {}, "prefer_markdown":
+      null, "json_schema": {"title": "validate_or_answer", "description": "Validate
+      or answer", "parameters": {"type": "object", "properties": {"reason": {"type":
+      "string", "description": "Reasoning for the answer or validation"}, "answer":
+      {"type": "string", "description": "Partial or complete answer to the user query
+      from the information in the context."}, "missing_info_query": {"type": "string",
+      "description": "Query needed to retrieve the missing information in case the
+      context is not enough to answer the question. If the context does not answer
+      the question at all, just return the original question."}, "useful": {"type":
+      "string", "description": "Is the context useful to answer the question?", "enum":
+      ["yes", "no"]}, "citations": {"type": "array", "items": {"type": "string", "description":
+      "Block ID cited in the answer, e.g. block-AB"}, "description": "List of block
+      IDs cited in the answer, if any"}}, "required": ["reason", "answer", "missing_info_query",
+      "useful", "citations"]}}, "format_prompt": false, "rerank_context": false, "tools":
+      [], "tool_choice": {"type": "required"}, "reasoning": false, "seed": null}'
     headers:
       Accept:
       - application/x-ndjson
@@ -334,12 +406,12 @@ interactions:
       - europe-1.nuclia.cloud
       User-Agent:
       - nuclia.py/4.9.25
-      X-STF-NUAKEY:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
       x-origin:
       - RAO
       x-show-consumption:
       - 'true'
+      x-stf-nuakey:
+      - DUMMY
     method: POST
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
@@ -350,14 +422,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":23,"output_tokens":8,"timings":{"generative":1.030542077991413},"input_nuclia_tokens":0.023,"output_nuclia_tokens":0.008}}
+        {"chunk":{"type":"meta","input_tokens":23,"output_tokens":8,"timings":{"generative":1.5892133030138211},"input_nuclia_tokens":0.023,"output_nuclia_tokens":0.008}}
 
         {"chunk":{"normalized_tokens":{"input":0.0228,"output":0.00768,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -365,36 +437,40 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 16:49:15 GMT
+      - Wed, 03 Jun 2026 07:32:51 GMT
       nuclia-learning-id:
-      - 1576997dd480425fad2c75d360070d00
+      - 66b04ab824f0494a80358ebd4f24df06
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1035'
+      - '1594'
       x-nuclia-trace-id:
-      - 6f44d25ae9a69a59cb34527010b64838
+      - 2c7c8fe996c4a7d8d503dca5db84b965
     status:
       code: 200
       message: OK
 - request:
-    body: '{"question":"","retrieval":true,"user_id":"summarize","system":"You are
-      a helpful AI assistant. Your role is to provide accurate, clear, and well-structured
+    body: '{"question": "", "retrieval": true, "user_id": "summarize", "system": "You
+      are a helpful AI assistant. Your role is to provide accurate, clear, and well-structured
       answers based strictly on the information provided to you.\nKey principles:\n-
       Answer only using the information in the provided context\n- Do not use external
       knowledge, assumptions, or prior experience\n- Maintain a professional and informative
       tone\n- Be concise yet thorough\n- If information is insufficient, acknowledge
       this clearly\n\nAlways follow any additional instructions provided about format,
-      style, or domain-specific behavior.","chat_history":[],"context":[],"query_context":{},"query_context_order":{},"truncate":true,"user_prompt":{"prompt":"\n##
+      style, or domain-specific behavior.", "chat_history": [], "context": [], "query_context":
+      {}, "query_context_order": {}, "truncate": true, "user_prompt": {"prompt": "\n##
       Question\nHow much is 2 + 2?\n\n## Provided Context\n[START OF CONTEXT]\n# How
       much is 2 + 2?\n\n 2 + 2 equals 4.0.\n[END OF CONTEXT]\n\n## Answering Guidelines\n-
       Carefully read all context; it may be lengthy or detailed\n- Do not omit or
       overlook any relevant information\n- If the context is incomplete or insufficient,
       state: \"Not enough data to answer this.\"\n- Read carefully any extra instructions
       below if provided and use them to answer\n\nNow provide your answer to the question:
-      How much is 2 + 2?"},"citations":null,"citation_threshold":null,"generative_model":"chatgpt-azure-4o-mini","max_tokens":5000,"query_context_images":{},"prefer_markdown":null,"json_schema":null,"format_prompt":false,"rerank_context":false,"tools":[],"tool_choice":{"type":"auto"},"reasoning":false,"seed":null}'
+      How much is 2 + 2?"}, "citations": null, "citation_threshold": null, "generative_model":
+      "chatgpt-azure-4o-mini", "max_tokens": 5000, "query_context_images": {}, "prefer_markdown":
+      null, "json_schema": null, "format_prompt": false, "rerank_context": false,
+      "tools": [], "tool_choice": {"type": "auto"}, "reasoning": false, "seed": null}'
     headers:
       Accept:
       - application/x-ndjson
@@ -410,18 +486,18 @@ interactions:
       - europe-1.nuclia.cloud
       User-Agent:
       - nuclia.py/4.9.25
-      X-STF-NUAKEY:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Im51YSIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLm51Y2xpYS5jbG91ZC8iLCJpYXQiOjE3MzcwNjE2NjUsInN1YiI6IjAzZDQ3OTk4LWY2NzItNGE5Yi1hNTdiLWJkZTNhOWMzZWU4YyIsImp0aSI6IjQ1YTQ3NjJkLTIyMzgtNGI2OC05YTI2LWQ4N2QzNjJhZThmYiIsImV4cCI6MjUzMzcwNzY0ODAwLCJrZXkiOiI0N2JjZDU4ZC04NDExLTQ1NTgtYWIzZS0wNGMyMWI4NWI2ZWEiLCJhbGxvd19rYl9tYW5hZ2VtZW50IjpmYWxzZX0.Ljgv780vMuwviospTcRQYxrFV_H7XXR0hJeeSyFIfwVjni7hyyrxB189R5rQyLLI2n85iAdNGshvc8etDQRkXr8n8IWFsy_FOWcru-LZFZwGCpsY6hKK4TdWXR9v5sxA5xyKA7lmWw1LZ8dfNbcdx11OY15BfmGuMpiq_auIs1F90C8T8_LmXbz0SbdYzPIoEP0JFBX92jHqDoJNUTlMELUrcjupK9ao2pZahI47zQHrWjGuw2KrSjghdZgzwjC0YEa7C8quEVZ9SoLOkJvJV7XV4LrlGGcsxZzng8kLBGRBS-i8p26n5vFvMqiZKqDWpq68cVzZhAsL93wkzHVZCAHpfEsHQ4DUb-Da53xUrrnVnyl1w79iXiLYwP0wxh3b34B1b1ca3rRKuifbd1e762gf11qw6LHpJ9qKYhRv6O3KZ18_amwjLhqYna5uUfrP7f59tJZ9vzTG1oTZ5KlMBeVfu_IvhAmMbGpTygqEoxXqNrH3lWOsEPLhRVBC6D5t84xy7WLe4XsGR4xWduLWHsjxPYbmTrLMysGSqBSNGPwUi8jMTrH16-xprNJRiWVHcvgz_FGQ7sT7RucaAxhmFlZY9h3BFw7u_6awOeX4ymhH6_iDzWxBc0Fx5JsDgQm9jkhlYIHqZG36N5XfsmqfCyM12gNa37j-8MPOt7eU0XQ
       x-client-ident:
       - default
       x-message:
-      - 0e61cdd729fc469badae20c8fa2fb106
+      - 6455d327b03d463ab73059e75f09d46e
       x-origin:
       - RAO
       x-session:
       - default_default_session
       x-show-consumption:
       - 'true'
+      x-stf-nuakey:
+      - DUMMY
     method: POST
     uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
   response:
@@ -448,14 +524,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":1,"timings":{"generative_first_chunk":0.6610615020035766,"generative":0.8302102200104855},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.001}}
+        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":1,"timings":{"generative_first_chunk":0.5488465939997695,"generative":0.8282849349925527},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.001}}
 
         {"chunk":{"normalized_tokens":{"input":0.00711,"output":0.00132,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -463,17 +539,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 16:49:17 GMT
+      - Wed, 03 Jun 2026 07:32:52 GMT
       nuclia-learning-id:
-      - 2065b9aa0708489083be45bfea429e04
+      - 9f2ff5a779e34870b660e0e8f2c0106b
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '667'
+      - '555'
       x-nuclia-trace-id:
-      - a2ddc6c5ab174a4743cf267af3ead44c
+      - 2c7c8fe996c4a7d8d503dca5db84b965
     status:
       code: 200
       message: OK

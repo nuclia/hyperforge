@@ -41,3 +41,7 @@ Repository = "https://github.com/nuclia/forge"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+
+[tool.setuptools.packages.find]
+include = ["src"]
+exclude = ["docs*", "tests*"]

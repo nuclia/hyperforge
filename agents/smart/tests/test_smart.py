@@ -12,6 +12,8 @@ NUA_KEY = os.environ.get(
     "NUA_KEY",
 ) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 
+PERPLEXITY_KEY = os.environ.get("PERPLEXITY_API_KEY", "DUMMY_PERPLEXITY_KEY")
+
 DOG_AGENT_ID = "269192da-f5b6-4196-8c9a-bd77e32f237c"
 hyperforge_ID = "1d372a1a-8aaf-4dc7-bcf2-b8393751beba"
 PERPLEXITY_AGENT_ID = "0f5487c8-432d-4205-b5e0-d5c06b7a638f"
@@ -23,7 +25,7 @@ CONFIG = {
             "identifier": "perplexity-01",
             "name": "perplexity",
             "config": {
-                "key": "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",
+                "key": PERPLEXITY_KEY,
             },
         },
     ],

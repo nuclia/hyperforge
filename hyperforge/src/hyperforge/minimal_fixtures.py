@@ -51,6 +51,7 @@ def vcr_config():
             ("x-nuclia-nuakey", "DUMMY"),
             ("x-stf-nuakey", "DUMMY"),
             ("x-goog-api-key", "DUMMY"),
+            ("x-stf-serviceaccount", "DUMMY"),
         ],
         # Redacts specific query parameters like API keys
         "filter_query_parameters": ["api_key", "access_token", "key"],

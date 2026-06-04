@@ -8,6 +8,7 @@ from hyperforge.minimal_fixtures import cassette_nua_key
 NUA_KEY = os.environ.get(
     "NUA_KEY",
 ) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+
 CONFIG = {
     "drivers": [],
     "rules": {

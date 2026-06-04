@@ -21,17 +21,102 @@ interactions:
       string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"03d47998-f672-4a9b-a57b-bde3a9c3ee8c","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
       - '227'
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 17:06:47 GMT
+      - Wed, 03 Jun 2026 07:41:33 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
       - '5'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.stashify.cloud
+      User-Agent:
+      - nucliadb-sdk/6.13.1.post6414
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: GET
+    uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/labelsets
+  response:
+    body:
+      string: '{"uuid":"e103caf3-f8cb-4161-a57c-aad1192d0666","labelsets":{}}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '62'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Jun 2026 07:41:33 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '12'
+      x-nuclia-trace-id:
+      - d5fa881d71c1de6fb3553011f45212d3
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.stashify.cloud
+      User-Agent:
+      - nucliadb-sdk/6.13.1.post6414
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: GET
+    uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666
+  response:
+    body:
+      string: '{"slug":"sync-service","uuid":"e103caf3-f8cb-4161-a57c-aad1192d0666","config":{"uuid":null,"slug":"7af24410-95ea-404a-8226-20051b507fd8:sync-service","title":"Sync
+        Service","description":"","learning_configuration":null,"external_index_provider":null,"configured_external_index_provider":{"type":"unset"},"similarity":null,"hidden_resources_enabled":false,"hidden_resources_hide_on_creation":false,"enforce_security":false},"model":null}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '437'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Jun 2026 07:41:33 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '11'
+      x-nuclia-trace-id:
+      - 4b3775b9492a09eadb12d1c4d444825e
     status:
       code: 200
       message: OK
@@ -50,10 +135,10 @@ interactions:
       - europe-1.stashify.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
-      X-STF-SERVICEACCOUNT:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InNhIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLnN0YXNoaWZ5LmNsb3VkLyIsImlhdCI6MTc3MjUzMTg0Nywic3ViIjoiZjA2OTJlYTgtYTMyMy00YTVkLTk2ODItM2EzZjE2NDY1ZGFkIiwianRpIjoiNTkwN2VjMDItMzU4My00ZDFjLTk5YmUtZDZlYWJkODE3ZTlmIiwiZXhwIjoxODA0MDY3ODQ2LCJrZXkiOiIxMDQ4MDBkNC05OTc0LTRkYzMtODUyYy04Njc5MmJhZjM1MmEiLCJraWQiOiJkNjY3Zjc5OS1lYjY3LTRlMWYtYmNkNi0xYTY1OGEzYmNmNzcifQ.JIrCKxThxIHWz83vqkGZVbxWCezh0Y0sxl717zwOvh2HDRQhR8BYvZtabHL2d3vCcBW9dFHblyj425bI8v5V0bIiTF8K3cI2nD_2axeHCjeJSNVn6QLvKiJ4BO89F2QyeUTBtgT2BkBjbRhHbk7s0BQ1RTUPONGELFmkMmYmuyWmXNfdmWGwYQQCjHBcQh_XWW37N8ffp7A6M6F9_5w0niHJS5jeyYbdEe97X8nzqXEbzIQTfqLx0BZVREaM7MfPQzNwZdkHB0MR-yUWkAjfRZOM9Y3P6a1of7QQgTlKa4XMIQo680l2-7rwMKnKpsPCGT-Yh6F8pxKDw7urpNjo4otZcUq8gul9SxQygjaQkwhgu_l_0OALtqP1B0hpf9wwgPThcJZUUvnkfLNLmPbBbBgvj4YrxQRaW8JSg-rlaCvdHyq3y6Resq1pibnJhlX6TqYTHSECZfxwz06V1APwBTrXlcx0UX_qxg6oS_eS7dPSvIvKCIacazU4bw87dcPYCiB0YdaoqLOe66iIb6DXKwYvJ2JYeXEkh2wpDnoQce5u0weoGcY4gxVQJcVrQqi5yNRxOWxVo7edsxiA49-SuMi05EYaB7XmTnEEwIO7OsAHBj9BfagTUXt8-83pjQawdkDpACOd3SkhdkfKgNLxiAqhCJeuj5nDurx9gAfaZRo
       content-type:
       - application/json
+      x-stf-serviceaccount:
+      - DUMMY
     method: POST
     uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/catalog/facets
   response:
@@ -61,7 +146,7 @@ interactions:
       string: '{"facets":{}}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
       - '13'
       access-control-expose-headers:
@@ -69,97 +154,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 17:06:48 GMT
+      - Wed, 03 Jun 2026 07:41:33 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '32'
+      - '10'
       x-nuclia-trace-id:
-      - 83a15f29ba420c0aa4b209d33ff365f5
-    status:
-      code: 200
-      message: OK
-- request:
-    body: ''
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Host:
-      - europe-1.stashify.cloud
-      User-Agent:
-      - nucliadb-sdk/6.13.1.post6414
-      X-STF-SERVICEACCOUNT:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InNhIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLnN0YXNoaWZ5LmNsb3VkLyIsImlhdCI6MTc3MjUzMTg0Nywic3ViIjoiZjA2OTJlYTgtYTMyMy00YTVkLTk2ODItM2EzZjE2NDY1ZGFkIiwianRpIjoiNTkwN2VjMDItMzU4My00ZDFjLTk5YmUtZDZlYWJkODE3ZTlmIiwiZXhwIjoxODA0MDY3ODQ2LCJrZXkiOiIxMDQ4MDBkNC05OTc0LTRkYzMtODUyYy04Njc5MmJhZjM1MmEiLCJraWQiOiJkNjY3Zjc5OS1lYjY3LTRlMWYtYmNkNi0xYTY1OGEzYmNmNzcifQ.JIrCKxThxIHWz83vqkGZVbxWCezh0Y0sxl717zwOvh2HDRQhR8BYvZtabHL2d3vCcBW9dFHblyj425bI8v5V0bIiTF8K3cI2nD_2axeHCjeJSNVn6QLvKiJ4BO89F2QyeUTBtgT2BkBjbRhHbk7s0BQ1RTUPONGELFmkMmYmuyWmXNfdmWGwYQQCjHBcQh_XWW37N8ffp7A6M6F9_5w0niHJS5jeyYbdEe97X8nzqXEbzIQTfqLx0BZVREaM7MfPQzNwZdkHB0MR-yUWkAjfRZOM9Y3P6a1of7QQgTlKa4XMIQo680l2-7rwMKnKpsPCGT-Yh6F8pxKDw7urpNjo4otZcUq8gul9SxQygjaQkwhgu_l_0OALtqP1B0hpf9wwgPThcJZUUvnkfLNLmPbBbBgvj4YrxQRaW8JSg-rlaCvdHyq3y6Resq1pibnJhlX6TqYTHSECZfxwz06V1APwBTrXlcx0UX_qxg6oS_eS7dPSvIvKCIacazU4bw87dcPYCiB0YdaoqLOe66iIb6DXKwYvJ2JYeXEkh2wpDnoQce5u0weoGcY4gxVQJcVrQqi5yNRxOWxVo7edsxiA49-SuMi05EYaB7XmTnEEwIO7OsAHBj9BfagTUXt8-83pjQawdkDpACOd3SkhdkfKgNLxiAqhCJeuj5nDurx9gAfaZRo
-      content-type:
-      - application/json
-    method: GET
-    uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/labelsets
-  response:
-    body:
-      string: '{"uuid":"e103caf3-f8cb-4161-a57c-aad1192d0666","labelsets":{}}'
-    headers:
-      Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
-      Content-Length:
-      - '62'
-      access-control-expose-headers:
-      - X-NUCLIA-TRACE-ID
-      content-type:
-      - application/json
-      date:
-      - Tue, 02 Jun 2026 17:06:47 GMT
-      via:
-      - 1.1 google
-      x-envoy-upstream-service-time:
-      - '37'
-      x-nuclia-trace-id:
-      - c33198b76dd1fe229b1d4b75ce3b2c65
-    status:
-      code: 200
-      message: OK
-- request:
-    body: ''
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Host:
-      - europe-1.stashify.cloud
-      User-Agent:
-      - nucliadb-sdk/6.13.1.post6414
-      X-STF-SERVICEACCOUNT:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InNhIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLnN0YXNoaWZ5LmNsb3VkLyIsImlhdCI6MTc3MjUzMTg0Nywic3ViIjoiZjA2OTJlYTgtYTMyMy00YTVkLTk2ODItM2EzZjE2NDY1ZGFkIiwianRpIjoiNTkwN2VjMDItMzU4My00ZDFjLTk5YmUtZDZlYWJkODE3ZTlmIiwiZXhwIjoxODA0MDY3ODQ2LCJrZXkiOiIxMDQ4MDBkNC05OTc0LTRkYzMtODUyYy04Njc5MmJhZjM1MmEiLCJraWQiOiJkNjY3Zjc5OS1lYjY3LTRlMWYtYmNkNi0xYTY1OGEzYmNmNzcifQ.JIrCKxThxIHWz83vqkGZVbxWCezh0Y0sxl717zwOvh2HDRQhR8BYvZtabHL2d3vCcBW9dFHblyj425bI8v5V0bIiTF8K3cI2nD_2axeHCjeJSNVn6QLvKiJ4BO89F2QyeUTBtgT2BkBjbRhHbk7s0BQ1RTUPONGELFmkMmYmuyWmXNfdmWGwYQQCjHBcQh_XWW37N8ffp7A6M6F9_5w0niHJS5jeyYbdEe97X8nzqXEbzIQTfqLx0BZVREaM7MfPQzNwZdkHB0MR-yUWkAjfRZOM9Y3P6a1of7QQgTlKa4XMIQo680l2-7rwMKnKpsPCGT-Yh6F8pxKDw7urpNjo4otZcUq8gul9SxQygjaQkwhgu_l_0OALtqP1B0hpf9wwgPThcJZUUvnkfLNLmPbBbBgvj4YrxQRaW8JSg-rlaCvdHyq3y6Resq1pibnJhlX6TqYTHSECZfxwz06V1APwBTrXlcx0UX_qxg6oS_eS7dPSvIvKCIacazU4bw87dcPYCiB0YdaoqLOe66iIb6DXKwYvJ2JYeXEkh2wpDnoQce5u0weoGcY4gxVQJcVrQqi5yNRxOWxVo7edsxiA49-SuMi05EYaB7XmTnEEwIO7OsAHBj9BfagTUXt8-83pjQawdkDpACOd3SkhdkfKgNLxiAqhCJeuj5nDurx9gAfaZRo
-      content-type:
-      - application/json
-    method: GET
-    uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/configuration
-  response:
-    body:
-      string: '{"resource_labelers_models":null,"paragraph_labelers_models":null,"intent_models":null,"visual_labeling":"disabled","ner_model":"multilingual","relation_model":"base","anonymization_model":"disabled","semantic_model":"multilingual-2024-05-06","semantic_models":["multilingual-2024-05-06"],"default_semantic_model":"multilingual-2024-05-06","semantic_graph_node_models":[],"default_semantic_graph_node_model":null,"semantic_graph_edge_models":[],"default_semantic_graph_edge_model":null,"semantic_vector_similarity":"DOT","semantic_vector_size":1024,"semantic_matryoshka_dims":[],"semantic_threshold":0.4,"generative_model":"chatgpt-azure-4o","user_keys":null,"user_prompts":null,"summary":"simple","summary_model":"chatgpt-azure-4o","summary_prompt":null,"prefer_markdown_generative_response":false,"allow_all_default_models":true,"semantic_model_configs":{"multilingual-2024-05-06":{"similarity":0,"size":1024,"threshold":0.4,"max_tokens":2048,"matryoshka_dims":[],"external":false}},"semantic_graph_node_model_configs":{},"semantic_graph_edge_model_configs":{}}'
-    headers:
-      Alt-Svc:
-      - h3=":443"; ma=2592000
-      Content-Length:
-      - '1063'
-      access-control-expose-headers:
-      - X-NUCLIA-TRACE-ID
-      content-type:
-      - application/json
-      date:
-      - Tue, 02 Jun 2026 17:06:47 GMT,Tue, 02 Jun 2026 17:06:47 GMT
-      via:
-      - 1.1 google
-      x-envoy-upstream-service-time:
-      - '75'
-      x-nuclia-trace-id:
-      - c716ce93856b1078530620dee2cfdcc4
+      - a6614450c42f2e55c723f0253a9d516d
     status:
       code: 200
       message: OK
@@ -178,10 +179,10 @@ interactions:
       - europe-1.stashify.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
-      X-STF-SERVICEACCOUNT:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InNhIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLnN0YXNoaWZ5LmNsb3VkLyIsImlhdCI6MTc3MjUzMTg0Nywic3ViIjoiZjA2OTJlYTgtYTMyMy00YTVkLTk2ODItM2EzZjE2NDY1ZGFkIiwianRpIjoiNTkwN2VjMDItMzU4My00ZDFjLTk5YmUtZDZlYWJkODE3ZTlmIiwiZXhwIjoxODA0MDY3ODQ2LCJrZXkiOiIxMDQ4MDBkNC05OTc0LTRkYzMtODUyYy04Njc5MmJhZjM1MmEiLCJraWQiOiJkNjY3Zjc5OS1lYjY3LTRlMWYtYmNkNi0xYTY1OGEzYmNmNzcifQ.JIrCKxThxIHWz83vqkGZVbxWCezh0Y0sxl717zwOvh2HDRQhR8BYvZtabHL2d3vCcBW9dFHblyj425bI8v5V0bIiTF8K3cI2nD_2axeHCjeJSNVn6QLvKiJ4BO89F2QyeUTBtgT2BkBjbRhHbk7s0BQ1RTUPONGELFmkMmYmuyWmXNfdmWGwYQQCjHBcQh_XWW37N8ffp7A6M6F9_5w0niHJS5jeyYbdEe97X8nzqXEbzIQTfqLx0BZVREaM7MfPQzNwZdkHB0MR-yUWkAjfRZOM9Y3P6a1of7QQgTlKa4XMIQo680l2-7rwMKnKpsPCGT-Yh6F8pxKDw7urpNjo4otZcUq8gul9SxQygjaQkwhgu_l_0OALtqP1B0hpf9wwgPThcJZUUvnkfLNLmPbBbBgvj4YrxQRaW8JSg-rlaCvdHyq3y6Resq1pibnJhlX6TqYTHSECZfxwz06V1APwBTrXlcx0UX_qxg6oS_eS7dPSvIvKCIacazU4bw87dcPYCiB0YdaoqLOe66iIb6DXKwYvJ2JYeXEkh2wpDnoQce5u0weoGcY4gxVQJcVrQqi5yNRxOWxVo7edsxiA49-SuMi05EYaB7XmTnEEwIO7OsAHBj9BfagTUXt8-83pjQawdkDpACOd3SkhdkfKgNLxiAqhCJeuj5nDurx9gAfaZRo
       content-type:
       - application/json
+      x-stf-serviceaccount:
+      - DUMMY
     method: POST
     uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/catalog/facets
   response:
@@ -189,7 +190,7 @@ interactions:
       string: '{"facets":{"/s/p":2,"/s/p/en":1,"/s/p/et":1}}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Content-Length:
       - '45'
       access-control-expose-headers:
@@ -197,56 +198,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 17:06:48 GMT
-      via:
-      - 1.1 google
-      x-envoy-upstream-service-time:
-      - '46'
-      x-nuclia-trace-id:
-      - 23b82ac1998d2a99a3ab40ae9244fa70
-    status:
-      code: 200
-      message: OK
-- request:
-    body: ''
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Host:
-      - europe-1.stashify.cloud
-      User-Agent:
-      - nucliadb-sdk/6.13.1.post6414
-      X-STF-SERVICEACCOUNT:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InNhIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLnN0YXNoaWZ5LmNsb3VkLyIsImlhdCI6MTc3MjUzMTg0Nywic3ViIjoiZjA2OTJlYTgtYTMyMy00YTVkLTk2ODItM2EzZjE2NDY1ZGFkIiwianRpIjoiNTkwN2VjMDItMzU4My00ZDFjLTk5YmUtZDZlYWJkODE3ZTlmIiwiZXhwIjoxODA0MDY3ODQ2LCJrZXkiOiIxMDQ4MDBkNC05OTc0LTRkYzMtODUyYy04Njc5MmJhZjM1MmEiLCJraWQiOiJkNjY3Zjc5OS1lYjY3LTRlMWYtYmNkNi0xYTY1OGEzYmNmNzcifQ.JIrCKxThxIHWz83vqkGZVbxWCezh0Y0sxl717zwOvh2HDRQhR8BYvZtabHL2d3vCcBW9dFHblyj425bI8v5V0bIiTF8K3cI2nD_2axeHCjeJSNVn6QLvKiJ4BO89F2QyeUTBtgT2BkBjbRhHbk7s0BQ1RTUPONGELFmkMmYmuyWmXNfdmWGwYQQCjHBcQh_XWW37N8ffp7A6M6F9_5w0niHJS5jeyYbdEe97X8nzqXEbzIQTfqLx0BZVREaM7MfPQzNwZdkHB0MR-yUWkAjfRZOM9Y3P6a1of7QQgTlKa4XMIQo680l2-7rwMKnKpsPCGT-Yh6F8pxKDw7urpNjo4otZcUq8gul9SxQygjaQkwhgu_l_0OALtqP1B0hpf9wwgPThcJZUUvnkfLNLmPbBbBgvj4YrxQRaW8JSg-rlaCvdHyq3y6Resq1pibnJhlX6TqYTHSECZfxwz06V1APwBTrXlcx0UX_qxg6oS_eS7dPSvIvKCIacazU4bw87dcPYCiB0YdaoqLOe66iIb6DXKwYvJ2JYeXEkh2wpDnoQce5u0weoGcY4gxVQJcVrQqi5yNRxOWxVo7edsxiA49-SuMi05EYaB7XmTnEEwIO7OsAHBj9BfagTUXt8-83pjQawdkDpACOd3SkhdkfKgNLxiAqhCJeuj5nDurx9gAfaZRo
-      content-type:
-      - application/json
-    method: GET
-    uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666
-  response:
-    body:
-      string: '{"slug":"sync-service","uuid":"e103caf3-f8cb-4161-a57c-aad1192d0666","config":{"uuid":null,"slug":"7af24410-95ea-404a-8226-20051b507fd8:sync-service","title":"Sync
-        Service","description":"","learning_configuration":null,"external_index_provider":null,"configured_external_index_provider":{"type":"unset"},"similarity":null,"hidden_resources_enabled":false,"hidden_resources_hide_on_creation":false,"enforce_security":false},"model":null}'
-    headers:
-      Alt-Svc:
-      - h3=":443"; ma=2592000
-      Content-Length:
-      - '437'
-      access-control-expose-headers:
-      - X-NUCLIA-TRACE-ID
-      content-type:
-      - application/json
-      date:
-      - Tue, 02 Jun 2026 17:06:47 GMT
+      - Wed, 03 Jun 2026 07:41:33 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
       - '17'
       x-nuclia-trace-id:
-      - 2f7ced43ec1ecf81fde90512a8c9de30
+      - f86c59862a8e8dbd3714c3046f92e2e9
     status:
       code: 200
       message: OK
@@ -265,10 +223,10 @@ interactions:
       - europe-1.stashify.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
-      X-STF-SERVICEACCOUNT:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InNhIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLnN0YXNoaWZ5LmNsb3VkLyIsImlhdCI6MTc3MjUzMTg0Nywic3ViIjoiZjA2OTJlYTgtYTMyMy00YTVkLTk2ODItM2EzZjE2NDY1ZGFkIiwianRpIjoiNTkwN2VjMDItMzU4My00ZDFjLTk5YmUtZDZlYWJkODE3ZTlmIiwiZXhwIjoxODA0MDY3ODQ2LCJrZXkiOiIxMDQ4MDBkNC05OTc0LTRkYzMtODUyYy04Njc5MmJhZjM1MmEiLCJraWQiOiJkNjY3Zjc5OS1lYjY3LTRlMWYtYmNkNi0xYTY1OGEzYmNmNzcifQ.JIrCKxThxIHWz83vqkGZVbxWCezh0Y0sxl717zwOvh2HDRQhR8BYvZtabHL2d3vCcBW9dFHblyj425bI8v5V0bIiTF8K3cI2nD_2axeHCjeJSNVn6QLvKiJ4BO89F2QyeUTBtgT2BkBjbRhHbk7s0BQ1RTUPONGELFmkMmYmuyWmXNfdmWGwYQQCjHBcQh_XWW37N8ffp7A6M6F9_5w0niHJS5jeyYbdEe97X8nzqXEbzIQTfqLx0BZVREaM7MfPQzNwZdkHB0MR-yUWkAjfRZOM9Y3P6a1of7QQgTlKa4XMIQo680l2-7rwMKnKpsPCGT-Yh6F8pxKDw7urpNjo4otZcUq8gul9SxQygjaQkwhgu_l_0OALtqP1B0hpf9wwgPThcJZUUvnkfLNLmPbBbBgvj4YrxQRaW8JSg-rlaCvdHyq3y6Resq1pibnJhlX6TqYTHSECZfxwz06V1APwBTrXlcx0UX_qxg6oS_eS7dPSvIvKCIacazU4bw87dcPYCiB0YdaoqLOe66iIb6DXKwYvJ2JYeXEkh2wpDnoQce5u0weoGcY4gxVQJcVrQqi5yNRxOWxVo7edsxiA49-SuMi05EYaB7XmTnEEwIO7OsAHBj9BfagTUXt8-83pjQawdkDpACOd3SkhdkfKgNLxiAqhCJeuj5nDurx9gAfaZRo
       content-type:
       - application/json
+      x-stf-serviceaccount:
+      - DUMMY
     method: POST
     uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/catalog/facets
   response:
@@ -284,13 +242,55 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 17:06:48 GMT
+      - Wed, 03 Jun 2026 07:41:33 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '19'
+      - '12'
       x-nuclia-trace-id:
-      - 25c910bd1327c333ec93a450ec6c34c8
+      - e563f30f1b5f4562ee3763e710966b9b
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.stashify.cloud
+      User-Agent:
+      - nucliadb-sdk/6.13.1.post6414
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: GET
+    uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/configuration
+  response:
+    body:
+      string: '{"resource_labelers_models":null,"paragraph_labelers_models":null,"intent_models":null,"visual_labeling":"disabled","ner_model":"multilingual","relation_model":"base","anonymization_model":"disabled","semantic_model":"multilingual-2024-05-06","semantic_models":["multilingual-2024-05-06"],"default_semantic_model":"multilingual-2024-05-06","semantic_graph_node_models":[],"default_semantic_graph_node_model":null,"semantic_graph_edge_models":[],"default_semantic_graph_edge_model":null,"semantic_vector_similarity":"DOT","semantic_vector_size":1024,"semantic_matryoshka_dims":[],"semantic_threshold":0.4,"generative_model":"chatgpt-azure-4o","user_keys":null,"user_prompts":null,"summary":"simple","summary_model":"chatgpt-azure-4o","summary_prompt":null,"prefer_markdown_generative_response":false,"allow_all_default_models":true,"semantic_model_configs":{"multilingual-2024-05-06":{"similarity":0,"size":1024,"threshold":0.4,"max_tokens":2048,"matryoshka_dims":[],"external":false}},"semantic_graph_node_model_configs":{},"semantic_graph_edge_model_configs":{}}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '1063'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Wed, 03 Jun 2026 07:41:33 GMT,Wed, 03 Jun 2026 07:41:33 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '57'
+      x-nuclia-trace-id:
+      - ce9483eda77e5c27a1ba72cf81a812d9
     status:
       code: 200
       message: OK
@@ -309,10 +309,10 @@ interactions:
       - europe-1.stashify.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
-      X-STF-SERVICEACCOUNT:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InNhIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLnN0YXNoaWZ5LmNsb3VkLyIsImlhdCI6MTc3MjUzMTg0Nywic3ViIjoiZjA2OTJlYTgtYTMyMy00YTVkLTk2ODItM2EzZjE2NDY1ZGFkIiwianRpIjoiNTkwN2VjMDItMzU4My00ZDFjLTk5YmUtZDZlYWJkODE3ZTlmIiwiZXhwIjoxODA0MDY3ODQ2LCJrZXkiOiIxMDQ4MDBkNC05OTc0LTRkYzMtODUyYy04Njc5MmJhZjM1MmEiLCJraWQiOiJkNjY3Zjc5OS1lYjY3LTRlMWYtYmNkNi0xYTY1OGEzYmNmNzcifQ.JIrCKxThxIHWz83vqkGZVbxWCezh0Y0sxl717zwOvh2HDRQhR8BYvZtabHL2d3vCcBW9dFHblyj425bI8v5V0bIiTF8K3cI2nD_2axeHCjeJSNVn6QLvKiJ4BO89F2QyeUTBtgT2BkBjbRhHbk7s0BQ1RTUPONGELFmkMmYmuyWmXNfdmWGwYQQCjHBcQh_XWW37N8ffp7A6M6F9_5w0niHJS5jeyYbdEe97X8nzqXEbzIQTfqLx0BZVREaM7MfPQzNwZdkHB0MR-yUWkAjfRZOM9Y3P6a1of7QQgTlKa4XMIQo680l2-7rwMKnKpsPCGT-Yh6F8pxKDw7urpNjo4otZcUq8gul9SxQygjaQkwhgu_l_0OALtqP1B0hpf9wwgPThcJZUUvnkfLNLmPbBbBgvj4YrxQRaW8JSg-rlaCvdHyq3y6Resq1pibnJhlX6TqYTHSECZfxwz06V1APwBTrXlcx0UX_qxg6oS_eS7dPSvIvKCIacazU4bw87dcPYCiB0YdaoqLOe66iIb6DXKwYvJ2JYeXEkh2wpDnoQce5u0weoGcY4gxVQJcVrQqi5yNRxOWxVo7edsxiA49-SuMi05EYaB7XmTnEEwIO7OsAHBj9BfagTUXt8-83pjQawdkDpACOd3SkhdkfKgNLxiAqhCJeuj5nDurx9gAfaZRo
       content-type:
       - application/json
+      x-stf-serviceaccount:
+      - DUMMY
     method: POST
     uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/search
   response:
@@ -361,7 +361,7 @@ interactions:
         approval or positivity.\",\"labels\":[],\"position\":{\"page_number\":9,\"index\":39,\"start\":8145,\"end\":8477},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"866f34bfe00a53e9265df7699d9b264b\",\"field_type\":\"f\",\"field\":\"866f34bfe00a53e9265df7699d9b264b\",\"text\":\"\",\"labels\":[],\"position\":{\"page_number\":61,\"index\":296,\"start\":58608,\"end\":58608},\"fuzzy_result\":false}],\"facets\":{},\"query\":\"\",\"total\":278,\"page_number\":0,\"page_size\":20,\"next_page\":true,\"min_score\":0.0},\"shards\":[\"ba1d9f4d-a635-47e2-a355-608efa3d5ead\"]}"
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Content-Length:
       - '8584'
       access-control-expose-headers:
@@ -369,13 +369,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 17:06:48 GMT
+      - Wed, 03 Jun 2026 07:41:33 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '298'
+      - '247'
       x-nuclia-trace-id:
-      - 94a365afcc565769f2b01abb2e148b78
+      - 8c933222e0c973abdbcc425fed6cefe3
     status:
       code: 200
       message: OK
@@ -394,10 +394,10 @@ interactions:
       - europe-1.stashify.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
-      X-STF-SERVICEACCOUNT:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InNhIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLnN0YXNoaWZ5LmNsb3VkLyIsImlhdCI6MTc3MjUzMTg0Nywic3ViIjoiZjA2OTJlYTgtYTMyMy00YTVkLTk2ODItM2EzZjE2NDY1ZGFkIiwianRpIjoiNTkwN2VjMDItMzU4My00ZDFjLTk5YmUtZDZlYWJkODE3ZTlmIiwiZXhwIjoxODA0MDY3ODQ2LCJrZXkiOiIxMDQ4MDBkNC05OTc0LTRkYzMtODUyYy04Njc5MmJhZjM1MmEiLCJraWQiOiJkNjY3Zjc5OS1lYjY3LTRlMWYtYmNkNi0xYTY1OGEzYmNmNzcifQ.JIrCKxThxIHWz83vqkGZVbxWCezh0Y0sxl717zwOvh2HDRQhR8BYvZtabHL2d3vCcBW9dFHblyj425bI8v5V0bIiTF8K3cI2nD_2axeHCjeJSNVn6QLvKiJ4BO89F2QyeUTBtgT2BkBjbRhHbk7s0BQ1RTUPONGELFmkMmYmuyWmXNfdmWGwYQQCjHBcQh_XWW37N8ffp7A6M6F9_5w0niHJS5jeyYbdEe97X8nzqXEbzIQTfqLx0BZVREaM7MfPQzNwZdkHB0MR-yUWkAjfRZOM9Y3P6a1of7QQgTlKa4XMIQo680l2-7rwMKnKpsPCGT-Yh6F8pxKDw7urpNjo4otZcUq8gul9SxQygjaQkwhgu_l_0OALtqP1B0hpf9wwgPThcJZUUvnkfLNLmPbBbBgvj4YrxQRaW8JSg-rlaCvdHyq3y6Resq1pibnJhlX6TqYTHSECZfxwz06V1APwBTrXlcx0UX_qxg6oS_eS7dPSvIvKCIacazU4bw87dcPYCiB0YdaoqLOe66iIb6DXKwYvJ2JYeXEkh2wpDnoQce5u0weoGcY4gxVQJcVrQqi5yNRxOWxVo7edsxiA49-SuMi05EYaB7XmTnEEwIO7OsAHBj9BfagTUXt8-83pjQawdkDpACOd3SkhdkfKgNLxiAqhCJeuj5nDurx9gAfaZRo
       content-type:
       - application/json
+      x-stf-serviceaccount:
+      - DUMMY
     method: POST
     uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/search
   response:
@@ -454,13 +454,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 17:06:48 GMT
+      - Wed, 03 Jun 2026 07:41:33 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '198'
+      - '218'
       x-nuclia-trace-id:
-      - 0e476404d79cdffba369bf118348d240
+      - ce21bc205ee45db833a73040c611b19a
     status:
       code: 200
       message: OK
@@ -479,10 +479,10 @@ interactions:
       - europe-1.stashify.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
-      X-STF-SERVICEACCOUNT:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InNhIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLnN0YXNoaWZ5LmNsb3VkLyIsImlhdCI6MTc3MjUzMTg0Nywic3ViIjoiZjA2OTJlYTgtYTMyMy00YTVkLTk2ODItM2EzZjE2NDY1ZGFkIiwianRpIjoiNTkwN2VjMDItMzU4My00ZDFjLTk5YmUtZDZlYWJkODE3ZTlmIiwiZXhwIjoxODA0MDY3ODQ2LCJrZXkiOiIxMDQ4MDBkNC05OTc0LTRkYzMtODUyYy04Njc5MmJhZjM1MmEiLCJraWQiOiJkNjY3Zjc5OS1lYjY3LTRlMWYtYmNkNi0xYTY1OGEzYmNmNzcifQ.JIrCKxThxIHWz83vqkGZVbxWCezh0Y0sxl717zwOvh2HDRQhR8BYvZtabHL2d3vCcBW9dFHblyj425bI8v5V0bIiTF8K3cI2nD_2axeHCjeJSNVn6QLvKiJ4BO89F2QyeUTBtgT2BkBjbRhHbk7s0BQ1RTUPONGELFmkMmYmuyWmXNfdmWGwYQQCjHBcQh_XWW37N8ffp7A6M6F9_5w0niHJS5jeyYbdEe97X8nzqXEbzIQTfqLx0BZVREaM7MfPQzNwZdkHB0MR-yUWkAjfRZOM9Y3P6a1of7QQgTlKa4XMIQo680l2-7rwMKnKpsPCGT-Yh6F8pxKDw7urpNjo4otZcUq8gul9SxQygjaQkwhgu_l_0OALtqP1B0hpf9wwgPThcJZUUvnkfLNLmPbBbBgvj4YrxQRaW8JSg-rlaCvdHyq3y6Resq1pibnJhlX6TqYTHSECZfxwz06V1APwBTrXlcx0UX_qxg6oS_eS7dPSvIvKCIacazU4bw87dcPYCiB0YdaoqLOe66iIb6DXKwYvJ2JYeXEkh2wpDnoQce5u0weoGcY4gxVQJcVrQqi5yNRxOWxVo7edsxiA49-SuMi05EYaB7XmTnEEwIO7OsAHBj9BfagTUXt8-83pjQawdkDpACOd3SkhdkfKgNLxiAqhCJeuj5nDurx9gAfaZRo
       content-type:
       - application/json
+      x-stf-serviceaccount:
+      - DUMMY
     method: POST
     uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/find
   response:
@@ -625,13 +625,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 17:06:49 GMT
+      - Wed, 03 Jun 2026 07:41:34 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '6048'
+      - '363'
       x-nuclia-trace-id:
-      - 4899aa9e299939b8d37edc0f8d1e15f2
+      - 2ce92698236f229c44343e33477df4bb
     status:
       code: 200
       message: OK
@@ -648,10 +648,10 @@ interactions:
       - europe-1.stashify.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
-      X-STF-SERVICEACCOUNT:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InNhIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLnN0YXNoaWZ5LmNsb3VkLyIsImlhdCI6MTc3MjUzMTg0Nywic3ViIjoiZjA2OTJlYTgtYTMyMy00YTVkLTk2ODItM2EzZjE2NDY1ZGFkIiwianRpIjoiNTkwN2VjMDItMzU4My00ZDFjLTk5YmUtZDZlYWJkODE3ZTlmIiwiZXhwIjoxODA0MDY3ODQ2LCJrZXkiOiIxMDQ4MDBkNC05OTc0LTRkYzMtODUyYy04Njc5MmJhZjM1MmEiLCJraWQiOiJkNjY3Zjc5OS1lYjY3LTRlMWYtYmNkNi0xYTY1OGEzYmNmNzcifQ.JIrCKxThxIHWz83vqkGZVbxWCezh0Y0sxl717zwOvh2HDRQhR8BYvZtabHL2d3vCcBW9dFHblyj425bI8v5V0bIiTF8K3cI2nD_2axeHCjeJSNVn6QLvKiJ4BO89F2QyeUTBtgT2BkBjbRhHbk7s0BQ1RTUPONGELFmkMmYmuyWmXNfdmWGwYQQCjHBcQh_XWW37N8ffp7A6M6F9_5w0niHJS5jeyYbdEe97X8nzqXEbzIQTfqLx0BZVREaM7MfPQzNwZdkHB0MR-yUWkAjfRZOM9Y3P6a1of7QQgTlKa4XMIQo680l2-7rwMKnKpsPCGT-Yh6F8pxKDw7urpNjo4otZcUq8gul9SxQygjaQkwhgu_l_0OALtqP1B0hpf9wwgPThcJZUUvnkfLNLmPbBbBgvj4YrxQRaW8JSg-rlaCvdHyq3y6Resq1pibnJhlX6TqYTHSECZfxwz06V1APwBTrXlcx0UX_qxg6oS_eS7dPSvIvKCIacazU4bw87dcPYCiB0YdaoqLOe66iIb6DXKwYvJ2JYeXEkh2wpDnoQce5u0weoGcY4gxVQJcVrQqi5yNRxOWxVo7edsxiA49-SuMi05EYaB7XmTnEEwIO7OsAHBj9BfagTUXt8-83pjQawdkDpACOd3SkhdkfKgNLxiAqhCJeuj5nDurx9gAfaZRo
       content-type:
       - application/json
+      x-stf-serviceaccount:
+      - DUMMY
     method: GET
     uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/resource/866f34bfe00a53e9265df7699d9b264b?show=origin
   response:
@@ -661,7 +661,7 @@ interactions:
         folder/Test folder/Business Context and Product Vision 2026 1_self_signed.pdf","sync_metadata":{"file_id":"fi3567d8-8bbe-96ac-4e21-132d539a9e53","auth_provider":"sharefile_oauth","content_hash":"866f34bfe00a53e9265df7699d9b264b"},"source":"API"}}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Content-Length:
       - '591'
       access-control-expose-headers:
@@ -669,13 +669,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 02 Jun 2026 17:06:54 GMT
+      - Wed, 03 Jun 2026 07:41:35 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '17'
+      - '12'
       x-nuclia-trace-id:
-      - c72c52942744540cce96012608c7b325
+      - b4817066ab352e8896929c58b75fb0f3
     status:
       code: 200
       message: OK
@@ -701,10 +701,10 @@ interactions:
       - nucliadb-sdk/6.13.1.post6414
       X-SHOW-CONSUMPTION:
       - 'true'
-      X-STF-SERVICEACCOUNT:
-      - Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InNhIiwidHlwIjoiSldUIn0.eyJpc3MiOiJodHRwczovL2V1cm9wZS0xLnN0YXNoaWZ5LmNsb3VkLyIsImlhdCI6MTc3MjUzMTg0Nywic3ViIjoiZjA2OTJlYTgtYTMyMy00YTVkLTk2ODItM2EzZjE2NDY1ZGFkIiwianRpIjoiNTkwN2VjMDItMzU4My00ZDFjLTk5YmUtZDZlYWJkODE3ZTlmIiwiZXhwIjoxODA0MDY3ODQ2LCJrZXkiOiIxMDQ4MDBkNC05OTc0LTRkYzMtODUyYy04Njc5MmJhZjM1MmEiLCJraWQiOiJkNjY3Zjc5OS1lYjY3LTRlMWYtYmNkNi0xYTY1OGEzYmNmNzcifQ.JIrCKxThxIHWz83vqkGZVbxWCezh0Y0sxl717zwOvh2HDRQhR8BYvZtabHL2d3vCcBW9dFHblyj425bI8v5V0bIiTF8K3cI2nD_2axeHCjeJSNVn6QLvKiJ4BO89F2QyeUTBtgT2BkBjbRhHbk7s0BQ1RTUPONGELFmkMmYmuyWmXNfdmWGwYQQCjHBcQh_XWW37N8ffp7A6M6F9_5w0niHJS5jeyYbdEe97X8nzqXEbzIQTfqLx0BZVREaM7MfPQzNwZdkHB0MR-yUWkAjfRZOM9Y3P6a1of7QQgTlKa4XMIQo680l2-7rwMKnKpsPCGT-Yh6F8pxKDw7urpNjo4otZcUq8gul9SxQygjaQkwhgu_l_0OALtqP1B0hpf9wwgPThcJZUUvnkfLNLmPbBbBgvj4YrxQRaW8JSg-rlaCvdHyq3y6Resq1pibnJhlX6TqYTHSECZfxwz06V1APwBTrXlcx0UX_qxg6oS_eS7dPSvIvKCIacazU4bw87dcPYCiB0YdaoqLOe66iIb6DXKwYvJ2JYeXEkh2wpDnoQce5u0weoGcY4gxVQJcVrQqi5yNRxOWxVo7edsxiA49-SuMi05EYaB7XmTnEEwIO7OsAHBj9BfagTUXt8-83pjQawdkDpACOd3SkhdkfKgNLxiAqhCJeuj5nDurx9gAfaZRo
       content-type:
       - application/json
+      x-stf-serviceaccount:
+      - DUMMY
     method: POST
     uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/ask
   response:
@@ -716,10 +716,10 @@ interactions:
         Shan\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"ig\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"ala\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\",\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         who\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" is\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         a\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" Coop\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"/\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"Intern\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        with\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" a\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        Technical\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" \"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"2\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        position\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" based\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        in\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" Hyderabad\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\",\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        in\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" Technical\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        \"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"2\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        based\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" in\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        Hyderabad\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\",\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         and\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" Nathan\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         Van\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" G\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"heem\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\",\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         who\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" serves\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
@@ -2053,7 +2053,7 @@ interactions:
         sync_config_019cade7-c177-77c5-99c2-c8771f85cf91\\nsync_metadata:\\n  auth_provider:
         sharefile_oauth\\n  content_hash: 866f34bfe00a53e9265df7699d9b264b\\n  file_id:
         fi3567d8-8bbe-96ac-4e21-132d539a9e53\\nurl: ''\\n\",\"parent\":\"866f34bfe00a53e9265df7699d9b264b/a/title\",\"augmentation_type\":\"metadata_extension\"}},\"fields\":{\"866f34bfe00a53e9265df7699d9b264b/a/title\":{\"id\":\"866f34bfe00a53e9265df7699d9b264b/a/title\",\"text\":\"Business
-        Context and Product Vision 2026 1_self_signed.pdf\",\"augmentation_type\":\"field_extension\"}}}}}\n{\"item\":{\"type\":\"footnote_citations\",\"footnote_to_context\":{\"block-AB\":\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/3054-3424\",\"block-AD\":\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/4148-4399\"}}}\n{\"item\":{\"type\":\"metadata\",\"tokens\":{\"input\":876,\"output\":10,\"input_nuclia\":0.876,\"output_nuclia\":0.01},\"timings\":{\"generative_first_chunk\":1.9678141399999731,\"generative_total\":3.4086381910001364}}}\n{\"item\":{\"type\":\"consumption\",\"normalized_tokens\":{\"input\":0.87567,\"output\":0.00972,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0}}}\n"
+        Context and Product Vision 2026 1_self_signed.pdf\",\"augmentation_type\":\"field_extension\"}}}}}\n{\"item\":{\"type\":\"footnote_citations\",\"footnote_to_context\":{\"block-AB\":\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/3054-3424\",\"block-AD\":\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/4148-4399\"}}}\n{\"item\":{\"type\":\"metadata\",\"tokens\":{\"input\":876,\"output\":9,\"input_nuclia\":0.876,\"output_nuclia\":0.009},\"timings\":{\"generative_first_chunk\":1.4314445939962752,\"generative_total\":2.5168852349961526}}}\n{\"item\":{\"type\":\"consumption\",\"normalized_tokens\":{\"input\":0.87567,\"output\":0.00948,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0}}}\n"
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000
@@ -2064,15 +2064,15 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 17:06:55 GMT
+      - Wed, 03 Jun 2026 07:41:34 GMT
       nuclia-learning-id:
-      - 5ec8000f64da4610b921dc6ed43c9101
+      - 22b6beaeb8e444c094a4411b918e6fe1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '5450'
+      - '2346'
       x-nuclia-trace-id:
-      - 0b0b33fd760bca4dfa316ee6ca5c95a4
+      - e38b917bc5b7d061e849ddf4cc904372
     status:
       code: 200
       message: OK
@@ -2166,23 +2166,26 @@ interactions:
     body:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
         names and roles of new employees at ADP, including their locations. However,
-        it does not specify any additional details about their roles or the onboarding
-        process.","answer":"New employees at ADP include: Vamshi Shanigala, Coop/Intern
-        Technical 2, located in Hyderabad; Nathan Van Gheem, Enterprise Architect,
-        located in Raleigh; Shivabalu Thouta, Software Engineer, Senior, located in
-        Hyderabad; Aleix Ruiz de Villa, Scientific Advisor, located in Spain; and
-        Casimiro Pio Carrino, Scientific Advisor, located in Spain.","missing_info_query":"","useful":"yes","citations":["block-AA","block-AB"]}}}
+        it does not specify the total number of new employees or any additional details
+        about their onboarding process. Therefore, the context partially answers the
+        question by listing some new employees but lacks comprehensive information.","answer":"New
+        employees at ADP include: Vamshi Shanigala, Coop/Intern Technical 2, located
+        in Hyderabad; Nathan Van Gheem, Enterprise Architect, located in Raleigh;
+        Shivabalu Thouta, Software Engineer, Senior, located in Hyderabad; Aleix Ruiz
+        de Villa, Scientific Advisor, located in Spain; and Casimiro Pio Carrino,
+        Scientific Advisor, located in Spain.","missing_info_query":"What is the total
+        number of new employees at ADP and details about their onboarding process?","useful":"yes","citations":["block-AA","block-AB"]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":27,"output_tokens":17,"timings":{"generative":2.1856251350000093},"input_nuclia_tokens":0.027,"output_nuclia_tokens":0.017}}
+        {"chunk":{"type":"meta","input_tokens":27,"output_tokens":22,"timings":{"generative":5.383216631998948},"input_nuclia_tokens":0.027,"output_nuclia_tokens":0.022}}
 
-        {"chunk":{"normalized_tokens":{"input":0.02733,"output":0.01704,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02733,"output":0.02196,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -2190,17 +2193,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 17:07:01 GMT
+      - Wed, 03 Jun 2026 07:41:38 GMT
       nuclia-learning-id:
-      - fab294dd459f4296abf93e962998a203
+      - 9c6ca6537e29430494515981641d818d
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '2192'
+      - '5388'
       x-nuclia-trace-id:
-      - d21730bee652d96cee548d0183a8f5bb
+      - 49ae78b411083056bffd628f9179fba2
     status:
       code: 200
       message: OK
@@ -2247,7 +2250,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - d02bdb12588442f884f63cb8a441f9ba
+      - 2e78ea232e66414d89530197f1294835
       x-origin:
       - RAO
       x-session:
@@ -2442,14 +2445,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":9,"output_tokens":11,"timings":{"generative_first_chunk":0.3510308969998732,"generative":1.4114776560018072},"input_nuclia_tokens":0.009,"output_nuclia_tokens":0.011}}
+        {"chunk":{"type":"meta","input_tokens":9,"output_tokens":11,"timings":{"generative_first_chunk":0.4797411299950909,"generative":1.6182193479980924},"input_nuclia_tokens":0.009,"output_nuclia_tokens":0.011}}
 
         {"chunk":{"normalized_tokens":{"input":0.00924,"output":0.01092,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -2457,17 +2460,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 02 Jun 2026 17:07:04 GMT
+      - Wed, 03 Jun 2026 07:41:44 GMT
       nuclia-learning-id:
-      - 662592567dd9480b9db8790de0e29f65
+      - d2eee006f2994907af89f0acb2d979db
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '358'
+      - '487'
       x-nuclia-trace-id:
-      - 980165a3e20b5fdaf699eb82de52f2e2
+      - 1b0cc0d36c74b42178630be8ce4f0d32
     status:
       code: 200
       message: OK
