@@ -194,6 +194,7 @@ class SessionManager:
                 headers=message.headers,
                 arguments=message.arguments,
                 streaming=message.streaming,
+                chat_history=message.chat_history,
             )
 
             task = asyncio.create_task(

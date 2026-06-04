@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Any, Awaitable, Callable, Dict, Optional, Tuple, cast
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple, cast
 
 from nuclia.lib.nua import AsyncNuaClient
 
@@ -9,6 +9,7 @@ from hyperforge.interaction import AragAnswer
 from hyperforge.llm import NoopNuaClient, NuaBaseModel, NUAConnection
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import BaseSessionMemory, QuestionMemory, SessionMemory
+from hyperforge.models import HistoryQuestionAnswer
 from hyperforge.retrieval.agent import RetrievalAgent
 from hyperforge.retrieval.config import RetrievalAgentConfig
 
@@ -84,6 +85,7 @@ async def main(
     headers: Optional[Dict[str, str]] = None,
     memory_klass: type[BaseSessionMemory] = SessionMemory,
     streaming: bool = False,
+    chat_history: Optional[List[HistoryQuestionAnswer]] = None,
 ) -> QuestionMemory:
     try:
         state, session_memory = await init(
@@ -99,7 +101,9 @@ async def main(
             session_id=session_id,
             memory_klass=memory_klass,
         )
-        question_memory = session_memory.start_question(question, streaming=streaming)
+        question_memory = session_memory.start_question(
+            question, streaming=streaming, chat_history=chat_history
+        )
         if callback is not None:
             question_memory.set_callback_fn(callback)
 

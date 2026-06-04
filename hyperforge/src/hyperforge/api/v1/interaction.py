@@ -208,6 +208,7 @@ async def stream_response(
         question=interaction.question,
         headers=interaction.headers,
         arguments=interaction.arguments,
+        chat_history=interaction.chat_history,
         workflow_id=workflow_id,
         streaming=interaction.streaming,
     )
