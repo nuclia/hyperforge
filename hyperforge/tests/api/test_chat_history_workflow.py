@@ -94,6 +94,11 @@ async def test_chat_history_is_used_in_rephrase_and_summarize():
         question="How do I set it and what is the default value?",
         config=config,
         chat_history=prior_history,
+        loaded_modules=[
+            "hyperforge_rephrase",
+            "hyperforge_static",
+            "hyperforge_summarize",
+        ],
     )
     # Check that max_tokens is in the rephrased question, which is the second rephrase step
     rephrase_steps = [
