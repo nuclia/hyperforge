@@ -43,13 +43,6 @@ alembic_history:
 generate_alembic_version:
 	POSTGRESQL_DSN=postgresql:///postgres alembic revision --autogenerate
 
-
-build-ui:
-	cd frontend && npm ci && npm run build
-
-dev-ui:
-	cd frontend && npm install && npm run dev
-
 dockers:
 	docker build -t arag . -f HYPERFORGE.Dockerfile
 

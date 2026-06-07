@@ -156,7 +156,7 @@ class StandaloneApplication(FastAPI):
         # In development the Vite dev server runs separately (proxied to :8080).
         # app.py lives at: arag/src/hyperforge.standalone/app.py
         # three .parent steps → arag/
-        _frontend_dist = Path(__file__).parent.parent.parent / "frontend" / "dist"
+        _frontend_dist = Path(__file__).parent / "static"
         if _frontend_dist.is_dir():
             self.mount(
                 "/",

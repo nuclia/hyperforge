@@ -43,9 +43,9 @@ from hyperforge.server.cache import ValkeyCache
 from hyperforge.server.session import SessionManager
 from hyperforge.server.settings import Settings as ServerSettings
 from hyperforge.utils.http import SafeTransport
+import hyperforge  # noqa: F401
 
-_dir = pathlib.Path(__file__).parent.absolute()
-_package_path = _dir.parent.parent.absolute()
+_package_path = pathlib.Path(hyperforge.__file__).parent.absolute()
 
 NUA = os.environ.get("NUA_KEY", "DUMMY")
 
