@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from typing import Any, Optional, Tuple
 
 import prometheus_client  # type: ignore
@@ -62,7 +63,13 @@ class HTTPApplication(FastAPI):
         *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        @asynccontextmanager
+        async def lifespan(app: "HTTPApplication"):
+            await app.startup()
+            yield
+            await app.shutdown()
+
+        super().__init__(*args, lifespan=lifespan, **kwargs)
         self.settings = settings
         self.data_manager_settings = data_manager_settings
         self.include_router(internal.router)
@@ -76,8 +83,6 @@ class HTTPApplication(FastAPI):
         if self.extra_middlewares is not None:
             for extra_middleware in self.extra_middlewares:
                 self.add_middleware(extra_middleware)
-        self.add_event_handler("startup", self.startup)
-        self.add_event_handler("shutdown", self.shutdown)
 
     async def startup(self) -> None:
         GLOBAL_REGISTRY.clear()
