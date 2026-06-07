@@ -72,6 +72,7 @@ class HTTPApplication(FastAPI):
             AuthenticationMiddleware,
             backend=RaoAuthenticationBackend(),
         )
+
         if self.extra_middlewares is not None:
             for extra_middleware in self.extra_middlewares:
                 self.add_middleware(extra_middleware)
