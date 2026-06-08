@@ -33,6 +33,7 @@ from sqlalchemy_utils import (  # type: ignore
     drop_database,
 )
 
+import hyperforge  # noqa: F401
 from hyperforge.api.app import HTTPApplication
 from hyperforge.api.settings import Settings
 from hyperforge.broker.redis import RedisBroker
@@ -43,7 +44,6 @@ from hyperforge.server.cache import ValkeyCache
 from hyperforge.server.session import SessionManager
 from hyperforge.server.settings import Settings as ServerSettings
 from hyperforge.utils.http import SafeTransport
-import hyperforge  # noqa: F401
 
 _package_path = pathlib.Path(hyperforge.__file__).parent.absolute()
 

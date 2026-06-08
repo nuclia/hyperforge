@@ -42,6 +42,7 @@ dependencies = [
     "lru-dict",
     "sentry_sdk",
     "fastapi",
+    "starlette>1.0.0",
 ]
 
 

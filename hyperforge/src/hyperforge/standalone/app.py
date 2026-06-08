@@ -6,6 +6,7 @@ process, connected via a LocalBroker.  No Redis, no gRPC, no PostgreSQL, no
 NucliaDB required.
 """
 
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Tuple
 
@@ -137,9 +138,17 @@ class StandaloneApplication(FastAPI):
         settings: StandaloneSettings,
         **kwargs: Any,
     ) -> None:
+
+        @asynccontextmanager
+        async def lifespan(app: "StandaloneApplication"):
+            await app._startup()
+            yield
+            await app._shutdown()
+
         super().__init__(
             title="arag standalone",
             description="Single-process agent RAG — interaction and MCP only",
+            lifespan=lifespan,
             **kwargs,
         )
         self._agents_cfg = agents_cfg
@@ -172,9 +181,6 @@ class StandaloneApplication(FastAPI):
             allow_methods=["*"],
             allow_headers=["*"],
         )
-
-        self.add_event_handler("startup", self._startup)
-        self.add_event_handler("shutdown", self._shutdown)
 
     # ------------------------------------------------------------------
     # Property used by interaction.py / oauth.py to read answers_subject
