@@ -53,10 +53,6 @@ images.settings["nucliadb"]["env"]["NUA_API_KEY"] = NUA
 images.settings["nucliadb"]["env"]["DUMMY_PREDICT"] = "False"
 
 
-NUCLIA_Make_dataset = (
-    "https://storage.googleapis.com/ncl-testbed-gcp-stage-1/test_nucliadb/make.export"
-)
-
 NUCLIA_Make_article = "https://storage.googleapis.com/ncl-testbed-gcp-stage-1/test_nucliadb/articles.export"
 
 
@@ -136,20 +132,6 @@ async def init_fixture(
     assert sdk.import_status(kbid=kbid, import_id=import_id).status.value == "finished"
 
     return kbid
-
-
-@pytest.fixture(scope="session")
-def make_dataset(nucliadb: NucliaFixture):
-
-    kbid = asyncio.run(
-        init_fixture(
-            nucliadb,
-            "conv",
-            NUCLIA_Make_dataset,
-            kbid="00000000-0000-0000-0000-000000000002",
-        )
-    )
-    yield kbid
 
 
 @pytest.fixture(scope="session")
