@@ -60,6 +60,7 @@ class Provider(Enum):
     AZURE_CERTIFICATE_CREDENTIALS = "azure_certificate_credentials"
     AWS_S3_ACCESS_KEYS = "aws_s3_access_keys"
     SHAREFILE_OAUTH = "sharefile_oauth"
+    MCP_OAUTH = "mcp_oauth"
 
 
 class OAuthAuthenticateURL(BaseModel):
