@@ -264,13 +264,13 @@ class NucliaDBDriver(Driver):
 
         # Run requests in parallel as otherwise the facets endpoint can take too long on large knowledge boxes.
         tasks = []
-        for prefix, depth in [
-            ("/n/i", 2),  # content types
-            ("/s/p", 2),  # primary language
-            ("/l", 2),  # classification labels
+        for prefix in [
+            "/n/i",  # content types
+            "/s/p",  # primary language
+            # "/l",  # classification labels
         ]:
             request = CatalogFacetsRequest(
-                prefixes=[CatalogFacetsPrefix(prefix=prefix, depth=depth)]
+                prefixes=[CatalogFacetsPrefix(prefix=prefix)]
             )
             tasks.append(
                 self.driver.catalog_facets(kbid=self.config.kbid, content=request)
