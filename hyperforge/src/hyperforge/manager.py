@@ -196,6 +196,9 @@ class Manager:
                 result.object = c.object
             elif isinstance(c, MetaGenerativeResponse):
                 result.timings = c.timings
+                result.learning_id = c.learning_id
+                result.model_name = c.model_name
+                result.trace_id = c.trace_id
             elif isinstance(c, CitationsGenerativeResponse):
                 result.citations = c.citations
             elif isinstance(c, FootnoteCitationsGenerativeResponse):

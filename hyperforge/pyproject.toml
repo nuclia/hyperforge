@@ -17,8 +17,8 @@ license = "Apache-2.0"
 dependencies = [
     "alembic",
     "pydantic",
-    "nuclia>=4.9.25",
-    "nuclia-models>=0.52.1",
+    "nuclia>=4.11.5",
+    "nuclia-models>=0.59.0",
     "nucliadb-models>=6.13.1.post6414",
     "nucliadb-sdk>=6.13.1.post6414",
     "nucliadb-telemetry[otel]",

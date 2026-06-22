@@ -43,6 +43,7 @@ class RedisBroker(Broker):
             client = Redis.from_url(
                 url,
                 decode_responses=True,
+                socket_timeout=keepalive_ms / 1000,
             )
         return cls(client, activate_subject, keepalive_ms)
 
