@@ -1,4 +1,4 @@
-from typing import Annotated, Dict, Literal
+from typing import Annotated, Dict, List, Literal, Optional
 
 from pydantic import AliasChoices, BaseModel, Field
 from pydantic.types import Discriminator, Tag
@@ -8,6 +8,7 @@ from hyperforge.interaction import (
     Feedback,
     OAuthAuthenticateURL,
 )
+from hyperforge.models import HistoryQuestionAnswer
 
 # Messages used in the pubsub protocol between API and agent servers
 
@@ -22,6 +23,10 @@ class StartInteraction(BaseModel):
     question: str
     headers: Dict[str, str] = {}
     arguments: Dict[str, str] = {}
+    chat_history: Optional[List[HistoryQuestionAnswer]] = Field(
+        default=None,
+        description="Client-managed chat history. When set (even to an empty list), overrides any server-side session history for agents that use previous Q&A context. Omit the field entirely to use server-side session history.",
+    )
     workflow_id: str = "default"
     streaming: bool = False
     op: Literal["start"] = "start"

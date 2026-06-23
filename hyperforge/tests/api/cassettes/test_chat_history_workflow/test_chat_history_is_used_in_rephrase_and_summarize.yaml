@@ -1,0 +1,250 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      x-nuclia-nuakey:
+      - DUMMY
+    method: GET
+    uri: https://europe-1.nuclia.cloud/api/authorizer/info
+  response:
+    body:
+      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"03d47998-f672-4a9b-a57b-bde3a9c3ee8c","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '227'
+      content-type:
+      - application/json
+      date:
+      - Tue, 16 Jun 2026 09:56:37 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '4'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"question": "", "retrieval": true, "user_id": "rephrase", "system": null,
+      "chat_history": [], "context": [], "query_context": {}, "query_context_order":
+      {}, "truncate": true, "user_prompt": {"prompt": "\nYou are an expert at rephrasing
+      complex questions for an agentic RAG system.\n\nYour task is to review the main
+      question and any provided context, then rephrase the question to maximize clarity
+      and focus. Follow these steps:\n\n1. Carefully analyze the main question and
+      all context provided, including sources, previous questions and answers, and
+      any other relevant information.\n2. I present, assess whether previous questions
+      and answers (history) are necessary for rephrasing. Only use history if it is
+      relevant and improves the clarity or specificity of the main question; otherwise,
+      ignore it.\n3. If the question can be made clearer or more specific, rephrase
+      it accordingly. If it is already clear and focused, return it unchanged.\n4.
+      Only use information present in the provided context. Do not introduce external
+      knowledge or assumptions.\n5. Return a JSON object with the following fields:\n    -
+      \"rephrased_question\": The rephrased version of the main question, keep the
+      same question if no rephrasing is needed or possible.\n    - \"rules\": Any
+      rules or guidelines that should be followed when generating the answer.\n    -
+      \"reason\": Explain why the rephrasing was necessary or beneficial.\nReturn
+      only the JSON object as your response.\n\nAdditional context to assist with
+      rephrasing:\n# CONTEXT\n\n- ## Previous questions and answers in this session:\n-
+      Question: What is the max_tokens parameter in Nuclia?\n- Answer: max_tokens
+      controls the maximum number of tokens the LLM may generate in a single response.\n-
+      Question: Oh nice, can you always start you responses with a smiley emoji?\n-
+      Answer: Sure! \ud83d\ude0a I can start my responses with a smiley emoji.\n\n\n\n\n\n\n#
+      MAIN QUESTION:\nHow do I set it and what is the default value?"}, "citations":
+      false, "citation_threshold": null, "generative_model": "gemini-2.5-flash-lite",
+      "max_tokens": 2000, "query_context_images": {}, "prefer_markdown": null, "json_schema":
+      {"title": "rephrase", "description": "", "type": "object", "properties": {"rephrased_question":
+      {"type": "string", "description": "Rephrased version of the main question."},
+      "rules": {"type": "array", "items": {"type": "string"}, "description": "Rules
+      or guidelines to follow when generating the answer."}, "reason": {"type": "string",
+      "description": "Reason for rephrasing explaining why it is necessary."}}, "required":
+      ["rephrased_question"]}, "format_prompt": false, "rerank_context": false, "tools":
+      [], "tool_choice": {"type": "required"}, "reasoning": false, "seed": null}'
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2651'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      x-client-ident:
+      - default
+      x-message:
+      - ec3a99d5123f4cb6af870927cd18da83
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+      x-stf-nuakey:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"object","object":{"rephrased_question":"What is the
+        default value of the max_tokens parameter in Nuclia, and how can it be set?","rules":["Start
+        the response with a smiley emoji."],"reason":"The original question ''How
+        do I set it and what is the default value?'' is ambiguous because ''it'' is
+        not clearly defined. By referencing the previous question about ''max_tokens'',
+        the rephrased question clarifies that ''it'' refers to the max_tokens parameter.
+        This makes the question more specific and easier to answer accurately."}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":9,"output_tokens":10,"timings":{"generative":0.8693042640807107},"input_nuclia_tokens":0.009,"output_nuclia_tokens":0.01}}
+
+        {"chunk":{"normalized_tokens":{"input":0.00894,"output":0.01048,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 16 Jun 2026 09:56:37 GMT
+      nuclia-learning-id:
+      - 050a227785984904af5e852ff2901e73
+      nuclia-learning-model:
+      - gemini-2.5-flash-lite
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '875'
+      x-nuclia-trace-id:
+      - 54b9805f3b078d7f4c9e0f4ad4e276d8
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"question": "", "retrieval": true, "user_id": "summarize", "system": "You
+      are a helpful AI assistant. Your role is to provide accurate, clear, and well-structured
+      answers based strictly on the information provided to you.\nKey principles:\n-
+      Answer only using the information in the provided context\n- Do not use external
+      knowledge, assumptions, or prior experience\n- Maintain a professional and informative
+      tone\n- Be concise yet thorough\n- If information is insufficient, acknowledge
+      this clearly\n\nAlways follow any additional instructions provided about format,
+      style, or domain-specific behavior.", "chat_history": [{"author": "USER", "text":
+      "What is the max_tokens parameter in Nuclia?"}, {"author": "NUCLIA", "text":
+      "max_tokens controls the maximum number of tokens the LLM may generate in a
+      single response."}, {"author": "USER", "text": "Oh nice, can you always start
+      you responses with a smiley emoji?"}, {"author": "NUCLIA", "text": "Sure! \ud83d\ude0a
+      I can start my responses with a smiley emoji."}], "context": [], "query_context":
+      {}, "query_context_order": {}, "truncate": true, "user_prompt": {"prompt": "\n##
+      Question\nWhat is the default value of the max_tokens parameter in Nuclia, and
+      how can it be set?\n\n## Provided Context\n[START OF CONTEXT]\n## max_tokens
+      reference\n\n\n\n\n## Chunk: 4cf92b85e2e04e5c834ea86206902b08\n``` The max_tokens
+      parameter controls how many tokens the LLM may generate in a single response.
+      It can be set per-request via the API or configured globally in the agent workflow.
+      The default value depends on the model, but is typically 1024 tokens. ```\n\n\n[END
+      OF CONTEXT]\n\n## Answering Guidelines\n- Carefully read all context; it may
+      be lengthy or detailed\n- Do not omit or overlook any relevant information\n-
+      If the context is incomplete or insufficient, try to provide a partial answer
+      and encourage the user to clarify their question\n- Read carefully any extra
+      instructions below if provided and use them to answer\n\nNow provide your answer
+      to the question: What is the default value of the max_tokens parameter in Nuclia,
+      and how can it be set?"}, "citations": null, "citation_threshold": null, "generative_model":
+      "chatgpt-azure-4o-mini", "max_tokens": 5000, "query_context_images": {}, "prefer_markdown":
+      null, "json_schema": null, "format_prompt": false, "rerank_context": false,
+      "tools": [], "tool_choice": {"type": "auto"}, "reasoning": false, "seed": null}'
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2361'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.nuclia.cloud
+      User-Agent:
+      - nuclia.py/4.9.25
+      x-client-ident:
+      - default
+      x-message:
+      - ec3a99d5123f4cb6af870927cd18da83
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+      x-stf-nuakey:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: "{\"chunk\":{\"type\":\"text\",\"text\":\"\U0001F60A\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        The\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" default\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        value\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" of\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        the\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" max\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        parameter\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" in\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        Nu\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"cl\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ia\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        is\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" typically\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        \"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"102\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"4\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\",\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        although\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" it\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        can\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" vary\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        depending\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" on\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        the\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" model\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        It\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" can\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        be\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" set\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        per\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"-request\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        via\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" the\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        API\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" or\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        configured\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" globally\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        in\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" the\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        agent\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" workflow\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":12,\"output_tokens\":6,\"timings\":{\"generative_first_chunk\":0.585227217990905,\"generative\":1.990719944005832},\"input_nuclia_tokens\":0.012,\"output_nuclia_tokens\":0.006}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.01212,\"output\":0.00564,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Tue, 16 Jun 2026 09:56:38 GMT
+      nuclia-learning-id:
+      - 8f66602fb183485e850f89a087c86876
+      nuclia-learning-model:
+      - chatgpt-azure-4o-mini
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '595'
+      x-nuclia-trace-id:
+      - e4b29beb1263f6a8ded53ab594bb3bfe
+    status:
+      code: 200
+      message: OK
+version: 1
