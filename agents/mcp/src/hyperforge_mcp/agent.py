@@ -421,6 +421,14 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                 "; ".join(error_texts) if error_texts else str(tool_result.meta)
             )
             logger.error(f"Tool {tool_name} encountered an error: {error_message}")
+            context.chunks.append(
+                Chunk(
+                    chunk_id=f"mcp_{self.config.id}_{tool_name}_error",
+                    title=f"MCP tool error: {tool_name}",
+                    text=(f"Tool: {tool_name}\nError: {error_message}"),
+                    origin_agent=self.config.module,
+                )
+            )
             await memory.add_step(
                 step_module=self.config.module,
                 step_title=self.step_title("Tool error"),
@@ -429,10 +437,32 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                 timeit=time() - t0,
             )
             return
-        # TODO: extract better information from the tool result
-        context.structured.append(
-            json.dumps(tool_result.structuredContent, indent=2, default=str)
+        text_blocks = sum(
+            1 for block in tool_result.content if isinstance(block, types.TextContent)
         )
+        image_blocks = sum(
+            1 for block in tool_result.content if isinstance(block, types.ImageContent)
+        )
+        resource_blocks = sum(
+            1 for block in tool_result.content if isinstance(block, types.ResourceLink)
+        )
+
+        trace_lines = [
+            f"Tool: {tool_name}",
+            f"is_error: {tool_result.isError}",
+            f"text_blocks: {text_blocks}",
+            f"image_blocks: {image_blocks}",
+            f"resource_links: {resource_blocks}",
+        ]
+        if tool_result.structuredContent is not None:
+            structured = json.dumps(
+                tool_result.structuredContent, indent=2, default=str
+            )
+            trace_lines.append("Structured content (truncated):")
+            trace_lines.append(
+                structured[:2000] + ("...(truncated)" if len(structured) > 2000 else "")
+            )
+            context.structured.append(structured)
         messages.append(
             Message(author=Author.NUCLIA, text=f"Tool {tool_name} executed")
         )
@@ -527,8 +557,10 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                             if block.resource.mimeType is not None
                             else "application/octet-stream",
                             b64encoded=block.resource.blob,
+                            )
                         )
-                    )
+
+        messages.append(Message(author=Author.NUCLIA, text="\n".join(trace_lines)))
 
         step_value = (
             f"Used tool: {tool_name} with arguments: {tool_arguments}"
@@ -1127,6 +1159,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             loaded_tools = False
             max_retries = 2
             for attempt in range(max_retries):
+                interaction_completed = False
                 try:
                     async with self.http_streaming_session_ctx(
                         manager=manager, memory=memory
@@ -1142,6 +1175,19 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                                 f"Failed to preload tools from MCP server: {e}"
                             )
                             self.tools = []
+                        if self.tools and loaded_tools and attempt == 0:
+                            tools_text = "\n".join(
+                                f"- {t.name}: {t.description or '(no description)'}"
+                                for t in self.tools
+                            )
+                            context.chunks.append(
+                                Chunk(
+                                    chunk_id=f"mcp_{self.config.id}_tools_list",
+                                    title="Available MCP tools",
+                                    text=f"The following tools are available:\n{tools_text}",
+                                    origin_agent=self.config.module,
+                                )
+                            )
                         if attempt == 0:
                             # Only preload prompts and resources on the first attempt
                             try:
@@ -1166,14 +1212,24 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                         ) = await self.mcp_interaction(
                             memory, manager, question, context
                         )
+                        interaction_completed = True
                     break  # Success, exit retry loop
                 except Exception as e:
+                    if interaction_completed:
+                        logger.warning(
+                            "Ignoring MCP HTTP teardown error after successful interaction: %s",
+                            repr(e),
+                        )
+                        break
+
                     logger.exception(
                         f"Error during MCP HTTP interaction (attempt {attempt + 1}/{max_retries})"
                     )
 
                     if attempt + 1 == max_retries:
                         raise e
+                finally:
+                    self.session = None
         elif self.driver_context_manager is not None:
             async with self.driver_context_manager as (read_stream, write_stream):  # type: ignore
                 if read_stream is None or write_stream is None:

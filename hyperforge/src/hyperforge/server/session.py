@@ -181,8 +181,12 @@ class SessionManager:
                     config=config.memory,
                     agent=message.agent_id,
                     workflow_id=message.workflow_id,
+                    account_id=message.account,
                 )
-                self.memory[message.session] = memory
+                # Ephemeral sessions are short-lived and should not be persisted in
+                # the shared LRU cache across activations.
+                if message.session != "ephemeral":
+                    self.memory[message.session] = memory
             else:
                 memory = self.memory[message.session]
 

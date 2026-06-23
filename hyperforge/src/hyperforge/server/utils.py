@@ -16,6 +16,7 @@ async def get_memory(
     config: MemoryConfig,
     agent: str,
     workflow_id: str,
+    account_id: str = "",
 ) -> BaseSessionMemory:
     memory: BaseSessionMemory
 
@@ -53,5 +54,6 @@ async def get_memory(
         )
 
     memory.init(session=session)
+    memory.account_id = account_id
 
     return memory

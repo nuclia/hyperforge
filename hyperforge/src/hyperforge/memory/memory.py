@@ -85,6 +85,7 @@ class BaseSessionMemory:
 
     agent_id: str = ""
     workflow_id: str = ""
+    account_id: str = ""
     kbid: Optional[str] = None
 
     # User information dictionary
@@ -637,6 +638,10 @@ class QuestionMemory:
     def get_workflow_id(self) -> str:
         """Returns the workflow ID for the current question. The workflow ID is a unique identifier that is shared across all questions and interactions that belong to the same workflow. This can be used to group related interactions together, and to keep track of the conversation history in a coherent way."""
         return self.session.workflow_id
+
+    def get_account_id(self) -> str:
+        """Returns the account ID for the current question."""
+        return self.session.account_id
 
     def context_user_info(self) -> str:
         """Returns a string with user information that can be used in the context of the agent. This can include information such as user preferences, user history, or any other relevant information about the user that can help the agent to generate a more personalized and accurate response."""
