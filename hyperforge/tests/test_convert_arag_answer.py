@@ -430,6 +430,76 @@ def test_step_without_optional_fields():
     assert "Planning" in result[0].text
 
 
+def test_step_metadata_defaults_to_none():
+    """Step.metadata is None when not provided (backward compat)."""
+    step = Step(
+        original_question_uuid=None,
+        actual_question_uuid=None,
+        module="smart",
+        title="Planning",
+        timeit=0.5,
+        input_nuclia_tokens=None,
+        output_nuclia_tokens=None,
+        agent_path="agent",
+    )
+    assert step.metadata is None
+
+
+def test_step_metadata_accepts_dict():
+    """Step.metadata stores an arbitrary key/value dict."""
+    meta = {"source": "test-run", "confidence": 0.95, "tags": ["a", "b"]}
+    step = Step(
+        original_question_uuid="q1",
+        actual_question_uuid="q1",
+        module="smart",
+        title="Planning",
+        timeit=1.0,
+        input_nuclia_tokens=5,
+        output_nuclia_tokens=10,
+        agent_path="agent",
+        metadata=meta,
+    )
+    assert step.metadata == meta
+
+
+def test_step_metadata_roundtrip():
+    """Step.metadata survives a model_dump / model_validate round-trip."""
+    meta = {"key": "value", "nested": {"inner": 42}}
+    step = Step(
+        original_question_uuid="q1",
+        actual_question_uuid="q1",
+        module="smart",
+        title="Planning",
+        timeit=1.0,
+        input_nuclia_tokens=5,
+        output_nuclia_tokens=10,
+        agent_path="agent",
+        metadata=meta,
+    )
+    dumped = step.model_dump()
+    assert dumped["metadata"] == meta
+
+    restored = Step.model_validate(dumped)
+    assert restored.metadata == meta
+
+
+def test_step_metadata_none_omitted_in_dump():
+    """When metadata is None the serialised dict contains the key with None value."""
+    step = Step(
+        original_question_uuid=None,
+        actual_question_uuid=None,
+        module="smart",
+        title="Planning",
+        timeit=0.5,
+        input_nuclia_tokens=None,
+        output_nuclia_tokens=None,
+        agent_path="agent",
+    )
+    dumped = step.model_dump()
+    assert "metadata" in dumped
+    assert dumped["metadata"] is None
+
+
 # Exception
 
 

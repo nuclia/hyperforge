@@ -122,6 +122,7 @@ class Step(BaseModel):
     input_nuclia_tokens: Optional[float]
     output_nuclia_tokens: Optional[float]
     error: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
 
     def __str__(self):
         return f"({self.timeit:.2f}s) {self.module}: {self.title} \n {self.value} \n {self.reason} \n NT:({self.input_nuclia_tokens}:{self.output_nuclia_tokens})"
@@ -248,6 +249,25 @@ CONTEXT_TEMPLATE = """
 CONTEXT_PROMPT_TEMPLATE = PROMPT_ENVIRONMENT.from_string(CONTEXT_TEMPLATE)
 
 
+class JSONObject(BaseModel):
+    json_schema: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="JSON schema that defines the structure of the JSON object.",
+    )
+    json_object: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="The actual JSON object that conforms to the provided JSON schema.",
+    )
+    metadata: Optional[Dict[str, Any]] = Field(
+        default_factory=dict,
+        description="Optional metadata associated with the JSON object.",
+    )
+    id: Optional[str] = Field(
+        default_factory=lambda: uuid.uuid4().hex,
+        description="Unique identifier for this JSON object instance.",
+    )
+
+
 class Context(BaseModel):
     id: str = Field(
         default_factory=lambda: uuid.uuid4().hex,
@@ -260,6 +280,7 @@ class Context(BaseModel):
     images: Dict[str, Image] = Field(default_factory=dict)
     prompts: List[Prompt] = Field(default_factory=list)
     structured: List[str] = Field(default_factory=list)
+    json_objects: List[JSONObject] = Field(default_factory=list)
     source: str
     agent: str
     # XXX: This is not actually a summary, but an answer attempt for now!
