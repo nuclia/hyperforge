@@ -51,7 +51,7 @@ class PerplexitySearchAgent(ContextAgent, Agent[PerplexitySearchAgentConfig]):
                 Optional[PerplexityDriver], manager.drivers.get(self.config.source)
             )
         if self.driver is None:
-            raise Exception("Perplexity driver does not exist")
+            raise Exception("Perplexity source does not exist")
 
         response = await self.driver.client.search.create(
             query=question,
@@ -121,7 +121,7 @@ class PerplexitySearchAgent(ContextAgent, Agent[PerplexitySearchAgentConfig]):
             )
 
         if self.driver is None:
-            raise Exception("Perplexity driver does not exist")
+            raise Exception("Perplexity source does not exist")
 
         context = await self.search(
             question,

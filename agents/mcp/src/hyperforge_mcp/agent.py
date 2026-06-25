@@ -1139,7 +1139,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         try:
             await self.initialize(manager, memory)
         except KeyError:
-            raise Exception("No MCP driver found")
+            raise Exception("No MCP source found")
 
         context = Context(
             agent_id=self.agent_id,

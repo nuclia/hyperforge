@@ -36,7 +36,7 @@ CONFIG = {
                 "kbid": "e103caf3-f8cb-4161-a57c-aad1192d0666",
                 "key": KB_E103CAF3_F8CB_4161_A57C_AAD1192D0666,
                 "filters": [],
-                "description": "Nuclia Sync driver for testing",
+                "description": "Nuclia Sync source for testing",
                 "connection_ids": ["019cade7-c177-77c5-99c2-c8771f85cf91"],
             },
         },

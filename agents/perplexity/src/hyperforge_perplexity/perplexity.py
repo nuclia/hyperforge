@@ -69,7 +69,7 @@ class PerplexityAgent(ContextAgent, Agent[PerplexityAgentConfig]):
                 Optional[PerplexityDriver], manager.drivers.get(self.config.source)
             )
         if self.driver is None:
-            raise Exception("Perplexity driver does not exist")
+            raise Exception("Perplexity source does not exist")
 
         web_search_options = WebSearchOptions(
             search_context_size=self.config.search_context_size,
@@ -178,7 +178,7 @@ class PerplexityAgent(ContextAgent, Agent[PerplexityAgentConfig]):
             )
 
         if self.driver is None:
-            raise Exception("Perplexity driver does not exist")
+            raise Exception("Perplexity source does not exist")
 
         context = await self.internet_search(
             question,

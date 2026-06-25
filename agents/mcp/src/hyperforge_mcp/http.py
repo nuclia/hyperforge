@@ -719,8 +719,8 @@ async def handle_callback(
 
 @driver(
     id="mcphttp",
-    title="MCP HTTP Driver",
-    description="Driver for interacting with the MCP HTTP API.",
+    title="MCP HTTP Source",
+    description="Source for interacting with the MCP HTTP API.",
     config_schema=MCPHTTPDriverConfig,
 )
 class MCPHTTPDriver(Driver):

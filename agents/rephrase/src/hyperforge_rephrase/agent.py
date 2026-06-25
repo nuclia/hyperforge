@@ -281,7 +281,7 @@ class RephraseAgent(Agent[RephraseAgentConfig]):
                 NucliaDBDriver, manager.drivers.get(self.config.kb)
             )
             if nucliadb_driver is None:
-                raise Exception(f"No NucliaDB Driver {self.config.kb} found")
+                raise Exception(f"No KnowledgeBox source {self.config.kb} found")
 
             if self.config.synonyms:
                 question = await nucliadb_driver.synonyms(question)

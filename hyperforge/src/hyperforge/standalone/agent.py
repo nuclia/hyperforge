@@ -87,7 +87,7 @@ class StaticAgentManager:
             if drv.identifier == driver:
                 return drv
         raise exceptions.NotFoundError(
-            f"Driver '{driver}' not found in agent '{agent_id}'"
+            f"Source '{driver}' not found in agent '{agent_id}'"
         )
 
     async def get_drivers(self, account: str, agent_id: str) -> List[Any]:
