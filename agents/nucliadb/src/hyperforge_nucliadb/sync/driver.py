@@ -52,8 +52,8 @@ class ExternalConnectionOutput(BaseModel):
 
 @driver(
     id="sync",
-    title="Sync Driver",
-    description="Driver for interacting with the Sync API.",
+    title="Sync Source",
+    description="Source for interacting with the Sync API.",
     config_schema=SyncDriverConfig,
 )
 class SyncDriver(NucliaDBDriver):

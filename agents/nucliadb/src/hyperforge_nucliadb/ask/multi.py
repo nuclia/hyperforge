@@ -122,7 +122,7 @@ async def choose_source(
 async def load_source_information(source: str, manager: Manager) -> Source:
     driver = manager.drivers.get(source)
     if not isinstance(driver, NucliaDBDriver) and not isinstance(driver, SyncDriver):
-        raise ValueError("Source is not a NucliaDB driver")
+        raise ValueError("Source is not a KnowledgeBox source")
     (
         description,
         labels,

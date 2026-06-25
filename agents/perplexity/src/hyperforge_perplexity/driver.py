@@ -7,8 +7,8 @@ from hyperforge_perplexity.config import PerplexityDriverConfig
 
 @driver(
     id="perplexity",
-    title="Perplexity Driver",
-    description="Driver for interacting with the Perplexity API.",
+    title="Perplexity Source",
+    description="Source for interacting with the Perplexity API.",
     config_schema=PerplexityDriverConfig,
 )
 class PerplexityDriver(Driver):

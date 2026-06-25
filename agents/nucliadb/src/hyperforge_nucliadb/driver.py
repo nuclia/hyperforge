@@ -81,8 +81,8 @@ async def manager_connect(conn: NucliaDBConnection):
 
 @driver(
     id="nucliadb",
-    title="NucliaDB Driver",
-    description="Driver for interacting with the NucliaDB API.",
+    title="KnowledgeBox Source",
+    description="Source for interacting with the KnowledgeBox API.",
     config_schema=NucliaDBConfig,
 )
 class NucliaDBDriver(Driver):

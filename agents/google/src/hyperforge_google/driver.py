@@ -8,8 +8,8 @@ from hyperforge_google.config import GoogleDriverConfig
 
 @driver(
     id="google",
-    title="Google Driver",
-    description="Driver for interacting with the Google API.",
+    title="Google Source",
+    description="Source for interacting with the Google API.",
     config_schema=GoogleDriverConfig,
 )
 class GoogleDriver(Driver):

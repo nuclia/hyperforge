@@ -130,8 +130,8 @@ class MCPStdioFullDriverConfig(MCPStdioInnerConfig):
 
 @driver(
     id="mcpstdio",
-    title="MCP Stdio Driver",
-    description="Driver for interacting with the MCP Stdio API.",
+    title="MCP Stdio Source",
+    description="Source for interacting with the MCP Stdio API.",
     config_schema=MCPStdioDriverConfig,
 )
 class MCPStdioDriver(Driver):
@@ -163,7 +163,7 @@ class MCPStdioDriver(Driver):
         for env in validated_config.env:
             if driver.config.env is None or env not in driver.config.env:
                 raise KeyError(
-                    f"No environmental variable on MCP driver {driver.config.server}: {env}"
+                    f"No environmental variable on MCP source {driver.config.server}: {env}"
                 )
 
         combined_envs = {}

@@ -77,7 +77,7 @@ class WidgetType(str, Enum):
 
     # Driver and source selection widgets
     DRIVER_SELECT = "driver_select"
-    """Selector for data source drivers (databases, APIs, etc.)"""
+    """Selector for data sources (databases, APIs, etc.)"""
 
     FILTERED_SOURCE_SELECT = "filtered_source_select"
     """Source selector with filtering capabilities based on transport type"""

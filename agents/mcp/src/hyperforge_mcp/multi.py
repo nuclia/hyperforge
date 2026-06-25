@@ -284,7 +284,7 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
             try:
                 await agent.initialize(manager, memory)
             except KeyError:
-                raise Exception("No MCP driver found")
+                raise Exception("No MCP source found")
             response, input_tokens, output_tokens = await self.summarize_tools(
                 manager,
                 agent.tools,

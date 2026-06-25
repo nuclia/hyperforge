@@ -15,9 +15,9 @@ class DriverConfig(BaseModel, Generic[T]):
     identifier: str
     name: str
     provider: Any = Field(
-        ..., description="The type of driver, e.g., 'google', 'marklogic', etc."
+        ..., description="The type of source, e.g., 'google', 'marklogic', etc."
     )
-    config: T = Field(..., description="The configuration specific to the driver.")
+    config: T = Field(..., description="The configuration specific to the source.")
 
 
 class Driver(BaseModel):
