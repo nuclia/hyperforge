@@ -21,7 +21,7 @@ dependencies = [
     "nuclia-models>=0.59.0",
     "nucliadb-models>=6.13.1.post6414",
     "nucliadb-sdk>=6.13.1.post6414",
-    "nucliadb-telemetry[otel]",
+    "nucliadb-telemetry[otel]>=6.15.0",
     "pydantic_settings",
     "mcp>=1.26.0",
     "prometheus_client",

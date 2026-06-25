@@ -1307,7 +1307,7 @@ requires-dist = [
     { name = "nuclia-models", specifier = ">=0.59.0" },
     { name = "nucliadb-models", specifier = ">=6.13.1.post6414" },
     { name = "nucliadb-sdk", specifier = ">=6.13.1.post6414" },
-    { name = "nucliadb-telemetry", extras = ["otel"] },
+    { name = "nucliadb-telemetry", extras = ["otel"], specifier = ">=6.15.0" },
     { name = "prometheus-client" },
     { name = "psycopg2" },
     { name = "pydantic" },
@@ -2930,7 +2930,7 @@ wheels = [
 
 [[package]]
 name = "nucliadb-telemetry"
-version = "6.13.0.post6160"
+version = "6.15.0.post6607"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "orjson" },
@@ -2940,13 +2940,12 @@ dependencies = [
     { name = "wrapt" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1f/34/7c9c95d717689320ac42a5f8e358be7720e31ed5175e9afb766a4d950913/nucliadb_telemetry-6.13.0.post6160-py3-none-any.whl", hash = "sha256:a27d4e72b1bc76e8f43b602b67a0df172db77c22ce7d4227a63609ac86b055a4", size = 54917, upload-time = "2026-04-29T08:16:40.052Z" },
+    { url = "https://files.pythonhosted.org/packages/ff/63/af67c940d9539e174db6ae53940996c94be478dfb6dcaa2565384dfb5fe3/nucliadb_telemetry-6.15.0.post6607-py3-none-any.whl", hash = "sha256:b74adfcabd6023de2cb9ab698da9091b0f8fb591cbcd8a0435dc868945f1d653", size = 50883, upload-time = "2026-06-23T11:06:37.15Z" },
 ]
 
 [package.optional-dependencies]
 otel = [
     { name = "opentelemetry-api" },
-    { name = "opentelemetry-exporter-jaeger-thrift" },
     { name = "opentelemetry-exporter-otlp-proto-grpc" },
     { name = "opentelemetry-instrumentation-aiohttp-client" },
     { name = "opentelemetry-instrumentation-fastapi" },
@@ -2968,20 +2967,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/97/b9/3161be15bb8e3ad01be8be5a968a9237c3027c5be504362ff800fca3e442/opentelemetry_api-1.39.1.tar.gz", hash = "sha256:fbde8c80e1b937a2c61f20347e91c0c18a1940cecf012d62e65a7caf08967c9c", size = 65767, upload-time = "2025-12-11T13:32:39.182Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/cf/df/d3f1ddf4bb4cb50ed9b1139cc7b1c54c34a1e7ce8fd1b9a37c0d1551a6bd/opentelemetry_api-1.39.1-py3-none-any.whl", hash = "sha256:2edd8463432a7f8443edce90972169b195e7d6a05500cd29e6d13898187c9950", size = 66356, upload-time = "2025-12-11T13:32:17.304Z" },
-]
-
-[[package]]
-name = "opentelemetry-exporter-jaeger-thrift"
-version = "1.21.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "opentelemetry-api" },
-    { name = "opentelemetry-sdk" },
-    { name = "thrift" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/c7/ff/560d975ce09ec123dce1b7a97877bad1a5b2424c5c8e31e55169d4cd85e6/opentelemetry_exporter_jaeger_thrift-1.21.0.tar.gz", hash = "sha256:41119bc7e5602cec83dd7d7060f061ecbc91de231272e8f515b07ef9a4b6e41c", size = 27722, upload-time = "2023-11-07T23:16:26.522Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/81/2b/c6ff9604f5b8469e1fabe2b6ee50c36dadf0f572a430494d8dd5ce37d99f/opentelemetry_exporter_jaeger_thrift-1.21.0-py3-none-any.whl", hash = "sha256:4364b8dfa6965707c72c43d85942b1491982b7d44f0123d593513e8bedafa9e2", size = 35929, upload-time = "2023-11-07T23:15:52.341Z" },
 ]
 
 [[package]]
@@ -4411,12 +4396,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/ca/6c/3d75c196ac07ac874
 wheels = [
     { url = "https://files.pythonhosted.org/packages/4f/bd/de8d508070629b6d84a30d01d57e4a65c69aa7f5abe7560b8fad3b50ea59/termcolor-3.1.0-py3-none-any.whl", hash = "sha256:591dd26b5c2ce03b9e43f391264626557873ce1d379019786f99b0c2bee140aa", size = 7684, upload-time = "2025-04-30T11:37:52.382Z" },
 ]
-
-[[package]]
-name = "thrift"
-version = "0.23.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/d2/fd/6766a2a1a2532dbcb0fa8e31fd9a22de78b7338c7a07b5e5a6ef4e8913f1/thrift-0.23.0.tar.gz", hash = "sha256:5f43448a92c36ed6a450048355d10e231a1787e4c28965f08fabac0eb978914c", size = 66440, upload-time = "2026-05-14T08:35:49.196Z" }
 
 [[package]]
 name = "tomli"
