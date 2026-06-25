@@ -229,6 +229,19 @@ def convert_arag_answer_to_content(
                 )
             )
 
+        if context.json_objects:
+            for idx, json_obj in enumerate(context.json_objects):
+                contents.append(
+                    EmbeddedResource(
+                        type="resource",
+                        resource=TextResourceContents(
+                            uri=f"rao-response://context/{context.id}/json-objects/{idx}",  # type: ignore[arg-type]
+                            text=json.dumps(pydantic_core.to_jsonable_python(json_obj)),
+                            mimeType="application/json",
+                        ),
+                    )
+                )
+
         if context.image_urls:
             contents.append(
                 EmbeddedResource(
@@ -272,6 +285,7 @@ def convert_arag_answer_to_content(
                 type="text",
                 text="\n".join(parts),
                 annotations=Annotations(audience=["assistant"]),
+                _meta=step.metadata,
             )
         )
 
