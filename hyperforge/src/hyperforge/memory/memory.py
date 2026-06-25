@@ -1,7 +1,7 @@
 import logging
 from collections import OrderedDict
 from datetime import datetime, timezone
-from typing import Awaitable, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple, Union, cast
 from uuid import uuid4
 
 from nuclia.lib.nua_responses import Author, Image, Message
@@ -74,6 +74,8 @@ def _qa_list_to_chat_messages(history: List[HistoryQuestionAnswer]) -> List[Mess
             Message(author=Author.NUCLIA, text=qa.answer),
         )
     ]
+
+
 CONTEXT_FIELD: str = "context"
 STEPS_FIELD: str = "steps"
 USER_INFO_FIELD: str = "user_info"
@@ -817,6 +819,7 @@ class QuestionMemory:
         step_value: Optional[str] = None,
         step_reason: Optional[str] = None,
         error: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
     ):
         new_step = Step(
             original_question_uuid=self.original_question_uuid,
@@ -830,6 +833,7 @@ class QuestionMemory:
             input_nuclia_tokens=input_nuclia_tokens,
             output_nuclia_tokens=output_nuclia_tokens,
             error=error,
+            metadata=metadata,
         )
         self.steps.append(new_step)
         if self.callback_fn is not None:
