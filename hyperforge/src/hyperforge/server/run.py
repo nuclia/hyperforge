@@ -6,8 +6,8 @@ import sentry_sdk
 from nucliadb_telemetry.fastapi import application_metrics
 from nucliadb_telemetry.logs import setup_logging
 from nucliadb_telemetry.settings import LogLevel, LogSettings
-from nucliadb_telemetry.tracerprovider import AsyncTracerProvider
 from nucliadb_telemetry.utils import get_telemetry, setup_telemetry
+from opentelemetry.sdk.trace import TracerProvider
 from sentry_sdk.integrations.excepthook import ExcepthookIntegration
 
 from hyperforge.broker.redis import RedisBroker
@@ -42,7 +42,7 @@ async def run_metrics_server(port: int):
 
 async def run_server(
     settings: Settings,
-    tracer: Optional[AsyncTracerProvider],
+    tracer: Optional[TracerProvider],
     data_manager_settings: DataManagerSettings,
 ) -> SessionManager:
     if tracer:
