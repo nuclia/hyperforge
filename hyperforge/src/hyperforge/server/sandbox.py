@@ -7,7 +7,7 @@ from nucliadb_telemetry.logs import setup_logging
 from nucliadb_telemetry.settings import LogLevel, LogSettings
 from sentry_sdk.integrations.excepthook import ExcepthookIntegration
 
-from agents.restricted.src.hyperforge_restricted import sandbox
+from hyperforge_restricted import sandbox
 from hyperforge.server.settings import Settings
 
 
