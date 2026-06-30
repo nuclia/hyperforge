@@ -56,9 +56,8 @@ class RedisBroker(Broker):
             maxlen=100,
         )
 
-    async def subscribe_activations(
-        self,
-    ) -> AsyncIterator[tuple[StartInteraction, dict[str, str]]]:
+    async def _ensure_consumer_group(self) -> None:
+        """Create the stream and consumer group if they don't exist."""
         try:
             await self._client.xgroup_create(
                 name=self._activate_subject,
@@ -68,6 +67,11 @@ class RedisBroker(Broker):
         except ResponseError as e:
             if "BUSYGROUP" not in str(e):
                 raise
+
+    async def subscribe_activations(
+        self,
+    ) -> AsyncIterator[tuple[StartInteraction, dict[str, str]]]:
+        await self._ensure_consumer_group()
 
         while True:
             try:
@@ -90,6 +94,13 @@ class RedisBroker(Broker):
             except (asyncio.CancelledError, KeyboardInterrupt):
                 logger.info("Activation subscription cancelled, exiting...")
                 break
+            except ResponseError as e:
+                if "NOGROUP" in str(e):
+                    logger.warning("Consumer group lost, re-creating...")
+                    await self._ensure_consumer_group()
+                else:
+                    logger.exception("Error while subscribing to activations, retrying...")
+                    await asyncio.sleep(1)
             except Exception:
                 logger.exception("Error while subscribing to activations, retrying...")
                 await asyncio.sleep(1)
