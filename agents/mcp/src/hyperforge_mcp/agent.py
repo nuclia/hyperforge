@@ -492,6 +492,8 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                 resource = await active_session.read_resource(block.uri)
                 for index, content in enumerate(resource.contents):
                     if isinstance(content, types.TextResourceContents):
+                        # Use the resource URI as the chunk URL source
+                        resource_urls = [content.uri] if content.uri else []
                         context.chunks.append(
                             Chunk(
                                 chunk_id=f"mcp_{self.config.id}_{tool_name}_{index}",
@@ -499,6 +501,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                                 text=content.text,
                                 metadata=content.meta,
                                 origin_agent=self.config.module,
+                                url=resource_urls,
                             )
                         )
                         block_text = content.text
@@ -525,6 +528,8 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
 
             elif isinstance(block, types.EmbeddedResource):
                 if isinstance(block.resource, types.TextResourceContents):
+                    # Use the embedded resource URI as the chunk URL source
+                    embedded_urls = [block.resource.uri] if block.resource.uri else []
                     context.chunks.append(
                         Chunk(
                             chunk_id=f"mcp_{self.config.id}_{tool_name}",
@@ -532,6 +537,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                             text=block.resource.text,
                             metadata=block.resource.meta,
                             origin_agent=self.config.module,
+                            url=embedded_urls,
                         )
                     )
                     # add also metadata to the messages so the LLM can use it if needed
@@ -557,8 +563,8 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                             if block.resource.mimeType is not None
                             else "application/octet-stream",
                             b64encoded=block.resource.blob,
-                            )
                         )
+                    )
 
         messages.append(Message(author=Author.NUCLIA, text="\n".join(trace_lines)))
 
