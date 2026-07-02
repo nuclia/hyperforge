@@ -24,6 +24,7 @@ dependencies = [
     "hyperforge_google",
     "hyperforge_perplexity",
     "hyperforge_perplexity_search",
+    "hyperforge_salesforce",
 ]
 
 
@@ -52,6 +53,11 @@ members = [
     "agents/perplexity_search",
 ]
 
+[[tool.uv.index]]
+name = "nuclia"
+url = "https://oauth2accesstoken@europe-west4-python.pkg.dev/nuclia-internal/nuclia-internal-python/simple/"
+explicit = true
+
 [tool.uv]
 default-groups = "all"
 managed = true
@@ -78,7 +84,9 @@ hyperforge_smart = { workspace = true }
 hyperforge_static_string = { workspace = true }
 hyperforge_google = { workspace = true }
 hyperforge_perplexity = { workspace = true }
+hyperforge_salesforce = { index = "nuclia" }
 hyperforge_perplexity_search = { workspace = true }
+hyperforge_salesforce = { index = "nuclia" }
 
 [dependency-groups]
 dev = [
