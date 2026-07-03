@@ -1,3 +1,4 @@
+import re
 from time import time
 from typing import List, Optional, overload
 
@@ -24,6 +25,8 @@ Key principles:
 - If information is insufficient, acknowledge this clearly
 
 Always follow any additional instructions provided about format, style, or domain-specific behavior."""
+
+_URL_RE = re.compile(r"https?://[^\s)\]>\"']+")
 
 SUMMARIZE_PROMPT_CONVERSATIONAL = """
 {% if rules -%}
@@ -302,6 +305,7 @@ class SummarizeAgent(Agent[SummarizeAgentConfig]):
 
 def build_answer_citations(answer: str, contexts: list[Context]) -> AnswerCitations:
     result = AnswerCitations()
+    answer_urls = list(dict.fromkeys(_URL_RE.findall(answer)))
     # Build a map of citation_id to context
     citation_map = {
         context.citations_id: context
@@ -347,6 +351,20 @@ def build_answer_citations(answer: str, contexts: list[Context]) -> AnswerCitati
                     context.citations is None or chunk.chunk_id in context.citations
                 ) and chunk.origin_url:
                     origin_urls.append(chunk.origin_url)
+
+            if not origin_urls:
+                for chunk in context.chunks:
+                    if chunk.origin_url:
+                        origin_urls.append(chunk.origin_url)
+
+            if not origin_urls and context.structured:
+                for structured_item in context.structured:
+                    origin_urls.extend(_URL_RE.findall(structured_item))
+
+        if origin_urls:
+            origin_urls = list(dict.fromkeys(origin_urls))
+        elif answer_urls:
+            origin_urls = answer_urls
 
         result.metadata[citation_id] = CitationMetadata(
             context_id=context.id,
