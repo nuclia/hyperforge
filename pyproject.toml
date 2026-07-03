@@ -86,7 +86,6 @@ hyperforge_google = { workspace = true }
 hyperforge_perplexity = { workspace = true }
 hyperforge_salesforce = { index = "nuclia" }
 hyperforge_perplexity_search = { workspace = true }
-hyperforge_salesforce = { index = "nuclia" }
 
 [dependency-groups]
 dev = [
