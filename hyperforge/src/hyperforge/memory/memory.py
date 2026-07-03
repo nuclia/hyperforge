@@ -206,6 +206,18 @@ class NoMemorySessionMemory(BaseSessionMemory):
     async def qa_history(self) -> list[HistoryQuestionAnswer]:
         return []
 
+    async def set_source(self, source: Source):
+        entry = CachedNucliaDBSource(
+            cache=self.cache, agent_id=self.agent_id, source=source.id
+        )
+        await entry.set(source)
+
+    async def get_source(self, source_id: str) -> Source | None:
+        entry = CachedNucliaDBSource(
+            cache=self.cache, agent_id=self.agent_id, source=source_id
+        )
+        return await entry.get()
+
 
 class EphemeralSessionMemory(BaseSessionMemory):
     @classmethod
