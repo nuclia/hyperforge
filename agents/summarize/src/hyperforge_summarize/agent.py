@@ -344,9 +344,17 @@ def build_answer_citations(answer: str, contexts: list[Context]) -> AnswerCitati
             # This is a citation to a summarized context
             for chunk in context.chunks:
                 if (
-                    context.citations is None or chunk.chunk_id in context.citations
+                    not context.citations or chunk.chunk_id in context.citations
                 ) and chunk.origin_url:
                     origin_urls.append(chunk.origin_url)
+
+            if not origin_urls:
+                for chunk in context.chunks:
+                    if chunk.origin_url:
+                        origin_urls.append(chunk.origin_url)
+
+        if origin_urls:
+            origin_urls = list(dict.fromkeys(origin_urls))
 
         result.metadata[citation_id] = CitationMetadata(
             context_id=context.id,
