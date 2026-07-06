@@ -89,7 +89,7 @@ class RestartAgent(Agent[RestartAgentConfig]):
 
         # retrieve all paragraphs and ask to rephrase on the NUA API
         new_questions = information.get("questions", [])
-        reason = information.get("reason", [])
+        reason = information.get("reason", "")
         answered = information.get("answered", False)
 
         if retry >= self.config.retries and not answered:
