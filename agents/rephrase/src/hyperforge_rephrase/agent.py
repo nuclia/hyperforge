@@ -202,7 +202,7 @@ class RephraseAgent(Agent[RephraseAgentConfig]):
         # retrieve all paragraphs and ask to rephrase on the NUA API
         new_questions = information.get("questions", [])
         list_rules = information.get("rules", [])
-        reason = information.get("reason", [])
+        reason = information.get("reason", "")
         step_value = (
             f"{len(new_questions)} questions.\nQuestions: {', '.join(new_questions)}"
         )
@@ -249,7 +249,7 @@ class RephraseAgent(Agent[RephraseAgentConfig]):
         # retrieve all paragraphs and ask to rephrase on the NUA API
         rephrased_question = [information.get("rephrased_question", question)]
         list_rules = information.get("rules", [])
-        reason = information.get("reason", [])
+        reason = information.get("reason", "")
         step_value = (
             (
                 f"Rephrased question: {rephrased_question[0]}\nRules: {', '.join(list_rules)}\n"
