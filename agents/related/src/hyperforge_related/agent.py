@@ -1,11 +1,11 @@
 from time import time
 
+from hyperforge import PROMPT_ENVIRONMENT
 from hyperforge.agent import Agent
 from hyperforge.manager import Manager
 from hyperforge.memory import QuestionMemory
 from hyperforge.trace import trace_agent
 
-from hyperforge import PROMPT_ENVIRONMENT
 from hyperforge_related.config import RelatedAgentConfig
 
 ASK_JSON_SCHEMA = {

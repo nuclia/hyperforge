@@ -1,18 +1,21 @@
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from hyperforge_related.agent import RelatedAgent
-from hyperforge_related.config import RelatedAgentConfig
-
+from hyperforge.llm_config import LLMConfig
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import EphemeralSessionMemory
 from hyperforge.models import MemoryConfig, Rules
+
+from hyperforge_related.agent import RelatedAgent
+from hyperforge_related.config import RelatedAgentConfig
 
 
 def make_agent(
     model: str = "chatgpt-azure-4o-mini", prompt: str | None = None
 ) -> RelatedAgent:
-    config = RelatedAgentConfig(id="test-related", model=model, prompt=prompt)
+    config = RelatedAgentConfig(
+        id="test-related", model=LLMConfig(model_id=model), prompt=prompt
+    )
     return RelatedAgent(config=config)
 
 
@@ -104,7 +107,7 @@ async def test_execute_json_called_with_correct_model():
     await agent(memory=memory, manager=manager)
 
     call_kwargs = manager.execute_json.call_args.kwargs
-    assert call_kwargs["model"] == "my-custom-model"
+    assert call_kwargs["model"].model_id == "my-custom-model"
 
 
 @pytest.mark.asyncio
