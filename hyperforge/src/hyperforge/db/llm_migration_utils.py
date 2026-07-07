@@ -52,12 +52,14 @@ def walk_and_replace(obj: Any, replacements: dict[str, str]) -> bool:
     if isinstance(obj, dict):
         if obj.get("_type") == LLM_CONFIG_TYPE and "model_id" in obj:
             model_value = obj["model_id"]
-            base_model = model_value.split("/")[0]
-            if base_model in replacements:
-                # Preserve the /<uuid> suffix if present
-                suffix = model_value[len(base_model) :]  # "" or "/<uuid>"
-                obj["model_id"] = replacements[base_model] + suffix
-                modified = True
+            if isinstance(model_value, str):
+                base_model, _, suffix = model_value.partition("/")
+                if base_model in replacements:
+                    new_value = replacements[base_model]
+                    if suffix:
+                        new_value = f"{new_value}/{suffix}"
+                    obj["model_id"] = new_value
+                    modified = True
         # Recurse into all values regardless (there may be nested LLMConfigs)
         for value in obj.values():
             if walk_and_replace(value, replacements):
@@ -98,9 +100,14 @@ def migrate_llm_models(conn: Connection, replacements: dict[str, str]) -> int:
         for row_id, config in rows:
             if config is None:
                 continue
+            # Some drivers return JSONB as a string; ensure we have a dict
+            if isinstance(config, str):
+                config = json.loads(config)
             if walk_and_replace(config, replacements):
                 conn.execute(
-                    text(f"UPDATE {table} SET {column} = :config WHERE id = :id"),
+                    text(
+                        f"UPDATE {table} SET {column} = CAST(:config AS jsonb) WHERE id = :id"
+                    ),
                     {"config": json.dumps(config), "id": row_id},
                 )
                 total_modified += 1
