@@ -1,6 +1,7 @@
 from typing import List, Literal, Optional
 
 from hyperforge.context.config import ContextAgentConfig
+from hyperforge.llm_config import LLMConfig, LLMField, llm_defaults
 from hyperforge.utils import WidgetType
 from nucliadb_models.search import KnowledgeGraphEntity
 from pydantic import Field
@@ -40,11 +41,10 @@ class AskAgentConfig(ContextAgentConfig):
             "show_in_node": True,
         },
     )
-    configuration_model: str = Field(
-        default="gemini-2.5-flash",
+    configuration_model: LLMField = Field(
+        default_factory=lambda: LLMConfig(model_id=llm_defaults.fast),
         title="Generative model",
         description="Model used to generate the configuration",
-        json_schema_extra={"widget": WidgetType.MODEL_SELECT},
     )
     fast_answer: bool = True
     # Setting this to True so that this PR will not break the current behavior

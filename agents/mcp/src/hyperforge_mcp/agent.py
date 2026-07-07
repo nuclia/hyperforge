@@ -331,7 +331,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             question="",
             user_id="mcp_agent",
             query_context_images=images,
-            generative_model=self.config.tool_choice_model,
+            generative_model=self.config.tool_choice_model.model_id,
             tools=tools,
             user_prompt=UserPrompt(
                 prompt="Choose the best tool or tools for the task, select task_complete if no more tools are needed according to the user request and previous interactions"
@@ -915,7 +915,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             question="",
             user_id=self.config.id or "mcp_agent",
             query_context_images=images,
-            generative_model=self.config.sampling_model,
+            generative_model=self.config.sampling_model.model_id,
             format_prompt=False,
             system=params.systemPrompt,
             context=new_messages,
@@ -940,7 +940,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         return CreateMessageResult(
             role="user",
             content=types.TextContent(type="text", text=resp.answer),
-            model=self.config.sampling_model,
+            model=self.config.sampling_model.model_id,
         )
 
     async def elicitation_callback(

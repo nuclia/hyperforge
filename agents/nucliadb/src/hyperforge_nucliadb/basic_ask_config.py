@@ -1,6 +1,7 @@
 from typing import List, Literal, Optional, Tuple
 
 from hyperforge.context.agent import ContextAgentConfig
+from hyperforge.llm_config import LLMConfig, LLMField, llm_defaults
 from hyperforge.utils import WidgetType
 from pydantic import Field
 from pydantic.config import ConfigDict
@@ -15,11 +16,10 @@ class BasicAskAgentConfig(ContextAgentConfig):
             "show_in_node": True,
         },
     )
-    generative_model: str = Field(
-        default="chatgpt-azure-4o-mini",
+    generative_model: LLMField = Field(
+        default_factory=lambda: LLMConfig(model_id=llm_defaults.default),
         title="Generative model",
         description="Model used to generate answers",
-        json_schema_extra={"widget": WidgetType.MODEL_SELECT},
     )
     published_functions: Optional[Tuple[str, ...]] = Field(
         default=(

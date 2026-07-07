@@ -709,7 +709,7 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
         # Use full resource strategy by requesting title and summary fields
         ask_request = AskRequest(
             query=question,
-            generative_model=self.config.generative_model,
+            generative_model=self.config.generative_model.model_id,
             # TODO: Consider what to do when multiple resources match
             filter_expression=filter_expression,
             rag_strategies=[
@@ -1132,7 +1132,7 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
             query=question,
             show=[ResourceProperties.BASIC, ResourceProperties.ORIGIN],
             citations=CitationsType.LLM_FOOTNOTES,
-            generative_model=self.config.generative_model,
+            generative_model=self.config.generative_model.model_id,
             filter_expression=filter_expression,
             rag_strategies=rag_strategies,
         )
@@ -1244,7 +1244,7 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
         ask_request = AskRequest(
             query=question,
             citations=True,
-            generative_model=self.config.generative_model,
+            generative_model=self.config.generative_model.model_id,
             filters=nucliadb_driver.config.filters,
         )
         paragraphs = await nucliadb_driver.ask(

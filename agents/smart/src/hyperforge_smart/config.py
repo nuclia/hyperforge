@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Literal, Optional, Tuple
 
 from hyperforge.configure import get_agent_config_klass
 from hyperforge.context.config import ContextAgentConfig
+from hyperforge.llm_config import LLMConfig, LLMField, llm_defaults
 from hyperforge.utils import WidgetType
 from pydantic import BaseModel, Field, field_serializer, field_validator
 from pydantic.config import ConfigDict
@@ -68,17 +69,15 @@ class SmartAgentConfig(ContextAgentConfig):
             "widget": WidgetType.NOT_SHOWN,
         },
     )
-    planner_model: str = Field(
-        default="chatgpt-4.1",
+    planner_model: LLMField = Field(
+        default_factory=lambda: LLMConfig(model_id=llm_defaults.smart),
         title="Planner model",
         description="Model used to plan the actions to take",
-        json_schema_extra={"widget": WidgetType.MODEL_SELECT},
     )
-    executor_model: str = Field(
-        default="chatgpt-4.1",
+    executor_model: LLMField = Field(
+        default_factory=lambda: LLMConfig(model_id=llm_defaults.smart),
         title="Executor model",
         description=("Model used to select and execute the tools."),
-        json_schema_extra={"widget": WidgetType.MODEL_SELECT},
     )
     max_iterations: int = Field(
         default=5,

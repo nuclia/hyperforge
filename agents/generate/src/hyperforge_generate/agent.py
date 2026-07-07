@@ -69,7 +69,7 @@ class GenerateAgent(Agent[GenerateAgentConfig]):
             question="",
             user_prompt=UserPrompt(prompt=prompt),
             format_prompt=False,
-            generative_model=self.config.model,
+            generative_model=self.config.model.model_id,
             max_tokens=2000,
             tracking=memory.get_tracking_info(),
         )

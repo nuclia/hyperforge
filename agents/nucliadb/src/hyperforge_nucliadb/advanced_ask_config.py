@@ -1,6 +1,7 @@
 from typing import Any, List, Literal, Optional, Union
 
 from hyperforge.context.config import ContextAgentConfig
+from hyperforge.llm_config import LLMConfig, LLMField, llm_defaults
 from hyperforge.utils import WidgetType
 from nucliadb_models.filters import FilterExpression
 from nucliadb_models.search import (
@@ -30,11 +31,10 @@ class AdvancedAskAgentConfig(ContextAgentConfig):
             "show_in_node": True,
         },
     )
-    generative_model: str = Field(
-        default="chatgpt-azure-4o-mini",
+    generative_model: LLMField = Field(
+        default_factory=lambda: LLMConfig(model_id=llm_defaults.default),
         title="Generative model",
         description="Model used to generate answers",
-        json_schema_extra={"widget": WidgetType.MODEL_SELECT},
     )
     features: Optional[list[ChatOptions]] = Field(
         default=None,

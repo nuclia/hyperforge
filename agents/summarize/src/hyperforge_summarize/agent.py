@@ -230,7 +230,7 @@ class SummarizeAgent(Agent[SummarizeAgentConfig]):
             if self.config.system_prompt
             else DEFAULT_SYSTEM_PROMPT,
             format_prompt=False,
-            generative_model=self.config.model,
+            generative_model=self.config.model.model_id,
             query_context_images=images,
             max_tokens=5000,
             chat_history=await memory.get_chat_history(),

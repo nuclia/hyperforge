@@ -1,11 +1,12 @@
 import json
-from typing import Any, AsyncIterator, Dict, List, Optional, Protocol, Tuple
+from typing import Any, AsyncIterator, Dict, List, Optional, Protocol, Tuple, Union
 
 from nuclia.lib.nua import AsyncNuaClient
 from nuclia.lib.nua_responses import (
     ChatModel,
     Image,
     Message,
+    Reasoning,
     RerankModel,
     RerankResponse,
     Tokens,
@@ -31,7 +32,47 @@ from pydantic_core import ErrorDetails, ValidationError
 from hyperforge.configure import get_driver_klass
 from hyperforge.driver import Driver, DriverConfig
 from hyperforge.interaction import StreamingChunk
+from hyperforge.llm_config import LLMConfig
 from hyperforge.models import TrackingInfo
+
+# Type alias for parameters that accept either a plain model ID string
+# or a structured LLMConfig object. This keeps backwards compatibility
+# with agents that still pass raw strings.
+ModelParam = Union[str, LLMConfig]
+
+
+def _resolve_model_id(model: ModelParam) -> str:
+    """Extract the model identifier string from a ModelParam.
+
+    If `model` is already a string, return it as-is.
+    If it's an LLMConfig, return its `model_id` field.
+    """
+    if isinstance(model, str):
+        return model
+    return model.model_id
+
+
+def _resolve_reasoning(model: ModelParam) -> Union[Reasoning, bool]:
+    """Extract the reasoning configuration from a ModelParam.
+
+    If `model` is a plain string or has no reasoning configured, returns False
+    (reasoning disabled). Otherwise, builds a `Reasoning` object from the
+    LLMConfig's effective reasoning settings. NUA handles any necessary
+    effort/budget_tokens normalization server-side.
+    """
+    if isinstance(model, str):
+        return False
+    effective = model.get_effective_reasoning()
+    if effective is None:
+        return False
+    kwargs: dict[str, Any] = {}
+    if effective.effort is not None:
+        kwargs["effort"] = effective.effort.value
+    if effective.budget_tokens is not None:
+        kwargs["budget_tokens"] = effective.budget_tokens
+    if not kwargs:
+        return False
+    return Reasoning(**kwargs)
 
 
 class StreamCallback(Protocol):
@@ -223,7 +264,7 @@ class Manager:
         self,
         prompt: str,
         user_id: str,
-        model: str,
+        model: ModelParam,
         query_context_images: Dict[str, Image] = {},
         system: Optional[str] = None,
         max_tokens: int = 2000,
@@ -242,7 +283,8 @@ class Manager:
                 question="",
                 user_prompt=UserPrompt(prompt=prompt),
                 format_prompt=False,
-                generative_model=model,
+                generative_model=_resolve_model_id(model),
+                reasoning=_resolve_reasoning(model),
                 query_context_images=query_context_images,
                 max_tokens=max_tokens,
                 chat_history=chat_history,
@@ -255,7 +297,7 @@ class Manager:
         self,
         prompt: str,
         user_id: str,
-        model: str,
+        model: ModelParam,
         query_context_images: Dict[str, Image] = {},
         system: Optional[str] = None,
         max_tokens: int = 2000,
@@ -270,7 +312,8 @@ class Manager:
                     question="",
                     user_prompt=UserPrompt(prompt=prompt),
                     format_prompt=False,
-                    generative_model=model,
+                    generative_model=_resolve_model_id(model),
+                    reasoning=_resolve_reasoning(model),
                     query_context_images=query_context_images,
                     max_tokens=max_tokens,
                     chat_history=chat_history,
@@ -300,7 +343,7 @@ class Manager:
         self,
         prompt: str,
         user_id: str,
-        model: str,
+        model: ModelParam,
         images: Dict[str, Image],
         system: Optional[str] = None,
         tracking: TrackingInfo | None = None,
@@ -312,7 +355,8 @@ class Manager:
                     user_id=user_id,
                     user_prompt=UserPrompt(prompt=prompt),
                     format_prompt=False,
-                    generative_model=model,
+                    generative_model=_resolve_model_id(model),
+                    reasoning=_resolve_reasoning(model),
                     query_context_images=images,
                     system=system,
                 ),
@@ -342,7 +386,7 @@ class Manager:
         prompt: str,
         user_id: str,
         schema: Dict[str, Any],
-        model: str,
+        model: ModelParam,
         images: Dict[str, Image] = {},
         system: Optional[str] = None,
         max_tokens: int = 2000,
@@ -354,7 +398,8 @@ class Manager:
                     user_id=user_id,
                     question="",
                     user_prompt=UserPrompt(prompt=prompt),
-                    generative_model=model,
+                    generative_model=_resolve_model_id(model),
+                    reasoning=_resolve_reasoning(model),
                     format_prompt=False,
                     query_context_images=images,
                     json_schema=schema,
@@ -390,7 +435,7 @@ class Manager:
         question: str,
         user_id: str,
         schema: Dict[str, Any],
-        model: str,
+        model: ModelParam,
         contexts: List[str] = [],
         images: Dict[str, Image] = {},
         system: Optional[str] = None,
@@ -402,7 +447,8 @@ class Manager:
                     user_id=user_id,
                     question=question,
                     query_context=contexts,
-                    generative_model=model,
+                    generative_model=_resolve_model_id(model),
+                    reasoning=_resolve_reasoning(model),
                     format_prompt=True,
                     query_context_images=images,
                     json_schema=schema,

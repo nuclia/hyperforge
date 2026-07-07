@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Literal, Optional
 from hyperforge.agent import AgentConfig
 from hyperforge.configure import get_agent_config_klass
 from hyperforge.context.config import ContextAgentConfig
+from hyperforge.llm_config import LLMConfig, LLMField, llm_defaults
 from hyperforge.utils import WidgetType
 from pydantic import BaseModel, Field, field_serializer, field_validator
 from pydantic.config import ConfigDict
@@ -49,11 +50,10 @@ class PythonAgentConfig(ContextAgentConfig):
         },
     )
 
-    decision_model: str = Field(
-        default="chatgpt-o3-mini",
+    decision_model: LLMField = Field(
+        default_factory=lambda: LLMConfig(model_id=llm_defaults.reasoning),
         title="Generative model",
         description="Model used to assess the condition",
-        json_schema_extra={"widget": WidgetType.MODEL_SELECT},
     )
 
     needs_rephrase: bool = Field(

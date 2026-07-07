@@ -311,7 +311,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         item = ChatModel(
             question="",
             user_id=f"smart_planner-{self.config.module}",
-            generative_model=model,
+            generative_model=model.model_id,
             tools=tools,
             user_prompt=UserPrompt(
                 prompt=f"{system}\n\nChoose the best tool or tools for the task. Call task_complete when you have enough information."

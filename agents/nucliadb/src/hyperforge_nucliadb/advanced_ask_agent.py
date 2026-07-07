@@ -190,7 +190,7 @@ def build_ask_request(
     filter_expression = parse_filter_expression(agent, driver)
     ask_request = AskRequest(
         query=question,
-        generative_model=agent.generative_model,
+        generative_model=agent.generative_model.model_id,
         citations=True,
         filters=driver.filters,
     )
