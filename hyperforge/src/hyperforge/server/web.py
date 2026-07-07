@@ -1,7 +1,11 @@
+import os
+
 import prometheus_client  # type: ignore
 from aiohttp import web
 
 from hyperforge.server import logger
+
+PORT = os.environ.get("HEALTH_CHECK_PORT", "8000")
 
 
 async def http_handler(request: web.Request):
@@ -19,10 +23,10 @@ async def start_web_server() -> web.Server:
     server = web.Server(http_handler)  # type: ignore
     runner = web.ServerRunner(server)
     await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", 8000)
+    site = web.TCPSite(runner, "0.0.0.0", int(PORT))
     await site.start()
 
-    logger.info("======= Serving on http://0.0.0.0:8000/ ======")
+    logger.info(f"======= Serving on http://0.0.0.0:{PORT}/ ======")
     return server
 
 
