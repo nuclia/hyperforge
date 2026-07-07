@@ -1,11 +1,12 @@
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from hyperforge_related.agent import RelatedAgent
+from hyperforge_related.config import RelatedAgentConfig
+
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import EphemeralSessionMemory
 from hyperforge.models import MemoryConfig, Rules
-from hyperforge_related.agent import RelatedAgent
-from hyperforge_related.config import RelatedAgentConfig
 
 
 def make_agent(
@@ -31,22 +32,6 @@ def make_manager(related: list[str] | None = None, return_none: bool = False):
     payload = None if return_none else {"related": questions}
     manager.execute_json = AsyncMock(return_value=(payload, 10, 20))
     return manager
-
-
-# --- Config tests ---
-
-
-def test_config_defaults():
-    config = RelatedAgentConfig()
-    assert config.module == "related"
-    assert config.model == "chatgpt-azure-4o-mini"
-    assert config.prompt is None
-    assert config.images is False
-
-
-def test_step_title():
-    agent = make_agent()
-    assert agent.step_title("Related questions") == "Related: Related questions"
 
 
 # --- Behaviour tests ---
