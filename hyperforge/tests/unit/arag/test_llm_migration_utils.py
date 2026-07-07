@@ -72,28 +72,40 @@ class TestMigrateLLMModelsDB:
                 }
             ],
         }
-        # We need an agent_id that exists in retrieval_agent_config for the FK.
-        # Instead, insert directly bypassing FK by using raw SQL with a temp disable
-        # or use a table that has no FK. Let's use retrieval_agents_drivers which
-        # also has a JSONB 'config' column.
-        # Actually, let's just insert into the table and handle FK by creating
-        # a parent row first.
+        # Insert parent rows to satisfy FK chain:
+        # retrieval_agent_config -> retrieval_agent_workflow -> retrieval_agent_generation
         test_db.execute(
             text(
-                "INSERT INTO retrieval_agent_config (account, kbid) "
-                "VALUES (:account, :kbid) ON CONFLICT DO NOTHING"
+                "INSERT INTO retrieval_agent_config (account, agent_id, rules, memory) "
+                "VALUES (:account, :agent_id, '[]'::jsonb, '{}'::jsonb) "
+                "ON CONFLICT DO NOTHING"
             ),
-            {"account": "test-account", "kbid": "test-kb"},
+            {"account": "test-account", "agent_id": "test-agent"},
         )
         test_db.execute(
             text(
-                "INSERT INTO retrieval_agent_generation (id, account, agent_id, generation) "
-                "VALUES (:id, :account, :agent_id, :generation)"
+                "INSERT INTO retrieval_agent_workflow (account, agent_id, workflow_id, name) "
+                "VALUES (:account, :agent_id, :workflow_id, :name) "
+                "ON CONFLICT DO NOTHING"
+            ),
+            {
+                "account": "test-account",
+                "agent_id": "test-agent",
+                "workflow_id": "test-workflow",
+                "name": "test",
+            },
+        )
+        test_db.execute(
+            text(
+                "INSERT INTO retrieval_agent_generation "
+                "(id, account, agent_id, workflow_id, generation) "
+                "VALUES (:id, :account, :agent_id, :workflow_id, :generation)"
             ),
             {
                 "id": self.row_id,
                 "account": "test-account",
-                "agent_id": "test-kb",
+                "agent_id": "test-agent",
+                "workflow_id": "test-workflow",
                 "generation": json.dumps(generation_config),
             },
         )
