@@ -19,7 +19,7 @@ from hyperforge.interaction import (
     PromptFeedbackSchema,
     ValidationFeedbackSchema,
 )
-from hyperforge.manager import Manager
+from hyperforge.manager import Manager, build_reasoning
 from hyperforge.memory import QuestionMemory
 from hyperforge.models import Chunk, Context, Prompt, TrackingInfo
 from hyperforge.utils import iterate_tools_resp
@@ -332,6 +332,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             user_id="mcp_agent",
             query_context_images=images,
             generative_model=self.config.tool_choice_model.model_id,
+            reasoning=build_reasoning(self.config.tool_choice_model),
             tools=tools,
             user_prompt=UserPrompt(
                 prompt="Choose the best tool or tools for the task, select task_complete if no more tools are needed according to the user request and previous interactions"
@@ -916,6 +917,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             user_id=self.config.id or "mcp_agent",
             query_context_images=images,
             generative_model=self.config.sampling_model.model_id,
+            reasoning=build_reasoning(self.config.sampling_model),
             format_prompt=False,
             system=params.systemPrompt,
             context=new_messages,

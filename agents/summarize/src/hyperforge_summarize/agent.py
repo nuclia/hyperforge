@@ -4,7 +4,7 @@ from typing import List, Optional, overload
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.context.agent import generate_ctx_block_id
-from hyperforge.manager import Manager
+from hyperforge.manager import Manager, build_reasoning
 from hyperforge.memory import QuestionMemory
 from hyperforge.models import AnswerCitations, CitationMetadata, Context
 from hyperforge.trace import trace_agent
@@ -231,6 +231,7 @@ class SummarizeAgent(Agent[SummarizeAgentConfig]):
             else DEFAULT_SYSTEM_PROMPT,
             format_prompt=False,
             generative_model=self.config.model.model_id,
+            reasoning=build_reasoning(self.config.model),
             query_context_images=images,
             max_tokens=5000,
             chat_history=await memory.get_chat_history(),

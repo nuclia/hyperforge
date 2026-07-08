@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
-from hyperforge.manager import Manager
+from hyperforge.manager import Manager, build_reasoning
 from hyperforge.memory import QuestionMemory
 from hyperforge.trace import trace_agent
 from nuclia.lib.nua_responses import ChatModel, UserPrompt
@@ -70,6 +70,7 @@ class GenerateAgent(Agent[GenerateAgentConfig]):
             user_prompt=UserPrompt(prompt=prompt),
             format_prompt=False,
             generative_model=self.config.model.model_id,
+            reasoning=build_reasoning(self.config.model),
             max_tokens=2000,
             tracking=memory.get_tracking_info(),
         )

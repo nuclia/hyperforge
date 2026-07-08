@@ -52,8 +52,8 @@ def _resolve_model_id(model: ModelParam) -> str:
     return model.model_id
 
 
-def _resolve_reasoning(model: ModelParam) -> Union[Reasoning, bool]:
-    """Extract the reasoning configuration from a ModelParam.
+def build_reasoning(model: ModelParam) -> Union[Reasoning, bool]:
+    """Build a NUA Reasoning object from a ModelParam.
 
     If `model` is a plain string or has no reasoning configured, returns False
     (reasoning disabled). Otherwise, builds a `Reasoning` object from the
@@ -284,7 +284,7 @@ class Manager:
                 user_prompt=UserPrompt(prompt=prompt),
                 format_prompt=False,
                 generative_model=_resolve_model_id(model),
-                reasoning=_resolve_reasoning(model),
+                reasoning=build_reasoning(model),
                 query_context_images=query_context_images,
                 max_tokens=max_tokens,
                 chat_history=chat_history,
@@ -313,7 +313,7 @@ class Manager:
                     user_prompt=UserPrompt(prompt=prompt),
                     format_prompt=False,
                     generative_model=_resolve_model_id(model),
-                    reasoning=_resolve_reasoning(model),
+                    reasoning=build_reasoning(model),
                     query_context_images=query_context_images,
                     max_tokens=max_tokens,
                     chat_history=chat_history,
@@ -356,7 +356,7 @@ class Manager:
                     user_prompt=UserPrompt(prompt=prompt),
                     format_prompt=False,
                     generative_model=_resolve_model_id(model),
-                    reasoning=_resolve_reasoning(model),
+                    reasoning=build_reasoning(model),
                     query_context_images=images,
                     system=system,
                 ),
@@ -399,7 +399,7 @@ class Manager:
                     question="",
                     user_prompt=UserPrompt(prompt=prompt),
                     generative_model=_resolve_model_id(model),
-                    reasoning=_resolve_reasoning(model),
+                    reasoning=build_reasoning(model),
                     format_prompt=False,
                     query_context_images=images,
                     json_schema=schema,
@@ -448,7 +448,7 @@ class Manager:
                     question=question,
                     query_context=contexts,
                     generative_model=_resolve_model_id(model),
-                    reasoning=_resolve_reasoning(model),
+                    reasoning=build_reasoning(model),
                     format_prompt=True,
                     query_context_images=images,
                     json_schema=schema,

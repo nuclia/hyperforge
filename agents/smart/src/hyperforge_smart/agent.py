@@ -10,7 +10,7 @@ from hyperforge.configure import agent
 from hyperforge.context.agent import ContextAgent, build_context_agent
 from hyperforge.definition import FunctionDefinition
 from hyperforge.interaction import Feedback
-from hyperforge.manager import Manager
+from hyperforge.manager import Manager, build_reasoning
 from hyperforge.memory.memory import QuestionMemory
 from hyperforge.models import Chunk, Context, TrackingInfo
 from hyperforge.utils import iterate_tools_resp
@@ -312,6 +312,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             question="",
             user_id=f"smart_planner-{self.config.module}",
             generative_model=model.model_id,
+            reasoning=build_reasoning(model),
             tools=tools,
             user_prompt=UserPrompt(
                 prompt=f"{system}\n\nChoose the best tool or tools for the task. Call task_complete when you have enough information."
