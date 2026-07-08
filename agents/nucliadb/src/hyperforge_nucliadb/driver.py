@@ -1,7 +1,7 @@
 import asyncio
 from asyncio import gather
 from functools import reduce
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import httpx
 from hyperforge.configure import driver
@@ -347,7 +347,7 @@ class NucliaDBDriver(Driver):
         return await self.driver.catalog(content=q, kbid=self.config.kbid)
 
     async def get_resource_by_id(
-        self, rid: str, query_params: Optional[Dict[str, str]] = None
+        self, rid: str, query_params: Optional[Dict[str, Union[str, List[str]]]] = None
     ) -> Optional[Resource]:
         return await self.driver.get_resource_by_id(
             kbid=self.config.kbid, rid=rid, query_params=query_params
