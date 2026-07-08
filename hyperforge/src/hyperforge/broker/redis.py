@@ -99,7 +99,9 @@ class RedisBroker(Broker):
                     logger.warning("Consumer group lost, re-creating...")
                     await self._ensure_consumer_group()
                 else:
-                    logger.exception("Error while subscribing to activations, retrying...")
+                    logger.exception(
+                        "Error while subscribing to activations, retrying..."
+                    )
                     await asyncio.sleep(1)
             except Exception:
                 logger.exception("Error while subscribing to activations, retrying...")

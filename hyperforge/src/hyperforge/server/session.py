@@ -111,7 +111,7 @@ class SessionManager:
                 logger.error(f"Module {load_module} could not be loaded")
 
         self.activation_task = asyncio.create_task(self.activation_listener())
-        if health_check:
+        if health_check and self.settings.health_check_enabled:
             self.server = await start_health_check()
 
     async def finalize(self):

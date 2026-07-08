@@ -3,13 +3,13 @@ from urllib.parse import urlencode
 
 from cryptography.fernet import InvalidToken
 from fastapi import Query
+from hyperforge_mcp.http import _fingerprint, decrypt_mcp_oauth_state
 from starlette.requests import Request
 from starlette.responses import HTMLResponse
 
 from hyperforge.api.settings import Settings
 from hyperforge.api.v1.router import router
 from hyperforge.api.v1.utils import tracer
-from hyperforge_mcp.http import _fingerprint, decrypt_mcp_oauth_state
 
 logger = logging.getLogger(__name__)
 
