@@ -26,9 +26,8 @@ def run(
 
     # Register all built-in agents and drivers (same as the base initialize,
     # but without start_health_check() — the FastAPI app handles /health/*).
-    scan("nuclia_agents.agents.agents")
-    scan("nuclia_agents.drivers.drivers")
-    load_all_configurations("nuclia_agents")
+    scan("hyperforge_restricted")
+    load_all_configurations("hyperforge_restricted")
 
     for load_module in settings.load_modules:
         try:
