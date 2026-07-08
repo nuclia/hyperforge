@@ -13,6 +13,16 @@ from uuid import uuid4
 import httpx
 from cryptography.fernet import Fernet
 from httpx import Auth, Timeout
+from hyperforge.configure import driver
+from hyperforge.driver import Driver
+from hyperforge.interaction import (
+    Feedback,
+    OAuthAuthenticateURL,
+    OAuthFeedbackReturnSchema,
+    Provider,
+)
+from hyperforge.memory import QuestionMemory
+from hyperforge.utils.http import SafeTransport
 from mcp.client.auth import OAuthClientProvider, PKCEParameters, TokenStorage
 from mcp.client.auth.exceptions import OAuthFlowError
 from mcp.client.streamable_http import streamable_http_client
@@ -25,16 +35,6 @@ from mcp.shared.auth import (
 from pydantic import AnyUrl, BaseModel
 
 from hyperforge import logger
-from hyperforge.configure import driver
-from hyperforge.driver import Driver
-from hyperforge.interaction import (
-    Feedback,
-    OAuthAuthenticateURL,
-    OAuthFeedbackReturnSchema,
-    Provider,
-)
-from hyperforge.memory import QuestionMemory
-from hyperforge.utils.http import SafeTransport
 from hyperforge_mcp.config_driver import MCPHTTPDriverConfig, MCPHTTPInnerConfig
 
 # ---------------------------------------------------------------------------

@@ -7,10 +7,6 @@ from urllib.parse import parse_qs, urlparse
 
 import httpx
 import pytest
-from mcp.client.auth import PKCEParameters
-from mcp.shared.auth import OAuthClientInformationFull, OAuthClientMetadata
-from pydantic import AnyUrl
-
 from hyperforge_mcp.http import (
     _MCP_OAUTH_SINGLE_FLIGHT_LOCKS,
     MCPOAuthRoutingParams,
@@ -18,6 +14,9 @@ from hyperforge_mcp.http import (
     _RoutedOAuthClientProvider,
     handle_callback,
 )
+from mcp.client.auth import PKCEParameters
+from mcp.shared.auth import OAuthClientInformationFull, OAuthClientMetadata
+from pydantic import AnyUrl
 
 
 def _make_provider(**kwargs) -> _RoutedOAuthClientProvider:
