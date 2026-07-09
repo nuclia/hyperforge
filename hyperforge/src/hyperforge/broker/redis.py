@@ -84,7 +84,7 @@ class RedisBroker(Broker):
                     logger.error("Failed to create consumer group after %d attempts, giving up.", max_retries)
                     raise
                 logger.warning("Failed to create consumer group (attempt %d/%d), retrying...", attempt, max_retries)
-                await asyncio.sleep(1)
+                await asyncio.sleep(10)
 
         while True:
             try:
