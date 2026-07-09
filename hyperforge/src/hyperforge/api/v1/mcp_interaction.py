@@ -205,7 +205,7 @@ async def mcp_interaction_protected_resource_metadata(
     resource = (
         auth_config.protected_resource
         if auth_config is not None and auth_config.protected_resource is not None
-        else str(mcp_url).replace("http://", "https://")
+        else str(mcp_url.replace(scheme="https"))
     )
     authorization_servers = (
         [auth_config.authorization_server]

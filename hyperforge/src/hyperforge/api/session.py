@@ -95,6 +95,48 @@ async def get_session_resource(
     )
 
 
+async def get_session_resource_by_slug(
+    ndb: NucliaDBAsync,
+    agent_id: str,
+    slug: str,
+    show: Optional[list[str]] = None,
+) -> Resource:
+    """Get a session resource by slug."""
+    query_params = {}
+    if show:
+        query_params["show"] = show
+
+    return await ndb.get_resource_by_slug(
+        slug=slug,
+        kbid=agent_id,
+        query_params=query_params,
+    )
+
+
+async def resolve_session_id(
+    ndb: NucliaDBAsync,
+    agent_id: str,
+    session: str,
+) -> str | None:
+    """Resolve a client-provided session identifier to the NucliaDB resource id."""
+    try:
+        UUID(session)
+    except ValueError:
+        try:
+            resource = await get_session_resource_by_slug(
+                ndb, agent_id, session, show=["basic"]
+            )
+        except NotFoundError:
+            return None
+        return resource.id
+
+    try:
+        await get_session_resource(ndb, agent_id, session, show=["basic"])
+        return session
+    except NotFoundError:
+        return None
+
+
 async def session_exists(
     ndb: NucliaDBAsync,
     agent_id: str,
@@ -110,20 +152,7 @@ async def session_exists(
     Returns:
         True if session exists, False otherwise
     """
-    try:
-        UUID(session_id)
-    except ValueError:
-        return False
-
-    try:
-        await ndb.get_resource_by_id(
-            rid=session_id,
-            kbid=agent_id,
-            query_params={"show": ["basic"]},
-        )
-        return True
-    except NotFoundError:
-        return False
+    return await resolve_session_id(ndb, agent_id, session_id) is not None
 
 
 async def update_session_resource(

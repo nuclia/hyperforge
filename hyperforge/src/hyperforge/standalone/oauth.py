@@ -130,8 +130,17 @@ def _select_jwk(jwks: dict[str, Any], kid: str | None) -> dict[str, Any]:
     keys = jwks.get("keys")
     if not isinstance(keys, list):
         raise AuthenticationError("Invalid JWKS")
+
+    if kid is None:
+        if len(keys) != 1:
+            raise AuthenticationError("Missing bearer token key id")
+        key = keys[0]
+        if isinstance(key, dict):
+            return key
+        raise AuthenticationError("Invalid JWKS")
+
     for key in keys:
-        if isinstance(key, dict) and (kid is None or key.get("kid") == kid):
+        if isinstance(key, dict) and key.get("kid") == kid:
             return key
     raise AuthenticationError("Bearer token key not found")
 

@@ -18,7 +18,7 @@ from pydantic import ValidationError
 from hyperforge import logger
 from hyperforge.api.authentication import requires_one
 from hyperforge.api.models import AgentRole, InteractionRequest
-from hyperforge.api.session import create_session_resource, session_exists
+from hyperforge.api.session import create_session_resource, resolve_session_id
 from hyperforge.api.settings import Settings
 from hyperforge.api.utils import agent_has_nucliadb_memory
 from hyperforge.api.v1.router import router
@@ -59,9 +59,11 @@ async def ensure_session_exists(
         The original session id and an error message if the session doesn't exist
         and shouldn't be created.
     """
-    # Check if session exists
-    if await session_exists(ndb, agent_id, session):
-        return session, None
+    # Check if session exists. The client may pass either the resource UUID or
+    # the session slug, but the memory layer needs the NucliaDB resource UUID.
+    existing_session_id = await resolve_session_id(ndb, agent_id, session)
+    if existing_session_id is not None:
+        return existing_session_id, None
 
     # Session doesn't exist
     if not create_if_not_exists:

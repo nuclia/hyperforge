@@ -115,9 +115,11 @@ def mock_jwks(monkeypatch, jwks):
     monkeypatch.setattr(standalone_oauth.JWKSCache, "get", get)
 
 
-def make_token(signing_key, **claims_overrides):
+def make_token(signing_key, kid: str | None = "test-key", **claims_overrides):
     now = int(time.time())
-    header = {"alg": "RS256", "kid": "test-key", "typ": "JWT"}
+    header = {"alg": "RS256", "typ": "JWT"}
+    if kid is not None:
+        header["kid"] = kid
     claims = {
         "iss": ISSUER,
         "aud": AUDIENCE,
@@ -248,6 +250,25 @@ async def test_protected_mcp_returns_401_when_jwks_fetch_fails(
 
     assert response.status_code == 401
     assert "JWKS" in response.text
+
+
+async def test_protected_mcp_rejects_token_without_kid_when_jwks_has_multiple_keys(
+    client: AsyncClient, monkeypatch, signing_key, jwks
+):
+    jwks["keys"].append({**jwks["keys"][0], "kid": "rotated-key"})
+
+    async def get(self, url: str):
+        return jwks
+
+    monkeypatch.setattr(standalone_oauth.JWKSCache, "get", get)
+
+    response = await client.delete(
+        f"/api/v1/agent/{AGENT_ID}/session/s1/mcp",
+        headers={"Authorization": f"Bearer {make_token(signing_key, kid=None)}"},
+    )
+
+    assert response.status_code == 401
+    assert "key id" in response.text
 
 
 async def test_protected_resource_metadata_uses_agent_oauth_config(
