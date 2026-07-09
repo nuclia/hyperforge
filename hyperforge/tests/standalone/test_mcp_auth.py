@@ -100,10 +100,9 @@ async def client(agents_config, standalone_settings):
         yield client
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def signing_key():
     return rsa.generate_private_key(public_exponent=65537, key_size=2048)
-
 
 @pytest.fixture
 def jwks(signing_key):
