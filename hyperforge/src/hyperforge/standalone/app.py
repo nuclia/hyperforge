@@ -21,7 +21,12 @@ from nucliadb_telemetry.logs import setup_logging
 from nucliadb_telemetry.settings import LogLevel, LogSettings
 from prometheus_client import CONTENT_TYPE_LATEST  # type: ignore
 from redis.asyncio import Redis
-from starlette.authentication import AuthCredentials, AuthenticationBackend, BaseUser
+from starlette.authentication import (
+    AuthCredentials,
+    AuthenticationBackend,
+    AuthenticationError,
+    BaseUser,
+)
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import HTTPConnection
 from starlette.responses import PlainTextResponse
@@ -37,6 +42,11 @@ from hyperforge.configure import resolve_dotted_name
 from hyperforge.server.cache import InMemoryCache, ValkeyCache
 from hyperforge.server.session import SessionManager
 from hyperforge.server.settings import Settings as ServerSettings
+from hyperforge.standalone.oauth import (
+    JWKSCache,
+    get_enabled_mcp_auth,
+    validate_mcp_bearer,
+)
 from hyperforge.standalone.settings import StandaloneSettings
 from hyperforge.standalone.ui_router import router as ui_router
 
@@ -96,13 +106,27 @@ _ALL_ROLES = AuthCredentials(
 )
 
 
-class OpenAuthBackend(AuthenticationBackend):
-    """Authentication backend that accepts every request as a local user with
-    all roles.  Only used in the standalone single-process deployment."""
+class StandaloneAuthBackend(AuthenticationBackend):
+    """Open standalone auth, with optional OAuth protection for MCP endpoints."""
+
+    def __init__(self, agents_cfg: dict[str, Any]) -> None:
+        self._agents_cfg = agents_cfg
+        self._jwks_cache = JWKSCache()
 
     async def authenticate(
         self, conn: HTTPConnection
     ) -> tuple[AuthCredentials, BaseUser] | None:
+        agent_id = self._mcp_agent_id(conn)
+        if agent_id is not None:
+            auth_config = get_enabled_mcp_auth(self._agents_cfg, agent_id)
+            if auth_config is not None:
+                conn.scope["hyperforge.mcp_auth_config"] = auth_config
+                await validate_mcp_bearer(
+                    conn.headers.get("authorization"),
+                    auth_config,
+                    self._jwks_cache,
+                )
+
         # Inject the headers that interaction endpoints declare as required
         # FastAPI Header() dependencies, so they don't get rejected.
         if "x-stf-account" not in conn.headers:
@@ -122,6 +146,58 @@ class OpenAuthBackend(AuthenticationBackend):
                 ],
             ]
         return _ALL_ROLES, User(username="standalone")
+
+    def _mcp_agent_id(self, conn: HTTPConnection) -> str | None:
+        parts = conn.url.path.strip("/").split("/")
+        if (
+            len(parts) == 7
+            and parts[:3] == ["api", "v1", "agent"]
+            and parts[4] == "session"
+            and parts[6] == "mcp"
+        ):
+            return parts[3]
+        return None
+
+
+def standalone_auth_error(
+    conn: HTTPConnection, exc: AuthenticationError
+) -> PlainTextResponse:
+    authenticate = "Bearer"
+    metadata_url = _mcp_resource_metadata_url(conn)
+    if metadata_url is not None:
+        authenticate = f'Bearer resource_metadata="{metadata_url}"'
+    return PlainTextResponse(
+        str(exc) or "Unauthorized",
+        status_code=401,
+        headers={"WWW-Authenticate": authenticate},
+    )
+
+
+def _mcp_resource_metadata_url(conn: HTTPConnection) -> str | None:
+    auth_config = conn.scope.get("hyperforge.mcp_auth_config")
+    if (
+        auth_config is not None
+        and auth_config.protected_resource_metadata_url is not None
+    ):
+        return auth_config.protected_resource_metadata_url
+
+    parts = conn.url.path.strip("/").split("/")
+    if (
+        len(parts) == 7
+        and parts[:3] == ["api", "v1", "agent"]
+        and parts[4] == "session"
+        and parts[6] == "mcp"
+    ):
+        agent_id = parts[3]
+        session = parts[5]
+        return str(
+            conn.url.replace(
+                path=f"/.well-known/oauth-protected-resource/api/v1/agent/{agent_id}/session/{session}/mcp",
+                query="",
+                fragment="",
+            )
+        )
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -173,7 +249,11 @@ class StandaloneApplication(FastAPI):
                 name="frontend",
             )
 
-        self.add_middleware(AuthenticationMiddleware, backend=OpenAuthBackend())
+        self.add_middleware(
+            AuthenticationMiddleware,
+            backend=StandaloneAuthBackend(agents_cfg),
+            on_error=standalone_auth_error,
+        )
         self.add_middleware(
             CORSMiddleware,
             allow_credentials=True,

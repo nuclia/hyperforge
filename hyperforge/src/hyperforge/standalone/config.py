@@ -48,6 +48,21 @@ from hyperforge.prompts import PromptConfig
 from hyperforge.workflows import WorkflowData
 
 
+class StandaloneMCPAuthConfig(BaseModel):
+    """Optional OAuth/JWT protection for the standalone MCP endpoint."""
+
+    enabled: bool = False
+    authorization_server: Optional[str] = None
+    protected_resource_metadata_url: Optional[str] = None
+    protected_resource: Optional[str] = None
+    scopes_supported: list[str] = Field(default_factory=list)
+    required_scopes: list[str] = Field(default_factory=list)
+    jwks_url: Optional[str] = None
+    issuer: Optional[str] = None
+    audience: Optional[str] = None
+    forward_authorization_header: bool = True
+
+
 class WorkflowConfig(BaseModel):
     """Pipeline steps for a single named workflow."""
 
@@ -112,6 +127,9 @@ class StandAloneAgentConfig(BaseModel):
 
     # Prompts exposed via the MCP server.
     prompts: list[PromptConfig] = Field(default_factory=list)
+
+    # Optional OAuth/JWT protection for this agent's standalone MCP endpoint.
+    mcp_auth: Optional[StandaloneMCPAuthConfig] = None
 
     @field_validator("drivers", mode="before")
     def validate_drivers(cls, value: list[Dict[str, Any]], field):
