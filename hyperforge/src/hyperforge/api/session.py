@@ -1,6 +1,7 @@
 """Session management functions for ARAG agents with NucliaDB memory."""
 
 from typing import Optional
+from uuid import UUID
 
 from nucliadb_models import (
     CreateResourcePayload,
@@ -109,6 +110,11 @@ async def session_exists(
     Returns:
         True if session exists, False otherwise
     """
+    try:
+        UUID(session_id)
+    except ValueError:
+        return False
+
     try:
         await ndb.get_resource_by_id(
             rid=session_id,

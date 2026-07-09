@@ -50,25 +50,26 @@ async def ensure_session_exists(
     agent_id: str,
     session: str,
     create_if_not_exists: bool,
-) -> Optional[str]:
+) -> tuple[str, Optional[str]]:
     """
     Check if session exists and create it if needed.
 
     Returns:
-        None if session exists or was created successfully.
-        Error message string if session doesn't exist and shouldn't be created.
+        The effective session id and None if the session exists or was created.
+        The original session id and an error message if the session doesn't exist
+        and shouldn't be created.
     """
     # Check if session exists
     if await session_exists(ndb, agent_id, session):
-        return None
+        return session, None
 
     # Session doesn't exist
     if not create_if_not_exists:
-        return f"Session '{session}' does not exist"
+        return session, f"Session '{session}' does not exist"
 
     # Create the session
     try:
-        await create_session_resource(
+        created = await create_session_resource(
             ndb=ndb,
             agent_id=agent_id,
             slug=session,
@@ -76,10 +77,10 @@ async def ensure_session_exists(
             summary="Auto-created session",
             data="",
         )
-        return None
+        return created.uuid, None
     except Exception as e:
         logger.exception(f"Error creating session {session} for agent {agent_id}: {e}")
-        return f"Failed to create session: {str(e)}"
+        return session, f"Failed to create session: {str(e)}"
 
 
 class Shutdown:
@@ -333,7 +334,7 @@ async def websocket_endpoint(
             agent_manager, x_stf_account, agent_id, workflow_id
         ):
             ndb: NucliaDBAsync = websocket.app.arag_reader
-            error_message = await ensure_session_exists(
+            session, error_message = await ensure_session_exists(
                 ndb, agent_id, session, create_session_if_not_exists
             )
             if error_message:
