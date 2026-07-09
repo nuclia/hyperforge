@@ -5,6 +5,8 @@ from typing import AsyncIterator, cast
 import opentelemetry.propagate
 from pydantic import TypeAdapter
 from redis.asyncio import Redis, ResponseError
+from redis.exceptions import ConnectionError as RedisConnectionError
+from redis.exceptions import TimeoutError as RedisTimeoutError
 
 from hyperforge import logger
 from hyperforge.broker import AgentTimeoutError, Broker
@@ -66,12 +68,23 @@ class RedisBroker(Broker):
             )
         except ResponseError as e:
             if "BUSYGROUP" not in str(e):
+                logger.exception("Failed to create consumer group, will retry...")
                 raise
 
     async def subscribe_activations(
         self,
     ) -> AsyncIterator[tuple[StartInteraction, dict[str, str]]]:
-        await self._ensure_consumer_group()
+        max_retries = 10
+        for attempt in range(1, max_retries + 1):
+            try:
+                await self._ensure_consumer_group()
+                break
+            except (ResponseError, RedisConnectionError, RedisTimeoutError):
+                if attempt == max_retries:
+                    logger.error("Failed to create consumer group after %d attempts, giving up.", max_retries)
+                    raise
+                logger.warning("Failed to create consumer group (attempt %d/%d), retrying...", attempt, max_retries)
+                await asyncio.sleep(1)
 
         while True:
             try:
@@ -97,7 +110,14 @@ class RedisBroker(Broker):
             except ResponseError as e:
                 if "NOGROUP" in str(e):
                     logger.warning("Consumer group lost, re-creating...")
-                    await self._ensure_consumer_group()
+                    try:
+                        await self._ensure_consumer_group()
+                    except (
+                        ResponseError,
+                        RedisConnectionError,
+                        RedisTimeoutError,
+                    ):
+                        await asyncio.sleep(1)
                 else:
                     logger.exception(
                         "Error while subscribing to activations, retrying..."
