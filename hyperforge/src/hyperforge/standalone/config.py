@@ -38,7 +38,14 @@ Minimal valid example
 
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, Field, TypeAdapter, field_serializer, field_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    TypeAdapter,
+    field_serializer,
+    field_validator,
+    model_validator,
+)
 
 from hyperforge.agent import AgentConfig
 from hyperforge.configure import get_agent_config_klass, get_driver_config_klass
@@ -61,6 +68,22 @@ class StandaloneMCPAuthConfig(BaseModel):
     issuer: Optional[str] = None
     audience: Optional[str] = None
     forward_authorization_header: bool = True
+
+    @model_validator(mode="after")
+    def validate_enabled_config(self):
+        if not self.enabled:
+            return self
+
+        missing = [
+            field
+            for field in ("authorization_server", "jwks_url")
+            if getattr(self, field) is None
+        ]
+        if missing:
+            raise ValueError(
+                f"Missing required MCP auth setting(s) when enabled: {', '.join(missing)}"
+            )
+        return self
 
 
 class WorkflowConfig(BaseModel):

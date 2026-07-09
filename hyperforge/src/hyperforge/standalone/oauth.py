@@ -43,6 +43,7 @@ def extract_bearer_token(authorization: str | None) -> str:
     if authorization is None:
         raise AuthenticationError("Missing bearer token")
     scheme, _, token = authorization.partition(" ")
+    token = token.strip()
     if scheme.lower() != "bearer" or not token:
         raise AuthenticationError("Invalid bearer token")
     return token

@@ -147,6 +147,52 @@ def _b64encode(value: bytes) -> str:
     return base64.urlsafe_b64encode(value).decode().rstrip("=")
 
 
+async def test_extract_bearer_token_strips_extra_token_whitespace():
+    token = standalone_oauth.extract_bearer_token("Bearer    token-value   ")
+
+    assert token == "token-value"
+
+
+async def test_enabled_mcp_auth_requires_authorization_server(load_agents):
+    with pytest.raises(ValueError, match="authorization_server"):
+        StandaloneConfig.validate_python(
+            {
+                AGENT_ID: {
+                    "mcp_auth": {
+                        "enabled": True,
+                        "jwks_url": "https://auth.example.test/jwks",
+                    },
+                    "workflows": {
+                        "default": {
+                            "name": "default",
+                            "generation": [{"module": "summarize"}],
+                        }
+                    },
+                }
+            }
+        )
+
+
+async def test_enabled_mcp_auth_requires_jwks_url(load_agents):
+    with pytest.raises(ValueError, match="jwks_url"):
+        StandaloneConfig.validate_python(
+            {
+                AGENT_ID: {
+                    "mcp_auth": {
+                        "enabled": True,
+                        "authorization_server": "https://auth.example.test",
+                    },
+                    "workflows": {
+                        "default": {
+                            "name": "default",
+                            "generation": [{"module": "summarize"}],
+                        }
+                    },
+                }
+            }
+        )
+
+
 async def test_mcp_auth_is_optional(client: AsyncClient):
     response = await client.delete(f"/api/v1/agent/{OPEN_AGENT_ID}/session/s1/mcp")
 
@@ -283,6 +329,21 @@ async def test_protected_resource_metadata_uses_agent_oauth_config(
         "resource": AUDIENCE,
         "scopes_supported": ["openid", "offline_access", REQUIRED_SCOPE],
         "authorization_servers": ["https://auth.example.test"],
+    }
+
+
+async def test_protected_resource_metadata_without_auth_has_no_hydra_fallback(
+    client: AsyncClient,
+):
+    response = await client.get(
+        f"/.well-known/oauth-protected-resource/api/v1/agent/{OPEN_AGENT_ID}/session/s1/mcp"
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "resource": "https://test/api/v1/agent/open-agent/session/s1/mcp",
+        "scopes_supported": [],
+        "authorization_servers": [],
     }
 
 

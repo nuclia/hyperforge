@@ -207,15 +207,20 @@ async def mcp_interaction_protected_resource_metadata(
         if auth_config is not None and auth_config.protected_resource is not None
         else str(mcp_url.replace(scheme="https"))
     )
+    fallback_authorization_server = getattr(app.settings, "hydra_public_url", None)
     authorization_servers = (
         [auth_config.authorization_server]
         if auth_config is not None and auth_config.authorization_server is not None
-        else [app.settings.hydra_public_url]
+        else (
+            [fallback_authorization_server]
+            if fallback_authorization_server is not None
+            else []
+        )
     )
     scopes_supported = (
         auth_config.scopes_supported
         if auth_config is not None
-        else app.settings.hydra_scopes_supported
+        else getattr(app.settings, "hydra_scopes_supported", [])
     )
     return {
         "resource": resource,
