@@ -7,8 +7,7 @@ from types import SimpleNamespace
 import pytest
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.hashes import SHA256
-from httpx import AsyncClient
-from httpx._transports.asgi import ASGITransport
+from httpx import ASGITransport, AsyncClient
 from hyperforge.api.v1.mcp_interaction import _prepare_interaction_headers
 from hyperforge.standalone import oauth as standalone_oauth
 from hyperforge.standalone.app import StandaloneApplication
@@ -21,6 +20,7 @@ pytestmark = pytest.mark.asyncio
 
 AGENT_ID = "protected-agent"
 OPEN_AGENT_ID = "open-agent"
+DEFAULT_METADATA_AGENT_ID = "default-metadata-agent"
 ISSUER = "https://login.example.test/tenant"
 AUDIENCE = "api://marklogic"
 REQUIRED_SCOPE = "marklogic:read"
@@ -56,6 +56,20 @@ def agents_config(load_agents):
             },
             OPEN_AGENT_ID: {
                 "title": "Open Agent",
+                "workflows": {
+                    "default": {
+                        "name": "default",
+                        "generation": [{"module": "summarize"}],
+                    }
+                },
+            },
+            DEFAULT_METADATA_AGENT_ID: {
+                "title": "Protected Agent With Default Metadata URL",
+                "mcp_auth": {
+                    "enabled": True,
+                    "authorization_server": "https://auth.example.test",
+                    "jwks_url": "https://auth.example.test/jwks",
+                },
                 "workflows": {
                     "default": {
                         "name": "default",
@@ -205,6 +219,17 @@ async def test_protected_mcp_requires_bearer(client: AsyncClient):
     assert response.status_code == 401
     assert response.headers["www-authenticate"] == (
         f'Bearer resource_metadata="{PROTECTED_RESOURCE_METADATA_URL}"'
+    )
+
+
+async def test_protected_mcp_default_metadata_url_uses_https(client: AsyncClient):
+    response = await client.delete(
+        f"/api/v1/agent/{DEFAULT_METADATA_AGENT_ID}/session/s1/mcp"
+    )
+
+    assert response.status_code == 401
+    assert response.headers["www-authenticate"] == (
+        'Bearer resource_metadata="https://test/.well-known/oauth-protected-resource/api/v1/agent/default-metadata-agent/session/s1/mcp"'
     )
 
 

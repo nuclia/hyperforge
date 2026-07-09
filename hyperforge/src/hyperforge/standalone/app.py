@@ -192,6 +192,7 @@ def _mcp_resource_metadata_url(conn: HTTPConnection) -> str | None:
         session = parts[5]
         return str(
             conn.url.replace(
+                scheme="https",
                 path=f"/.well-known/oauth-protected-resource/api/v1/agent/{agent_id}/session/{session}/mcp",
                 query="",
                 fragment="",
