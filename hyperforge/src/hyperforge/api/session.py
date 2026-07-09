@@ -134,7 +134,13 @@ async def resolve_session_id(
         await get_session_resource(ndb, agent_id, session, show=["basic"])
         return session
     except NotFoundError:
-        return None
+        try:
+            resource = await get_session_resource_by_slug(
+                ndb, agent_id, session, show=["basic"]
+            )
+        except NotFoundError:
+            return None
+        return resource.id
 
 
 async def session_exists(
