@@ -154,11 +154,21 @@ def _validate_claims(
     exp = payload.get("exp")
     if exp is None:
         raise AuthenticationError("Missing bearer token expiration")
-    if float(exp) < now:
+    try:
+        exp_value = float(exp)
+    except (TypeError, ValueError) as exc:
+        raise AuthenticationError("Invalid bearer token expiration") from exc
+    if exp_value < now:
         raise AuthenticationError("Expired bearer token")
+
     nbf = payload.get("nbf")
-    if nbf is not None and float(nbf) > now:
-        raise AuthenticationError("Bearer token is not valid yet")
+    if nbf is not None:
+        try:
+            nbf_value = float(nbf)
+        except (TypeError, ValueError) as exc:
+            raise AuthenticationError("Invalid bearer token not-before") from exc
+        if nbf_value > now:
+            raise AuthenticationError("Bearer token is not valid yet")
 
     if auth_config.issuer is not None and payload.get("iss") != auth_config.issuer:
         raise AuthenticationError("Invalid bearer token issuer")
