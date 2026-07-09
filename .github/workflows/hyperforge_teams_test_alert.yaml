@@ -1,0 +1,28 @@
+name: Hyperforge Teams Test Alert
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  notify-teams-test:
+    name: Send test Teams notification
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Send Teams notification
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "@type": "MessageCard",
+              "@context": "http://schema.org/extensions",
+              "themeColor": "FF0000",
+              "summary": "[TEST] Hyperforge CI failed",
+              "sections": [{
+                "activityTitle": "**[TEST] Hyperforge CI failed on `${{ github.ref_name }}`**",
+                "activityText": "This is a test notification. Run [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for commit `${{ github.sha }}`."
+              }]
+            }' \
+            "${{ secrets.TEAMS_WEBHOOK_URL }}"

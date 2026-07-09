@@ -131,3 +131,28 @@ jobs:
         run: |
           docker push "ghcr.io/$REPOSITORY_OWNER/hyperforge:$IMAGE_SHA_TAG"
           docker push "ghcr.io/$REPOSITORY_OWNER/hyperforge:$IMAGE_REF_TAG"
+
+  notify-teams-fail:
+    name: Notify Teams on failure
+    needs:
+      - test
+      - build_wheels
+      - build_and_push_docker_image
+    if: (failure() || cancelled()) && github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Send Teams notification
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "@type": "MessageCard",
+              "@context": "http://schema.org/extensions",
+              "themeColor": "FF0000",
+              "summary": "Hyperforge CI failed",
+              "sections": [{
+                "activityTitle": "**Hyperforge CI failed on `${{ github.ref_name }}`**",
+                "activityText": "Run [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) failed for commit `${{ github.sha }}`."
+              }]
+            }' \
+            "${{ secrets.TEAMS_WEBHOOK_URL }}"
