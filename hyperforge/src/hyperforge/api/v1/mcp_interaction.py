@@ -1,7 +1,7 @@
 import asyncio
 from collections.abc import MutableMapping
 from functools import partial
-from typing import TYPE_CHECKING, Any, Iterable, Protocol, Sequence, cast
+from typing import TYPE_CHECKING, Any, Iterable, Sequence
 
 import anyio
 from fastapi import Header
@@ -52,10 +52,6 @@ from hyperforge.api.models import (
 )
 from hyperforge.api.v1.mcp_content import convert_arag_answer_to_content
 from hyperforge.api.v1.router import router
-
-
-class _HasAgentsCfg(Protocol):
-    _agents_cfg: dict[str, Any]
 
 
 async def list_tools(workflows: list[WorkflowData]) -> list[Tool]:
@@ -191,16 +187,10 @@ def _default_oauth_metadata(app: "HTTPApplication") -> tuple[list[str], list[str
     return [], []
 
 
-def _agents_cfg(app: "HTTPApplication") -> dict[str, Any]:
-    if "_agents_cfg" in vars(app):
-        return cast(_HasAgentsCfg, app)._agents_cfg
-    return {}
-
-
 def _get_mcp_auth_config(
     app: "HTTPApplication", agent_id: str
 ):
-    return get_enabled_mcp_auth(_agents_cfg(app), agent_id)
+    return get_enabled_mcp_auth(app._agents_cfg, agent_id)
 
 
 @router.get(

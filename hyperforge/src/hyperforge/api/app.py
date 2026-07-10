@@ -54,6 +54,7 @@ class HTTPApplication(FastAPI):
     arag_writer: NucliaDBAsync
     arag_reader: NucliaDBAsync
     broker: Broker
+    _agents_cfg: dict[str, Any]
     extra_middlewares: Optional[list[Any]] = None
 
     def __init__(

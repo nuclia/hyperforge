@@ -209,6 +209,8 @@ def _mcp_resource_metadata_url(conn: HTTPConnection) -> str | None:
 class StandaloneApplication(FastAPI):
     """Single-process arag: API + SessionManager sharing one LocalBroker."""
 
+    _agents_cfg: dict[str, Any]
+
     def __init__(
         self,
         agents_cfg: dict[str, Any],
