@@ -73,6 +73,7 @@ class HTTPApplication(FastAPI):
         super().__init__(*args, lifespan=lifespan, **kwargs)
         self.settings = settings
         self.data_manager_settings = data_manager_settings
+        self._agents_cfg = {}
         self.include_router(internal.router)
         self.include_router(v1.router)
         self.include_router(router)
