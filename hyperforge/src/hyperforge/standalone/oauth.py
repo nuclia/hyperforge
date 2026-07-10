@@ -9,7 +9,7 @@ from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.hashes import SHA256, SHA384, SHA512
 from starlette.authentication import AuthenticationError
 
-from hyperforge.standalone.config import StandaloneMCPAuthConfig
+from hyperforge.standalone.config import StandAloneAgentConfig, StandaloneMCPAuthConfig
 
 _HASHES = {
     "RS256": SHA256,
@@ -53,7 +53,10 @@ def get_enabled_mcp_auth(
     agents_cfg: dict[str, Any], agent_id: str
 ) -> StandaloneMCPAuthConfig | None:
     agent_config = agents_cfg.get(agent_id)
-    auth_config = getattr(agent_config, "mcp_auth", None)
+    if not isinstance(agent_config, StandAloneAgentConfig):
+        return None
+
+    auth_config = agent_config.mcp_auth
     if auth_config is None or not auth_config.enabled:
         return None
     return auth_config

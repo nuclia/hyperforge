@@ -45,7 +45,6 @@ def agents_config(load_agents):
                     "jwks_url": "https://auth.example.test/jwks",
                     "issuer": ISSUER,
                     "audience": AUDIENCE,
-                    "forward_authorization_header": True,
                 },
                 "workflows": {
                     "default": {
@@ -379,13 +378,3 @@ async def test_prepare_interaction_headers_forwards_authorization(agents_config)
 
     assert prepared["authorization"] == "Bearer user-token"
     assert prepared["x-other"] == "value"
-
-
-async def test_prepare_interaction_headers_can_drop_authorization(agents_config):
-    agents_config[AGENT_ID].mcp_auth.forward_authorization_header = False
-    app = SimpleNamespace(_agents_cfg=agents_config)
-    headers = Headers({"Authorization": "Bearer user-token"})
-
-    prepared = _prepare_interaction_headers(app, AGENT_ID, headers)
-
-    assert "authorization" not in prepared

@@ -1,7 +1,7 @@
 import asyncio
 from collections.abc import MutableMapping
 from functools import partial
-from typing import TYPE_CHECKING, Any, Iterable, Sequence
+from typing import TYPE_CHECKING, Any, Iterable, Protocol, Sequence, cast
 
 import anyio
 from fastapi import Header
@@ -33,6 +33,7 @@ from starlette.responses import Response
 
 from hyperforge.api.authentication import requires_one
 from hyperforge.api.models import InteractionRequest
+from hyperforge.api.settings import Settings as ApiSettings
 from hyperforge.api.v1.interaction import WebsocketReceiver, stream_response
 from hyperforge.db.agents import AgentManager
 from hyperforge.interaction import AnswerOperation
@@ -51,6 +52,10 @@ from hyperforge.api.models import (
 )
 from hyperforge.api.v1.mcp_content import convert_arag_answer_to_content
 from hyperforge.api.v1.router import router
+
+
+class _HasAgentsCfg(Protocol):
+    _agents_cfg: dict[str, Any]
 
 
 async def list_tools(workflows: list[WorkflowData]) -> list[Tool]:
@@ -173,16 +178,29 @@ def _prepare_interaction_headers(
     app: "HTTPApplication", agent_id: str, headers: Headers
 ) -> dict[str, str]:
     interaction_headers = dict(headers.items())
-    auth_config = get_enabled_mcp_auth(getattr(app, "_agents_cfg", {}), agent_id)
-
     authorization = headers.get("authorization")
-    if auth_config is not None and not auth_config.forward_authorization_header:
-        interaction_headers.pop("authorization", None)
-        interaction_headers.pop("Authorization", None)
-    elif authorization is not None:
+    if authorization is not None:
         interaction_headers["authorization"] = authorization
 
     return interaction_headers
+
+
+def _default_oauth_metadata(app: "HTTPApplication") -> tuple[list[str], list[str]]:
+    if isinstance(app.settings, ApiSettings):
+        return [app.settings.hydra_public_url], app.settings.hydra_scopes_supported
+    return [], []
+
+
+def _agents_cfg(app: "HTTPApplication") -> dict[str, Any]:
+    if "_agents_cfg" in vars(app):
+        return cast(_HasAgentsCfg, app)._agents_cfg
+    return {}
+
+
+def _get_mcp_auth_config(
+    app: "HTTPApplication", agent_id: str
+):
+    return get_enabled_mcp_auth(_agents_cfg(app), agent_id)
 
 
 @router.get(
@@ -201,26 +219,24 @@ async def mcp_interaction_protected_resource_metadata(
     mcp_url = request.url_for(
         "interaction_mcp_handler", agent_id=agent_id, session=session
     )
-    auth_config = get_enabled_mcp_auth(getattr(app, "_agents_cfg", {}), agent_id)
+    auth_config = _get_mcp_auth_config(app, agent_id)
     resource = (
         auth_config.protected_resource
         if auth_config is not None and auth_config.protected_resource is not None
         else str(mcp_url.replace(scheme="https"))
     )
-    fallback_authorization_server = getattr(app.settings, "hydra_public_url", None)
+    default_authorization_server, default_scopes_supported = _default_oauth_metadata(
+        app
+    )
     authorization_servers = (
         [auth_config.authorization_server]
         if auth_config is not None and auth_config.authorization_server is not None
-        else (
-            [fallback_authorization_server]
-            if fallback_authorization_server is not None
-            else []
-        )
+        else default_authorization_server
     )
     scopes_supported = (
         auth_config.scopes_supported
         if auth_config is not None
-        else getattr(app.settings, "hydra_scopes_supported", [])
+        else default_scopes_supported
     )
     return {
         "resource": resource,

@@ -67,18 +67,17 @@ class StandaloneMCPAuthConfig(BaseModel):
     jwks_url: Optional[str] = None
     issuer: Optional[str] = None
     audience: Optional[str] = None
-    forward_authorization_header: bool = True
 
     @model_validator(mode="after")
     def validate_enabled_config(self):
         if not self.enabled:
             return self
 
-        missing = [
-            field
-            for field in ("authorization_server", "jwks_url")
-            if getattr(self, field) is None
-        ]
+        missing = []
+        if self.authorization_server is None:
+            missing.append("authorization_server")
+        if self.jwks_url is None:
+            missing.append("jwks_url")
         if missing:
             raise ValueError(
                 f"Missing required MCP auth setting(s) when enabled: {', '.join(missing)}"
