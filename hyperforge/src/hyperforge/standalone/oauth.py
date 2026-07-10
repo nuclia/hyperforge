@@ -96,6 +96,8 @@ async def _validate_jwt(
         raise
     except Exception as exc:
         raise AuthenticationError("Unable to fetch JWKS") from exc
+    if not isinstance(jwks, dict):
+        raise AuthenticationError("Invalid JWKS")
     key = _select_jwk(jwks, header.get("kid"))
     public_key = _rsa_public_key_from_jwk(key)
     signed_payload = f"{header_raw}.{payload_raw}".encode()
