@@ -9,13 +9,13 @@ interactions:
       Connection:
       - keep-alive
       Host:
-      - europe-1.dp.stashify.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.11.5
       x-nuclia-nuakey:
       - DUMMY
     method: GET
-    uri: https://europe-1.dp.stashify.cloud/api/authorizer/info
+    uri: https://europe-1.dp.progress.cloud/api/authorizer/info
   response:
     body:
       string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"8701c866-f5c1-4783-b75d-f0e43fd1791b","account_id":"ab695f2e-5c0e-4c5e-8037-1916ba3a0dd1","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
