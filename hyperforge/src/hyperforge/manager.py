@@ -345,7 +345,7 @@ class Manager:
         model: str,
         images: Dict[str, Image] = {},
         system: Optional[str] = None,
-        max_tokens: int = 2000,
+        max_tokens: int = 8192,
         tracking: TrackingInfo | None = None,
     ) -> Tuple[Dict[str, Any], float, float]:
         try:
