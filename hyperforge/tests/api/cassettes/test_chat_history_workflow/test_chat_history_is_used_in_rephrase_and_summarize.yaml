@@ -18,7 +18,7 @@ interactions:
     uri: https://europe-1.dp.progress.cloud/api/authorizer/info
   response:
     body:
-      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"8701c866-f5c1-4783-b75d-f0e43fd1791b","account_id":"ab695f2e-5c0e-4c5e-8037-1916ba3a0dd1","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
+      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"7fe77405-a6de-43cf-ac27-ac09f80b66c6","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000
@@ -27,11 +27,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 13 Jul 2026 09:56:36 GMT
+      - Mon, 13 Jul 2026 11:13:00 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '164'
+      - '5'
     status:
       code: 200
       message: OK
@@ -88,7 +88,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - d626a2faf9774d81b9e4c59ae997020c
+      - 23c6bc6c3d6a4a49b473c8790220de6c
       x-origin:
       - RAO
       x-session:
@@ -101,18 +101,18 @@ interactions:
     uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"object","object":{"rephrased_question":"What is the
-        default value for the max_tokens parameter in Nuclia, and how can it be set?","rules":[],"reason":"The
-        previous question established that ''max_tokens'' is a parameter in Nuclia.
-        The main question is asking about its default value and how to set it. Combining
-        these elements makes the rephrased question more specific and directly asks
-        for the information needed."}}}
+      string: '{"chunk":{"type":"object","object":{"rephrased_question":"How do I
+        set the max_tokens parameter in Nuclia and what is its default value?","rules":["Start
+        the response with a smiley emoji."],"reason":"The previous question established
+        that ''max_tokens'' is a parameter related to LLM responses in Nuclia. The
+        main question implicitly refers to this parameter. Rephrasing makes this explicit
+        by including ''max_tokens parameter in Nuclia'' for clarity and better retrieval."}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":9,"output_tokens":8,"timings":{"generative":0.8196444320055889},"input_nuclia_tokens":0.009,"output_nuclia_tokens":0.008}}
+        {"chunk":{"type":"meta","input_tokens":9,"output_tokens":9,"timings":{"generative":0.9737297659739852},"input_nuclia_tokens":0.009,"output_nuclia_tokens":0.009}}
 
-        {"chunk":{"normalized_tokens":{"input":0.00894,"output":0.008,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.00894,"output":0.00912,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -125,17 +125,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 13 Jul 2026 09:56:37 GMT
+      - Mon, 13 Jul 2026 11:13:00 GMT
       nuclia-learning-id:
-      - 9430260ac71547258cf998b831c01623
+      - 9e17244c84194ee58efd48d410b7b062
       nuclia-learning-model:
       - gemini-2.5-flash-lite
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '848'
+      - '981'
       x-nuclia-trace-id:
-      - 5d64e774e67798345314ed25c609057d
+      - 77d4f28db7d497453f13d76308ce5533
     status:
       code: 200
       message: OK
@@ -154,22 +154,22 @@ interactions:
       you responses with a smiley emoji?"}, {"author": "NUCLIA", "text": "Sure! \ud83d\ude0a
       I can start my responses with a smiley emoji."}], "context": [], "query_context":
       {}, "query_context_order": {}, "truncate": true, "user_prompt": {"prompt": "\n##
-      Question\nWhat is the default value for the max_tokens parameter in Nuclia,
-      and how can it be set?\n\n## Provided Context\n[START OF CONTEXT]\n## max_tokens
-      reference\n\n\n\n\n## Chunk: c52669329e6541a49d3201fcdb2f724b\n``` The max_tokens
-      parameter controls how many tokens the LLM may generate in a single response.
-      It can be set per-request via the API or configured globally in the agent workflow.
-      The default value depends on the model, but is typically 1024 tokens. ```\n\n\n[END
-      OF CONTEXT]\n\n## Answering Guidelines\n- Carefully read all context; it may
-      be lengthy or detailed\n- Do not omit or overlook any relevant information\n-
-      If the context is incomplete or insufficient, try to provide a partial answer
-      and encourage the user to clarify their question\n- Read carefully any extra
-      instructions below if provided and use them to answer\n\nNow provide your answer
-      to the question: What is the default value for the max_tokens parameter in Nuclia,
-      and how can it be set?"}, "citations": null, "citation_threshold": null, "generative_model":
-      "chatgpt-azure-4o-mini", "max_tokens": 5000, "query_context_images": {}, "prefer_markdown":
-      null, "json_schema": null, "format_prompt": false, "rerank_context": false,
-      "tools": [], "tool_choice": {"type": "auto"}, "reasoning": false, "seed": null}'
+      Question\nHow do I set the max_tokens parameter in Nuclia and what is its default
+      value?\n\n## Provided Context\n[START OF CONTEXT]\n## max_tokens reference\n\n\n\n\n##
+      Chunk: 09c72e31520e404f8dd740fdae710ad7\n``` The max_tokens parameter controls
+      how many tokens the LLM may generate in a single response. It can be set per-request
+      via the API or configured globally in the agent workflow. The default value
+      depends on the model, but is typically 1024 tokens. ```\n\n\n[END OF CONTEXT]\n\n##
+      Answering Guidelines\n- Carefully read all context; it may be lengthy or detailed\n-
+      Do not omit or overlook any relevant information\n- If the context is incomplete
+      or insufficient, try to provide a partial answer and encourage the user to clarify
+      their question\n- Read carefully any extra instructions below if provided and
+      use them to answer\n\nNow provide your answer to the question: How do I set
+      the max_tokens parameter in Nuclia and what is its default value?"}, "citations":
+      null, "citation_threshold": null, "generative_model": "chatgpt-azure-4o-mini",
+      "max_tokens": 5000, "query_context_images": {}, "prefer_markdown": null, "json_schema":
+      null, "format_prompt": false, "rerank_context": false, "tools": [], "tool_choice":
+      {"type": "auto"}, "reasoning": false, "seed": null}'
     headers:
       Accept:
       - application/x-ndjson
@@ -178,7 +178,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2363'
+      - '2343'
       Content-Type:
       - application/json
       Host:
@@ -188,7 +188,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - d626a2faf9774d81b9e4c59ae997020c
+      - 23c6bc6c3d6a4a49b473c8790220de6c
       x-origin:
       - RAO
       x-session:
@@ -201,44 +201,27 @@ interactions:
     uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
-      string: "{\"chunk\":{\"type\":\"text\",\"text\":\"\U0001F60A\"}}\n{\"chunk\"\
-        :{\"type\":\"text\",\"text\":\" The\"}}\n{\"chunk\":{\"type\":\"text\",\"\
-        text\":\" default\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" value\"}}\n\
-        {\"chunk\":{\"type\":\"text\",\"text\":\" for\"}}\n{\"chunk\":{\"type\":\"\
-        text\",\"text\":\" the\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" max\"\
-        }}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_tokens\"}}\n{\"chunk\":{\"type\"\
-        :\"text\",\"text\":\" parameter\"}}\n{\"chunk\":{\"type\":\"text\",\"text\"\
-        :\" in\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" Nu\"}}\n{\"chunk\":{\"\
-        type\":\"text\",\"text\":\"cl\"}}\n{\"chunk\":{\"type\":\"text\",\"text\"\
-        :\"ia\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" is\"}}\n{\"chunk\":{\"\
-        type\":\"text\",\"text\":\" typically\"}}\n{\"chunk\":{\"type\":\"text\",\"\
-        text\":\" \"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"102\"}}\n{\"chunk\"\
-        :{\"type\":\"text\",\"text\":\"4\"}}\n{\"chunk\":{\"type\":\"text\",\"text\"\
-        :\" tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\",\"}}\n{\"chunk\"\
-        :{\"type\":\"text\",\"text\":\" although\"}}\n{\"chunk\":{\"type\":\"text\"\
-        ,\"text\":\" it\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" can\"}}\n{\"\
-        chunk\":{\"type\":\"text\",\"text\":\" vary\"}}\n{\"chunk\":{\"type\":\"text\"\
-        ,\"text\":\" depending\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" on\"\
-        }}\n{\"chunk\":{\"type\":\"text\",\"text\":\" the\"}}\n{\"chunk\":{\"type\"\
-        :\"text\",\"text\":\" model\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"\
-        .\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" It\"}}\n{\"chunk\":{\"type\"\
-        :\"text\",\"text\":\" can\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" be\"\
-        }}\n{\"chunk\":{\"type\":\"text\",\"text\":\" set\"}}\n{\"chunk\":{\"type\"\
-        :\"text\",\"text\":\" per\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"-request\"\
-        }}\n{\"chunk\":{\"type\":\"text\",\"text\":\" via\"}}\n{\"chunk\":{\"type\"\
-        :\"text\",\"text\":\" the\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" API\"\
-        }}\n{\"chunk\":{\"type\":\"text\",\"text\":\" or\"}}\n{\"chunk\":{\"type\"\
-        :\"text\",\"text\":\" configured\"}}\n{\"chunk\":{\"type\":\"text\",\"text\"\
-        :\" globally\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" in\"}}\n{\"chunk\"\
-        :{\"type\":\"text\",\"text\":\" the\"}}\n{\"chunk\":{\"type\":\"text\",\"\
-        text\":\" agent\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" workflow\"\
-        }}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"\
-        status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\"\
-        :12,\"output_tokens\":6,\"timings\":{\"generative_first_chunk\":0.6149385969999912,\"\
-        generative\":1.3838776729999154},\"input_nuclia_tokens\":0.012,\"output_nuclia_tokens\"\
-        :0.006}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.01206,\"output\"\
-        :0.00564,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\"\
-        :0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+      string: "{\"chunk\":{\"type\":\"text\",\"text\":\"\U0001F60A\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        You\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" can\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        set\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" the\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        max\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        parameter\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" in\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        Nu\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"cl\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ia\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        per\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"-request\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        via\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" the\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        API\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" or\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        configure\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" it\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        globally\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" in\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        the\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" agent\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        workflow\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        The\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" default\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        value\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" typically\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        depends\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" on\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        the\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" model\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\",\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        but\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" it\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        is\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" usually\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        \"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"102\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"4\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":12,\"output_tokens\":5,\"timings\":{\"generative_first_chunk\":0.5862585690338165,\"generative\":1.8597000750014558},\"input_nuclia_tokens\":0.012,\"output_nuclia_tokens\":0.005}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.01188,\"output\":0.0054,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -249,17 +232,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 13 Jul 2026 09:56:37 GMT
+      - Mon, 13 Jul 2026 11:13:02 GMT
       nuclia-learning-id:
-      - d4df03ffcc394014a48eb904e695002d
+      - c886b0ac529443d889a4ed8f822737c7
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '642'
+      - '597'
       x-nuclia-trace-id:
-      - debad68c445f08a1713d7e32451efffb
+      - c18964e85dd1b8d9fee0823b145d6cd6
     status:
       code: 200
       message: OK

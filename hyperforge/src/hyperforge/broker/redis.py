@@ -45,6 +45,8 @@ class RedisBroker(Broker):
     ) -> "RedisBroker":
         client_kwargs = cls._client_kwargs(keepalive_ms)
         if cluster_mode:
+            # redis-py cluster client does not accept retry_on_timeout.
+            client_kwargs.pop("retry_on_timeout", None)
             client = cast(
                 Redis,
                 ManualStreamKeysRedisCluster.from_url(
