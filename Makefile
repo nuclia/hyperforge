@@ -27,7 +27,7 @@ install:
 install-test:
 	uv sync --group dev
 
-fmt:
+format fmt:
 	@for dir in $(COMPONENTS); do $(MAKE) -C $$dir format || exit 1; done
 
 extract-openai:
