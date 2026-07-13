@@ -113,7 +113,7 @@ interactions:
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -244,12 +244,15 @@ interactions:
     uri: https://europe-1.rag.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b
   response:
     body:
-      string: '{"detail":"JWT decoding error"}'
+      string: '{"slug":"nuclia-docs","uuid":"df8b4c24-2807-4888-ad6c-ae97357a638b","config":{"uuid":null,"slug":"4f9285c7-7151-4431-94e6-3f1fb0d66aca:nuclia-docs","title":"Nuclia
+        Docs","description":"","learning_configuration":null,"external_index_provider":null,"configured_external_index_provider":{"type":"unset"},"similarity":null,"hidden_resources_enabled":false,"hidden_resources_hide_on_creation":false,"enforce_security":false},"model":null}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000
       Content-Length:
-      - '31'
+      - '434'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
       content-type:
       - application/json
       date:
@@ -261,8 +264,8 @@ interactions:
       x-nuclia-trace-id:
       - 28af327aadf1e240c1a32b4f248e6ea4
     status:
-      code: 400
-      message: Bad Request
+      code: 200
+      message: OK
 - request:
     body: ''
     headers:
