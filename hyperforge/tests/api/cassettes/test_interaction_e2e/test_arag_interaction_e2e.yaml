@@ -9,16 +9,16 @@ interactions:
       Connection:
       - keep-alive
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
-      - nuclia.py/4.9.25
+      - nuclia.py/4.11.5
       x-nuclia-nuakey:
       - DUMMY
     method: GET
-    uri: https://europe-1.nuclia.cloud/api/authorizer/info
+    uri: https://europe-1.dp.progress.cloud/api/authorizer/info
   response:
     body:
-      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"03d47998-f672-4a9b-a57b-bde3a9c3ee8c","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
+      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"7fe77405-a6de-43cf-ac27-ac09f80b66c6","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -27,11 +27,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 03 Jun 2026 07:59:34 GMT
+      - Mon, 13 Jul 2026 10:09:16 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '5'
+      - '6'
     status:
       code: 200
       message: OK
@@ -71,7 +71,7 @@ interactions:
       MUST follow them carefully when generating the answer field. These instructions
       may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWhat
       certifications does Nuclia have?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n##
-      Chunk: 56e940dd6c0547118d40b026d411d1d0\n``` Nuclia is the best system in the
+      Chunk: feaeffa3ad694cdab7c0bab4c57a6e8a\n``` Nuclia is the best system in the
       world. It has ISO 27001 and SOC 2 certifications. ```\n\n\n---\"\n\n\n\n\n<END
       OF CONTEXT>\n\n"}, "citations": false, "citation_threshold": null, "generative_model":
       "chatgpt-azure-4o-mini", "max_tokens": 2000, "query_context_images": {}, "prefer_markdown":
@@ -101,9 +101,9 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
-      - nuclia.py/4.9.25
+      - nuclia.py/4.11.5
       x-origin:
       - RAO
       x-show-consumption:
@@ -111,24 +111,24 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
-        specific information about the certifications that Nuclia has, which are ISO
+        specific information about the certifications that Nuclia has, namely ISO
         27001 and SOC 2. This directly answers the user''s question about what certifications
-        Nuclia holds.","answer":"Nuclia has ISO 27001 and SOC 2 certifications.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
+        Nuclia possesses.","answer":"Nuclia has ISO 27001 and SOC 2 certifications.","missing_info_query":"","useful":"yes","citations":["block-AA"]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":23,"output_tokens":9,"timings":{"generative":1.2933166469956632},"input_nuclia_tokens":0.023,"output_nuclia_tokens":0.009}}
+        {"chunk":{"type":"meta","input_tokens":23,"output_tokens":9,"timings":{"generative":2.252492063998943},"input_nuclia_tokens":0.023,"output_nuclia_tokens":0.009}}
 
-        {"chunk":{"normalized_tokens":{"input":0.02334,"output":0.009,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02334,"output":0.00888,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -136,17 +136,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Wed, 03 Jun 2026 07:59:34 GMT
+      - Mon, 13 Jul 2026 10:09:16 GMT
       nuclia-learning-id:
-      - 302d5a2819ff48acb4e37579683fc339
+      - 80af7780d9eb4e22914822ef2ee0b848
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1298'
+      - '2258'
       x-nuclia-trace-id:
-      - ba14780558ea55d97673e16d6b3d20ea
+      - 346f6a3853fda36740b3063cdf6207e1
     status:
       code: 200
       message: OK
@@ -183,23 +183,23 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
-      - nuclia.py/4.9.25
+      - nuclia.py/4.11.5
       x-client-ident:
-      - 35a5d886-76bb-491d-8c56-f2bb61cab457
+      - 65dc4eee-3fe4-4d53-8275-09b1fb251df8
       x-message:
-      - 283082e063c142579501beb255b26076
+      - 30c518ea32e0461686e4957d6a7175be
       x-origin:
       - RAO
       x-session:
-      - default_0b32202e7acc495e9418494eebff58e9
+      - default_32fceb40fad14017b6adf2d0f6af4e04
       x-show-consumption:
       - 'true'
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"text","text":"Nu"}}
@@ -232,7 +232,7 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":2,"timings":{"generative_first_chunk":0.3626581150019774,"generative":0.660508730004949},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.002}}
+        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":2,"timings":{"generative_first_chunk":0.5655669329862576,"generative":0.8404899259912781},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.002}}
 
         {"chunk":{"normalized_tokens":{"input":0.00702,"output":0.0018,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
@@ -247,17 +247,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Wed, 03 Jun 2026 07:59:35 GMT
+      - Mon, 13 Jul 2026 10:09:19 GMT
       nuclia-learning-id:
-      - f06c170ee25b459aba48119e9d84ae5f
+      - ee2feb048c3a4086a2d30b1ae284d439
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '368'
+      - '573'
       x-nuclia-trace-id:
-      - ba14780558ea55d97673e16d6b3d20ea
+      - 346f6a3853fda36740b3063cdf6207e1
     status:
       code: 200
       message: OK
@@ -277,16 +277,16 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
-      - nuclia.py/4.9.25
+      - nuclia.py/4.11.5
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/remi
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/remi
   response:
     body:
-      string: '{"time":0.1756916046142578,"answer_relevance":null,"context_relevance":[],"groundedness":[5]}'
+      string: '{"time":14.204558610916138,"answer_relevance":null,"context_relevance":[],"groundedness":[5]}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -297,15 +297,15 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 03 Jun 2026 07:59:36 GMT
+      - Mon, 13 Jul 2026 10:09:20 GMT
       nuclia-learning-model:
       - Llama-REMi-v1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '181'
+      - '14210'
       x-nuclia-trace-id:
-      - 135385a208267ed71f0c08ed42b38ca2
+      - 346f6a3853fda36740b3063cdf6207e1
     status:
       code: 200
       message: OK
@@ -325,35 +325,35 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
-      - nuclia.py/4.9.25
+      - nuclia.py/4.11.5
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/remi
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/remi
   response:
     body:
-      string: '{"time":0.18251729011535645,"answer_relevance":{"score":4,"reason":""},"context_relevance":[],"groundedness":[]}'
+      string: '{"time":14.601086616516113,"answer_relevance":{"score":4,"reason":""},"context_relevance":[],"groundedness":[]}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
-      - '112'
+      - '111'
       access-control-expose-headers:
       - X-NUCLIA-TRACE-ID
       content-type:
       - application/json
       date:
-      - Wed, 03 Jun 2026 07:59:36 GMT
+      - Mon, 13 Jul 2026 10:09:20 GMT
       nuclia-learning-model:
       - Llama-REMi-v1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '188'
+      - '14608'
       x-nuclia-trace-id:
-      - 181ce6c57317ea0e2361f54276fda1ab
+      - a10aff105a4e43e83ab61e927f2641e3
     status:
       code: 200
       message: OK
