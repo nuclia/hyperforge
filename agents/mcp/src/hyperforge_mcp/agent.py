@@ -423,7 +423,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             logger.error(f"Tool {tool_name} encountered an error: {error_message}")
             context.chunks.append(
                 Chunk(
-                    chunk_id=f"mcp_{self.config.id}_{tool_name}_error",
+                    chunk_id=f"mcp_{self.config.id}_{tool_name}_error_{uuid4().hex[:8]}",
                     title=f"MCP tool error: {tool_name}",
                     text=(f"Tool: {tool_name}\nError: {error_message}"),
                     origin_agent=self.config.module,
@@ -470,7 +470,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             if isinstance(block, types.TextContent):
                 context.chunks.append(
                     Chunk(
-                        chunk_id=f"mcp_{self.config.id}_{tool_name}",
+                        chunk_id=f"mcp_{self.config.id}_{tool_name}_{uuid4().hex[:8]}",
                         title=f"Calling {tool_name}",
                         text=block.text,
                         metadata=block.meta,
@@ -532,7 +532,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                     embedded_urls = [block.resource.uri] if block.resource.uri else []
                     context.chunks.append(
                         Chunk(
-                            chunk_id=f"mcp_{self.config.id}_{tool_name}",
+                            chunk_id=f"mcp_{self.config.id}_{tool_name}_{uuid4().hex[:8]}",
                             title=f"Calling {tool_name}",
                             text=block.resource.text,
                             metadata=block.resource.meta,
@@ -693,7 +693,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                         if isinstance(message.content, types.TextContent):
                             context.chunks.append(
                                 Chunk(
-                                    chunk_id=f"mcp_prompt_{self.config.id}_{prompt_name}",
+                                    chunk_id=f"mcp_prompt_{self.config.id}_{prompt_name}_{uuid4().hex[:8]}",
                                     title=f"MCP Prompt: {prompt_name}",
                                     text=message.content.text,
                                     origin_agent=self.config.module,
@@ -713,7 +713,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                         ):
                             context.chunks.append(
                                 Chunk(
-                                    chunk_id=f"mcp_prompt_{self.config.id}_{prompt_name}",
+                                    chunk_id=f"mcp_prompt_{self.config.id}_{prompt_name}_{uuid4().hex[:8]}",
                                     title=f"MCP Prompt: {prompt_name}",
                                     text=message.content.resource.text,
                                     origin_agent=self.config.module,
