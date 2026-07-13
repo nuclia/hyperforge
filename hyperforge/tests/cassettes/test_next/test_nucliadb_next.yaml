@@ -21,17 +21,17 @@ interactions:
       string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"7fe77405-a6de-43cf-ac27-ac09f80b66c6","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
       - '227'
       content-type:
       - application/json
       date:
-      - Mon, 13 Jul 2026 10:09:55 GMT
+      - Mon, 13 Jul 2026 11:13:45 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '3'
+      - '6'
     status:
       code: 200
       message: OK
@@ -83,7 +83,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - d0eb6ff6790c4afe97e4d917cc80a34f
+      - 1e2be8638468448383fc495592a2e6e2
       x-origin:
       - RAO
       x-session:
@@ -96,25 +96,24 @@ interactions:
     uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"object","object":{"rephrased_question":"What is the
-        function and usage of `max_tokens` in Nuclia, and what is a Cardamom bun?","rules":["Answer
-        both parts of the question distinctly.","Provide a clear explanation of `max_tokens`
-        within the Nuclia context.","Define what a Cardamom bun is."],"reason":"The
-        original question combines two distinct topics. The rephrased question separates
-        these into clear, actionable parts, improving the focus for retrieval and
-        ensuring both aspects are addressed. The addition of ''function and usage''
-        for `max_tokens` provides more specific guidance for the answer."}}}
+      string: '{"chunk":{"type":"object","object":{"rephrased_question":"Explain how
+        to use the `max_tokens` parameter in Nuclia and define what a Cardamom bun
+        is.","rules":["Ensure the explanation of `max_tokens` is specific to Nuclia''s
+        implementation.","Provide a clear and concise definition of a Cardamom bun."],"reason":"The
+        original question was a compound question combining a technical query about
+        Nuclia with a general knowledge query. Rephrasing it separates these distinct
+        topics for clarity and ensures each part is addressed independently and appropriately."}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":12,"timings":{"generative":1.0572556690021884},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.012}}
+        {"chunk":{"type":"meta","input_tokens":7,"output_tokens":10,"timings":{"generative":0.9227260270272382},"input_nuclia_tokens":0.007,"output_nuclia_tokens":0.01}}
 
-        {"chunk":{"normalized_tokens":{"input":0.00706,"output":0.012,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.00706,"output":0.01032,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -122,17 +121,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 13 Jul 2026 10:09:55 GMT
+      - Mon, 13 Jul 2026 11:13:46 GMT
       nuclia-learning-id:
-      - 1dbff840744a47799a87db7659944cc6
+      - 8b69b8601c5e48f8b0dd1530ae2d6770
       nuclia-learning-model:
       - gemini-2.5-flash-lite
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1063'
+      - '929'
       x-nuclia-trace-id:
-      - 24cbd0c54c9732d8d07bd7c231663f40
+      - 5b0222578a0e53c028bc88032c8dcfd4
     status:
       code: 200
       message: OK
@@ -170,18 +169,18 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 13 Jul 2026 10:09:57 GMT
+      - Mon, 13 Jul 2026 11:13:46 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '10'
+      - '22'
       x-nuclia-trace-id:
-      - d00f2a78a0677636ddcd3e533c26535a
+      - 6eee8974c092f72939e03d5554585b9d
     status:
       code: 200
       message: OK
 - request:
-    body: ''
+    body: '{"prefixes": [{"prefix": "/n/i"}]}'
     headers:
       Accept:
       - '*/*'
@@ -189,6 +188,8 @@ interactions:
       - gzip, deflate
       Connection:
       - keep-alive
+      Content-Length:
+      - '32'
       Host:
       - europe-1.rag.progress.cloud
       User-Agent:
@@ -197,32 +198,28 @@ interactions:
       - application/json
       x-stf-serviceaccount:
       - DUMMY
-    method: GET
-    uri: https://europe-1.rag.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/labelsets
+    method: POST
+    uri: https://europe-1.rag.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/catalog/facets
   response:
     body:
-      string: '{"uuid":"df8b4c24-2807-4888-ad6c-ae97357a638b","labelsets":{"pmm":{"title":"pmm","color":"#DAF3E6","multiple":true,"kind":["RESOURCES"],"labels":[{"title":"Videos","related":"","text":"","uri":""},{"title":"Partner
-        Content","related":"","text":"","uri":""},{"title":"Softcat","related":"","text":"","uri":""},{"title":"Sales
-        Enablement Assets","related":"","text":"","uri":""},{"title":"KO 26","related":"","text":"","uri":""},{"title":"Data
-        Sheets","related":"","text":"","uri":""},{"title":"Progress Agentic RAG Training
-        Materials 2026","related":"","text":"","uri":""}]}}}'
+      string: '{"facets":{"/n/i":986,"/n/i/application":1,"/n/i/application/json":1,"/n/i/text":985,"/n/i/text/markdown":985}}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
-      - '575'
+      - '111'
       access-control-expose-headers:
       - X-NUCLIA-TRACE-ID
       content-type:
       - application/json
       date:
-      - Mon, 13 Jul 2026 10:09:57 GMT
+      - Mon, 13 Jul 2026 11:13:47 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '11'
+      - '19'
       x-nuclia-trace-id:
-      - f90cf2df4bf8231825e1b4e5638e8660
+      - 177c6fb4ab55076da0c0ce626f10086c
     status:
       code: 200
       message: OK
@@ -259,18 +256,18 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 13 Jul 2026 10:09:57 GMT
+      - Mon, 13 Jul 2026 11:13:47 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '4'
+      - '12'
       x-nuclia-trace-id:
-      - bab703bcd2edc56a8b7ec44dc6743662
+      - 28af327aadf1e240c1a32b4f248e6ea4
     status:
       code: 200
       message: OK
 - request:
-    body: '{"prefixes": [{"prefix": "/n/i"}]}'
+    body: ''
     headers:
       Accept:
       - '*/*'
@@ -278,8 +275,6 @@ interactions:
       - gzip, deflate
       Connection:
       - keep-alive
-      Content-Length:
-      - '32'
       Host:
       - europe-1.rag.progress.cloud
       User-Agent:
@@ -288,28 +283,32 @@ interactions:
       - application/json
       x-stf-serviceaccount:
       - DUMMY
-    method: POST
-    uri: https://europe-1.rag.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/catalog/facets
+    method: GET
+    uri: https://europe-1.rag.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/labelsets
   response:
     body:
-      string: '{"facets":{"/n/i":986,"/n/i/application":1,"/n/i/application/json":1,"/n/i/text":985,"/n/i/text/markdown":985}}'
+      string: '{"uuid":"df8b4c24-2807-4888-ad6c-ae97357a638b","labelsets":{"pmm":{"title":"pmm","color":"#DAF3E6","multiple":true,"kind":["RESOURCES"],"labels":[{"title":"Videos","related":"","text":"","uri":""},{"title":"Partner
+        Content","related":"","text":"","uri":""},{"title":"Softcat","related":"","text":"","uri":""},{"title":"Sales
+        Enablement Assets","related":"","text":"","uri":""},{"title":"KO 26","related":"","text":"","uri":""},{"title":"Data
+        Sheets","related":"","text":"","uri":""},{"title":"Progress Agentic RAG Training
+        Materials 2026","related":"","text":"","uri":""}]}}}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
-      - '111'
+      - '575'
       access-control-expose-headers:
       - X-NUCLIA-TRACE-ID
       content-type:
       - application/json
       date:
-      - Mon, 13 Jul 2026 10:09:57 GMT
+      - Mon, 13 Jul 2026 11:13:47 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '14'
+      - '21'
       x-nuclia-trace-id:
-      - f57caf717b62b48bebce1429624d5b2d
+      - 7e63869a26a56026a4b8d0be98049a79
     status:
       code: 200
       message: OK
@@ -348,13 +347,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 13 Jul 2026 10:09:57 GMT,Mon, 13 Jul 2026 10:09:57 GMT
+      - Mon, 13 Jul 2026 11:13:46 GMT,Mon, 13 Jul 2026 11:13:46 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '50'
+      - '43'
       x-nuclia-trace-id:
-      - 26c4f415731801832cd9c0600da5ea28
+      - de708c406d6780bd6bd8f300371be268
     status:
       code: 200
       message: OK
@@ -481,7 +480,7 @@ interactions:
         code snippet to embed it in your website or application. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":1,\"start\":401,\"end\":617},\"fuzzy_result\":false}],\"facets\":{},\"query\":\"\",\"total\":5294,\"page_number\":0,\"page_size\":20,\"next_page\":true,\"min_score\":0.0},\"shards\":[\"306cbabb-72a5-417c-827f-7874e205c858\"]}"
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Content-Length:
       - '12993'
       access-control-expose-headers:
@@ -489,13 +488,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 13 Jul 2026 10:09:57 GMT
+      - Mon, 13 Jul 2026 11:13:47 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '49'
+      - '54'
       x-nuclia-trace-id:
-      - 9ebcd72bc069ec63246a7f9d52bcc6f6
+      - d17d9c0006fce94a419cfb5dc5e78dcb
     status:
       code: 200
       message: OK
@@ -527,7 +526,7 @@ interactions:
         Materials 2026","related":"","text":"","uri":""}]}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Content-Length:
       - '507'
       access-control-expose-headers:
@@ -535,13 +534,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 13 Jul 2026 10:09:57 GMT
+      - Mon, 13 Jul 2026 11:13:47 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '12'
+      - '16'
       x-nuclia-trace-id:
-      - 128259ad42a2f17e7577443c17a9a83e
+      - 427aa3ebb759e3bfea8583e4207f5bcb
     status:
       code: 200
       message: OK
@@ -670,7 +669,7 @@ interactions:
         code snippet to embed it in your website or application. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":1,\"start\":401,\"end\":617},\"fuzzy_result\":false}],\"facets\":{\"/k\":{\"/k/text\":5294}},\"query\":\"\",\"total\":5294,\"page_number\":0,\"page_size\":20,\"next_page\":true,\"min_score\":0.0},\"fulltext\":{\"results\":[{\"score\":0.0,\"rid\":\"007b445866574d7ca69891d388663cc6\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"007b445866574d7ca69891d388663cc6\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"b28e388104644fc5bba68c0cd44e01d4\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"b28e388104644fc5bba68c0cd44e01d4\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"2a0d73029ad24c599d6dc1e117a41897\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"2a0d73029ad24c599d6dc1e117a41897\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"f13642b2862f4a1ea2144c9eb2abb2a3\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"f13642b2862f4a1ea2144c9eb2abb2a3\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"ed6fda7434aa43a3bd5138b95e7fe081\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"ed6fda7434aa43a3bd5138b95e7fe081\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"a572ce0c7eb949e4a17babae21a03a4a\",\"field_type\":\"t\",\"field\":\"kb-resources\",\"labels\":[]},{\"score\":0.0,\"rid\":\"a572ce0c7eb949e4a17babae21a03a4a\",\"field_type\":\"t\",\"field\":\"kb-search\",\"labels\":[]},{\"score\":0.0,\"rid\":\"a572ce0c7eb949e4a17babae21a03a4a\",\"field_type\":\"t\",\"field\":\"kb-rag-lab\",\"labels\":[]},{\"score\":0.0,\"rid\":\"a572ce0c7eb949e4a17babae21a03a4a\",\"field_type\":\"t\",\"field\":\"account-arag\",\"labels\":[]},{\"score\":0.0,\"rid\":\"a572ce0c7eb949e4a17babae21a03a4a\",\"field_type\":\"t\",\"field\":\"kb-kv-schemas\",\"labels\":[]},{\"score\":0.0,\"rid\":\"a572ce0c7eb949e4a17babae21a03a4a\",\"field_type\":\"t\",\"field\":\"user-profile\",\"labels\":[]},{\"score\":0.0,\"rid\":\"a572ce0c7eb949e4a17babae21a03a4a\",\"field_type\":\"t\",\"field\":\"kb-users\",\"labels\":[]},{\"score\":0.0,\"rid\":\"a572ce0c7eb949e4a17babae21a03a4a\",\"field_type\":\"t\",\"field\":\"kb-widgets\",\"labels\":[]},{\"score\":0.0,\"rid\":\"a572ce0c7eb949e4a17babae21a03a4a\",\"field_type\":\"t\",\"field\":\"kb-remi-analytics\",\"labels\":[]},{\"score\":0.0,\"rid\":\"a572ce0c7eb949e4a17babae21a03a4a\",\"field_type\":\"t\",\"field\":\"agent-users\",\"labels\":[]}],\"facets\":{},\"query\":\"\",\"total\":2013,\"page_number\":0,\"page_size\":20,\"next_page\":true,\"min_score\":0.0},\"shards\":[\"306cbabb-72a5-417c-827f-7874e205c858\"]}"
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
       - '16898'
       access-control-expose-headers:
@@ -678,19 +677,19 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 13 Jul 2026 10:09:57 GMT
+      - Mon, 13 Jul 2026 11:13:47 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '66'
+      - '72'
       x-nuclia-trace-id:
-      - d15479f1d11644d6db7916eb45f40799
+      - 8082f71c93e648b32c35ca638469fdd9
     status:
       code: 200
       message: OK
 - request:
-    body: '{"query": "What is the function and usage of `max_tokens` in Nuclia, and
-      what is a Cardamom bun?", "filters": [], "citations": true, "generative_model":
+    body: '{"query": "Explain how to use the `max_tokens` parameter in Nuclia and
+      define what a Cardamom bun is.", "filters": [], "citations": true, "generative_model":
       "chatgpt-azure-4o-mini"}'
     headers:
       Accept:
@@ -700,7 +699,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '170'
+      - '175'
       Host:
       - europe-1.rag.progress.cloud
       User-Agent:
@@ -720,248 +719,50 @@ interactions:
         is\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" used\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         to\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" set\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         hard\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" limits\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        on\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" context\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        on\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" both\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        the\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" context\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         size\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" and\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        answer\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" length\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        when\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" interacting\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        with\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" the\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        /\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"ask\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        endpoint\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\".\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        It\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" defines\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        the\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" answer\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        length\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" when\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        interacting\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" with\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        the\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" API\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\".\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        Specifically\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\",\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        it\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" defines\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         the\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" maximum\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         number\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" of\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        input\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" tokens\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        that\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" can\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        be\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" included\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        in\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" the\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        final\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" context\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\",\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        which\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" encompasses\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        tokens\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" that\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        the\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" model\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        will\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" take\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        as\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" context\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\",\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        which\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" includes\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         the\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" prompt\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\",\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         retrieved\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" results\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\",\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         and\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" the\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        user\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" question\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\".\\n\\n\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"Not\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        user\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" question\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\".\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        This\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" helps\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        manage\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" the\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        amount\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" of\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        information\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" sent\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        to\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" the\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        language\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" model\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        and\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" controls\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        the\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" length\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        of\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" the\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        generated\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" response\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\".\\n\\n\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"Not\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         enough\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" data\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         to\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" answer\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        this\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\".\"}}\n{\"item\":{\"type\":\"retrieval\",\"results\":{\"resources\":{\"e8525e64c5b44982b958d32cf6090613\":{\"id\":\"e8525e64c5b44982b958d32cf6090613\",\"slug\":\"docs-develop-js-sdk-interfaces-ChatOptions-md\",\"title\":\"docs
-        > develop > js sdk > interfaces > ChatOptions\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:50:37.546010\",\"modified\":\"2026-07-13T08:05:43.436778\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"e8525e64c5b44982b958d32cf6090613/t/page/2450-2808\":{\"score\":0.02029348537325859,\"score_type\":\"RERANKER\",\"order\":9,\"text\":\"
-        \\n optional highlight: boolean \\n \\n Inherited from \\n BaseSearchOptions.highlight
-        \\n Defined in \\n libs/sdk-core/src/lib/db/search/search.models.ts:76 \\n
-        \\n keyword_filters? \\n \\n optional keyword_filters: string[] \\\\| Filter[]
-        \\n \\n Inherited from \\n BaseSearchOptions.keyword_filters \\n Defined in
-        \\n libs/sdk-core/src/lib/db/search/search.models.ts:65 \\n \\n max_tokens?
-        \\n\",\"id\":\"e8525e64c5b44982b958d32cf6090613/t/page/2450-2808\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":2450,\"end\":2808,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false},\"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011\":{\"score\":0.018833128735423088,\"score_type\":\"RERANKER\",\"order\":10,\"text\":\"
-        \\n optional max_tokens: number \\\\| object \\n \\n Defines the maximum number
-        of tokens that the model will take as context. \\n Defined in \\n libs/sdk-core/src/lib/db/search/search.models.ts:112
-        \\n \\n min_score? \\n\",\"id\":\"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":2808,\"end\":3011,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"220eb37c167f4eb9bb8e9454e7ba8cf5\":{\"id\":\"220eb37c167f4eb9bb8e9454e7ba8cf5\",\"slug\":\"docs-develop-python-sdk-05-search-md\",\"title\":\"docs
-        > develop > python sdk > 05 search\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:48:33.723913\",\"modified\":\"2026-06-09T08:08:04.866092\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276\":{\"score\":0.13028541207313538,\"score_type\":\"RERANKER\",\"order\":4,\"text\":\"
-        \\n SDK: \\n \\n ```python \\n from nuclia import sdk \\n from nucliadb_models.search
-        import AskRequest, Reasoning \\n search = sdk.NucliaSearch() \\n query = AskRequest(
-        \\n query= My question with extra reasoning effort , \\n max_tokens=5000,
-        \\n reasoning=Reasoning( \\n display=True, # Show reasoning in the response
-        \\n effort= low , # Can be low , medium , or high \\n budget_tokens=1024 #
-        How many tokens reasoning can use \\n ), \\n ) \\n search.ask(query=query)
-        \\n ``` \\n Model Support for Reasoning Options: \\n\",\"id\":\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":1790,\"end\":2276,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false},\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\":{\"score\":0.037256766110658646,\"score_type\":\"RERANKER\",\"order\":6,\"text\":\"
-        ::: \\n :::warning \\n Enabling reasoning can use additional tokens, which
-        may increase your usage costs. \\n You may need to increase max_tokens to
-        give the LLM enough room to reason and generate an answer. \\n\",\"id\":\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":2505,\"end\":2709,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"b14cf452a3434839a04c111f2ea4dc51\":{\"id\":\"b14cf452a3434839a04c111f2ea4dc51\",\"slug\":\"docs-develop-js-sdk-enums-UsageType-md\",\"title\":\"docs
-        > develop > js sdk > enums > UsageType\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\",\"tn\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:51:41.582110\",\"modified\":\"2026-06-09T08:13:34.112208\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"b14cf452a3434839a04c111f2ea4dc51/t/page/0-2139\":{\"score\":0.1678997427225113,\"score_type\":\"RERANKER\",\"order\":2,\"text\":\"@nuclia/core
-        / Exports / UsageType \\n Enumeration: UsageType \\n Table of contents \\n
-        Enumeration Members \\n \\n AI_TOKENS_USED \\n BYTES_PROCESSED \\n CHARS_PROCESSED
-        \\n MEDIA_FILES_PROCESSED \\n MEDIA_SECONDS_PROCESSED \\n NUCLIA_TOKENS \\n
-        PAGES_PROCESSED \\n PARAGRAPHS_PROCESSED \\n PRE_PROCESSING_TIME \\n RESOURCES_PROCESSED
-        \\n SEARCHES_PERFORMED \\n SLOW_PROCESSING_TIME \\n SUGGESTIONS_PERFORMED
-        \\n TRAIN_SECONDS \\n \\n Enumeration Members \\n AI_TOKENS_USED \\n \u2022
-        AI_TOKENS_USED = ai_tokens_used \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:190
-        \\n \\n BYTES_PROCESSED \\n \u2022 BYTES_PROCESSED = bytes_processed \\n Defined
-        in \\n libs/sdk-core/src/lib/db/db.models.ts:181 \\n \\n CHARS_PROCESSED \\n
-        \u2022 CHARS_PROCESSED = chars_processed \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:182
-        \\n \\n MEDIA_FILES_PROCESSED \\n \u2022 MEDIA_FILES_PROCESSED = media_files_processed
-        \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:184 \\n \\n MEDIA_SECONDS_PROCESSED
-        \\n \u2022 MEDIA_SECONDS_PROCESSED = media_seconds_processed \\n Defined in
-        \\n libs/sdk-core/src/lib/db/db.models.ts:183 \\n \\n NUCLIA_TOKENS \\n \u2022
-        NUCLIA_TOKENS = nuclia_tokens_billed \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:191
-        \\n \\n PAGES_PROCESSED \\n \u2022 PAGES_PROCESSED = pages_processed \\n Defined
-        in \\n libs/sdk-core/src/lib/db/db.models.ts:185 \\n \\n PARAGRAPHS_PROCESSED
-        \\n \u2022 PARAGRAPHS_PROCESSED = paragraphs_processed \\n Defined in \\n
-        libs/sdk-core/src/lib/db/db.models.ts:186 \\n \\n PRE_PROCESSING_TIME \\n
-        \u2022 PRE_PROCESSING_TIME = pre_processing_time \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:178
-        \\n \\n RESOURCES_PROCESSED \\n \u2022 RESOURCES_PROCESSED = resources_processed
-        \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:180 \\n \\n SEARCHES_PERFORMED
-        \\n \u2022 SEARCHES_PERFORMED = searches_performed \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:188
-        \\n \\n SLOW_PROCESSING_TIME \\n \u2022 SLOW_PROCESSING_TIME = slow_processing_time
-        \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:179 \\n \\n SUGGESTIONS_PERFORMED
-        \\n \u2022 SUGGESTIONS_PERFORMED = suggestions_performed \\n Defined in \\n
-        libs/sdk-core/src/lib/db/db.models.ts:189 \\n \\n TRAIN_SECONDS \\n \u2022
-        TRAIN_SECONDS = train_seconds \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:187\",\"id\":\"b14cf452a3434839a04c111f2ea4dc51/t/page/0-2139\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":2139,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"4039d76b0fff4962900836ab3fdec9f7\":{\"id\":\"4039d76b0fff4962900836ab3fdec9f7\",\"slug\":\"docs-rag-advanced-consumption-mdx\",\"title\":\"docs
-        > rag > advanced > consumption.\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-10-03T08:32:26.341394\",\"modified\":\"2026-06-09T08:18:16.730959\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\":{\"score\":0.18907149136066437,\"score_type\":\"RERANKER\",\"order\":1,\"text\":\"
-        Use the max_tokens parameter on the /ask endpoint to set hard limits on: \\n
-        - Context size: Limits the amount of retrieved information sent to the LLM
-        \\n - Answer length: Limits the length of the generated response \\n Important
-        Considerations \\n Context Limitations: \\n\",\"id\":\"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":3075,\"end\":3340,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"6c56729cf0a44da3a4435094b8333ad5\":{\"id\":\"6c56729cf0a44da3a4435094b8333ad5\",\"slug\":\"docs-develop-js-sdk-interfaces-SamlConfig-md\",\"title\":\"docs
-        > develop > js sdk > interfaces > SamlConfig\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\",\"eo\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-08-26T10:00:01.641788\",\"modified\":\"2026-07-13T08:08:37.888085\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"6c56729cf0a44da3a4435094b8333ad5/t/page/0-603\":{\"score\":0.00985985528677702,\"score_type\":\"RERANKER\",\"order\":12,\"text\":\"@nuclia/core
-        \u2022 Docs \\n \\n @nuclia/core / SamlConfig \\n Interface: SamlConfig \\n
-        Properties \\n authn_context? \\n \\n optional authn_context: exact \\\\|
-        minimum \\\\| better \\\\| maximum \\n \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:113
-        \\n \\n domains \\n \\n domains: string[] \\n \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:109
-        \\n \\n entity_id \\n \\n entity_id: string \\n \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:110
-        \\n \\n sso_url \\n \\n sso_url: string \\n \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:111
-        \\n \\n x509_cert \\n \\n x509_cert: string \\n \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:112\",\"id\":\"6c56729cf0a44da3a4435094b8333ad5/t/page/0-603\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":603,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"8b3e0ef630a346d1b591143309db87ec\":{\"id\":\"8b3e0ef630a346d1b591143309db87ec\",\"slug\":\"docs-develop-js-sdk-interfaces-NucliaTokensMetric-md\",\"title\":\"docs
-        > develop > js sdk > interfaces > NucliaTokensMetric\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\",\"la\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:48:48.423622\",\"modified\":\"2026-07-13T08:07:40.133200\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"8b3e0ef630a346d1b591143309db87ec/t/page/281-511\":{\"score\":0.003403005190193653,\"score_type\":\"RERANKER\",\"order\":19,\"text\":\"
-        name: nuclia_tokens \\n \\n Overrides \\n UsageMetric.name \\n Defined in
-        \\n libs/sdk-core/src/lib/db/db.models.ts:183 \\n \\n value \\n \\n value:
-        number \\n \\n Overrides \\n UsageMetric.value \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:184\",\"id\":\"8b3e0ef630a346d1b591143309db87ec/t/page/281-511\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":281,\"end\":511,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"9f7036a7a6694700b72d52eb58a8326c\":{\"id\":\"9f7036a7a6694700b72d52eb58a8326c\",\"slug\":\"docs-rag-advanced-widget-features-md\",\"title\":\"docs
-        > rag > advanced > widget > features\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2024-07-18T14:32:26.204740\",\"modified\":\"2026-06-09T08:07:51.648767\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412\":{\"score\":0.40827676653862,\"score_type\":\"RERANKER\",\"order\":0,\"text\":\"
-        max_tokens: the maximum number of input tokens to put in the final context
-        (including the prompt, the retrieved results and the user question). \\n max_output_tokens:
-        the maximum number of tokens to generate. \\n\",\"id\":\"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":5203,\"end\":5412,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"43004f553e534ffe9c9e735856bd9b23\":{\"id\":\"43004f553e534ffe9c9e735856bd9b23\",\"slug\":\"docs-develop-js-sdk-interfaces-ModelConfig-md\",\"title\":\"docs
-        > develop > js sdk > interfaces > ModelConfig\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-01-08T16:32:44.621593\",\"modified\":\"2026-07-13T08:05:25.656406\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"43004f553e534ffe9c9e735856bd9b23/t/page/212-480\":{\"score\":0.0050211502239108086,\"score_type\":\"RERANKER\",\"order\":16,\"text\":\"
+        this\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\".\"}}\n{\"item\":{\"type\":\"retrieval\",\"results\":{\"resources\":{\"43004f553e534ffe9c9e735856bd9b23\":{\"id\":\"43004f553e534ffe9c9e735856bd9b23\",\"slug\":\"docs-develop-js-sdk-interfaces-ModelConfig-md\",\"title\":\"docs
+        > develop > js sdk > interfaces > ModelConfig\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-01-08T16:32:44.621593\",\"modified\":\"2026-07-13T08:05:25.656406\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"43004f553e534ffe9c9e735856bd9b23/t/page/212-480\":{\"score\":0.006641112733632326,\"score_type\":\"RERANKER\",\"order\":12,\"text\":\"
         \\n optional driver: string \\n \\n Defined in \\n libs/sdk-core/src/lib/db/kb/kb.models.ts:590
         \\n \\n input_tokens \\n \\n input_tokens: object \\n \\n max \\n \\n max:
         number \\n \\n min? \\n \\n optional min: number \\n \\n Defined in \\n libs/sdk-core/src/lib/db/kb/kb.models.ts:587
-        \\n \\n max_images? \\n\",\"id\":\"43004f553e534ffe9c9e735856bd9b23/t/page/212-480\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":212,\"end\":480,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"6e8250e6b5264156988657a221fd5e94\":{\"id\":\"6e8250e6b5264156988657a221fd5e94\",\"slug\":\"docs-develop-js-sdk-namespaces-Ask-interfaces-ConsumptionAskResponseItem-md\",\"title\":\"docs
-        > develop > js sdk > namespaces > Ask > interfaces > ConsumptionAskResponseItem\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-12-09T11:47:37.548412\",\"modified\":\"2026-07-13T08:09:20.576829\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"6e8250e6b5264156988657a221fd5e94/t/page/0-397\":{\"score\":0.003765413537621498,\"score_type\":\"RERANKER\",\"order\":18,\"text\":\"@nuclia/core
-        \u2022 Docs \\n \\n @nuclia/core / Ask / ConsumptionAskResponseItem \\n Interface:
-        ConsumptionAskResponseItem \\n Properties \\n customer_key_tokens \\n \\n
-        customer_key_tokens: TokenConsumption \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/ask.models.ts:127
-        \\n \\n normalized_tokens \\n \\n normalized_tokens: TokenConsumption \\n
-        \\n Defined in \\n libs/sdk-core/src/lib/db/search/ask.models.ts:126 \\n \\n
-        type \\n \\n\",\"id\":\"6e8250e6b5264156988657a221fd5e94/t/page/0-397\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":397,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"50aac6f34b6d47de8e3b01f8b2de6e9c\":{\"id\":\"50aac6f34b6d47de8e3b01f8b2de6e9c\",\"slug\":\"docs-develop-js-sdk-interfaces-PredictAnswerOptions-md\",\"title\":\"docs
-        > develop > js sdk > interfaces > PredictAnswerOptions\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-08-26T10:03:11.443619\",\"modified\":\"2026-07-13T08:07:00.470062\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221\":{\"score\":0.01851104572415352,\"score_type\":\"RERANKER\",\"order\":11,\"text\":\"
-        \\n optional max_tokens: number \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/ask.models.ts:251
-        \\n \\n prefer_markdown? \\n \\n optional prefer_markdown: boolean \\n \\n
-        Defined in \\n libs/sdk-core/src/lib/db/search/ask.models.ts:256 \\n \\n query_context?
-        \\n\",\"id\":\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":977,\"end\":1221,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false},\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/739-977\":{\"score\":0.009522485546767712,\"score_type\":\"RERANKER\",\"order\":14,\"text\":\"
-        \\n optional generative_model: string \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/ask.models.ts:250
-        \\n \\n json_schema? \\n \\n optional json_schema: object \\n \\n Defined
-        in \\n libs/sdk-core/src/lib/db/search/ask.models.ts:257 \\n \\n max_tokens?
-        \\n\",\"id\":\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/739-977\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":739,\"end\":977,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"36489cbab30247fea4edcbe8ba6d93d6\":{\"id\":\"36489cbab30247fea4edcbe8ba6d93d6\",\"slug\":\"docs-management-authentication-mdx\",\"title\":\"docs
-        > management > authentication.\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2024-07-18T15:30:46.369763\",\"modified\":\"2026-06-26T08:59:51.921782\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"36489cbab30247fea4edcbe8ba6d93d6/t/page/2372-2627\":{\"score\":0.009746103547513485,\"score_type\":\"RERANKER\",\"order\":13,\"text\":\"
-        \\n \\n bash \\n nuclia auth kb   \\n \\n \\n Temporal API Keys \\n Temporal
-        API keys function as short-lived tokens (maximum 10 seconds) built on top
-        of a service account. They serve as an alternative to standard API keys in
-        specific scenarios. One key use case is: \\n\",\"id\":\"36489cbab30247fea4edcbe8ba6d93d6/t/page/2372-2627\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":2372,\"end\":2627,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"666b3a9d01f74323b6ca6c9939834bec\":{\"id\":\"666b3a9d01f74323b6ca6c9939834bec\",\"slug\":\"docs-develop-js-sdk-enums-StatsType-md\",\"title\":\"docs
-        > develop > js sdk > enums > StatsType\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"sv\",\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:51:41.005040\",\"modified\":\"2026-06-09T08:13:37.365717\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"666b3a9d01f74323b6ca6c9939834bec/t/page/0-1386\":{\"score\":0.029145970940589905,\"score_type\":\"RERANKER\",\"order\":7,\"text\":\"@nuclia/core
-        / Exports / StatsType \\n Enumeration: StatsType \\n Deprecated \\n Table
-        of contents \\n Enumeration Members \\n \\n AI_TOKENS_USED \\n BYTES \\n CHARS
-        \\n DOCS_NO_MEDIA \\n MEDIA_SECONDS \\n PAGES \\n PROCESSING_TIME \\n RESOURCES
-        \\n SEARCHES \\n SUGGESTIONS \\n TRAIN_SECONDS \\n \\n Enumeration Members
-        \\n AI_TOKENS_USED \\n \u2022 AI_TOKENS_USED = ai_tokens_used \\n Defined
-        in \\n libs/sdk-core/src/lib/db/db.models.ts:206 \\n \\n BYTES \\n \u2022
-        BYTES = bytes \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:200
-        \\n \\n CHARS \\n \u2022 CHARS = chars \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:198
-        \\n \\n DOCS_NO_MEDIA \\n \u2022 DOCS_NO_MEDIA = docs_no_media \\n Defined
-        in \\n libs/sdk-core/src/lib/db/db.models.ts:205 \\n \\n MEDIA_SECONDS \\n
-        \u2022 MEDIA_SECONDS = media_seconds \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:199
-        \\n \\n PAGES \\n \u2022 PAGES = pages \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:202
-        \\n \\n PROCESSING_TIME \\n \u2022 PROCESSING_TIME = processing_time \\n Defined
-        in \\n libs/sdk-core/src/lib/db/db.models.ts:196 \\n \\n RESOURCES \\n \u2022
-        RESOURCES = resources \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:201
-        \\n \\n SEARCHES \\n \u2022 SEARCHES = searches \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:197
-        \\n \\n SUGGESTIONS \\n \u2022 SUGGESTIONS = suggestions \\n Defined in \\n
-        libs/sdk-core/src/lib/db/db.models.ts:204 \\n \\n TRAIN_SECONDS \\n \u2022
-        TRAIN_SECONDS = train_seconds \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:203\",\"id\":\"666b3a9d01f74323b6ca6c9939834bec/t/page/0-1386\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":1386,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"079ee3dc13a34f45a722937440b08020\":{\"id\":\"079ee3dc13a34f45a722937440b08020\",\"slug\":\"docs-develop-js-sdk-globals-md\",\"title\":\"docs
-        > develop > js sdk > globals\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-08-26T09:57:26.792711\",\"modified\":\"2026-06-26T09:05:45.732884\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"079ee3dc13a34f45a722937440b08020/t/page/0-6155\":{\"score\":0.020371293649077415,\"score_type\":\"RERANKER\",\"order\":8,\"text\":\"@nuclia/core
-        \u2022 Docs \\n \\n @nuclia/core \\n Namespaces \\n \\n Agentic \\n Ask \\n
-        Memory \\n Search \\n Widget \\n \\n Enumerations \\n \\n AccountBlockingState
-        \\n AnswerOperation \\n AssumeRole \\n BlockedFeature \\n CustomSplitStrategy
-        \\n DataResidencyStatus \\n EventType \\n ExtractedDataTypes \\n FIELD_TYPE
-        \\n FilterOperator \\n InteractionOperation \\n LabelSetKind \\n ModelStability
-        \\n ModelType \\n NumericReasoningEffort \\n RAG_METADATAS \\n RagImageStrategyName
-        \\n RagStrategyName \\n ReasoningEffort \\n Reranker \\n RESOURCE_STATUS \\n
-        ResourceFieldProperties \\n ResourceProperties \\n SEVERITY \\n SHORT_FIELD_TYPE
-        \\n SortField \\n TaskApplyTo \\n TrainingExecutionStatus \\n TrainingStatus
-        \\n TrainingType \\n UsageType \\n \\n Classes \\n \\n ActivityMonitor \\n
-        Authentication \\n ConversationFieldData \\n Db \\n FileFieldData \\n JwtHelper
-        \\n KnowledgeBox \\n LinkFieldData \\n Nuclia \\n ReadableResource \\n ReadableSession
-        \\n Resource \\n Rest \\n RetrievalAgent \\n Session \\n SyncManager \\n TaskManager
-        \\n TextFieldData \\n Training \\n WritableKnowledgeBox \\n \\n Interfaces
-        \\n \\n Account \\n AccountConfig \\n AccountCreation \\n AccountLimits \\n
-        AccountLimitsPatchPayload \\n AccountModification \\n AccountStatus \\n AccountUser
-        \\n AccountUsersPayload \\n ActivityLogAskFilters \\n ActivityLogChatFilters
-        \\n ActivityLogDownload \\n ActivityLogDownloadQuery \\n ActivityLogFilter
-        \\n ActivityLogFilters \\n ActivityLogPagination \\n ActivityLogQueryBase
-        \\n ActivityLogResponseAskItem \\n ActivityLogResponseChatItem \\n ActivityLogResponseItem
-        \\n ActivityLogResponseSearchItem \\n ActivityLogSearchFilters \\n ActivityLogStringFilter
-        \\n AliniaConfig \\n AliniaDriver \\n And \\n AppliedDataAugmentation \\n
-        ARAGAgent \\n AragAnswer \\n ARAGDriver \\n ARAGException \\n AragResponse
-        \\n ARAGSchemas \\n AskAgent \\n AskAgentCreation \\n AskConfig \\n AskOperation
-        \\n AssumeRoleInfo \\n AuditMetadataFilter \\n AugmentedField \\n AuthInfo
-        \\n AuthTokens \\n AWSS3AccessKeysCredentials \\n AzureCertificateCredentials
-        \\n BaseAgent \\n BaseAliniaAgentCreation \\n BaseConditionalAgentCreation
-        \\n BaseContextAgent \\n BaseEntitiesGroup \\n BaseGenerationAgent \\n BaseNotificationData
-        \\n BasePostprocessAgent \\n BasePreprocessAgent \\n BaseSearchOptions \\n
-        BasicAskAgent \\n BasicAskAgentCreation \\n BraveAgent \\n BraveAgentCreation
-        \\n BraveConfig \\n BraveDriver \\n BrowseCapabilities \\n BrowseOptions \\n
-        CatalogOptions \\n CatalogQuery \\n ChatOptions \\n CitationFootnotes \\n
-        Citations \\n Classification \\n CloudLink \\n CommonMetricDetails \\n ComputedMetadata
-        \\n Consumption \\n ContextAgent \\n ContextConditionalAgent \\n ContextConditionalAgentCreation
-        \\n ConversationalStrategy \\n ConversationField \\n ConversationFieldPages
-        \\n Counters \\n CustomModel \\n CustomModelItem \\n CypherAgent \\n CypherAgentCreation
-        \\n CypherConfig \\n CypherDriver \\n DataAugmentationParameters \\n DateCreatedFilter
-        \\n DateModifiedFilter \\n DownloadOptions \\n DownloadStatus \\n Entities
-        \\n EntitiesGroup \\n Entity \\n EntityDefinition \\n EntityExample \\n EntityFilter
-        \\n EntityPosition \\n EntityPositions \\n EventList \\n ExportOptions \\n
-        ExternalAgent \\n ExternalAgentCreation \\n ExternalConnection \\n ExtractConfig
-        \\n ExtractedData \\n ExtractedText \\n ExtractLLMConfig \\n ExtractVLLMConfig
-        \\n ExtraMetadata \\n Feedback \\n FieldClassification \\n FieldComputedMetadata
-        \\n FieldEntities \\n FieldEntity \\n FieldExtensionStrategy \\n FieldFilter
-        \\n FieldFullId \\n FieldId \\n FieldMetadata \\n FieldMimetypeFilter \\n
-        FileB64 \\n FileExtractedData \\n FileField \\n FileFieldExtractedData \\n
-        FileFilter \\n FileMetadata \\n FilePages \\n FileUploadStatus \\n FileWithMetadata
-        \\n FilterExpression \\n FindConfig \\n FullAccountUser \\n FullKbUser \\n
-        FullResourceStrategy \\n GenerateAgent \\n GenerateAgentCreation \\n GeneratedFilter
-        \\n GenerationAgent \\n GenerativeProvider \\n GenerativeProviders \\n GenericFieldData
-        \\n GoogleAgent \\n GoogleAgentCreation \\n GoogleConfig \\n GoogleDriver
-        \\n GraphExtractionExample \\n GraphOperation \\n GraphStrategy \\n GuardOperation
-        \\n HierarchyStrategy \\n HistoricalAgent \\n HistoricalAgentCreation \\n
-        IAuthentication \\n ICreateResource \\n IDb \\n IDriver \\n IError \\n IErrorResponse
-        \\n IEvents \\n IFieldData \\n IFieldDataBase \\n IKnowledgeBox \\n IKnowledgeBoxBase
-        \\n IKnowledgeBoxItem \\n IKnowledgeBoxStandalone \\n ImportOptions \\n InspectTaskResponse
-        \\n InteractionOptions \\n InteractionRequest \\n InternetConfig \\n INuclia
-        \\n InviteAccountUserPayload \\n InviteKbData \\n IPAddressInfo \\n IResource
-        \\n IRest \\n IRetrievalAgent \\n IStandaloneKb \\n ISyncManager \\n IWritableKnowledgeBox
-        \\n Job \\n JobLog \\n JobLogsPage \\n JobPagination \\n JobsPage \\n JwtUser
-        \\n KbIndex \\n KbInvite \\n KBKVSchemas \\n KbUser \\n KbUserPayload \\n
-        KeyValueField \\n KeyValueFieldData \\n KeywordFilter \\n KindFilter \\n KnowledgeBoxCreation
-        \\n KVRange \\n KVSchema \\n KVSchemaField \\n Label \\n LabelFilter \\n LabelOperation
-        \\n LabelSet \\n LabelSets \\n LanguageFilter \\n LearningConfiguration \\n
-        LearningConfigurationOption \\n LearningConfigurationProperty \\n LearningConfigurations
-        \\n LearningConfigurationSchema \\n LearningConfigurationUserKeys \\n LinkExtractedData
-        \\n LinkField \\n LinkFieldExtractedData \\n LLMConfig \\n LogFilters \\n
-        MagicAction \\n McpAgent \\n McpAgentCreation \\n McpHttpConfig \\n McpHttpDriver
-        \\n McpSseConfig \\n McpSseDriver \\n McpStdioConfig \\n McpStdioDriver \\n
-        Message \\n MessageAttachment \\n MessageContent \\n Metadata \\n MetadatasStrategy
-        \\n Metric \\n MinScore \\n ModelConfig \\n ModelConfiguration \\n ModelConfigurationItem
-        \\n ModelFeatures \\n ModelInfo \\n ModelMetadata \\n ModifiedTimeRange \\n
-        NeighbouringParagraphsStrategy \\n Ner \\n NestedPosition \\n Not \\n NotificationMessage
-        \\n NUAClient \\n NUAClientPayload \\n NucliaDBConfig \\n NucliaDBDriver \\n
-        NucliaOptions \\n NucliaTokensDetails \\n NucliaTokensMetric \\n OAuthCredentials
-        \\n OAuthRedirection \\n OAuthUrl \\n Operation \\n Or \\n Origin \\n OriginCollaboratorFilter
-        \\n OriginMetadataFilter \\n OriginPathFilter \\n OriginSourceFilter \\n OriginTagFilter
-        \\n PageImageStrategy \\n PagePositions \\n PageSelections \\n PageStructure
-        \\n PageToken \\n Paragraph \\n ParagraphClassification \\n ParagraphImageStrategy
-        \\n PendingInvitation \\n PerplexityAgent \\n PerplexityAgentCreation \\n
-        PerplexityDriver \\n PositionedNER \\n PostConditionalAgent \\n PostConditionalAgentCreation
-        \\n PostprocessAgent \\n PostprocessAliniaAgent \\n PostprocessAliniaCreation
-        \\n PreConditionalAgent \\n PreConditionalAgentCreation \\n PredictAnswerOptions
-        \\n PredictedToken \\n PreprocessAgent \\n PreprocessAliniaAgent \\n PreprocessAliniaCreation
-        \\n PrequeriesStrategy \\n Prequery \\n\",\"id\":\"079ee3dc13a34f45a722937440b08020/t/page/0-6155\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":6155,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"aa2a2d122a4d404986a77b79aa10e8cf\":{\"id\":\"aa2a2d122a4d404986a77b79aa10e8cf\",\"slug\":\"docs-develop-js-sdk-classes-Db-md\",\"title\":\"docs
-        > develop > js sdk > classes > Db\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:51:28.062220\",\"modified\":\"2026-07-13T08:10:31.209045\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"aa2a2d122a4d404986a77b79aa10e8cf/t/page/19267-20156\":{\"score\":0.005343256052583456,\"score_type\":\"RERANKER\",\"order\":15,\"text\":\"
-        token: string \\n \\n Implementation of \\n IDb.renewNUAClient \\n Defined
-        in \\n libs/sdk-core/src/lib/db/db.ts:628 \\n \\n setAccountUsers() \\n \\n
-        setAccountUsers(accountSlug, users): Observable\\\\ \\n \\n Add and/or delete
-        users from an account \\n Parameters \\n \u2022 accountSlug: string \\n \u2022
-        users: AccountUsersPayload \\n Returns \\n Observable\\\\ \\n Implementation
-        of \\n IDb.setAccountUsers \\n Defined in \\n libs/sdk-core/src/lib/db/db.ts:800
-        \\n \\n updateModelConfiguration() \\n \\n updateModelConfiguration(model,
-        modelId, accountId, zone): Observable\\\\ \\n \\n Updates a model configuration
-        \\n Parameters \\n \u2022 model: ModelConfigurationCreation \\n \u2022 modelId:
-        string \\n \u2022 accountId: string \\n \u2022 zone: string \\n Returns \\n
-        Observable\\\\ \\n Implementation of \\n IDb.updateModelConfiguration \\n
-        Defined in \\n libs/sdk-core/src/lib/db/db.ts:911 \\n \\n upload() \\n \\n
-        upload(file): Observable\\\\ \\n \\n Uploads and pushes a file to Nuclia Understanding
-        API. \\n\",\"id\":\"aa2a2d122a4d404986a77b79aa10e8cf/t/page/19267-20156\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":19267,\"end\":20156,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"f66261eb1a5e492c9929bd2e761e0802\":{\"id\":\"f66261eb1a5e492c9929bd2e761e0802\",\"slug\":\"docs-develop-js-sdk-modules-md\",\"title\":\"docs
-        > develop > js sdk > modules\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:48:41.071283\",\"modified\":\"2026-06-09T08:08:09.396202\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"f66261eb1a5e492c9929bd2e761e0802/t/page/12352-18509\":{\"score\":0.09301680326461792,\"score_type\":\"RERANKER\",\"order\":5,\"text\":\"
+        \\n \\n max_images? \\n\",\"id\":\"43004f553e534ffe9c9e735856bd9b23/t/page/212-480\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":212,\"end\":480,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"4039d76b0fff4962900836ab3fdec9f7\":{\"id\":\"4039d76b0fff4962900836ab3fdec9f7\",\"slug\":\"docs-rag-advanced-consumption-mdx\",\"title\":\"docs
+        > rag > advanced > consumption.\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-10-03T08:32:26.341394\",\"modified\":\"2026-06-09T08:18:16.730959\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\":{\"score\":0.08803311735391617,\"score_type\":\"RERANKER\",\"order\":3,\"text\":\"
+        Use the max_tokens parameter on the /ask endpoint to set hard limits on: \\n
+        - Context size: Limits the amount of retrieved information sent to the LLM
+        \\n - Answer length: Limits the length of the generated response \\n Important
+        Considerations \\n Context Limitations: \\n\",\"id\":\"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":3075,\"end\":3340,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"f66261eb1a5e492c9929bd2e761e0802\":{\"id\":\"f66261eb1a5e492c9929bd2e761e0802\",\"slug\":\"docs-develop-js-sdk-modules-md\",\"title\":\"docs
+        > develop > js sdk > modules\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:48:41.071283\",\"modified\":\"2026-06-09T08:08:09.396202\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"f66261eb1a5e492c9929bd2e761e0802/t/page/12352-18509\":{\"score\":0.11616110056638718,\"score_type\":\"RERANKER\",\"order\":2,\"text\":\"
         \\n LABEL_FILTER_PREFIX \\n \u2022 Const LABEL_FILTER_PREFIX: classification.labels
         \\n Defined in \\n libs/sdk-core/src/lib/db/search/filter.ts:3 \\n \\n NER_FILTER_PREFIX
         \\n \u2022 Const NER_FILTER_PREFIX: entities \\n Defined in \\n libs/sdk-core/src/lib/db/search/filter.ts:4
@@ -1046,14 +847,170 @@ interactions:
         | \\n Returns \\n string \\n Defined in \\n libs/sdk-core/src/lib/db/search/filter.ts:6
         \\n \\n getFilterFromLabelSet \\n \u25B8 getFilterFromLabelSet(labelSet):
         string \\n Parameters \\n | Name | Type | \\n | :------ | :------ | \\n |
-        labelSet | string | \\n Returns \\n string \\n Defined in \\n\",\"id\":\"f66261eb1a5e492c9929bd2e761e0802/t/page/12352-18509\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":12352,\"end\":18509,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"44d05174f1954331b62f5e4026f2b01a\":{\"id\":\"44d05174f1954331b62f5e4026f2b01a\",\"slug\":\"docs-develop-python-sdk-14-rao-md\",\"title\":\"docs
-        > develop > python sdk > 14 rao\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-12-22T13:38:09.919472\",\"modified\":\"2026-06-09T08:08:04.176136\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"44d05174f1954331b62f5e4026f2b01a/t/page/6346-6668\":{\"score\":0.0037800956051796675,\"score_type\":\"RERANKER\",\"order\":17,\"text\":\"
-        \\n step: Information about the current processing step \\n module: The module
-        being executed (e.g., rephrase , basic_ask , remi ) \\n title: Display title
-        for the step \\n value: Result of the step \\n reason: Explanation for the
-        step \\n timeit: Time taken in seconds \\n \\n input_nuclia_tokens/output_nuclia_tokens:
-        Token usage \\n \\n \\n\",\"id\":\"44d05174f1954331b62f5e4026f2b01a/t/page/6346-6668\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":6346,\"end\":6668,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"66b6f0dbd883413e98fbbf5b59f049b9\":{\"id\":\"66b6f0dbd883413e98fbbf5b59f049b9\",\"slug\":\"docs-develop-js-sdk-enumerations-UsageType-md\",\"title\":\"docs
-        > develop > js sdk > enumerations > UsageType\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\",\"tl\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-08-26T09:59:02.349911\",\"modified\":\"2026-07-13T08:04:12.758718\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833\":{\"score\":0.1368389129638672,\"score_type\":\"RERANKER\",\"order\":3,\"text\":\"@nuclia/core
+        labelSet | string | \\n Returns \\n string \\n Defined in \\n\",\"id\":\"f66261eb1a5e492c9929bd2e761e0802/t/page/12352-18509\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":12352,\"end\":18509,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"9f7036a7a6694700b72d52eb58a8326c\":{\"id\":\"9f7036a7a6694700b72d52eb58a8326c\",\"slug\":\"docs-rag-advanced-widget-features-md\",\"title\":\"docs
+        > rag > advanced > widget > features\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2024-07-18T14:32:26.204740\",\"modified\":\"2026-06-09T08:07:51.648767\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412\":{\"score\":0.15456733107566833,\"score_type\":\"RERANKER\",\"order\":0,\"text\":\"
+        max_tokens: the maximum number of input tokens to put in the final context
+        (including the prompt, the retrieved results and the user question). \\n max_output_tokens:
+        the maximum number of tokens to generate. \\n\",\"id\":\"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":5203,\"end\":5412,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"8b3e0ef630a346d1b591143309db87ec\":{\"id\":\"8b3e0ef630a346d1b591143309db87ec\",\"slug\":\"docs-develop-js-sdk-interfaces-NucliaTokensMetric-md\",\"title\":\"docs
+        > develop > js sdk > interfaces > NucliaTokensMetric\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\",\"la\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:48:48.423622\",\"modified\":\"2026-07-13T08:07:40.133200\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"8b3e0ef630a346d1b591143309db87ec/t/page/281-511\":{\"score\":0.002234362531453371,\"score_type\":\"RERANKER\",\"order\":18,\"text\":\"
+        name: nuclia_tokens \\n \\n Overrides \\n UsageMetric.name \\n Defined in
+        \\n libs/sdk-core/src/lib/db/db.models.ts:183 \\n \\n value \\n \\n value:
+        number \\n \\n Overrides \\n UsageMetric.value \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:184\",\"id\":\"8b3e0ef630a346d1b591143309db87ec/t/page/281-511\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":281,\"end\":511,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"e8525e64c5b44982b958d32cf6090613\":{\"id\":\"e8525e64c5b44982b958d32cf6090613\",\"slug\":\"docs-develop-js-sdk-interfaces-ChatOptions-md\",\"title\":\"docs
+        > develop > js sdk > interfaces > ChatOptions\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:50:37.546010\",\"modified\":\"2026-07-13T08:05:43.436778\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011\":{\"score\":0.013121271505951881,\"score_type\":\"RERANKER\",\"order\":9,\"text\":\"
+        \\n optional max_tokens: number \\\\| object \\n \\n Defines the maximum number
+        of tokens that the model will take as context. \\n Defined in \\n libs/sdk-core/src/lib/db/search/search.models.ts:112
+        \\n \\n min_score? \\n\",\"id\":\"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":2808,\"end\":3011,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false},\"e8525e64c5b44982b958d32cf6090613/t/page/2450-2808\":{\"score\":0.012288597412407398,\"score_type\":\"RERANKER\",\"order\":10,\"text\":\"
+        \\n optional highlight: boolean \\n \\n Inherited from \\n BaseSearchOptions.highlight
+        \\n Defined in \\n libs/sdk-core/src/lib/db/search/search.models.ts:76 \\n
+        \\n keyword_filters? \\n \\n optional keyword_filters: string[] \\\\| Filter[]
+        \\n \\n Inherited from \\n BaseSearchOptions.keyword_filters \\n Defined in
+        \\n libs/sdk-core/src/lib/db/search/search.models.ts:65 \\n \\n max_tokens?
+        \\n\",\"id\":\"e8525e64c5b44982b958d32cf6090613/t/page/2450-2808\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":2450,\"end\":2808,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"9a6df7db9c6d4036b949d3f8a134ca1c\":{\"id\":\"9a6df7db9c6d4036b949d3f8a134ca1c\",\"slug\":\"docs-develop-python-sdk-02-auth-md\",\"title\":\"docs
+        > develop > python sdk > 02 auth\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:48:39.987690\",\"modified\":\"2026-06-09T08:08:06.772770\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"9a6df7db9c6d4036b949d3f8a134ca1c/t/page/1555-1827\":{\"score\":0.0022430878598243,\"score_type\":\"RERANKER\",\"order\":17,\"text\":\"
+        You define its expiration date (default is 90 days), and you can revoke it
+        at any time. \\n \\n CLI: \\n \\n To generate a token, run: \\n sh \\n nuclia
+        auth create_personal_token --description= My token --days=30 \\n To generate
+        a token and use it as authentication in the CLI, run: \\n\",\"id\":\"9a6df7db9c6d4036b949d3f8a134ca1c/t/page/1555-1827\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":1555,\"end\":1827,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"b14cf452a3434839a04c111f2ea4dc51\":{\"id\":\"b14cf452a3434839a04c111f2ea4dc51\",\"slug\":\"docs-develop-js-sdk-enums-UsageType-md\",\"title\":\"docs
+        > develop > js sdk > enums > UsageType\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\",\"tn\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:51:41.582110\",\"modified\":\"2026-06-09T08:13:34.112208\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"b14cf452a3434839a04c111f2ea4dc51/t/page/0-2139\":{\"score\":0.06656918674707413,\"score_type\":\"RERANKER\",\"order\":4,\"text\":\"@nuclia/core
+        / Exports / UsageType \\n Enumeration: UsageType \\n Table of contents \\n
+        Enumeration Members \\n \\n AI_TOKENS_USED \\n BYTES_PROCESSED \\n CHARS_PROCESSED
+        \\n MEDIA_FILES_PROCESSED \\n MEDIA_SECONDS_PROCESSED \\n NUCLIA_TOKENS \\n
+        PAGES_PROCESSED \\n PARAGRAPHS_PROCESSED \\n PRE_PROCESSING_TIME \\n RESOURCES_PROCESSED
+        \\n SEARCHES_PERFORMED \\n SLOW_PROCESSING_TIME \\n SUGGESTIONS_PERFORMED
+        \\n TRAIN_SECONDS \\n \\n Enumeration Members \\n AI_TOKENS_USED \\n \u2022
+        AI_TOKENS_USED = ai_tokens_used \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:190
+        \\n \\n BYTES_PROCESSED \\n \u2022 BYTES_PROCESSED = bytes_processed \\n Defined
+        in \\n libs/sdk-core/src/lib/db/db.models.ts:181 \\n \\n CHARS_PROCESSED \\n
+        \u2022 CHARS_PROCESSED = chars_processed \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:182
+        \\n \\n MEDIA_FILES_PROCESSED \\n \u2022 MEDIA_FILES_PROCESSED = media_files_processed
+        \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:184 \\n \\n MEDIA_SECONDS_PROCESSED
+        \\n \u2022 MEDIA_SECONDS_PROCESSED = media_seconds_processed \\n Defined in
+        \\n libs/sdk-core/src/lib/db/db.models.ts:183 \\n \\n NUCLIA_TOKENS \\n \u2022
+        NUCLIA_TOKENS = nuclia_tokens_billed \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:191
+        \\n \\n PAGES_PROCESSED \\n \u2022 PAGES_PROCESSED = pages_processed \\n Defined
+        in \\n libs/sdk-core/src/lib/db/db.models.ts:185 \\n \\n PARAGRAPHS_PROCESSED
+        \\n \u2022 PARAGRAPHS_PROCESSED = paragraphs_processed \\n Defined in \\n
+        libs/sdk-core/src/lib/db/db.models.ts:186 \\n \\n PRE_PROCESSING_TIME \\n
+        \u2022 PRE_PROCESSING_TIME = pre_processing_time \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:178
+        \\n \\n RESOURCES_PROCESSED \\n \u2022 RESOURCES_PROCESSED = resources_processed
+        \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:180 \\n \\n SEARCHES_PERFORMED
+        \\n \u2022 SEARCHES_PERFORMED = searches_performed \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:188
+        \\n \\n SLOW_PROCESSING_TIME \\n \u2022 SLOW_PROCESSING_TIME = slow_processing_time
+        \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:179 \\n \\n SUGGESTIONS_PERFORMED
+        \\n \u2022 SUGGESTIONS_PERFORMED = suggestions_performed \\n Defined in \\n
+        libs/sdk-core/src/lib/db/db.models.ts:189 \\n \\n TRAIN_SECONDS \\n \u2022
+        TRAIN_SECONDS = train_seconds \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:187\",\"id\":\"b14cf452a3434839a04c111f2ea4dc51/t/page/0-2139\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":2139,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"6c56729cf0a44da3a4435094b8333ad5\":{\"id\":\"6c56729cf0a44da3a4435094b8333ad5\",\"slug\":\"docs-develop-js-sdk-interfaces-SamlConfig-md\",\"title\":\"docs
+        > develop > js sdk > interfaces > SamlConfig\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\",\"eo\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-08-26T10:00:01.641788\",\"modified\":\"2026-07-13T08:08:37.888085\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"6c56729cf0a44da3a4435094b8333ad5/t/page/0-603\":{\"score\":0.005080037284642458,\"score_type\":\"RERANKER\",\"order\":14,\"text\":\"@nuclia/core
+        \u2022 Docs \\n \\n @nuclia/core / SamlConfig \\n Interface: SamlConfig \\n
+        Properties \\n authn_context? \\n \\n optional authn_context: exact \\\\|
+        minimum \\\\| better \\\\| maximum \\n \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:113
+        \\n \\n domains \\n \\n domains: string[] \\n \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:109
+        \\n \\n entity_id \\n \\n entity_id: string \\n \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:110
+        \\n \\n sso_url \\n \\n sso_url: string \\n \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:111
+        \\n \\n x509_cert \\n \\n x509_cert: string \\n \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:112\",\"id\":\"6c56729cf0a44da3a4435094b8333ad5/t/page/0-603\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":603,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"fdf3457fa750438d86d4dc95f5f2ac78\":{\"id\":\"fdf3457fa750438d86d4dc95f5f2ac78\",\"slug\":\"docs-develop-js-sdk-functions-TUSuploadFile-md\",\"title\":\"docs
+        > develop > js sdk > functions > TUSuploadFile\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-08-26T09:58:57.704609\",\"modified\":\"2026-07-13T08:10:02.118989\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"fdf3457fa750438d86d4dc95f5f2ac78/t/page/0-432\":{\"score\":0.0017140384297817945,\"score_type\":\"RERANKER\",\"order\":19,\"text\":\"@nuclia/core
+        \u2022 Docs \\n \\n @nuclia/core / TUSuploadFile \\n Function: TUSuploadFile()
+        \\n \\n TUSuploadFile(nuclia, path, buffer, metadata?, creationPayload?, maxWaitOn429?):
+        Observable\\\\ \\n \\n Parameters \\n \u2022 nuclia: INuclia \\n \u2022 path:
+        string \\n \u2022 buffer: ArrayBuffer \\n \u2022 metadata?: FileMetadata \\n
+        \u2022 creationPayload?: ICreateResource \\n \u2022 maxWaitOn429?: number
+        = 30000 \\n Returns \\n Observable\\\\ \\n Defined in \\n libs/sdk-core/src/lib/db/upload.ts:163\",\"id\":\"fdf3457fa750438d86d4dc95f5f2ac78/t/page/0-432\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":432,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"666b3a9d01f74323b6ca6c9939834bec\":{\"id\":\"666b3a9d01f74323b6ca6c9939834bec\",\"slug\":\"docs-develop-js-sdk-enums-StatsType-md\",\"title\":\"docs
+        > develop > js sdk > enums > StatsType\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"sv\",\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:51:41.005040\",\"modified\":\"2026-06-09T08:13:37.365717\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"666b3a9d01f74323b6ca6c9939834bec/t/page/0-1386\":{\"score\":0.009125636890530586,\"score_type\":\"RERANKER\",\"order\":11,\"text\":\"@nuclia/core
+        / Exports / StatsType \\n Enumeration: StatsType \\n Deprecated \\n Table
+        of contents \\n Enumeration Members \\n \\n AI_TOKENS_USED \\n BYTES \\n CHARS
+        \\n DOCS_NO_MEDIA \\n MEDIA_SECONDS \\n PAGES \\n PROCESSING_TIME \\n RESOURCES
+        \\n SEARCHES \\n SUGGESTIONS \\n TRAIN_SECONDS \\n \\n Enumeration Members
+        \\n AI_TOKENS_USED \\n \u2022 AI_TOKENS_USED = ai_tokens_used \\n Defined
+        in \\n libs/sdk-core/src/lib/db/db.models.ts:206 \\n \\n BYTES \\n \u2022
+        BYTES = bytes \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:200
+        \\n \\n CHARS \\n \u2022 CHARS = chars \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:198
+        \\n \\n DOCS_NO_MEDIA \\n \u2022 DOCS_NO_MEDIA = docs_no_media \\n Defined
+        in \\n libs/sdk-core/src/lib/db/db.models.ts:205 \\n \\n MEDIA_SECONDS \\n
+        \u2022 MEDIA_SECONDS = media_seconds \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:199
+        \\n \\n PAGES \\n \u2022 PAGES = pages \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:202
+        \\n \\n PROCESSING_TIME \\n \u2022 PROCESSING_TIME = processing_time \\n Defined
+        in \\n libs/sdk-core/src/lib/db/db.models.ts:196 \\n \\n RESOURCES \\n \u2022
+        RESOURCES = resources \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:201
+        \\n \\n SEARCHES \\n \u2022 SEARCHES = searches \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:197
+        \\n \\n SUGGESTIONS \\n \u2022 SUGGESTIONS = suggestions \\n Defined in \\n
+        libs/sdk-core/src/lib/db/db.models.ts:204 \\n \\n TRAIN_SECONDS \\n \u2022
+        TRAIN_SECONDS = train_seconds \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:203\",\"id\":\"666b3a9d01f74323b6ca6c9939834bec/t/page/0-1386\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":1386,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"aa2a2d122a4d404986a77b79aa10e8cf\":{\"id\":\"aa2a2d122a4d404986a77b79aa10e8cf\",\"slug\":\"docs-develop-js-sdk-classes-Db-md\",\"title\":\"docs
+        > develop > js sdk > classes > Db\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:51:28.062220\",\"modified\":\"2026-07-13T08:10:31.209045\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"aa2a2d122a4d404986a77b79aa10e8cf/t/page/9545-13087\":{\"score\":0.03197956085205078,\"score_type\":\"RERANKER\",\"order\":6,\"text\":\"
+        When used on Cloud account, this method is requiring account id and zone parameters.
+        \\n When used on standalone, this method doesn't take any parameter \\n Returns
+        \\n Observable\\\\ \\n Implementation of \\n IDb.getLearningSchema \\n Defined
+        in \\n libs/sdk-core/src/lib/db/db.ts:659 \\n getLearningSchema(accountId,
+        zone) \\n \\n getLearningSchema(accountId, zone): Observable\\\\ \\n \\n Parameters
+        \\n \u2022 accountId: string \\n \u2022 zone: string \\n Returns \\n Observable\\\\
+        \\n Implementation of \\n IDb.getLearningSchema \\n Defined in \\n libs/sdk-core/src/lib/db/db.ts:660
+        \\n \\n getModel() \\n \\n getModel(modelId, accountId, zone): Observable\\\\
+        \\n \\n Get a custom models \\n Parameters \\n \u2022 modelId: string \\n
+        \u2022 accountId: string \\n \u2022 zone: string \\n Returns \\n Observable\\\\
+        \\n Implementation of \\n IDb.getModel \\n Defined in \\n libs/sdk-core/src/lib/db/db.ts:845
+        \\n \\n getModelConfiguration() \\n \\n getModelConfiguration(modelId, accountId,
+        zone): Observable\\\\ \\n \\n Get a model configuration \\n Parameters \\n
+        \u2022 modelId: string \\n \u2022 accountId: string \\n \u2022 zone: string
+        \\n Returns \\n Observable\\\\ \\n Implementation of \\n IDb.getModelConfiguration
+        \\n Defined in \\n libs/sdk-core/src/lib/db/db.ts:885 \\n \\n getModelConfigurations()
+        \\n \\n getModelConfigurations(accountId, zone): Observable\\\\ \\n \\n Get
+        the list of model configurations of an account \\n Parameters \\n \u2022 accountId:
+        string \\n \u2022 zone: string \\n Returns \\n Observable\\\\ \\n Implementation
+        of \\n IDb.getModelConfigurations \\n Defined in \\n libs/sdk-core/src/lib/db/db.ts:873
+        \\n \\n getModels() \\n \\n getModels(accountId, zone): Observable\\\\ \\n
+        \\n Get the list of custom models of an account \\n Parameters \\n \u2022
+        accountId: string \\n \u2022 zone: string \\n Returns \\n Observable\\\\ \\n
+        Implementation of \\n IDb.getModels \\n Defined in \\n libs/sdk-core/src/lib/db/db.ts:838
+        \\n \\n getNUAActivity() \\n \\n getNUAActivity(accountId, client_id, zoneSlug,
+        pageIndex): Observable\\\\ \\n \\n Parameters \\n \u2022 accountId: string
+        \\n \u2022 client_id: string \\n \u2022 zoneSlug: string \\n \u2022 pageIndex:
+        number = 0 \\n Returns \\n Observable\\\\ \\n Implementation of \\n IDb.getNUAActivity
+        \\n Defined in \\n libs/sdk-core/src/lib/db/db.ts:529 \\n \\n getNUAClient()
+        \\n \\n getNUAClient(accountId, client_id, zone): Observable\\\\ \\n \\n Parameters
+        \\n \u2022 accountId: string \\n \u2022 client_id: string \\n \u2022 zone:
+        string \\n Returns \\n Observable\\\\ \\n Implementation of \\n IDb.getNUAClient
+        \\n Defined in \\n libs/sdk-core/src/lib/db/db.ts:560 \\n \\n getNUAClients()
+        \\n \\n getNUAClients(accountId): Observable\\\\ \\n \\n Parameters \\n \u2022
+        accountId: string \\n Returns \\n Observable\\\\ \\n Implementation of \\n
+        IDb.getNUAClients \\n Defined in \\n libs/sdk-core/src/lib/db/db.ts:538 \\n
+        \\n getNUAHeader() \\n \\n getNUAHeader(): object \\n \\n Returns \\n object
+        \\n x-nuclia-nuakey \\n \\n x-nuclia-nuakey: string \\n \\n Defined in \\n
+        libs/sdk-core/src/lib/db/db.ts:572 \\n \\n getNUAKey() \\n \\n getNUAKey():
+        string \\n \\n Returns \\n string \\n Defined in \\n libs/sdk-core/src/lib/db/db.ts:568
+        \\n \\n getRetrievalAgent() \\n getRetrievalAgent() \\n \\n getRetrievalAgent():
+        Observable\\\\ \\n \\n Returns \\n Observable\\\\ \\n Implementation of \\n
+        IDb.getRetrievalAgent \\n Defined in \\n libs/sdk-core/src/lib/db/db.ts:345
+        \\n getRetrievalAgent(accountId, retrievalAgentId, zone) \\n \\n getRetrievalAgent(accountId,
+        retrievalAgentId, zone?): Observable\\\\ \\n \\n Parameters \\n \u2022 accountId:
+        string \\n \u2022 retrievalAgentId: string \\n \u2022 zone?: string \\n Returns
+        \\n Observable\\\\ \\n Implementation of \\n IDb.getRetrievalAgent \\n Defined
+        in \\n libs/sdk-core/src/lib/db/db.ts:346 \\n \\n getRetrievalAgents() \\n
+        getRetrievalAgents() \\n \\n getRetrievalAgents(): Observable\\\\ \\n \\n
+        Returns a list of all the Retrieval Agents for the given account. Account
+        slug and id can be provided in the Nuclia options or as parameters. \\n\",\"id\":\"aa2a2d122a4d404986a77b79aa10e8cf/t/page/9545-13087\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":9545,\"end\":13087,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false},\"aa2a2d122a4d404986a77b79aa10e8cf/t/page/19267-20156\":{\"score\":0.002424914389848709,\"score_type\":\"RERANKER\",\"order\":16,\"text\":\"
+        token: string \\n \\n Implementation of \\n IDb.renewNUAClient \\n Defined
+        in \\n libs/sdk-core/src/lib/db/db.ts:628 \\n \\n setAccountUsers() \\n \\n
+        setAccountUsers(accountSlug, users): Observable\\\\ \\n \\n Add and/or delete
+        users from an account \\n Parameters \\n \u2022 accountSlug: string \\n \u2022
+        users: AccountUsersPayload \\n Returns \\n Observable\\\\ \\n Implementation
+        of \\n IDb.setAccountUsers \\n Defined in \\n libs/sdk-core/src/lib/db/db.ts:800
+        \\n \\n updateModelConfiguration() \\n \\n updateModelConfiguration(model,
+        modelId, accountId, zone): Observable\\\\ \\n \\n Updates a model configuration
+        \\n Parameters \\n \u2022 model: ModelConfigurationCreation \\n \u2022 modelId:
+        string \\n \u2022 accountId: string \\n \u2022 zone: string \\n Returns \\n
+        Observable\\\\ \\n Implementation of \\n IDb.updateModelConfiguration \\n
+        Defined in \\n libs/sdk-core/src/lib/db/db.ts:911 \\n \\n upload() \\n \\n
+        upload(file): Observable\\\\ \\n \\n Uploads and pushes a file to Nuclia Understanding
+        API. \\n\",\"id\":\"aa2a2d122a4d404986a77b79aa10e8cf/t/page/19267-20156\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":19267,\"end\":20156,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"50aac6f34b6d47de8e3b01f8b2de6e9c\":{\"id\":\"50aac6f34b6d47de8e3b01f8b2de6e9c\",\"slug\":\"docs-develop-js-sdk-interfaces-PredictAnswerOptions-md\",\"title\":\"docs
+        > develop > js sdk > interfaces > PredictAnswerOptions\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-08-26T10:03:11.443619\",\"modified\":\"2026-07-13T08:07:00.470062\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221\":{\"score\":0.01400956604629755,\"score_type\":\"RERANKER\",\"order\":8,\"text\":\"
+        \\n optional max_tokens: number \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/ask.models.ts:251
+        \\n \\n prefer_markdown? \\n \\n optional prefer_markdown: boolean \\n \\n
+        Defined in \\n libs/sdk-core/src/lib/db/search/ask.models.ts:256 \\n \\n query_context?
+        \\n\",\"id\":\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":977,\"end\":1221,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false},\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/739-977\":{\"score\":0.006413164082914591,\"score_type\":\"RERANKER\",\"order\":13,\"text\":\"
+        \\n optional generative_model: string \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/ask.models.ts:250
+        \\n \\n json_schema? \\n \\n optional json_schema: object \\n \\n Defined
+        in \\n libs/sdk-core/src/lib/db/search/ask.models.ts:257 \\n \\n max_tokens?
+        \\n\",\"id\":\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/739-977\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":739,\"end\":977,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"66b6f0dbd883413e98fbbf5b59f049b9\":{\"id\":\"66b6f0dbd883413e98fbbf5b59f049b9\",\"slug\":\"docs-develop-js-sdk-enumerations-UsageType-md\",\"title\":\"docs
+        > develop > js sdk > enumerations > UsageType\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\",\"tl\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-08-26T09:59:02.349911\",\"modified\":\"2026-07-13T08:04:12.758718\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833\":{\"score\":0.04672495648264885,\"score_type\":\"RERANKER\",\"order\":5,\"text\":\"@nuclia/core
         \u2022 Docs \\n \\n @nuclia/core / UsageType \\n Enumeration: UsageType \\n
         Enumeration Members \\n AI_TOKENS_USED \\n \\n AI_TOKENS_USED: ai_tokens_used
         \\n \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:206 \\n \\n BYTES_PROCESSED
@@ -1077,12 +1034,28 @@ interactions:
         \\n \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:195 \\n \\n SUGGESTIONS_PERFORMED
         \\n \\n SUGGESTIONS_PERFORMED: suggestions_performed \\n \\n Defined in \\n
         libs/sdk-core/src/lib/db/db.models.ts:205 \\n \\n TRAIN_SECONDS \\n \\n TRAIN_SECONDS:
-        train_seconds \\n \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:203\",\"id\":\"66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":1833,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}}},\"query\":\"What
-        is the function and usage of `max_tokens` in Nuclia, and what is a Cardamom
-        bun?\",\"total\":20,\"page_number\":0,\"page_size\":20,\"next_page\":false,\"autofilters\":[],\"min_score\":{\"bm25\":0.0},\"best_matches\":[\"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412\",\"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\",\"b14cf452a3434839a04c111f2ea4dc51/t/page/0-2139\",\"66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833\",\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276\",\"f66261eb1a5e492c9929bd2e761e0802/t/page/12352-18509\",\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\",\"666b3a9d01f74323b6ca6c9939834bec/t/page/0-1386\",\"079ee3dc13a34f45a722937440b08020/t/page/0-6155\",\"e8525e64c5b44982b958d32cf6090613/t/page/2450-2808\",\"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011\",\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221\",\"6c56729cf0a44da3a4435094b8333ad5/t/page/0-603\",\"36489cbab30247fea4edcbe8ba6d93d6/t/page/2372-2627\",\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/739-977\",\"aa2a2d122a4d404986a77b79aa10e8cf/t/page/19267-20156\",\"43004f553e534ffe9c9e735856bd9b23/t/page/212-480\",\"44d05174f1954331b62f5e4026f2b01a/t/page/6346-6668\",\"6e8250e6b5264156988657a221fd5e94/t/page/0-397\",\"8b3e0ef630a346d1b591143309db87ec/t/page/281-511\"]},\"best_matches\":[{\"id\":\"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412\"},{\"id\":\"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\"},{\"id\":\"b14cf452a3434839a04c111f2ea4dc51/t/page/0-2139\"},{\"id\":\"66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833\"},{\"id\":\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276\"},{\"id\":\"f66261eb1a5e492c9929bd2e761e0802/t/page/12352-18509\"},{\"id\":\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\"},{\"id\":\"666b3a9d01f74323b6ca6c9939834bec/t/page/0-1386\"},{\"id\":\"079ee3dc13a34f45a722937440b08020/t/page/0-6155\"},{\"id\":\"e8525e64c5b44982b958d32cf6090613/t/page/2450-2808\"},{\"id\":\"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011\"},{\"id\":\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221\"},{\"id\":\"6c56729cf0a44da3a4435094b8333ad5/t/page/0-603\"},{\"id\":\"36489cbab30247fea4edcbe8ba6d93d6/t/page/2372-2627\"},{\"id\":\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/739-977\"},{\"id\":\"aa2a2d122a4d404986a77b79aa10e8cf/t/page/19267-20156\"},{\"id\":\"43004f553e534ffe9c9e735856bd9b23/t/page/212-480\"},{\"id\":\"44d05174f1954331b62f5e4026f2b01a/t/page/6346-6668\"},{\"id\":\"6e8250e6b5264156988657a221fd5e94/t/page/0-397\"},{\"id\":\"8b3e0ef630a346d1b591143309db87ec/t/page/281-511\"}]}}\n{\"item\":{\"type\":\"status\",\"code\":\"0\",\"status\":\"success\"}}\n{\"item\":{\"type\":\"augmented_context\",\"augmented\":{\"paragraphs\":{},\"fields\":{}}}}\n{\"item\":{\"type\":\"citations\",\"citations\":{\"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\":[[0,332]],\"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412\":[[0,332]],\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221\":[[0,332]],\"66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833\":[[0,332]],\"b14cf452a3434839a04c111f2ea4dc51/t/page/0-2139\":[[0,332]],\"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011\":[[0,332]],\"079ee3dc13a34f45a722937440b08020/t/page/0-6155\":[[0,332]],\"f66261eb1a5e492c9929bd2e761e0802/t/page/12352-18509\":[[0,332]],\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276\":[[0,332]]}}}\n{\"item\":{\"type\":\"metadata\",\"tokens\":{\"input\":169,\"output\":8,\"input_nuclia\":0.169,\"output_nuclia\":0.008},\"timings\":{\"generative_first_chunk\":0.7082018940127455,\"generative_total\":1.5366885910043493}}}\n"
+        train_seconds \\n \\n Defined in \\n libs/sdk-core/src/lib/db/db.models.ts:203\",\"id\":\"66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":1833,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"9a7220958c2348a58672b1a2eb38d7ef\":{\"id\":\"9a7220958c2348a58672b1a2eb38d7ef\",\"slug\":\"docs-develop-python_nucliadb_datasets-md\",\"title\":\"docs
+        > develop > python_nucliadb_datasets\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"cy\",\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:48:31.929919\",\"modified\":\"2026-06-26T09:05:44.380889\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"9a7220958c2348a58672b1a2eb38d7ef/t/page/3977-4199\":{\"score\":0.0046455576084554195,\"score_type\":\"RERANKER\",\"order\":15,\"text\":\"
+        kb = sdk.create_knowledge_box(slug=slug) \\n finally: \\n return kb.uuid \\n
+        sdk = NucliaDB() \\n kbid = get_or_create_kb(sdk, entity_test ) \\n ``` \\n
+        Then you will define the entity family you are going to use, and its entities:
+        \\n\",\"id\":\"9a7220958c2348a58672b1a2eb38d7ef/t/page/3977-4199\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":3977,\"end\":4199,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"220eb37c167f4eb9bb8e9454e7ba8cf5\":{\"id\":\"220eb37c167f4eb9bb8e9454e7ba8cf5\",\"slug\":\"docs-develop-python-sdk-05-search-md\",\"title\":\"docs
+        > develop > python sdk > 05 search\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:48:33.723913\",\"modified\":\"2026-06-09T08:08:04.866092\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276\":{\"score\":0.12431928515434265,\"score_type\":\"RERANKER\",\"order\":1,\"text\":\"
+        \\n SDK: \\n \\n ```python \\n from nuclia import sdk \\n from nucliadb_models.search
+        import AskRequest, Reasoning \\n search = sdk.NucliaSearch() \\n query = AskRequest(
+        \\n query= My question with extra reasoning effort , \\n max_tokens=5000,
+        \\n reasoning=Reasoning( \\n display=True, # Show reasoning in the response
+        \\n effort= low , # Can be low , medium , or high \\n budget_tokens=1024 #
+        How many tokens reasoning can use \\n ), \\n ) \\n search.ask(query=query)
+        \\n ``` \\n Model Support for Reasoning Options: \\n\",\"id\":\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":1790,\"end\":2276,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false},\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\":{\"score\":0.01851104572415352,\"score_type\":\"RERANKER\",\"order\":7,\"text\":\"
+        ::: \\n :::warning \\n Enabling reasoning can use additional tokens, which
+        may increase your usage costs. \\n You may need to increase max_tokens to
+        give the LLM enough room to reason and generate an answer. \\n\",\"id\":\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":2505,\"end\":2709,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}}},\"query\":\"Explain
+        how to use the `max_tokens` parameter in Nuclia and define what a Cardamom
+        bun is.\",\"total\":20,\"page_number\":0,\"page_size\":20,\"next_page\":false,\"autofilters\":[],\"min_score\":{\"bm25\":0.0},\"best_matches\":[\"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412\",\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276\",\"f66261eb1a5e492c9929bd2e761e0802/t/page/12352-18509\",\"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\",\"b14cf452a3434839a04c111f2ea4dc51/t/page/0-2139\",\"66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833\",\"aa2a2d122a4d404986a77b79aa10e8cf/t/page/9545-13087\",\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\",\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221\",\"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011\",\"e8525e64c5b44982b958d32cf6090613/t/page/2450-2808\",\"666b3a9d01f74323b6ca6c9939834bec/t/page/0-1386\",\"43004f553e534ffe9c9e735856bd9b23/t/page/212-480\",\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/739-977\",\"6c56729cf0a44da3a4435094b8333ad5/t/page/0-603\",\"9a7220958c2348a58672b1a2eb38d7ef/t/page/3977-4199\",\"aa2a2d122a4d404986a77b79aa10e8cf/t/page/19267-20156\",\"9a6df7db9c6d4036b949d3f8a134ca1c/t/page/1555-1827\",\"8b3e0ef630a346d1b591143309db87ec/t/page/281-511\",\"fdf3457fa750438d86d4dc95f5f2ac78/t/page/0-432\"]},\"best_matches\":[{\"id\":\"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412\"},{\"id\":\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276\"},{\"id\":\"f66261eb1a5e492c9929bd2e761e0802/t/page/12352-18509\"},{\"id\":\"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\"},{\"id\":\"b14cf452a3434839a04c111f2ea4dc51/t/page/0-2139\"},{\"id\":\"66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833\"},{\"id\":\"aa2a2d122a4d404986a77b79aa10e8cf/t/page/9545-13087\"},{\"id\":\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\"},{\"id\":\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221\"},{\"id\":\"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011\"},{\"id\":\"e8525e64c5b44982b958d32cf6090613/t/page/2450-2808\"},{\"id\":\"666b3a9d01f74323b6ca6c9939834bec/t/page/0-1386\"},{\"id\":\"43004f553e534ffe9c9e735856bd9b23/t/page/212-480\"},{\"id\":\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/739-977\"},{\"id\":\"6c56729cf0a44da3a4435094b8333ad5/t/page/0-603\"},{\"id\":\"9a7220958c2348a58672b1a2eb38d7ef/t/page/3977-4199\"},{\"id\":\"aa2a2d122a4d404986a77b79aa10e8cf/t/page/19267-20156\"},{\"id\":\"9a6df7db9c6d4036b949d3f8a134ca1c/t/page/1555-1827\"},{\"id\":\"8b3e0ef630a346d1b591143309db87ec/t/page/281-511\"},{\"id\":\"fdf3457fa750438d86d4dc95f5f2ac78/t/page/0-432\"}]}}\n{\"item\":{\"type\":\"status\",\"code\":\"0\",\"status\":\"success\"}}\n{\"item\":{\"type\":\"augmented_context\",\"augmented\":{\"paragraphs\":{},\"fields\":{}}}}\n{\"item\":{\"type\":\"citations\",\"citations\":{\"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\":[[0,456]],\"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412\":[[0,456]],\"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011\":[[0,456]],\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221\":[[0,456]],\"66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833\":[[0,456]],\"b14cf452a3434839a04c111f2ea4dc51/t/page/0-2139\":[[0,456]],\"e8525e64c5b44982b958d32cf6090613/t/page/2450-2808\":[[0,456]]}}}\n{\"item\":{\"type\":\"metadata\",\"tokens\":{\"input\":156,\"output\":11,\"input_nuclia\":0.156,\"output_nuclia\":0.011},\"timings\":{\"generative_first_chunk\":0.7607673279708251,\"generative_total\":1.9851716439588927}}}\n"
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -1090,15 +1063,15 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 13 Jul 2026 10:09:57 GMT
+      - Mon, 13 Jul 2026 11:13:47 GMT
       nuclia-learning-id:
-      - ef8935367ff142539e2506822075e393
+      - a30a96c28edd48478ace9ab109db6d76
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1477'
+      - '1815'
       x-nuclia-trace-id:
-      - ff123b9e6789eefdf76c10eb5bbe80a4
+      - 8e06d0c34ed0820e04c4d2772ee363d1
     status:
       code: 200
       message: OK
@@ -1136,9 +1109,9 @@ interactions:
       List the IDs of the blocks relevant to the answer, if any (e.g., [\"block-AB\",
       \"block-CD\"]).\n11. **IMPORTANT** If any extra instructions are provided, you
       MUST follow them carefully when generating the answer field. These instructions
-      may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWhat
-      is the function and usage of `max_tokens` in Nuclia, and what is a Cardamom
-      bun?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk: docs > rag
+      may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nExplain
+      how to use the `max_tokens` parameter in Nuclia and define what a Cardamom bun
+      is.\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk: docs > rag
       > advanced > consumption.\n```  Use the max_tokens parameter on the /ask endpoint
       to set hard limits on: \n - Context size: Limits the amount of retrieved information
       sent to the LLM \n - Answer length: Limits the length of the generated response
@@ -1147,34 +1120,38 @@ interactions:
       number of input tokens to put in the final context (including the prompt, the
       retrieved results and the user question). \n max_output_tokens: the maximum
       number of tokens to generate. \n ```\n\n\n---\"\n\n\n**block-AC**\n\n## Chunk:
-      docs > develop > js sdk > interfaces > PredictAnswerOptions\n```  \n optional
-      max_tokens: number \n \n Defined in \n libs/sdk-core/src/lib/db/search/ask.models.ts:251
-      \n \n prefer_markdown? \n \n optional prefer_markdown: boolean \n \n Defined
-      in \n libs/sdk-core/src/lib/db/search/ask.models.ts:256 \n \n query_context?
-      \n ```\n\n\n---\"\n\n\n**block-AD**\n\n## Chunk: docs > develop > js sdk > enumerations
-      > UsageType\n``` @nuclia/core \u2022 Docs \n \n @nuclia/core / UsageType \n
-      Enumeration: UsageType \n Enumeration Members \n AI_TOKENS_USED \n \n AI_TOKENS_USED:
-      ai_tokens_used \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:206
-      \n \n BYTES_PROCESSED \n \n BYTES_PROCESSED: bytes_processed \n \n Defined in
-      \n libs/sdk-core/src/lib/db/db.models.ts:197 \n \n CHARS_PROCESSED \n \n CHARS_PROCESSED:
-      chars_processed \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:198
-      \n \n MEDIA_FILES_PROCESSED \n \n MEDIA_FILES_PROCESSED: media_files_processed
-      \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:200 \n \n MEDIA_SECONDS_PROCESSED
-      \n \n MEDIA_SECONDS_PROCESSED: media_seconds_processed \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:199
-      \n \n NUCLIA_TOKENS \n \n NUCLIA_TOKENS: nuclia_tokens_billed \n \n Defined
-      in \n libs/sdk-core/src/lib/db/db.models.ts:207 \n \n PAGES_PROCESSED \n \n
-      PAGES_PROCESSED: pages_processed \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:201
-      \n \n PARAGRAPHS_PROCESSED \n \n PARAGRAPHS_PROCESSED: paragraphs_processed
-      \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:202 \n \n PRE_PROCESSING_TIME
-      \n \n PRE_PROCESSING_TIME: pre_processing_time \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:194
-      \n \n RESOURCES_PROCESSED \n \n RESOURCES_PROCESSED: resources_processed \n
-      \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:196 \n \n SEARCHES_PERFORMED
-      \n \n SEARCHES_PERFORMED: searches_performed \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:204
-      \n \n SLOW_PROCESSING_TIME \n \n SLOW_PROCESSING_TIME: slow_processing_time
-      \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:195 \n \n SUGGESTIONS_PERFORMED
-      \n \n SUGGESTIONS_PERFORMED: suggestions_performed \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:205
-      \n \n TRAIN_SECONDS \n \n TRAIN_SECONDS: train_seconds \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:203
-      ```\n\n\n---\"\n\n\n**block-AE**\n\n## Chunk: docs > develop > js sdk > enums
+      docs > develop > js sdk > interfaces > ChatOptions\n```  \n optional max_tokens:
+      number \\| object \n \n Defines the maximum number of tokens that the model
+      will take as context. \n Defined in \n libs/sdk-core/src/lib/db/search/search.models.ts:112
+      \n \n min_score? \n ```\n\n\n---\"\n\n\n**block-AD**\n\n## Chunk: docs > develop
+      > js sdk > interfaces > PredictAnswerOptions\n```  \n optional max_tokens: number
+      \n \n Defined in \n libs/sdk-core/src/lib/db/search/ask.models.ts:251 \n \n
+      prefer_markdown? \n \n optional prefer_markdown: boolean \n \n Defined in \n
+      libs/sdk-core/src/lib/db/search/ask.models.ts:256 \n \n query_context? \n ```\n\n\n---\"\n\n\n**block-AE**\n\n##
+      Chunk: docs > develop > js sdk > enumerations > UsageType\n``` @nuclia/core
+      \u2022 Docs \n \n @nuclia/core / UsageType \n Enumeration: UsageType \n Enumeration
+      Members \n AI_TOKENS_USED \n \n AI_TOKENS_USED: ai_tokens_used \n \n Defined
+      in \n libs/sdk-core/src/lib/db/db.models.ts:206 \n \n BYTES_PROCESSED \n \n
+      BYTES_PROCESSED: bytes_processed \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:197
+      \n \n CHARS_PROCESSED \n \n CHARS_PROCESSED: chars_processed \n \n Defined in
+      \n libs/sdk-core/src/lib/db/db.models.ts:198 \n \n MEDIA_FILES_PROCESSED \n
+      \n MEDIA_FILES_PROCESSED: media_files_processed \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:200
+      \n \n MEDIA_SECONDS_PROCESSED \n \n MEDIA_SECONDS_PROCESSED: media_seconds_processed
+      \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:199 \n \n NUCLIA_TOKENS
+      \n \n NUCLIA_TOKENS: nuclia_tokens_billed \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:207
+      \n \n PAGES_PROCESSED \n \n PAGES_PROCESSED: pages_processed \n \n Defined in
+      \n libs/sdk-core/src/lib/db/db.models.ts:201 \n \n PARAGRAPHS_PROCESSED \n \n
+      PARAGRAPHS_PROCESSED: paragraphs_processed \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:202
+      \n \n PRE_PROCESSING_TIME \n \n PRE_PROCESSING_TIME: pre_processing_time \n
+      \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:194 \n \n RESOURCES_PROCESSED
+      \n \n RESOURCES_PROCESSED: resources_processed \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:196
+      \n \n SEARCHES_PERFORMED \n \n SEARCHES_PERFORMED: searches_performed \n \n
+      Defined in \n libs/sdk-core/src/lib/db/db.models.ts:204 \n \n SLOW_PROCESSING_TIME
+      \n \n SLOW_PROCESSING_TIME: slow_processing_time \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:195
+      \n \n SUGGESTIONS_PERFORMED \n \n SUGGESTIONS_PERFORMED: suggestions_performed
+      \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:205 \n \n TRAIN_SECONDS
+      \n \n TRAIN_SECONDS: train_seconds \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:203
+      ```\n\n\n---\"\n\n\n**block-AF**\n\n## Chunk: docs > develop > js sdk > enums
       > UsageType\n``` @nuclia/core / Exports / UsageType \n Enumeration: UsageType
       \n Table of contents \n Enumeration Members \n \n AI_TOKENS_USED \n BYTES_PROCESSED
       \n CHARS_PROCESSED \n MEDIA_FILES_PROCESSED \n MEDIA_SECONDS_PROCESSED \n NUCLIA_TOKENS
@@ -1201,193 +1178,28 @@ interactions:
       \n \n SUGGESTIONS_PERFORMED \n \u2022 SUGGESTIONS_PERFORMED = suggestions_performed
       \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:189 \n \n TRAIN_SECONDS
       \n \u2022 TRAIN_SECONDS = train_seconds \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:187
-      ```\n\n\n---\"\n\n\n**block-AF**\n\n## Chunk: docs > develop > js sdk > interfaces
-      > ChatOptions\n```  \n optional max_tokens: number \\| object \n \n Defines
-      the maximum number of tokens that the model will take as context. \n Defined
-      in \n libs/sdk-core/src/lib/db/search/search.models.ts:112 \n \n min_score?
-      \n ```\n\n\n---\"\n\n\n**block-AG**\n\n## Chunk: docs > develop > js sdk > globals\n```
-      @nuclia/core \u2022 Docs \n \n @nuclia/core \n Namespaces \n \n Agentic \n Ask
-      \n Memory \n Search \n Widget \n \n Enumerations \n \n AccountBlockingState
-      \n AnswerOperation \n AssumeRole \n BlockedFeature \n CustomSplitStrategy \n
-      DataResidencyStatus \n EventType \n ExtractedDataTypes \n FIELD_TYPE \n FilterOperator
-      \n InteractionOperation \n LabelSetKind \n ModelStability \n ModelType \n NumericReasoningEffort
-      \n RAG_METADATAS \n RagImageStrategyName \n RagStrategyName \n ReasoningEffort
-      \n Reranker \n RESOURCE_STATUS \n ResourceFieldProperties \n ResourceProperties
-      \n SEVERITY \n SHORT_FIELD_TYPE \n SortField \n TaskApplyTo \n TrainingExecutionStatus
-      \n TrainingStatus \n TrainingType \n UsageType \n \n Classes \n \n ActivityMonitor
-      \n Authentication \n ConversationFieldData \n Db \n FileFieldData \n JwtHelper
-      \n KnowledgeBox \n LinkFieldData \n Nuclia \n ReadableResource \n ReadableSession
-      \n Resource \n Rest \n RetrievalAgent \n Session \n SyncManager \n TaskManager
-      \n TextFieldData \n Training \n WritableKnowledgeBox \n \n Interfaces \n \n
-      Account \n AccountConfig \n AccountCreation \n AccountLimits \n AccountLimitsPatchPayload
-      \n AccountModification \n AccountStatus \n AccountUser \n AccountUsersPayload
-      \n ActivityLogAskFilters \n ActivityLogChatFilters \n ActivityLogDownload \n
-      ActivityLogDownloadQuery \n ActivityLogFilter \n ActivityLogFilters \n ActivityLogPagination
-      \n ActivityLogQueryBase \n ActivityLogResponseAskItem \n ActivityLogResponseChatItem
-      \n ActivityLogResponseItem \n ActivityLogResponseSearchItem \n ActivityLogSearchFilters
-      \n ActivityLogStringFilter \n AliniaConfig \n AliniaDriver \n And \n AppliedDataAugmentation
-      \n ARAGAgent \n AragAnswer \n ARAGDriver \n ARAGException \n AragResponse \n
-      ARAGSchemas \n AskAgent \n AskAgentCreation \n AskConfig \n AskOperation \n
-      AssumeRoleInfo \n AuditMetadataFilter \n AugmentedField \n AuthInfo \n AuthTokens
-      \n AWSS3AccessKeysCredentials \n AzureCertificateCredentials \n BaseAgent \n
-      BaseAliniaAgentCreation \n BaseConditionalAgentCreation \n BaseContextAgent
-      \n BaseEntitiesGroup \n BaseGenerationAgent \n BaseNotificationData \n BasePostprocessAgent
-      \n BasePreprocessAgent \n BaseSearchOptions \n BasicAskAgent \n BasicAskAgentCreation
-      \n BraveAgent \n BraveAgentCreation \n BraveConfig \n BraveDriver \n BrowseCapabilities
-      \n BrowseOptions \n CatalogOptions \n CatalogQuery \n ChatOptions \n CitationFootnotes
-      \n Citations \n Classification \n CloudLink \n CommonMetricDetails \n ComputedMetadata
-      \n Consumption \n ContextAgent \n ContextConditionalAgent \n ContextConditionalAgentCreation
-      \n ConversationalStrategy \n ConversationField \n ConversationFieldPages \n
-      Counters \n CustomModel \n CustomModelItem \n CypherAgent \n CypherAgentCreation
-      \n CypherConfig \n CypherDriver \n DataAugmentationParameters \n DateCreatedFilter
-      \n DateModifiedFilter \n DownloadOptions \n DownloadStatus \n Entities \n EntitiesGroup
-      \n Entity \n EntityDefinition \n EntityExample \n EntityFilter \n EntityPosition
-      \n EntityPositions \n EventList \n ExportOptions \n ExternalAgent \n ExternalAgentCreation
-      \n ExternalConnection \n ExtractConfig \n ExtractedData \n ExtractedText \n
-      ExtractLLMConfig \n ExtractVLLMConfig \n ExtraMetadata \n Feedback \n FieldClassification
-      \n FieldComputedMetadata \n FieldEntities \n FieldEntity \n FieldExtensionStrategy
-      \n FieldFilter \n FieldFullId \n FieldId \n FieldMetadata \n FieldMimetypeFilter
-      \n FileB64 \n FileExtractedData \n FileField \n FileFieldExtractedData \n FileFilter
-      \n FileMetadata \n FilePages \n FileUploadStatus \n FileWithMetadata \n FilterExpression
-      \n FindConfig \n FullAccountUser \n FullKbUser \n FullResourceStrategy \n GenerateAgent
-      \n GenerateAgentCreation \n GeneratedFilter \n GenerationAgent \n GenerativeProvider
-      \n GenerativeProviders \n GenericFieldData \n GoogleAgent \n GoogleAgentCreation
-      \n GoogleConfig \n GoogleDriver \n GraphExtractionExample \n GraphOperation
-      \n GraphStrategy \n GuardOperation \n HierarchyStrategy \n HistoricalAgent \n
-      HistoricalAgentCreation \n IAuthentication \n ICreateResource \n IDb \n IDriver
-      \n IError \n IErrorResponse \n IEvents \n IFieldData \n IFieldDataBase \n IKnowledgeBox
-      \n IKnowledgeBoxBase \n IKnowledgeBoxItem \n IKnowledgeBoxStandalone \n ImportOptions
-      \n InspectTaskResponse \n InteractionOptions \n InteractionRequest \n InternetConfig
-      \n INuclia \n InviteAccountUserPayload \n InviteKbData \n IPAddressInfo \n IResource
-      \n IRest \n IRetrievalAgent \n IStandaloneKb \n ISyncManager \n IWritableKnowledgeBox
-      \n Job \n JobLog \n JobLogsPage \n JobPagination \n JobsPage \n JwtUser \n KbIndex
-      \n KbInvite \n KBKVSchemas \n KbUser \n KbUserPayload \n KeyValueField \n KeyValueFieldData
-      \n KeywordFilter \n KindFilter \n KnowledgeBoxCreation \n KVRange \n KVSchema
-      \n KVSchemaField \n Label \n LabelFilter \n LabelOperation \n LabelSet \n LabelSets
-      \n LanguageFilter \n LearningConfiguration \n LearningConfigurationOption \n
-      LearningConfigurationProperty \n LearningConfigurations \n LearningConfigurationSchema
-      \n LearningConfigurationUserKeys \n LinkExtractedData \n LinkField \n LinkFieldExtractedData
-      \n LLMConfig \n LogFilters \n MagicAction \n McpAgent \n McpAgentCreation \n
-      McpHttpConfig \n McpHttpDriver \n McpSseConfig \n McpSseDriver \n McpStdioConfig
-      \n McpStdioDriver \n Message \n MessageAttachment \n MessageContent \n Metadata
-      \n MetadatasStrategy \n Metric \n MinScore \n ModelConfig \n ModelConfiguration
-      \n ModelConfigurationItem \n ModelFeatures \n ModelInfo \n ModelMetadata \n
-      ModifiedTimeRange \n NeighbouringParagraphsStrategy \n Ner \n NestedPosition
-      \n Not \n NotificationMessage \n NUAClient \n NUAClientPayload \n NucliaDBConfig
-      \n NucliaDBDriver \n NucliaOptions \n NucliaTokensDetails \n NucliaTokensMetric
-      \n OAuthCredentials \n OAuthRedirection \n OAuthUrl \n Operation \n Or \n Origin
-      \n OriginCollaboratorFilter \n OriginMetadataFilter \n OriginPathFilter \n OriginSourceFilter
-      \n OriginTagFilter \n PageImageStrategy \n PagePositions \n PageSelections \n
-      PageStructure \n PageToken \n Paragraph \n ParagraphClassification \n ParagraphImageStrategy
-      \n PendingInvitation \n PerplexityAgent \n PerplexityAgentCreation \n PerplexityDriver
-      \n PositionedNER \n PostConditionalAgent \n PostConditionalAgentCreation \n
-      PostprocessAgent \n PostprocessAliniaAgent \n PostprocessAliniaCreation \n PreConditionalAgent
-      \n PreConditionalAgentCreation \n PredictAnswerOptions \n PredictedToken \n
-      PreprocessAgent \n PreprocessAliniaAgent \n PreprocessAliniaCreation \n PrequeriesStrategy
-      \n Prequery \n ```\n\n\n---\"\n\n\n**block-AH**\n\n## Chunk: docs > develop
-      > js sdk > modules\n```  \n LABEL_FILTER_PREFIX \n \u2022 Const LABEL_FILTER_PREFIX:
-      classification.labels \n Defined in \n libs/sdk-core/src/lib/db/search/filter.ts:3
-      \n \n NER_FILTER_PREFIX \n \u2022 Const NER_FILTER_PREFIX: entities \n Defined
-      in \n libs/sdk-core/src/lib/db/search/filter.ts:4 \n \n NUA_KEY \n \u2022 Const
-      NUA_KEY: NUCLIA_NUA_KEY \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:18
-      \n \n SUMMARY_PROMPT \n \u2022 Const SUMMARY_PROMPT: summary_prompt \n Defined
-      in \n libs/sdk-core/src/lib/db/db.models.ts:274 \n \n USER_PROMPTS \n \u2022
-      Const USER_PROMPTS: user_prompts \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:273
-      \n Functions \n TUSuploadFile \n \u25b8 TUSuploadFile(nuclia, path, buffer,
-      metadata?, creationPayload?, maxWaitOn429?): Observable \n Parameters \n | Name
-      | Type | Default value | \n | :------ | :------ | :------ | \n | nuclia | INuclia
-      | undefined | \n | path | string | undefined | \n | buffer | ArrayBuffer | undefined
-      | \n | metadata? | FileMetadata | undefined | \n | creationPayload? | ICreateResource
-      | undefined | \n | maxWaitOn429 | number | 30000 | \n Returns \n Observable
-      \n Defined in \n libs/sdk-core/src/lib/db/upload.ts:150 \n \n ask \n \u25b8
-      ask(nuclia, kbid, path, query, context?, features?, options?): Observable \n
-      Parameters \n | Name | Type | Default value | \n | :------ | :------ | :------
-      | \n | nuclia | INuclia | undefined | \n | kbid | string | undefined | \n |
-      path | string | undefined | \n | query | string | undefined | \n | context |
-      ContextEntry[] | [] | \n | features | Features[] | undefined | \n | options
-      | ChatOptions | {} | \n Returns \n Observable \n Defined in \n libs/sdk-core/src/lib/db/search/ask.ts:8
-      \n \n batchUpload \n \u25b8 batchUpload(nuclia, path, files, isResource?): Observable
-      \n Parameters \n | Name | Type | Default value | \n | :------ | :------ | :------
-      | \n | nuclia | INuclia | undefined | \n | path | string | undefined | \n |
-      files | FileList \\| File[] \\| FileWithMetadata[] | undefined | \n | isResource
-      | boolean | false | \n Returns \n Observable \n Defined in \n libs/sdk-core/src/lib/db/upload.ts:244
-      \n \n catalog \n \u25b8 catalog(nuclia, kbid, query, options?, useGet?): Observable
-      \n Parameters \n | Name | Type | \n | :------ | :------ | \n | nuclia | INuclia
-      | \n | kbid | string | \n | query | string | \n | options? | CatalogOptions
-      | \n | useGet? | boolean | \n Returns \n Observable \n Defined in \n libs/sdk-core/src/lib/db/search/search.ts:112
-      \n \n deDuplicateList \n \u25b8 deDuplicateList(a): any[] \n Parameters \n |
-      Name | Type | \n | :------ | :------ | \n | a | any[] | \n Returns \n any[]
-      \n Defined in \n libs/sdk-core/src/lib/db/resource/resource.helpers.ts:4 \n
-      \n evaluateExpression \n \u25b8 evaluateExpression(expression, context): T \\|
-      undefined \n Type parameters \n | Name | \n | :------ | \n | T | \n Parameters
-      \n | Name | Type | \n | :------ | :------ | \n | expression | string | \n |
-      context | any | \n Returns \n T \\| undefined \n Defined in \n libs/sdk-core/src/lib/db/search/agentic.ts:473
-      \n \n find \n \u25b8 find(nuclia, kbid, path, query, features?, options?, useGet?):
-      Observable \n Parameters \n | Name | Type | Default value | \n | :------ | :------
-      | :------ | \n | nuclia | INuclia | undefined | \n | kbid | string | undefined
-      | \n | path | string | undefined | \n | query | string | undefined | \n | features
-      | (Features \\| ResourceFeatures)[] | [] | \n | options? | SearchOptions | undefined
-      | \n | useGet? | boolean | undefined | \n Returns \n Observable \n Defined in
-      \n libs/sdk-core/src/lib/db/search/search.ts:6 \n \n format \n \u25b8 format(expression,
-      context, skipMissing?): string \\| undefined \n Parameters \n | Name | Type
-      | Default value | \n | :------ | :------ | :------ | \n | expression | string
-      | undefined | \n | context | any | undefined | \n | skipMissing | boolean |
-      true | \n Returns \n string \\| undefined \n Defined in \n libs/sdk-core/src/lib/db/search/agentic.ts:426
-      \n \n formatObject \n \u25b8 formatObject(obj, context): any \n Parameters \n
-      | Name | Type | \n | :------ | :------ | \n | obj | any | \n | context | any
-      | \n Returns \n any \n Defined in \n libs/sdk-core/src/lib/db/search/agentic.ts:447
-      \n \n getAllNotifications \n \u25b8 getAllNotifications(nuclia, path, controller):
-      Observable \n Parameters \n | Name | Type | \n | :------ | :------ | \n | nuclia
-      | INuclia | \n | path | string | \n | controller | AbortController | \n Returns
-      \n Observable \n Defined in \n libs/sdk-core/src/lib/db/notifications/notifications.ts:5
-      \n \n getDataKeyFromFieldType \n \u25b8 getDataKeyFromFieldType(fieldType):
-      null \\| keyof ResourceData \n Currently in our models, there are more FIELD_TYPEs
-      than ResourceData keys, so we need the switch for typing reason \n Parameters
-      \n | Name | Type | \n | :------ | :------ | \n | fieldType | FIELD_TYPE | \n
-      Returns \n null \\| keyof ResourceData \n Defined in \n libs/sdk-core/src/lib/db/resource/resource.mapper.ts:7
-      \n \n getEntityFromFilter \n \u25b8 getEntityFromFilter(filter): Object \n Parameters
-      \n | Name | Type | \n | :------ | :------ | \n | filter | string | \n Returns
-      \n Object \n | Name | Type | \n | :------ | :------ | \n | entity | string |
-      \n | family | string | \n Defined in \n libs/sdk-core/src/lib/db/search/filter.ts:27
-      \n \n getFieldTypeFromString \n \u25b8 getFieldTypeFromString(type): FIELD_TYPE
-      \\| null \n Parameters \n | Name | Type | \n | :------ | :------ | \n | type
-      | string | \n Returns \n FIELD_TYPE \\| null \n Defined in \n libs/sdk-core/src/lib/db/resource/resource.mapper.ts:40
-      \n \n getFileMetadata \n \u25b8 getFileMetadata(metadata): Object \n Parameters
-      \n | Name | Type | \n | :------ | :------ | \n | metadata | undefined \\| FileMetadata
-      | \n Returns \n Object \n Defined in \n libs/sdk-core/src/lib/db/upload.ts:327
-      \n \n getFilterFromEntity \n \u25b8 getFilterFromEntity(entity): string \n Parameters
-      \n | Name | Type | \n | :------ | :------ | \n | entity | Object | \n | entity.entity
-      | string | \n | entity.family | string | \n Returns \n string \n Defined in
-      \n libs/sdk-core/src/lib/db/search/filter.ts:23 \n \n getFilterFromLabel \n
-      \u25b8 getFilterFromLabel(label): string \n Parameters \n | Name | Type | \n
-      | :------ | :------ | \n | label | Classification | \n Returns \n string \n
-      Defined in \n libs/sdk-core/src/lib/db/search/filter.ts:6 \n \n getFilterFromLabelSet
-      \n \u25b8 getFilterFromLabelSet(labelSet): string \n Parameters \n | Name |
-      Type | \n | :------ | :------ | \n | labelSet | string | \n Returns \n string
-      \n Defined in \n ```\n\n\n---\"\n\n\n**block-AI**\n\n## Chunk: docs > develop
-      > python sdk > 05 search\n```  \n SDK: \n \n ```python \n from nuclia import
-      sdk \n from nucliadb_models.search import AskRequest, Reasoning \n search =
-      sdk.NucliaSearch() \n query = AskRequest( \n query= My question with extra reasoning
-      effort , \n max_tokens=5000, \n reasoning=Reasoning( \n display=True, # Show
-      reasoning in the response \n effort= low , # Can be low , medium , or high \n
-      budget_tokens=1024 # How many tokens reasoning can use \n ), \n ) \n search.ask(query=query)
-      \n ``` \n Model Support for Reasoning Options: \n ```\n\n\n---\"\n\n\n\n\n<END
-      OF CONTEXT>\n\n"}, "citations": false, "citation_threshold": null, "generative_model":
-      "chatgpt-azure-4o-mini", "max_tokens": 2000, "query_context_images": {}, "prefer_markdown":
-      null, "json_schema": {"title": "validate_or_answer", "description": "Validate
-      or answer", "parameters": {"type": "object", "properties": {"reason": {"type":
-      "string", "description": "Reasoning for the answer or validation"}, "answer":
-      {"type": "string", "description": "Partial or complete answer to the user query
-      from the information in the context."}, "missing_info_query": {"type": "string",
-      "description": "Query needed to retrieve the missing information in case the
-      context is not enough to answer the question. If the context does not answer
-      the question at all, just return the original question."}, "useful": {"type":
-      "string", "description": "Is the context useful to answer the question?", "enum":
-      ["yes", "no"]}, "citations": {"type": "array", "items": {"type": "string", "description":
-      "Block ID cited in the answer, e.g. block-AB"}, "description": "List of block
-      IDs cited in the answer, if any"}}, "required": ["reason", "answer", "missing_info_query",
-      "useful", "citations"]}}, "format_prompt": false, "rerank_context": false, "tools":
-      [], "tool_choice": {"type": "required"}, "reasoning": false, "seed": null}'
+      ```\n\n\n---\"\n\n\n**block-AG**\n\n## Chunk: docs > develop > js sdk > interfaces
+      > ChatOptions\n```  \n optional highlight: boolean \n \n Inherited from \n BaseSearchOptions.highlight
+      \n Defined in \n libs/sdk-core/src/lib/db/search/search.models.ts:76 \n \n keyword_filters?
+      \n \n optional keyword_filters: string[] \\| Filter[] \n \n Inherited from \n
+      BaseSearchOptions.keyword_filters \n Defined in \n libs/sdk-core/src/lib/db/search/search.models.ts:65
+      \n \n max_tokens? \n ```\n\n\n---\"\n\n\n\n\n<END OF CONTEXT>\n\n"}, "citations":
+      false, "citation_threshold": null, "generative_model": "chatgpt-azure-4o-mini",
+      "max_tokens": 2000, "query_context_images": {}, "prefer_markdown": null, "json_schema":
+      {"title": "validate_or_answer", "description": "Validate or answer", "parameters":
+      {"type": "object", "properties": {"reason": {"type": "string", "description":
+      "Reasoning for the answer or validation"}, "answer": {"type": "string", "description":
+      "Partial or complete answer to the user query from the information in the context."},
+      "missing_info_query": {"type": "string", "description": "Query needed to retrieve
+      the missing information in case the context is not enough to answer the question.
+      If the context does not answer the question at all, just return the original
+      question."}, "useful": {"type": "string", "description": "Is the context useful
+      to answer the question?", "enum": ["yes", "no"]}, "citations": {"type": "array",
+      "items": {"type": "string", "description": "Block ID cited in the answer, e.g.
+      block-AB"}, "description": "List of block IDs cited in the answer, if any"}},
+      "required": ["reason", "answer", "missing_info_query", "useful", "citations"]}},
+      "format_prompt": false, "rerank_context": false, "tools": [], "tool_choice":
+      {"type": "required"}, "reasoning": false, "seed": null}'
     headers:
       Accept:
       - application/x-ndjson
@@ -1396,7 +1208,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '23543'
+      - '10278'
       Content-Type:
       - application/json
       Host:
@@ -1414,22 +1226,24 @@ interactions:
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
-        detailed information about the function and usage of the `max_tokens` parameter
-        in Nuclia, including its role in setting limits on context size and answer
-        length. However, the context does not contain any information about what a
-        Cardamom bun is. Therefore, the answer is partially complete, as it addresses
-        the first part of the question but not the second.","answer":"The `max_tokens`
-        parameter in Nuclia is used on the /ask endpoint to set hard limits on context
-        size and answer length. Specifically, it limits the amount of retrieved information
-        sent to the language model (LLM) and the length of the generated response.
-        The maximum number of input tokens includes the prompt, the retrieved results,
-        and the user question.","missing_info_query":"What is a Cardamom bun?","useful":"yes","citations":["block-AA","block-AB"]}}}
+        detailed information on how to use the `max_tokens` parameter in Nuclia, including
+        its purpose and limitations. However, the context does not contain any information
+        about what a Cardamom bun is. Therefore, the answer is partially complete,
+        as it addresses the first part of the question but not the second.","answer":"To
+        use the `max_tokens` parameter in Nuclia, you can set it on the /ask endpoint.
+        This parameter sets hard limits on two aspects: the context size and the answer
+        length. The context size limits the amount of retrieved information sent to
+        the language model (LLM). The answer length limits the length of the generated
+        response. Additionally, the `max_tokens` parameter defines the maximum number
+        of input tokens to include in the final context, which encompasses the prompt,
+        the retrieved results, and the user question.","missing_info_query":"What
+        is a Cardamom bun?","useful":"yes","citations":["block-AA","block-AB","block-AC"]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":156,"output_tokens":22,"timings":{"generative":3.922194180020597},"input_nuclia_tokens":0.156,"output_nuclia_tokens":0.022}}
+        {"chunk":{"type":"meta","input_tokens":66,"output_tokens":25,"timings":{"generative":4.598991474980721},"input_nuclia_tokens":0.066,"output_nuclia_tokens":0.025}}
 
-        {"chunk":{"normalized_tokens":{"input":0.15624,"output":0.02196,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.06597,"output":0.0252,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -1442,17 +1256,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 13 Jul 2026 10:10:00 GMT
+      - Mon, 13 Jul 2026 11:13:51 GMT
       nuclia-learning-id:
-      - a86734bb168e49be9c7a87727546afe2
+      - 907b0c455ddf4f67b9e75b2b6b7604b8
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '3925'
+      - '4613'
       x-nuclia-trace-id:
-      - f77ede1eb73838ab19439b8364e2a322
+      - a46bc53f8feebf5fa26e66d3a358e5cc
     status:
       code: 200
       message: OK
@@ -1475,13 +1289,15 @@ interactions:
       your reasoning for rephrasing or not the question.\n\nHere you have the question,
       the contexts from previous agents and the description of the current agent:\n\n\n<CURRENT
       AGENT DESCRIPTION>\nAgent that provides context to answer questions.\n\n\n\n\n<PREVIOUS
-      CONTEXTS>\n\nContext:\n\n- The `max_tokens` parameter in Nuclia is used on the
-      /ask endpoint to set hard limits on context size and answer length. Specifically,
-      it limits the amount of retrieved information sent to the language model (LLM)
-      and the length of the generated response. The maximum number of input tokens
-      includes the prompt, the retrieved results, and the user question.\n\n\n\n<QUESTION>\nWhat
-      is the function and usage of `max_tokens` in Nuclia, and what is a Cardamom
-      bun?\n"}, "citations": false, "citation_threshold": null, "generative_model":
+      CONTEXTS>\n\nContext:\n\n- To use the `max_tokens` parameter in Nuclia, you
+      can set it on the /ask endpoint. This parameter sets hard limits on two aspects:
+      the context size and the answer length. The context size limits the amount of
+      retrieved information sent to the language model (LLM). The answer length limits
+      the length of the generated response. Additionally, the `max_tokens` parameter
+      defines the maximum number of input tokens to include in the final context,
+      which encompasses the prompt, the retrieved results, and the user question.\n\n\n\n<QUESTION>\nExplain
+      how to use the `max_tokens` parameter in Nuclia and define what a Cardamom bun
+      is.\n"}, "citations": false, "citation_threshold": null, "generative_model":
       "chatgpt-azure-4o-mini", "max_tokens": 2000, "query_context_images": {}, "prefer_markdown":
       null, "json_schema": {"title": "next_rephrase", "description": "Rephrase the
       question if needed given info about previous contexts and the current agent",
@@ -1500,7 +1316,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2771'
+      - '2939'
       Content-Type:
       - application/json
       Host:
@@ -1517,18 +1333,18 @@ interactions:
     uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"object","object":{"rephrased_question":"What is the
-        function and usage of `max_tokens` in Nuclia? Also, can you explain what a
-        Cardamom bun is?","needed":true,"reason":"The original question combines two
-        distinct topics: the function of `max_tokens` in Nuclia and the definition
-        of a Cardamom bun. The current agent focuses on providing context for questions,
-        so separating these topics will allow for clearer and more focused responses."}}}
+      string: '{"chunk":{"type":"object","object":{"rephrased_question":"Can you explain
+        how to use the `max_tokens` parameter in Nuclia and also provide a definition
+        of a Cardamom bun?","needed":true,"reason":"The current agent can provide
+        context on the `max_tokens` parameter in Nuclia but does not have the capability
+        to define what a Cardamom bun is, requiring rephrasing to clarify the two
+        distinct topics."}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":15,"output_tokens":12,"timings":{"generative":1.697011565003777},"input_nuclia_tokens":0.015,"output_nuclia_tokens":0.012}}
+        {"chunk":{"type":"meta","input_tokens":16,"output_tokens":10,"timings":{"generative":1.8466963869868778},"input_nuclia_tokens":0.016,"output_nuclia_tokens":0.01}}
 
-        {"chunk":{"normalized_tokens":{"input":0.01473,"output":0.01152,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.01566,"output":0.01044,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -1541,17 +1357,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 13 Jul 2026 10:10:04 GMT
+      - Mon, 13 Jul 2026 11:13:56 GMT
       nuclia-learning-id:
-      - 723a0cbc58db42a1a34ca4f808cb8993
+      - de649890cb954678b8a09e6392ccae3d
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1705'
+      - '1855'
       x-nuclia-trace-id:
-      - 96c19c9391c507638435770fa050e2fb
+      - 4b006ac9dff2c63b205afd4771b9e16b
     status:
       code: 200
       message: OK
@@ -1589,10 +1405,10 @@ interactions:
       List the IDs of the blocks relevant to the answer, if any (e.g., [\"block-AB\",
       \"block-CD\"]).\n11. **IMPORTANT** If any extra instructions are provided, you
       MUST follow them carefully when generating the answer field. These instructions
-      may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nWhat
-      is the function and usage of `max_tokens` in Nuclia? Also, can you explain what
-      a Cardamom bun is?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n## Chunk:
-      a9b595b1f601431f9587240aaa48a3b3\n``` Cardamom bun is a pastry ```\n\n\n---\"\n\n\n\n\n<END
+      may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nCan
+      you explain how to use the `max_tokens` parameter in Nuclia and also provide
+      a definition of a Cardamom bun?\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n##
+      Chunk: 2816e3f617e24135b5b888d33923ab55\n``` Cardamom bun is a pastry ```\n\n\n---\"\n\n\n\n\n<END
       OF CONTEXT>\n\n"}, "citations": false, "citation_threshold": null, "generative_model":
       "chatgpt-azure-4o-mini", "max_tokens": 2000, "query_context_images": {}, "prefer_markdown":
       null, "json_schema": {"title": "validate_or_answer", "description": "Validate
@@ -1617,7 +1433,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '4179'
+      - '4188'
       Content-Type:
       - application/json
       Host:
@@ -1635,16 +1451,17 @@ interactions:
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
-        information about Cardamom bun as a pastry but does not mention anything about
-        `max_tokens` in Nuclia. Therefore, the context is only partially useful for
-        answering the question.","answer":"Cardamom bun is a pastry.","missing_info_query":"What
-        is the function and usage of `max_tokens` in Nuclia?","useful":"yes","citations":["block-AA"]}}}
+        a definition of a Cardamom bun as a pastry. However, it does not provide any
+        information about the `max_tokens` parameter in Nuclia. Therefore, the context
+        is only partially useful for answering the question.","answer":"A Cardamom
+        bun is a pastry.","missing_info_query":"How to use the `max_tokens` parameter
+        in Nuclia?","useful":"yes","citations":["block-AA"]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":23,"output_tokens":10,"timings":{"generative":1.9728301020222716},"input_nuclia_tokens":0.023,"output_nuclia_tokens":0.01}}
+        {"chunk":{"type":"meta","input_tokens":23,"output_tokens":11,"timings":{"generative":1.9072701369877905},"input_nuclia_tokens":0.023,"output_nuclia_tokens":0.011}}
 
-        {"chunk":{"normalized_tokens":{"input":0.02346,"output":0.01044,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02343,"output":0.01128,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -1657,17 +1474,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 13 Jul 2026 10:10:06 GMT
+      - Mon, 13 Jul 2026 11:13:58 GMT
       nuclia-learning-id:
-      - c4724fe1226f45d5a087d2aa378b9ae2
+      - 2da203047730455892a0d664598f7a5d
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1979'
+      - '1914'
       x-nuclia-trace-id:
-      - 614a60bceb243d88007125f73c8ef3b3
+      - 880757e25e58bbdf9a947f9db9184806
     status:
       code: 200
       message: OK
@@ -1681,21 +1498,23 @@ interactions:
       this clearly\n\nAlways follow any additional instructions provided about format,
       style, or domain-specific behavior.", "chat_history": [], "context": [], "query_context":
       {}, "query_context_order": {}, "truncate": true, "user_prompt": {"prompt": "\n##
-      Question\nWhat is the function and usage of `max_tokens` in Nuclia, and what
-      is a Cardamom bun?\n\n## Provided Context\n[START OF CONTEXT]\n## Retrieval
-      on nuclia-docs Knowledge Box\n\n# What is the function and usage of `max_tokens`
-      in Nuclia, and what is a Cardamom bun?\n\n The `max_tokens` parameter in Nuclia
-      is used on the /ask endpoint to set hard limits on context size and answer length.
-      Specifically, it limits the amount of retrieved information sent to the language
-      model (LLM) and the length of the generated response. The maximum number of
-      input tokens includes the prompt, the retrieved results, and the user question.\n\n##
-      Static Context\n\n# \n\n Cardamom bun is a pastry.\n[END OF CONTEXT]\n\n## Answering
-      Guidelines\n- Carefully read all context; it may be lengthy or detailed\n- Do
-      not omit or overlook any relevant information\n- If the context is incomplete
+      Question\nExplain how to use the `max_tokens` parameter in Nuclia and define
+      what a Cardamom bun is.\n\n## Provided Context\n[START OF CONTEXT]\n## Retrieval
+      on nuclia-docs Knowledge Box\n\n# Explain how to use the `max_tokens` parameter
+      in Nuclia and define what a Cardamom bun is.\n\n To use the `max_tokens` parameter
+      in Nuclia, you can set it on the /ask endpoint. This parameter sets hard limits
+      on two aspects: the context size and the answer length. The context size limits
+      the amount of retrieved information sent to the language model (LLM). The answer
+      length limits the length of the generated response. Additionally, the `max_tokens`
+      parameter defines the maximum number of input tokens to include in the final
+      context, which encompasses the prompt, the retrieved results, and the user question.\n\n##
+      Static Context\n\n# \n\n A Cardamom bun is a pastry.\n[END OF CONTEXT]\n\n##
+      Answering Guidelines\n- Carefully read all context; it may be lengthy or detailed\n-
+      Do not omit or overlook any relevant information\n- If the context is incomplete
       or insufficient, state: \"Not enough data to answer this.\"\n- Read carefully
       any extra instructions below if provided and use them to answer\n\nNow provide
-      your answer to the question: What is the function and usage of `max_tokens`
-      in Nuclia, and what is a Cardamom bun?"}, "citations": null, "citation_threshold":
+      your answer to the question: Explain how to use the `max_tokens` parameter in
+      Nuclia and define what a Cardamom bun is."}, "citations": null, "citation_threshold":
       null, "generative_model": "chatgpt-azure-4o-mini", "max_tokens": 5000, "query_context_images":
       {}, "prefer_markdown": null, "json_schema": null, "format_prompt": false, "rerank_context":
       false, "tools": [], "tool_choice": {"type": "auto"}, "reasoning": false, "seed":
@@ -1708,7 +1527,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2165'
+      - '2345'
       Content-Type:
       - application/json
       Host:
@@ -1718,7 +1537,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - d0eb6ff6790c4afe97e4d917cc80a34f
+      - 1e2be8638468448383fc495592a2e6e2
       x-origin:
       - RAO
       x-session:
@@ -1731,7 +1550,11 @@ interactions:
     uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"text","text":"The"}}
+      string: '{"chunk":{"type":"text","text":"To"}}
+
+        {"chunk":{"type":"text","text":" use"}}
+
+        {"chunk":{"type":"text","text":" the"}}
 
         {"chunk":{"type":"text","text":" `"}}
 
@@ -1751,9 +1574,15 @@ interactions:
 
         {"chunk":{"type":"text","text":"ia"}}
 
-        {"chunk":{"type":"text","text":" is"}}
+        {"chunk":{"type":"text","text":","}}
 
-        {"chunk":{"type":"text","text":" used"}}
+        {"chunk":{"type":"text","text":" you"}}
+
+        {"chunk":{"type":"text","text":" can"}}
+
+        {"chunk":{"type":"text","text":" set"}}
+
+        {"chunk":{"type":"text","text":" it"}}
 
         {"chunk":{"type":"text","text":" on"}}
 
@@ -1765,9 +1594,13 @@ interactions:
 
         {"chunk":{"type":"text","text":" endpoint"}}
 
-        {"chunk":{"type":"text","text":" to"}}
+        {"chunk":{"type":"text","text":"."}}
 
-        {"chunk":{"type":"text","text":" set"}}
+        {"chunk":{"type":"text","text":" This"}}
+
+        {"chunk":{"type":"text","text":" parameter"}}
+
+        {"chunk":{"type":"text","text":" establishes"}}
 
         {"chunk":{"type":"text","text":" hard"}}
 
@@ -1775,11 +1608,23 @@ interactions:
 
         {"chunk":{"type":"text","text":" on"}}
 
+        {"chunk":{"type":"text","text":" two"}}
+
+        {"chunk":{"type":"text","text":" key"}}
+
+        {"chunk":{"type":"text","text":" aspects"}}
+
+        {"chunk":{"type":"text","text":":"}}
+
+        {"chunk":{"type":"text","text":" the"}}
+
         {"chunk":{"type":"text","text":" context"}}
 
         {"chunk":{"type":"text","text":" size"}}
 
         {"chunk":{"type":"text","text":" and"}}
+
+        {"chunk":{"type":"text","text":" the"}}
 
         {"chunk":{"type":"text","text":" answer"}}
 
@@ -1787,9 +1632,11 @@ interactions:
 
         {"chunk":{"type":"text","text":"."}}
 
-        {"chunk":{"type":"text","text":" It"}}
+        {"chunk":{"type":"text","text":" Specifically"}}
 
-        {"chunk":{"type":"text","text":" specifically"}}
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" it"}}
 
         {"chunk":{"type":"text","text":" limits"}}
 
@@ -1839,6 +1686,22 @@ interactions:
 
         {"chunk":{"type":"text","text":" The"}}
 
+        {"chunk":{"type":"text","text":" `"}}
+
+        {"chunk":{"type":"text","text":"max"}}
+
+        {"chunk":{"type":"text","text":"_tokens"}}
+
+        {"chunk":{"type":"text","text":"`"}}
+
+        {"chunk":{"type":"text","text":" parameter"}}
+
+        {"chunk":{"type":"text","text":" also"}}
+
+        {"chunk":{"type":"text","text":" defines"}}
+
+        {"chunk":{"type":"text","text":" the"}}
+
         {"chunk":{"type":"text","text":" maximum"}}
 
         {"chunk":{"type":"text","text":" number"}}
@@ -1849,7 +1712,25 @@ interactions:
 
         {"chunk":{"type":"text","text":" tokens"}}
 
-        {"chunk":{"type":"text","text":" includes"}}
+        {"chunk":{"type":"text","text":" to"}}
+
+        {"chunk":{"type":"text","text":" include"}}
+
+        {"chunk":{"type":"text","text":" in"}}
+
+        {"chunk":{"type":"text","text":" the"}}
+
+        {"chunk":{"type":"text","text":" final"}}
+
+        {"chunk":{"type":"text","text":" context"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" which"}}
+
+        {"chunk":{"type":"text","text":" consists"}}
+
+        {"chunk":{"type":"text","text":" of"}}
 
         {"chunk":{"type":"text","text":" the"}}
 
@@ -1895,9 +1776,9 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":11,"output_tokens":10,"timings":{"generative_first_chunk":0.7168290030094795,"generative":2.069631089019822},"input_nuclia_tokens":0.011,"output_nuclia_tokens":0.01}}
+        {"chunk":{"type":"meta","input_tokens":12,"output_tokens":14,"timings":{"generative_first_chunk":0.35769885999616235,"generative":1.81964945801883},"input_nuclia_tokens":0.012,"output_nuclia_tokens":0.014}}
 
-        {"chunk":{"normalized_tokens":{"input":0.01116,"output":0.00984,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.01206,"output":0.01356,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -1910,17 +1791,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 13 Jul 2026 10:10:08 GMT
+      - Mon, 13 Jul 2026 11:14:00 GMT
       nuclia-learning-id:
-      - b03ce5020d174b69bef9b989e7838b3d
+      - 4778fe8cd89249c1a7d3035d64fb3778
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '723'
+      - '369'
       x-nuclia-trace-id:
-      - edd784cf5a41d9bde93205344c922166
+      - 818a23a270b0a7da845bad6f2e995ab1
     status:
       code: 200
       message: OK
