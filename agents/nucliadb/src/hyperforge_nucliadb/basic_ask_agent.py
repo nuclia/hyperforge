@@ -4,6 +4,7 @@ import json
 from time import time
 from typing import Any, ClassVar, Dict, List, Literal, Optional, cast
 
+from hyperforge import PROMPT_ENVIRONMENT, logger
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.context.agent import ContextAgent
@@ -36,7 +37,6 @@ from nucliadb_models.search import (
     SyncAskResponse,
 )
 
-from hyperforge import PROMPT_ENVIRONMENT, logger
 from hyperforge_nucliadb.ask.multi import choose_source
 from hyperforge_nucliadb.ask_utils import (
     combine_catalog_filter_expressions,

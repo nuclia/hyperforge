@@ -8,9 +8,10 @@ from hyperforge.memory import Context
 from hyperforge.memory.memory import EphemeralSessionMemory
 from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.models import MemoryConfig, Rules
+from nuclia.lib.nua import AsyncNuaClient
+
 from hyperforge_perplexity_search.agent import PerplexitySearchAgent
 from hyperforge_perplexity_search.config import PerplexitySearchAgentConfig
-from nuclia.lib.nua import AsyncNuaClient
 
 NUA_KEY = os.environ.get(
     "NUA_KEY",

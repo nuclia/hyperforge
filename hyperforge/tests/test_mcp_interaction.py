@@ -2,6 +2,10 @@ import os
 from typing import Any
 
 from httpx import AsyncClient
+from hyperforge_mcp.agent import MCPAgent
+from hyperforge_mcp.config import MCPAgentConfig, Transport
+from nucliadb_models.resource import KnowledgeBoxObj
+
 from hyperforge.configure import get_driver_config_instance
 from hyperforge.llm import NUAConnection
 from hyperforge.manager import Manager
@@ -14,9 +18,6 @@ from hyperforge.models import Rule, Rules
 from hyperforge.prompts import PromptConfig
 from hyperforge.server.session import SessionManager
 from hyperforge.workflows import WorkflowData
-from hyperforge_mcp.agent import MCPAgent
-from hyperforge_mcp.config import MCPAgentConfig, Transport
-from nucliadb_models.resource import KnowledgeBoxObj
 
 NUA_KEY = os.environ.get(
     "NUA_KEY",

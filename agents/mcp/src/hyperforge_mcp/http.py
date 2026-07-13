@@ -13,6 +13,7 @@ from uuid import uuid4
 import httpx
 from cryptography.fernet import Fernet
 from httpx import Auth, Timeout
+from hyperforge import logger
 from hyperforge.configure import driver
 from hyperforge.driver import Driver
 from hyperforge.interaction import (
@@ -34,7 +35,6 @@ from mcp.shared.auth import (
 )
 from pydantic import AnyUrl, BaseModel
 
-from hyperforge import logger
 from hyperforge_mcp.config_driver import MCPHTTPDriverConfig, MCPHTTPInnerConfig
 
 # ---------------------------------------------------------------------------

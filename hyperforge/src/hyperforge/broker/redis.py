@@ -15,7 +15,6 @@ from hyperforge.broker import AgentTimeoutError, Broker
 from hyperforge.pubsub import AgentMessage, StartInteraction
 from hyperforge.redis_utils import ManualStreamKeysRedisCluster
 
-
 _REDIS_CONNECT_TIMEOUT_SECONDS = 5
 _REDIS_HEALTH_CHECK_INTERVAL_SECONDS = 30
 _REDIS_RETRY_ATTEMPTS = 3

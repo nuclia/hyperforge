@@ -2,6 +2,7 @@ import asyncio
 from time import time
 from typing import Any, Dict, List, Optional, cast
 
+from hyperforge import logger
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.context.agent import ContextAgent
@@ -10,7 +11,6 @@ from hyperforge.memory import Chunk, Context, QuestionMemory, Source
 from nucliadb_models import filters as ndb_filters
 from nucliadb_models.search import AskRequest
 
-from hyperforge import logger
 from hyperforge_nucliadb.advanced_ask_config import (
     AdvancedAskAgentConfig,
 )

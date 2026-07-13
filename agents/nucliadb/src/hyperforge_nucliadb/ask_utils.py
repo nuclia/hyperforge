@@ -1,10 +1,9 @@
 from typing import Literal, Optional
 
+from hyperforge import logger
 from nucliadb_models import filters as ndb_filters
 from nucliadb_models.labels import LABEL_QUERY_ALIASES as LABEL_ALIASES
 from nucliadb_models.search import SyncAskResponse
-
-from hyperforge import logger
 
 
 def get_chunk_text(ask_response: SyncAskResponse, chunk_id: str) -> str:

@@ -1,6 +1,7 @@
 from time import time
 from uuid import uuid4
 
+from hyperforge import PROMPT_ENVIRONMENT
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.manager import Manager
@@ -8,7 +9,6 @@ from hyperforge.memory import QuestionMemory
 from hyperforge.trace import trace_agent
 from nuclia.lib.nua_responses import ChatModel, UserPrompt
 
-from hyperforge import PROMPT_ENVIRONMENT
 from hyperforge_generate.config import GenerateAgentConfig
 
 GENERATE_PROMPT = """

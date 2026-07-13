@@ -1,6 +1,7 @@
 from time import time
 from typing import List, Optional, overload
 
+from hyperforge import PROMPT_ENVIRONMENT
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.context.agent import generate_ctx_block_id
@@ -11,7 +12,6 @@ from hyperforge.trace import trace_agent
 from nuclia.lib.nua_responses import ChatModel, Tool, ToolChoiceAuto, UserPrompt
 from nuclia_models.predict.generative_responses import ToolCall
 
-from hyperforge import PROMPT_ENVIRONMENT
 from hyperforge_summarize.config import SummarizeAgentConfig
 from hyperforge_summarize.prompts import MARKDOWN_TWO_LEVELS_CITATIONS_PROMPT_ADJUSTMENT
 

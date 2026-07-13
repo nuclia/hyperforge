@@ -1,6 +1,7 @@
 from time import time
 from typing import Any, Dict, List, Optional, Tuple
 
+from hyperforge import logger
 from hyperforge.agent import Agent
 from hyperforge.context.agent import ContextAgent
 from hyperforge.interaction import Feedback, PromptFeedbackSchema
@@ -12,7 +13,6 @@ from hyperforge.utils import iterate_tools_resp
 from mcp import types
 from nuclia.lib.nua_responses import Image, Message
 
-from hyperforge import logger
 from hyperforge_mcp.agent import EXIT_LOOP_TOOLS, MCPAgent
 from hyperforge_mcp.config import MCPAgentConfig, MultiMCPAgentConfig
 from hyperforge_mcp.tools import (

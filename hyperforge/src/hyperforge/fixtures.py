@@ -33,7 +33,7 @@ from sqlalchemy_utils import (  # type: ignore
     drop_database,
 )
 
-import hyperforge  # noqa: F401
+import hyperforge
 from hyperforge.api.app import HTTPApplication
 from hyperforge.api.settings import Settings
 from hyperforge.broker.redis import RedisBroker

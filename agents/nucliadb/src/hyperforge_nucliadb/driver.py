@@ -4,6 +4,7 @@ from functools import reduce
 from typing import Dict, List, Optional, Union
 
 import httpx
+from hyperforge import logger
 from hyperforge.configure import driver
 from hyperforge.driver import Driver
 from hyperforge.models import Facets
@@ -37,7 +38,6 @@ from nucliadb_models.search import (
 )
 from nucliadb_sdk.v2 import NucliaDBAsync
 
-from hyperforge import logger
 from hyperforge_nucliadb.driver_config import (
     ManagerConnection,
     NucliaDBConfig,

@@ -4,6 +4,7 @@ import pytest
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import EphemeralSessionMemory
 from hyperforge.models import MemoryConfig, Rules
+
 from hyperforge_related.agent import RelatedAgent
 from hyperforge_related.config import RelatedAgentConfig
 

@@ -10,7 +10,6 @@ if TYPE_CHECKING:
 import nucliadb_telemetry.context
 import nucliadb_telemetry.metrics
 import prometheus_client
-from hyperforge.server.web import WebServer
 from lru import LRU
 from nucliadb_telemetry import errors
 from nucliadb_telemetry.utils import get_telemetry
@@ -42,7 +41,7 @@ from hyperforge.server import SERVICE_NAME, logger
 from hyperforge.server.cache import Cache
 from hyperforge.server.settings import Settings
 from hyperforge.server.utils import get_memory
-from hyperforge.server.web import start_health_check
+from hyperforge.server.web import WebServer, start_health_check
 
 HOSTNAME = os.environ.get("HOSTNAME", "arag-server").encode()
 

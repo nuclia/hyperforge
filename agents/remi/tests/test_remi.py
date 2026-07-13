@@ -4,6 +4,7 @@ import re
 import pytest
 from hyperforge.engine import main as arag_main
 from hyperforge.minimal_fixtures import cassette_nua_key
+
 from hyperforge_remi.config import ContextGranularity
 
 NUA_KEY = os.environ.get(

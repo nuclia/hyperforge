@@ -2,6 +2,7 @@ import asyncio
 from time import time
 from typing import Any, ClassVar, Dict, List, Optional, cast
 
+from hyperforge import logger
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.context.agent import ContextAgent, trace_agent
@@ -9,7 +10,6 @@ from hyperforge.definition import FunctionDefinition
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import Context, QuestionMemory, Source
 
-from hyperforge import logger
 from hyperforge_nucliadb.ask.analysis import question_analysis
 from hyperforge_nucliadb.ask.config import AskAgentConfig
 from hyperforge_nucliadb.ask.hydrate import hydrate

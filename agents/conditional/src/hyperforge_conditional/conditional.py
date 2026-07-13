@@ -2,6 +2,7 @@ import asyncio
 from time import time
 from typing import Any, Dict, List, Literal, Optional, cast
 
+from hyperforge import PROMPT_ENVIRONMENT
 from hyperforge.agent import Agent, AgentConfig
 from hyperforge.configure import get_agent_config_klass, get_agent_klass
 from hyperforge.manager import Manager
@@ -9,8 +10,6 @@ from hyperforge.memory.memory import QuestionMemory
 from hyperforge.trace import trace_agent
 from hyperforge.utils import WidgetType
 from pydantic import BaseModel, Field, field_serializer, field_validator
-
-from hyperforge import PROMPT_ENVIRONMENT
 
 CONDITIONAL_AGENT = """
 Given a prompt that indicates a condition , assess whether a given text fulfills it or not.
