@@ -9,16 +9,16 @@ interactions:
       Connection:
       - keep-alive
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
-      - nuclia.py/4.9.25
+      - nuclia.py/4.11.5
       x-nuclia-nuakey:
       - DUMMY
     method: GET
-    uri: https://europe-1.nuclia.cloud/api/authorizer/info
+    uri: https://europe-1.dp.progress.cloud/api/authorizer/info
   response:
     body:
-      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"03d47998-f672-4a9b-a57b-bde3a9c3ee8c","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
+      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"7fe77405-a6de-43cf-ac27-ac09f80b66c6","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 16 Jun 2026 09:56:37 GMT
+      - Mon, 13 Jul 2026 08:55:36 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
@@ -82,13 +82,13 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
-      - nuclia.py/4.9.25
+      - nuclia.py/4.11.5
       x-client-ident:
       - default
       x-message:
-      - ec3a99d5123f4cb6af870927cd18da83
+      - 9e5ca9b8cbc24ee7ab48484d03020af9
       x-origin:
       - RAO
       x-session:
@@ -98,27 +98,29 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"rephrased_question":"What is the
-        default value of the max_tokens parameter in Nuclia, and how can it be set?","rules":["Start
-        the response with a smiley emoji."],"reason":"The original question ''How
-        do I set it and what is the default value?'' is ambiguous because ''it'' is
-        not clearly defined. By referencing the previous question about ''max_tokens'',
-        the rephrased question clarifies that ''it'' refers to the max_tokens parameter.
-        This makes the question more specific and easier to answer accurately."}}}
+        default value for the max_tokens parameter in Nuclia and how can it be set?","rules":[],"reason":"The
+        previous question established that ''max_tokens'' controls the maximum number
+        of tokens the LLM may generate in a single response. The current question
+        asks how to set it and its default value, but it refers to ''it'' without
+        explicitly mentioning ''max_tokens''. The rephrased question clarifies that
+        ''it'' refers to the ''max_tokens parameter in Nuclia'' for better specificity
+        and to ensure the answer is directly relevant to the previously discussed
+        topic."}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":9,"output_tokens":10,"timings":{"generative":0.8693042640807107},"input_nuclia_tokens":0.009,"output_nuclia_tokens":0.01}}
+        {"chunk":{"type":"meta","input_tokens":9,"output_tokens":11,"timings":{"generative":1.1304126630129758},"input_nuclia_tokens":0.009,"output_nuclia_tokens":0.011}}
 
-        {"chunk":{"normalized_tokens":{"input":0.00894,"output":0.01048,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.00894,"output":0.01128,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -126,17 +128,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 16 Jun 2026 09:56:37 GMT
+      - Mon, 13 Jul 2026 08:55:36 GMT
       nuclia-learning-id:
-      - 050a227785984904af5e852ff2901e73
+      - 4428574895494fcc8e73df22eb8a14b5
       nuclia-learning-model:
       - gemini-2.5-flash-lite
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '875'
+      - '1139'
       x-nuclia-trace-id:
-      - 54b9805f3b078d7f4c9e0f4ad4e276d8
+      - 273ba9840599f45fd8629f421046ee8f
     status:
       code: 200
       message: OK
@@ -155,9 +157,9 @@ interactions:
       you responses with a smiley emoji?"}, {"author": "NUCLIA", "text": "Sure! \ud83d\ude0a
       I can start my responses with a smiley emoji."}], "context": [], "query_context":
       {}, "query_context_order": {}, "truncate": true, "user_prompt": {"prompt": "\n##
-      Question\nWhat is the default value of the max_tokens parameter in Nuclia, and
+      Question\nWhat is the default value for the max_tokens parameter in Nuclia and
       how can it be set?\n\n## Provided Context\n[START OF CONTEXT]\n## max_tokens
-      reference\n\n\n\n\n## Chunk: 4cf92b85e2e04e5c834ea86206902b08\n``` The max_tokens
+      reference\n\n\n\n\n## Chunk: 4090655ed8d04b46bfccf86af459f06b\n``` The max_tokens
       parameter controls how many tokens the LLM may generate in a single response.
       It can be set per-request via the API or configured globally in the agent workflow.
       The default value depends on the model, but is typically 1024 tokens. ```\n\n\n[END
@@ -166,7 +168,7 @@ interactions:
       If the context is incomplete or insufficient, try to provide a partial answer
       and encourage the user to clarify their question\n- Read carefully any extra
       instructions below if provided and use them to answer\n\nNow provide your answer
-      to the question: What is the default value of the max_tokens parameter in Nuclia,
+      to the question: What is the default value for the max_tokens parameter in Nuclia
       and how can it be set?"}, "citations": null, "citation_threshold": null, "generative_model":
       "chatgpt-azure-4o-mini", "max_tokens": 5000, "query_context_images": {}, "prefer_markdown":
       null, "json_schema": null, "format_prompt": false, "rerank_context": false,
@@ -183,13 +185,13 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
-      - nuclia.py/4.9.25
+      - nuclia.py/4.11.5
       x-client-ident:
       - default
       x-message:
-      - ec3a99d5123f4cb6af870927cd18da83
+      - 9e5ca9b8cbc24ee7ab48484d03020af9
       x-origin:
       - RAO
       x-session:
@@ -199,12 +201,12 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: "{\"chunk\":{\"type\":\"text\",\"text\":\"\U0001F60A\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         The\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" default\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        value\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" of\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        value\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" for\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         the\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" max\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         parameter\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" in\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         Nu\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"cl\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ia\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
@@ -222,7 +224,7 @@ interactions:
         API\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" or\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         configured\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" globally\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         in\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" the\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        agent\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" workflow\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":12,\"output_tokens\":6,\"timings\":{\"generative_first_chunk\":0.585227217990905,\"generative\":1.990719944005832},\"input_nuclia_tokens\":0.012,\"output_nuclia_tokens\":0.006}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.01212,\"output\":0.00564,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+        agent\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" workflow\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":12,\"output_tokens\":6,\"timings\":{\"generative_first_chunk\":0.640167025005212,\"generative\":1.5157096800103318},\"input_nuclia_tokens\":0.012,\"output_nuclia_tokens\":0.006}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.01203,\"output\":0.00564,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000
@@ -233,17 +235,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Tue, 16 Jun 2026 09:56:38 GMT
+      - Mon, 13 Jul 2026 08:55:37 GMT
       nuclia-learning-id:
-      - 8f66602fb183485e850f89a087c86876
+      - 863fdaf9d8214ac9964e58fcd8097083
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '595'
+      - '650'
       x-nuclia-trace-id:
-      - e4b29beb1263f6a8ded53ab594bb3bfe
+      - eed1a926873a6afb0f9c138977084073
     status:
       code: 200
       message: OK
