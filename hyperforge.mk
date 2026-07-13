@@ -17,7 +17,7 @@ PYTEST := pytest $(pytest_flags) $(pytest_extra_flags)
 
 
 .PHONY: format
-format:
+format fmt:
 	uv run ruff check --fix .
 	uv run ruff format .
 
