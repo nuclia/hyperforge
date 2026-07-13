@@ -7,14 +7,19 @@ from time import time
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, assert_never, cast
 from uuid import uuid4
 
-
-def _short_uid() -> str:
-    """Return a short unique suffix for chunk IDs."""
-    return uuid4().hex[:4]
-
 import mcp.shared.exceptions as exceptions
 import mcp.types as types
 from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
+from mcp import ClientSession, CreateMessageResult, ErrorData
+from mcp.client.streamable_http import GetSessionIdCallback
+from mcp.shared.context import RequestContext
+from mcp.shared.message import SessionMessage
+from mcp.shared.session import RequestResponder
+from nuclia.lib.nua_responses import Author, ChatModel, Image, Message, Tool, UserPrompt
+from nuclia_models.predict.generative_responses import GenerativeFullResponse
+from pydantic import FileUrl
+
+from hyperforge import logger
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.context.agent import ContextAgent
@@ -28,16 +33,6 @@ from hyperforge.manager import Manager
 from hyperforge.memory import QuestionMemory
 from hyperforge.models import Chunk, Context, Prompt, TrackingInfo
 from hyperforge.utils import iterate_tools_resp
-from mcp import ClientSession, CreateMessageResult, ErrorData
-from mcp.client.streamable_http import GetSessionIdCallback
-from mcp.shared.context import RequestContext
-from mcp.shared.message import SessionMessage
-from mcp.shared.session import RequestResponder
-from nuclia.lib.nua_responses import Author, ChatModel, Image, Message, Tool, UserPrompt
-from nuclia_models.predict.generative_responses import GenerativeFullResponse
-from pydantic import FileUrl
-
-from hyperforge import logger
 from hyperforge_mcp.config import MCPAgentConfig, Transport
 from hyperforge_mcp.http import MCPHTTPDriver
 from hyperforge_mcp.stdio import MCPStdioDriver
@@ -60,6 +55,11 @@ EXIT_LOOP_TOOLS = [
         },
     ),
 ]
+
+
+def _short_uid() -> str:
+    """Return a short unique suffix for chunk IDs."""
+    return uuid4().hex[:4]
 
 
 @agent(
