@@ -22,12 +22,12 @@ from nuclia.sdk import NucliaPredict
 from nucliadb_models.resource import KnowledgeBoxObj
 from nucliadb_sdk import NucliaDB, NucliaDBAsync
 from nucliadb_sdk.tests.fixtures import NucliaFixture
-from pytest_docker_fixtures import images  # type: ignore  # type: ignore
-from pytest_docker_fixtures.containers.pg import pg_image  # type: ignore
-from pytest_docker_fixtures.containers.valkey import valkey_image  # type: ignore
+from pytest_docker_fixtures import images
+from pytest_docker_fixtures.containers.pg import pg_image
+from pytest_docker_fixtures.containers.valkey import valkey_image
 from redis.asyncio import Redis
 from sqlalchemy import create_engine
-from sqlalchemy_utils import (  # type: ignore
+from sqlalchemy_utils import (
     create_database,
     database_exists,
     drop_database,
@@ -49,8 +49,8 @@ _package_path = pathlib.Path(hyperforge.__file__).parent.absolute()
 
 NUA = os.environ.get("NUA_KEY", "DUMMY")
 
-images.settings["nucliadb"]["env"]["NUA_API_KEY"] = NUA
-images.settings["nucliadb"]["env"]["DUMMY_PREDICT"] = "False"
+images.settings["nucliadb"]["env"]["NUA_API_KEY"] = NUA  # type: ignore
+images.settings["nucliadb"]["env"]["DUMMY_PREDICT"] = "False"  # type: ignore
 
 
 NUCLIA_Make_article = "https://storage.googleapis.com/ncl-testbed-gcp-stage-1/test_nucliadb/articles.export"
@@ -162,7 +162,7 @@ async def arag_settings(sdk_async: NucliaDBAsync, valkey_url: str):
     )
 
 
-images.settings["postgresql"].update(
+images.settings["postgresql"].update(  # type: ignore
     {
         "version": "16.1",
         "env": {

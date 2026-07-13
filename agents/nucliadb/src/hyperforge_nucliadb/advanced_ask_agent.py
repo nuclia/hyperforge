@@ -85,7 +85,7 @@ class AdvancedAskAgent(ContextAgent, Agent[AdvancedAskAgentConfig]):
         nucliadb_driver = get_ndb_driver(manager, source)
 
         context = Context(
-            agent_id=self.config.id,
+            agent_id=self.config.id,  # ty: ignore[invalid-argument-type]
             original_question_uuid=memory.original_question_uuid,
             actual_question_uuid=question_uuid,
             question=question,

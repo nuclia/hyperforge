@@ -24,7 +24,7 @@ from hyperforge_mcp.tools import (
 
 
 class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
-    config: MultiMCPAgentConfig  # type: ignore
+    config: MultiMCPAgentConfig
     agents: list[MCPAgent]
     main_agent: MCPAgent
 
@@ -294,7 +294,7 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
             global_output_tokens += output_tokens
             self.main_agent.tools.append(
                 types.Tool(name=agent.config.id, description=response, inputSchema={})
-            )  # type: ignore
+            )
 
             response, input_tokens, output_tokens = await self.summarize_prompts(
                 manager,
@@ -305,7 +305,7 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
             global_output_tokens += output_tokens
             self.main_agent.prompts.append(
                 types.Prompt(name=agent.config.id, description=response)
-            )  # type: ignore
+            )
 
         context = Context(
             agent_id=self.agent_id,

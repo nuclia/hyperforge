@@ -231,4 +231,4 @@ class RedisBroker(Broker):
         pass
 
     async def finalize(self) -> None:
-        await self._client.aclose()  # type: ignore[attr-defined]
+        await self._client.aclose()  # type: ignore[attr-defined]  # ty: ignore[unresolved-attribute]

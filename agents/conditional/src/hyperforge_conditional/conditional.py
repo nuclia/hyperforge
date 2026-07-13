@@ -112,7 +112,7 @@ class ConditionalAgentConfig(AgentConfig):
     def is_conditional_agent(cls, value: list[Dict[str, Any]]) -> list[BaseModel]:
         if value is None:
             return value
-        result = []
+        result: list[BaseModel] = []
         for agent_cfg in value:
             module = agent_cfg.get("module")
             if module is None:
@@ -120,8 +120,8 @@ class ConditionalAgentConfig(AgentConfig):
 
             agent_config_klass = get_agent_config_klass(module)
             agent_config_instance = agent_config_klass.model_validate(agent_cfg)
-            result.append(agent_config_instance)
-        return result  # type: ignore
+            result.append(cast(BaseModel, agent_config_instance))
+        return result
 
 
 class Conditional:
@@ -228,7 +228,7 @@ class Conditional:
 
         if condition and self.then is not None:
             for then_agent in self.then:
-                await then_agent(memory, manager)  # type: ignore
+                await then_agent(memory, manager)
         elif condition is False and self.else_ is not None:
             for else_agent in self.else_:
-                await else_agent(memory, manager)  # type: ignore
+                await else_agent(memory, manager)

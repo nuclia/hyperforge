@@ -41,7 +41,7 @@ from hyperforge_nucliadb.sync.driver import SyncDriver
     description="Provide answer questions from synched resources. This agent is responsible for handling the authentication flow and resource validation for synched resources, and then providing the valid resources to the Basic Ask Agent to answer questions.",
     config_schema=SyncAskAgentConfig,
 )
-class SyncAskAgent(BasicAskAgent):  # type: ignore
+class SyncAskAgent(BasicAskAgent):
     sources: Dict[str, SyncDriver]
     settings: OAuthSettings = OAuthSettings()
 

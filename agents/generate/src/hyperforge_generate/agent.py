@@ -71,12 +71,15 @@ class GenerateAgent(Agent[GenerateAgentConfig]):
             format_prompt=False,
             generative_model=self.config.model,
             max_tokens=2000,
-            tracking=memory.get_tracking_info(),
         )
 
         agent_path = f"/generation/{self.config.id if self.config.id else 'default'}"
         resp, input_tokens, output_tokens = await manager.execute_raw(
-            chat_model, memory=memory, module="generate", agent_path=agent_path
+            chat_model,
+            memory=memory,
+            module="generate",
+            agent_path=agent_path,
+            tracking=memory.get_tracking_info(),
         )
 
         generated_text = resp.answer or ""

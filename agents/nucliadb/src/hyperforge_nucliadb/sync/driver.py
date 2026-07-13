@@ -58,7 +58,7 @@ class ExternalConnectionOutput(BaseModel):
 )
 class SyncDriver(NucliaDBDriver):
     async_driver: AsyncClient
-    config: SyncConnection  # type: ignore
+    config: SyncConnection
     information: Dict[str, ExternalConnectionOutput]
     sync_configs: Dict[str, list[str]]
 

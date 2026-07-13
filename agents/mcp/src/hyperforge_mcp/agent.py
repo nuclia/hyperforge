@@ -65,7 +65,7 @@ EXIT_LOOP_TOOLS = [
     config_schema=MCPAgentConfig,
 )
 class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
-    __published_functions__: Dict[str, FunctionDefinition]  # type: ignore[misc]  # instance-level, not ClassVar
+    __published_functions__: Dict[str, FunctionDefinition]  # type: ignore[misc] # ty: ignore[invalid-attribute-override]  # instance-level, not ClassVar
     driver: Union[MCPStdioDriver, MCPHTTPDriver, None]
     resources: List[types.Resource]
     prompts: List[types.Prompt]

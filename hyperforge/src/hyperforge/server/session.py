@@ -96,9 +96,9 @@ class SessionManager:
             except (asyncio.CancelledError, KeyboardInterrupt):
                 logger.info("Activation listener cancelled, exiting...")
                 break
-            except Exception:
+            except Exception as e:
                 logger.exception("Error processing activation message")
-                errors.capture_exception()
+                errors.capture_exception(e)
 
     async def initialize(self, health_check: bool = True) -> None:
 

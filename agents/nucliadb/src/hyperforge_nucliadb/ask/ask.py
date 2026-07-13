@@ -96,7 +96,7 @@ class AskAgent(ContextAgent, Agent[AskAgentConfig]):
                 config=self.config,
                 question=question,
                 step_title=self.step_title("Choose parameters"),
-            )  # type: ignore
+            )
             result.append(analysis)
         return result
 
@@ -242,7 +242,7 @@ class AskAgent(ContextAgent, Agent[AskAgentConfig]):
             raise Exception("No NDB available")
 
         context = Context(
-            agent_id=self.config.id,
+            agent_id=self.config.id,  # ty: ignore[invalid-argument-type]
             original_question_uuid=memory.original_question_uuid,
             actual_question_uuid=question_uuid,
             question=question,
@@ -284,7 +284,7 @@ class AskAgent(ContextAgent, Agent[AskAgentConfig]):
             # for now I'm only adding it if we have no fallback agent configured
             if self.config.fallback is None:
                 context = Context(
-                    agent_id=self.config.id,
+                    agent_id=self.config.id,  # ty: ignore[invalid-argument-type]
                     original_question_uuid=memory.original_question_uuid,
                     actual_question_uuid=missing_uuid,
                     question=missing,

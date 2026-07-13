@@ -1,7 +1,7 @@
 import asyncio
 import os
 
-import prometheus_client  # type: ignore
+import prometheus_client
 import uvicorn
 from starlette.applications import Starlette
 from starlette.requests import Request

@@ -9,7 +9,7 @@ from hyperforge_nucliadb.driver_config import (
 
 
 class SyncConnection(NucliaDBConnection):
-    connection_ids: list[str]  # type: ignore
+    connection_ids: list[str]
 
     @property
     def kb_url(self) -> str:
