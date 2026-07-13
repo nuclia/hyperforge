@@ -27,11 +27,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 13 Jul 2026 08:55:36 GMT
+      - Mon, 13 Jul 2026 10:09:00 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '4'
+      - '5'
     status:
       code: 200
       message: OK
@@ -88,7 +88,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 9e5ca9b8cbc24ee7ab48484d03020af9
+      - 5ea6ee0633a24fc491e13a4d2eea3c86
       x-origin:
       - RAO
       x-session:
@@ -103,19 +103,17 @@ interactions:
     body:
       string: '{"chunk":{"type":"object","object":{"rephrased_question":"What is the
         default value for the max_tokens parameter in Nuclia and how can it be set?","rules":[],"reason":"The
-        previous question established that ''max_tokens'' controls the maximum number
-        of tokens the LLM may generate in a single response. The current question
-        asks how to set it and its default value, but it refers to ''it'' without
-        explicitly mentioning ''max_tokens''. The rephrased question clarifies that
-        ''it'' refers to the ''max_tokens parameter in Nuclia'' for better specificity
-        and to ensure the answer is directly relevant to the previously discussed
-        topic."}}}
+        previous question established that ''max_tokens'' refers to the maximum number
+        of tokens an LLM can generate. The current question asks about setting it
+        and its default value. By combining these, the rephrased question is more
+        specific and directly asks about the ''max_tokens'' parameter established
+        in the prior turn."}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":9,"output_tokens":11,"timings":{"generative":1.1304126630129758},"input_nuclia_tokens":0.009,"output_nuclia_tokens":0.011}}
+        {"chunk":{"type":"meta","input_tokens":9,"output_tokens":9,"timings":{"generative":0.9051441570045426},"input_nuclia_tokens":0.009,"output_nuclia_tokens":0.009}}
 
-        {"chunk":{"normalized_tokens":{"input":0.00894,"output":0.01128,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.00894,"output":0.00896,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -128,17 +126,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 13 Jul 2026 08:55:36 GMT
+      - Mon, 13 Jul 2026 10:09:00 GMT
       nuclia-learning-id:
-      - 4428574895494fcc8e73df22eb8a14b5
+      - ecbd0a61682d44b49844f944dfe7d627
       nuclia-learning-model:
       - gemini-2.5-flash-lite
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1139'
+      - '914'
       x-nuclia-trace-id:
-      - 273ba9840599f45fd8629f421046ee8f
+      - 0c18f3225731983d827a4441193e66bf
     status:
       code: 200
       message: OK
@@ -159,7 +157,7 @@ interactions:
       {}, "query_context_order": {}, "truncate": true, "user_prompt": {"prompt": "\n##
       Question\nWhat is the default value for the max_tokens parameter in Nuclia and
       how can it be set?\n\n## Provided Context\n[START OF CONTEXT]\n## max_tokens
-      reference\n\n\n\n\n## Chunk: 4090655ed8d04b46bfccf86af459f06b\n``` The max_tokens
+      reference\n\n\n\n\n## Chunk: 064f6f62fe8047e5a57189be7fba7bb5\n``` The max_tokens
       parameter controls how many tokens the LLM may generate in a single response.
       It can be set per-request via the API or configured globally in the agent workflow.
       The default value depends on the model, but is typically 1024 tokens. ```\n\n\n[END
@@ -191,7 +189,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 9e5ca9b8cbc24ee7ab48484d03020af9
+      - 5ea6ee0633a24fc491e13a4d2eea3c86
       x-origin:
       - RAO
       x-session:
@@ -224,7 +222,7 @@ interactions:
         API\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" or\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         configured\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" globally\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         in\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" the\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        agent\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" workflow\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":12,\"output_tokens\":6,\"timings\":{\"generative_first_chunk\":0.640167025005212,\"generative\":1.5157096800103318},\"input_nuclia_tokens\":0.012,\"output_nuclia_tokens\":0.006}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.01203,\"output\":0.00564,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+        agent\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" workflow\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":12,\"output_tokens\":6,\"timings\":{\"generative_first_chunk\":0.6783177129982505,\"generative\":1.2217138860141858},\"input_nuclia_tokens\":0.012,\"output_nuclia_tokens\":0.006}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.01209,\"output\":0.00564,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000
@@ -235,17 +233,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 13 Jul 2026 08:55:37 GMT
+      - Mon, 13 Jul 2026 10:09:01 GMT
       nuclia-learning-id:
-      - 863fdaf9d8214ac9964e58fcd8097083
+      - e02e82e47d7e48bcaeb770627f895334
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '650'
+      - '689'
       x-nuclia-trace-id:
-      - eed1a926873a6afb0f9c138977084073
+      - 66d85debe99f83ade6974c5e34e5f3e2
     status:
       code: 200
       message: OK
