@@ -37,3 +37,6 @@ dev = [
     "pytest",
     "pytest-asyncio",
 ]
+
+[tool.ruff]
+extend = "../../ruff.toml"

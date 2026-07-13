@@ -89,3 +89,6 @@ hyperforge-sandbox = "hyperforge.server:sandbox.run"
 hyperforge-extract-openapi = "hyperforge.api.commands:extract_openapi"
 hyperforge-workflows-cleanup-cronjob = "hyperforge.agents.workflow_cleanup:run"
 hyperforge-standalone = "hyperforge.standalone:run.run"
+
+[tool.ruff]
+extend = "../ruff.toml"

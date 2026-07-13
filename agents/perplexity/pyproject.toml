@@ -45,3 +45,6 @@ asyncio_mode = "auto"
 
 # Exclude specific files from being packaged
 source-exclude = ["tests/**", "*.pyc"]
+
+[tool.ruff]
+extend = "../../ruff.toml"
