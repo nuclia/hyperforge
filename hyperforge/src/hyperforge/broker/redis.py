@@ -1,10 +1,12 @@
 import asyncio
 import json
+import time
 from typing import AsyncIterator, cast
 
 import opentelemetry.propagate
 from pydantic import TypeAdapter
 from redis.asyncio import Redis, ResponseError
+from redis.exceptions import ConnectionError as RedisConnectionError
 
 from hyperforge import logger
 from hyperforge.broker import AgentTimeoutError, Broker
@@ -159,14 +161,38 @@ class RedisBroker(Broker):
         )
 
     async def receive_reply(self, key: str, timeout_ms: int) -> str | None:
-        response = await self._client.xread(
-            {key: "$"},
-            block=timeout_ms,
-            count=1,
-        )
-        if not response:
-            return None
-        return response[0][1][0][1]["msg"]
+        deadline = time.monotonic() + (timeout_ms / 1000)
+        reconnect_attempts = 0
+
+        while True:
+            remaining_s = deadline - time.monotonic()
+            if remaining_s <= 0:
+                return None
+
+            # Keep each blocking read short so transient socket closures/failovers
+            # can be recovered within the same overall timeout budget.
+            block_ms = min(2000, max(1, int(remaining_s * 1000)))
+
+            try:
+                response = await self._client.xread(
+                    {key: "$"},
+                    block=block_ms,
+                    count=1,
+                )
+            except RedisConnectionError:
+                reconnect_attempts += 1
+                backoff_s = min(1.0, 0.1 * reconnect_attempts)
+                logger.warning(
+                    "Redis connection closed while receiving reply key=%s; retrying (attempt=%d)",
+                    key,
+                    reconnect_attempts,
+                )
+                await asyncio.sleep(backoff_s)
+                continue
+
+            if not response:
+                continue
+            return response[0][1][0][1]["msg"]
 
     async def initialize(self) -> None:
         pass
