@@ -24,9 +24,9 @@ format:
 
 .PHONY: lint
 lint:
-	uv run ruff check .
-	uv run ruff format --check .
-	uv run ty check .
+	uv run ruff check . && \
+	uv run ruff format --check . && \
+	uv run ty check src && \
 	uv run mypy --config-file=$(REPO_ROOT)/mypy.ini src
 
 .PHONY: test
