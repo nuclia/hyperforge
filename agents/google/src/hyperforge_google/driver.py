@@ -30,7 +30,7 @@ class GoogleDriver(Driver):
                     scopes=["https://www.googleapis.com/auth/cloud-platform"],
                 )
         else:
-            project = driver.config.project_location
+            project = driver.config.location
             location = driver.config.location
         client = Client(
             vertexai=driver.config.vertexai,
