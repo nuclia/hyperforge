@@ -1,4 +1,7 @@
+import json
+
 from google.genai import Client
+from google.oauth2 import service_account
 from hyperforge.configure import driver
 from hyperforge.driver import Driver
 from typing_extensions import Self
@@ -17,11 +20,15 @@ class GoogleDriver(Driver):
 
     @classmethod
     async def init(cls, driver: GoogleDriverConfig) -> Self:
+
         creds = None
         if driver.config.vertexai:
-            from google.auth import load_credentials_from_file
-
-            creds, _ = load_credentials_from_file(driver.config.credentials)
+            if driver.config.credentials:
+                info = json.loads(driver.config.credentials)
+                creds = service_account.Credentials.from_service_account_info(
+                    info,
+                    scopes=["https://www.googleapis.com/auth/cloud-platform"],
+                )
         client = Client(
             vertexai=driver.config.vertexai,
             credentials=creds,

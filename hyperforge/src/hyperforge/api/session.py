@@ -1,5 +1,6 @@
 """Session management functions for ARAG agents with NucliaDB memory."""
 
+from uuid import UUID
 from typing import Optional
 from uuid import UUID
 
@@ -18,6 +19,14 @@ from nucliadb_sdk.v2.exceptions import NotFoundError
 from hyperforge import logger
 from hyperforge.api.models import INFO_FIELD_ID
 from hyperforge.memory.memory import QUESTION_ANSWERS_FIELD
+
+
+def _is_uuid(value: str) -> bool:
+    try:
+        UUID(value)
+        return True
+    except (ValueError, TypeError):
+        return False
 
 
 async def create_session_resource(
@@ -158,7 +167,22 @@ async def session_exists(
     Returns:
         True if session exists, False otherwise
     """
-    return await resolve_session_id(ndb, agent_id, session_id) is not None
+    try:
+        if _is_uuid(session_id):
+            await ndb.get_resource_by_id(
+                rid=session_id,
+                kbid=agent_id,
+                query_params={"show": ["basic"]},
+            )
+        else:
+            await ndb.get_resource_by_slug(
+                slug=session_id,
+                kbid=agent_id,
+                query_params={"show": ["basic"]},
+            )
+        return True
+    except NotFoundError:
+        return False
 
 
 async def update_session_resource(
