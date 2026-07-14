@@ -1,7 +1,7 @@
 import json
 
-from google.genai import Client
 from google.auth import load_credentials_from_dict  # type: ignore
+from google.genai import Client
 from hyperforge.configure import driver
 from hyperforge.driver import Driver
 from typing_extensions import Self
@@ -21,7 +21,8 @@ class GoogleDriver(Driver):
     @classmethod
     async def init(cls, driver: GoogleDriverConfig) -> Self:
 
-        creds = None
+        credentials = None
+        location = None
         if driver.config.vertexai:
             if driver.config.credentials:
                 info = json.loads(driver.config.credentials)
