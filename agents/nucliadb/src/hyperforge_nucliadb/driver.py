@@ -1,9 +1,11 @@
 import asyncio
+import os
 from asyncio import gather
 from functools import reduce
 from typing import Dict, List, Optional, Union
 
 import httpx
+from httpx import AsyncHTTPTransport
 from hyperforge.configure import driver
 from hyperforge.driver import Driver
 from hyperforge.models import Facets
@@ -59,13 +61,62 @@ DEFAULT_FIELD_FACETS = [
 ]
 DEFAULT_CHUNK_LABELS = ["/k"]
 
+# Paths that are served by the search component; all others go to reader.
+_SEARCH_PATH_SEGMENTS = (
+    "/search",
+    "/find",
+    "/ask",
+    "/catalog",
+    "/graph",
+    "/summarize",
+    "/retrieve",
+    "/augment",
+)
+
+
+class InternalNucliaDBTransport(AsyncHTTPTransport):
+    """Routes requests to the NucliaDB reader or search component based on path."""
+
+    def __init__(self, reader_url: str, search_url: str):
+        super().__init__()
+        self._reader_url = reader_url.rstrip("/")
+        self._search_url = search_url.rstrip("/")
+
+    async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
+        path = request.url.path
+        if any(seg in path for seg in _SEARCH_PATH_SEGMENTS):
+            base = self._search_url
+        else:
+            base = self._reader_url
+
+        target = httpx.URL(base)
+        new_url = request.url.copy_with(
+            scheme=target.scheme,
+            host=target.host,
+            port=target.port,
+        )
+        request = httpx.Request(
+            method=request.method,
+            url=new_url,
+            headers=request.headers,
+            content=request.content,
+            extensions=request.extensions,
+        )
+        return await super().handle_async_request(request)
+
 
 async def connect(conn: NucliaDBConnection):
     headers: Dict[str, str] = {}
-    if "http://localhost" in conn.url:
-        headers = {
-            "X-NUCLIADB-ROLES": "READER",
-        }
+    if conn.internal:
+        reader_url = os.environ.get("NUCLIADB_READER_INTERNAL_URL")
+        search_url = os.environ.get("NUCLIADB_SEARCH_INTERNAL_URL")
+        if reader_url and search_url:
+            headers = {"X-NUCLIADB-ROLES": "READER"}
+            return NucliaDBAsync(
+                url=reader_url,
+                headers=headers,
+                _httpx_transport=InternalNucliaDBTransport(reader_url, search_url),
+            )
     return NucliaDBAsync(
         api_key=conn.key,
         url=conn.url,

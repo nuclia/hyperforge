@@ -17,6 +17,7 @@ class NucliaDBConnection(EncryptedPayload):
     key: Optional[str] = None
     url: str
     manager: str
+    internal: bool = False
     filters: List[str] = Field(
         default_factory=list,
         deprecated=True,
