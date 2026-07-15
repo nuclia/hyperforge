@@ -677,9 +677,9 @@ class AgentManager:
         # Queries for each agent type
         queries = [
             sa.select(
-                sa.literal_column(f"'{table.name}'").label("kind"),  # type:ignore
+                sa.literal_column(f"'{table.name}'").label("kind"),
                 table.c.id,
-                sa.null().label("identifier"),  # type:ignore
+                sa.null().label("identifier"),
                 sa.null().label("name"),
                 sa.null().label("provider"),
                 column.label("config"),
@@ -700,9 +700,9 @@ class AgentManager:
         # Query for drivers
         queries.append(
             sa.select(
-                sa.literal_column("'driver'").label("kind"),  # type:ignore
+                sa.literal_column("'driver'").label("kind"),
                 retrieval_agents_drivers.c.id,
-                retrieval_agents_drivers.c.identifier,  # type:ignore
+                retrieval_agents_drivers.c.identifier,
                 retrieval_agents_drivers.c.driver.label("name"),
                 retrieval_agents_drivers.c.provider,
                 retrieval_agents_drivers.c.config,
@@ -713,9 +713,9 @@ class AgentManager:
         # Query for rules
         queries.append(
             sa.select(
-                sa.literal_column("'rules'").label("kind"),  # type:ignore
+                sa.literal_column("'rules'").label("kind"),
                 sa.null().label("id"),
-                sa.null().label("identifier"),  # type:ignore
+                sa.null().label("identifier"),
                 sa.null().label("name"),
                 sa.null().label("provider"),
                 retrieval_agent_config.c.rules.label("config"),
@@ -725,9 +725,9 @@ class AgentManager:
         )
         queries.append(
             sa.select(
-                sa.literal_column("'memory'").label("kind"),  # type:ignore
+                sa.literal_column("'memory'").label("kind"),
                 sa.null().label("id"),
-                sa.null().label("identifier"),  # type:ignore
+                sa.null().label("identifier"),
                 sa.null().label("name"),
                 sa.null().label("provider"),
                 retrieval_agent_config.c.memory.label("config"),
@@ -737,9 +737,9 @@ class AgentManager:
         )
         workflow_query = (
             sa.select(
-                retrieval_agent_workflow.c.name,  # type: ignore
+                retrieval_agent_workflow.c.name,
                 retrieval_agent_workflow.c.description,
-                retrieval_agent_workflow.c.parameters,  # type: ignore
+                retrieval_agent_workflow.c.parameters,
                 retrieval_agent_workflow.c.rules,
             )
             .where(retrieval_agent_workflow.c.account == account)

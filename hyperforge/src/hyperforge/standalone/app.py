@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Tuple
 
-import prometheus_client  # type: ignore
+import prometheus_client
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -19,7 +19,7 @@ from mcp.server.lowlevel.server import Server as MCPServer
 from mcp.server.streamable_http import StreamableHTTPServerTransport
 from nucliadb_telemetry.logs import setup_logging
 from nucliadb_telemetry.settings import LogLevel, LogSettings
-from prometheus_client import CONTENT_TYPE_LATEST  # type: ignore
+from prometheus_client import CONTENT_TYPE_LATEST
 from redis.asyncio import Redis
 from starlette.authentication import (
     AuthCredentials,

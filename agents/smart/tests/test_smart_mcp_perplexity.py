@@ -7,6 +7,7 @@ from hyperforge.manager import Manager
 from hyperforge.memory.memory import EphemeralSessionMemory, MemoryConfig
 from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.models import Rule, Rules
+
 from hyperforge_smart.agent import SmartAgent
 from hyperforge_smart.config import SmartAgentConfig
 

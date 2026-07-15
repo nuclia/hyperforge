@@ -6,11 +6,11 @@ from typing import Any, Dict, List, Optional
 from hyperforge.definition import FunctionDefinition
 from hyperforge.memory import Chunk
 from hyperforge.memory.memory import Context
-from RestrictedPython import compile_restricted  # type: ignore
-from RestrictedPython.Guards import (  # type: ignore
+from RestrictedPython import compile_restricted
+from RestrictedPython.Guards import (
     guarded_iter_unpack_sequence,
     guarded_unpack_sequence,
-    safe_builtins,  # type: ignore
+    safe_builtins,
 )
 
 from hyperforge_restricted.model import RestrictedPythonTask

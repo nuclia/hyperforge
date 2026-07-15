@@ -124,7 +124,8 @@ async def call_tool(
             )
             websocket.queue.put_nowait(
                 UserToAgentInteraction(
-                    request_id=msg.feedback.request_id, response=result.content
+                    request_id=msg.feedback.request_id,
+                    response=result.content,  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
                 )
             )
         elif msg.operation == AnswerOperation.ANSWER:

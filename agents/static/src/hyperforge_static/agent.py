@@ -32,7 +32,7 @@ class StaticAgent(ContextAgent, Agent[StaticAgentConfig]):
         self,
         memory: QuestionMemory,
         manager: Manager,
-        question: Optional[str] = "",
+        question: str = "",
         question_uuid: Optional[str] = None,
     ) -> Context:
         if question_uuid is None:

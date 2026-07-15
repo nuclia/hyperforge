@@ -123,9 +123,9 @@ def get_caller_module(
     """
     Pulled out of pyramid
     """
-    module_globals = sys._getframe(level).f_globals  # type: ignore
+    module_globals = sys._getframe(level).f_globals
     module_name = module_globals.get("__name__") or "__main__"
-    module = sys.modules[module_name]  # type: ignore
+    module = sys.modules[module_name]
     return module
 
 

@@ -1,6 +1,7 @@
 from copy import deepcopy
 from time import time
 
+from hyperforge import PROMPT_ENVIRONMENT, logger
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.manager import Manager
@@ -9,7 +10,6 @@ from hyperforge.trace import trace_agent
 from hyperforge.utils import check_dns
 from hyperforge.utils.http import safe_http_client
 
-from hyperforge import PROMPT_ENVIRONMENT, logger
 from hyperforge_external.config import ExternalCallAgentConfig
 
 EXTERNAL_CALL_PROMPT = """

@@ -47,6 +47,10 @@ jobs:
       - name: Install package dependencies with uv
         run: uv sync --group dev
 
+      - name: Lint
+        working-directory: hyperforge
+        run: make lint
+
       - name: Run tests
         working-directory: hyperforge
         run: make test

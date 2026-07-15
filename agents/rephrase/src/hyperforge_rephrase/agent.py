@@ -1,6 +1,7 @@
 from time import time
 from typing import Any, Dict, Optional, cast
 
+from hyperforge import PROMPT_ENVIRONMENT
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.manager import Manager
@@ -9,7 +10,6 @@ from hyperforge.models import TrackingInfo
 from hyperforge.trace import trace_agent
 from hyperforge_nucliadb.driver import NucliaDBDriver
 
-from hyperforge import PROMPT_ENVIRONMENT
 from hyperforge_rephrase.config import RephraseAgentConfig
 
 REPHRASE_PROMPT = """

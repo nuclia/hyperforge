@@ -8,12 +8,6 @@ from hyperforge.interaction import AragAnswer
 from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.models import Context
 from hyperforge.utils.http import PrivateUrlError
-from hyperforge_nucliadb.advanced_ask_agent import build_ask_request
-from hyperforge_nucliadb.advanced_ask_config import AdvancedAskAgentConfig
-from hyperforge_nucliadb.ask.hydrate import hydrate_images
-from hyperforge_nucliadb.driver_config import (
-    NucliaDBConnection,
-)
 from nucliadb_models import filters as ndb_filters
 from nucliadb_models.hydration import (
     Hydrated,
@@ -24,6 +18,13 @@ from nucliadb_models.hydration import (
     HydratedParagraphTable,
 )
 from nucliadb_models.search import AskRequest, Image
+
+from hyperforge_nucliadb.advanced_ask_agent import build_ask_request
+from hyperforge_nucliadb.advanced_ask_config import AdvancedAskAgentConfig
+from hyperforge_nucliadb.ask.hydrate import hydrate_images
+from hyperforge_nucliadb.driver_config import (
+    NucliaDBConnection,
+)
 
 NUA_KEY = os.environ.get(
     "NUA_KEY",
@@ -249,7 +250,7 @@ async def test_nucliadb_agent():
 
 
 @pytest.mark.asyncio
-@pytest.mark.vcr(ignore_localhost=True)
+@pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["europe-1.dp.progress.cloud"])
 async def test_nucliadb_agent_simple():
     answers = []
 
@@ -275,7 +276,7 @@ async def test_nucliadb_agent_simple():
 
 
 @pytest.mark.asyncio
-@pytest.mark.vcr(ignore_localhost=True)
+@pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["europe-1.dp.progress.cloud"])
 async def test_nucliadb_agent_simple_disable_ai_parameter_search():
     question_memory = await arag_main(
         agent_id="default",
@@ -293,7 +294,7 @@ async def test_nucliadb_agent_simple_disable_ai_parameter_search():
 
 
 @pytest.mark.asyncio
-@pytest.mark.vcr(ignore_localhost=True)
+@pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["europe-1.dp.progress.cloud"])
 async def test_nucliadb_agent_basic_ask():
     config = deepcopy(CONFIG_SIMPLE)
 

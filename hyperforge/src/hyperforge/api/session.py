@@ -1,6 +1,5 @@
 """Session management functions for ARAG agents with NucliaDB memory."""
 
-from uuid import UUID
 from typing import Optional
 from uuid import UUID
 

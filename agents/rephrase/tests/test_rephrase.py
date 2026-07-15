@@ -18,9 +18,7 @@ DF8B4C24_2807_4888_AD6C_AE97357A638B = os.environ.get(
     "KB_DF8B4C24_2807_4888_AD6C_AE97357A638B"
 ) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 pytestmark = [
-    pytest.mark.vcr(
-        ignore_localhost=True, ignore_hosts=["test", "europe-1.nuclia.cloud"]
-    ),
+    pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["test"]),
     pytest.mark.asyncio,
 ]
 
