@@ -250,7 +250,7 @@ async def test_nucliadb_agent():
 
 
 @pytest.mark.asyncio
-@pytest.mark.vcr(ignore_localhost=True)
+@pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["europe-1.dp.progress.cloud"])
 async def test_nucliadb_agent_simple():
     answers = []
 
@@ -276,7 +276,7 @@ async def test_nucliadb_agent_simple():
 
 
 @pytest.mark.asyncio
-@pytest.mark.vcr(ignore_localhost=True)
+@pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["europe-1.dp.progress.cloud"])
 async def test_nucliadb_agent_simple_disable_ai_parameter_search():
     question_memory = await arag_main(
         agent_id="default",
@@ -294,7 +294,7 @@ async def test_nucliadb_agent_simple_disable_ai_parameter_search():
 
 
 @pytest.mark.asyncio
-@pytest.mark.vcr(ignore_localhost=True)
+@pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["europe-1.dp.progress.cloud"])
 async def test_nucliadb_agent_basic_ask():
     config = deepcopy(CONFIG_SIMPLE)
 
