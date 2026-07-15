@@ -8,12 +8,13 @@ import pytest
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.hashes import SHA256
 from httpx import ASGITransport, AsyncClient
+from starlette.datastructures import Headers
+
 from hyperforge.api.v1.mcp_interaction import _prepare_interaction_headers
 from hyperforge.standalone import oauth as standalone_oauth
 from hyperforge.standalone.app import StandaloneApplication
 from hyperforge.standalone.config import StandaloneConfig
 from hyperforge.standalone.settings import StandaloneSettings
-from starlette.datastructures import Headers
 
 pytestmark = pytest.mark.asyncio
 
@@ -102,6 +103,7 @@ async def client(agents_config, standalone_settings):
 @pytest.fixture(scope="module")
 def signing_key():
     return rsa.generate_private_key(public_exponent=65537, key_size=2048)
+
 
 @pytest.fixture
 def jwks(signing_key):
@@ -231,9 +233,7 @@ async def test_protected_mcp_default_metadata_url_uses_https(client: AsyncClient
     )
 
 
-async def test_protected_mcp_accepts_signed_bearer(
-    client: AsyncClient, signing_key
-):
+async def test_protected_mcp_accepts_signed_bearer(client: AsyncClient, signing_key):
     response = await client.delete(
         f"/api/v1/agent/{AGENT_ID}/session/s1/mcp",
         headers={"Authorization": f"Bearer {make_token(signing_key)}"},
@@ -247,7 +247,9 @@ async def test_protected_mcp_rejects_token_with_wrong_audience(
 ):
     response = await client.delete(
         f"/api/v1/agent/{AGENT_ID}/session/s1/mcp",
-        headers={"Authorization": f"Bearer {make_token(signing_key, aud='api://other')}"},
+        headers={
+            "Authorization": f"Bearer {make_token(signing_key, aud='api://other')}"
+        },
     )
 
     assert response.status_code == 401
@@ -264,9 +266,7 @@ async def test_protected_mcp_rejects_tampered_token(client: AsyncClient, signing
         "scp": REQUIRED_SCOPE,
         "sub": "tampered",
     }
-    tampered_token = (
-        f"{header_raw}.{_b64encode_json(tampered_claims)}.{signature_raw}"
-    )
+    tampered_token = f"{header_raw}.{_b64encode_json(tampered_claims)}.{signature_raw}"
 
     response = await client.delete(
         f"/api/v1/agent/{AGENT_ID}/session/s1/mcp",
@@ -285,7 +285,9 @@ async def test_protected_mcp_rejects_token_without_required_scope(
 ):
     response = await client.delete(
         f"/api/v1/agent/{AGENT_ID}/session/s1/mcp",
-        headers={"Authorization": f"Bearer {make_token(signing_key, scp='other:read')}"},
+        headers={
+            "Authorization": f"Bearer {make_token(signing_key, scp='other:read')}"
+        },
     )
 
     assert response.status_code == 401

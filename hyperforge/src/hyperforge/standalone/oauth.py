@@ -12,9 +12,9 @@ from starlette.authentication import AuthenticationError
 from hyperforge.standalone.config import StandAloneAgentConfig, StandaloneMCPAuthConfig
 
 _HASHES = {
-    "RS256": SHA256,
-    "RS384": SHA384,
-    "RS512": SHA512,
+    "RS256": SHA256(),
+    "RS384": SHA384(),
+    "RS512": SHA512(),
 }
 
 
@@ -110,7 +110,7 @@ async def _validate_jwt(
             signature,
             signed_payload,
             padding.PKCS1v15(),
-            _HASHES[alg](),
+            _HASHES[alg],
         )
     except Exception as exc:
         raise AuthenticationError("Invalid bearer token signature") from exc
