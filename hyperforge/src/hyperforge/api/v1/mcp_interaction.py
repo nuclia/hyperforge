@@ -188,9 +188,7 @@ def _default_oauth_metadata(app: "HTTPApplication") -> tuple[list[str], list[str
     return [], []
 
 
-def _get_mcp_auth_config(
-    app: "HTTPApplication", agent_id: str
-):
+def _get_mcp_auth_config(app: "HTTPApplication", agent_id: str):
     return get_enabled_mcp_auth(app._agents_cfg, agent_id)
 
 
