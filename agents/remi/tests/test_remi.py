@@ -16,7 +16,7 @@ KB_DF8B4C24_2807_4888_AD6C_AE97357A638B = os.environ.get(
 )
 
 pytestmark = [
-    pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["europe-1.nuclia.cloud", "europe-1.dp.progress.cloud"]),
+    pytest.mark.vcr(ignore_localhost=True),
     pytest.mark.asyncio,
 ]
 
