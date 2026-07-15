@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 import nucliadb_telemetry.context
 import nucliadb_telemetry.metrics
 import prometheus_client
-from aiohttp.web import Server
+from hyperforge.server.web import WebServer
 from lru import LRU
 from nucliadb_telemetry import errors
 from nucliadb_telemetry.utils import get_telemetry
@@ -62,7 +62,7 @@ def tracer():
 
 
 class SessionManager:
-    server: Optional[Server] = None
+    server: Optional[WebServer] = None
     tasks: List[Task]
     hooks: Optional[Dict[str, List[Callable]]] = None
 
@@ -111,7 +111,7 @@ class SessionManager:
                 logger.error(f"Module {load_module} could not be loaded")
 
         self.activation_task = asyncio.create_task(self.activation_listener())
-        if health_check:
+        if health_check and self.settings.health_check_enabled:
             self.server = await start_health_check()
 
     async def finalize(self):

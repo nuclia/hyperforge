@@ -1273,6 +1273,7 @@ dependencies = [
     { name = "starlette" },
     { name = "tenacity" },
     { name = "types-redis" },
+    { name = "uvicorn" },
     { name = "websockets" },
 ]
 
@@ -1321,6 +1322,7 @@ requires-dist = [
     { name = "starlette", specifier = ">1.0.0" },
     { name = "tenacity" },
     { name = "types-redis", specifier = ">=4.6.0.20241004" },
+    { name = "uvicorn", specifier = ">=0.30.0" },
     { name = "websockets" },
 ]
 
