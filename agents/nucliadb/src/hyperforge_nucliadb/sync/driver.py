@@ -1,5 +1,5 @@
-import datetime
 import asyncio
+import datetime
 import random
 import time
 from typing import Any, Dict, List, cast
@@ -34,7 +34,6 @@ from hyperforge_nucliadb.sync.config_driver import (
     SyncConnection,
     SyncDriverConfig,
 )
-
 
 SYNC_VALIDATE_ATTEMPTS = 2
 SYNC_VALIDATE_RETRY_BASE_SECONDS = 0.5
