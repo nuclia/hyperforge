@@ -103,6 +103,54 @@ async def get_session_resource(
     )
 
 
+async def get_session_resource_by_slug(
+    ndb: NucliaDBAsync,
+    agent_id: str,
+    slug: str,
+    show: Optional[list[str]] = None,
+) -> Resource:
+    """Get a session resource by slug."""
+    query_params = {}
+    if show:
+        query_params["show"] = show
+
+    return await ndb.get_resource_by_slug(
+        slug=slug,
+        kbid=agent_id,
+        query_params=query_params,
+    )
+
+
+async def resolve_session_id(
+    ndb: NucliaDBAsync,
+    agent_id: str,
+    session: str,
+) -> str | None:
+    """Resolve a client-provided session identifier to the NucliaDB resource id."""
+    try:
+        UUID(session)
+    except ValueError:
+        try:
+            resource = await get_session_resource_by_slug(
+                ndb, agent_id, session, show=["basic"]
+            )
+        except NotFoundError:
+            return None
+        return resource.id
+
+    try:
+        await get_session_resource(ndb, agent_id, session, show=["basic"])
+        return session
+    except NotFoundError:
+        try:
+            resource = await get_session_resource_by_slug(
+                ndb, agent_id, session, show=["basic"]
+            )
+        except NotFoundError:
+            return None
+        return resource.id
+
+
 async def session_exists(
     ndb: NucliaDBAsync,
     agent_id: str,

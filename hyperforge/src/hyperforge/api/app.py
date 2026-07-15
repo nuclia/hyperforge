@@ -54,6 +54,7 @@ class HTTPApplication(FastAPI):
     arag_writer: NucliaDBAsync
     arag_reader: NucliaDBAsync
     broker: Broker
+    _agents_cfg: dict[str, Any]
     extra_middlewares: Optional[list[Any]] = None
 
     def __init__(
@@ -72,6 +73,7 @@ class HTTPApplication(FastAPI):
         super().__init__(*args, lifespan=lifespan, **kwargs)
         self.settings = settings
         self.data_manager_settings = data_manager_settings
+        self._agents_cfg = {}
         self.include_router(internal.router)
         self.include_router(v1.router)
         self.include_router(router)
