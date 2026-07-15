@@ -2,6 +2,7 @@ import asyncio
 from time import time
 from typing import Any, ClassVar, Dict, List, Optional, cast
 
+from hyperforge import logger
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.context.agent import ContextAgent, trace_agent
@@ -9,7 +10,6 @@ from hyperforge.definition import FunctionDefinition
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import Context, QuestionMemory, Source
 
-from hyperforge import logger
 from hyperforge_nucliadb.ask.analysis import question_analysis
 from hyperforge_nucliadb.ask.config import AskAgentConfig
 from hyperforge_nucliadb.ask.hydrate import hydrate
@@ -96,7 +96,7 @@ class AskAgent(ContextAgent, Agent[AskAgentConfig]):
                 config=self.config,
                 question=question,
                 step_title=self.step_title("Choose parameters"),
-            )  # type: ignore
+            )
             result.append(analysis)
         return result
 
@@ -242,7 +242,7 @@ class AskAgent(ContextAgent, Agent[AskAgentConfig]):
             raise Exception("No NDB available")
 
         context = Context(
-            agent_id=self.config.id,
+            agent_id=self.config.id,  # ty: ignore[invalid-argument-type]
             original_question_uuid=memory.original_question_uuid,
             actual_question_uuid=question_uuid,
             question=question,
@@ -284,7 +284,7 @@ class AskAgent(ContextAgent, Agent[AskAgentConfig]):
             # for now I'm only adding it if we have no fallback agent configured
             if self.config.fallback is None:
                 context = Context(
-                    agent_id=self.config.id,
+                    agent_id=self.config.id,  # ty: ignore[invalid-argument-type]
                     original_question_uuid=memory.original_question_uuid,
                     actual_question_uuid=missing_uuid,
                     question=missing,

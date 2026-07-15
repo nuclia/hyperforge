@@ -323,10 +323,10 @@ def requires_nucliadb_memory(func: Callable) -> Callable:
     @wraps(func)
     async def wrapper(*args, **kwargs):
         # Extract required parameters from kwargs
-        request: Request = kwargs.get("request")
-        agent_id: str = kwargs.get("agent_id")
-        workflow_id: str = kwargs.get("workflow_id", "default")
-        x_stf_account: str = kwargs.get("x_stf_account")
+        request: Request = kwargs.get("request")  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
+        agent_id: str = kwargs.get("agent_id")  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
+        workflow_id: str = kwargs.get("workflow_id", "default")  # type: ignore[assignment]
+        x_stf_account: str = kwargs.get("x_stf_account")  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
 
         if not request or not agent_id or not x_stf_account:
             raise HTTPException(

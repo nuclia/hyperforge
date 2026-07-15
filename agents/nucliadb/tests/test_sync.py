@@ -22,7 +22,10 @@ KB_E103CAF3_F8CB_4161_A57C_AAD1192D0666 = os.environ.get(
     "KB_E103CAF3_F8CB_4161_A57C_AAD1192D0666"
 ) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 
-pytestmark = [pytest.mark.vcr(ignore_localhost=True), pytest.mark.asyncio]
+pytestmark = [
+    pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["europe-1.dp.progress.cloud"]),
+    pytest.mark.asyncio,
+]
 
 CONFIG = {
     "drivers": [

@@ -4,6 +4,7 @@ import re
 import pytest
 from hyperforge.engine import main as arag_main
 from hyperforge.minimal_fixtures import cassette_nua_key
+
 from hyperforge_remi.config import ContextGranularity
 
 NUA_KEY = os.environ.get(
@@ -15,7 +16,7 @@ KB_DF8B4C24_2807_4888_AD6C_AE97357A638B = os.environ.get(
 )
 
 pytestmark = [
-    pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["europe-1.nuclia.cloud"]),
+    pytest.mark.vcr(ignore_localhost=True),
     pytest.mark.asyncio,
 ]
 

@@ -2,6 +2,10 @@
 #
 # include path/to/hyperforge.mk
 #
+# Set REPO_ROOT before including if the default (../..) doesn't match your depth.
+# REPO_ROOT is used to locate mypy.ini.
+
+REPO_ROOT ?= ../..
 
 pytest_flags := -s -rfE -v --tb=native 
 pytest_extra_flags :=
@@ -13,17 +17,17 @@ PYTEST := pytest $(pytest_flags) $(pytest_extra_flags)
 
 
 .PHONY: format
-format:
-	uv run ruff check --fix --config=../../ruff.toml .
-	uv run ruff format --config=../../ruff.toml .
+format fmt:
+	uv run ruff check --fix .
+	uv run ruff format .
 
 
 .PHONY: lint
 lint:
-	uv run ruff check --config=../../ruff.toml .
-	uv run ruff format --check --config=../../ruff.toml .
-	uv run ty check .
-	uv run mypy --config-file=../../mypy.ini src
+	uv run ruff check . && \
+	uv run ruff format --check . && \
+	uv run ty check src && \
+	uv run mypy --config-file=$(REPO_ROOT)/mypy.ini src
 
 .PHONY: test
 test:

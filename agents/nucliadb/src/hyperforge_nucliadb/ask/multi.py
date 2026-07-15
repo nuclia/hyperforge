@@ -2,11 +2,11 @@ import asyncio
 from time import time
 from typing import List, cast
 
+from hyperforge import PROMPT_ENVIRONMENT
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import QuestionMemory
 from hyperforge.models import Source
 
-from hyperforge import PROMPT_ENVIRONMENT
 from hyperforge_nucliadb.driver import NucliaDBDriver
 from hyperforge_nucliadb.sync.driver import SyncDriver
 

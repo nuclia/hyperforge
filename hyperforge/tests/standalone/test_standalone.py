@@ -9,6 +9,11 @@ import pytest
 import uvicorn
 from httpx import AsyncClient
 from httpx._transports.asgi import ASGITransport
+from mcp import ClientSession
+from mcp.client.streamable_http import streamable_http_client
+from mcp.types import TextContent
+from websockets.asyncio.client import connect
+
 from hyperforge.api.models import (
     InteractionOperation,
     InteractionRequest,
@@ -27,10 +32,6 @@ from hyperforge.standalone.app import StandaloneApplication
 from hyperforge.standalone.config import StandaloneConfig
 from hyperforge.standalone.settings import StandaloneSettings
 from hyperforge.trace import trace_agent
-from mcp import ClientSession
-from mcp.client.streamable_http import streamable_http_client
-from mcp.types import TextContent
-from websockets.asyncio.client import connect
 
 pytestmark = pytest.mark.asyncio
 

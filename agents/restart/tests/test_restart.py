@@ -1,11 +1,11 @@
 from unittest.mock import AsyncMock, MagicMock
-from uuid import uuid4
 
 import pytest
 from hyperforge.exceptions import MaxRetries
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import EphemeralSessionMemory
 from hyperforge.models import MemoryConfig, Rules
+
 from hyperforge_restart.agent import RestartAgent
 from hyperforge_restart.config import RestartAgentConfig
 

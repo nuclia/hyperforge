@@ -3,10 +3,11 @@ Unit tests for client-managed chat history in QuestionMemory.
 """
 
 import pytest
+from nuclia.lib.nua_responses import Author
+
 from hyperforge.memory.memory import EphemeralSessionMemory
 from hyperforge.models import HistoryQuestionAnswer, MemoryConfig, Rules
 from hyperforge.server.cache import NoCache
-from nuclia.lib.nua_responses import Author
 
 
 def _make_ephemeral_session() -> EphemeralSessionMemory:

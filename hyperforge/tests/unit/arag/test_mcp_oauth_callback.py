@@ -46,6 +46,7 @@ def _inject_key(monkeypatch):
 def _make_app():
     """Return a minimal FastAPI app that mounts only the oauth router."""
     from fastapi import FastAPI
+
     from hyperforge.api.settings import Settings
     from hyperforge.api.v1.router import router
 
