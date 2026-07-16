@@ -1,6 +1,7 @@
 from time import time
 from uuid import uuid4
 
+from hyperforge import PROMPT_ENVIRONMENT
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.manager import Manager, build_reasoning
@@ -8,7 +9,6 @@ from hyperforge.memory import QuestionMemory
 from hyperforge.trace import trace_agent
 from nuclia.lib.nua_responses import ChatModel, UserPrompt
 
-from hyperforge import PROMPT_ENVIRONMENT
 from hyperforge_generate.config import GenerateAgentConfig
 
 GENERATE_PROMPT = """
@@ -72,12 +72,15 @@ class GenerateAgent(Agent[GenerateAgentConfig]):
             generative_model=self.config.model.model_id,
             reasoning=build_reasoning(self.config.model),
             max_tokens=2000,
-            tracking=memory.get_tracking_info(),
         )
 
         agent_path = f"/generation/{self.config.id if self.config.id else 'default'}"
         resp, input_tokens, output_tokens = await manager.execute_raw(
-            chat_model, memory=memory, module="generate", agent_path=agent_path
+            chat_model,
+            memory=memory,
+            module="generate",
+            agent_path=agent_path,
+            tracking=memory.get_tracking_info(),
         )
 
         generated_text = resp.answer or ""

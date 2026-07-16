@@ -33,11 +33,13 @@ from starlette.responses import Response
 
 from hyperforge.api.authentication import requires_one
 from hyperforge.api.models import InteractionRequest
+from hyperforge.api.settings import Settings as ApiSettings
 from hyperforge.api.v1.interaction import WebsocketReceiver, stream_response
 from hyperforge.db.agents import AgentManager
 from hyperforge.interaction import AnswerOperation
 from hyperforge.prompts import PromptConfig
 from hyperforge.pubsub import UserToAgentInteraction
+from hyperforge.standalone.oauth import get_enabled_mcp_auth
 from hyperforge.workflows import WorkflowData
 
 if TYPE_CHECKING:
@@ -93,9 +95,10 @@ async def call_tool(
             raise ResourceError(f"Missing required parameter: {parameter}")
 
     question = f"Calling tool: {workflow.description or workflow.name} with arguments: {arguments}"
+    interaction_headers = _prepare_interaction_headers(app, agent_id, headers)
 
     interaction = InteractionRequest(
-        question=question, headers=dict(headers.items()), arguments=arguments
+        question=question, headers=interaction_headers, arguments=arguments
     )
     mcp_session = mcp_server.request_context.session
     websocket = WebsocketReceiver(websocket=None)
@@ -121,7 +124,8 @@ async def call_tool(
             )
             websocket.queue.put_nowait(
                 UserToAgentInteraction(
-                    request_id=msg.feedback.request_id, response=result.content
+                    request_id=msg.feedback.request_id,
+                    response=result.content,  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
                 )
             )
         elif msg.operation == AnswerOperation.ANSWER:
@@ -167,6 +171,27 @@ async def read_resource(
     raise ResourceError(f"Unknown uri: {uri}")
 
 
+def _prepare_interaction_headers(
+    app: "HTTPApplication", agent_id: str, headers: Headers
+) -> dict[str, str]:
+    interaction_headers = dict(headers.items())
+    authorization = headers.get("authorization")
+    if authorization is not None:
+        interaction_headers["authorization"] = authorization
+
+    return interaction_headers
+
+
+def _default_oauth_metadata(app: "HTTPApplication") -> tuple[list[str], list[str]]:
+    if isinstance(app.settings, ApiSettings):
+        return [app.settings.hydra_public_url], app.settings.hydra_scopes_supported
+    return [], []
+
+
+def _get_mcp_auth_config(app: "HTTPApplication", agent_id: str):
+    return get_enabled_mcp_auth(app._agents_cfg, agent_id)
+
+
 @router.get(
     "/.well-known/oauth-protected-resource/api/v1/agent/{agent_id}/session/{session}/mcp"
 )
@@ -183,13 +208,29 @@ async def mcp_interaction_protected_resource_metadata(
     mcp_url = request.url_for(
         "interaction_mcp_handler", agent_id=agent_id, session=session
     )
-    mcp_url_https = str(mcp_url).replace(
-        "http://", "https://"
-    )  # Ensure the URL uses https
+    auth_config = _get_mcp_auth_config(app, agent_id)
+    resource = (
+        auth_config.protected_resource
+        if auth_config is not None and auth_config.protected_resource is not None
+        else str(mcp_url.replace(scheme="https"))
+    )
+    default_authorization_server, default_scopes_supported = _default_oauth_metadata(
+        app
+    )
+    authorization_servers = (
+        [auth_config.authorization_server]
+        if auth_config is not None and auth_config.authorization_server is not None
+        else default_authorization_server
+    )
+    scopes_supported = (
+        auth_config.scopes_supported
+        if auth_config is not None
+        else default_scopes_supported
+    )
     return {
-        "resource": mcp_url_https,
-        "scopes_supported": app.settings.hydra_scopes_supported,
-        "authorization_servers": [app.settings.hydra_public_url],
+        "resource": resource,
+        "scopes_supported": scopes_supported,
+        "authorization_servers": authorization_servers,
     }
 
 

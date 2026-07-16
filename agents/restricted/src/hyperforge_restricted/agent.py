@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from time import time
 from typing import Any, Dict, List, Optional, cast
 
+from hyperforge import logger
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.context.agent import ContextAgent, build_context_agent
@@ -25,9 +26,8 @@ from hyperforge_rephrase.config import RephraseAgentConfig
 from nuclia_models.predict.remi import RemiResponse
 from nucliadb_telemetry.utils import get_telemetry
 from opentelemetry import trace
-from RestrictedPython.Guards import safe_builtins  # type: ignore
+from RestrictedPython.Guards import safe_builtins
 
-from hyperforge import logger
 from hyperforge_restricted.config import PythonAgentConfig
 from hyperforge_restricted.decision import (
     CHOOSE_AGENT_TEMPLATE,
@@ -616,7 +616,7 @@ class PythonAgent(Agent[PythonAgentConfig], ContextAgent):
                         schema = CHOOSE_SCHEMA.copy()
                         schema["parameters"]["properties"]["selected"]["enum"].extend(  # type: ignore
                             options.keys()
-                        )  # type: ignore
+                        )
                         prompt = CHOOSE_AGENT_TEMPLATE.render(
                             options=options, question=question, extra_info=extra_info
                         )
@@ -690,7 +690,7 @@ class PythonAgent(Agent[PythonAgentConfig], ContextAgent):
                             )
                         )
                         decision = await conditional_agent.make_decision(
-                            *item.args,  # type: ignore
+                            *item.args,
                             **item.keyword_args,
                         )
                         return decision

@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 import pytest
 from hyperforge.definition import FunctionDefinition
+
 from hyperforge_restricted import sandbox
 from hyperforge_restricted.model import (
     RestrictedPythonTask,

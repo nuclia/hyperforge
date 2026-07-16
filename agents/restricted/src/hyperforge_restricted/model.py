@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Sequence, assert_never
+from typing import Any, Sequence, assert_never, cast
 
 from hyperforge.definition import FunctionDefinition
 from hyperforge.memory import Context
@@ -34,7 +34,7 @@ WorkerTypes = (
     | RemiResponse
     | RestrictedPythonTask
 )
-WorkerModels = {
+WorkerModels: dict[str, type[BaseModel]] = {
     "Context": Context,
     "RemiResponse": RemiResponse,
 }
@@ -55,7 +55,7 @@ def deserialize(msg: Any) -> WorkerTypes:
                 },
             )
         else:
-            return WorkerModels[model_name].model_validate(msg)  # type: ignore
+            return cast(WorkerTypes, WorkerModels[model_name].model_validate(msg))
     elif isinstance(msg, list):
         return [deserialize(m) for m in msg]
     else:

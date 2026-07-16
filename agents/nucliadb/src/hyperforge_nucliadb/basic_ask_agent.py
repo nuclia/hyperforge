@@ -4,6 +4,7 @@ import json
 from time import time
 from typing import Any, ClassVar, Dict, List, Literal, Optional, cast
 
+from hyperforge import PROMPT_ENVIRONMENT, logger
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.context.agent import ContextAgent
@@ -36,7 +37,6 @@ from nucliadb_models.search import (
     SyncAskResponse,
 )
 
-from hyperforge import PROMPT_ENVIRONMENT, logger
 from hyperforge_nucliadb.ask.multi import choose_source
 from hyperforge_nucliadb.ask_utils import (
     combine_catalog_filter_expressions,
@@ -584,7 +584,7 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
 
                 if len(images_urls) > 0:
                     context = Context(
-                        agent_id=self.config.id,
+                        agent_id=self.config.id,  # ty: ignore[invalid-argument-type]
                         original_question_uuid=memory.original_question_uuid,
                         actual_question_uuid=None,
                         question="Search images by title. Title: "
@@ -626,8 +626,8 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
             for resource_id in resource_ids:
                 resource = await nucliadb_driver.get_resource_by_id(
                     query_params={
-                        "show": ["basic", "extracted"],  # type: ignore
-                        "extracted": ["metadata", "file"],  # type: ignore
+                        "show": ["basic", "extracted"],
+                        "extracted": ["metadata", "file"],
                     },
                     rid=resource_id,
                 )
@@ -637,7 +637,7 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
                 images_urls = await self.get_all_images(resource=resource)
                 if len(images_urls) > 0:
                     context = Context(
-                        agent_id=self.config.id,
+                        agent_id=self.config.id,  # ty: ignore[invalid-argument-type]
                         original_question_uuid=memory.original_question_uuid,
                         actual_question_uuid=None,
                         question="All images by title. Title: " + title,

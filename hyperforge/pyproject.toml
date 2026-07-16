@@ -8,7 +8,7 @@ version = "1.0.0"
 authors = [{ name = "AI Data Team", email = "learning@nuclia.com" }]
 description = "Agentic Framework for Orchestrated Runtime, Governance, and Execution"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
@@ -89,3 +89,6 @@ hyperforge-sandbox = "hyperforge.server:sandbox.run"
 hyperforge-extract-openapi = "hyperforge.api.commands:extract_openapi"
 hyperforge-workflows-cleanup-cronjob = "hyperforge.agents.workflow_cleanup:run"
 hyperforge-standalone = "hyperforge.standalone:run.run"
+
+[tool.ruff]
+extend = "../ruff.toml"

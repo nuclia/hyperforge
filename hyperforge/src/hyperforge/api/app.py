@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import Any, Optional, Tuple
 
-import prometheus_client  # type: ignore
+import prometheus_client
 from fastapi import APIRouter, FastAPI
 from lru import LRU
 from mcp.server.lowlevel.server import Server as MCPServer
@@ -12,7 +12,7 @@ from nucliadb_sdk.v2.sdk import NucliaDBAsync
 from nucliadb_telemetry.logs import setup_logging
 from nucliadb_telemetry.settings import LogLevel, LogSettings
 from nucliadb_telemetry.utils import clean_telemetry, setup_telemetry
-from prometheus_client import CONTENT_TYPE_LATEST  # type: ignore
+from prometheus_client import CONTENT_TYPE_LATEST
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.responses import PlainTextResponse
 
@@ -54,6 +54,7 @@ class HTTPApplication(FastAPI):
     arag_writer: NucliaDBAsync
     arag_reader: NucliaDBAsync
     broker: Broker
+    _agents_cfg: dict[str, Any]
     extra_middlewares: Optional[list[Any]] = None
 
     def __init__(
@@ -72,6 +73,7 @@ class HTTPApplication(FastAPI):
         super().__init__(*args, lifespan=lifespan, **kwargs)
         self.settings = settings
         self.data_manager_settings = data_manager_settings
+        self._agents_cfg = {}
         self.include_router(internal.router)
         self.include_router(v1.router)
         self.include_router(router)

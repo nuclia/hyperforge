@@ -51,13 +51,14 @@ class RaoAuthenticationBackend(AuthenticationBackend):
         ]
         self.security_groups_headers = ["X-NUCLIADB-SECURITY-GROUPS"]
 
-    async def authenticate(self, request) -> tuple[AuthCredentials, BaseUser] | None:
+    async def authenticate(self, conn) -> tuple[AuthCredentials, BaseUser] | None:
         # There are two groups of headers to authenticate: X-STF-* and
         # X-NUCLIADB-*. As authorizer should only resolve to one set of headers,
         # we scan and try to find any of both. While endpoint roles are properly
         # synchronized with authorizer rules, we don't really care which one
         # there is, nor we will mix them
 
+        request = conn
         auth_creds = None
         for roles_header in self.roles_headers:
             if roles_header in request.headers:

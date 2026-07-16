@@ -1,6 +1,6 @@
 [project]
 name = "hyperforge_workspace"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 version = "1.0.0"
 dependencies = [
     "hyperforge",
@@ -85,7 +85,6 @@ dev = [
     # Linting
     "mypy-protobuf>=3.6.0",
     "mypy",
-    "pre-commit",
     "ruff",
     # Testing
     "aioresponses",
@@ -106,7 +105,7 @@ dev = [
     "requests",
     "requests-mock>=1.12.1",
     "types-PyYAML>=6.0.12.20240808",
-    "ty>=0.0.34",
+    "ty>=0.0.59",
     "sqlalchemy_utils",
     "inline_snapshot",
 ]

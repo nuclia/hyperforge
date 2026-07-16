@@ -1,10 +1,11 @@
-from hyperforge.api.models import INFO_FIELD_ID
-from hyperforge.memory.memory import QUESTION_ANSWERS_FIELD, SessionMemory
-from hyperforge.models import MemoryConfig, NucliaDBMemoryConfig, Rules
 from nucliadb_models import CreateResourcePayload, InputConversationField
 from nucliadb_models.resource import KnowledgeBoxObj
 from nucliadb_models.text import TextField
 from nucliadb_sdk import NucliaDB
+
+from hyperforge.api.models import INFO_FIELD_ID
+from hyperforge.memory.memory import QUESTION_ANSWERS_FIELD, SessionMemory
+from hyperforge.models import MemoryConfig, NucliaDBMemoryConfig, Rules
 
 
 async def test_memory_save_load(sdk: NucliaDB, arag_kb: KnowledgeBoxObj):

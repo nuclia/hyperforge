@@ -120,7 +120,7 @@ class SmartAgentConfig(ContextAgentConfig):
     def is_smart_agent(cls, value: list[Dict[str, Any]]) -> list[BaseModel]:
         if value is None:
             return value
-        result = []
+        result: list[BaseModel] = []
         for agent_cfg in value:
             module = agent_cfg.get("module")
             if module is None:
@@ -129,4 +129,4 @@ class SmartAgentConfig(ContextAgentConfig):
             agent_config_klass = get_agent_config_klass(module)
             agent_config_instance = agent_config_klass.model_validate(agent_cfg)
             result.append(agent_config_instance)
-        return result  # type: ignore
+        return result

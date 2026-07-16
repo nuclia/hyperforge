@@ -3,6 +3,7 @@ from copy import deepcopy
 from time import time
 from typing import Any, Dict, List
 
+from hyperforge import PROMPT_ENVIRONMENT
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import QuestionMemory, Source
 from nuclia_models.predict.run_agents import RunTextAgentsRequest
@@ -10,7 +11,6 @@ from nuclia_models.worker.triggers import Relation
 from nucliadb_models import RelationNodeType
 from nucliadb_models.search import Filter, KnowledgeGraphEntity
 
-from hyperforge import PROMPT_ENVIRONMENT
 from hyperforge_nucliadb.ask.config import AskAgentConfig
 from hyperforge_nucliadb.ask.kb_analysis import get_knowledge_base_analysis
 from hyperforge_nucliadb.ask.models import Analysis

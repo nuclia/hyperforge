@@ -42,7 +42,7 @@ async def build_context_agent(config: ContextAgentConfig) -> "ContextAgent":
     assert issubclass(agent_class, ContextAgent), (
         f"Agent {config.module} is not a ContextAgent"
     )
-    return await agent_class.from_config(config)
+    return await agent_class.from_config(config)  # type: ignore[return-type]  # ty: ignore[invalid-return-type]
 
 
 class ContextAgent:
