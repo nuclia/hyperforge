@@ -10,6 +10,31 @@ from hyperforge.standalone.config import StandAloneAgentConfig, StandaloneConfig
 from hyperforge.standalone.settings import StandaloneSettings
 
 
+def load_default_modules() -> str:
+    """
+    Load built-in agent/driver modules.
+
+    Prefer nuclia_agents when available. In generic standalone deployments where
+    nuclia_agents is not installed, fall back to Hyperforge built-ins.
+    """
+    from hyperforge.configure import load_all_configurations, scan
+
+    try:
+        scan("nuclia_agents.agents.agents")
+        scan("nuclia_agents.drivers.drivers")
+        load_all_configurations("nuclia_agents")
+        return "nuclia_agents"
+    except ModuleNotFoundError as exc:
+        if not exc.name or exc.name.startswith("nuclia_agents"):
+            logger.info(
+                "nuclia_agents package not available; loading Hyperforge built-ins"
+            )
+            scan("hyperforge")
+            load_all_configurations("hyperforge")
+            return "hyperforge"
+        raise
+
+
 def run(
     application_class: type[StandaloneApplication] | None = None,
 ) -> None:  # pragma: no cover
@@ -26,9 +51,7 @@ def run(
 
     # Register all built-in agents and drivers (same as the base initialize,
     # but without start_health_check() — the FastAPI app handles /health/*).
-    scan("nuclia_agents.agents.agents")
-    scan("nuclia_agents.drivers.drivers")
-    load_all_configurations("nuclia_agents")
+    load_default_modules()
 
     for load_module in settings.load_modules:
         try:
