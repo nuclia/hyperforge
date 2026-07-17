@@ -310,3 +310,15 @@ async def test_mcp_protected_resource_metadata(
         "scopes_supported": ["offline_access", "openid"],
         "authorization_servers": ["https://oauth.progress.cloud"],
     }
+
+
+async def test_mcp_protected_resource_metadata_root(arag_api_http: str):
+    http_client = AsyncClient(base_url=f"http://{arag_api_http}")
+    resp = await http_client.get("/.well-known/oauth-protected-resource")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body == {
+        "resource": f"http://{arag_api_http}",
+        "scopes_supported": ["offline_access", "openid"],
+        "authorization_servers": ["https://oauth.progress.cloud"],
+    }
