@@ -9,6 +9,51 @@ from hyperforge.standalone.app import StandaloneApplication
 from hyperforge.standalone.config import StandAloneAgentConfig, StandaloneConfig
 from hyperforge.standalone.settings import StandaloneSettings
 
+BUILTIN_MODULES = (
+    "hyperforge_conditional",
+    "hyperforge_external",
+    "hyperforge_generate.agent",
+    "hyperforge_google",
+    "hyperforge_historical",
+    "hyperforge_http",
+    "hyperforge_mcp",
+    "hyperforge_mcp.stdio",
+    "hyperforge_nucliadb",
+    "hyperforge_passthrough",
+    "hyperforge_perplexity",
+    "hyperforge_perplexity_search",
+    "hyperforge_related.agent",
+    "hyperforge_remi",
+    "hyperforge_rephrase",
+    "hyperforge_restart.agent",
+    "hyperforge_restricted",
+    "hyperforge_smart",
+    "hyperforge_static",
+    "hyperforge_static_string",
+    "hyperforge_summarize",
+)
+
+
+def load_hyperforge_builtins() -> None:
+    """Load every installed built-in Hyperforge agent and driver package."""
+    from hyperforge.configure import load_all_configurations, scan
+
+    loaded_packages: set[str] = set()
+    for module in BUILTIN_MODULES:
+        package = module.partition(".")[0]
+        try:
+            scan(module)
+        except ModuleNotFoundError as exc:
+            # Standalone consumers may install only the built-ins they use. Do not
+            # hide missing dependencies from a built-in package that is installed.
+            if exc.name == package:
+                continue
+            raise
+        loaded_packages.add(package)
+
+    for package in loaded_packages:
+        load_all_configurations(package)
+
 
 def load_default_modules() -> str:
     """
@@ -29,8 +74,7 @@ def load_default_modules() -> str:
             logger.info(
                 "nuclia_agents package not available; loading Hyperforge built-ins"
             )
-            scan("hyperforge")
-            load_all_configurations("hyperforge")
+            load_hyperforge_builtins()
             return "hyperforge"
         raise
 
