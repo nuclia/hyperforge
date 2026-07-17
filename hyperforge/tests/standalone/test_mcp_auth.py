@@ -91,8 +91,28 @@ def standalone_settings():
 
 
 @pytest.fixture
+def standalone_settings_http_metadata():
+    return StandaloneSettings(
+        agents_config=Path("/dev/null"),
+        external_nua_api_key="dummy",
+        debug=False,
+        mcp_force_https_metadata=False,
+    )
+
+
+@pytest.fixture
 async def client(agents_config, standalone_settings):
     app = StandaloneApplication(agents_config, standalone_settings)
+    async with (
+        app.router.lifespan_context(app),
+        AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client,
+    ):
+        yield client
+
+
+@pytest.fixture
+async def client_http_metadata(agents_config, standalone_settings_http_metadata):
+    app = StandaloneApplication(agents_config, standalone_settings_http_metadata)
     async with (
         app.router.lifespan_context(app),
         AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client,
@@ -380,3 +400,19 @@ async def test_prepare_interaction_headers_forwards_authorization(agents_config)
 
     assert prepared["authorization"] == "Bearer user-token"
     assert prepared["x-other"] == "value"
+
+
+async def test_protected_mcp_default_metadata_url_allows_http_when_flag_disabled(
+    client_http_metadata: AsyncClient,
+):
+    response = await client_http_metadata.delete(
+        f"/api/v1/agent/{DEFAULT_METADATA_AGENT_ID}/session/s1/mcp"
+    )
+
+    assert response.status_code == 401
+    header = response.headers["www-authenticate"]
+    assert (
+        "http://test/.well-known/oauth-protected-resource/api/v1/agent/default-metadata-agent/session/s1/mcp"
+        in header
+    )
+    assert "https://test/.well-known/oauth-protected-resource/" not in header
