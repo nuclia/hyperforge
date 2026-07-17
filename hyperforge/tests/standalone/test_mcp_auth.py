@@ -357,6 +357,19 @@ async def test_protected_resource_metadata_uses_agent_oauth_config(
     }
 
 
+async def test_protected_resource_metadata_root_uses_first_enabled_agent_config(
+    client: AsyncClient,
+):
+    response = await client.get("/.well-known/oauth-protected-resource")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "resource": AUDIENCE,
+        "scopes_supported": ["openid", "offline_access", REQUIRED_SCOPE],
+        "authorization_servers": ["https://auth.example.test"],
+    }
+
+
 async def test_protected_resource_metadata_without_auth_has_no_hydra_fallback(
     client: AsyncClient,
 ):
@@ -367,6 +380,37 @@ async def test_protected_resource_metadata_without_auth_has_no_hydra_fallback(
     assert response.status_code == 200
     assert response.json() == {
         "resource": "https://test/api/v1/agent/open-agent/session/s1/mcp",
+        "scopes_supported": [],
+        "authorization_servers": [],
+    }
+
+
+async def test_protected_resource_metadata_root_without_auth_has_no_hydra_fallback(
+    load_agents, standalone_settings
+):
+    cfg = StandaloneConfig.validate_python(
+        {
+            OPEN_AGENT_ID: {
+                "title": "Open Agent",
+                "workflows": {
+                    "default": {
+                        "name": "default",
+                        "generation": [{"module": "summarize"}],
+                    }
+                },
+            },
+        }
+    )
+    app = StandaloneApplication(cfg, standalone_settings)
+    async with (
+        app.router.lifespan_context(app),
+        AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client,
+    ):
+        response = await client.get("/.well-known/oauth-protected-resource")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "resource": "http://test",
         "scopes_supported": [],
         "authorization_servers": [],
     }
