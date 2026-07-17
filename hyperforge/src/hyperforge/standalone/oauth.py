@@ -18,6 +18,15 @@ _HASHES = {
 }
 
 
+def force_https_metadata(app: Any) -> bool:
+    """Return whether generated MCP OAuth metadata URLs should use HTTPS."""
+    for settings_attribute in ("settings", "_standalone_settings"):
+        settings = getattr(app, settings_attribute, None)
+        if settings is not None and hasattr(settings, "mcp_force_https_metadata"):
+            return bool(settings.mcp_force_https_metadata)
+    return True
+
+
 @dataclass
 class JWKSCache:
     ttl_seconds: int = 300

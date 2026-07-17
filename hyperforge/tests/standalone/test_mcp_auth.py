@@ -405,14 +405,23 @@ async def test_prepare_interaction_headers_forwards_authorization(agents_config)
 async def test_protected_mcp_default_metadata_url_allows_http_when_flag_disabled(
     client_http_metadata: AsyncClient,
 ):
-    response = await client_http_metadata.delete(
+    challenge_response = await client_http_metadata.delete(
         f"/api/v1/agent/{DEFAULT_METADATA_AGENT_ID}/session/s1/mcp"
     )
 
-    assert response.status_code == 401
-    header = response.headers["www-authenticate"]
+    assert challenge_response.status_code == 401
+    header = challenge_response.headers["www-authenticate"]
     assert (
         "http://test/.well-known/oauth-protected-resource/api/v1/agent/default-metadata-agent/session/s1/mcp"
         in header
     )
     assert "https://test/.well-known/oauth-protected-resource/" not in header
+
+    metadata_response = await client_http_metadata.get(
+        f"/.well-known/oauth-protected-resource/api/v1/agent/{DEFAULT_METADATA_AGENT_ID}/session/s1/mcp"
+    )
+
+    assert metadata_response.status_code == 200
+    assert metadata_response.json()["resource"] == (
+        f"http://test/api/v1/agent/{DEFAULT_METADATA_AGENT_ID}/session/s1/mcp"
+    )

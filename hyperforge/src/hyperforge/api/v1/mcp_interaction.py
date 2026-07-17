@@ -39,7 +39,7 @@ from hyperforge.db.agents import AgentManager
 from hyperforge.interaction import AnswerOperation
 from hyperforge.prompts import PromptConfig
 from hyperforge.pubsub import UserToAgentInteraction
-from hyperforge.standalone.oauth import get_enabled_mcp_auth
+from hyperforge.standalone.oauth import force_https_metadata, get_enabled_mcp_auth
 from hyperforge.workflows import WorkflowData
 
 if TYPE_CHECKING:
@@ -192,18 +192,6 @@ def _get_mcp_auth_config(app: "HTTPApplication", agent_id: str):
     return get_enabled_mcp_auth(app._agents_cfg, agent_id)
 
 
-def _force_https_metadata(app: "HTTPApplication") -> bool:
-    settings = getattr(app, "settings", None)
-    if settings is not None and hasattr(settings, "mcp_force_https_metadata"):
-        return bool(settings.mcp_force_https_metadata)
-    standalone_settings = getattr(app, "_standalone_settings", None)
-    if standalone_settings is not None and hasattr(
-        standalone_settings, "mcp_force_https_metadata"
-    ):
-        return bool(standalone_settings.mcp_force_https_metadata)
-    return True
-
-
 @router.get(
     "/.well-known/oauth-protected-resource/api/v1/agent/{agent_id}/session/{session}/mcp"
 )
@@ -220,12 +208,14 @@ async def mcp_interaction_protected_resource_metadata(
     mcp_url = request.url_for(
         "interaction_mcp_handler", agent_id=agent_id, session=session
     )
-    force_https = _force_https_metadata(app)
+    force_https = force_https_metadata(app)
     auth_config = _get_mcp_auth_config(app, agent_id)
     resource = (
         auth_config.protected_resource
         if auth_config is not None and auth_config.protected_resource is not None
-        else str(mcp_url.replace(scheme="https")) if force_https else str(mcp_url)
+        else str(mcp_url.replace(scheme="https"))
+        if force_https
+        else str(mcp_url)
     )
     default_authorization_server, default_scopes_supported = _default_oauth_metadata(
         app
