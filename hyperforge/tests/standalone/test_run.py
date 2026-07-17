@@ -1,8 +1,9 @@
+import json
+import subprocess
 import sys
 
 import pytest
 
-from hyperforge.configure import GLOBAL_REGISTRY, clear
 from hyperforge.standalone.run import BUILTIN_MODULES, load_default_modules
 
 
@@ -34,35 +35,39 @@ def test_load_default_modules_uses_nuclia_when_available(monkeypatch):
     assert loaded == ["nuclia_agents"]
 
 
-def test_load_default_modules_falls_back_when_nuclia_missing(monkeypatch):
-    # Force the decorator in this real built-in module to run even if another test
-    # imported it previously, and limit the test to packages always in the workspace.
-    monkeypatch.setattr(
-        "hyperforge.standalone.run.BUILTIN_MODULES",
-        ("hyperforge_static", "hyperforge_mcp", "hyperforge_mcp.stdio"),
+def test_load_hyperforge_builtins_registers_real_agents_and_drivers():
+    # Registry configuration is process-global and module decorators only run once.
+    # Use a fresh interpreter so this integration check cannot affect other tests.
+    script = """
+import json
+
+import hyperforge.standalone.run as standalone_run
+from hyperforge.configure import GLOBAL_REGISTRY
+
+standalone_run.BUILTIN_MODULES = (
+    "hyperforge_static",
+    "hyperforge_mcp",
+    "hyperforge_mcp.stdio",
+)
+standalone_run.load_hyperforge_builtins()
+print(json.dumps({
+    "static": GLOBAL_REGISTRY.context_agents["static"].klass.__module__,
+    "mcphttp": GLOBAL_REGISTRY.drivers["mcphttp"].klass.__module__,
+    "mcpstdio": GLOBAL_REGISTRY.drivers["mcpstdio"].klass.__module__,
+}))
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        check=True,
+        capture_output=True,
+        text=True,
     )
-    for module in tuple(sys.modules):
-        if module.split(".")[0] in {"hyperforge_static", "hyperforge_mcp"}:
-            monkeypatch.delitem(sys.modules, module)
 
-    clear()
-    GLOBAL_REGISTRY.clear()
-    try:
-        result = load_default_modules()
-
-        assert result == "hyperforge"
-        assert "static" in GLOBAL_REGISTRY.context_agents
-        registration = GLOBAL_REGISTRY.context_agents["static"]
-        assert registration.klass.__module__ == "hyperforge_static.agent"
-        assert GLOBAL_REGISTRY.drivers["mcphttp"].klass.__module__ == (
-            "hyperforge_mcp.http"
-        )
-        assert GLOBAL_REGISTRY.drivers["mcpstdio"].klass.__module__ == (
-            "hyperforge_mcp.stdio"
-        )
-    finally:
-        clear()
-        GLOBAL_REGISTRY.clear()
+    assert json.loads(result.stdout) == {
+        "static": "hyperforge_static.agent",
+        "mcphttp": "hyperforge_mcp.http",
+        "mcpstdio": "hyperforge_mcp.stdio",
+    }
 
 
 def test_builtin_modules_include_agents_and_drivers():
