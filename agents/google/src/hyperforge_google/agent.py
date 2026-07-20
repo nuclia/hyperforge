@@ -162,9 +162,7 @@ class GoogleAgent(ContextAgent, Agent[GoogleAgentConfig]):
             external_usage=[
                 ExternalUsage(
                     provider="google",
-                    model=(
-                        response.model_version if response is not None else None
-                    )
+                    model=(response.model_version if response is not None else None)
                     or self.config.gen_model_id,
                     input_tokens=(usage.prompt_token_count or 0) if usage else 0,
                     output_tokens=(
