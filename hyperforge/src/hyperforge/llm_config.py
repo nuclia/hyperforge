@@ -78,7 +78,11 @@ class LLMConfig(BaseModel):
 
     model_config = {"populate_by_name": True, "serialize_by_alias": True}
 
-    type: str = Field(default=LLM_CONFIG_TYPE, alias="_type")
+    type: str = Field(
+        default=LLM_CONFIG_TYPE,
+        alias="_type",
+        json_schema_extra={"widget": WidgetType.HIDDEN},
+    )
     model_id: str = Field(
         title="Model",
         description="The model identifier (e.g. 'chatgpt-azure-4o-mini', 'chatgpt-4.1')",
@@ -88,11 +92,13 @@ class LLMConfig(BaseModel):
         default=None,
         title="Reasoning",
         description="Simplified reasoning toggle. Set to 'enabled' for reasoning models.",
+        json_schema_extra={"widget": WidgetType.ENUM_SELECT},
     )
     advanced_reasoning: Optional[ReasoningConfig] = Field(
         default=None,
         title="Advanced reasoning",
         description="Fine-grained reasoning configuration (effort level, budget tokens). Takes precedence over 'reasoning' if both are set.",
+        json_schema_extra={"widget": WidgetType.HIDDEN},
     )
 
     def get_effective_reasoning(self) -> Optional[ReasoningConfig]:
