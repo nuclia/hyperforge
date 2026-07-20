@@ -39,7 +39,7 @@ from hyperforge.db.agents import AgentManager
 from hyperforge.interaction import AnswerOperation
 from hyperforge.prompts import PromptConfig
 from hyperforge.pubsub import UserToAgentInteraction
-from hyperforge.standalone.oauth import get_enabled_mcp_auth
+from hyperforge.standalone.oauth import force_https_metadata, get_enabled_mcp_auth
 from hyperforge.workflows import WorkflowData
 
 if TYPE_CHECKING:
@@ -192,6 +192,50 @@ def _get_mcp_auth_config(app: "HTTPApplication", agent_id: str):
     return get_enabled_mcp_auth(app._agents_cfg, agent_id)
 
 
+def _get_first_enabled_mcp_auth_config(app: "HTTPApplication"):
+    agents_cfg = getattr(app, "_agents_cfg", None)
+    if isinstance(agents_cfg, dict):
+        for agent_id in agents_cfg:
+            auth_config = get_enabled_mcp_auth(agents_cfg, agent_id)
+            if auth_config is not None:
+                return auth_config
+    return None
+
+
+@router.get("/.well-known/oauth-protected-resource")
+async def mcp_interaction_protected_resource_metadata_root(
+    request: Request,
+):
+    """
+    Root protected resource metadata endpoint for MCP client compatibility.
+    """
+    app: "HTTPApplication" = request.app
+    auth_config = _get_first_enabled_mcp_auth_config(app)
+    default_authorization_server, default_scopes_supported = _default_oauth_metadata(
+        app
+    )
+    authorization_servers = (
+        [auth_config.authorization_server]
+        if auth_config is not None and auth_config.authorization_server is not None
+        else default_authorization_server
+    )
+    scopes_supported = (
+        auth_config.scopes_supported
+        if auth_config is not None
+        else default_scopes_supported
+    )
+    resource = (
+        auth_config.protected_resource
+        if auth_config is not None and auth_config.protected_resource is not None
+        else str(request.base_url).rstrip("/")
+    )
+    return {
+        "resource": resource,
+        "scopes_supported": scopes_supported,
+        "authorization_servers": authorization_servers,
+    }
+
+
 @router.get(
     "/.well-known/oauth-protected-resource/api/v1/agent/{agent_id}/session/{session}/mcp"
 )
@@ -208,11 +252,14 @@ async def mcp_interaction_protected_resource_metadata(
     mcp_url = request.url_for(
         "interaction_mcp_handler", agent_id=agent_id, session=session
     )
+    force_https = force_https_metadata(app)
     auth_config = _get_mcp_auth_config(app, agent_id)
     resource = (
         auth_config.protected_resource
         if auth_config is not None and auth_config.protected_resource is not None
         else str(mcp_url.replace(scheme="https"))
+        if force_https
+        else str(mcp_url)
     )
     default_authorization_server, default_scopes_supported = _default_oauth_metadata(
         app

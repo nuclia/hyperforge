@@ -44,6 +44,7 @@ from hyperforge.server.session import SessionManager
 from hyperforge.server.settings import Settings as ServerSettings
 from hyperforge.standalone.oauth import (
     JWKSCache,
+    force_https_metadata,
     get_enabled_mcp_auth,
     validate_mcp_bearer,
 )
@@ -190,14 +191,14 @@ def _mcp_resource_metadata_url(conn: HTTPConnection) -> str | None:
     ):
         agent_id = parts[3]
         session = parts[5]
-        return str(
-            conn.url.replace(
-                scheme="https",
-                path=f"/.well-known/oauth-protected-resource/api/v1/agent/{agent_id}/session/{session}/mcp",
-                query="",
-                fragment="",
-            )
-        )
+        replace_kwargs: dict[str, str] = {
+            "path": f"/.well-known/oauth-protected-resource/api/v1/agent/{agent_id}/session/{session}/mcp",
+            "query": "",
+            "fragment": "",
+        }
+        if force_https_metadata(conn.app):
+            replace_kwargs["scheme"] = "https"
+        return str(conn.url.replace(**replace_kwargs))
     return None
 
 

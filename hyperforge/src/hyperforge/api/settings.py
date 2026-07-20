@@ -36,3 +36,4 @@ class Settings(BaseSettings):
     # Hydra settings for MCP Oauth
     hydra_public_url: str = "https://oauth.progress.cloud"
     hydra_scopes_supported: list[str] = ["offline_access", "openid"]
+    mcp_force_https_metadata: bool = True
