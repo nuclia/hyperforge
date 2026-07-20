@@ -110,6 +110,14 @@ class VegaLiteVisualization(BaseModel):
 Visualization = Union[VegaLiteVisualization]
 
 
+class ExternalUsage(BaseModel):
+    provider: str
+    model: str
+    input_tokens: int = 0
+    output_tokens: int = 0
+    requests: int = 1
+
+
 class Step(BaseModel):
     original_question_uuid: Optional[str]
     actual_question_uuid: Optional[str]
@@ -123,6 +131,7 @@ class Step(BaseModel):
     output_nuclia_tokens: Optional[float]
     error: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = None
+    external_usage: Optional[list[ExternalUsage]] = None
 
     def __str__(self):
         return f"({self.timeit:.2f}s) {self.module}: {self.title} \n {self.value} \n {self.reason} \n NT:({self.input_nuclia_tokens}:{self.output_nuclia_tokens})"

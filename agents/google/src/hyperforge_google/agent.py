@@ -16,6 +16,7 @@ from hyperforge.context.agent import ContextAgent
 from hyperforge.definition import FunctionDefinition
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import Chunk, Context, QuestionMemory
+from hyperforge.models import ExternalUsage
 from hyperforge.utils.http import safe_http_client
 
 from hyperforge_google.config import GoogleAgentConfig
@@ -76,18 +77,7 @@ class GoogleAgent(ContextAgent, Agent[GoogleAgentConfig]):
                 thinking_config=ThinkingConfig(include_thoughts=True),
             ),
         )
-        if (
-            response is not None
-            and response.usage_metadata is not None
-            and response.usage_metadata.total_token_count is not None
-            and response.usage_metadata.prompt_token_count is not None
-        ):
-            tokens = response.usage_metadata.total_token_count * 0.05
-            input_tokens = response.usage_metadata.prompt_token_count * 0.05
-            output_tokens = tokens - input_tokens
-        else:
-            input_tokens = 0.5
-            output_tokens = 0.5
+        usage = response.usage_metadata if response is not None else None
         context = Context(
             agent_id=self.config.id or self.agent_id,
             original_question_uuid=memory.original_question_uuid,
@@ -169,8 +159,23 @@ class GoogleAgent(ContextAgent, Agent[GoogleAgentConfig]):
             step_reason=reasoning,
             step_value=f"{count} results found",
             timeit=time() - t0,
-            input_nuclia_tokens=input_tokens,
-            output_nuclia_tokens=output_tokens,
+            external_usage=[
+                ExternalUsage(
+                    provider="google",
+                    model=(
+                        response.model_version if response is not None else None
+                    )
+                    or self.config.gen_model_id,
+                    input_tokens=(usage.prompt_token_count or 0) if usage else 0,
+                    output_tokens=(
+                        (usage.candidates_token_count or 0)
+                        + (usage.thoughts_token_count or 0)
+                        + (usage.tool_use_prompt_token_count or 0)
+                        if usage
+                        else 0
+                    ),
+                )
+            ],
         )
         return context
 
