@@ -1,5 +1,7 @@
 """Tests for hyperforge.llm_config: backwards-compatible coercion and reasoning resolution."""
 
+from pydantic import BaseModel, Field
+
 from hyperforge.llm_config import (
     LLMConfig,
     LLMField,
@@ -8,7 +10,6 @@ from hyperforge.llm_config import (
     SimpleReasoning,
     llm_defaults,
 )
-from pydantic import BaseModel, Field
 
 
 class SampleConfig(BaseModel):

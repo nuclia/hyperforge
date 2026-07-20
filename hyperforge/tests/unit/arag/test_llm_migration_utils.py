@@ -4,9 +4,10 @@ import json
 import uuid
 
 import pytest
+from sqlalchemy import text
+
 from hyperforge.db.llm_migration_utils import migrate_llm_models, walk_and_replace
 from hyperforge.llm_config import LLM_CONFIG_TYPE
-from sqlalchemy import text
 
 
 class TestWalkAndReplace:
