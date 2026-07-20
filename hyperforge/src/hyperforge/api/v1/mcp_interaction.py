@@ -39,7 +39,7 @@ from hyperforge.db.agents import AgentManager
 from hyperforge.interaction import AnswerOperation
 from hyperforge.prompts import PromptConfig
 from hyperforge.pubsub import UserToAgentInteraction
-from hyperforge.standalone.oauth import get_enabled_mcp_auth
+from hyperforge.standalone.oauth import force_https_metadata, get_enabled_mcp_auth
 from hyperforge.workflows import WorkflowData
 
 if TYPE_CHECKING:
@@ -252,11 +252,14 @@ async def mcp_interaction_protected_resource_metadata(
     mcp_url = request.url_for(
         "interaction_mcp_handler", agent_id=agent_id, session=session
     )
+    force_https = force_https_metadata(app)
     auth_config = _get_mcp_auth_config(app, agent_id)
     resource = (
         auth_config.protected_resource
         if auth_config is not None and auth_config.protected_resource is not None
         else str(mcp_url.replace(scheme="https"))
+        if force_https
+        else str(mcp_url)
     )
     default_authorization_server, default_scopes_supported = _default_oauth_metadata(
         app

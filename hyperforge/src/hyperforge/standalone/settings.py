@@ -35,6 +35,14 @@ class StandaloneSettings(BaseSettings):
     port: int = Field(default=8080, description="Listen port.")
     log_level: str = Field(default="INFO", description="Log level (uvicorn + app).")
     debug: bool = Field(default=False, description="Enable debug mode.")
+    mcp_force_https_metadata: bool = Field(
+        default=True,
+        description=(
+            "When true, force https URLs in OAuth protected-resource metadata links "
+            "emitted by MCP auth challenges and metadata endpoints. "
+            "Set false only for local/dev HTTP deployments."
+        ),
+    )
 
     # ------------------------------------------------------------------
     # Agent runner
