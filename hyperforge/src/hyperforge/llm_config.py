@@ -81,7 +81,7 @@ class LLMConfig(BaseModel):
     type: str = Field(
         default=LLM_CONFIG_TYPE,
         alias="_type",
-        json_schema_extra={"widget": WidgetType.HIDDEN},
+        json_schema_extra={"widget": WidgetType.NOT_SHOWN},
     )
     model_id: str = Field(
         title="Model",
@@ -98,7 +98,7 @@ class LLMConfig(BaseModel):
         default=None,
         title="Advanced reasoning",
         description="Fine-grained reasoning configuration (effort level, budget tokens). Takes precedence over 'reasoning' if both are set.",
-        json_schema_extra={"widget": WidgetType.HIDDEN},
+        json_schema_extra={"widget": WidgetType.NOT_SHOWN},
     )
 
     def get_effective_reasoning(self) -> Optional[ReasoningConfig]:
