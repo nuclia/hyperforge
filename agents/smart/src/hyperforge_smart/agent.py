@@ -763,12 +763,9 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             tool_key = self._tool_call_key(
                 skipped_result.tool_name, skipped_result.tool_arguments
             )
-            attempted_tool_calls[tool_key] = ToolAttempt(
-                tool_name=skipped_result.tool_name,
-                tool_arguments=skipped_result.tool_arguments,
-                outcome=self._classify_tool_result(skipped_result),
-                detail=str(skipped_result),
-            )
+            previous_attempt = attempted_tool_calls.get(tool_key)
+            if previous_attempt is not None:
+                previous_attempt.detail = str(skipped_result)
 
         result_texts = self._process_results(list(results), context=context)
         result_summary = "; ".join(
