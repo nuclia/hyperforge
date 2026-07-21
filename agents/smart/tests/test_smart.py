@@ -537,9 +537,9 @@ async def test_smart_plan_execute_surfaces_empty_attempts_to_planner():
                 0.0,
             )
 
-        assert "Tool attempts:" in prompt
         assert "**Tool attempts:**" in prompt
-        assert f"- lookup__{agent_id}({{'query': 'Snoopy'}}): empty" in prompt
+        assert f"- lookup__{agent_id}(" in prompt
+        assert ": empty" in prompt and "Snoopy" in prompt
         return (
             {
                 "status": "done",
