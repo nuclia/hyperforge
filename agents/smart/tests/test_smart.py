@@ -1,12 +1,22 @@
 import os
 from copy import deepcopy
+from types import SimpleNamespace
+from typing import ClassVar
 from unittest.mock import patch
 
 import pytest
-from hyperforge.engine import main as arag_main
+from hyperforge.context.agent import ContextAgent
+from hyperforge.definition import FunctionDefinition
+from hyperforge.engine import main as hyperforge_main
 from hyperforge.interaction import AragAnswer
+from hyperforge.manager import Manager
+from hyperforge.memory.memory import EphemeralSessionMemory, MemoryConfig
 from hyperforge.minimal_fixtures import cassette_nua_key
+from hyperforge.models import Context, Rules
 from hyperforge.pubsub import UserToAgentInteraction
+
+from hyperforge_smart.agent import RegisteredAgent, SmartAgent
+from hyperforge_smart.config import SmartAgentConfig
 
 NUA_KEY = os.environ.get(
     "NUA_KEY",
@@ -106,7 +116,7 @@ async def test_smart(executor_model, planner_model):
     async def callback(obj: AragAnswer):
         answers.append(obj)
 
-    question_memory = await arag_main(
+    question_memory = await hyperforge_main(
         agent_id="default",
         internal_nua=False,
         external_nua_api_key=NUA_KEY,
@@ -128,7 +138,7 @@ async def test_smart(executor_model, planner_model):
         keyword.lower() in question_memory.final_answer.lower() for keyword in keywords
     )
 
-    question_memory = await arag_main(
+    question_memory = await hyperforge_main(
         agent_id="default",
         internal_nua=False,
         external_nua_api_key=NUA_KEY,
@@ -155,7 +165,7 @@ async def test_smart(executor_model, planner_model):
 @pytest.mark.vcr(ignore_localhost=True)
 async def test_smart_parameters():
     question = "Who is Snoopy and can you tell me the stock price of the company where his owner works?"
-    question_memory = await arag_main(
+    question_memory = await hyperforge_main(
         agent_id="default",
         internal_nua=False,
         external_nua_api_key=NUA_KEY,
@@ -199,7 +209,7 @@ async def test_smart_parameters():
     # Verify that the planning mode also works correctly
     config = deepcopy(CONFIG)
     config["context"][0]["planning_mode"] = "plan_execute"
-    question_memory = await arag_main(
+    question_memory = await hyperforge_main(
         agent_id="default",
         internal_nua=False,
         external_nua_api_key=NUA_KEY,
@@ -244,7 +254,7 @@ async def test_smart_parameters():
 @pytest.mark.vcr(ignore_localhost=True)
 async def test_smart_calls_correct_agent():
     """Verify the smart agent calls only the relevant agent for a focused question."""
-    question_memory = await arag_main(
+    question_memory = await hyperforge_main(
         agent_id="default",
         internal_nua=False,
         external_nua_api_key=NUA_KEY,
@@ -282,7 +292,7 @@ async def test_smart_with_history():
     """Verify the smart agent includes session history when history is enabled."""
     config = deepcopy(CONFIG)
     config["context"][0]["history"] = True
-    question_memory = await arag_main(
+    question_memory = await hyperforge_main(
         agent_id="default",
         internal_nua=False,
         external_nua_api_key=NUA_KEY,
@@ -336,7 +346,7 @@ async def test_smart_with_user_feedback():
         "hyperforge.memory.memory.QuestionMemory.send_feedback",
         side_effect=mock_send_feedback,
     ):
-        question_memory = await arag_main(
+        question_memory = await hyperforge_main(
             agent_id="default",
             internal_nua=False,
             external_nua_api_key=NUA_KEY,
@@ -357,3 +367,199 @@ async def test_smart_with_user_feedback():
         keyword.lower() in question_memory.final_answer.lower()
         for keyword in ["Snoopy", "dog", "Carmen"]
     )
+
+
+class EmptyResultAgent(ContextAgent):
+    __published_functions__: ClassVar[dict[str, FunctionDefinition]] = {
+        "lookup": FunctionDefinition(
+            name="lookup",
+            description="Return context for a lookup request.",
+            parameters={
+                "query": {
+                    "type": "string",
+                    "description": "Query to look up.",
+                }
+            },
+        )
+    }
+
+    def __init__(self, agent_id: str):
+        self.agent_id = agent_id
+        self.calls: list[dict[str, str]] = []
+
+    async def preload(self, manager, memory):
+        return None
+
+    async def lookup(self, memory, manager, query: str):
+        self.calls.append({"query": query})
+        return Context(
+            original_question_uuid=memory.original_question_uuid,
+            actual_question_uuid=memory.actual_question_uuid,
+            question=query,
+            source="dummy",
+            agent="dummy",
+            agent_id=self.agent_id,
+            title="Empty result",
+            chunks=[],
+        )
+
+
+def make_tool_response(name: str, arguments: dict[str, str]):
+    return SimpleNamespace(
+        tools={
+            name: [
+                SimpleNamespace(
+                    function=SimpleNamespace(name=name, arguments=arguments)
+                )
+            ]
+        }
+    )
+
+
+@pytest.mark.asyncio
+async def test_smart_reactive_does_not_repeat_identical_empty_tool_call():
+    agent_id = "empty-agent"
+    empty_agent = EmptyResultAgent(agent_id=agent_id)
+    smart_agent = SmartAgent(
+        config=SmartAgentConfig.model_validate(
+            {
+                "id": "smart-test",
+                "module": "smart",
+                "title": "Smart Agent",
+                "planning_mode": "reactive",
+                "max_iterations": 3,
+            }
+        )
+    )
+    smart_agent.registered_agents = [
+        RegisteredAgent(
+            agent=empty_agent,
+            description="Returns an empty result for testing.",
+            available_functions=empty_agent.__published_functions__,
+        )
+    ]
+
+    memory = EphemeralSessionMemory.from_config(
+        MemoryConfig.model_validate({}),
+        agent_id="agent",
+        workflow_id="default",
+        rules=Rules(rules=[]),
+    )
+    memory.init("session")
+    question_memory = memory.start_question("Find Snoopy", question_id="question-id")
+
+    responses = iter(
+        [
+            (make_tool_response(f"lookup__{agent_id}", {"query": "Snoopy"}), 0.0, 0.0),
+            (make_tool_response(f"lookup__{agent_id}", {"query": "Snoopy"}), 0.0, 0.0),
+            (make_tool_response("task_complete", {}), 0.0, 0.0),
+        ]
+    )
+
+    async def fake_choose_tools(
+        self, manager, messages, tools, system_override=None, tracking=None
+    ):
+        return next(responses)
+
+    with patch.object(SmartAgent, "choose_tools", fake_choose_tools):
+        await smart_agent.smart_planner(
+            question="Find Snoopy",
+            memory=question_memory,
+            manager=SimpleNamespace(spec=Manager),
+            question_uuid="question-id",
+        )
+
+    assert empty_agent.calls == [{"query": "Snoopy"}]
+
+
+@pytest.mark.asyncio
+async def test_smart_plan_execute_surfaces_empty_attempts_to_planner():
+    agent_id = "empty-agent"
+    empty_agent = EmptyResultAgent(agent_id=agent_id)
+    smart_agent = SmartAgent(
+        config=SmartAgentConfig.model_validate(
+            {
+                "id": "smart-test",
+                "module": "smart",
+                "title": "Smart Agent",
+                "planning_mode": "plan_execute",
+                "max_iterations": 3,
+            }
+        )
+    )
+    smart_agent.registered_agents = [
+        RegisteredAgent(
+            agent=empty_agent,
+            description="Returns an empty result for testing.",
+            available_functions=empty_agent.__published_functions__,
+        )
+    ]
+
+    memory = EphemeralSessionMemory.from_config(
+        MemoryConfig.model_validate({}),
+        agent_id="agent",
+        workflow_id="default",
+        rules=Rules(rules=[]),
+    )
+    memory.init("session")
+    question_memory = memory.start_question("Find Snoopy", question_id="question-id")
+
+    responses = iter(
+        [
+            (make_tool_response(f"lookup__{agent_id}", {"query": "Snoopy"}), 0.0, 0.0),
+            (make_tool_response("task_complete", {}), 0.0, 0.0),
+        ]
+    )
+    planner_prompts: list[str] = []
+
+    async def fake_choose_tools(
+        self, manager, messages, tools, system_override=None, tracking=None
+    ):
+        return next(responses)
+
+    async def fake_execute_json(*args, **kwargs):
+        prompt = kwargs["prompt"]
+        planner_prompts.append(prompt)
+        if len(planner_prompts) == 1:
+            return (
+                {
+                    "status": "plan",
+                    "reasoning": "Need to search once.",
+                    "summary": "Nothing yet.",
+                    "steps": [
+                        {
+                            "description": "Look up Snoopy in the available source.",
+                            "reason": "Need source-specific context.",
+                        }
+                    ],
+                },
+                0.0,
+                0.0,
+            )
+
+        assert "Tool attempts:" in prompt
+        assert "**Tool attempts:**" in prompt
+        assert f"- lookup__{agent_id}({{'query': 'Snoopy'}}): empty" in prompt
+        return (
+            {
+                "status": "done",
+                "reasoning": "The previous attempt was exhausted and should not be repeated.",
+                "summary": "The lookup path returned no useful information.",
+                "steps": [],
+            },
+            0.0,
+            0.0,
+        )
+
+    manager = SimpleNamespace(execute_json=fake_execute_json)
+
+    with patch.object(SmartAgent, "choose_tools", fake_choose_tools):
+        await smart_agent.smart_planner(
+            question="Find Snoopy",
+            memory=question_memory,
+            manager=manager,
+            question_uuid="question-id",
+        )
+
+    assert empty_agent.calls == [{"query": "Snoopy"}]
+    assert len(planner_prompts) == 2

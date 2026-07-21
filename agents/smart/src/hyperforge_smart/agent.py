@@ -1,8 +1,9 @@
 import asyncio
+import json
 import logging
 from dataclasses import dataclass, field
 from time import time
-from typing import Any, ClassVar, Dict, List, Optional, Tuple
+from typing import Any, ClassVar, Dict, List, Literal, Optional, Tuple
 from uuid import uuid4
 
 from hyperforge.agent import Agent
@@ -54,6 +55,29 @@ class ToolError:
         return self.error
 
 
+@dataclass
+class SkippedToolCall:
+    """Represents a tool call that was intentionally skipped by the orchestrator."""
+
+    tool_name: str
+    tool_arguments: Dict[str, Any]
+    reason: str
+
+    def __str__(self) -> str:
+        return self.reason
+
+
+ToolOutcome = Literal["useful", "empty", "error"]
+
+
+@dataclass
+class ToolAttempt:
+    tool_name: str
+    tool_arguments: Dict[str, Any]
+    outcome: ToolOutcome
+    detail: str
+
+
 TASK_COMPLETE_TOOL = Tool(
     name="task_complete",
     description="Call this tool when you have gathered enough information to answer the question and no more tools are needed.",
@@ -87,6 +111,7 @@ class PlanIteration:
     plan_summary: str = ""
     results: List[Tuple[str, Any]] = field(default_factory=list)
     results_summary: str = ""
+    tool_attempts: List[ToolAttempt] = field(default_factory=list)
 
 
 class RegisteredAgent(BaseModel):
@@ -133,6 +158,90 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
     }
     config: SmartAgentConfig
     registered_agents: List[RegisteredAgent]
+
+    @staticmethod
+    def _normalize_tool_arguments(value: Any) -> Any:
+        if isinstance(value, dict):
+            return {
+                key: SmartAgent._normalize_tool_arguments(value[key])
+                for key in sorted(value)
+            }
+        if isinstance(value, list):
+            return [SmartAgent._normalize_tool_arguments(item) for item in value]
+        return value
+
+    @classmethod
+    def _tool_call_key(cls, tool_name: str, tool_arguments: Dict[str, Any]) -> str:
+        normalized_arguments = cls._normalize_tool_arguments(tool_arguments or {})
+        return json.dumps(
+            {"tool_name": tool_name, "tool_arguments": normalized_arguments},
+            sort_keys=True,
+            ensure_ascii=True,
+            default=str,
+        )
+
+    @staticmethod
+    def _context_has_useful_content(context: Context) -> bool:
+        return any(
+            [
+                bool(context.chunks),
+                bool(context.structured),
+                bool(context.json_objects),
+                bool(context.prompts),
+                bool(context.images),
+                bool(context.summary.strip()),
+                bool(context.image_urls),
+            ]
+        )
+
+    @classmethod
+    def _classify_tool_result(cls, result: Any) -> ToolOutcome:
+        if isinstance(result, (ToolError, SkippedToolCall)):
+            return "error"
+        if result is None:
+            return "empty"
+        if isinstance(result, Context):
+            return "useful" if cls._context_has_useful_content(result) else "empty"
+        if isinstance(result, list):
+            if not result:
+                return "empty"
+            if all(isinstance(item, Context) for item in result):
+                return (
+                    "useful"
+                    if any(cls._context_has_useful_content(item) for item in result)
+                    else "empty"
+                )
+            return "useful"
+        if isinstance(result, str):
+            return "useful" if result.strip() else "empty"
+        if isinstance(result, (dict, tuple, set)):
+            return "useful" if len(result) > 0 else "empty"
+        return "useful"
+
+    @classmethod
+    def _build_tool_attempts(cls, results: List[Tuple[str, Any]]) -> List[ToolAttempt]:
+        attempts: List[ToolAttempt] = []
+        for action_info, result in results:
+            tool_name = action_info
+            tool_arguments: Dict[str, Any] = {}
+            if isinstance(result, (ToolError, SkippedToolCall)):
+                tool_name = result.tool_name
+                tool_arguments = result.tool_arguments
+            attempts.append(
+                ToolAttempt(
+                    tool_name=tool_name,
+                    tool_arguments=tool_arguments,
+                    outcome=cls._classify_tool_result(result),
+                    detail=str(result),
+                )
+            )
+        return attempts
+
+    @staticmethod
+    def _planner_attempts_from_registry(
+        attempted_tool_calls: Dict[str, ToolAttempt],
+    ) -> List[ToolAttempt]:
+        return list(attempted_tool_calls.values())
 
     async def inner_from_config(
         self, config: SmartAgentConfig, agent_id: Optional[str] = None
@@ -255,6 +364,10 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         for action_info, result in results:
             if isinstance(result, ToolError):
                 result_texts.append(f"[{action_info}]:\n{result.error}")
+                continue
+
+            if isinstance(result, SkippedToolCall):
+                result_texts.append(f"[{action_info}]:\n{result.reason}")
                 continue
 
             if isinstance(result, Context):
@@ -515,6 +628,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         tool_calls: List[Tuple[str, Any]],
         turn_label: str,
         context: Optional[Context] = None,
+        attempted_tool_calls: Optional[Dict[str, ToolAttempt]] = None,
     ) -> List[Tuple[str, Any]]:
         """Handle one turn of tool calls.
 
@@ -585,13 +699,77 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             return []
 
         # --- normal tool execution path ---
-        results = await asyncio.gather(
-            *[
-                self.execute_tool_call(memory, manager, name, args)
-                for name, args in tool_calls
-                if name != "task_complete"
-            ]
+        attempted_tool_calls = (
+            attempted_tool_calls if attempted_tool_calls is not None else {}
         )
+        skipped_results: List[Tuple[str, Any]] = []
+        calls_to_execute: List[Tuple[str, Dict[str, Any]]] = []
+
+        for name, args in tool_calls:
+            if name == "task_complete":
+                continue
+            tool_arguments = args or {}
+            tool_key = self._tool_call_key(name, tool_arguments)
+            previous_attempt = attempted_tool_calls.get(tool_key)
+            if previous_attempt is not None and previous_attempt.outcome in {
+                "empty",
+                "error",
+            }:
+                skipped_results.append(
+                    (
+                        name,
+                        SkippedToolCall(
+                            tool_name=name,
+                            tool_arguments=tool_arguments,
+                            reason=(
+                                "Skipped repeated tool call because the same tool "
+                                "with the same arguments already returned an "
+                                f"{previous_attempt.outcome} result in this run."
+                            ),
+                        ),
+                    )
+                )
+                continue
+
+            attempted_tool_calls[tool_key] = ToolAttempt(
+                tool_name=name,
+                tool_arguments=tool_arguments,
+                outcome="useful",
+                detail="pending",
+            )
+            calls_to_execute.append((name, tool_arguments))
+
+        executed_results = []
+        if calls_to_execute:
+            executed_results = await asyncio.gather(
+                *[
+                    self.execute_tool_call(memory, manager, name, args)
+                    for name, args in calls_to_execute
+                ]
+            )
+
+        results = [*executed_results, *skipped_results]
+        for (tool_name, tool_arguments), (_, result) in zip(
+            calls_to_execute, executed_results
+        ):
+            tool_key = self._tool_call_key(tool_name, tool_arguments)
+            attempted_tool_calls[tool_key] = ToolAttempt(
+                tool_name=tool_name,
+                tool_arguments=tool_arguments,
+                outcome=self._classify_tool_result(result),
+                detail=str(result),
+            )
+        for _, skipped_result in skipped_results:
+            tool_key = self._tool_call_key(
+                skipped_result.tool_name, skipped_result.tool_arguments
+            )
+            attempted_tool_calls[tool_key] = ToolAttempt(
+                tool_name=skipped_result.tool_name,
+                tool_arguments=skipped_result.tool_arguments,
+                outcome=self._classify_tool_result(skipped_result),
+                detail=str(skipped_result),
+            )
+
         result_texts = self._process_results(list(results), context=context)
         result_summary = "; ".join(
             f"{info}: {'context' if isinstance(res, Context) else type(res).__name__}"
@@ -650,6 +828,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         finished = False
         total_input_tokens = 0.0
         total_output_tokens = 0.0
+        attempted_tool_calls: Dict[str, ToolAttempt] = {}
         while not finished and iteration < self.config.max_iterations:
             iteration += 1
 
@@ -703,6 +882,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 tool_calls=tool_calls,
                 turn_label=f"iteration {iteration}/{self.config.max_iterations}",
                 context=context,
+                attempted_tool_calls=attempted_tool_calls,
             )
 
         reason = (
@@ -779,7 +959,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         steps: List[Dict[str, Any]],
         summary: str,
         tools: List[Tool],
-    ) -> Tuple[List[Tuple[str, Any]], float, float]:
+    ) -> Tuple[List[Tuple[str, Any]], float, float, List[ToolAttempt]]:
         """Run the executor LLM turn: call tools guided by the current plan steps."""
         system = PLAN_EXECUTE_EXECUTOR_SYSTEM_PROMPT_TEMPLATE.render(
             question=question,
@@ -796,6 +976,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         total_output_tokens = 0.0
         finished = False
         max_executor_turns = self.config.max_iterations
+        attempted_tool_calls: Dict[str, ToolAttempt] = {}
 
         executor_turn = 0
         while not finished and executor_turn < max_executor_turns:
@@ -822,10 +1003,16 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 messages=messages,
                 tool_calls=tool_calls,
                 turn_label=f"executor turn {executor_turn}/{max_executor_turns}",
+                attempted_tool_calls=attempted_tool_calls,
             )
             all_results.extend(results)
 
-        return all_results, total_input_tokens, total_output_tokens
+        return (
+            all_results,
+            total_input_tokens,
+            total_output_tokens,
+            self._planner_attempts_from_registry(attempted_tool_calls),
+        )
 
     async def _plan_and_execute(
         self,
@@ -854,6 +1041,8 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         iteration = 0
         total_input_tokens = 0.0
         total_output_tokens = 0.0
+        status = "done"
+        steps: List[Dict[str, Any]] = []
 
         # Build tools once for the entire plan-execute cycle
         tools = self.build_tools()
@@ -916,6 +1105,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 iteration_results,
                 exec_in_tokens,
                 exec_out_tokens,
+                iteration_attempts,
             ) = await self._call_executor(
                 memory=memory,
                 manager=manager,
@@ -933,6 +1123,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             )
             current_iteration.results = iteration_results
             current_iteration.results_summary = results_summary
+            current_iteration.tool_attempts = iteration_attempts
             history.append(current_iteration)
 
             exec_result_summary = (

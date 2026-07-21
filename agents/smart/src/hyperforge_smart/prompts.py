@@ -31,6 +31,7 @@ Guidelines:
 - Produce a minimal, targeted plan: only include steps that will meaningfully advance towards answering the question.
 - If the information gathered so far is already sufficient to answer the question, set status to "done".
 - Each step should describe the information to retrieve in plain language.
+- Do not propose steps that depend on repeating tool attempts that already produced empty or error results, unless the question or available information has materially changed.
 - Provide a concise summary of what has been accomplished so far for the executor to use as context."""
 
 PLAN_EXECUTE_PLANNER_PROMPT_TEMPLATE = PROMPT_ENVIRONMENT.from_string(
@@ -53,6 +54,12 @@ Previous interactions in this session that may be relevant to the question and c
 ### Iteration {{ loop.index }}
 **Plan:** {{ entry.plan_summary }}
 **Results summary:** {{ entry.results_summary }}
+{% if entry.tool_attempts %}
+**Tool attempts:**
+{% for attempt in entry.tool_attempts %}
+- {{ attempt.tool_name }}({{ attempt.tool_arguments }}): {{ attempt.outcome }}
+{% endfor %}
+{% endif %}
 {% endfor %}
 {% else %}
 ## Execution history
