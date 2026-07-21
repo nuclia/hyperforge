@@ -218,25 +218,6 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             return "useful" if len(result) > 0 else "empty"
         return "useful"
 
-    @classmethod
-    def _build_tool_attempts(cls, results: List[Tuple[str, Any]]) -> List[ToolAttempt]:
-        attempts: List[ToolAttempt] = []
-        for action_info, result in results:
-            tool_name = action_info
-            tool_arguments: Dict[str, Any] = {}
-            if isinstance(result, (ToolError, SkippedToolCall)):
-                tool_name = result.tool_name
-                tool_arguments = result.tool_arguments
-            attempts.append(
-                ToolAttempt(
-                    tool_name=tool_name,
-                    tool_arguments=tool_arguments,
-                    outcome=cls._classify_tool_result(result),
-                    detail=str(result),
-                )
-            )
-        return attempts
-
     @staticmethod
     def _planner_attempts_from_registry(
         attempted_tool_calls: Dict[str, ToolAttempt],
