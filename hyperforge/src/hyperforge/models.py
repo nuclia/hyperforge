@@ -111,11 +111,30 @@ Visualization = Union[VegaLiteVisualization]
 
 
 class ExternalUsage(BaseModel):
-    provider: str
-    model: str
-    input_tokens: int = 0
-    output_tokens: int = 0
-    requests: int = 1
+    provider: str = Field(
+        description="The external provider that generated this usage.",
+        examples=["perplexity", "google", "brave"],
+    )
+    model: str = Field(
+        description="The model identifier that was used. Might also refer to specific api or request type.",
+        examples=["sonar", "gemini-3.5-flash", "search"],
+    )
+    input_tokens: int = Field(
+        default=0,
+        description="Number of raw input tokens used for this request. This number is forwarded from the external provider.",
+    )
+    output_tokens: int = Field(
+        default=0,
+        description="Number of raw output tokens generated for this request. This number is forwarded from the external provider.",
+    )
+    image: int = Field(
+        default=0,
+        description="Usage specific to images. Might refer to image tokens, images generated, or images processed.",
+    )
+    requests: int = Field(
+        default=1,
+        description="Number of requests made to the external provider.",
+    )
 
 
 class Step(BaseModel):
