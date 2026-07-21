@@ -10,6 +10,7 @@ from hyperforge.standalone.config import StandAloneAgentConfig, StandaloneConfig
 from hyperforge.standalone.settings import StandaloneSettings
 
 BUILTIN_MODULES = (
+    "hyperforge_a2a",
     "hyperforge_conditional",
     "hyperforge_external",
     "hyperforge_generate.agent",
