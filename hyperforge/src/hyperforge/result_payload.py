@@ -56,8 +56,12 @@ def inspect_text_blocks(
         if overflow is not None:
             return overflow
 
-    combined = "\n".join(texts)
-    observed_bytes = len(combined.encode("utf-8"))
+    observed_bytes = 0
+    for idx, text in enumerate(texts):
+        if idx:
+            observed_bytes += 1  # "\n" separator
+        observed_bytes += len(text.encode("utf-8"))
+
     if observed_bytes <= budget.max_bytes:
         return None
     return OversizedResult(
