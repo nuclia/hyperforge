@@ -26,18 +26,6 @@ def context_agent_validator(value: Any, handler: ValidatorFunctionWrapHandler) -
 
 
 class ContextAgentConfig(AgentConfig):
-    max_tool_result_bytes: int = Field(
-        default=64 * 1024,
-        ge=1,
-        title="Maximum tool result bytes",
-        description="Maximum UTF-8 byte size of one connector result included in LLM context.",
-    )
-    max_tool_result_item_bytes: int = Field(
-        default=16 * 1024,
-        ge=1,
-        title="Maximum tool result item bytes",
-        description="Maximum UTF-8 byte size of one connector text block, row, or structured item.",
-    )
     fallback: Optional["ContextAgentConfig"] = Field(
         default=None,
         title="Fallback agent",
