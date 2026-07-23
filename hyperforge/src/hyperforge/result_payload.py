@@ -19,7 +19,7 @@ class ResultPayloadSettings(BaseSettings):
     """Deployment defaults for connector results that may enter LLM context."""
 
     model_config = SettingsConfigDict(
-        env_prefix="ARAG_TOOL_RESULT_",
+        env_prefix="HYPERFORGE_TOOL_RESULT_",
         populate_by_name=True,
     )
 
