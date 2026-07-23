@@ -78,7 +78,10 @@ async def test_report_tool_error_records_a_safe_rejection_step():
 
     assert "safety budget" in error.error
     assert "x" * 100 not in error.error
-    assert memory.add_step.await_args.kwargs["step_title"] == "Smart agent: Tool result rejected"
+    assert (
+        memory.add_step.await_args.kwargs["step_title"]
+        == "Smart agent: Tool result rejected"
+    )
     assert "observed_bytes=100" in memory.add_step.await_args.kwargs["step_value"]
 
 
@@ -126,7 +129,9 @@ async def test_execute_tool_call_records_an_oversized_result_step():
             agent=OversizedResultAgent(),
             available_functions={
                 "get_large_result": FunctionDefinition(
-                    name="get_large_result", description="Returns a large result", parameters={}
+                    name="get_large_result",
+                    description="Returns a large result",
+                    parameters={},
                 )
             },
         )
@@ -143,7 +148,10 @@ async def test_execute_tool_call_records_an_oversized_result_step():
     assert action_info == "get_large_result of oversized-result-agent"
     assert isinstance(result, Context)
     memory.add_step.assert_awaited_once()
-    assert memory.add_step.await_args.kwargs["step_title"] == "Smart agent: Tool result rejected"
+    assert (
+        memory.add_step.await_args.kwargs["step_title"]
+        == "Smart agent: Tool result rejected"
+    )
     assert "observed_bytes=" in memory.add_step.await_args.kwargs["step_value"]
     assert "byte_limit=32" in memory.add_step.await_args.kwargs["step_value"]
 

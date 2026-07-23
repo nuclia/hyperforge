@@ -5,7 +5,9 @@ from hyperforge.result_payload import (
 
 
 def test_accepts_a_small_text_result():
-    assert inspect_text_blocks(["small result"], ResultPayloadBudget(max_bytes=32)) is None
+    assert (
+        inspect_text_blocks(["small result"], ResultPayloadBudget(max_bytes=32)) is None
+    )
 
 
 def test_rejects_large_text_without_including_payload_content():
