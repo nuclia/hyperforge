@@ -42,7 +42,7 @@ DRIVERS = [
 async def _run_question(
     drivers: list[dict],
     question: str,
-) -> list[Context]:
+) -> tuple[list[Context], EphemeralSessionMemory]:
     """Build a manager from driver configs, run the agent, return contexts."""
     load_all_configurations("hyperforge_google")
     # Google agent doesn't use nua — construct client directly with test values
@@ -78,11 +78,11 @@ async def _run_question(
         question=question,
         flow_id=flow_id,
     )
-    return memory.get_agent_contexts(flow_id=flow_id, agent_id=agent.agent_id)
+    return memory.get_agent_contexts(flow_id=flow_id, agent_id=agent.agent_id), memory
 
 
 async def test_google():
-    contexts = await _run_question(
+    contexts, memory = await _run_question(
         DRIVERS,
         "What is Nuclia?",
     )
@@ -90,3 +90,11 @@ async def test_google():
     all_text = " ".join(chunk.text for ctx in contexts for chunk in ctx.chunks).lower()
     summary = " ".join(ctx.summary for ctx in contexts if ctx.summary).lower()
     assert "rag" in all_text or "ai" in all_text or "rag" in summary or "ai" in summary
+    usage = next(step.external_usage for step in memory.steps if step.external_usage)
+    assert len(usage) == 1
+    event = usage[0]
+    assert event.provider == "google"
+    assert event.model == "gemini-2.5-flash"
+    assert event.input_tokens > 0
+    assert event.output_tokens > 0
+    assert event.requests == 1

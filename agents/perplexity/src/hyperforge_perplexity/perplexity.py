@@ -9,6 +9,7 @@ from hyperforge.context.agent import ContextAgent
 from hyperforge.definition import FunctionDefinition
 from hyperforge.manager import Manager
 from hyperforge.memory import Chunk, Context, QuestionMemory
+from hyperforge.models import ExternalUsage
 from hyperforge.utils.http import safe_http_client
 from nuclia.lib.nua_responses import Image
 from perplexity.types import ChatMessageInput
@@ -135,8 +136,6 @@ class PerplexityAgent(ContextAgent, Agent[PerplexityAgentConfig]):
             )
             context.chunks.append(chunk)
 
-        # for chunk in response add to context
-        input_nuclia_tokens = 0
         context.summary = text if text is not None else ""
 
         if (
@@ -147,9 +146,7 @@ class PerplexityAgent(ContextAgent, Agent[PerplexityAgentConfig]):
             questions: List[str] = cast(List[str], response.related_questions)
             memory.add_future_questions(questions)
 
-        # TODO: Report nuclia tokens correctly
-        if response.usage is not None and response.usage.total_tokens is not None:
-            input_nuclia_tokens += response.usage.total_tokens
+        usage = response.usage
 
         await memory.add_step(
             step_module=self.config.module,
@@ -158,8 +155,15 @@ class PerplexityAgent(ContextAgent, Agent[PerplexityAgentConfig]):
             step_agent_path=f"/context/{self.config.id or self.agent_id}",
             step_value=text if text is not None else "",
             timeit=time() - t0,
-            input_nuclia_tokens=input_nuclia_tokens,
-            output_nuclia_tokens=0,
+            external_usage=[
+                ExternalUsage(
+                    provider="perplexity",
+                    model="sonar-pro",
+                    input_tokens=(usage.prompt_tokens or 0) if usage else 0,
+                    output_tokens=(usage.completion_tokens or 0) if usage else 0,
+                    requests=1,
+                )
+            ],
         )
         return context
 
