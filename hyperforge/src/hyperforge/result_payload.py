@@ -11,8 +11,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class ResultPayloadBudget:
     """Limits for data returned by a connector in a single tool call."""
 
-    max_bytes: int = 64 * 1024
-    max_item_bytes: int = 16 * 1024
+    max_bytes: int
+    max_item_bytes: int
 
 
 class ResultPayloadSettings(BaseSettings):
