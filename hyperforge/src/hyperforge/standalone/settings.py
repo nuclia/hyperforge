@@ -2,7 +2,7 @@
 Runtime settings for the standalone arag deployment.
 
 All values can be supplied via:
-    - Environment variables (prefixed with HYPERFORGE_, e.g. HYPERFORGE_EXTERNAL_NUA_API_KEY)
+    - Environment variables (prefixed with ARAG_, e.g. ARAG_EXTERNAL_NUA_API_KEY)
   - A .env file
   - CLI arguments when using the pydantic-settings CLI integration
 
