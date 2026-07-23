@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Any, Sequence
 
-from pydantic import AliasChoices, Field, model_validator
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,21 +18,18 @@ class ResultPayloadBudget:
 class ResultPayloadSettings(BaseSettings):
     """Deployment defaults for connector results that may enter LLM context."""
 
-    model_config = SettingsConfigDict(populate_by_name=True)
+    model_config = SettingsConfigDict(
+        env_prefix="ARAG_TOOL_RESULT_",
+        populate_by_name=True,
+    )
 
     max_bytes: int = Field(
         default=64 * 1024,
         ge=1,
-        validation_alias=AliasChoices(
-            "TOOL_RESULT_MAX_BYTES", "ARAG_TOOL_RESULT_MAX_BYTES"
-        ),
     )
     max_item_bytes: int = Field(
         default=16 * 1024,
         ge=1,
-        validation_alias=AliasChoices(
-            "TOOL_RESULT_MAX_ITEM_BYTES", "ARAG_TOOL_RESULT_MAX_ITEM_BYTES"
-        ),
     )
 
     @model_validator(mode="after")

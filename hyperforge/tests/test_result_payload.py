@@ -52,8 +52,8 @@ def test_rejects_multiple_small_blocks_that_exceed_the_total_budget():
 
 
 def test_uses_deployment_defaults_when_agent_has_no_overrides(monkeypatch):
-    monkeypatch.setenv("TOOL_RESULT_MAX_BYTES", "100")
-    monkeypatch.setenv("TOOL_RESULT_MAX_ITEM_BYTES", "50")
+    monkeypatch.setenv("ARAG_TOOL_RESULT_MAX_BYTES", "100")
+    monkeypatch.setenv("ARAG_TOOL_RESULT_MAX_ITEM_BYTES", "50")
 
     budget = budget_from_config(
         SimpleNamespace(max_tool_result_bytes=None, max_tool_result_item_bytes=None)
@@ -62,7 +62,7 @@ def test_uses_deployment_defaults_when_agent_has_no_overrides(monkeypatch):
     assert budget == ResultPayloadBudget(max_bytes=100, max_item_bytes=50)
 
 
-def test_accepts_arag_deployment_environment_variables(monkeypatch):
+def test_uses_arag_tool_result_environment_prefix(monkeypatch):
     monkeypatch.setenv("ARAG_TOOL_RESULT_MAX_BYTES", "100")
     monkeypatch.setenv("ARAG_TOOL_RESULT_MAX_ITEM_BYTES", "50")
 
@@ -73,8 +73,8 @@ def test_accepts_arag_deployment_environment_variables(monkeypatch):
 
 
 def test_agent_overrides_take_precedence_over_deployment_defaults(monkeypatch):
-    monkeypatch.setenv("TOOL_RESULT_MAX_BYTES", "100")
-    monkeypatch.setenv("TOOL_RESULT_MAX_ITEM_BYTES", "50")
+    monkeypatch.setenv("ARAG_TOOL_RESULT_MAX_BYTES", "100")
+    monkeypatch.setenv("ARAG_TOOL_RESULT_MAX_ITEM_BYTES", "50")
 
     budget = budget_from_config(
         SimpleNamespace(max_tool_result_bytes=80, max_tool_result_item_bytes=40)
