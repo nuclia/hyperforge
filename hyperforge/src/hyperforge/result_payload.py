@@ -1,0 +1,78 @@
+"""Bound external connector results before they can be sent to an LLM."""
+
+from dataclasses import dataclass
+from typing import Any, Sequence
+
+
+@dataclass(frozen=True)
+class ResultPayloadBudget:
+    """Limits for data returned by a connector in a single tool call."""
+
+    max_bytes: int = 64 * 1024
+    max_item_bytes: int = 16 * 1024
+
+
+@dataclass(frozen=True)
+class OversizedResult:
+    """A safe, bounded description of a rejected connector result."""
+
+    kind: str
+    observed_bytes: int
+    max_bytes: int
+
+    def trace_value(self) -> str:
+        """Return non-sensitive metadata suitable for an execution step."""
+        value = (
+            f"kind={self.kind}; observed_bytes={self.observed_bytes}; "
+            f"byte_limit={self.max_bytes}"
+        )
+        return value
+
+    def render(self) -> str:
+        details = [
+            "Tool result was not included because it exceeds the configured safety budget.",
+            f"Observed size: {self.observed_bytes} bytes; limit: {self.max_bytes} bytes.",
+        ]
+        details.append(
+            "Retry with narrower filters, pagination, aggregation, or a summary-oriented request."
+        )
+        return "\n".join(details)
+
+
+def budget_from_config(config: Any) -> ResultPayloadBudget:
+    """Build a result budget from a context-agent configuration."""
+    return ResultPayloadBudget(
+        max_bytes=config.max_tool_result_bytes,
+        max_item_bytes=config.max_tool_result_item_bytes,
+    )
+
+
+def inspect_text_blocks(
+    texts: Sequence[str], budget: ResultPayloadBudget
+) -> OversizedResult | None:
+    """Inspect several text blocks as one connector result."""
+    for text in texts:
+        overflow = _inspect_text(text, budget)
+        if overflow is not None:
+            return overflow
+
+    combined = "\n".join(texts)
+    observed_bytes = len(combined.encode("utf-8"))
+    if observed_bytes <= budget.max_bytes:
+        return None
+    return OversizedResult(
+        kind="text",
+        observed_bytes=observed_bytes,
+        max_bytes=budget.max_bytes,
+    )
+
+
+def _inspect_text(text: str, budget: ResultPayloadBudget) -> OversizedResult | None:
+    observed_bytes = len(text.encode("utf-8"))
+    if observed_bytes <= budget.max_bytes and observed_bytes <= budget.max_item_bytes:
+        return None
+    return OversizedResult(
+        kind="text",
+        observed_bytes=observed_bytes,
+        max_bytes=min(budget.max_bytes, budget.max_item_bytes),
+    )
