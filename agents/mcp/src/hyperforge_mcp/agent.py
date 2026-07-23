@@ -556,8 +556,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             return
         if structured is not None:
             context.structured.append(structured)
-            trace_lines.append("Structured content:")
-            trace_lines.append(structured)
+            trace_lines.append(f"structured_bytes: {len(structured.encode('utf-8'))}")
         messages.append(
             Message(author=Author.NUCLIA, text=f"Tool {tool_name} executed")
         )
