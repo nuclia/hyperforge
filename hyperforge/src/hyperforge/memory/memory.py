@@ -710,15 +710,18 @@ class QuestionMemory:
             "final_answer": self.final_answer,
         }
 
-    async def save_context(self, flow_id: str, context: Context):
+    async def save_context(
+        self, flow_id: str, context: Context, agent_id: str | None = None
+    ):
         context.original_question_uuid = self.original_question_uuid
         context.actual_question_uuid = self.actual_question_uuid
         self.contexts.append(context)
         if self.agent_contexts.get(flow_id) is None:
             self.agent_contexts[flow_id] = {}
-        if self.agent_contexts[flow_id].get(context.agent_id) is None:
-            self.agent_contexts[flow_id][context.agent_id] = []
-        self.agent_contexts[flow_id][context.agent_id].append(context)
+        context_agent_id = agent_id or context.agent_id
+        if self.agent_contexts[flow_id].get(context_agent_id) is None:
+            self.agent_contexts[flow_id][context_agent_id] = []
+        self.agent_contexts[flow_id][context_agent_id].append(context)
         if self.callback_fn is not None:
             await self.callback_fn(AragAnswer(context=context))
 

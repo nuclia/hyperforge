@@ -15,6 +15,8 @@ from hyperforge.prompts import (
     NEXT_REPHRASE_PROMPT_SYSTEM,
     NEXT_REPHRASE_PROMPT_TEMPLATE,
     VALIDATE_JSON_SCHEMA,
+    VALIDATE_MULTIPLE_CONTEXTS_JSON_SCHEMA,
+    VALIDATE_MULTIPLE_CONTEXTS_PROMPT_TEMPLATE,
     VALIDATE_OR_ANSWER_PROMPT_TEMPLATE,
 )
 from hyperforge.trace import trace_agent
@@ -75,6 +77,120 @@ class ContextAgent:
             self.fallback = await build_context_agent(config.fallback)
         if config.next_agent:
             self.next_agent = await build_context_agent(config.next_agent)
+
+    async def validate_contexts_and_answer(
+        self,
+        memory: QuestionMemory,
+        manager: Manager,
+        contexts: list[Context],
+        question: str,
+        images: bool = False,
+        fast_answer: bool = False,
+        user_id: str = "rao_answer_summary",
+        use_stored_context_prompts: bool = False,
+        title: Optional[str] = None,
+    ) -> Tuple[Literal["yes", "no", "error"], Optional[str], Optional[str]]:
+        """Validate several contexts and update each relevant context independently."""
+        t0 = time()
+        model = self.context_config.context_validation_model
+        module = self.context_config.module
+        ident = self.context_config.id if self.context_config.id else "default"
+        context_by_id = {context.id: context for context in contexts}
+        block_targets: dict[str, tuple[str, str]] = {}
+        prompt_contexts = []
+        validation_images = {}
+        block_index = 0
+
+        for context_index, context in enumerate(contexts):
+            context.citations = None
+            blocks = {}
+            for chunk in context.chunks:
+                block_id = generate_ctx_block_id(block_index)
+                block_index += 1
+                blocks[block_id] = chunk.render()
+                block_targets[block_id] = (context.id, chunk.chunk_id)
+            for structured_index, structured in enumerate(context.structured):
+                block_id = generate_ctx_block_id(block_index)
+                block_index += 1
+                blocks[block_id] = structured
+                block_targets[block_id] = (
+                    context.id,
+                    f"structured-{structured_index}",
+                )
+            prompt_contexts.append(
+                {
+                    "context_id": context.id,
+                    "title": context.title,
+                    "summary": context.summary,
+                    "blocks": blocks,
+                }
+            )
+            validation_images.update(
+                {
+                    f"context-{context_index}-{image_id}": image
+                    for image_id, image in context.images.items()
+                }
+            )
+
+        prompt = VALIDATE_MULTIPLE_CONTEXTS_PROMPT_TEMPLATE.render(
+            question=question,
+            contexts=prompt_contexts,
+        )
+        try:
+            response, input_tokens, output_tokens = await manager.execute_json(
+                user_id=user_id + f"-{module}",
+                images=validation_images if images else {},
+                prompt=prompt,
+                schema=VALIDATE_MULTIPLE_CONTEXTS_JSON_SCHEMA,
+                model=model,
+            )
+        except Exception as e:
+            error_message = f"Error executing validation of contexts for {module} with question '{question}': {e}"
+            await memory.add_step(
+                step_module=module,
+                step_title=f"{title}: Context summary error",
+                step_reason="Error in summary generation",
+                step_value="Error in summary generation",
+                timeit=time() - t0,
+                step_agent_path=f"/context/{ident}",
+                error=error_message,
+            )
+            return "error", question, error_message
+
+        relevant_contexts = 0
+        for context_result in response.get("contexts", []):
+            ctx = context_by_id.get(context_result.get("context_id"))
+            if ctx is None:
+                continue
+            cited_items = []
+            for block_id in dict.fromkeys(context_result.get("citations", [])):
+                target = block_targets.get(block_id)
+                if target is not None and target[0] == ctx.id:
+                    cited_items.append(target[1])
+
+            answer = context_result.get("answer", "")
+            if not answer and not cited_items:
+                continue
+
+            relevant_contexts += 1
+            ctx.citations = cited_items
+            if answer and "not enough data to answer this" not in answer.lower():
+                ctx.summary = answer
+            else:
+                ctx.summary = ""
+
+        missing = response.get("missing_info_query") or None
+        await memory.add_step(
+            step_module=module,
+            step_title=f"{title}: Context validation",
+            step_reason=f"Selected {relevant_contexts} of {len(contexts)} contexts",
+            step_value="No missing information" if not missing else missing,
+            timeit=time() - t0,
+            input_nuclia_tokens=input_tokens,
+            output_nuclia_tokens=output_tokens,
+            step_agent_path=f"/context/{ident}",
+        )
+        return "yes" if relevant_contexts else "no", missing, None
 
     async def validate_ctx_and_answer(
         self,
@@ -374,4 +490,57 @@ class ContextAgent:
             return missing_question
         else:
             await memory.save_context(flow_id=flow_id, context=context)
+        return None
+
+    async def save_contexts_and_return_missing(
+        self,
+        *,
+        memory: QuestionMemory,
+        manager: Manager,
+        question: str,
+        contexts: list[Context],
+        flow_id: str,
+    ) -> tuple[str, str] | None:
+        """Validate, prune, and save several contexts as one retrieval result."""
+        should_validate = (
+            self.fallback is not None
+            or self.next_agent is not None
+            or self.context_config.prune_context
+        ) and self.context_config.context_validation_model
+
+        if should_validate:
+            useful, missing, validate_error = await self.validate_contexts_and_answer(
+                memory,
+                manager,
+                contexts,
+                question=question,
+                images=any(context.images for context in contexts),
+            )
+            if useful == "yes" or validate_error is not None:
+                for context in contexts:
+                    if self.context_config.prune_context and validate_error is None:
+                        if context.citations is None:
+                            continue
+                        if context.citations == []:
+                            if not context.summary:
+                                continue
+                            context.chunks = []
+                            context.structured = []
+                        else:
+                            context.prune_to_citations()
+                    elif validate_error is None and context.citations is None:
+                        continue
+                    await memory.save_context(
+                        flow_id=flow_id, context=context, agent_id=self.agent_id
+                    )
+            return (
+                None
+                if missing is None or missing.strip() == ""
+                else (uuid4().hex, missing)
+            )
+
+        for context in contexts:
+            await memory.save_context(
+                flow_id=flow_id, context=context, agent_id=self.agent_id
+            )
         return None

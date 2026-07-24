@@ -244,9 +244,9 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
     def _process_results(
         self,
         results: List[Tuple[str, Any]],
-        context: Optional[Context] = None,
+        collected_contexts: Optional[List[Context]] = None,
     ) -> List[str]:
-        """Process tool results: optionally update context chunks, always return text summaries.
+        """Process tool results and optionally retain each returned context.
 
         ToolError results are included in the text summaries (so the LLM
         is aware of the failure) but are never stored in the context.
@@ -266,28 +266,38 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             else:
                 contexts = []
 
-            if context is not None:
+            if collected_contexts is not None:
                 if contexts:
                     for ctx in contexts:
                         for chunk in ctx.chunks:
                             chunk.action = action_info
-                            context.chunks.append(chunk)
-                        if ctx.structured:
-                            for structured in ctx.structured:
-                                if structured:
-                                    context.structured.append(structured)
+                        collected_contexts.append(ctx)
                 else:
-                    context.chunks.append(
-                        Chunk(
-                            chunk_id=uuid4().hex,
-                            text=str(result),
-                            action=action_info,
-                            origin_agent=self.config.module,  # TODO: track origin agent in a better way for text results (this is a corner case, ideally tools return Context objects)
+                    collected_contexts.append(
+                        Context(
+                            agent_id=self.config.id or "smart_agent",
+                            original_question_uuid=None,
+                            actual_question_uuid=None,
+                            question="",
+                            source="smart_agent",
+                            agent="smart_agent",
+                            title=action_info,
+                            chunks=[
+                                Chunk(
+                                    chunk_id=uuid4().hex,
+                                    text=str(result),
+                                    action=action_info,
+                                    origin_agent=self.config.module,
+                                )
+                            ],
                         )
                     )
 
             for ctx in contexts:
-                result_texts.append(f"[{action_info}]:\n{ctx.context_markdown()}")
+                if ctx.summary:
+                    result_texts.append(f"[{action_info}]:\n{ctx.summary}")
+                else:
+                    result_texts.append(f"[{action_info}]:\n{ctx.context_markdown()}")
             if not contexts:
                 result_texts.append(f"[{action_info}]:\n{result}")
 
@@ -460,7 +470,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         manager: Manager,
         question_uuid: Optional[str] = None,
         extra_context: Optional[Dict[str, Any]] = None,
-    ) -> Context:
+    ) -> List[Context]:
         """Entry point: dispatches to the appropriate reasoning mode."""
         if question_uuid is None:
             question_uuid = uuid4().hex
@@ -514,7 +524,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         messages: List[Message],
         tool_calls: List[Tuple[str, Any]],
         turn_label: str,
-        context: Optional[Context] = None,
+        collected_contexts: Optional[List[Context]] = None,
     ) -> List[Tuple[str, Any]]:
         """Handle one turn of tool calls.
 
@@ -572,7 +582,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                             feedback_text,
                         )
                         result_texts = self._process_results(
-                            [feedback_result], context=context
+                            [feedback_result], collected_contexts=collected_contexts
                         )
                         if result_texts:
                             messages.append(
@@ -592,7 +602,9 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 if name != "task_complete"
             ]
         )
-        result_texts = self._process_results(list(results), context=context)
+        result_texts = self._process_results(
+            list(results), collected_contexts=collected_contexts
+        )
         result_summary = "; ".join(
             f"{info}: {'context' if isinstance(res, Context) else type(res).__name__}"
             for info, res in results
@@ -619,7 +631,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         question_uuid: str,
         extra_context: Optional[Dict[str, Any]] = None,
         session_context: str = "",
-    ) -> Context:
+    ) -> List[Context]:
         t0 = time()
 
         tools = self.build_tools()
@@ -636,15 +648,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             )
         messages.append(Message(author=Author.USER, text=question))
 
-        context = Context(
-            agent_id=self.config.id or "smart_agent",
-            original_question_uuid=memory.original_question_uuid,
-            actual_question_uuid=question_uuid,
-            question=question,
-            source="smart_agent",
-            agent="smart_agent",
-            title=self.config.title or "Smart Agent Results",
-        )
+        contexts: List[Context] = []
 
         iteration = 0
         finished = False
@@ -686,12 +690,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 output_nuclia_tokens=output_tokens,
             )
 
-            if not tool_calls:
-                finished = True
-                break
-
-            # Check for task_complete before executing
-            if any(name == "task_complete" for name, _ in tool_calls):
+            if not tool_calls or any(name == "task_complete" for name, _ in tool_calls):
                 finished = True
                 break
 
@@ -702,7 +701,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 messages=messages,
                 tool_calls=tool_calls,
                 turn_label=f"iteration {iteration}/{self.config.max_iterations}",
-                context=context,
+                collected_contexts=contexts,
             )
 
         reason = (
@@ -721,7 +720,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             output_nuclia_tokens=total_output_tokens,
         )
 
-        return context
+        return contexts
 
     async def _call_planner(
         self,
@@ -835,20 +834,12 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         question_uuid: str,
         extra_context: Optional[Dict[str, Any]] = None,
         session_context: str = "",
-    ) -> Context:
+    ) -> List[Context]:
         """Plan-execute reasoning mode: planner drafts a plan, executor runs tools, repeat."""
         t0 = time()
         agent_path = f"/context/{self.config.id or 'default'}"
 
-        context = Context(
-            agent_id=self.config.id or "smart_agent",
-            original_question_uuid=memory.original_question_uuid,
-            actual_question_uuid=question_uuid,
-            question=question,
-            source="smart_agent",
-            agent="smart_agent",
-            title=self.config.title or "Smart Agent Results",
-        )
+        contexts: List[Context] = []
 
         history: List[PlanIteration] = []
         iteration = 0
@@ -927,7 +918,9 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             total_input_tokens += exec_in_tokens
             total_output_tokens += exec_out_tokens
 
-            result_texts = self._process_results(iteration_results, context=context)
+            result_texts = self._process_results(
+                iteration_results, collected_contexts=contexts
+            )
             results_summary = (
                 "\n\n".join(result_texts) if result_texts else "(no results)"
             )
@@ -972,7 +965,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             output_nuclia_tokens=total_output_tokens,
         )
 
-        return context
+        return contexts
 
     async def _get_question_context(
         self,
@@ -983,7 +976,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         flow_id: str,
         extra_context: Optional[Dict[str, Any]] = None,
     ) -> List[Tuple[str, str]]:
-        context = await self.smart_planner(
+        contexts = await self.smart_planner(
             memory=memory,
             manager=manager,
             question_uuid=question_uuid,
@@ -991,8 +984,8 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             extra_context=extra_context,
         )
 
-        missing = await self.save_ctx_and_return_missing(
-            context=context,
+        missing = await self.save_contexts_and_return_missing(
+            contexts=contexts,
             question=question,
             memory=memory,
             manager=manager,

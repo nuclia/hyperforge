@@ -204,6 +204,8 @@ class SummarizeAgent(Agent[SummarizeAgentConfig]):
 
         prompt = PROMPT_TEMPLATE.render(
             question=question,
+            # TODO: Forced chunk-level citations should also expose each context's
+            # summary so answer attempts from upstream tools are not hidden.
             context=memory.contexts_markdown()
             if citations_enabled and self.config.force_chunk_level_citations
             else memory.contexts_minimal(),
