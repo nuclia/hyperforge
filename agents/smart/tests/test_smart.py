@@ -430,6 +430,27 @@ class EmptyResultAgent(ContextAgent):
         )
 
 
+class EmptyLabelsAgent(ContextAgent):
+    __published_functions__: ClassVar[dict[str, FunctionDefinition]] = {
+        "labels": FunctionDefinition(
+            name="labels",
+            description="Return no labels.",
+            parameters={},
+        )
+    }
+
+    def __init__(self, agent_id: str):
+        self.agent_id = agent_id
+        self.calls = 0
+
+    async def preload(self, manager, memory):
+        return None
+
+    async def labels(self, memory, manager):
+        self.calls += 1
+        return {}
+
+
 def make_tool_response(name: str, arguments: dict[str, str]):
     return SimpleNamespace(
         tools={
@@ -559,6 +580,65 @@ async def test_smart_reactive_does_not_repeat_identical_empty_tool_call():
         )
 
     assert empty_agent.calls == [{"query": "Snoopy"}]
+
+
+@pytest.mark.asyncio
+async def test_smart_reactive_hides_empty_parameterless_tool():
+    agent_id = "empty-agent"
+    empty_agent = EmptyLabelsAgent(agent_id=agent_id)
+    smart_agent = SmartAgent(
+        config=SmartAgentConfig.model_validate(
+            {
+                "id": "smart-test",
+                "module": "smart",
+                "title": "Smart Agent",
+                "planning_mode": "reactive",
+                "max_iterations": 2,
+            }
+        )
+    )
+    smart_agent.registered_agents = [
+        RegisteredAgent(
+            agent=empty_agent,
+            description="Returns an empty result for testing.",
+            available_functions=empty_agent.__published_functions__,
+        )
+    ]
+
+    memory = EphemeralSessionMemory.from_config(
+        MemoryConfig.model_validate({}),
+        agent_id="agent",
+        workflow_id="default",
+        rules=Rules(rules=[]),
+    )
+    memory.init("session")
+    question_memory = memory.start_question("Find Snoopy", question_id="question-id")
+
+    responses = iter(
+        [
+            (make_tool_response(f"labels__{agent_id}", {}), 0.0, 0.0),
+            (make_tool_response("task_complete", {}), 0.0, 0.0),
+        ]
+    )
+    tools_by_turn = []
+
+    async def fake_choose_tools(
+        self, manager, messages, tools, system_override=None, tracking=None
+    ):
+        tools_by_turn.append([tool.name for tool in tools])
+        return next(responses)
+
+    with patch.object(SmartAgent, "choose_tools", fake_choose_tools):
+        await smart_agent.smart_planner(
+            question="Find Snoopy",
+            memory=question_memory,
+            manager=SimpleNamespace(spec=Manager),
+            question_uuid="question-id",
+        )
+
+    assert empty_agent.calls == 1
+    assert f"labels__{agent_id}" in tools_by_turn[0]
+    assert f"labels__{agent_id}" not in tools_by_turn[1]
 
 
 @pytest.mark.asyncio
