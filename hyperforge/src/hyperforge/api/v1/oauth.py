@@ -13,7 +13,71 @@ from hyperforge.api.v1.utils import tracer
 
 logger = logging.getLogger(__name__)
 
-RENDER = "<html><body><h1>OAuth Completed</h1><p>You can close this window and return to the application.</p></body></html>"
+RENDER = """\
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Progress Agentic RAG</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #1a1a1a;
+        }
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 16px rgba(0,0,0,.08);
+            padding: 3rem 3.5rem;
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+        }
+        .logo {
+            width: 180px;
+            margin-bottom: 2rem;
+        }
+        .icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.25rem;
+            font-size: 1.5rem;
+        }
+        .icon--success { background: #f0fdf4; color: #16a34a; }
+        h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: .5rem;
+        }
+        p {
+            font-size: .925rem;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <img class="logo" src="https://rag.progress.cloud/assets/logos/logo.svg" alt="Progress Agentic RAG" onerror="this.style.display='none'">
+        <div class="icon icon--success">&#10003;</div>
+        <h1>Authentication successful</h1>
+        <p>Authentication complete. You can close this window and return to the application.</p>
+    </div>
+</body>
+</html>
+"""
 
 
 def _build_oauth_subject(
