@@ -209,9 +209,9 @@ class Chunk(BaseModel):
         citations_id: Optional[str] = None,
     ) -> str:
         if citations_id:
-            lines = [f"## Chunk: [{citations_id}] {self.title or self.chunk_id}"]
+            lines = [f"#### Chunk: [{citations_id}] {self.title or self.chunk_id}"]
         else:
-            lines = [f"## Chunk: {self.title or self.chunk_id}"]
+            lines = [f"#### Chunk: {self.title or self.chunk_id}"]
         if self.action:
             lines.append(f"Result of running: {self.action}")
         if self.labels:
@@ -369,10 +369,9 @@ class Context(BaseModel):
             for citation_id in self.citations
             if not citation_id.startswith("structured-")
         }
-        if cited_chunk_ids:
-            self.chunks = [
-                chunk for chunk in self.chunks if chunk.chunk_id in cited_chunk_ids
-            ]
+        self.chunks = [
+            chunk for chunk in self.chunks if chunk.chunk_id in cited_chunk_ids
+        ]
         self.structured = [
             s
             for i, s in enumerate(self.structured)

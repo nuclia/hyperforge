@@ -24,22 +24,18 @@ def test_process_results_replaces_an_oversized_context_with_retry_guidance():
         agent="test",
         chunks=[Chunk(chunk_id="large", text="x" * 100)],
     )
-    accumulated = Context(
-        original_question_uuid=None,
-        actual_question_uuid=None,
-        question="question",
-        source="smart",
-        agent="smart",
-    )
+    collected_contexts: list[Context] = []
 
-    texts = agent._process_results([("tool of test", result)], context=accumulated)
+    texts = agent._process_results(
+        [("tool of test", result)], collected_contexts=collected_contexts
+    )
 
     assert len(texts) == 1
     assert "safety budget" in texts[0]
     assert "x" * 100 not in texts[0]
-    assert len(accumulated.chunks) == 1
-    assert "safety budget" in accumulated.chunks[0].text
-    assert accumulated.chunks[0].text != result.chunks[0].text
+    assert len(collected_contexts) == 1
+    assert "safety budget" in collected_contexts[0].chunks[0].text
+    assert collected_contexts[0].chunks[0].text != result.chunks[0].text
 
 
 def test_process_results_replaces_an_oversized_tool_error():
