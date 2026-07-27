@@ -3,7 +3,15 @@ from copy import deepcopy
 
 import pytest
 from hyperforge.engine import main as arag_main
+from hyperforge.manager import Manager
+from hyperforge.memory import Chunk, Context
+from hyperforge.memory.memory import EphemeralSessionMemory
 from hyperforge.minimal_fixtures import cassette_nua_key
+from hyperforge.models import MemoryConfig, Rules
+from nuclia.lib.nua import AsyncNuaClient
+
+from hyperforge_summarize.agent import SummarizeAgent
+from hyperforge_summarize.config import SummarizeAgentConfig
 
 # Real key used when recording; the stub is sufficient for cassette replay.
 NUA_KEY = os.environ.get(
@@ -70,6 +78,50 @@ CONFIG = {
     "generation": [],
     "postprocess": [],
 }
+
+
+async def test_summarize_uses_context_summary_with_forced_chunk_citations():
+    manager = await Manager.from_config(
+        drivers=[],
+        nua=AsyncNuaClient(region="europe-1", account="test", token=NUA_KEY),
+    )
+    agent = SummarizeAgent(
+        SummarizeAgentConfig(
+            citations=True,
+            force_chunk_level_citations=True,
+        )
+    )
+    session = EphemeralSessionMemory.from_config(
+        config=MemoryConfig(),
+        agent_id="test",
+        workflow_id="test",
+        rules=Rules(),
+    )
+    session.init("test-session")
+    memory = session.start_question("What is the launch code for the Aurora project?")
+    memory.contexts.append(
+        Context(
+            original_question_uuid="question-1",
+            actual_question_uuid="question-1",
+            question="What is the launch code for the Aurora project?",
+            source="test-source",
+            agent="upstream",
+            summary="The Aurora project launch code is LANTERN-47.",
+            chunks=[
+                Chunk(
+                    chunk_id="chunk-1",
+                    text="The Aurora project launch code is documented in the deployment runbook.",
+                )
+            ],
+        )
+    )
+
+    await agent(memory, manager)
+
+    answer, citations = memory.answers[-1]
+    assert "lantern-47" in answer.lower()
+    assert citations is not None
+    assert citations.metadata["block-AA-0"].chunk_index == 0
 
 
 async def test_summarize_answers():

@@ -3,6 +3,7 @@ from typing import Any, List
 from uuid import UUID
 
 import databases
+import sentry_sdk
 import sqlalchemy as sa
 from cryptography.fernet import Fernet
 from fastapi import UploadFile
@@ -427,7 +428,14 @@ class AgentManager:
         if result is None:
             raise exceptions.DriverNotFoundError()
 
-        config_class = get_driver_config_klass(result["provider"])
+        try:
+            config_class = get_driver_config_klass(result["provider"])
+        except Exception as e:
+            logger.warning(
+                f"Driver provider '{result['provider']}' is not registered, treating as not found"
+            )
+            sentry_sdk.capture_exception(e)
+            raise exceptions.DriverNotFoundError()
         driver_config = config_class.model_validate(
             {
                 "id": str(result["id"]),
@@ -449,7 +457,15 @@ class AgentManager:
         results = await self.database.fetch_all(statement)
         drivers = []
         for result in results:
-            config_class = get_driver_config_klass(result["provider"])
+            try:
+                config_class = get_driver_config_klass(result["provider"])
+            except Exception as e:
+                logger.warning(
+                    f"Skipping driver with unregistered provider '{result['provider']}' "
+                    f"for agent {agent_id}"
+                )
+                sentry_sdk.capture_exception(e)
+                continue
             driver = config_class.model_validate(
                 {
                     "id": str(result["id"]),

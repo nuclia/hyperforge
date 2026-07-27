@@ -38,7 +38,7 @@ async def _run_question(
     drivers: list[dict],
     question: str,
     config_overrides: dict | None = None,
-) -> list[Context]:
+) -> tuple[list[Context], EphemeralSessionMemory]:
     """Build a manager from driver configs, run the agent, return contexts."""
     load_all_configurations("hyperforge_perplexity")
     # Perplexity agent doesn't use nua — construct client directly with test values
@@ -75,17 +75,25 @@ async def _run_question(
         question=question,
         flow_id=flow_id,
     )
-    return memory.get_agent_contexts(flow_id=flow_id, agent_id=agent.agent_id)
+    return memory.get_agent_contexts(flow_id=flow_id, agent_id=agent.agent_id), memory
 
 
 async def test_perplexity():
-    contexts = await _run_question(
+    contexts, memory = await _run_question(
         DRIVERS,
         "What is Nuclia?",
         config_overrides={"domain": ["nuclia.com"], "related_questions": True},
     )
     assert len(contexts) > 0
     assert any(ctx.chunks for ctx in contexts)
+    usage = next(step.external_usage for step in memory.steps if step.external_usage)
+    assert len(usage) == 1
+    event = usage[0]
+    assert event.provider == "perplexity"
+    assert event.model == "sonar-pro"
+    assert event.input_tokens > 0
+    assert event.output_tokens > 0
+    assert event.requests == 1
 
 
 @pytest.mark.skipif(
@@ -93,7 +101,7 @@ async def test_perplexity():
     reason="Only run when LOCAL_TESTING env var is set.",
 )
 async def test_perplexity_images():
-    contexts = await _run_question(
+    contexts, _ = await _run_question(
         DRIVERS,
         "What colors are 'duppi' usually?",
         config_overrides={"images": True, "related_questions": True},

@@ -36,7 +36,7 @@ DRIVERS = [
 
 async def _run_question(
     drivers: list[dict], question: str, config_overrides: dict | None = None
-) -> list[Context]:
+) -> tuple[list[Context], EphemeralSessionMemory]:
     load_all_configurations("hyperforge_perplexity_search")
     load_all_configurations("hyperforge_perplexity")  # register the perplexity driver
     # Perplexity agent doesn't use nua — construct client directly with test values
@@ -69,21 +69,29 @@ async def _run_question(
         question=question,
         flow_id=flow_id,
     )
-    return memory.get_agent_contexts(flow_id=flow_id, agent_id=agent.agent_id)
+    return memory.get_agent_contexts(flow_id=flow_id, agent_id=agent.agent_id), memory
 
 
 async def test_perplexity_search():
-    contexts = await _run_question(
+    contexts, memory = await _run_question(
         DRIVERS,
         "What is Nuclia?",
         config_overrides={"domain": ["nuclia.com"], "max_results": 3},
     )
     assert len(contexts) > 0
     assert any(ctx.chunks for ctx in contexts)
+    usage = next(step.external_usage for step in memory.steps if step.external_usage)
+    assert len(usage) == 1
+    event = usage[0]
+    assert event.provider == "perplexity"
+    assert event.model == "search"
+    assert event.input_tokens == 0
+    assert event.output_tokens == 0
+    assert event.requests == 1
 
 
 async def test_perplexity_search_domain():
-    contexts = await _run_question(
+    contexts, _ = await _run_question(
         DRIVERS,
         "What is Marklogic?",
         config_overrides={"domain": ["progress.com"], "max_results": 5},
