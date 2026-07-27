@@ -32,6 +32,7 @@ from hyperforge.models import (
     AnswerCitations,
     Chunk,
     Context,
+    ExternalUsage,
     HistoryQuestionAnswer,
     MemoryConfig,
     Rule,
@@ -832,6 +833,7 @@ class QuestionMemory:
         step_reason: Optional[str] = None,
         error: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
+        external_usage: Optional[List[ExternalUsage]] = None,
     ):
         new_step = Step(
             original_question_uuid=self.original_question_uuid,
@@ -846,6 +848,7 @@ class QuestionMemory:
             output_nuclia_tokens=output_nuclia_tokens,
             error=error,
             metadata=metadata,
+            external_usage=external_usage,
         )
         self.steps.append(new_step)
         if self.callback_fn is not None:
