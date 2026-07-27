@@ -21,13 +21,13 @@ interactions:
       string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"7fe77405-a6de-43cf-ac27-ac09f80b66c6","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Content-Length:
       - '227'
       content-type:
       - application/json
       date:
-      - Mon, 27 Jul 2026 06:31:19 GMT
+      - Mon, 27 Jul 2026 06:53:36 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
@@ -102,7 +102,7 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":24,"output_tokens":40,"timings":{"generative":0.8031821479671635},"input_nuclia_tokens":0.024,"output_nuclia_tokens":0.04}}
+        {"chunk":{"type":"meta","input_tokens":24,"output_tokens":40,"timings":{"generative":0.8324119789758697},"input_nuclia_tokens":0.024,"output_nuclia_tokens":0.04}}
 
         {"chunk":{"normalized_tokens":{"input":0.02412,"output":0.04,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
@@ -117,17 +117,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 27 Jul 2026 06:31:20 GMT
+      - Mon, 27 Jul 2026 06:53:36 GMT
       nuclia-learning-id:
-      - caafb9929a99404eab838dc703219cb5
+      - 0132ba6366274170a7b95e13d11694a8
       nuclia-learning-model:
       - gemini-2.5-flash
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '808'
+      - '842'
       x-nuclia-trace-id:
-      - 620a15c512eedfd45026e044e8d13d12
+      - f78a86f197b30de1a5956e4ee15a402b
     status:
       code: 200
       message: OK

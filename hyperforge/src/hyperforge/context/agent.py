@@ -95,6 +95,7 @@ class ContextAgent:
         model = self.context_config.context_validation_model
         module = self.context_config.module
         ident = self.context_config.id if self.context_config.id else "default"
+        title = title or self.context_config.title or module
         context_by_id = {context.id: context for context in contexts}
         block_targets: dict[str, tuple[str, str]] = {}
         prompt_contexts = []

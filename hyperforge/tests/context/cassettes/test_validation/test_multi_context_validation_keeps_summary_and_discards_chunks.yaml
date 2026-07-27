@@ -21,17 +21,17 @@ interactions:
       string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"7fe77405-a6de-43cf-ac27-ac09f80b66c6","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
       - '227'
       content-type:
       - application/json
       date:
-      - Mon, 27 Jul 2026 06:31:17 GMT
+      - Mon, 27 Jul 2026 06:53:33 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '11'
+      - '8'
     status:
       code: 200
       message: OK
@@ -103,14 +103,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":27,"output_tokens":34,"timings":{"generative":0.822925177984871},"input_nuclia_tokens":0.027,"output_nuclia_tokens":0.034}}
+        {"chunk":{"type":"meta","input_tokens":27,"output_tokens":34,"timings":{"generative":0.9416235770331696},"input_nuclia_tokens":0.027,"output_nuclia_tokens":0.034}}
 
         {"chunk":{"normalized_tokens":{"input":0.02724,"output":0.034,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -118,17 +118,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 27 Jul 2026 06:31:17 GMT
+      - Mon, 27 Jul 2026 06:53:33 GMT
       nuclia-learning-id:
-      - 0f899ae18d024f0498749bdb467911eb
+      - ad2c7f837eda4c309e600148a84a4f38
       nuclia-learning-model:
       - gemini-2.5-flash
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '828'
+      - '947'
       x-nuclia-trace-id:
-      - 4768c82deb7718af168095e09514a307
+      - 129751d044a782bd3edb71fe916ba6de
     status:
       code: 200
       message: OK

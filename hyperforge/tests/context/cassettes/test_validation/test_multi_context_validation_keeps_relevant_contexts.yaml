@@ -27,11 +27,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 27 Jul 2026 06:31:16 GMT
+      - Mon, 27 Jul 2026 06:53:31 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '147'
+      - '144'
     status:
       code: 200
       message: OK
@@ -100,19 +100,19 @@ interactions:
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"missing_info_query":"","contexts":[{"context_id":"context-animal","answer":"Pixel
-        is a cat.","citations":["block-AA"]},{"context_id":"context-collar","answer":"Pixel
-        wears a green collar.","citations":["block-AB"]}]}}}
+        is a cat.","citations":["block-AA"]},{"context_id":"context-collar","answer":"Pixel''s
+        collar is green.","citations":["block-AB"]}]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":28,"output_tokens":56,"timings":{"generative":1.0054573450470343},"input_nuclia_tokens":0.028,"output_nuclia_tokens":0.056}}
+        {"chunk":{"type":"meta","input_tokens":28,"output_tokens":57,"timings":{"generative":1.0661035950179212},"input_nuclia_tokens":0.028,"output_nuclia_tokens":0.057}}
 
-        {"chunk":{"normalized_tokens":{"input":0.02844,"output":0.0565,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02844,"output":0.057,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -120,17 +120,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Mon, 27 Jul 2026 06:31:16 GMT
+      - Mon, 27 Jul 2026 06:53:32 GMT
       nuclia-learning-id:
-      - c99f53cc3fc04e5696afcdcafa9b2412
+      - 93c038d2a3854b50ab82e7c9d082bde0
       nuclia-learning-model:
       - gemini-2.5-flash
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1011'
+      - '1072'
       x-nuclia-trace-id:
-      - 7fb973ec17fa440ed11c35980f228153
+      - b65a21414ab25ab6b9baf8715a083828
     status:
       code: 200
       message: OK

@@ -93,8 +93,9 @@ async def test_validate_contexts_maps_blocks_to_original_payloads() -> None:
         5,
     )
 
+    memory = make_memory()
     result = await agent.validate_contexts_and_answer(
-        make_memory(), manager, contexts, "question"
+        memory, manager, contexts, "question"
     )
 
     assert result == ("yes", None, None)
@@ -104,6 +105,18 @@ async def test_validate_contexts_maps_blocks_to_original_payloads() -> None:
     assert contexts[0].summary == "First partial answer"
     assert contexts[1].summary == "Second partial answer"
     assert contexts[2].summary == ""
+    assert memory.steps[-1].title == "agent: Context validation"
+
+
+def test_prune_to_structured_citations_removes_chunks() -> None:
+    context = make_context("mixed", chunks=["Unrelated chunk"])
+    context.structured = ["Relevant structured data", "Unrelated structured data"]
+    context.citations = ["structured-0"]
+
+    context.prune_to_citations()
+
+    assert context.chunks == []
+    assert context.structured == ["Relevant structured data"]
 
 
 @pytest.mark.asyncio
