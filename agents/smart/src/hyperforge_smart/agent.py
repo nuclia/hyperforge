@@ -331,6 +331,26 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 lines.append(f"- **{tool_name}**: {description}\n{params_text}")
         return "\n\n".join(lines) if lines else "(no tools available)"
 
+    def _reactive_tools(
+        self,
+        tools: List[Tool],
+        attempted_tool_calls: Dict[str, ToolAttempt],
+    ) -> List[Tool]:
+        """Hide parameterless tools after they returned no result in this run."""
+        available_tools = []
+        for tool in tools:
+            properties = tool.parameters.get("properties", {})
+            empty_call_key = self._tool_call_key(tool.name, {})
+            empty_attempt = attempted_tool_calls.get(empty_call_key)
+            if (
+                not properties
+                and empty_attempt is not None
+                and empty_attempt.outcome == "empty"
+            ):
+                continue
+            available_tools.append(tool)
+        return available_tools
+
     def _process_results(
         self,
         results: List[Tuple[str, Any]],
@@ -820,11 +840,12 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         attempted_tool_calls: Dict[str, ToolAttempt] = {}
         while not finished and iteration < self.config.max_iterations:
             iteration += 1
+            available_tools = self._reactive_tools(tools, attempted_tool_calls)
 
             resp, input_tokens, output_tokens = await self.choose_tools(
                 manager,
                 messages,
-                tools,
+                available_tools,
                 tracking=memory.get_tracking_info(),
             )
             total_input_tokens += input_tokens
