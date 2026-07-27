@@ -342,7 +342,11 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             properties = tool.parameters.get("properties", {})
             empty_call_key = self._tool_call_key(tool.name, {})
             empty_attempt = attempted_tool_calls.get(empty_call_key)
-            if not properties and empty_attempt is not None and empty_attempt.outcome == "empty":
+            if (
+                not properties
+                and empty_attempt is not None
+                and empty_attempt.outcome == "empty"
+            ):
                 continue
             available_tools.append(tool)
         return available_tools
