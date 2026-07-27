@@ -218,7 +218,6 @@ class SummarizeAgent(Agent[SummarizeAgentConfig]):
         if citations_enabled:
             # Adjust the prompt so that the model returns citations
             prompt += MARKDOWN_TWO_LEVELS_CITATIONS_PROMPT_ADJUSTMENT
-        breakpoint()
         t0 = time()
         images = {}
         for memory_context in memory.contexts:
