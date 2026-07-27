@@ -810,7 +810,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         finished = False
         total_input_tokens = 0.0
         total_output_tokens = 0.0
-        attempresult_texts = self._process_results(list(results), context=context)ted_tool_calls: Dict[str, ToolAttempt] = {}
+        attempted_tool_calls: Dict[str, ToolAttempt] = {}
         while not finished and iteration < self.config.max_iterations:
             iteration += 1
 
