@@ -14,6 +14,7 @@ from hyperforge.interaction import Feedback
 from hyperforge.manager import Manager, build_reasoning
 from hyperforge.memory.memory import QuestionMemory
 from hyperforge.models import Chunk, Context, TrackingInfo
+from hyperforge.result_payload import budget_from_config, inspect_text_blocks
 from hyperforge.utils import iterate_tools_resp
 from nuclia.lib.nua_responses import (
     Author,
@@ -331,6 +332,26 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 lines.append(f"- **{tool_name}**: {description}\n{params_text}")
         return "\n\n".join(lines) if lines else "(no tools available)"
 
+    def _reactive_tools(
+        self,
+        tools: List[Tool],
+        attempted_tool_calls: Dict[str, ToolAttempt],
+    ) -> List[Tool]:
+        """Hide parameterless tools after they returned no result in this run."""
+        available_tools = []
+        for tool in tools:
+            properties = tool.parameters.get("properties", {})
+            empty_call_key = self._tool_call_key(tool.name, {})
+            empty_attempt = attempted_tool_calls.get(empty_call_key)
+            if (
+                not properties
+                and empty_attempt is not None
+                and empty_attempt.outcome == "empty"
+            ):
+                continue
+            available_tools.append(tool)
+        return available_tools
+
     def _process_results(
         self,
         results: List[Tuple[str, Any]],
@@ -343,8 +364,10 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         """
         result_texts: List[str] = []
         for action_info, result in results:
+            overflow = self._inspect_result(result)
             if isinstance(result, ToolError):
-                result_texts.append(f"[{action_info}]:\n{result.error}")
+                error_text = overflow.render() if overflow is not None else result.error
+                result_texts.append(f"[{action_info}]:\n{error_text}")
                 continue
 
             if isinstance(result, SkippedToolCall):
@@ -360,6 +383,15 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             else:
                 contexts = []
 
+            if overflow is not None:
+                error_text = overflow.render()
+                result_texts.append(f"[{action_info}]:\n{error_text}")
+                if collected_contexts is not None:
+                    collected_contexts.append(
+                        self._synthetic_result_context(action_info, error_text)
+                    )
+                continue
+
             if collected_contexts is not None:
                 if contexts:
                     for ctx in contexts:
@@ -368,23 +400,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                         collected_contexts.append(ctx)
                 else:
                     collected_contexts.append(
-                        Context(
-                            agent_id=self.config.id or "smart_agent",
-                            original_question_uuid=None,
-                            actual_question_uuid=None,
-                            question="",
-                            source="smart_agent",
-                            agent="smart_agent",
-                            title=action_info,
-                            chunks=[
-                                Chunk(
-                                    chunk_id=uuid4().hex,
-                                    text=str(result),
-                                    action=action_info,
-                                    origin_agent=self.config.module,
-                                )
-                            ],
-                        )
+                        self._synthetic_result_context(action_info, str(result))
                     )
 
             for ctx in contexts:
@@ -396,6 +412,47 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 result_texts.append(f"[{action_info}]:\n{result}")
 
         return result_texts
+
+    def _synthetic_result_context(self, action_info: str, text: str) -> Context:
+        return Context(
+            agent_id=self.config.id or "smart_agent",
+            original_question_uuid=None,
+            actual_question_uuid=None,
+            question="",
+            source="smart_agent",
+            agent="smart_agent",
+            title=action_info,
+            chunks=[
+                Chunk(
+                    chunk_id=uuid4().hex,
+                    text=text,
+                    action=action_info,
+                    origin_agent=self.config.module,
+                )
+            ],
+        )
+
+    def _inspect_result(self, result: Any):
+        if isinstance(result, ToolError):
+            texts = [result.error]
+        else:
+            contexts = (
+                [result]
+                if isinstance(result, Context)
+                else result
+                if isinstance(result, list)
+                and all(isinstance(item, Context) for item in result)
+                else []
+            )
+            texts = (
+                [
+                    *[chunk.render() for ctx in contexts for chunk in ctx.chunks],
+                    *[value for ctx in contexts for value in ctx.structured],
+                ]
+                if contexts
+                else [str(result)]
+            )
+        return inspect_text_blocks(texts, budget_from_config(self.config))
 
     async def choose_tools(
         self,
@@ -439,12 +496,17 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         tool_arguments: Dict[str, Any],
     ) -> Tuple[str, ToolError]:
         """Log a tool error to memory and return a ToolError result."""
+        overflow = inspect_text_blocks([error], budget_from_config(self.config))
+        if overflow is not None:
+            error = overflow.render()
         await memory.add_step(
             step_module=self.config.module,
-            step_title=self.step_title(title),
+            step_title=self.step_title(
+                "Tool result rejected" if overflow is not None else title
+            ),
             step_reason=error,
             step_agent_path=f"/context/{self.config.id or 'default'}",
-            step_value="Error",
+            step_value=overflow.trace_value() if overflow is not None else "Error",
             timeit=0,
         )
         return tool_name, ToolError(
@@ -535,6 +597,16 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         action_info = f"{function_id} of {agent_id}"
         if tool_arguments:
             action_info += f" with parameters {tool_arguments}"
+        overflow = self._inspect_result(result)
+        if overflow is not None:
+            await memory.add_step(
+                step_module=self.config.module,
+                step_title=self.step_title("Tool result rejected"),
+                step_reason=f"{action_info} exceeded the configured LLM context safety budget.",
+                step_agent_path=f"/context/{self.config.id or 'default'}",
+                step_value=overflow.trace_value(),
+                timeit=0,
+            )
         return action_info, result
 
     async def _preload_registered_agents(
@@ -573,9 +645,21 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         await self._preload_registered_agents(manager, memory)
 
         session_context_parts: List[str] = []
+        reactive_history_messages: List[Message] = []
 
         if self.config.history:
-            qa_history, interactions = await memory.context_history()
+            if self.config.planning_mode == "reactive":
+                reactive_history_messages = await memory.get_chat_history()
+                interactions = sum(
+                    1
+                    for message in reactive_history_messages
+                    if message.author == Author.USER
+                )
+            else:
+                qa_history, interactions = await memory.context_history()
+                session_context_parts.append(
+                    f"## Previous questions and answers in this session:\n{qa_history}"
+                )
             await memory.add_step(
                 step_module=self.config.module,
                 step_title=self.step_title("History check"),
@@ -587,9 +671,6 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
                 input_nuclia_tokens=0.0,
                 output_nuclia_tokens=0.0,
-            )
-            session_context_parts.append(
-                f"## Previous questions and answers in this session:\n{qa_history}"
             )
 
         session_context = "\n\n".join(session_context_parts)
@@ -610,6 +691,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             question_uuid=question_uuid,
             extra_context=extra_context,
             session_context=session_context,
+            history_messages=reactive_history_messages,
         )
 
     async def _execute_tool_calls_turn(
@@ -788,11 +870,12 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         question_uuid: str,
         extra_context: Optional[Dict[str, Any]] = None,
         session_context: str = "",
+        history_messages: Optional[List[Message]] = None,
     ) -> List[Context]:
         t0 = time()
 
         tools = self.build_tools()
-        messages: List[Message] = []
+        messages: List[Message] = list(history_messages or [])
         if session_context:
             messages.append(
                 Message(
@@ -814,11 +897,12 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         attempted_tool_calls: Dict[str, ToolAttempt] = {}
         while not finished and iteration < self.config.max_iterations:
             iteration += 1
+            available_tools = self._reactive_tools(tools, attempted_tool_calls)
 
             resp, input_tokens, output_tokens = await self.choose_tools(
                 manager,
                 messages,
-                tools,
+                available_tools,
                 tracking=memory.get_tracking_info(),
             )
             total_input_tokens += input_tokens
@@ -1093,7 +1177,11 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             results_summary = (
                 "\n\n".join(result_texts) if result_texts else "(no results)"
             )
-            current_iteration.results = iteration_results
+            for action_info, result in iteration_results:
+                overflow = self._inspect_result(result)
+                current_iteration.results.append(
+                    (action_info, overflow.render() if overflow is not None else result)
+                )
             current_iteration.results_summary = results_summary
             current_iteration.tool_attempts = iteration_attempts
             history.append(current_iteration)

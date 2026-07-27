@@ -15,6 +15,20 @@ class Transport(str, Enum):
 class MCPAgentConfig(ContextAgentConfig):
     model_config = ConfigDict(title="MCP")
     module: Literal["mcp"] = "mcp"
+    max_tool_result_bytes: int | None = Field(
+        default=None,
+        ge=1,
+        title="Tool result byte limit override",
+        description="Optional override of the deployment tool-result byte limit.",
+        json_schema_extra={"widget": WidgetType.NOT_SHOWN},
+    )
+    max_tool_result_item_bytes: int | None = Field(
+        default=None,
+        ge=1,
+        title="Tool result item byte limit override",
+        description="Optional override of the deployment tool-result item byte limit.",
+        json_schema_extra={"widget": WidgetType.NOT_SHOWN},
+    )
     transport: Transport = Field(Transport.HTTP, title="Proper transport mechanism")
     source: str = Field(
         ...,
