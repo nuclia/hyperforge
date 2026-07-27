@@ -562,9 +562,21 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         await self._preload_registered_agents(manager, memory)
 
         session_context_parts: List[str] = []
+        reactive_history_messages: List[Message] = []
 
         if self.config.history:
-            qa_history, interactions = await memory.context_history()
+            if self.config.planning_mode == "reactive":
+                reactive_history_messages = await memory.get_chat_history()
+                interactions = sum(
+                    1
+                    for message in reactive_history_messages
+                    if message.author == Author.USER
+                )
+            else:
+                qa_history, interactions = await memory.context_history()
+                session_context_parts.append(
+                    f"## Previous questions and answers in this session:\n{qa_history}"
+                )
             await memory.add_step(
                 step_module=self.config.module,
                 step_title=self.step_title("History check"),
@@ -576,9 +588,6 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
                 input_nuclia_tokens=0.0,
                 output_nuclia_tokens=0.0,
-            )
-            session_context_parts.append(
-                f"## Previous questions and answers in this session:\n{qa_history}"
             )
 
         session_context = "\n\n".join(session_context_parts)
@@ -599,6 +608,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             question_uuid=question_uuid,
             extra_context=extra_context,
             session_context=session_context,
+            history_messages=reactive_history_messages,
         )
 
     async def _execute_tool_calls_turn(
@@ -775,11 +785,12 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         question_uuid: str,
         extra_context: Optional[Dict[str, Any]] = None,
         session_context: str = "",
+        history_messages: Optional[List[Message]] = None,
     ) -> Context:
         t0 = time()
 
         tools = self.build_tools()
-        messages: List[Message] = []
+        messages: List[Message] = list(history_messages or [])
         if session_context:
             messages.append(
                 Message(

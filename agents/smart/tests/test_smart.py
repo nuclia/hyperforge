@@ -1,7 +1,8 @@
 import os
 from copy import deepcopy
+from dataclasses import dataclass
 from types import SimpleNamespace
-from typing import ClassVar
+from typing import Any, ClassVar, cast
 from unittest.mock import patch
 
 import pytest
@@ -12,8 +13,9 @@ from hyperforge.interaction import AragAnswer
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import EphemeralSessionMemory, MemoryConfig
 from hyperforge.minimal_fixtures import cassette_nua_key
-from hyperforge.models import Context, Rules
+from hyperforge.models import Context, HistoryQuestionAnswer, Rules
 from hyperforge.pubsub import UserToAgentInteraction
+from nuclia.lib.nua_responses import Author, Message
 
 from hyperforge_smart.agent import RegisteredAgent, SmartAgent
 from hyperforge_smart.config import SmartAgentConfig
@@ -369,6 +371,30 @@ async def test_smart_with_user_feedback():
     )
 
 
+@dataclass
+class SpyReactiveMemory:
+    question_memory: object
+    context_history_calls: int = 0
+    get_chat_history_calls: int = 0
+
+    def __getattr__(self, name):
+        return getattr(self.question_memory, name)
+
+    async def context_history(self):
+        self.context_history_calls += 1
+        return (
+            "User: Earlier question about Snoopy\nAssistant: Earlier answer about Snoopy",
+            1,
+        )
+
+    async def get_chat_history(self):
+        self.get_chat_history_calls += 1
+        return [
+            Message(author=Author.USER, text="Earlier question about Snoopy"),
+            Message(author=Author.NUCLIA, text="Earlier answer about Snoopy"),
+        ]
+
+
 class EmptyResultAgent(ContextAgent):
     __published_functions__: ClassVar[dict[str, FunctionDefinition]] = {
         "lookup": FunctionDefinition(
@@ -414,6 +440,69 @@ def make_tool_response(name: str, arguments: dict[str, str]):
             ]
         }
     )
+
+
+@pytest.mark.asyncio
+async def test_smart_reactive_uses_structured_chat_history_messages():
+    smart_agent = SmartAgent(
+        config=SmartAgentConfig.model_validate(
+            {
+                "id": "smart-test",
+                "module": "smart",
+                "title": "Smart Agent",
+                "planning_mode": "reactive",
+                "history": True,
+                "max_iterations": 1,
+            }
+        )
+    )
+    smart_agent.registered_agents = []
+
+    memory = EphemeralSessionMemory.from_config(
+        MemoryConfig.model_validate({}),
+        agent_id="agent",
+        workflow_id="default",
+        rules=Rules(rules=[]),
+    )
+    memory.init("session")
+    base_question_memory = memory.start_question(
+        "Use previous Snoopy context",
+        question_id="question-id",
+        chat_history=[
+            HistoryQuestionAnswer(
+                question="Earlier question about Snoopy",
+                answer="Earlier answer about Snoopy",
+            )
+        ],
+    )
+    question_memory = SpyReactiveMemory(base_question_memory)
+
+    captured_messages = []
+
+    async def fake_choose_tools(
+        self, manager, messages, tools, system_override=None, tracking=None
+    ):
+        captured_messages.extend(messages)
+        return make_tool_response("task_complete", {}), 0.0, 0.0
+
+    with patch.object(SmartAgent, "choose_tools", fake_choose_tools):
+        await smart_agent.smart_planner(
+            question="Use previous Snoopy context",
+            memory=cast(Any, question_memory),
+            manager=cast(Manager, SimpleNamespace(spec=Manager)),
+            question_uuid="question-id",
+        )
+
+    assert question_memory.context_history_calls == 0
+    assert question_memory.get_chat_history_calls == 1
+    assert [message.author for message in captured_messages] == [
+        Author.USER,
+        Author.NUCLIA,
+        Author.USER,
+    ]
+    assert captured_messages[0].text == "Earlier question about Snoopy"
+    assert captured_messages[1].text == "Earlier answer about Snoopy"
+    assert captured_messages[2].text == "Use previous Snoopy context"
 
 
 @pytest.mark.asyncio
