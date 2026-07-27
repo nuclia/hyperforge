@@ -27,11 +27,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 24 Jul 2026 14:05:48 GMT
+      - Mon, 27 Jul 2026 06:31:18 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '6'
+      - '8'
     status:
       code: 200
       message: OK
@@ -54,7 +54,7 @@ interactions:
       context IDs or block IDs.\n\n`missing_info_query` is global across all contexts.
       Leave it empty when the contexts together contain enough information. Otherwise,
       return the query needed to retrieve the missing information.\n\n<QUESTION>\nWho
-      won the Northbridge design award?\n\n<CONTEXTS>\n\n<CONTEXT id=\"e8e29dfd2cea4584933c954a430eef9e\">\n\n\n\n**block-AA**\n##
+      won the Northbridge design award?\n\n<CONTEXTS>\n\n<CONTEXT id=\"context-awards\">\n\n\n\n**block-AA**\n##
       Chunk: awards-0\n``` Mira Chen won the Northbridge design award. ```\n\n\n**block-AB**\n##
       Chunk: awards-1\n``` The ceremony menu included mushroom risotto. ```\n\n\n</CONTEXT>\n\n</CONTEXTS>"},
       "citations": false, "citation_threshold": null, "generative_model": "gemini-2.5-flash",
@@ -79,7 +79,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2780'
+      - '2762'
       Content-Type:
       - application/json
       Host:
@@ -96,14 +96,14 @@ interactions:
     uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"object","object":{"missing_info_query":"","contexts":[{"context_id":"e8e29dfd2cea4584933c954a430eef9e","answer":"Mira
+      string: '{"chunk":{"type":"object","object":{"missing_info_query":"","contexts":[{"context_id":"context-awards","answer":"Mira
         Chen won the Northbridge design award.","citations":["block-AA"]}]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":27,"output_tokens":48,"timings":{"generative":0.9183910040010232},"input_nuclia_tokens":0.027,"output_nuclia_tokens":0.048}}
+        {"chunk":{"type":"meta","input_tokens":25,"output_tokens":36,"timings":{"generative":0.8014325890108012},"input_nuclia_tokens":0.025,"output_nuclia_tokens":0.036}}
 
-        {"chunk":{"normalized_tokens":{"input":0.0267,"output":0.048,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.0252,"output":0.0355,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -116,17 +116,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Fri, 24 Jul 2026 14:05:48 GMT
+      - Mon, 27 Jul 2026 06:31:19 GMT
       nuclia-learning-id:
-      - 3386fb6215954126ab501e868bc3372f
+      - 6359474404f941e2ac9a38b4f90a5150
       nuclia-learning-model:
       - gemini-2.5-flash
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '924'
+      - '807'
       x-nuclia-trace-id:
-      - 09cb563160902709d2011d47e703fe89
+      - 45e3670c2e9c8acfb4b9ba1b868f5128
     status:
       code: 200
       message: OK

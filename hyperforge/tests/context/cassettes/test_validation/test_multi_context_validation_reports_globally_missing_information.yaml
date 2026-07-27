@@ -21,17 +21,17 @@ interactions:
       string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"7fe77405-a6de-43cf-ac27-ac09f80b66c6","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
       - '227'
       content-type:
       - application/json
       date:
-      - Fri, 24 Jul 2026 14:05:49 GMT
+      - Mon, 27 Jul 2026 06:31:19 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '5'
+      - '8'
     status:
       code: 200
       message: OK
@@ -55,12 +55,12 @@ interactions:
       Leave it empty when the contexts together contain enough information. Otherwise,
       return the query needed to retrieve the missing information.\n\n<QUESTION>\nWhat
       is Project Aurora''s codename and approved budget?\n\n<CONTEXTS>\n\n<CONTEXT
-      id=\"99904fb023744d929fbe8349bf8e2ceb\">\n\n\n\n**block-AA**\n## Chunk: project-0\n```
-      The internal codename for the project is Aurora. ```\n\n\n</CONTEXT>\n\n</CONTEXTS>"},
-      "citations": false, "citation_threshold": null, "generative_model": "gemini-2.5-flash",
-      "max_tokens": 8192, "query_context_images": {}, "prefer_markdown": null, "json_schema":
-      {"title": "validate_multiple_contexts", "description": "Validate several contexts
-      and summarize each relevant one", "parameters": {"type": "object", "properties":
+      id=\"context-project\">\n\n\n\n**block-AA**\n## Chunk: project-0\n``` The internal
+      codename for the project is Aurora. ```\n\n\n</CONTEXT>\n\n</CONTEXTS>"}, "citations":
+      false, "citation_threshold": null, "generative_model": "gemini-2.5-flash", "max_tokens":
+      8192, "query_context_images": {}, "prefer_markdown": null, "json_schema": {"title":
+      "validate_multiple_contexts", "description": "Validate several contexts and
+      summarize each relevant one", "parameters": {"type": "object", "properties":
       {"missing_info_query": {"type": "string", "description": "Query needed to retrieve
       information missing across all contexts, or an empty string."}, "contexts":
       {"type": "array", "items": {"type": "object", "properties": {"context_id": {"type":
@@ -79,7 +79,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2711'
+      - '2694'
       Content-Type:
       - application/json
       Host:
@@ -96,20 +96,20 @@ interactions:
     uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"object","object":{"missing_info_query":"Project Aurora
-        approved budget","contexts":[{"context_id":"99904fb023744d929fbe8349bf8e2ceb","answer":"Project
+      string: '{"chunk":{"type":"object","object":{"missing_info_query":"What is the
+        approved budget for Project Aurora?","contexts":[{"context_id":"context-project","answer":"Project
         Aurora''s codename is Aurora.","citations":["block-AA"]}]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":26,"output_tokens":50,"timings":{"generative":1.0460320260026492},"input_nuclia_tokens":0.026,"output_nuclia_tokens":0.05}}
+        {"chunk":{"type":"meta","input_tokens":24,"output_tokens":40,"timings":{"generative":0.8031821479671635},"input_nuclia_tokens":0.024,"output_nuclia_tokens":0.04}}
 
-        {"chunk":{"normalized_tokens":{"input":0.02562,"output":0.0505,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02412,"output":0.04,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -117,17 +117,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Fri, 24 Jul 2026 14:05:49 GMT
+      - Mon, 27 Jul 2026 06:31:20 GMT
       nuclia-learning-id:
-      - f3523bbc6dc0415c82ec0874e93889d3
+      - caafb9929a99404eab838dc703219cb5
       nuclia-learning-model:
       - gemini-2.5-flash
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1052'
+      - '808'
       x-nuclia-trace-id:
-      - 2871ac59877151b37612742e1bfca56d
+      - 620a15c512eedfd45026e044e8d13d12
     status:
       code: 200
       message: OK

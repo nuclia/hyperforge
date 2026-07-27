@@ -27,11 +27,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 24 Jul 2026 14:05:45 GMT
+      - Mon, 27 Jul 2026 06:31:16 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '82'
+      - '147'
     status:
       code: 200
       message: OK
@@ -55,11 +55,11 @@ interactions:
       Leave it empty when the contexts together contain enough information. Otherwise,
       return the query needed to retrieve the missing information.\n\n<QUESTION>\nWhat
       kind of animal is Pixel, and what color is Pixel''s collar?\n\n<CONTEXTS>\n\n<CONTEXT
-      id=\"c2e50106a6cc48548b425145c5fd5170\">\n\n\n\n**block-AA**\n## Chunk: animal-0\n```
-      Pixel is a rescue cat. ```\n\n\n</CONTEXT>\n\n<CONTEXT id=\"c159fef7284940cc9413901666daa49e\">\n\n\n\n**block-AB**\n##
+      id=\"context-animal\">\n\n\n\n**block-AA**\n## Chunk: animal-0\n``` Pixel is
+      a rescue cat. ```\n\n\n</CONTEXT>\n\n<CONTEXT id=\"context-collar\">\n\n\n\n**block-AB**\n##
       Chunk: collar-0\n``` Pixel wears a green collar. ```\n\n\n</CONTEXT>\n\n<CONTEXT
-      id=\"2dbae3e133fb4747b5e130811735d509\">\n\n\n\n**block-AC**\n## Chunk: database-0\n```
-      The reporting service stores data in PostgreSQL. ```\n\n\n</CONTEXT>\n\n</CONTEXTS>"},
+      id=\"context-database\">\n\n\n\n**block-AC**\n## Chunk: database-0\n``` The
+      reporting service stores data in PostgreSQL. ```\n\n\n</CONTEXT>\n\n</CONTEXTS>"},
       "citations": false, "citation_threshold": null, "generative_model": "gemini-2.5-flash",
       "max_tokens": 8192, "query_context_images": {}, "prefer_markdown": null, "json_schema":
       {"title": "validate_multiple_contexts", "description": "Validate several contexts
@@ -82,7 +82,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '3008'
+      - '2956'
       Content-Type:
       - application/json
       Host:
@@ -99,15 +99,15 @@ interactions:
     uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"object","object":{"missing_info_query":"","contexts":[{"context_id":"c2e50106a6cc48548b425145c5fd5170","answer":"Pixel
-        is a rescue cat.","citations":["block-AA"]},{"context_id":"c159fef7284940cc9413901666daa49e","answer":"Pixel''s
-        collar is green.","citations":["block-AB"]}]}}}
+      string: '{"chunk":{"type":"object","object":{"missing_info_query":"","contexts":[{"context_id":"context-animal","answer":"Pixel
+        is a cat.","citations":["block-AA"]},{"context_id":"context-collar","answer":"Pixel
+        wears a green collar.","citations":["block-AB"]}]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":33,"output_tokens":84,"timings":{"generative":1.325332624008297},"input_nuclia_tokens":0.033,"output_nuclia_tokens":0.084}}
+        {"chunk":{"type":"meta","input_tokens":28,"output_tokens":56,"timings":{"generative":1.0054573450470343},"input_nuclia_tokens":0.028,"output_nuclia_tokens":0.056}}
 
-        {"chunk":{"normalized_tokens":{"input":0.03312,"output":0.0835,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02844,"output":0.0565,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
@@ -120,17 +120,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Fri, 24 Jul 2026 14:05:45 GMT
+      - Mon, 27 Jul 2026 06:31:16 GMT
       nuclia-learning-id:
-      - 722552c5e0544f7680bce5b4f88eb29f
+      - c99f53cc3fc04e5696afcdcafa9b2412
       nuclia-learning-model:
       - gemini-2.5-flash
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1331'
+      - '1011'
       x-nuclia-trace-id:
-      - a255693d7be300664b5d58da73286bc7
+      - 7fb973ec17fa440ed11c35980f228153
     status:
       code: 200
       message: OK

@@ -49,6 +49,7 @@ def make_context(
     chunks: list[str] | None = None,
 ) -> Context:
     return Context(
+        id=f"context-{agent_id}",
         agent_id=agent_id,
         original_question_uuid="original",
         actual_question_uuid="actual",

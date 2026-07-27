@@ -27,11 +27,11 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 24 Jul 2026 14:05:47 GMT
+      - Mon, 27 Jul 2026 06:31:17 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '8'
+      - '11'
     status:
       code: 200
       message: OK
@@ -54,15 +54,15 @@ interactions:
       context IDs or block IDs.\n\n`missing_info_query` is global across all contexts.
       Leave it empty when the contexts together contain enough information. Otherwise,
       return the query needed to retrieve the missing information.\n\n<QUESTION>\nOn
-      what date is the Atlas launch scheduled?\n\n<CONTEXTS>\n\n<CONTEXT id=\"afe047673b9a4ce0969e8f240de2fc08\">\n\n\nExisting
+      what date is the Atlas launch scheduled?\n\n<CONTEXTS>\n\n<CONTEXT id=\"context-launch\">\n\n\nExisting
       summary:\nThe Atlas launch is scheduled for 14 September 2032.\n\n\n**block-AA**\n##
       Chunk: launch-0\n``` The cafeteria serves soup on Tuesdays. ```\n\n\n</CONTEXT>\n\n<CONTEXT
-      id=\"92984300ab9f43459cde81b501e03edd\">\n\n\n\n**block-AB**\n## Chunk: weather-0\n```
-      The coastal forecast calls for light rain. ```\n\n\n</CONTEXT>\n\n</CONTEXTS>"},
-      "citations": false, "citation_threshold": null, "generative_model": "gemini-2.5-flash",
-      "max_tokens": 8192, "query_context_images": {}, "prefer_markdown": null, "json_schema":
-      {"title": "validate_multiple_contexts", "description": "Validate several contexts
-      and summarize each relevant one", "parameters": {"type": "object", "properties":
+      id=\"context-weather\">\n\n\n\n**block-AB**\n## Chunk: weather-0\n``` The coastal
+      forecast calls for light rain. ```\n\n\n</CONTEXT>\n\n</CONTEXTS>"}, "citations":
+      false, "citation_threshold": null, "generative_model": "gemini-2.5-flash", "max_tokens":
+      8192, "query_context_images": {}, "prefer_markdown": null, "json_schema": {"title":
+      "validate_multiple_contexts", "description": "Validate several contexts and
+      summarize each relevant one", "parameters": {"type": "object", "properties":
       {"missing_info_query": {"type": "string", "description": "Query needed to retrieve
       information missing across all contexts, or an empty string."}, "contexts":
       {"type": "array", "items": {"type": "object", "properties": {"context_id": {"type":
@@ -81,7 +81,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2926'
+      - '2891'
       Content-Type:
       - application/json
       Host:
@@ -98,19 +98,19 @@ interactions:
     uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"object","object":{"missing_info_query":"","contexts":[{"context_id":"afe047673b9a4ce0969e8f240de2fc08","answer":"The
+      string: '{"chunk":{"type":"object","object":{"missing_info_query":"","contexts":[{"context_id":"context-launch","answer":"The
         Atlas launch is scheduled for 14 September 2032.","citations":[]}]}}}
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":30,"output_tokens":46,"timings":{"generative":1.0018591549887788},"input_nuclia_tokens":0.03,"output_nuclia_tokens":0.046}}
+        {"chunk":{"type":"meta","input_tokens":27,"output_tokens":34,"timings":{"generative":0.822925177984871},"input_nuclia_tokens":0.027,"output_nuclia_tokens":0.034}}
 
-        {"chunk":{"normalized_tokens":{"input":0.03018,"output":0.046,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+        {"chunk":{"normalized_tokens":{"input":0.02724,"output":0.034,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -118,17 +118,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Fri, 24 Jul 2026 14:05:46 GMT
+      - Mon, 27 Jul 2026 06:31:17 GMT
       nuclia-learning-id:
-      - d85fced3cb354b7f8c30fcd5ee3b90d1
+      - 0f899ae18d024f0498749bdb467911eb
       nuclia-learning-model:
       - gemini-2.5-flash
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1009'
+      - '828'
       x-nuclia-trace-id:
-      - 2871ac59877151b37612742e1bfca56d
+      - 4768c82deb7718af168095e09514a307
     status:
       code: 200
       message: OK
