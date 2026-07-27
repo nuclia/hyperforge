@@ -204,11 +204,11 @@ class SummarizeAgent(Agent[SummarizeAgentConfig]):
 
         prompt = PROMPT_TEMPLATE.render(
             question=question,
-            # TODO: Forced chunk-level citations should also expose each context's
-            # summary so answer attempts from upstream tools are not hidden.
-            context=memory.contexts_markdown()
-            if citations_enabled and self.config.force_chunk_level_citations
-            else memory.contexts_minimal(),
+            context=(
+                memory.contexts_markdown(include_summaries=True)
+                if citations_enabled and self.config.force_chunk_level_citations
+                else memory.contexts_minimal()
+            ),
             prompt=prompt,
             extra_prompts=extra_prompts,
             rules=self.config.rules,
@@ -218,7 +218,7 @@ class SummarizeAgent(Agent[SummarizeAgentConfig]):
         if citations_enabled:
             # Adjust the prompt so that the model returns citations
             prompt += MARKDOWN_TWO_LEVELS_CITATIONS_PROMPT_ADJUSTMENT
-
+        breakpoint()
         t0 = time()
         images = {}
         for memory_context in memory.contexts:
@@ -258,7 +258,11 @@ class SummarizeAgent(Agent[SummarizeAgentConfig]):
         if end_code == "-2":  # indicates not enough data
             prompt = PROMPT_TEMPLATE.render(
                 question=memory.original_question,
-                context=memory.contexts_markdown(),
+                context=memory.contexts_markdown(
+                    include_summaries=(
+                        citations_enabled and self.config.force_chunk_level_citations
+                    )
+                ),
                 prompt=prompt,
                 extra_prompts=extra_prompts,
                 rules=self.config.rules,

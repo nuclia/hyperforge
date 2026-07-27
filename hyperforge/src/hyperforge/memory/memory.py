@@ -745,18 +745,21 @@ class QuestionMemory:
             context.summary for context in contexts if context.summary.strip() != ""
         ]
 
-    def list_contexts_markdown(self) -> list[str]:
+    def list_contexts_markdown(self, include_summaries: bool = False) -> list[str]:
         contexts_str = []
         for context in self.contexts:
             result = ""
             if context.citations_id is not None:
                 if context.title:
-                    result += f"## [{context.citations_id}] {context.title}\n\n"
+                    result += f"## Context [{context.citations_id}] {context.title}\n\n"
                 else:
-                    result += f"## [{context.citations_id}]\n\n"
+                    result += f"## Context [{context.citations_id}]\n\n"
             else:
                 if context.title:
                     result += f"## {context.title}\n\n"
+            if include_summaries and context.summary.strip() != "":
+                result += f"### Existing context summary\n\n{context.summary}\n\n"
+            result += "### Context chunks\n\n"
             result += f"{context.context_markdown()}"
             contexts_str.append(result)
         return contexts_str
@@ -778,11 +781,14 @@ class QuestionMemory:
                 chunks_str.append(result)
         return chunks_str
 
-    def contexts_markdown(self) -> str:
+    def contexts_markdown(self, include_summaries: bool = False) -> str:
         """
-        Returns the concatenated contexts as a single string. Includes full context (i.e: all the chunk texts)
+        Returns the concatenated contexts as a single string. Includes full context
+        (i.e: all the chunk texts), and optionally existing context summaries.
         """
-        return "\n\n".join(self.list_contexts_markdown())
+        return "\n\n".join(
+            self.list_contexts_markdown(include_summaries=include_summaries)
+        )
 
     def list_contexts_minimal(
         self,

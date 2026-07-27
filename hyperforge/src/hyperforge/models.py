@@ -209,9 +209,9 @@ class Chunk(BaseModel):
         citations_id: Optional[str] = None,
     ) -> str:
         if citations_id:
-            lines = [f"## Chunk: [{citations_id}] {self.title or self.chunk_id}"]
+            lines = [f"#### Chunk: [{citations_id}] {self.title or self.chunk_id}"]
         else:
-            lines = [f"## Chunk: {self.title or self.chunk_id}"]
+            lines = [f"#### Chunk: {self.title or self.chunk_id}"]
         if self.action:
             lines.append(f"Result of running: {self.action}")
         if self.labels:
