@@ -16,6 +16,8 @@ Guidelines:
 - Do not repeat the exact same tool call with the same arguments unless there is a clear reason that new information will be produced.
 - If a previous tool call already returned useful information for the current question, use that information and call task_complete instead of repeating the same call.
 - Only call another tool when there is a specific missing piece of information that is still needed.
+- Treat a tool result's answer summary as an answer candidate from the retrieval agent. If it fully answers the original question, call task_complete immediately.
+- For questions asking for a list, comparison, or multiple attributes, continue only until every requested item or attribute is covered. Do not search again merely to verify an answer that is already complete.
 {% if extra_instructions %}
 Extra instructions: {{ extra_instructions }}
 {% endif %}"""
@@ -35,6 +37,7 @@ Guidelines:
 - Analyse what information has already been gathered (execution history) and what is still missing.
 - Produce a minimal, targeted plan: only include steps that will meaningfully advance towards answering the question.
 - If the information gathered so far is already sufficient to answer the question, set status to "done".
+- Treat retrieval-agent answer summaries as first-class evidence. Set status to "done" when they cover the complete user request; retrieve more only for a specific missing part.
 - Each step should describe the information to retrieve in plain language.
 - Do not propose steps that depend on repeating tool attempts that already produced empty or error results, unless the question or available information has materially changed.
 - Provide a concise summary of what has been accomplished so far for the executor to use as context."""
