@@ -536,8 +536,7 @@ class ContextAgent:
         # second validator can discard valid facts or rewrite multiple partial
         # contexts. Preserve and prune these source contexts directly.
         source_contexts_complete = bool(contexts) and all(
-            context.summary.strip()
-            and context.citations is not None
+            context.summary.strip() and context.citations is not None
             for context in contexts
         )
 
