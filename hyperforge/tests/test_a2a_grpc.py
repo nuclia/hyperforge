@@ -5,30 +5,59 @@ Spins up a real gRPC A2A server backed by the production
 drives it with the a2a-sdk gRPC client used by the A2A client agent.
 """
 
+import socket
 from concurrent import futures
 
 import grpc
 from a2a.server.request_handlers import DefaultRequestHandler, GrpcHandler
 from a2a.server.tasks import InMemoryTaskStore
 from a2a.types import a2a_pb2_grpc
+from hyperforge_a2a.agent import A2AClientAgent
 from hyperforge_a2a.client import (
     build_grpc_client,
     build_send_request,
     collect_text_from_stream_response,
 )
+from hyperforge_a2a.config import A2AAgentConfig
 
 import hyperforge.a2a.executor as executor_module
+import hyperforge.server.session as session_module
 from hyperforge.a2a.card import build_agent_card
 from hyperforge.a2a.executor import HyperforgeA2AExecutor
 from hyperforge.a2a.settings import A2ASettings
+from hyperforge.broker.local import LocalBroker
+from hyperforge.engine import State
 from hyperforge.interaction import AnswerOperation, AragAnswer
+from hyperforge.memory.memory import NoMemorySessionMemory
+from hyperforge.models import MemoryConfig
+from hyperforge.server.cache import NoCache
+from hyperforge.server.session import SessionManager
+from hyperforge.server.settings import Settings as ServerSettings
+from hyperforge.standalone.agent import StaticAgentManager
+from hyperforge.standalone.config import StandAloneAgentConfig, WorkflowConfig
 
 
 class _FakeContext:
-    def __init__(self, settings: A2ASettings):
+    def __init__(self, settings: A2ASettings, agent_manager=None, broker=None):
         self.settings = settings
-        self.agent_manager = None
-        self.broker = None
+        self.agent_manager = agent_manager
+        self.broker = broker
+
+
+class _DeterministicWorkflow:
+    async def __call__(self, memory, manager):
+        await memory.add_answer(
+            "The deterministic workflow completed.",
+            module="deterministic",
+            agent_path="/generation/deterministic",
+        )
+        await memory.add_final_answer()
+
+
+def _free_port() -> int:
+    with socket.socket() as sock:
+        sock.bind(("127.0.0.1", 0))
+        return int(sock.getsockname()[1])
 
 
 async def _serve(executor, port: int):
@@ -63,12 +92,13 @@ async def test_a2a_grpc_round_trip(monkeypatch):
 
     monkeypatch.setattr(executor_module, "stream_response", fake_stream_response)
 
-    settings = A2ASettings(a2a_grpc_port=8041)
+    port = _free_port()
+    settings = A2ASettings(a2a_grpc_port=port)
     executor = HyperforgeA2AExecutor(_FakeContext(settings))
-    server = await _serve(executor, 8041)
+    server = await _serve(executor, port)
 
     try:
-        client = build_grpc_client("127.0.0.1:8041", use_tls=False)
+        client = build_grpc_client(f"127.0.0.1:{port}", use_tls=False)
         request = build_send_request(
             "what is A2A?",
             {
@@ -93,18 +123,150 @@ async def test_a2a_grpc_round_trip(monkeypatch):
     assert captured["headers"].get("authorization") == "Bearer token"
 
 
+async def test_a2a_client_agent_builds_context_from_streamed_workflow(monkeypatch):
+    captured = {}
+
+    async def deterministic_workflow(
+        app, websocket, account, agent_id, session, interaction, workflow_id="default"
+    ):
+        captured["account"] = account
+        captured["agent_id"] = agent_id
+        captured["workflow_id"] = workflow_id
+        captured["headers"] = dict(interaction.headers)
+        yield AragAnswer(operation=AnswerOperation.ANSWER, answer="deterministic ")
+        yield AragAnswer(operation=AnswerOperation.ANSWER, answer="A2A response")
+        yield AragAnswer(operation=AnswerOperation.DONE)
+
+    monkeypatch.setattr(executor_module, "stream_response", deterministic_workflow)
+
+    port = _free_port()
+    server_settings = A2ASettings(a2a_grpc_port=port)
+    server = await _serve(HyperforgeA2AExecutor(_FakeContext(server_settings)), port)
+
+    try:
+        client_agent = await A2AClientAgent.from_config(
+            A2AAgentConfig(
+                id="local-a2a-client",
+                source=f"127.0.0.1:{port}",
+                remote_account="local",
+                remote_agent_id="deterministic-agent",
+                remote_workflow_id="deterministic-workflow",
+                valid_headers=["authorization"],
+            )
+        )
+        session = NoMemorySessionMemory(
+            MemoryConfig(),
+            "client-agent",
+            "default",
+            cache=None,  # type: ignore[arg-type]
+        )
+        session.init("local-a2a-session")
+        memory = session.start_question(
+            "Run the deterministic workflow",
+            headers={"authorization": "Bearer local-demo"},
+        )
+
+        context = await client_agent.a2a_query(
+            "Run the deterministic workflow",
+            memory,
+            manager=None,  # type: ignore[arg-type]
+        )
+    finally:
+        await server.stop(grace=1)
+
+    assert context.summary == "deterministic \nA2A response"
+    assert [chunk.text for chunk in context.chunks] == [context.summary]
+    assert captured == {
+        "account": "local",
+        "agent_id": "deterministic-agent",
+        "workflow_id": "deterministic-workflow",
+        "headers": {"authorization": "Bearer local-demo"},
+    }
+
+
+async def test_a2a_client_server_workflow_end_to_end(monkeypatch):
+    """Run client, A2A server, broker, and deterministic workflow in one process."""
+    broker = LocalBroker(keepalive_ms=1_000)
+    remote_agent_id = "deterministic-agent"
+    workflow_id = "deterministic-workflow"
+    agent_manager = StaticAgentManager(
+        {
+            remote_agent_id: StandAloneAgentConfig(
+                workflows={workflow_id: WorkflowConfig(name="Deterministic")}
+            )
+        }
+    )
+    worker = SessionManager(
+        settings=ServerSettings(health_check_enabled=False),
+        broker=broker,
+        agent_manager=agent_manager,
+        cache=NoCache(),
+    )
+
+    async def deterministic_state(**_):
+        return State(manager=None, agent=_DeterministicWorkflow())
+
+    monkeypatch.setattr(
+        session_module,
+        "get_state",
+        deterministic_state,
+    )
+    await worker.initialize(health_check=False)
+
+    port = _free_port()
+    a2a_settings = A2ASettings(a2a_grpc_port=port)
+    server = await _serve(
+        HyperforgeA2AExecutor(
+            _FakeContext(a2a_settings, agent_manager=agent_manager, broker=broker)
+        ),
+        port,
+    )
+
+    try:
+        client_agent = await A2AClientAgent.from_config(
+            A2AAgentConfig(
+                id="local-a2a-client",
+                source=f"127.0.0.1:{port}",
+                remote_account="local",
+                remote_agent_id=remote_agent_id,
+                remote_workflow_id=workflow_id,
+            )
+        )
+        session = NoMemorySessionMemory(
+            MemoryConfig(),
+            "client-agent",
+            "default",
+            cache=None,  # type: ignore[arg-type]
+        )
+        session.init("local-a2a-session")
+        memory = session.start_question("Run the local workflow")
+
+        context = await client_agent.a2a_query(
+            "Run the local workflow",
+            memory,
+            manager=None,  # type: ignore[arg-type]
+        )
+    finally:
+        await server.stop(grace=1)
+        await worker.finalize()
+
+    assert context.summary == "The deterministic workflow completed."
+    assert [chunk.text for chunk in context.chunks] == [context.summary]
+
+
 async def test_a2a_grpc_missing_routing_metadata(monkeypatch):
     async def fake_stream_response(*args, **kwargs):  # pragma: no cover - not called
         yield AragAnswer(operation=AnswerOperation.DONE)
 
     monkeypatch.setattr(executor_module, "stream_response", fake_stream_response)
 
-    settings = A2ASettings(a2a_grpc_port=8042)
+    port = _free_port()
+    settings = A2ASettings(a2a_grpc_port=port)
     executor = HyperforgeA2AExecutor(_FakeContext(settings))
-    server = await _serve(executor, 8042)
+    server = await _serve(executor, port)
 
     try:
-        client = build_grpc_client("127.0.0.1:8042", use_tls=False)
+        client = build_grpc_client(f"127.0.0.1:{port}", use_tls=False)
         # No agent_id / account provided -> task should fail gracefully.
         request = build_send_request("hi", {"workflow_id": "default"})
         texts: list[str] = []

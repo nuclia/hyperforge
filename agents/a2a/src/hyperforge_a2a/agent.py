@@ -10,7 +10,7 @@ from hyperforge.manager import Manager
 from hyperforge.memory import Chunk, Context, QuestionMemory
 
 from hyperforge_a2a.client import (
-    build_grpc_client,
+    build_a2a_client,
     build_send_request,
     collect_text_from_stream_response,
 )
@@ -69,7 +69,7 @@ class A2AClientAgent(ContextAgent, Agent[A2AAgentConfig]):
         t0 = time()
         texts: List[str] = []
 
-        client = build_grpc_client(self.config.source, self.config.use_tls)
+        client = await build_a2a_client(self.config.source, self.config.use_tls)
         try:
             request = build_send_request(question, self._build_metadata(memory))
             async for response in client.send_message(request):

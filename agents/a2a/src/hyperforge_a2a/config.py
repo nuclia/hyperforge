@@ -13,15 +13,16 @@ class A2AAgentConfig(ContextAgentConfig):
         ...,
         title="A2A server address",
         description=(
-            "gRPC address of the external A2A server, e.g. 'localhost:8034' "
-            "or 'a2a.example.com:443'."
+            "gRPC address (e.g. 'localhost:8034') or HTTP(S) URL that serves "
+            "an A2A Agent Card (e.g. 'http://localhost:9999')."
         ),
         json_schema_extra={"show_in_node": True},
     )
     use_tls: bool = Field(
         default=False,
         title="Use TLS",
-        description="Establish a secure gRPC channel to the A2A server.",
+        description="Establish a secure gRPC channel to the A2A server."
+        " HTTPS URLs use TLS automatically.",
     )
     read_timeout_seconds: int = Field(default=120, title="Read timeout in seconds")
 

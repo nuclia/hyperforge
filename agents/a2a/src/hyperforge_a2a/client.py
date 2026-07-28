@@ -4,7 +4,15 @@ from typing import Any, Optional
 from uuid import uuid4
 
 import grpc
-from a2a.client import Client, ClientConfig, ClientFactory, minimal_agent_card
+import httpx
+from a2a.client import (
+    A2ACardResolver,
+    Client,
+    ClientConfig,
+    ClientFactory,
+    create_client,
+    minimal_agent_card,
+)
 from a2a.types import a2a_pb2
 from a2a.utils import TransportProtocol
 from google.protobuf import struct_pb2
@@ -33,6 +41,37 @@ def build_grpc_client(source: str, use_tls: bool) -> Client:
     )
     card = minimal_agent_card(source, [TransportProtocol.GRPC])
     return ClientFactory(config).create(card)
+
+
+async def build_a2a_client(
+    source: str,
+    use_tls: bool,
+    http_client: httpx.AsyncClient | None = None,
+) -> Client:
+    """Create an A2A client from either a gRPC address or an HTTP Agent Card URL."""
+    if not source.startswith(("http://", "https://")):
+        return build_grpc_client(source, use_tls)
+
+    owns_http_client = http_client is None
+    if http_client is None:
+        http_client = httpx.AsyncClient()
+    try:
+        card = await A2ACardResolver(
+            httpx_client=http_client,
+            base_url=source,
+        ).get_agent_card()
+        return await create_client(
+            agent=card,
+            client_config=ClientConfig(
+                streaming=True,
+                httpx_client=http_client,
+                accepted_output_modes=["text/plain"],
+            ),
+        )
+    except Exception:
+        if owns_http_client:
+            await http_client.aclose()
+        raise
 
 
 def build_message(question: str) -> a2a_pb2.Message:
