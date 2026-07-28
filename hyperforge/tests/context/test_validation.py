@@ -102,10 +102,104 @@ async def test_validate_contexts_maps_blocks_to_original_payloads() -> None:
     assert contexts[0].citations == []
     assert contexts[1].citations == ["second-0"]
     assert contexts[2].citations is None
-    assert contexts[0].summary == "First partial answer"
+    assert contexts[0].summary == "First summary"
     assert contexts[1].summary == "Second partial answer"
     assert contexts[2].summary == ""
     assert memory.steps[-1].title == "agent: Context validation"
+
+
+@pytest.mark.asyncio
+async def test_multi_context_validation_merges_duplicate_context_results() -> None:
+    agent = StubContextAgent()
+    manager = AsyncMock()
+    context = make_context(
+        "cities",
+        chunks=["Haverhill answer", "Ashland answer", "York answer"],
+    )
+    manager.execute_json.return_value = (
+        {
+            "missing_info_query": "",
+            "contexts": [
+                {
+                    "context_id": context.id,
+                    "answer": "City of Haverhill",
+                    "citations": ["block-AA"],
+                },
+                {
+                    "context_id": context.id,
+                    "answer": "City of Ashland",
+                    "citations": ["block-AB"],
+                },
+            ],
+        },
+        10,
+        5,
+    )
+
+    memory = make_memory()
+    await agent.save_contexts_and_return_missing(
+        memory=memory,
+        manager=manager,
+        question="Which cities?",
+        contexts=[context],
+        flow_id="flow",
+    )
+
+    assert memory.contexts == [context]
+    assert context.summary == "City of Haverhill\nCity of Ashland"
+    assert context.citations == ["cities-0", "cities-1"]
+    assert [chunk.chunk_id for chunk in context.chunks] == ["cities-0", "cities-1"]
+
+
+@pytest.mark.asyncio
+async def test_complete_source_contexts_skip_second_validation() -> None:
+    agent = StubContextAgent()
+    manager = AsyncMock()
+    context = make_context(
+        "source",
+        summary="The source answer.",
+        chunks=["Relevant", "Unrelated"],
+    )
+    context.citations = ["source-0"]
+    memory = make_memory()
+
+    await agent.save_contexts_and_return_missing(
+        memory=memory,
+        manager=manager,
+        question="question",
+        contexts=[context],
+        flow_id="flow",
+    )
+
+    manager.execute_json.assert_not_awaited()
+    assert memory.contexts == [context]
+    assert [chunk.chunk_id for chunk in context.chunks] == ["source-0"]
+
+
+@pytest.mark.asyncio
+async def test_multi_context_validation_keeps_unmentioned_source_answer() -> None:
+    agent = StubContextAgent()
+    manager = AsyncMock()
+    context = make_context("haverhill", summary="City of Haverhill")
+    context.citations = ["haverhill-0"]
+    manager.execute_json.return_value = (
+        {"missing_info_query": "", "contexts": []},
+        10,
+        5,
+    )
+
+    memory = make_memory()
+    await agent.save_contexts_and_return_missing(
+        memory=memory,
+        manager=manager,
+        question="Which city?",
+        contexts=[context],
+        flow_id="flow",
+    )
+
+    assert memory.contexts == [context]
+    assert context.summary == "City of Haverhill"
+    assert context.citations == ["haverhill-0"]
 
 
 def test_prune_to_structured_citations_removes_chunks() -> None:

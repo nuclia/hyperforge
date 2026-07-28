@@ -38,6 +38,32 @@ def test_process_results_replaces_an_oversized_context_with_retry_guidance():
     assert collected_contexts[0].chunks[0].text != result.chunks[0].text
 
 
+def test_process_results_budgets_a_context_summary_before_raw_chunks():
+    agent = SmartAgent(
+        SmartAgentConfig(
+            max_tool_result_bytes=32,
+            max_tool_result_item_bytes=32,
+        )
+    )
+    result = Context(
+        original_question_uuid=None,
+        actual_question_uuid=None,
+        question="question",
+        source="test",
+        agent="test",
+        summary="The answer is Haverhill.",
+        chunks=[Chunk(chunk_id="large", text="x" * 100)],
+    )
+    collected_contexts: list[Context] = []
+
+    texts = agent._process_results(
+        [("search of test", result)], collected_contexts=collected_contexts
+    )
+
+    assert texts == ["[search of test]:\nThe answer is Haverhill."]
+    assert collected_contexts == [result]
+
+
 def test_process_results_replaces_an_oversized_tool_error():
     agent = SmartAgent(
         SmartAgentConfig(
