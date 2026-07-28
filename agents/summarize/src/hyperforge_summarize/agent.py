@@ -1,3 +1,4 @@
+import re
 from time import time
 from typing import List, Optional, overload
 
@@ -121,6 +122,10 @@ SUMMARIZE_PROMPT_CONVERSATIONAL_TEMPLATE = PROMPT_ENVIRONMENT.from_string(
 )
 
 
+FOOTNOTE_DEFINITION = re.compile(r"^\[(\d+)\]:\s*(block-\S+)\s*$", re.MULTILINE)
+FOOTNOTE_MARKER = re.compile(r"\[(\d+)\]")
+
+
 @agent(
     id="summarize",
     agent_type="generation",
@@ -204,9 +209,11 @@ class SummarizeAgent(Agent[SummarizeAgentConfig]):
 
         prompt = PROMPT_TEMPLATE.render(
             question=question,
-            context=memory.contexts_markdown()
-            if citations_enabled and self.config.force_chunk_level_citations
-            else memory.contexts_minimal(),
+            context=(
+                memory.contexts_markdown(include_summaries=True)
+                if citations_enabled and self.config.force_chunk_level_citations
+                else memory.contexts_minimal()
+            ),
             prompt=prompt,
             extra_prompts=extra_prompts,
             rules=self.config.rules,
@@ -216,7 +223,6 @@ class SummarizeAgent(Agent[SummarizeAgentConfig]):
         if citations_enabled:
             # Adjust the prompt so that the model returns citations
             prompt += MARKDOWN_TWO_LEVELS_CITATIONS_PROMPT_ADJUSTMENT
-
         t0 = time()
         images = {}
         for memory_context in memory.contexts:
@@ -257,7 +263,11 @@ class SummarizeAgent(Agent[SummarizeAgentConfig]):
         if end_code == "-2":  # indicates not enough data
             prompt = PROMPT_TEMPLATE.render(
                 question=memory.original_question,
-                context=memory.contexts_markdown(),
+                context=memory.contexts_markdown(
+                    include_summaries=(
+                        citations_enabled and self.config.force_chunk_level_citations
+                    )
+                ),
                 prompt=prompt,
                 extra_prompts=extra_prompts,
                 rules=self.config.rules,
@@ -276,6 +286,9 @@ class SummarizeAgent(Agent[SummarizeAgentConfig]):
             )
             answer = resp.answer
             end_code = resp.code
+
+        if citations_enabled and self.config.force_chunk_level_citations:
+            answer = normalize_chunk_level_citations(answer, memory.contexts)
 
         if not resp.tools or answer:
             # Only add answer if not a tool call or if answer is present (maybe some models return both)
@@ -310,14 +323,8 @@ def build_answer_citations(answer: str, contexts: list[Context]) -> AnswerCitati
         if context.citations_id is not None
     }
 
-    # Parse citations in the answer
-    citations_in_answer: set[str] = set()
-    for line in answer.splitlines():
-        if line.startswith("[") and "]: block-" in line:
-            citation_id = line.split("]: ")[1].strip()
-            citations_in_answer.add(citation_id)
-
-    for citation_id in citations_in_answer:
+    _, footnotes = split_markdown_footnotes(answer)
+    for citation_id in dict.fromkeys(citation_id for _, citation_id in footnotes):
         try:
             context_citation_id, chunk_index = _parse_citation_id(citation_id)
         except ValueError:
@@ -364,6 +371,77 @@ def build_answer_citations(answer: str, contexts: list[Context]) -> AnswerCitati
         )
 
     return result
+
+
+def split_markdown_footnotes(answer: str) -> tuple[str, list[tuple[str, str]]]:
+    """Return an answer body and its ordered markdown footnote definitions."""
+    definitions = list(FOOTNOTE_DEFINITION.finditer(answer))
+    if not definitions:
+        return answer, []
+    return (
+        answer[: definitions[0].start()].rstrip(),
+        [(definition.group(1), definition.group(2)) for definition in definitions],
+    )
+
+
+def render_markdown_footnotes(body: str, citation_ids: list[str]) -> str:
+    references = "\n".join(
+        f"[{number}]: {citation_id}"
+        for number, citation_id in enumerate(citation_ids, start=1)
+    )
+    return f"{body}\n\n{references}"
+
+
+def normalize_chunk_level_citations(answer: str, contexts: list[Context]) -> str:
+    """Expand context citations to every chunk when chunk-level citations are forced."""
+    body, footnotes = split_markdown_footnotes(answer)
+    if not footnotes:
+        return answer
+
+    contexts_by_citation_id = {
+        context.citations_id: context
+        for context in contexts
+        if context.citations_id is not None
+    }
+    targets_by_marker: dict[str, list[str]] = {}
+    changed = False
+    for marker, citation_id in footnotes:
+        try:
+            context_citation_id, chunk_index = _parse_citation_id(citation_id)
+        except ValueError:
+            targets_by_marker[marker] = [citation_id]
+            continue
+        context = contexts_by_citation_id.get(context_citation_id)
+        if chunk_index is None and context is not None and context.chunks:
+            targets_by_marker[marker] = [
+                f"{citation_id}-{index}" for index in range(len(context.chunks))
+            ]
+            changed = True
+        else:
+            targets_by_marker[marker] = [citation_id]
+
+    if not changed:
+        return answer
+
+    citation_ids = list(
+        dict.fromkeys(
+            citation_id
+            for marker, _ in footnotes
+            for citation_id in targets_by_marker[marker]
+        )
+    )
+    citation_numbers = {
+        citation_id: number for number, citation_id in enumerate(citation_ids, start=1)
+    }
+
+    def replace_marker(match: re.Match[str]) -> str:
+        targets = targets_by_marker.get(match.group(1))
+        if targets is None:
+            return match.group(0)
+        return " ".join(f"[{citation_numbers[target]}]" for target in targets)
+
+    body = FOOTNOTE_MARKER.sub(replace_marker, body)
+    return render_markdown_footnotes(body, citation_ids)
 
 
 def _parse_citation_id(citation_id: str) -> tuple[str, Optional[int]]:
