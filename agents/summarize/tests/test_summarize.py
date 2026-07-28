@@ -183,6 +183,28 @@ async def test_normalize_chunk_level_citations_expands_context_references():
     }
 
 
+async def test_normalize_chunk_level_citations_uses_source_citations():
+    context = Context(
+        original_question_uuid="question-1",
+        actual_question_uuid="question-1",
+        question="What is the answer?",
+        source="test-source",
+        agent="upstream",
+        citations_id="block-AA",
+        citations=["chunk-2"],
+        chunks=[
+            Chunk(chunk_id="chunk-1", text="Unrelated"),
+            Chunk(chunk_id="chunk-2", text="Relevant"),
+        ],
+    )
+
+    answer = normalize_chunk_level_citations(
+        "The answer is here [1].\n\n[1]: block-AA", [context]
+    )
+
+    assert answer == "The answer is here [1].\n\n[1]: block-AA-1"
+
+
 async def test_summarize_answers():
     config = deepcopy(CONFIG)
     config["context"] = [
