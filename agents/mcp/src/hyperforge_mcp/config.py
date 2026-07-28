@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Dict, List, Literal
 
 from hyperforge.context.config import ContextAgentConfig
-from hyperforge.llm_config import LLMConfig, LLMField, llm_defaults
+from hyperforge.utils import WidgetType
 from pydantic import Field
 from pydantic.config import ConfigDict
 
