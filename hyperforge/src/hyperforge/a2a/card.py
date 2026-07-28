@@ -48,13 +48,12 @@ def build_agent_card(
 ) -> a2a_pb2.AgentCard:
     """Build the A2A agent card advertised by the gRPC server.
 
-    Routing to a concrete agent/workflow happens through the ``agent_id`` /
-    ``workflow_id`` message metadata, so the base card advertises a single
-    generic skill when no per-agent skills are provided.
+    Callers without a configured agent may omit ``skills`` to create a generic
+    card. The production server always supplies workflow-derived skills.
     """
     url = _public_url(settings)
 
-    if not skills:
+    if skills is None:
         skills = [
             a2a_pb2.AgentSkill(
                 id="ask",

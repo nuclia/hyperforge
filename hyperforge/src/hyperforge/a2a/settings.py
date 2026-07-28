@@ -1,5 +1,6 @@
 from typing import Optional
 
+from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
@@ -29,9 +30,12 @@ class A2ASettings(BaseSettings):
     # the agent card interfaces). Falls back to host:port when unset.
     a2a_public_url: Optional[str] = None
 
-    # When an incoming A2A message omits the ``account`` routing metadata this
-    # value is used instead (useful for single-tenant standalone deployments).
-    a2a_default_account: Optional[str] = None
+    # The single Hyperforge agent represented by this A2A server. Both values
+    # are required when starting the server and are advertised through its
+    # workflow-derived Agent Card.
+    a2a_account: Optional[str] = None
+    a2a_agent_id: Optional[str] = None
+    a2a_allowed_forwarded_headers: list[str] = Field(default_factory=list)
 
     # Broker / pubsub (must match the worker + api settings).
     valkey_url: str = "redis://arag-valkey-cluster"

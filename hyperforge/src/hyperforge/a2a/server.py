@@ -14,7 +14,7 @@ from a2a.server.tasks import InMemoryTaskStore
 from a2a.types import a2a_pb2_grpc
 
 from hyperforge.a2a import logger
-from hyperforge.a2a.card import build_agent_card
+from hyperforge.a2a.card import build_agent_card, build_agent_skills
 from hyperforge.a2a.context import A2AServerContext
 from hyperforge.a2a.executor import HyperforgeA2AExecutor
 from hyperforge.a2a.settings import A2ASettings
@@ -38,6 +38,9 @@ async def build_grpc_server(
     data_manager_settings: DataManagerSettings,
 ) -> tuple[grpc.aio.Server, AgentManager, RedisBroker]:
     """Wire up the broker, agent manager and A2A gRPC servicer."""
+    if not settings.a2a_account or not settings.a2a_agent_id:
+        raise ValueError("A2A_ACCOUNT and A2A_AGENT_ID must be configured")
+
     GLOBAL_REGISTRY.clear()
 
     broker = RedisBroker.from_url(
@@ -59,7 +62,14 @@ async def build_grpc_server(
     )
 
     executor = HyperforgeA2AExecutor(app_context)
-    agent_card = build_agent_card(settings)
+    skills = await build_agent_skills(
+        agent_manager, settings.a2a_account, settings.a2a_agent_id
+    )
+    if not skills:
+        raise ValueError(
+            "A2A server agent must have at least one workflow to advertise"
+        )
+    agent_card = build_agent_card(settings, skills)
     request_handler = DefaultRequestHandler(
         agent_executor=executor,
         task_store=InMemoryTaskStore(),

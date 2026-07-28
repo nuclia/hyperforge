@@ -1,13 +1,7 @@
-"""A2A ``AgentExecutor`` bridging incoming A2A messages to Hyperforge.
+"""A2A ``AgentExecutor`` bridging incoming A2A messages to Hyperforge."""
 
-The executor extracts routing information (``account``, ``agent_id``,
-``workflow_id``, ``session``) from the A2A message metadata, then drives the
-exact same broker-backed interaction pipeline used by the HTTP/WS API
-(``stream_response``). ``AragAnswer`` chunks streamed back from the worker are
-mapped onto A2A task artifacts / status updates.
-"""
-
-from typing import Any, Optional
+from dataclasses import dataclass
+from typing import Any
 from uuid import uuid4
 
 from a2a.helpers import new_task
@@ -20,6 +14,7 @@ from hyperforge.a2a import logger
 from hyperforge.a2a.context import A2AServerContext
 from hyperforge.api.models import InteractionRequest
 from hyperforge.api.v1.interaction import WebsocketReceiver, stream_response
+from hyperforge.db import exceptions
 from hyperforge.interaction import AnswerOperation, AragAnswer
 
 # Metadata keys read from the incoming A2A message to route the interaction.
@@ -29,28 +24,95 @@ META_WORKFLOW_ID = "workflow_id"
 META_SESSION = "session"
 META_HEADERS = "headers"
 META_ARGUMENTS = "arguments"
+_ALLOWED_METADATA = {
+    META_ACCOUNT,
+    META_AGENT_ID,
+    META_WORKFLOW_ID,
+    META_SESSION,
+    META_HEADERS,
+    META_ARGUMENTS,
+}
+
+
+@dataclass(frozen=True)
+class A2ARouting:
+    account: str
+    agent_id: str
+    workflow_id: str
+    session: str
+    headers: dict[str, str]
+    arguments: dict[str, str]
 
 
 def _text_part(text: str) -> a2a_pb2.Part:
     return a2a_pb2.Part(text=text)
 
 
-def _headers_from_metadata(metadata: dict[str, Any]) -> dict[str, str]:
-    headers_raw = metadata.get(META_HEADERS) or {}
-    headers: dict[str, str] = {}
-    if isinstance(headers_raw, dict):
-        for key, value in headers_raw.items():
-            headers[str(key)] = str(value)
-    return headers
+def _optional_string(metadata: dict[str, Any], name: str) -> str | None:
+    value = metadata.get(name)
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"A2A metadata '{name}' must be a non-empty string")
+    return value
 
 
-def _arguments_from_metadata(metadata: dict[str, Any]) -> dict[str, str]:
-    args_raw = metadata.get(META_ARGUMENTS) or {}
-    arguments: dict[str, str] = {}
-    if isinstance(args_raw, dict):
-        for key, value in args_raw.items():
-            arguments[str(key)] = str(value)
-    return arguments
+def _string_mapping(metadata: dict[str, Any], name: str) -> dict[str, str]:
+    value = metadata.get(name, {})
+    if value is None:
+        return {}
+    if not isinstance(value, dict):
+        raise ValueError(f"A2A metadata '{name}' must be an object")
+
+    result: dict[str, str] = {}
+    for key, item in value.items():
+        if not isinstance(key, str) or not key:
+            raise ValueError(f"A2A metadata '{name}' must use non-empty string keys")
+        if isinstance(item, (dict, list)) or item is None:
+            raise ValueError(f"A2A metadata '{name}.{key}' must be a scalar value")
+        result[key] = str(item)
+    return result
+
+
+def parse_routing_metadata(
+    metadata: dict[str, Any], settings: Any, context_id: str
+) -> A2ARouting:
+    """Validate client metadata against the fixed A2A server identity."""
+    unknown_keys = set(metadata).difference(_ALLOWED_METADATA)
+    if unknown_keys:
+        keys = ", ".join(sorted(unknown_keys))
+        raise ValueError(f"Unknown A2A metadata field(s): {keys}")
+
+    if not settings.a2a_account or not settings.a2a_agent_id:
+        raise ValueError("A2A server identity is not configured")
+
+    account = _optional_string(metadata, META_ACCOUNT)
+    if account is not None and account != settings.a2a_account:
+        raise ValueError("A2A metadata 'account' does not match this server")
+
+    agent_id = _optional_string(metadata, META_AGENT_ID)
+    if agent_id is not None and agent_id != settings.a2a_agent_id:
+        raise ValueError("A2A metadata 'agent_id' does not match this server")
+
+    headers = _string_mapping(metadata, META_HEADERS)
+    allowed_headers = {
+        header.lower() for header in settings.a2a_allowed_forwarded_headers
+    }
+    disallowed_headers = [
+        header for header in headers if header.lower() not in allowed_headers
+    ]
+    if disallowed_headers:
+        headers_list = ", ".join(sorted(disallowed_headers))
+        raise ValueError(f"A2A metadata contains disallowed header(s): {headers_list}")
+
+    return A2ARouting(
+        account=settings.a2a_account,
+        agent_id=settings.a2a_agent_id,
+        workflow_id=_optional_string(metadata, META_WORKFLOW_ID) or "default",
+        session=_optional_string(metadata, META_SESSION) or context_id,
+        headers=headers,
+        arguments=_string_mapping(metadata, META_ARGUMENTS),
+    )
 
 
 def arag_answer_to_parts(msg: AragAnswer) -> list[a2a_pb2.Part]:
@@ -86,30 +148,15 @@ class HyperforgeA2AExecutor(AgentExecutor):
                 )
             )
 
-        metadata = context.metadata or {}
-        settings = self.app.settings
-
-        account: Optional[str] = (
-            metadata.get(META_ACCOUNT) or settings.a2a_default_account
-        )
-        agent_id: Optional[str] = metadata.get(META_AGENT_ID)
-        workflow_id: str = str(metadata.get(META_WORKFLOW_ID) or "default")
-        session: str = str(metadata.get(META_SESSION) or context_id)
-        question = context.get_user_input()
-
-        if not account or not agent_id:
-            await updater.failed(
-                updater.new_agent_message(
-                    [
-                        _text_part(
-                            "Missing required A2A metadata: 'account' and "
-                            "'agent_id' must be provided."
-                        )
-                    ]
-                )
+        try:
+            routing = parse_routing_metadata(
+                dict(context.metadata or {}), self.app.settings, context_id
             )
+        except ValueError as exc:
+            await updater.failed(updater.new_agent_message([_text_part(str(exc))]))
             return
 
+        question = context.get_user_input()
         if not question:
             await updater.failed(
                 updater.new_agent_message(
@@ -118,23 +165,35 @@ class HyperforgeA2AExecutor(AgentExecutor):
             )
             return
 
+        try:
+            await self.app.agent_manager.ensure_workflow_active(
+                routing.account, routing.agent_id, routing.workflow_id
+            )
+        except exceptions.NotFoundError:
+            await updater.failed(
+                updater.new_agent_message(
+                    [_text_part(f"Unknown workflow_id: {routing.workflow_id}")]
+                )
+            )
+            return
+
         await updater.start_work()
 
         interaction = InteractionRequest(
             question=question,
-            headers=_headers_from_metadata(metadata),
-            arguments=_arguments_from_metadata(metadata),
+            headers=routing.headers,
+            arguments=routing.arguments,
         )
 
         try:
             async for msg in stream_response(
                 self.app,  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
                 WebsocketReceiver(websocket=None),
-                account,
-                agent_id,
-                session,
+                routing.account,
+                routing.agent_id,
+                routing.session,
                 interaction,
-                workflow_id=workflow_id,
+                workflow_id=routing.workflow_id,
             ):
                 if msg.operation == AnswerOperation.ERROR:
                     detail = msg.exception.detail if msg.exception else "Unknown error"

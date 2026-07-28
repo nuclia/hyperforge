@@ -22,8 +22,8 @@ from hyperforge_a2a.config import A2AAgentConfig
 
 import hyperforge.a2a.executor as executor_module
 import hyperforge.server.session as session_module
-from hyperforge.a2a.card import build_agent_card
-from hyperforge.a2a.executor import HyperforgeA2AExecutor
+from hyperforge.a2a.card import build_agent_card, build_agent_skills
+from hyperforge.a2a.executor import HyperforgeA2AExecutor, parse_routing_metadata
 from hyperforge.a2a.settings import A2ASettings
 from hyperforge.broker.local import LocalBroker
 from hyperforge.engine import State
@@ -42,6 +42,17 @@ class _FakeContext:
         self.settings = settings
         self.agent_manager = agent_manager
         self.broker = broker
+
+
+class _FakeAgentManager:
+    def __init__(self, workflows: set[str] | None = None):
+        self.workflows = workflows or {"default"}
+
+    async def ensure_workflow_active(self, account, agent_id, workflow_id):
+        if workflow_id not in self.workflows:
+            from hyperforge.db import exceptions
+
+            raise exceptions.NotFoundError("Workflow not found")
 
 
 class _DeterministicWorkflow:
@@ -93,8 +104,13 @@ async def test_a2a_grpc_round_trip(monkeypatch):
     monkeypatch.setattr(executor_module, "stream_response", fake_stream_response)
 
     port = _free_port()
-    settings = A2ASettings(a2a_grpc_port=port)
-    executor = HyperforgeA2AExecutor(_FakeContext(settings))
+    settings = A2ASettings(
+        a2a_grpc_port=port,
+        a2a_account="acc",
+        a2a_agent_id="myagent",
+        a2a_allowed_forwarded_headers=["authorization"],
+    )
+    executor = HyperforgeA2AExecutor(_FakeContext(settings, _FakeAgentManager({"wf1"})))
     server = await _serve(executor, port)
 
     try:
@@ -140,8 +156,18 @@ async def test_a2a_client_agent_builds_context_from_streamed_workflow(monkeypatc
     monkeypatch.setattr(executor_module, "stream_response", deterministic_workflow)
 
     port = _free_port()
-    server_settings = A2ASettings(a2a_grpc_port=port)
-    server = await _serve(HyperforgeA2AExecutor(_FakeContext(server_settings)), port)
+    server_settings = A2ASettings(
+        a2a_grpc_port=port,
+        a2a_account="local",
+        a2a_agent_id="deterministic-agent",
+        a2a_allowed_forwarded_headers=["authorization"],
+    )
+    server = await _serve(
+        HyperforgeA2AExecutor(
+            _FakeContext(server_settings, _FakeAgentManager({"deterministic-workflow"}))
+        ),
+        port,
+    )
 
     try:
         client_agent = await A2AClientAgent.from_config(
@@ -214,7 +240,11 @@ async def test_a2a_client_server_workflow_end_to_end(monkeypatch):
     await worker.initialize(health_check=False)
 
     port = _free_port()
-    a2a_settings = A2ASettings(a2a_grpc_port=port)
+    a2a_settings = A2ASettings(
+        a2a_grpc_port=port,
+        a2a_account="local",
+        a2a_agent_id=remote_agent_id,
+    )
     server = await _serve(
         HyperforgeA2AExecutor(
             _FakeContext(a2a_settings, agent_manager=agent_manager, broker=broker)
@@ -254,21 +284,48 @@ async def test_a2a_client_server_workflow_end_to_end(monkeypatch):
     assert [chunk.text for chunk in context.chunks] == [context.summary]
 
 
-async def test_a2a_grpc_missing_routing_metadata(monkeypatch):
+def test_parse_routing_metadata_defaults_and_allowed_headers():
+    routing = parse_routing_metadata(
+        {
+            "headers": {"Authorization": "Bearer token"},
+            "arguments": {"limit": 3, "include_archived": False},
+        },
+        A2ASettings(
+            a2a_account="account",
+            a2a_agent_id="research-agent",
+            a2a_allowed_forwarded_headers=["authorization"],
+        ),
+        "a2a-context",
+    )
+
+    assert routing.account == "account"
+    assert routing.agent_id == "research-agent"
+    assert routing.workflow_id == "default"
+    assert routing.session == "a2a-context"
+    assert routing.headers == {"Authorization": "Bearer token"}
+    assert routing.arguments == {"limit": "3", "include_archived": "False"}
+
+
+async def test_a2a_grpc_rejects_identity_override(monkeypatch):
     async def fake_stream_response(*args, **kwargs):  # pragma: no cover - not called
         yield AragAnswer(operation=AnswerOperation.DONE)
 
     monkeypatch.setattr(executor_module, "stream_response", fake_stream_response)
 
     port = _free_port()
-    settings = A2ASettings(a2a_grpc_port=port)
-    executor = HyperforgeA2AExecutor(_FakeContext(settings))
+    settings = A2ASettings(
+        a2a_grpc_port=port,
+        a2a_account="account",
+        a2a_agent_id="research-agent",
+    )
+    executor = HyperforgeA2AExecutor(_FakeContext(settings, _FakeAgentManager()))
     server = await _serve(executor, port)
 
     try:
         client = build_grpc_client(f"127.0.0.1:{port}", use_tls=False)
-        # No agent_id / account provided -> task should fail gracefully.
-        request = build_send_request("hi", {"workflow_id": "default"})
+        request = build_send_request(
+            "hi", {"account": "other-account", "agent_id": "research-agent"}
+        )
         texts: list[str] = []
         states = []
         async for response in client.send_message(request):
@@ -285,7 +342,39 @@ async def test_a2a_grpc_missing_routing_metadata(monkeypatch):
     from a2a.types import a2a_pb2
 
     assert a2a_pb2.TaskState.TASK_STATE_FAILED in states
-    assert any("Missing required A2A metadata" in t for t in texts)
+    assert any("does not match this server" in text for text in texts)
+
+
+async def test_a2a_grpc_rejects_unknown_workflow(monkeypatch):
+    async def fake_stream_response(*args, **kwargs):  # pragma: no cover - not called
+        yield AragAnswer(operation=AnswerOperation.DONE)
+
+    monkeypatch.setattr(executor_module, "stream_response", fake_stream_response)
+
+    port = _free_port()
+    settings = A2ASettings(
+        a2a_grpc_port=port,
+        a2a_account="account",
+        a2a_agent_id="research-agent",
+    )
+    server = await _serve(
+        HyperforgeA2AExecutor(
+            _FakeContext(settings, _FakeAgentManager({"known-workflow"}))
+        ),
+        port,
+    )
+
+    try:
+        client = build_grpc_client(f"127.0.0.1:{port}", use_tls=False)
+        request = build_send_request("hi", {"workflow_id": "unknown-workflow"})
+        texts: list[str] = []
+        async for response in client.send_message(request):
+            texts.extend(collect_text_from_stream_response(response))
+        await client.close()
+    finally:
+        await server.stop(grace=1)
+
+    assert any("Unknown workflow_id: unknown-workflow" in text for text in texts)
 
 
 def test_build_agent_card_defaults():
@@ -294,3 +383,28 @@ def test_build_agent_card_defaults():
     assert card.capabilities.streaming is True
     assert card.skills
     assert card.supported_interfaces[0].protocol_binding == "GRPC"
+
+
+async def test_agent_card_advertises_configured_workflows():
+    agent_manager = StaticAgentManager(
+        {
+            "research-agent": StandAloneAgentConfig(
+                workflows={
+                    "answer": WorkflowConfig(
+                        name="Answer", description="Answer a question"
+                    ),
+                    "summarize": WorkflowConfig(
+                        name="Summarize", description="Summarize context"
+                    ),
+                }
+            )
+        }
+    )
+
+    skills = await build_agent_skills(agent_manager, "account", "research-agent")
+    card = build_agent_card(A2ASettings(), skills)
+
+    assert [(skill.id, skill.name, skill.description) for skill in card.skills] == [
+        ("research-agent:answer", "Answer", "Answer a question"),
+        ("research-agent:summarize", "Summarize", "Summarize context"),
+    ]
