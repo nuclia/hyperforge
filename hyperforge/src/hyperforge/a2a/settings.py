@@ -36,6 +36,8 @@ class A2ASettings(BaseSettings):
     a2a_account: Optional[str] = None
     a2a_agent_id: Optional[str] = None
     a2a_allowed_forwarded_headers: list[str] = Field(default_factory=list)
+    a2a_task_store_prefix: str = "hyperforge:a2a:task"
+    a2a_task_ttl_seconds: int = 300
 
     # Broker / pubsub (must match the worker + api settings).
     valkey_url: str = "redis://arag-valkey-cluster"

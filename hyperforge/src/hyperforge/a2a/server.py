@@ -18,6 +18,7 @@ from hyperforge.a2a.card import build_agent_card, build_agent_skills
 from hyperforge.a2a.context import A2AServerContext
 from hyperforge.a2a.executor import HyperforgeA2AExecutor
 from hyperforge.a2a.settings import A2ASettings
+from hyperforge.a2a.task_store import RedisA2ATaskStore
 from hyperforge.broker.redis import RedisBroker
 from hyperforge.configure import GLOBAL_REGISTRY, load_all_configurations, scan
 from hyperforge.db.agents import AgentManager
@@ -59,6 +60,11 @@ async def build_grpc_server(
         settings=settings,
         agent_manager=agent_manager,
         broker=broker,
+        task_store=RedisA2ATaskStore(
+            broker.client,
+            settings.a2a_task_store_prefix,
+            settings.a2a_task_ttl_seconds,
+        ),
     )
 
     executor = HyperforgeA2AExecutor(app_context)

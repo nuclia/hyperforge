@@ -1,4 +1,5 @@
 from hyperforge.a2a.settings import A2ASettings
+from hyperforge.a2a.task_store import A2ATaskStore
 from hyperforge.broker import Broker
 from hyperforge.db.agents import AgentManager
 
@@ -18,7 +19,9 @@ class A2AServerContext:
         settings: A2ASettings,
         agent_manager: AgentManager,
         broker: Broker,
+        task_store: A2ATaskStore,
     ):
         self.settings = settings
         self.agent_manager = agent_manager
         self.broker = broker
+        self.task_store = task_store

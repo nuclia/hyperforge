@@ -7,8 +7,10 @@ drives it with the a2a-sdk gRPC client used by the A2A client agent.
 
 import socket
 from concurrent import futures
+from uuid import uuid4
 
 import grpc
+import pytest
 from a2a.server.request_handlers import DefaultRequestHandler, GrpcHandler
 from a2a.server.tasks import InMemoryTaskStore
 from a2a.types import a2a_pb2_grpc
@@ -19,15 +21,17 @@ from hyperforge_a2a.client import (
     collect_text_from_stream_response,
 )
 from hyperforge_a2a.config import A2AAgentConfig
+from redis.asyncio import Redis
 
 import hyperforge.a2a.executor as executor_module
 import hyperforge.server.session as session_module
 from hyperforge.a2a.card import build_agent_card, build_agent_skills
 from hyperforge.a2a.executor import HyperforgeA2AExecutor, parse_routing_metadata
 from hyperforge.a2a.settings import A2ASettings
+from hyperforge.a2a.task_store import RedisA2ATaskStore
 from hyperforge.broker.local import LocalBroker
 from hyperforge.engine import State
-from hyperforge.interaction import AnswerOperation, AragAnswer
+from hyperforge.interaction import AnswerOperation, AragAnswer, Feedback
 from hyperforge.memory.memory import NoMemorySessionMemory
 from hyperforge.models import MemoryConfig
 from hyperforge.server.cache import NoCache
@@ -38,10 +42,13 @@ from hyperforge.standalone.config import StandAloneAgentConfig, WorkflowConfig
 
 
 class _FakeContext:
-    def __init__(self, settings: A2ASettings, agent_manager=None, broker=None):
+    def __init__(
+        self, settings: A2ASettings, agent_manager=None, broker=None, task_store=None
+    ):
         self.settings = settings
         self.agent_manager = agent_manager
         self.broker = broker
+        self.task_store = task_store
 
 
 class _FakeAgentManager:
@@ -65,6 +72,14 @@ class _DeterministicWorkflow:
         await memory.add_final_answer()
 
 
+@pytest.fixture
+async def a2a_task_store(valkey):
+    redis = Redis(host=valkey[0], port=valkey[1], decode_responses=True)
+    store = RedisA2ATaskStore(redis, f"test:a2a:grpc:{uuid4().hex}", 30)
+    yield store
+    await redis.aclose()  # type: ignore[attr-defined]
+
+
 def _free_port() -> int:
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", 0))
@@ -83,7 +98,7 @@ async def _serve(executor, port: int):
     return server
 
 
-async def test_a2a_grpc_round_trip(monkeypatch):
+async def test_a2a_grpc_round_trip(monkeypatch, a2a_task_store):
     captured = {}
 
     async def fake_stream_response(
@@ -110,7 +125,9 @@ async def test_a2a_grpc_round_trip(monkeypatch):
         a2a_agent_id="myagent",
         a2a_allowed_forwarded_headers=["authorization"],
     )
-    executor = HyperforgeA2AExecutor(_FakeContext(settings, _FakeAgentManager({"wf1"})))
+    executor = HyperforgeA2AExecutor(
+        _FakeContext(settings, _FakeAgentManager({"wf1"}), task_store=a2a_task_store)
+    )
     server = await _serve(executor, port)
 
     try:
@@ -139,7 +156,9 @@ async def test_a2a_grpc_round_trip(monkeypatch):
     assert captured["headers"].get("authorization") == "Bearer token"
 
 
-async def test_a2a_client_agent_builds_context_from_streamed_workflow(monkeypatch):
+async def test_a2a_client_agent_builds_context_from_streamed_workflow(
+    monkeypatch, a2a_task_store
+):
     captured = {}
 
     async def deterministic_workflow(
@@ -164,7 +183,11 @@ async def test_a2a_client_agent_builds_context_from_streamed_workflow(monkeypatc
     )
     server = await _serve(
         HyperforgeA2AExecutor(
-            _FakeContext(server_settings, _FakeAgentManager({"deterministic-workflow"}))
+            _FakeContext(
+                server_settings,
+                _FakeAgentManager({"deterministic-workflow"}),
+                task_store=a2a_task_store,
+            )
         ),
         port,
     )
@@ -210,7 +233,7 @@ async def test_a2a_client_agent_builds_context_from_streamed_workflow(monkeypatc
     }
 
 
-async def test_a2a_client_server_workflow_end_to_end(monkeypatch):
+async def test_a2a_client_server_workflow_end_to_end(monkeypatch, a2a_task_store):
     """Run client, A2A server, broker, and deterministic workflow in one process."""
     broker = LocalBroker(keepalive_ms=1_000)
     remote_agent_id = "deterministic-agent"
@@ -247,7 +270,12 @@ async def test_a2a_client_server_workflow_end_to_end(monkeypatch):
     )
     server = await _serve(
         HyperforgeA2AExecutor(
-            _FakeContext(a2a_settings, agent_manager=agent_manager, broker=broker)
+            _FakeContext(
+                a2a_settings,
+                agent_manager=agent_manager,
+                broker=broker,
+                task_store=a2a_task_store,
+            )
         ),
         port,
     )
@@ -284,6 +312,95 @@ async def test_a2a_client_server_workflow_end_to_end(monkeypatch):
     assert [chunk.text for chunk in context.chunks] == [context.summary]
 
 
+async def test_a2a_grpc_feedback_reply_continues_task(monkeypatch, a2a_task_store):
+    captured = {}
+
+    async def feedback_workflow(
+        app, receiver, account, agent_id, session, interaction, workflow_id="default"
+    ):
+        feedback = Feedback(
+            request_id="request-1",
+            feedback_id="feedback-1",
+            question="Which region should I use?",
+            module="test",
+            agent_id=agent_id,
+            data={},
+            response_schema={"type": "string"},
+        )
+        yield AragAnswer(operation=AnswerOperation.AGENT_REQUEST, feedback=feedback)
+        reply = await receiver.receive_feedback()
+        captured["request_id"] = reply.request_id
+        captured["response"] = reply.response
+        yield AragAnswer(
+            operation=AnswerOperation.ANSWER, answer=f"Using {reply.response}"
+        )
+        yield AragAnswer(operation=AnswerOperation.DONE)
+
+    monkeypatch.setattr(executor_module, "stream_response", feedback_workflow)
+
+    port = _free_port()
+    settings = A2ASettings(
+        a2a_grpc_port=port,
+        a2a_account="local",
+        a2a_agent_id="feedback-agent",
+    )
+    server = await _serve(
+        HyperforgeA2AExecutor(
+            _FakeContext(settings, _FakeAgentManager(), task_store=a2a_task_store)
+        ),
+        port,
+    )
+
+    try:
+        client = build_grpc_client(f"127.0.0.1:{port}", use_tls=False)
+        initial = build_send_request("Find sales data")
+        task_id = ""
+        context_id = ""
+        feedback_id = ""
+        states = []
+        async for event in client.send_message(initial):
+            which = event.WhichOneof("payload")
+            if which == "status_update":
+                task_id = event.status_update.task_id
+                context_id = event.status_update.context_id
+                states.append(event.status_update.status.state)
+                if event.status_update.status.HasField("message"):
+                    feedback_id = event.status_update.status.message.metadata.fields[
+                        "feedback_id"
+                    ].string_value
+            elif which == "task":
+                task_id = event.task.id
+                context_id = event.task.context_id
+                states.append(event.task.status.state)
+                if event.task.status.HasField("message"):
+                    feedback_id = event.task.status.message.metadata.fields[
+                        "feedback_id"
+                    ].string_value
+
+        reply = build_send_request("EMEA", {"feedback_id": feedback_id})
+        reply.message.task_id = task_id
+        reply.message.context_id = context_id
+        texts: list[str] = []
+        async for event in client.send_message(reply):
+            texts.extend(collect_text_from_stream_response(event))
+            which = event.WhichOneof("payload")
+            if which == "status_update":
+                states.append(event.status_update.status.state)
+            elif which == "task":
+                states.append(event.task.status.state)
+        await client.close()
+    finally:
+        await server.stop(grace=1)
+
+    from a2a.types import a2a_pb2
+
+    assert feedback_id == "feedback-1"
+    assert a2a_pb2.TaskState.TASK_STATE_INPUT_REQUIRED in states
+    assert a2a_pb2.TaskState.TASK_STATE_COMPLETED in states
+    assert captured == {"request_id": "request-1", "response": "EMEA"}
+    assert any("Using EMEA" in text for text in texts)
+
+
 def test_parse_routing_metadata_defaults_and_allowed_headers():
     routing = parse_routing_metadata(
         {
@@ -306,7 +423,7 @@ def test_parse_routing_metadata_defaults_and_allowed_headers():
     assert routing.arguments == {"limit": "3", "include_archived": "False"}
 
 
-async def test_a2a_grpc_rejects_identity_override(monkeypatch):
+async def test_a2a_grpc_rejects_identity_override(monkeypatch, a2a_task_store):
     async def fake_stream_response(*args, **kwargs):  # pragma: no cover - not called
         yield AragAnswer(operation=AnswerOperation.DONE)
 
@@ -318,7 +435,9 @@ async def test_a2a_grpc_rejects_identity_override(monkeypatch):
         a2a_account="account",
         a2a_agent_id="research-agent",
     )
-    executor = HyperforgeA2AExecutor(_FakeContext(settings, _FakeAgentManager()))
+    executor = HyperforgeA2AExecutor(
+        _FakeContext(settings, _FakeAgentManager(), task_store=a2a_task_store)
+    )
     server = await _serve(executor, port)
 
     try:
@@ -345,7 +464,7 @@ async def test_a2a_grpc_rejects_identity_override(monkeypatch):
     assert any("does not match this server" in text for text in texts)
 
 
-async def test_a2a_grpc_rejects_unknown_workflow(monkeypatch):
+async def test_a2a_grpc_rejects_unknown_workflow(monkeypatch, a2a_task_store):
     async def fake_stream_response(*args, **kwargs):  # pragma: no cover - not called
         yield AragAnswer(operation=AnswerOperation.DONE)
 
@@ -359,7 +478,11 @@ async def test_a2a_grpc_rejects_unknown_workflow(monkeypatch):
     )
     server = await _serve(
         HyperforgeA2AExecutor(
-            _FakeContext(settings, _FakeAgentManager({"known-workflow"}))
+            _FakeContext(
+                settings,
+                _FakeAgentManager({"known-workflow"}),
+                task_store=a2a_task_store,
+            )
         ),
         port,
     )

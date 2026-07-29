@@ -34,6 +34,11 @@ class RedisBroker(Broker):
     def keepalive_seconds(self) -> float:
         return self._keepalive_ms / 1000
 
+    @property
+    def client(self) -> Redis:
+        """Expose the shared Redis client for tightly coupled runtime stores."""
+        return self._client
+
     @classmethod
     def from_url(
         cls,

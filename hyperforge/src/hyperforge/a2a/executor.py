@@ -1,7 +1,7 @@
 """A2A ``AgentExecutor`` bridging incoming A2A messages to Hyperforge."""
 
-from dataclasses import dataclass
-from typing import Any
+from dataclasses import asdict, dataclass
+from typing import Any, AsyncIterator
 from uuid import uuid4
 
 from a2a.helpers import new_task
@@ -12,10 +12,12 @@ from a2a.types import a2a_pb2
 
 from hyperforge.a2a import logger
 from hyperforge.a2a.context import A2AServerContext
+from hyperforge.a2a.task_store import PendingTaskRecord
 from hyperforge.api.models import InteractionRequest
-from hyperforge.api.v1.interaction import WebsocketReceiver, stream_response
+from hyperforge.api.v1.interaction import Shutdown, WebsocketReceiver, stream_response
 from hyperforge.db import exceptions
 from hyperforge.interaction import AnswerOperation, AragAnswer
+from hyperforge.pubsub import UserToAgentInteraction
 
 # Metadata keys read from the incoming A2A message to route the interaction.
 META_ACCOUNT = "account"
@@ -24,6 +26,7 @@ META_WORKFLOW_ID = "workflow_id"
 META_SESSION = "session"
 META_HEADERS = "headers"
 META_ARGUMENTS = "arguments"
+META_FEEDBACK_ID = "feedback_id"
 _ALLOWED_METADATA = {
     META_ACCOUNT,
     META_AGENT_ID,
@@ -31,6 +34,7 @@ _ALLOWED_METADATA = {
     META_SESSION,
     META_HEADERS,
     META_ARGUMENTS,
+    META_FEEDBACK_ID,
 }
 
 
@@ -42,6 +46,16 @@ class A2ARouting:
     session: str
     headers: dict[str, str]
     arguments: dict[str, str]
+
+
+@dataclass
+class PendingA2ATask:
+    context_id: str
+    feedback_id: str
+    request_id: str
+    routing: A2ARouting
+    receiver: WebsocketReceiver
+    response_stream: AsyncIterator[AragAnswer]
 
 
 def _text_part(text: str) -> a2a_pb2.Part:
@@ -132,11 +146,24 @@ class HyperforgeA2AExecutor(AgentExecutor):
 
     def __init__(self, context: A2AServerContext):
         self.app = context
+        self._pending_tasks: dict[str, PendingA2ATask] = {}
+        self._task_store = context.task_store
 
     async def execute(self, context: RequestContext, event_queue: EventQueue) -> None:
         task_id = context.task_id or uuid4().hex
         context_id = context.context_id or uuid4().hex
         updater = TaskUpdater(event_queue, task_id, context_id)
+
+        if context.current_task is not None:
+            if task_id not in self._pending_tasks:
+                await updater.failed(
+                    updater.new_agent_message(
+                        [_text_part("A2A task is no longer active")]
+                    )
+                )
+                return
+            await self._resume_task(context, updater)
+            return
 
         # A2A requires a Task to be enqueued before any status/artifact events.
         if context.current_task is None:
@@ -184,53 +211,150 @@ class HyperforgeA2AExecutor(AgentExecutor):
             headers=routing.headers,
             arguments=routing.arguments,
         )
+        receiver = WebsocketReceiver(websocket=None)
+        response_stream = stream_response(
+            self.app,  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
+            receiver,
+            routing.account,
+            routing.agent_id,
+            routing.session,
+            interaction,
+            workflow_id=routing.workflow_id,
+        )
 
         try:
-            async for msg in stream_response(
-                self.app,  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
-                WebsocketReceiver(websocket=None),
-                routing.account,
-                routing.agent_id,
-                routing.session,
-                interaction,
-                workflow_id=routing.workflow_id,
-            ):
-                if msg.operation == AnswerOperation.ERROR:
-                    detail = msg.exception.detail if msg.exception else "Unknown error"
-                    await updater.failed(
-                        updater.new_agent_message([_text_part(detail)])
-                    )
-                    return
-                elif msg.operation == AnswerOperation.AGENT_REQUEST and msg.feedback:
-                    # A2A input-required: surface the agent's question and yield
-                    # control back to the client. Resumption is expected via a
-                    # follow-up message referencing the same task.
-                    await updater.requires_input(
-                        updater.new_agent_message(
-                            [_text_part(msg.feedback.question)],
-                            metadata={
-                                "response_schema": msg.feedback.response_schema,
-                                "request_id": msg.feedback.request_id,
-                            },
-                        )
-                    )
-                    return
-                elif msg.operation == AnswerOperation.DONE:
-                    break
-                else:
-                    parts = arag_answer_to_parts(msg)
-                    if parts:
-                        await updater.add_artifact(parts, name="answer")
-
-            await updater.complete()
+            await self._stream_until_pause(
+                task_id, updater, receiver, response_stream, routing
+            )
         except Exception as exc:  # pragma: no cover - defensive
             logger.exception("A2A interaction failed")
+            self._pending_tasks.pop(task_id, None)
             await updater.failed(
                 updater.new_agent_message([_text_part(f"Internal error: {exc}")])
             )
+
+    async def _resume_task(self, context: RequestContext, updater: TaskUpdater) -> None:
+        task_id = context.task_id
+        if task_id is None:  # pragma: no cover - RequestContext always has one here
+            await updater.failed(
+                updater.new_agent_message([_text_part("Missing task_id")])
+            )
+            return
+
+        pending = self._pending_tasks[task_id]
+        metadata = dict(context.metadata or {})
+        feedback_id = metadata.get(META_FEEDBACK_ID)
+        if feedback_id != pending.feedback_id:
+            await updater.failed(
+                updater.new_agent_message(
+                    [_text_part("Invalid or missing feedback_id")]
+                )
+            )
+            return
+
+        record = await self._task_store.claim_pending(
+            task_id, context.context_id or "", feedback_id
+        )
+        if (
+            record is None
+            or context.context_id != pending.context_id
+            or record.context_id != pending.context_id
+        ):
+            self._pending_tasks.pop(task_id, None)
+            await updater.failed(
+                updater.new_agent_message([_text_part("A2A task has expired")])
+            )
+            return
+
+        response = context.get_user_input()
+        if not response:
+            await updater.failed(
+                updater.new_agent_message([_text_part("Empty feedback response")])
+            )
+            return
+
+        await pending.receiver.queue.put(
+            UserToAgentInteraction(
+                request_id=pending.request_id,
+                response=response,
+            )
+        )
+        await updater.start_work()
+        try:
+            await self._stream_until_pause(
+                task_id,
+                updater,
+                pending.receiver,
+                pending.response_stream,
+                pending.routing,
+            )
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.exception("A2A interaction resume failed")
+            self._pending_tasks.pop(task_id, None)
+            await self._task_store.remove(task_id)
+            await updater.failed(
+                updater.new_agent_message([_text_part(f"Internal error: {exc}")])
+            )
+
+    async def _stream_until_pause(
+        self,
+        task_id: str,
+        updater: TaskUpdater,
+        receiver: WebsocketReceiver,
+        response_stream: AsyncIterator[AragAnswer],
+        routing: A2ARouting,
+    ) -> None:
+        async for msg in response_stream:
+            if msg.operation == AnswerOperation.ERROR:
+                detail = msg.exception.detail if msg.exception else "Unknown error"
+                self._pending_tasks.pop(task_id, None)
+                await updater.failed(updater.new_agent_message([_text_part(detail)]))
+                return
+            if msg.operation == AnswerOperation.AGENT_REQUEST and msg.feedback:
+                self._pending_tasks[task_id] = PendingA2ATask(
+                    context_id=updater.context_id,
+                    feedback_id=msg.feedback.feedback_id,
+                    request_id=msg.feedback.request_id,
+                    routing=routing,
+                    receiver=receiver,
+                    response_stream=response_stream,
+                )
+                await self._task_store.save_pending(
+                    PendingTaskRecord(
+                        task_id=task_id,
+                        context_id=updater.context_id,
+                        routing=asdict(routing),
+                        feedback_id=msg.feedback.feedback_id,
+                        request_id=msg.feedback.request_id,
+                    )
+                )
+                await updater.requires_input(
+                    updater.new_agent_message(
+                        [_text_part(msg.feedback.question)],
+                        metadata={
+                            "feedback_id": msg.feedback.feedback_id,
+                            "response_schema": msg.feedback.response_schema,
+                            "request_id": msg.feedback.request_id,
+                        },
+                    )
+                )
+                return
+            if msg.operation == AnswerOperation.DONE:
+                self._pending_tasks.pop(task_id, None)
+                await self._task_store.remove(task_id)
+                await updater.complete()
+                return
+
+            parts = arag_answer_to_parts(msg)
+            if parts:
+                await updater.add_artifact(parts, name="answer")
 
     async def cancel(self, context: RequestContext, event_queue: EventQueue) -> None:
         task_id = context.task_id or uuid4().hex
         context_id = context.context_id or uuid4().hex
         updater = TaskUpdater(event_queue, task_id, context_id)
+        pending = self._pending_tasks.pop(task_id, None)
+        if pending is not None:
+            await pending.receiver.queue.put(Shutdown())
+        await self._task_store.remove(task_id)
         await updater.cancel()
