@@ -34,6 +34,7 @@ from hyperforge.engine import State
 from hyperforge.interaction import AnswerOperation, AragAnswer, Feedback
 from hyperforge.memory.memory import NoMemorySessionMemory
 from hyperforge.models import MemoryConfig
+from hyperforge.pubsub import UserToAgentInteraction
 from hyperforge.server.cache import NoCache
 from hyperforge.server.session import SessionManager
 from hyperforge.server.settings import Settings as ServerSettings
@@ -399,6 +400,83 @@ async def test_a2a_grpc_feedback_reply_continues_task(monkeypatch, a2a_task_stor
     assert a2a_pb2.TaskState.TASK_STATE_COMPLETED in states
     assert captured == {"request_id": "request-1", "response": "EMEA"}
     assert any("Using EMEA" in text for text in texts)
+
+
+async def test_a2a_client_agent_answers_remote_feedback(monkeypatch, a2a_task_store):
+    captured = {}
+
+    async def feedback_workflow(
+        app, receiver, account, agent_id, session, interaction, workflow_id="default"
+    ):
+        feedback = Feedback(
+            request_id="request-1",
+            feedback_id="feedback-1",
+            question="Which region should I use?",
+            module="test",
+            agent_id=agent_id,
+            data={},
+            response_schema={"type": "string"},
+        )
+        yield AragAnswer(operation=AnswerOperation.AGENT_REQUEST, feedback=feedback)
+        reply = await receiver.receive_feedback()
+        captured["request_id"] = reply.request_id
+        captured["response"] = reply.response
+        yield AragAnswer(
+            operation=AnswerOperation.ANSWER, answer=f"Using {reply.response}"
+        )
+        yield AragAnswer(operation=AnswerOperation.DONE)
+
+    monkeypatch.setattr(executor_module, "stream_response", feedback_workflow)
+
+    port = _free_port()
+    settings = A2ASettings(
+        a2a_grpc_port=port,
+        a2a_account="local",
+        a2a_agent_id="feedback-agent",
+    )
+    server = await _serve(
+        HyperforgeA2AExecutor(
+            _FakeContext(settings, _FakeAgentManager(), task_store=a2a_task_store)
+        ),
+        port,
+    )
+
+    try:
+        client_agent = await A2AClientAgent.from_config(
+            A2AAgentConfig(id="a2a-client", source=f"127.0.0.1:{port}")
+        )
+        session = NoMemorySessionMemory(
+            MemoryConfig(), "client-agent", "default", cache=NoCache()
+        )
+        session.init("a2a-feedback-session")
+        memory = session.start_question("Find sales data")
+        requested_feedback = {}
+
+        async def answer_feedback(feedback):
+            requested_feedback["question"] = feedback.question
+            requested_feedback["schema"] = feedback.response_schema
+            requested_feedback["feedback_id"] = feedback.feedback_id
+            return UserToAgentInteraction(
+                request_id=feedback.request_id, response="EMEA"
+            )
+
+        memory.set_feedback_fn(answer_feedback)
+        context = await client_agent.a2a_query(
+            "Find sales data",
+            memory,
+            manager=None,  # type: ignore[arg-type]
+        )
+    finally:
+        await server.stop(grace=1)
+
+    assert requested_feedback == {
+        "question": "Which region should I use?",
+        "schema": {"type": "string"},
+        "feedback_id": "feedback-1",
+    }
+    assert captured == {"request_id": "request-1", "response": "EMEA"}
+    assert context.summary == "Using EMEA"
+    assert [chunk.text for chunk in context.chunks] == ["Using EMEA"]
 
 
 def test_parse_routing_metadata_defaults_and_allowed_headers():

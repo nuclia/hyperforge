@@ -1,7 +1,13 @@
+import pytest
+
 from hyperforge_a2a.client import (
+    RemoteFeedbackRequest,
+    build_feedback_request,
     build_send_request,
     collect_text_from_stream_response,
     dict_to_struct,
+    extract_feedback_request,
+    raise_for_terminal_task_error,
 )
 from hyperforge_a2a.config import A2AAgentConfig
 
@@ -65,3 +71,61 @@ def test_build_metadata_forwards_valid_headers():
     assert metadata["workflow_id"] == "wf"
     assert metadata["headers"] == {"authorization": "Bearer token"}
     assert metadata["custom"] == "1"
+
+
+def test_extract_feedback_request_and_build_continuation():
+    from a2a.types import a2a_pb2
+
+    response = a2a_pb2.StreamResponse(
+        status_update=a2a_pb2.TaskStatusUpdateEvent(
+            task_id="task-1",
+            context_id="context-1",
+            status=a2a_pb2.TaskStatus(
+                state=a2a_pb2.TaskState.TASK_STATE_INPUT_REQUIRED,
+                message=a2a_pb2.Message(
+                    parts=[a2a_pb2.Part(text="Which region should I use?")],
+                    metadata=dict_to_struct(
+                        {
+                            "feedback_id": "feedback-1",
+                            "request_id": "request-1",
+                            "response_schema": {"type": "string"},
+                        }
+                    ),
+                ),
+            ),
+        )
+    )
+
+    feedback = extract_feedback_request(response)
+
+    assert feedback == RemoteFeedbackRequest(
+        task_id="task-1",
+        context_id="context-1",
+        feedback_id="feedback-1",
+        request_id="request-1",
+        question="Which region should I use?",
+        response_schema={"type": "string"},
+    )
+    continuation = build_feedback_request("EMEA", feedback)
+    assert continuation.message.task_id == "task-1"
+    assert continuation.message.context_id == "context-1"
+    assert continuation.message.parts[0].text == "EMEA"
+    assert continuation.metadata["feedback_id"] == "feedback-1"
+
+
+def test_failed_remote_task_raises_its_message():
+    from a2a.types import a2a_pb2
+
+    response = a2a_pb2.StreamResponse(
+        status_update=a2a_pb2.TaskStatusUpdateEvent(
+            task_id="task-1",
+            context_id="context-1",
+            status=a2a_pb2.TaskStatus(
+                state=a2a_pb2.TaskState.TASK_STATE_FAILED,
+                message=a2a_pb2.Message(parts=[a2a_pb2.Part(text="Remote failure")]),
+            ),
+        )
+    )
+
+    with pytest.raises(ValueError, match="Remote failure"):
+        raise_for_terminal_task_error(response)

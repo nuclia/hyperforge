@@ -6,13 +6,17 @@ from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.context.agent import ContextAgent
 from hyperforge.definition import FunctionDefinition
+from hyperforge.interaction import Feedback
 from hyperforge.manager import Manager
 from hyperforge.memory import Chunk, Context, QuestionMemory
 
 from hyperforge_a2a.client import (
     build_a2a_client,
+    build_feedback_request,
     build_send_request,
     collect_text_from_stream_response,
+    extract_feedback_request,
+    raise_for_terminal_task_error,
 )
 from hyperforge_a2a.config import A2AAgentConfig
 
@@ -72,8 +76,39 @@ class A2AClientAgent(ContextAgent, Agent[A2AAgentConfig]):
         client = await build_a2a_client(self.config.source, self.config.use_tls)
         try:
             request = build_send_request(question, self._build_metadata(memory))
-            async for response in client.send_message(request):
-                texts.extend(collect_text_from_stream_response(response))
+            while request is not None:
+                continuation = None
+                async for response in client.send_message(request):
+                    raise_for_terminal_task_error(response)
+                    remote_feedback = extract_feedback_request(response)
+                    if remote_feedback is not None:
+                        local_feedback = Feedback(
+                            request_id=remote_feedback.request_id,
+                            feedback_id=remote_feedback.feedback_id,
+                            question=remote_feedback.question,
+                            module=self.config.module,
+                            agent_id=self.agent_id,
+                            data={
+                                "a2a_task_id": remote_feedback.task_id,
+                                "a2a_context_id": remote_feedback.context_id,
+                            },
+                            response_schema=remote_feedback.response_schema,
+                        )
+                        user_response = await memory.send_feedback(local_feedback)
+                        if user_response is None:
+                            raise ValueError("A2A feedback request was not answered")
+                        if user_response.request_id != remote_feedback.request_id:
+                            raise ValueError(
+                                "A2A feedback response request_id mismatch"
+                            )
+                        if not user_response.response.strip():
+                            raise ValueError("A2A feedback response cannot be empty")
+                        continuation = build_feedback_request(
+                            user_response.response, remote_feedback
+                        )
+                        break
+                    texts.extend(collect_text_from_stream_response(response))
+                request = continuation
         finally:
             await client.close()
 

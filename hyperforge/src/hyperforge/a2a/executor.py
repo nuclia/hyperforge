@@ -244,7 +244,7 @@ class HyperforgeA2AExecutor(AgentExecutor):
         pending = self._pending_tasks[task_id]
         metadata = dict(context.metadata or {})
         feedback_id = metadata.get(META_FEEDBACK_ID)
-        if feedback_id != pending.feedback_id:
+        if not isinstance(feedback_id, str) or feedback_id != pending.feedback_id:
             await updater.failed(
                 updater.new_agent_message(
                     [_text_part("Invalid or missing feedback_id")]

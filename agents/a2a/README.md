@@ -8,6 +8,12 @@ base URL such as `http://localhost:9999`. For HTTP(S) sources, the client
 resolves `/.well-known/agent-card.json` and uses the transport advertised by
 the remote Agent Card.
 
+When a remote A2A task enters `input-required`, the client creates a standard
+Hyperforge feedback request using the remote question and response schema. The
+answer supplied through Hyperforge's normal feedback path resumes the same A2A
+task with its original task ID, context ID, and feedback ID. Remote failed or
+cancelled task states are reported as A2A client errors.
+
 ## Serving Hyperforge over A2A
 
 The A2A gRPC server represents one configured Hyperforge agent. Set
