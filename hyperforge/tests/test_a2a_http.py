@@ -23,6 +23,7 @@ from a2a.types import (
 from hyperforge_a2a.agent import A2AClientAgent
 from hyperforge_a2a.client import build_a2a_client
 from hyperforge_a2a.config import A2AAgentConfig
+from sse_starlette.sse import AppStatus
 from starlette.applications import Starlette
 
 from hyperforge.memory.memory import NoMemorySessionMemory
@@ -85,6 +86,10 @@ def _jsonrpc_a2a_app() -> Starlette:
 
 
 async def test_http_agent_card_discovery_streams_into_context(monkeypatch):
+    # sse-starlette caches this event process-wide, but pytest gives async tests
+    # separate event loops. Do not reuse a closed loop's event.
+    AppStatus.should_exit_event = None
+
     async def build_test_client(*_args, **_kwargs):
         http_client = httpx.AsyncClient(
             transport=httpx.ASGITransport(app=_jsonrpc_a2a_app()),
@@ -105,11 +110,14 @@ async def test_http_agent_card_discovery_streams_into_context(monkeypatch):
     session.init("http-a2a-session")
     memory = session.start_question("Is HTTP A2A supported?")
 
-    context = await client_agent.a2a_query(
-        "Is HTTP A2A supported?",
-        memory,
-        manager=None,  # type: ignore[arg-type]
-    )
+    try:
+        context = await client_agent.a2a_query(
+            "Is HTTP A2A supported?",
+            memory,
+            manager=None,  # type: ignore[arg-type]
+        )
+    finally:
+        AppStatus.should_exit_event = None
 
     assert context.summary == (
         "Working\nExternal answer: Is HTTP A2A supported?\nComplete"
