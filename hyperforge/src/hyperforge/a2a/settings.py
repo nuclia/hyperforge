@@ -1,6 +1,7 @@
+from pathlib import Path
 from typing import Optional
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings
 
 
@@ -19,6 +20,10 @@ class A2ASettings(BaseSettings):
     a2a_grpc_host: str = "0.0.0.0"
     a2a_grpc_port: int = 8034
     a2a_grpc_max_workers: int = 10
+    a2a_tls_enabled: bool = False
+    a2a_tls_certificate_chain_path: Optional[Path] = None
+    a2a_tls_private_key_path: Optional[Path] = None
+    a2a_tls_client_ca_path: Optional[Path] = None
 
     # Agent card metadata advertised over A2A.
     a2a_agent_name: str = "Hyperforge"
@@ -56,3 +61,21 @@ class A2ASettings(BaseSettings):
     load_modules: list[str] = []
 
     metrics_port: int = 8091
+
+    @model_validator(mode="after")
+    def validate_tls_settings(self) -> "A2ASettings":
+        if self.a2a_tls_enabled:
+            if not self.a2a_tls_certificate_chain_path or not self.a2a_tls_private_key_path:
+                raise ValueError(
+                    "A2A_TLS_CERTIFICATE_CHAIN_PATH and A2A_TLS_PRIVATE_KEY_PATH "
+                    "must be configured when A2A_TLS_ENABLED is true"
+                )
+            if not self.a2a_public_url:
+                raise ValueError(
+                    "A2A_PUBLIC_URL must be configured when A2A_TLS_ENABLED is true"
+                )
+        elif self.a2a_tls_client_ca_path:
+            raise ValueError(
+                "A2A_TLS_CLIENT_CA_PATH requires A2A_TLS_ENABLED to be true"
+            )
+        return self

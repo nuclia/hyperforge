@@ -7,6 +7,8 @@ drives it with the a2a-sdk gRPC client used by the A2A client agent.
 
 import socket
 from concurrent import futures
+from datetime import datetime, timedelta, timezone
+from ipaddress import ip_address
 from uuid import uuid4
 
 import grpc
@@ -14,6 +16,10 @@ import pytest
 from a2a.server.request_handlers import DefaultRequestHandler, GrpcHandler
 from a2a.server.tasks import InMemoryTaskStore
 from a2a.types import a2a_pb2_grpc
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.x509.oid import NameOID
 from hyperforge_a2a.agent import A2AClientAgent
 from hyperforge_a2a.client import (
     build_grpc_client,
@@ -87,16 +93,162 @@ def _free_port() -> int:
         return int(sock.getsockname()[1])
 
 
-async def _serve(executor, port: int):
-    settings = A2ASettings(a2a_grpc_port=port)
+async def _serve(executor, port: int, credentials=None, sdk_task_store=None):
+    settings = A2ASettings(a2a_grpc_host="127.0.0.1", a2a_grpc_port=port)
     handler = DefaultRequestHandler(
-        executor, InMemoryTaskStore(), build_agent_card(settings)
+        executor,
+        sdk_task_store or InMemoryTaskStore(),
+        build_agent_card(settings),
     )
     server = grpc.aio.server(futures.ThreadPoolExecutor(max_workers=4))
     a2a_pb2_grpc.add_A2AServiceServicer_to_server(GrpcHandler(handler), server)
-    server.add_insecure_port(f"127.0.0.1:{port}")
+    bind_address = f"127.0.0.1:{port}"
+    if credentials:
+        server.add_secure_port(bind_address, credentials)
+    else:
+        server.add_insecure_port(bind_address)
     await server.start()
     return server
+
+
+def _write_test_certificate(tmp_path):
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    subject = issuer = x509.Name(
+        [x509.NameAttribute(NameOID.COMMON_NAME, "127.0.0.1")]
+    )
+    certificate = (
+        x509.CertificateBuilder()
+        .subject_name(subject)
+        .issuer_name(issuer)
+        .public_key(private_key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(datetime.now(timezone.utc) - timedelta(minutes=1))
+        .not_valid_after(datetime.now(timezone.utc) + timedelta(days=1))
+        .add_extension(
+            x509.SubjectAlternativeName([x509.IPAddress(ip_address("127.0.0.1"))]),
+            critical=False,
+        )
+        .sign(private_key, hashes.SHA256())
+    )
+    certificate_path = tmp_path / "server-cert.pem"
+    key_path = tmp_path / "server-key.pem"
+    certificate_path.write_bytes(certificate.public_bytes(serialization.Encoding.PEM))
+    key_path.write_bytes(
+        private_key.private_bytes(
+            serialization.Encoding.PEM,
+            serialization.PrivateFormat.PKCS8,
+            serialization.NoEncryption(),
+        )
+    )
+    return certificate_path, key_path
+
+
+def test_tls_settings_require_key_pair_and_public_endpoint():
+    with pytest.raises(ValueError, match="CERTIFICATE_CHAIN_PATH"):
+        A2ASettings(a2a_tls_enabled=True)
+
+    with pytest.raises(ValueError, match="requires A2A_TLS_ENABLED"):
+        A2ASettings(a2a_tls_client_ca_path="client-ca.pem")
+
+    with pytest.raises(ValueError, match="wildcard address"):
+        build_agent_card(A2ASettings())
+
+
+def test_secure_agent_card_advertises_configured_public_endpoint(tmp_path):
+    certificate_path, key_path = _write_test_certificate(tmp_path)
+    settings = A2ASettings(
+        a2a_tls_enabled=True,
+        a2a_tls_certificate_chain_path=certificate_path,
+        a2a_tls_private_key_path=key_path,
+        a2a_public_url="a2a.example.com:443",
+    )
+
+    card = build_agent_card(settings)
+
+    assert card.supported_interfaces[0].url == "a2a.example.com:443"
+
+
+async def test_a2a_grpc_tls_serves_agent_card(tmp_path):
+    certificate_path, key_path = _write_test_certificate(tmp_path)
+    credentials = grpc.ssl_server_credentials(
+        [(key_path.read_bytes(), certificate_path.read_bytes())]
+    )
+    port = _free_port()
+    settings = A2ASettings(a2a_grpc_port=port)
+    server = await _serve(
+        HyperforgeA2AExecutor(
+            _FakeContext(settings, _FakeAgentManager())
+        ),
+        port,
+        credentials,
+    )
+    channel = grpc.aio.secure_channel(
+        f"127.0.0.1:{port}",
+        grpc.ssl_channel_credentials(root_certificates=certificate_path.read_bytes()),
+    )
+
+    try:
+        stub = a2a_pb2_grpc.A2AServiceStub(channel)
+        response = await stub.SendMessage(build_send_request("TLS handshake test"))
+    finally:
+        await channel.close()
+        await server.stop(grace=1)
+
+    assert response.WhichOneof("payload") == "task"
+
+
+async def test_a2a_grpc_mtls_requires_client_certificate(tmp_path):
+    server_certificate_path, server_key_path = _write_test_certificate(
+        tmp_path / "server"
+    )
+    client_certificate_path, client_key_path = _write_test_certificate(
+        tmp_path / "client"
+    )
+    credentials = grpc.ssl_server_credentials(
+        [(server_key_path.read_bytes(), server_certificate_path.read_bytes())],
+        root_certificates=client_certificate_path.read_bytes(),
+        require_client_auth=True,
+    )
+    port = _free_port()
+    settings = A2ASettings(a2a_grpc_port=port)
+    server = await _serve(
+        HyperforgeA2AExecutor(
+            _FakeContext(settings, _FakeAgentManager())
+        ),
+        port,
+        credentials,
+    )
+    unauthenticated_channel = grpc.aio.secure_channel(
+        f"127.0.0.1:{port}",
+        grpc.ssl_channel_credentials(
+            root_certificates=server_certificate_path.read_bytes()
+        ),
+    )
+    authenticated_channel = grpc.aio.secure_channel(
+        f"127.0.0.1:{port}",
+        grpc.ssl_channel_credentials(
+            root_certificates=server_certificate_path.read_bytes(),
+            private_key=client_key_path.read_bytes(),
+            certificate_chain=client_certificate_path.read_bytes(),
+        ),
+    )
+
+    try:
+        with pytest.raises(grpc.aio.AioRpcError):
+            await a2a_pb2_grpc.A2AServiceStub(unauthenticated_channel).SendMessage(
+                build_send_request("mTLS rejected client")
+            )
+
+        response = await a2a_pb2_grpc.A2AServiceStub(
+            authenticated_channel
+        ).SendMessage(build_send_request("mTLS accepted client"))
+    finally:
+        await unauthenticated_channel.close()
+        await authenticated_channel.close()
+        await server.stop(grace=1)
+
+    assert response.WhichOneof("payload") == "task"
 
 
 async def test_a2a_grpc_round_trip(monkeypatch, a2a_task_store):
@@ -339,27 +491,48 @@ async def test_a2a_grpc_feedback_reply_continues_task(monkeypatch, a2a_task_stor
 
     monkeypatch.setattr(executor_module, "stream_response", feedback_workflow)
 
-    port = _free_port()
+    owner_port = _free_port()
+    receiver_port = _free_port()
     settings = A2ASettings(
-        a2a_grpc_port=port,
+        a2a_grpc_port=owner_port,
         a2a_account="local",
         a2a_agent_id="feedback-agent",
     )
-    server = await _serve(
+    broker = LocalBroker()
+    sdk_task_store = InMemoryTaskStore()
+    owner_server = await _serve(
         HyperforgeA2AExecutor(
-            _FakeContext(settings, _FakeAgentManager(), task_store=a2a_task_store)
+            _FakeContext(
+                settings,
+                _FakeAgentManager(),
+                broker=broker,
+                task_store=a2a_task_store,
+            )
         ),
-        port,
+        owner_port,
+        sdk_task_store=sdk_task_store,
+    )
+    receiver_server = await _serve(
+        HyperforgeA2AExecutor(
+            _FakeContext(
+                settings,
+                _FakeAgentManager(),
+                broker=broker,
+                task_store=a2a_task_store,
+            )
+        ),
+        receiver_port,
+        sdk_task_store=sdk_task_store,
     )
 
     try:
-        client = build_grpc_client(f"127.0.0.1:{port}", use_tls=False)
+        owner_client = build_grpc_client(f"127.0.0.1:{owner_port}", use_tls=False)
         initial = build_send_request("Find sales data")
         task_id = ""
         context_id = ""
         feedback_id = ""
         states = []
-        async for event in client.send_message(initial):
+        async for event in owner_client.send_message(initial):
             which = event.WhichOneof("payload")
             if which == "status_update":
                 task_id = event.status_update.task_id
@@ -382,16 +555,21 @@ async def test_a2a_grpc_feedback_reply_continues_task(monkeypatch, a2a_task_stor
         reply.message.task_id = task_id
         reply.message.context_id = context_id
         texts: list[str] = []
-        async for event in client.send_message(reply):
+        receiver_client = build_grpc_client(
+            f"127.0.0.1:{receiver_port}", use_tls=False
+        )
+        async for event in receiver_client.send_message(reply):
             texts.extend(collect_text_from_stream_response(event))
             which = event.WhichOneof("payload")
             if which == "status_update":
                 states.append(event.status_update.status.state)
             elif which == "task":
                 states.append(event.task.status.state)
-        await client.close()
+        await owner_client.close()
+        await receiver_client.close()
     finally:
-        await server.stop(grace=1)
+        await owner_server.stop(grace=1)
+        await receiver_server.stop(grace=1)
 
     from a2a.types import a2a_pb2
 
@@ -436,7 +614,12 @@ async def test_a2a_client_agent_answers_remote_feedback(monkeypatch, a2a_task_st
     )
     server = await _serve(
         HyperforgeA2AExecutor(
-            _FakeContext(settings, _FakeAgentManager(), task_store=a2a_task_store)
+            _FakeContext(
+                settings,
+                _FakeAgentManager(),
+                broker=LocalBroker(),
+                task_store=a2a_task_store,
+            )
         ),
         port,
     )
@@ -579,7 +762,7 @@ async def test_a2a_grpc_rejects_unknown_workflow(monkeypatch, a2a_task_store):
 
 
 def test_build_agent_card_defaults():
-    card = build_agent_card(A2ASettings())
+    card = build_agent_card(A2ASettings(a2a_grpc_host="127.0.0.1"))
     assert card.name == "Hyperforge"
     assert card.capabilities.streaming is True
     assert card.skills
@@ -603,7 +786,7 @@ async def test_agent_card_advertises_configured_workflows():
     )
 
     skills = await build_agent_skills(agent_manager, "account", "research-agent")
-    card = build_agent_card(A2ASettings(), skills)
+    card = build_agent_card(A2ASettings(a2a_grpc_host="127.0.0.1"), skills)
 
     assert [(skill.id, skill.name, skill.description) for skill in card.skills] == [
         ("research-agent:answer", "Answer", "Answer a question"),

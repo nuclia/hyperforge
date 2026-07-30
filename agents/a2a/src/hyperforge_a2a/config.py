@@ -1,7 +1,8 @@
+from pathlib import Path
 from typing import Dict, List, Literal, Optional
 
 from hyperforge.context.config import ContextAgentConfig
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic.config import ConfigDict
 
 
@@ -23,6 +24,21 @@ class A2AAgentConfig(ContextAgentConfig):
         title="Use TLS",
         description="Establish a secure gRPC channel to the A2A server."
         " HTTPS URLs use TLS automatically.",
+    )
+    tls_ca_certificate_path: Optional[Path] = Field(
+        default=None,
+        title="TLS CA certificate path",
+        description="Optional PEM CA bundle used to verify the remote A2A server.",
+    )
+    tls_client_certificate_chain_path: Optional[Path] = Field(
+        default=None,
+        title="TLS client certificate chain path",
+        description="Optional PEM client certificate chain for mTLS.",
+    )
+    tls_client_private_key_path: Optional[Path] = Field(
+        default=None,
+        title="TLS client private key path",
+        description="Optional PEM client private key for mTLS.",
     )
     read_timeout_seconds: int = Field(default=120, title="Read timeout in seconds")
 
@@ -52,3 +68,19 @@ class A2AAgentConfig(ContextAgentConfig):
         default_factory=list,
         title="Valid headers to forward to the remote A2A agent",
     )
+
+    @model_validator(mode="after")
+    def validate_tls_settings(self) -> "A2AAgentConfig":
+        client_certificate_configured = self.tls_client_certificate_chain_path is not None
+        client_key_configured = self.tls_client_private_key_path is not None
+        if client_certificate_configured != client_key_configured:
+            raise ValueError(
+                "TLS client certificate chain and private key must be configured together"
+            )
+        if (
+            self.tls_ca_certificate_path
+            or client_certificate_configured
+            or client_key_configured
+        ) and not self.use_tls:
+            raise ValueError("TLS client credentials require use_tls to be true")
+        return self

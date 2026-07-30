@@ -1,3 +1,4 @@
+import asyncio
 from time import time
 from typing import Any, ClassVar, Dict, List, Optional
 from uuid import uuid4
@@ -73,42 +74,54 @@ class A2AClientAgent(ContextAgent, Agent[A2AAgentConfig]):
         t0 = time()
         texts: List[str] = []
 
-        client = await build_a2a_client(self.config.source, self.config.use_tls)
+        client = await build_a2a_client(
+            self.config.source,
+            self.config.use_tls,
+            tls_ca_certificate_path=self.config.tls_ca_certificate_path,
+            tls_client_certificate_chain_path=self.config.tls_client_certificate_chain_path,
+            tls_client_private_key_path=self.config.tls_client_private_key_path,
+        )
         try:
-            request = build_send_request(question, self._build_metadata(memory))
-            while request is not None:
-                continuation = None
-                async for response in client.send_message(request):
-                    raise_for_terminal_task_error(response)
-                    remote_feedback = extract_feedback_request(response)
-                    if remote_feedback is not None:
-                        local_feedback = Feedback(
-                            request_id=remote_feedback.request_id,
-                            feedback_id=remote_feedback.feedback_id,
-                            question=remote_feedback.question,
-                            module=self.config.module,
-                            agent_id=self.agent_id,
-                            data={
-                                "a2a_task_id": remote_feedback.task_id,
-                                "a2a_context_id": remote_feedback.context_id,
-                            },
-                            response_schema=remote_feedback.response_schema,
-                        )
-                        user_response = await memory.send_feedback(local_feedback)
-                        if user_response is None:
-                            raise ValueError("A2A feedback request was not answered")
-                        if user_response.request_id != remote_feedback.request_id:
-                            raise ValueError(
-                                "A2A feedback response request_id mismatch"
-                            )
-                        if not user_response.response.strip():
-                            raise ValueError("A2A feedback response cannot be empty")
-                        continuation = build_feedback_request(
-                            user_response.response, remote_feedback
-                        )
-                        break
-                    texts.extend(collect_text_from_stream_response(response))
-                request = continuation
+            try:
+                async with asyncio.timeout(self.config.read_timeout_seconds):
+                    request = build_send_request(question, self._build_metadata(memory))
+                    while request is not None:
+                        continuation = None
+                        async for response in client.send_message(request):
+                            raise_for_terminal_task_error(response)
+                            remote_feedback = extract_feedback_request(response)
+                            if remote_feedback is not None:
+                                local_feedback = Feedback(
+                                    request_id=remote_feedback.request_id,
+                                    feedback_id=remote_feedback.feedback_id,
+                                    question=remote_feedback.question,
+                                    module=self.config.module,
+                                    agent_id=self.agent_id,
+                                    data={
+                                        "a2a_task_id": remote_feedback.task_id,
+                                        "a2a_context_id": remote_feedback.context_id,
+                                    },
+                                    response_schema=remote_feedback.response_schema,
+                                )
+                                user_response = await memory.send_feedback(local_feedback)
+                                if user_response is None:
+                                    raise ValueError("A2A feedback request was not answered")
+                                if user_response.request_id != remote_feedback.request_id:
+                                    raise ValueError(
+                                        "A2A feedback response request_id mismatch"
+                                    )
+                                if not user_response.response.strip():
+                                    raise ValueError("A2A feedback response cannot be empty")
+                                continuation = build_feedback_request(
+                                    user_response.response, remote_feedback
+                                )
+                                break
+                            texts.extend(collect_text_from_stream_response(response))
+                        request = continuation
+            except TimeoutError as exc:
+                raise ValueError(
+                    f"A2A request timed out after {self.config.read_timeout_seconds} seconds"
+                ) from exc
         finally:
             await client.close()
 

@@ -73,6 +73,21 @@ def test_build_metadata_forwards_valid_headers():
     assert metadata["custom"] == "1"
 
 
+def test_tls_client_credentials_require_tls_and_a_complete_key_pair():
+    with pytest.raises(ValueError, match="configured together"):
+        A2AAgentConfig(
+            source="a2a.example.com:443",
+            use_tls=True,
+            tls_client_certificate_chain_path="client.pem",
+        )
+
+    with pytest.raises(ValueError, match="require use_tls"):
+        A2AAgentConfig(
+            source="a2a.example.com:443",
+            tls_ca_certificate_path="ca.pem",
+        )
+
+
 def test_extract_feedback_request_and_build_continuation():
     from a2a.types import a2a_pb2
 

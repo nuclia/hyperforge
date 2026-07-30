@@ -10,7 +10,6 @@ from concurrent import futures
 
 import grpc
 from a2a.server.request_handlers import DefaultRequestHandler, GrpcHandler
-from a2a.server.tasks import InMemoryTaskStore
 from a2a.types import a2a_pb2_grpc
 
 from hyperforge.a2a import logger
@@ -18,7 +17,7 @@ from hyperforge.a2a.card import build_agent_card, build_agent_skills
 from hyperforge.a2a.context import A2AServerContext
 from hyperforge.a2a.executor import HyperforgeA2AExecutor
 from hyperforge.a2a.settings import A2ASettings
-from hyperforge.a2a.task_store import RedisA2ATaskStore
+from hyperforge.a2a.task_store import RedisA2ASDKTaskStore, RedisA2ATaskStore
 from hyperforge.broker.redis import RedisBroker
 from hyperforge.configure import GLOBAL_REGISTRY, load_all_configurations, scan
 from hyperforge.db.agents import AgentManager
@@ -32,6 +31,22 @@ def _load_modules(settings: A2ASettings) -> None:
             load_all_configurations(load_module)
         except ImportError:
             logger.error(f"Module {load_module} could not be loaded")
+
+
+def build_server_credentials(settings: A2ASettings) -> grpc.ServerCredentials:
+    """Load the configured server certificate and optional mTLS CA at startup."""
+    certificate_chain = settings.a2a_tls_certificate_chain_path.read_bytes()
+    private_key = settings.a2a_tls_private_key_path.read_bytes()
+    client_ca = (
+        settings.a2a_tls_client_ca_path.read_bytes()
+        if settings.a2a_tls_client_ca_path
+        else None
+    )
+    return grpc.ssl_server_credentials(
+        [(private_key, certificate_chain)],
+        root_certificates=client_ca,
+        require_client_auth=client_ca is not None,
+    )
 
 
 async def build_grpc_server(
@@ -76,9 +91,15 @@ async def build_grpc_server(
             "A2A server agent must have at least one workflow to advertise"
         )
     agent_card = build_agent_card(settings, skills)
+    task_owner = f"{settings.a2a_account}:{settings.a2a_agent_id}"
     request_handler = DefaultRequestHandler(
         agent_executor=executor,
-        task_store=InMemoryTaskStore(),
+        task_store=RedisA2ASDKTaskStore(
+            broker.client,
+            settings.a2a_task_store_prefix,
+            settings.a2a_task_ttl_seconds,
+            owner_resolver=lambda _context: task_owner,
+        ),
         agent_card=agent_card,
     )
     grpc_handler = GrpcHandler(request_handler=request_handler)
@@ -87,7 +108,16 @@ async def build_grpc_server(
         futures.ThreadPoolExecutor(max_workers=settings.a2a_grpc_max_workers)
     )
     a2a_pb2_grpc.add_A2AServiceServicer_to_server(grpc_handler, server)
-    server.add_insecure_port(f"{settings.a2a_grpc_host}:{settings.a2a_grpc_port}")
+    bind_address = f"{settings.a2a_grpc_host}:{settings.a2a_grpc_port}"
+    if settings.a2a_tls_enabled:
+        bound_port = server.add_secure_port(
+            bind_address,
+            build_server_credentials(settings),
+        )
+    else:
+        bound_port = server.add_insecure_port(bind_address)
+    if bound_port == 0:
+        raise RuntimeError(f"Unable to bind A2A gRPC server to {bind_address}")
 
     return server, agent_manager, broker
 
@@ -102,7 +132,8 @@ async def serve(
     await server.start()
     logger.warning(
         f"A2A gRPC server listening on "
-        f"{settings.a2a_grpc_host}:{settings.a2a_grpc_port}"
+        f"{settings.a2a_grpc_host}:{settings.a2a_grpc_port} "
+        f"(tls={settings.a2a_tls_enabled})"
     )
     try:
         await server.wait_for_termination()

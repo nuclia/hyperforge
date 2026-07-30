@@ -19,6 +19,12 @@ from hyperforge.workflows import WorkflowData
 def _public_url(settings: A2ASettings) -> str:
     if settings.a2a_public_url:
         return settings.a2a_public_url
+    if settings.a2a_tls_enabled:
+        raise ValueError("A2A_PUBLIC_URL is required when A2A TLS is enabled")
+    if settings.a2a_grpc_host in {"0.0.0.0", "::"}:
+        raise ValueError(
+            "A2A_PUBLIC_URL is required when A2A_GRPC_HOST is a wildcard address"
+        )
     return f"{settings.a2a_grpc_host}:{settings.a2a_grpc_port}"
 
 
