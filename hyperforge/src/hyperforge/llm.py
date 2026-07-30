@@ -4,8 +4,6 @@ from nuclia.lib.nua import AsyncNuaClient
 from nuclia.sdk import AsyncNucliaAuth
 from pydantic import BaseModel
 
-from hyperforge.nua import AsyncInternalNuaClient
-
 
 class NuaBaseModel(BaseModel):
     async def connect(self):
@@ -72,4 +70,4 @@ class NUAConnection(NuaBaseModel):
 
     @classmethod
     async def connect_internal(cls, kbid: str | None, account: str | None, url: str):
-        return AsyncInternalNuaClient(kbid=kbid, account=account, url=url)
+        return AsyncNuaClient.internal(url=url, kbid=kbid, account=account)
