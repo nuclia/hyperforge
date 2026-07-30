@@ -7,6 +7,7 @@ interaction flows through the same worker pipeline as the HTTP/WS API.
 """
 
 from concurrent import futures
+from typing import Any
 
 import grpc
 from a2a.server.request_handlers import DefaultRequestHandler, GrpcHandler
@@ -58,7 +59,7 @@ async def build_grpc_server(
     settings: A2ASettings,
     data_manager_settings: DataManagerSettings,
 ) -> tuple[grpc.aio.Server, AgentManager, RedisBroker]:
-    """Wire up the broker, agent manager and A2A gRPC servicer."""
+    """Wire up SaaS dependencies and the A2A gRPC servicer."""
     if not settings.a2a_account or not settings.a2a_agent_id:
         raise ValueError("A2A_ACCOUNT and A2A_AGENT_ID must be configured")
 
@@ -75,6 +76,25 @@ async def build_grpc_server(
     await agent_manager.initialize()
 
     _load_modules(settings)
+
+    try:
+        server = await build_grpc_server_from_runtime(settings, agent_manager, broker)
+    except Exception:
+        await agent_manager.finalize()
+        await broker.finalize()
+        raise
+
+    return server, agent_manager, broker
+
+
+async def build_grpc_server_from_runtime(
+    settings: A2ASettings,
+    agent_manager: Any,
+    broker: RedisBroker,
+) -> grpc.aio.Server:
+    """Build an A2A server from already-initialized Hyperforge runtime services."""
+    if not settings.a2a_account or not settings.a2a_agent_id:
+        raise ValueError("A2A_ACCOUNT and A2A_AGENT_ID must be configured")
 
     app_context = A2AServerContext(
         settings=settings,
@@ -124,7 +144,7 @@ async def build_grpc_server(
     if bound_port == 0:
         raise RuntimeError(f"Unable to bind A2A gRPC server to {bind_address}")
 
-    return server, agent_manager, broker
+    return server
 
 
 async def serve(

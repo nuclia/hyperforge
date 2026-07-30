@@ -1,7 +1,8 @@
+from typing import Any
+
 from hyperforge.a2a.settings import A2ASettings
 from hyperforge.a2a.task_store import A2ATaskStore
 from hyperforge.broker import Broker
-from hyperforge.db.agents import AgentManager
 
 
 class A2AServerContext:
@@ -17,7 +18,7 @@ class A2AServerContext:
     def __init__(
         self,
         settings: A2ASettings,
-        agent_manager: AgentManager,
+        agent_manager: Any,
         broker: Broker,
         task_store: A2ATaskStore,
     ):

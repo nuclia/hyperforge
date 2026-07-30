@@ -31,6 +31,7 @@ from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import HTTPConnection
 from starlette.responses import PlainTextResponse
 
+from hyperforge.a2a.server import build_grpc_server_from_runtime
 from hyperforge.api import v1
 from hyperforge.api.authentication import User
 from hyperforge.api.models import AgentRole, StashRoles
@@ -42,6 +43,7 @@ from hyperforge.configure import resolve_dotted_name
 from hyperforge.server.cache import InMemoryCache, ValkeyCache
 from hyperforge.server.session import SessionManager
 from hyperforge.server.settings import Settings as ServerSettings
+from hyperforge.standalone import logger
 from hyperforge.standalone.oauth import (
     JWKSCache,
     force_https_metadata,
@@ -348,7 +350,28 @@ class StandaloneApplication(FastAPI):
             agent_manager=self.agent_manager,
             cache=cache,
         )
-        await self.session_manager.initialize()
+        self.a2a_server = None
+        try:
+            await self.session_manager.initialize()
+            if s.a2a_enabled:
+                if not isinstance(self.broker, RedisBroker):
+                    raise ValueError("A2A_ENABLED requires BROKER_REDIS_DSN")
+                self.a2a_server = await build_grpc_server_from_runtime(
+                    s.a2a_settings(), self.agent_manager, self.broker
+                )
+                await self.a2a_server.start()
+                logger.info(
+                    "Standalone A2A gRPC server listening on %s:%s",
+                    s.a2a_grpc_host,
+                    s.a2a_grpc_port,
+                )
+        except Exception:
+            await self.session_manager.finalize()
+            await self.broker.finalize()
+            raise
 
     async def _shutdown(self) -> None:
+        if self.a2a_server is not None:
+            await self.a2a_server.stop(grace=5)
         await self.session_manager.finalize()
+        await self.broker.finalize()

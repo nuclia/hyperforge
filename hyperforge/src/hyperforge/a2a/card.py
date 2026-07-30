@@ -6,13 +6,12 @@ an A2A :class:`AgentSkill`, mirroring how the MCP interface exposes workflows as
 tools (see ``hyperforge.api.v1.mcp_interaction.list_tools``).
 """
 
-from typing import Optional
+from typing import Any, Optional
 
 from a2a.types import a2a_pb2
 from a2a.utils import TransportProtocol
 
 from hyperforge.a2a.settings import A2ASettings
-from hyperforge.db.agents import AgentManager
 from hyperforge.workflows import WorkflowData
 
 
@@ -41,7 +40,7 @@ def skill_from_workflow(agent_id: str, workflow: WorkflowData) -> a2a_pb2.AgentS
 
 
 async def build_agent_skills(
-    agent_manager: AgentManager, account: str, agent_id: str
+    agent_manager: Any, account: str, agent_id: str
 ) -> list[a2a_pb2.AgentSkill]:
     """Enumerate the workflows of an agent as A2A skills."""
     workflows = await agent_manager.workflows_list(account=account, agent_id=agent_id)
