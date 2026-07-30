@@ -65,7 +65,10 @@ class A2ASettings(BaseSettings):
     @model_validator(mode="after")
     def validate_tls_settings(self) -> "A2ASettings":
         if self.a2a_tls_enabled:
-            if not self.a2a_tls_certificate_chain_path or not self.a2a_tls_private_key_path:
+            if (
+                not self.a2a_tls_certificate_chain_path
+                or not self.a2a_tls_private_key_path
+            ):
                 raise ValueError(
                     "A2A_TLS_CERTIFICATE_CHAIN_PATH and A2A_TLS_PRIVATE_KEY_PATH "
                     "must be configured when A2A_TLS_ENABLED is true"

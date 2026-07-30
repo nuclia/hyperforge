@@ -288,12 +288,19 @@ class HyperforgeA2AExecutor(AgentExecutor):
                 if isinstance(message, AgentAnswer):
                     answer = message.answer
                     if answer.operation == AnswerOperation.ERROR:
-                        detail = answer.exception.detail if answer.exception else "Unknown error"
+                        detail = (
+                            answer.exception.detail
+                            if answer.exception
+                            else "Unknown error"
+                        )
                         await updater.failed(
                             updater.new_agent_message([_text_part(detail)])
                         )
                         return
-                    if answer.operation == AnswerOperation.AGENT_REQUEST and answer.feedback:
+                    if (
+                        answer.operation == AnswerOperation.AGENT_REQUEST
+                        and answer.feedback
+                    ):
                         await updater.requires_input(
                             updater.new_agent_message(
                                 [_text_part(answer.feedback.question)],

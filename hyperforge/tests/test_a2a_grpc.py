@@ -114,9 +114,7 @@ async def _serve(executor, port: int, credentials=None, sdk_task_store=None):
 def _write_test_certificate(tmp_path):
     tmp_path.mkdir(parents=True, exist_ok=True)
     private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    subject = issuer = x509.Name(
-        [x509.NameAttribute(NameOID.COMMON_NAME, "127.0.0.1")]
-    )
+    subject = issuer = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "127.0.0.1")])
     certificate = (
         x509.CertificateBuilder()
         .subject_name(subject)
@@ -177,9 +175,7 @@ async def test_a2a_grpc_tls_serves_agent_card(tmp_path):
     port = _free_port()
     settings = A2ASettings(a2a_grpc_port=port)
     server = await _serve(
-        HyperforgeA2AExecutor(
-            _FakeContext(settings, _FakeAgentManager())
-        ),
+        HyperforgeA2AExecutor(_FakeContext(settings, _FakeAgentManager())),
         port,
         credentials,
     )
@@ -213,9 +209,7 @@ async def test_a2a_grpc_mtls_requires_client_certificate(tmp_path):
     port = _free_port()
     settings = A2ASettings(a2a_grpc_port=port)
     server = await _serve(
-        HyperforgeA2AExecutor(
-            _FakeContext(settings, _FakeAgentManager())
-        ),
+        HyperforgeA2AExecutor(_FakeContext(settings, _FakeAgentManager())),
         port,
         credentials,
     )
@@ -240,9 +234,9 @@ async def test_a2a_grpc_mtls_requires_client_certificate(tmp_path):
                 build_send_request("mTLS rejected client")
             )
 
-        response = await a2a_pb2_grpc.A2AServiceStub(
-            authenticated_channel
-        ).SendMessage(build_send_request("mTLS accepted client"))
+        response = await a2a_pb2_grpc.A2AServiceStub(authenticated_channel).SendMessage(
+            build_send_request("mTLS accepted client")
+        )
     finally:
         await unauthenticated_channel.close()
         await authenticated_channel.close()
@@ -555,9 +549,7 @@ async def test_a2a_grpc_feedback_reply_continues_task(monkeypatch, a2a_task_stor
         reply.message.task_id = task_id
         reply.message.context_id = context_id
         texts: list[str] = []
-        receiver_client = build_grpc_client(
-            f"127.0.0.1:{receiver_port}", use_tls=False
-        )
+        receiver_client = build_grpc_client(f"127.0.0.1:{receiver_port}", use_tls=False)
         async for event in receiver_client.send_message(reply):
             texts.extend(collect_text_from_stream_response(event))
             which = event.WhichOneof("payload")

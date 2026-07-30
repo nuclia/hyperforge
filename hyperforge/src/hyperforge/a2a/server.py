@@ -35,6 +35,11 @@ def _load_modules(settings: A2ASettings) -> None:
 
 def build_server_credentials(settings: A2ASettings) -> grpc.ServerCredentials:
     """Load the configured server certificate and optional mTLS CA at startup."""
+    if (
+        not settings.a2a_tls_certificate_chain_path
+        or not settings.a2a_tls_private_key_path
+    ):
+        raise ValueError("A2A TLS certificate chain and private key must be configured")
     certificate_chain = settings.a2a_tls_certificate_chain_path.read_bytes()
     private_key = settings.a2a_tls_private_key_path.read_bytes()
     client_ca = (

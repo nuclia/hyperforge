@@ -98,7 +98,8 @@ async def test_sdk_task_store_is_shared_between_server_instances(valkey):
         assert loaded == _task("task-1")
 
         page = await second_store.list(
-            a2a_pb2.ListTasksRequest(), context=None  # type: ignore[arg-type]
+            a2a_pb2.ListTasksRequest(),
+            context=None,  # type: ignore[arg-type]
         )
         assert [task.id for task in page.tasks] == ["task-1"]
         assert page.total_size == 1
@@ -123,7 +124,8 @@ async def test_sdk_task_store_uses_ttl_and_cluster_safe_key_tag(valkey):
 
         assert await store.get("task-1", context=None) is None  # type: ignore[arg-type]
         page = await store.list(
-            a2a_pb2.ListTasksRequest(), context=None  # type: ignore[arg-type]
+            a2a_pb2.ListTasksRequest(),
+            context=None,  # type: ignore[arg-type]
         )
         assert not page.tasks
     finally:
