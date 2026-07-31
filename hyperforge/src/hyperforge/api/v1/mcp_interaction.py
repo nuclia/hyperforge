@@ -391,13 +391,32 @@ async def interaction_mcp_handler(
         elif message["type"] == "http.response.body":
             body_chunks.append(message.get("body", b""))
 
+    # Pre-read the body before passing to the MCP transport.
+    # Fix for FastAPI/Starlette 1.x
+    # which consumes the ASGI receive callable internally before the route handler runs.
+    # TODO: consider rewriting this handler to use the official StreamableHTTPSessionManager
+    # This does not happen in arag due to older versions of FastAPI/Starlette.
+
+    body_bytes = await request.body()
+    body_sent = False
+
+    async def patched_receive():
+        nonlocal body_sent
+        if not body_sent:
+            body_sent = True
+            return {"type": "http.request", "body": body_bytes, "more_body": False}
+        while True:
+            msg = await request._receive()
+            if msg["type"] == "http.disconnect":
+                return msg
+
     async with anyio.create_task_group() as tg:
         # Start the server task
         await tg.start(run_stateless_server)
 
-        # Handle the HTTP request via the intercepting send
+        # Handle the HTTP request via the patched receive
         await http_transport.handle_request(
-            request.scope, request._receive, intercepting_send
+            request.scope, patched_receive, intercepting_send
         )
 
         # Terminate the transport after the request is handled

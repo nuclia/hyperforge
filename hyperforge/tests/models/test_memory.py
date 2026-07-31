@@ -4,8 +4,18 @@ from nucliadb_models.text import TextField
 from nucliadb_sdk import NucliaDB
 
 from hyperforge.api.models import INFO_FIELD_ID
-from hyperforge.memory.memory import QUESTION_ANSWERS_FIELD, SessionMemory
-from hyperforge.models import MemoryConfig, NucliaDBMemoryConfig, Rules
+from hyperforge.memory.memory import (
+    QUESTION_ANSWERS_FIELD,
+    QuestionMemory,
+    SessionMemory,
+)
+from hyperforge.models import (
+    Chunk,
+    Context,
+    MemoryConfig,
+    NucliaDBMemoryConfig,
+    Rules,
+)
 
 
 async def test_memory_save_load(sdk: NucliaDB, arag_kb: KnowledgeBoxObj):
@@ -43,7 +53,6 @@ async def test_memory_save_load(sdk: NucliaDB, arag_kb: KnowledgeBoxObj):
         and result
         == "- Question: How to make bread?\n- Answer: With ingredients and love\n"
     )
-
     # After a reload, it still has the Q & A
     memory = SessionMemory.from_config(
         config, "agent", workflow_id="default", rules=Rules(rules=[])
@@ -55,3 +64,28 @@ async def test_memory_save_load(sdk: NucliaDB, arag_kb: KnowledgeBoxObj):
         and result
         == "- Question: How to make bread?\n- Answer: With ingredients and love\n"
     )
+
+
+def test_contexts_markdown_can_include_summaries_with_chunks():
+    session = SessionMemory.from_config(
+        MemoryConfig(), "agent", workflow_id="default", rules=Rules(rules=[])
+    )
+    memory = QuestionMemory(session, "What is the answer?")
+    memory.contexts = [
+        Context(
+            original_question_uuid="question-1",
+            actual_question_uuid="question-1",
+            question="What is the answer?",
+            source="test",
+            agent="test",
+            summary="The answer is already known from an upstream tool.",
+            citations_id="block-AA",
+            chunks=[Chunk(chunk_id="chunk-1", text="Supporting source text")],
+        )
+    ]
+
+    markdown = memory.contexts_markdown(include_summaries=True)
+
+    assert "The answer is already known from an upstream tool." in markdown
+    assert "[block-AA-0]" in markdown
+    assert "Supporting source text" in markdown

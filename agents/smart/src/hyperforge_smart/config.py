@@ -12,6 +12,20 @@ PlanningMode = Literal["reactive", "plan_execute"]
 class SmartAgentConfig(ContextAgentConfig):
     model_config = ConfigDict(title="Smart agent")
     module: Literal["smart"] = "smart"
+    max_tool_result_bytes: int | None = Field(
+        default=None,
+        ge=1,
+        title="Tool result byte limit override",
+        description="Optional override of the deployment tool-result byte limit.",
+        json_schema_extra={"widget": WidgetType.NOT_SHOWN},
+    )
+    max_tool_result_item_bytes: int | None = Field(
+        default=None,
+        ge=1,
+        title="Tool result item byte limit override",
+        description="Optional override of the deployment tool-result item byte limit.",
+        json_schema_extra={"widget": WidgetType.NOT_SHOWN},
+    )
     planning_mode: PlanningMode = Field(
         default="reactive",
         title="Planning mode",

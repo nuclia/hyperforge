@@ -36,7 +36,7 @@ async def _not_found_as_404(awaitable):
     description="Add Workflow Configuration",
     tags=["Workflows"],
 )
-@requires_one([StashRoles.OWNER, StashRoles.CONTRIBUTOR, StashRoles.MEMBER])
+@requires_one([StashRoles.OWNER])
 async def add_workflow(
     request: Request,
     agent_id: str,
@@ -59,7 +59,7 @@ async def add_workflow(
     description="Get Workflow Configuration",
     tags=["Workflows"],
 )
-@requires_one([StashRoles.OWNER])
+@requires_one([StashRoles.OWNER, StashRoles.CONTRIBUTOR, StashRoles.MEMBER])
 async def get_workflows(
     request: Request,
     agent_id: str,
