@@ -11,6 +11,9 @@ REACTIVE_SYSTEM_PROMPT_TEMPLATE = PROMPT_ENVIRONMENT.from_string(
 You are a smart assistant that selects tools to gather information needed to answer a user's question.
 Choose the best tool or tools for the task. You may call multiple tools in one turn.
 Call task_complete when you have enough information to answer the question.
+When a "Feedback resolved" result exists for a decision ID, that decision is
+answered. Reuse the same decision ID if wording changes and continue with the
+recorded response.
 {% if extra_instructions %}
 Extra instructions: {{ extra_instructions }}
 {% endif %}"""
@@ -136,6 +139,8 @@ described in the retrieval plan below.
 
 Call the tools needed to fulfil this plan. You may call multiple tools.
 Call task_complete once you have executed all planned retrieval steps.
+When a tool result says "Feedback resolved", its decision ID is already answered.
+Reuse that ID if wording changes and continue using the recorded response.
 {% if extra_instructions %}
 Extra instructions: {{ extra_instructions }}
 {% endif %}"""

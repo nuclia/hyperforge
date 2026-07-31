@@ -201,36 +201,42 @@ class RedisBroker(Broker):
     async def receive_reply(self, key: str, timeout_ms: int) -> str | None:
         deadline = time.monotonic() + (timeout_ms / 1000)
         reconnect_attempts = 0
+        cursor = "0-0"
 
-        while True:
-            remaining_s = deadline - time.monotonic()
-            if remaining_s <= 0:
-                return None
+        try:
+            while True:
+                remaining_s = deadline - time.monotonic()
+                if remaining_s <= 0:
+                    return None
 
-            # Keep each blocking read short so transient socket closures/failovers
-            # can be recovered within the same overall timeout budget.
-            block_ms = min(_REPLY_READ_BLOCK_MAX_MS, max(1, int(remaining_s * 1000)))
-
-            try:
-                response = await self._client.xread(
-                    {key: "$"},
-                    block=block_ms,
-                    count=1,
+                # Keep each blocking read short so transient socket closures/failovers
+                # can be recovered within the same overall timeout budget.
+                block_ms = min(
+                    _REPLY_READ_BLOCK_MAX_MS, max(1, int(remaining_s * 1000))
                 )
-            except RedisConnectionError:
-                reconnect_attempts += 1
-                backoff_s = min(1.0, 0.1 * reconnect_attempts)
-                logger.warning(
-                    "Redis connection closed while receiving reply key=%s; retrying (attempt=%d)",
-                    key,
-                    reconnect_attempts,
-                )
-                await asyncio.sleep(backoff_s)
-                continue
 
-            if not response:
-                continue
-            return response[0][1][0][1]["msg"]
+                try:
+                    response = await self._client.xread(
+                        {key: cursor},
+                        block=block_ms,
+                        count=1,
+                    )
+                except RedisConnectionError:
+                    reconnect_attempts += 1
+                    backoff_s = min(1.0, 0.1 * reconnect_attempts)
+                    logger.warning(
+                        "Redis connection closed while receiving reply key=%s; retrying (attempt=%d)",
+                        key,
+                        reconnect_attempts,
+                    )
+                    await asyncio.sleep(backoff_s)
+                    continue
+
+                if not response:
+                    continue
+                return response[0][1][0][1]["msg"]
+        finally:
+            await self._client.delete(key)
 
     async def initialize(self) -> None:
         pass

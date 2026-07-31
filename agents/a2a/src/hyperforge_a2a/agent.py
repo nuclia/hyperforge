@@ -12,6 +12,7 @@ from hyperforge.manager import Manager
 from hyperforge.memory import Chunk, Context, QuestionMemory
 
 from hyperforge_a2a.client import (
+    RemoteFeedbackRequest,
     build_a2a_client,
     build_feedback_request,
     build_send_request,
@@ -20,6 +21,29 @@ from hyperforge_a2a.client import (
     raise_for_terminal_task_error,
 )
 from hyperforge_a2a.config import A2AAgentConfig
+
+
+def build_local_feedback(
+    remote_feedback: RemoteFeedbackRequest,
+    local_request_id: str,
+    module: str,
+    agent_id: str,
+    timeout_ms: int,
+) -> Feedback:
+    return Feedback(
+        request_id=local_request_id,
+        feedback_id=remote_feedback.feedback_id,
+        question=remote_feedback.question,
+        module=module,
+        agent_id=agent_id,
+        timeout_ms=timeout_ms,
+        data={
+            "a2a_task_id": remote_feedback.task_id,
+            "a2a_context_id": remote_feedback.context_id,
+            "a2a_request_id": remote_feedback.request_id,
+        },
+        response_schema=remote_feedback.response_schema,
+    )
 
 
 @agent(
@@ -91,22 +115,18 @@ class A2AClientAgent(ContextAgent, Agent[A2AAgentConfig]):
                             raise_for_terminal_task_error(response)
                             remote_feedback = extract_feedback_request(response)
                             if remote_feedback is not None:
-                                local_feedback = Feedback(
-                                    request_id=remote_feedback.request_id,
-                                    feedback_id=remote_feedback.feedback_id,
-                                    question=remote_feedback.question,
+                                local_feedback = build_local_feedback(
+                                    remote_feedback=remote_feedback,
+                                    local_request_id=memory.get_session_id(),
                                     module=self.config.module,
                                     agent_id=self.agent_id,
-                                    data={
-                                        "a2a_task_id": remote_feedback.task_id,
-                                        "a2a_context_id": remote_feedback.context_id,
-                                    },
-                                    response_schema=remote_feedback.response_schema,
+                                    timeout_ms=self.config.read_timeout_seconds
+                                    * 1000,
                                 )
                                 user_response = await memory.send_feedback(local_feedback)
                                 if user_response is None:
                                     raise ValueError("A2A feedback request was not answered")
-                                if user_response.request_id != remote_feedback.request_id:
+                                if user_response.request_id != memory.get_session_id():
                                     raise ValueError(
                                         "A2A feedback response request_id mismatch"
                                     )

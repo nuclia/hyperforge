@@ -147,6 +147,24 @@ def arag_answer_to_parts(msg: AragAnswer) -> list[a2a_pb2.Part]:
     return parts
 
 
+async def publish_step(updater: TaskUpdater, msg: AragAnswer) -> bool:
+    if msg.step is None:
+        return False
+    step = msg.step
+    await updater.add_artifact(
+        [_text_part(step.title)],
+        name="step",
+        metadata={
+            "module": step.module,
+            "title": step.title,
+            "reason": step.reason or "",
+            "value": step.value or "",
+            "agent_path": step.agent_path,
+        },
+    )
+    return True
+
+
 class HyperforgeA2AExecutor(AgentExecutor):
     """Runs a Hyperforge interaction in response to an A2A ``message/send``."""
 
@@ -308,10 +326,14 @@ class HyperforgeA2AExecutor(AgentExecutor):
                                     "feedback_id": answer.feedback.feedback_id,
                                     "response_schema": answer.feedback.response_schema,
                                     "request_id": answer.feedback.request_id,
+                                    "agent_id": answer.feedback.agent_id,
+                                    "module": answer.feedback.module,
                                 },
                             )
                         )
                         return
+                    if await publish_step(updater, answer):
+                        continue
                     parts = arag_answer_to_parts(answer)
                     if parts:
                         await updater.add_artifact(parts, name="answer")
@@ -373,6 +395,8 @@ class HyperforgeA2AExecutor(AgentExecutor):
                             "feedback_id": msg.feedback.feedback_id,
                             "response_schema": msg.feedback.response_schema,
                             "request_id": msg.feedback.request_id,
+                            "agent_id": msg.feedback.agent_id,
+                            "module": msg.feedback.module,
                         },
                     )
                 )
@@ -384,6 +408,8 @@ class HyperforgeA2AExecutor(AgentExecutor):
                 await updater.complete()
                 return
 
+            if await publish_step(updater, msg):
+                continue
             parts = arag_answer_to_parts(msg)
             if parts:
                 await updater.add_artifact(parts, name="answer")

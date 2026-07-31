@@ -1,5 +1,7 @@
 import os
 from copy import deepcopy
+from types import MethodType, SimpleNamespace
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -7,6 +9,9 @@ from hyperforge.engine import main as arag_main
 from hyperforge.interaction import AragAnswer
 from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.pubsub import UserToAgentInteraction
+from nuclia.lib.nua_responses import Author, Message
+
+from hyperforge_smart.agent import SmartAgent
 
 NUA_KEY = os.environ.get(
     "NUA_KEY",
@@ -83,6 +88,195 @@ CONFIG = {
     ],
     "postprocess": [],
 }
+
+
+@pytest.mark.asyncio
+async def test_plan_executor_preserves_messages_between_iterations():
+    observed_messages = []
+
+    async def choose_tools(_self, *, messages, **_kwargs):
+        observed_messages.append(messages)
+        return SimpleNamespace(tools=None), 0, 0
+
+    smart: Any = SimpleNamespace(
+        config=SimpleNamespace(extra_prompt=None, max_iterations=1),
+        choose_tools=MethodType(choose_tools, object()),
+    )
+    memory: Any = SimpleNamespace(get_tracking_info=lambda: None)
+    manager: Any = None
+    messages = [
+        Message(author=Author.USER, text="Coordinate the incident"),
+        Message(author=Author.NUCLIA, text="Tour Manager approved the change"),
+    ]
+
+    await SmartAgent._call_executor(
+        smart,
+        memory=memory,
+        manager=manager,
+        question="Coordinate the incident",
+        steps=[{"description": "Continue coordination", "reason": "Approval received"}],
+        summary="The Tour Manager approved the change",
+        tools=[],
+        messages=messages,
+        resolved_feedback={},
+    )
+
+    assert observed_messages == [messages]
+    assert observed_messages[0] is messages
+    assert observed_messages[0][-1].text == "Tour Manager approved the change"
+
+
+@pytest.mark.asyncio
+async def test_feedback_decision_id_survives_rephrasing():
+    class Memory:
+        calls = 0
+
+        def get_session_id(self):
+            return "session-1"
+
+        async def send_feedback(self, feedback):
+            self.calls += 1
+            return UserToAgentInteraction(
+                request_id=feedback.request_id,
+                response="Approved",
+            )
+
+        async def add_step(self, **_kwargs):
+            return None
+
+    memory: Any = Memory()
+    manager: Any = None
+    smart: Any = SimpleNamespace(
+        config=SimpleNamespace(id="operations", module="smart", feedback_timeout=5_000),
+        step_title=lambda title: title,
+    )
+    smart._process_results = MethodType(SmartAgent._process_results, smart)
+    messages: list[Message] = []
+    resolved_feedback: dict[str, str] = {}
+
+    for question in ("Approve the shorter set?", "Can we reduce the set to 60 minutes?"):
+        await SmartAgent._execute_tool_calls_turn(
+            smart,
+            memory=memory,
+            manager=manager,
+            messages=messages,
+            tool_calls=[
+                (
+                    "user_feedback",
+                    {"decision_id": "set-duration", "question": question},
+                )
+            ],
+            turn_label="test",
+            resolved_feedback=resolved_feedback,
+        )
+
+    assert memory.calls == 1
+    assert resolved_feedback == {"set-duration": "Approved"}
+    assert "Decision ID: set-duration" in messages[-1].text
+
+
+@pytest.mark.asyncio
+async def test_different_feedback_decisions_are_both_requested():
+    class Memory:
+        calls = 0
+
+        def get_session_id(self):
+            return "session-1"
+
+        async def send_feedback(self, feedback):
+            self.calls += 1
+            return UserToAgentInteraction(
+                request_id=feedback.request_id,
+                response="Approved",
+            )
+
+        async def add_step(self, **_kwargs):
+            return None
+
+    memory: Any = Memory()
+    manager: Any = None
+    smart: Any = SimpleNamespace(
+        config=SimpleNamespace(id="operations", module="smart", feedback_timeout=5_000),
+        step_title=lambda title: title,
+    )
+    smart._process_results = MethodType(SmartAgent._process_results, smart)
+    messages: list[Message] = []
+    resolved_feedback: dict[str, str] = {}
+
+    for decision_id in ("set-duration", "gate-activation"):
+        await SmartAgent._execute_tool_calls_turn(
+            smart,
+            memory=memory,
+            manager=manager,
+            messages=messages,
+            tool_calls=[
+                (
+                    "user_feedback",
+                    {"decision_id": decision_id, "question": f"Approve {decision_id}?"},
+                )
+            ],
+            turn_label="test",
+            resolved_feedback=resolved_feedback,
+        )
+
+    assert memory.calls == 2
+    assert resolved_feedback == {
+        "set-duration": "Approved",
+        "gate-activation": "Approved",
+    }
+
+
+@pytest.mark.asyncio
+async def test_executor_runs_tools_returned_with_task_complete():
+    smart: Any = SimpleNamespace(
+        config=SimpleNamespace(max_iterations=1, extra_prompt=None),
+    )
+
+    async def choose_tools(**_kwargs):
+        return (
+            SimpleNamespace(
+                tools={
+                    "calls": [
+                        SimpleNamespace(
+                            function=SimpleNamespace(
+                                name="a2a_query_of_logistics", arguments={}
+                            )
+                        ),
+                        SimpleNamespace(
+                            function=SimpleNamespace(
+                                name="task_complete", arguments={}
+                            )
+                        ),
+                    ]
+                }
+            ),
+            0,
+            0,
+        )
+
+    executed_calls = []
+
+    async def execute_turn(**kwargs):
+        executed_calls.extend(kwargs["tool_calls"])
+        return [("a2a_query of logistics", "result")]
+
+    smart.choose_tools = choose_tools
+    smart._execute_tool_calls_turn = execute_turn
+
+    results, _, _ = await SmartAgent._call_executor(
+        smart,
+        memory=SimpleNamespace(get_tracking_info=lambda: None),
+        manager=None,
+        question="question",
+        steps=[],
+        summary="",
+        tools=[],
+        messages=[],
+        resolved_feedback={},
+    )
+
+    assert executed_calls == [("a2a_query_of_logistics", {})]
+    assert results == [("a2a_query of logistics", "result")]
 
 
 @pytest.mark.asyncio
@@ -328,7 +522,7 @@ async def test_smart_with_user_feedback():
 
     async def mock_send_feedback(feedback):
         return UserToAgentInteraction(
-            request_id=feedback.request_id,
+            request_id="upstream-a2a-request",
             response="Snoopy the pet",
         )
 

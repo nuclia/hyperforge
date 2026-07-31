@@ -7,6 +7,7 @@ from hyperforge_a2a.client import (
     collect_text_from_stream_response,
     dict_to_struct,
     extract_feedback_request,
+    extract_steps_from_stream_response,
     raise_for_terminal_task_error,
 )
 from hyperforge_a2a.config import A2AAgentConfig
@@ -56,6 +57,36 @@ def test_collect_text_from_artifact_update():
     assert collect_text_from_stream_response(response) == ["hello world"]
 
 
+def test_extract_step_artifact_without_collecting_it_as_answer_text():
+    from a2a.types import a2a_pb2
+
+    response = a2a_pb2.StreamResponse(
+        artifact_update=a2a_pb2.TaskArtifactUpdateEvent(
+            task_id="t",
+            context_id="c",
+            artifact=a2a_pb2.Artifact(
+                artifact_id="step-1",
+                name="step",
+                parts=[a2a_pb2.Part(text="Calling Venue")],
+                metadata=dict_to_struct(
+                    {
+                        "module": "smart",
+                        "title": "Calling Venue",
+                        "reason": "Venue owns access.",
+                        "value": "Check Gate C.",
+                        "agent_path": "/context/coordinator",
+                    }
+                ),
+            ),
+        )
+    )
+
+    assert collect_text_from_stream_response(response) == []
+    step = extract_steps_from_stream_response(response)[0]
+    assert step.title == "Calling Venue"
+    assert step.reason == "Venue owns access."
+
+
 def test_build_metadata_forwards_valid_headers():
     agent = _make_agent(
         remote_account="acc",
@@ -103,6 +134,7 @@ def test_extract_feedback_request_and_build_continuation():
                         {
                             "feedback_id": "feedback-1",
                             "request_id": "request-1",
+                            "agent_id": "venue",
                             "response_schema": {"type": "string"},
                         }
                     ),
@@ -120,12 +152,43 @@ def test_extract_feedback_request_and_build_continuation():
         request_id="request-1",
         question="Which region should I use?",
         response_schema={"type": "string"},
+        agent_id="venue",
     )
     continuation = build_feedback_request("EMEA", feedback)
     assert continuation.message.task_id == "task-1"
     assert continuation.message.context_id == "context-1"
     assert continuation.message.parts[0].text == "EMEA"
     assert continuation.metadata["feedback_id"] == "feedback-1"
+
+
+def test_relayed_feedback_uses_local_request_id():
+    from hyperforge_a2a.agent import build_local_feedback
+
+    remote = RemoteFeedbackRequest(
+        task_id="task-1",
+        context_id="context-1",
+        feedback_id="feedback-1",
+        request_id="remote-request",
+        question="Approve the change?",
+        response_schema={"type": "string"},
+    )
+
+    feedback = build_local_feedback(
+        remote,
+        local_request_id="local-session",
+        module="a2a",
+        agent_id="remote-agent",
+        timeout_ms=600_000,
+    )
+
+    assert feedback.request_id == "local-session"
+    assert feedback.feedback_id == "feedback-1"
+    assert feedback.timeout_ms == 600_000
+    assert feedback.data == {
+        "a2a_task_id": "task-1",
+        "a2a_context_id": "context-1",
+        "a2a_request_id": "remote-request",
+    }
 
 
 def test_failed_remote_task_raises_its_message():

@@ -69,12 +69,16 @@ USER_FEEDBACK_TOOL = Tool(
     parameters={
         "type": "object",
         "properties": {
+            "decision_id": {
+                "type": "string",
+                "description": "Stable identifier for the underlying decision. Reuse it if the question is rephrased.",
+            },
             "question": {
                 "type": "string",
                 "description": "The question to ask the user",
             },
         },
-        "required": ["question"],
+        "required": ["decision_id", "question"],
     },
 )
 
@@ -515,6 +519,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         tool_calls: List[Tuple[str, Any]],
         turn_label: str,
         context: Optional[Context] = None,
+        resolved_feedback: Optional[Dict[str, str]] = None,
     ) -> List[Tuple[str, Any]]:
         """Handle one turn of tool calls.
 
@@ -531,10 +536,35 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         if any(name == "user_feedback" for name, _ in tool_calls):
             for name, args in tool_calls:
                 if name == "user_feedback":
+                    decision_id: Optional[str] = (
+                        args.get("decision_id") if args else None
+                    )
                     feedback_question: Optional[str] = (
                         args.get("question") if args else None
                     )
-                    if feedback_question:
+                    if decision_id and feedback_question:
+                        if (
+                            resolved_feedback is not None
+                            and decision_id in resolved_feedback
+                        ):
+                            feedback_result = (
+                                "user_feedback",
+                                "Feedback resolved. Do not request this feedback again. "
+                                f"Decision ID: {decision_id}\n"
+                                f"Question: {feedback_question}\n"
+                                f"Response: {resolved_feedback[decision_id]}",
+                            )
+                            result_texts = self._process_results(
+                                [feedback_result], context=context
+                            )
+                            if result_texts:
+                                messages.append(
+                                    Message(
+                                        author=Author.NUCLIA,
+                                        text="\n\n".join(result_texts),
+                                    )
+                                )
+                            return [feedback_result]
                         feedback = Feedback(
                             request_id=memory.get_session_id(),
                             question=feedback_question,
@@ -550,12 +580,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                         )
                         answer = await memory.send_feedback(feedback)
                         feedback_text = (
-                            answer.response
-                            if (
-                                answer is not None
-                                and answer.request_id == memory.get_session_id()
-                            )
-                            else "(No response received)"
+                            answer.response if answer is not None else "(No response received)"
                         )
                         messages.append(Message(author=Author.USER, text=feedback_text))
                         logger.info(f"Received user feedback response: {feedback_text}")
@@ -569,8 +594,13 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                         )
                         feedback_result: Tuple[str, Any] = (
                             "user_feedback",
-                            feedback_text,
+                            "Feedback resolved. Do not request this feedback again. "
+                            f"Decision ID: {decision_id}\n"
+                            f"Question: {feedback_question}\n"
+                            f"Response: {feedback_text}",
                         )
+                        if resolved_feedback is not None:
+                            resolved_feedback[decision_id] = feedback_text
                         result_texts = self._process_results(
                             [feedback_result], context=context
                         )
@@ -585,13 +615,36 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             return []
 
         # --- normal tool execution path ---
-        results = await asyncio.gather(
-            *[
-                self.execute_tool_call(memory, manager, name, args)
-                for name, args in tool_calls
-                if name != "task_complete"
-            ]
-        )
+        executable_calls = [
+            (name, args) for name, args in tool_calls if name != "task_complete"
+        ]
+
+        async def record_delegation(tool_name: str) -> None:
+            await memory.add_step(
+                step_module=self.config.module,
+                step_title=self.step_title(f"Delegating to {tool_name}"),
+                step_reason="Starting selected tool",
+                step_agent_path=agent_path,
+                step_value=tool_name,
+                timeit=0,
+            )
+
+        if self.config.parallel_tool_calls:
+            for tool_name, _ in executable_calls:
+                await record_delegation(tool_name)
+            results = await asyncio.gather(
+                *[
+                    self.execute_tool_call(memory, manager, name, args)
+                    for name, args in executable_calls
+                ]
+            )
+        else:
+            results = []
+            for name, args in executable_calls:
+                await record_delegation(name)
+                results.append(
+                    await self.execute_tool_call(memory, manager, name, args)
+                )
         result_texts = self._process_results(list(results), context=context)
         result_summary = "; ".join(
             f"{info}: {'context' if isinstance(res, Context) else type(res).__name__}"
@@ -650,6 +703,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         finished = False
         total_input_tokens = 0.0
         total_output_tokens = 0.0
+        resolved_feedback: Dict[str, str] = {}
         while not finished and iteration < self.config.max_iterations:
             iteration += 1
 
@@ -703,6 +757,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 tool_calls=tool_calls,
                 turn_label=f"iteration {iteration}/{self.config.max_iterations}",
                 context=context,
+                resolved_feedback=resolved_feedback,
             )
 
         reason = (
@@ -779,6 +834,8 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         steps: List[Dict[str, Any]],
         summary: str,
         tools: List[Tool],
+        messages: List[Message],
+        resolved_feedback: Dict[str, str],
     ) -> Tuple[List[Tuple[str, Any]], float, float]:
         """Run the executor LLM turn: call tools guided by the current plan steps."""
         system = PLAN_EXECUTE_EXECUTOR_SYSTEM_PROMPT_TEMPLATE.render(
@@ -787,10 +844,6 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             summary=summary,
             extra_instructions=self.config.extra_prompt or "",
         )
-        messages: List[Message] = [
-            Message(author=Author.USER, text=question),
-        ]
-
         all_results: List[Tuple[str, Any]] = []
         total_input_tokens = 0.0
         total_output_tokens = 0.0
@@ -812,7 +865,14 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
 
             tool_calls = list(iterate_tools_resp(resp))
 
-            if not tool_calls or any(name == "task_complete" for name, _ in tool_calls):
+            if not tool_calls:
+                finished = True
+                break
+
+            executable_calls = [
+                (name, args) for name, args in tool_calls if name != "task_complete"
+            ]
+            if not executable_calls:
                 finished = True
                 break
 
@@ -820,10 +880,13 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 memory=memory,
                 manager=manager,
                 messages=messages,
-                tool_calls=tool_calls,
+                tool_calls=executable_calls,
                 turn_label=f"executor turn {executor_turn}/{max_executor_turns}",
+                resolved_feedback=resolved_feedback,
             )
             all_results.extend(results)
+            if any(name == "task_complete" for name, _ in tool_calls):
+                finished = True
 
         return all_results, total_input_tokens, total_output_tokens
 
@@ -854,6 +917,8 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         iteration = 0
         total_input_tokens = 0.0
         total_output_tokens = 0.0
+        executor_messages = [Message(author=Author.USER, text=question)]
+        resolved_feedback: Dict[str, str] = {}
 
         # Build tools once for the entire plan-execute cycle
         tools = self.build_tools()
@@ -923,6 +988,8 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 steps=steps,
                 summary=summary,
                 tools=tools,
+                messages=executor_messages,
+                resolved_feedback=resolved_feedback,
             )
             total_input_tokens += exec_in_tokens
             total_output_tokens += exec_out_tokens

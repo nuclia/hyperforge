@@ -25,6 +25,7 @@ from hyperforge_a2a.client import (
     build_grpc_client,
     build_send_request,
     collect_text_from_stream_response,
+    extract_steps_from_stream_response,
 )
 from hyperforge_a2a.config import A2AAgentConfig
 from redis.asyncio import Redis
@@ -39,7 +40,7 @@ from hyperforge.broker.local import LocalBroker
 from hyperforge.engine import State
 from hyperforge.interaction import AnswerOperation, AragAnswer, Feedback
 from hyperforge.memory.memory import NoMemorySessionMemory
-from hyperforge.models import MemoryConfig
+from hyperforge.models import MemoryConfig, Step
 from hyperforge.pubsub import UserToAgentInteraction
 from hyperforge.server.cache import NoCache
 from hyperforge.server.session import SessionManager
@@ -258,6 +259,20 @@ async def test_a2a_grpc_round_trip(monkeypatch, a2a_task_store):
         captured["question"] = interaction.question
         captured["headers"] = dict(interaction.headers)
         yield AragAnswer(
+            step=Step(
+                original_question_uuid=None,
+                actual_question_uuid=None,
+                module="smart",
+                title="Calling Logistics",
+                value="Check the stage transfer schedule.",
+                agent_path="/context/coordinator",
+                reason="Logistics owns production timing.",
+                timeit=0,
+                input_nuclia_tokens=None,
+                output_nuclia_tokens=None,
+            )
+        )
+        yield AragAnswer(
             operation=AnswerOperation.ANSWER,
             answer=f"Answer to: {interaction.question}",
         )
@@ -289,13 +304,20 @@ async def test_a2a_grpc_round_trip(monkeypatch, a2a_task_store):
             },
         )
         texts: list[str] = []
+        step_events = []
         async for response in client.send_message(request):
+            step_events.extend(extract_steps_from_stream_response(response))
             texts.extend(collect_text_from_stream_response(response))
         await client.close()
     finally:
         await server.stop(grace=1)
 
     assert any("Answer to: what is A2A?" in t for t in texts)
+    assert len(step_events) == 1
+    assert step_events[0].module == "smart"
+    assert step_events[0].title == "Calling Logistics"
+    assert step_events[0].reason == "Logistics owns production timing."
+    assert all("Calling Logistics" not in text for text in texts)
     assert captured["account"] == "acc"
     assert captured["agent_id"] == "myagent"
     assert captured["workflow_id"] == "wf1"

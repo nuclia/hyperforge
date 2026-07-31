@@ -31,6 +31,16 @@ class RemoteFeedbackRequest:
     request_id: str
     question: str
     response_schema: Any
+    agent_id: str = ""
+
+
+@dataclass(frozen=True)
+class RemoteAgentStep:
+    module: str
+    title: str
+    reason: str
+    value: str
+    agent_path: str
 
 
 def dict_to_struct(data: dict[str, Any]) -> struct_pb2.Struct:
@@ -157,6 +167,7 @@ def _feedback_from_status(
     feedback_id = message.metadata.fields.get("feedback_id")
     request_id = message.metadata.fields.get("request_id")
     response_schema = message.metadata.fields.get("response_schema")
+    agent_id = message.metadata.fields.get("agent_id")
     question = "\n".join(extract_text_from_parts(message.parts)).strip()
     if (
         feedback_id is None
@@ -175,6 +186,7 @@ def _feedback_from_status(
         request_id=request_id.string_value,
         question=question,
         response_schema=MessageToDict(response_schema),
+        agent_id=agent_id.string_value if agent_id is not None else "",
     )
 
 
@@ -232,14 +244,45 @@ def collect_text_from_stream_response(response: a2a_pb2.StreamResponse) -> list[
     if which == "message":
         texts.extend(extract_text_from_parts(response.message.parts))
     elif which == "artifact_update":
-        texts.extend(extract_text_from_parts(response.artifact_update.artifact.parts))
+        artifact = response.artifact_update.artifact
+        if artifact.name != "step":
+            texts.extend(extract_text_from_parts(artifact.parts))
     elif which == "status_update":
         status = response.status_update.status
         if status.HasField("message"):
             texts.extend(extract_text_from_parts(status.message.parts))
     elif which == "task":
         for artifact in response.task.artifacts:
-            texts.extend(extract_text_from_parts(artifact.parts))
+            if artifact.name != "step":
+                texts.extend(extract_text_from_parts(artifact.parts))
         if response.task.status.HasField("message"):
             texts.extend(extract_text_from_parts(response.task.status.message.parts))
     return texts
+
+
+def extract_steps_from_stream_response(
+    response: a2a_pb2.StreamResponse,
+) -> list[RemoteAgentStep]:
+    which = response.WhichOneof("payload")
+    if which == "artifact_update":
+        artifacts = [response.artifact_update.artifact]
+    elif which == "task":
+        artifacts = response.task.artifacts
+    else:
+        artifacts = []
+
+    steps = []
+    for artifact in artifacts:
+        if artifact.name != "step":
+            continue
+        metadata = MessageToDict(artifact.metadata)
+        steps.append(
+            RemoteAgentStep(
+                module=str(metadata.get("module", "")),
+                title=str(metadata.get("title", "")),
+                reason=str(metadata.get("reason", "")),
+                value=str(metadata.get("value", "")),
+                agent_path=str(metadata.get("agent_path", "")),
+            )
+        )
+    return steps
