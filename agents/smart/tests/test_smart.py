@@ -570,7 +570,16 @@ async def test_smart_with_user_feedback():
         )
 
     assert question_memory.final_answer
-    assert "Feedback response: Snoopy the pet" in question_memory.steps[1].value
+    feedback_steps = [
+        step
+        for step in question_memory.steps
+        if step.module == "smart" and "user feedback" in step.title.lower()
+    ]
+    assert feedback_steps, "Expected a user feedback step"
+    assert any(
+        "Feedback response: Snoopy the pet" in (step.value or "")
+        for step in feedback_steps
+    )
     assert any(
         keyword.lower() in question_memory.final_answer.lower()
         for keyword in ["Snoopy", "dog", "Carmen"]

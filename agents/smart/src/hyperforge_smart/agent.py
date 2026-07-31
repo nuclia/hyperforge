@@ -732,7 +732,10 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                     feedback_question: Optional[str] = (
                         args.get("question") if args else None
                     )
-                    if decision_id and feedback_question:
+                    if feedback_question:
+                        decision_id = decision_id or (
+                            f"legacy:{feedback_question.strip().lower()}"
+                        )
                         if (
                             resolved_feedback is not None
                             and decision_id in resolved_feedback
