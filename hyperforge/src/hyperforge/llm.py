@@ -36,6 +36,9 @@ class NoopNuaClient(AsyncNuaClient):  # pragma: no cover
             "or LOCAL_OPENAI to enable LLM-based agents."
         )
 
+    async def aclose(self) -> None:
+        pass
+
     async def generate(self, *args: Any, **kwargs: Any) -> Any:  # type: ignore[override]
         self._not_configured("generate")
 

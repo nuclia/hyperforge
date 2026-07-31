@@ -87,6 +87,7 @@ async def main(
     streaming: bool = False,
     chat_history: Optional[List[HistoryQuestionAnswer]] = None,
 ) -> QuestionMemory:
+    state: State | None = None
     try:
         state, session_memory = await init(
             config=config,
@@ -123,6 +124,8 @@ async def main(
     except Exception as e:
         raise e
     finally:
+        if state is not None and state.manager is not None:
+            await state.manager.aclose()
         GLOBAL_REGISTRY.clear()
     return question_memory
 
