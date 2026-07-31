@@ -17,14 +17,6 @@ def _record(task_id: str = "task-1") -> PendingTaskRecord:
     return PendingTaskRecord(
         task_id=task_id,
         context_id="context-1",
-        routing={
-            "account": "local",
-            "agent_id": "agent-1",
-            "workflow_id": "default",
-            "session": "session-1",
-            "headers": {"authorization": "Bearer token"},
-            "arguments": {"region": "EMEA"},
-        },
         feedback_id="feedback-1",
         request_id="request-1",
     )

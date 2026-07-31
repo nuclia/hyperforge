@@ -3,6 +3,7 @@ from time import time
 from typing import Any, ClassVar, Dict, List, Optional
 from uuid import uuid4
 
+from a2a.types import a2a_pb2
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.context.agent import ContextAgent
@@ -108,9 +109,11 @@ class A2AClientAgent(ContextAgent, Agent[A2AAgentConfig]):
         try:
             try:
                 async with asyncio.timeout(self.config.read_timeout_seconds):
-                    request = build_send_request(question, self._build_metadata(memory))
+                    request: a2a_pb2.SendMessageRequest | None = build_send_request(
+                        question, self._build_metadata(memory)
+                    )
                     while request is not None:
-                        continuation = None
+                        continuation: a2a_pb2.SendMessageRequest | None = None
                         async for response in client.send_message(request):
                             raise_for_terminal_task_error(response)
                             remote_feedback = extract_feedback_request(response)
@@ -120,18 +123,23 @@ class A2AClientAgent(ContextAgent, Agent[A2AAgentConfig]):
                                     local_request_id=memory.get_session_id(),
                                     module=self.config.module,
                                     agent_id=self.agent_id,
-                                    timeout_ms=self.config.read_timeout_seconds
-                                    * 1000,
+                                    timeout_ms=self.config.read_timeout_seconds * 1000,
                                 )
-                                user_response = await memory.send_feedback(local_feedback)
+                                user_response = await memory.send_feedback(
+                                    local_feedback
+                                )
                                 if user_response is None:
-                                    raise ValueError("A2A feedback request was not answered")
+                                    raise ValueError(
+                                        "A2A feedback request was not answered"
+                                    )
                                 if user_response.request_id != memory.get_session_id():
                                     raise ValueError(
                                         "A2A feedback response request_id mismatch"
                                     )
                                 if not user_response.response.strip():
-                                    raise ValueError("A2A feedback response cannot be empty")
+                                    raise ValueError(
+                                        "A2A feedback response cannot be empty"
+                                    )
                                 continuation = build_feedback_request(
                                     user_response.response, remote_feedback
                                 )

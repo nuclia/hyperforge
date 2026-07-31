@@ -4,7 +4,7 @@ import base64
 import json
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
-from typing import Any, Protocol
+from typing import Protocol
 
 from a2a.server.context import ServerCallContext
 from a2a.server.owner_resolver import OwnerResolver, resolve_user_scope
@@ -23,7 +23,6 @@ class PendingTaskRecord:
 
     task_id: str
     context_id: str
-    routing: dict[str, Any]
     feedback_id: str
     request_id: str
     owner_instance_id: str = ""

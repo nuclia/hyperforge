@@ -1,7 +1,10 @@
+from unittest.mock import AsyncMock, Mock
+
 import pytest
 
 from hyperforge_a2a.client import (
     RemoteFeedbackRequest,
+    build_a2a_client,
     build_feedback_request,
     build_send_request,
     collect_text_from_stream_response,
@@ -117,6 +120,38 @@ def test_tls_client_credentials_require_tls_and_a_complete_key_pair():
             source="a2a.example.com:443",
             tls_ca_certificate_path="ca.pem",
         )
+
+    with pytest.raises(ValueError, match="requires an HTTPS"):
+        A2AAgentConfig(source="http://a2a.example.com", use_tls=True)
+
+
+@pytest.mark.asyncio
+async def test_http_client_uses_configured_tls_context(monkeypatch, tmp_path):
+    ca_path = tmp_path / "ca.pem"
+    ca_path.write_text("CA")
+    ssl_context = Mock()
+    monkeypatch.setattr(
+        "hyperforge_a2a.client.ssl.create_default_context",
+        Mock(return_value=ssl_context),
+    )
+    http_client = AsyncMock()
+    http_client.aclose = AsyncMock()
+    async_client = Mock(return_value=http_client)
+    monkeypatch.setattr("hyperforge_a2a.client.httpx.AsyncClient", async_client)
+    monkeypatch.setattr(
+        "hyperforge_a2a.client.A2ACardResolver.get_agent_card",
+        AsyncMock(side_effect=RuntimeError("stop after card lookup")),
+    )
+
+    with pytest.raises(RuntimeError, match="stop after card lookup"):
+        await build_a2a_client(
+            "https://a2a.example.com",
+            use_tls=True,
+            tls_ca_certificate_path=ca_path,
+        )
+
+    async_client.assert_called_once_with(verify=ssl_context)
+    http_client.aclose.assert_awaited_once()
 
 
 def test_extract_feedback_request_and_build_continuation():

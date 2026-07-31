@@ -2,7 +2,7 @@
 
 import asyncio
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from typing import Any, AsyncIterator
 from uuid import uuid4
 
@@ -11,14 +11,16 @@ from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.server.tasks import TaskUpdater
 from a2a.types import a2a_pb2
+from a2a.utils.errors import InvalidParamsError
 
 from hyperforge.a2a import logger
 from hyperforge.a2a.context import A2AServerContext
 from hyperforge.a2a.task_store import PendingTaskRecord
 from hyperforge.api.models import InteractionRequest
 from hyperforge.api.v1.interaction import Shutdown, WebsocketReceiver, stream_response
+from hyperforge.broker import AgentTimeoutError
 from hyperforge.db import exceptions
-from hyperforge.interaction import AnswerOperation, AragAnswer
+from hyperforge.interaction import AnswerOperation, AragAnswer, ARAGException
 from hyperforge.pubsub import AgentAnswer, AgentDone, UserToAgentInteraction
 
 # Metadata keys read from the incoming A2A message to route the interaction.
@@ -55,7 +57,6 @@ class PendingA2ATask:
     context_id: str
     feedback_id: str
     request_id: str
-    routing: A2ARouting
     receiver: WebsocketReceiver
     response_stream: AsyncIterator[AragAnswer]
 
@@ -114,13 +115,19 @@ def parse_routing_metadata(
     if agent_id is not None and agent_id != settings.a2a_agent_id:
         raise ValueError("A2A metadata 'agent_id' does not match this server")
 
-    headers = _string_mapping(metadata, META_HEADERS)
+    raw_headers = _string_mapping(metadata, META_HEADERS)
+    headers: dict[str, str] = {}
+    for header, value in raw_headers.items():
+        normalized_header = header.lower()
+        if normalized_header in headers:
+            raise ValueError(
+                f"A2A metadata contains duplicate header: {normalized_header}"
+            )
+        headers[normalized_header] = value
     allowed_headers = {
         header.lower() for header in settings.a2a_allowed_forwarded_headers
     }
-    disallowed_headers = [
-        header for header in headers if header.lower() not in allowed_headers
-    ]
+    disallowed_headers = [header for header in headers if header not in allowed_headers]
     if disallowed_headers:
         headers_list = ", ".join(sorted(disallowed_headers))
         raise ValueError(f"A2A metadata contains disallowed header(s): {headers_list}")
@@ -172,6 +179,7 @@ class HyperforgeA2AExecutor(AgentExecutor):
         self.app = context
         self._pending_tasks: dict[str, PendingA2ATask] = {}
         self._pending_waiters: dict[str, asyncio.Task[None]] = {}
+        self._active_receivers: dict[str, WebsocketReceiver] = {}
         self._instance_id = uuid4().hex
         self._task_store = context.task_store
 
@@ -185,14 +193,13 @@ class HyperforgeA2AExecutor(AgentExecutor):
             return
 
         # A2A requires a Task to be enqueued before any status/artifact events.
-        if context.current_task is None:
-            await event_queue.enqueue_event(
-                new_task(
-                    task_id,
-                    context_id,
-                    a2a_pb2.TaskState.TASK_STATE_SUBMITTED,
-                )
+        await event_queue.enqueue_event(
+            new_task(
+                task_id,
+                context_id,
+                a2a_pb2.TaskState.TASK_STATE_SUBMITTED,
             )
+        )
 
         try:
             routing = parse_routing_metadata(
@@ -241,16 +248,18 @@ class HyperforgeA2AExecutor(AgentExecutor):
             workflow_id=routing.workflow_id,
         )
 
+        self._active_receivers[task_id] = receiver
         try:
-            await self._stream_until_pause(
-                task_id, updater, receiver, response_stream, routing
-            )
+            await self._stream_until_pause(task_id, updater, receiver, response_stream)
         except Exception as exc:  # pragma: no cover - defensive
             logger.exception("A2A interaction failed")
-            self._pending_tasks.pop(task_id, None)
+            self._cancel_feedback_waiter(task_id)
+            await self._discard_pending_task(task_id)
             await updater.failed(
                 updater.new_agent_message([_text_part(f"Internal error: {exc}")])
             )
+        finally:
+            self._active_receivers.pop(task_id, None)
 
     async def _forward_feedback(
         self, context: RequestContext, updater: TaskUpdater
@@ -265,13 +274,25 @@ class HyperforgeA2AExecutor(AgentExecutor):
         metadata = dict(context.metadata or {})
         feedback_id = metadata.get(META_FEEDBACK_ID)
         if not isinstance(feedback_id, str):
+            raise InvalidParamsError("Invalid or missing feedback_id")
+
+        response = context.get_user_input()
+        if not response:
+            raise InvalidParamsError("Empty feedback response")
+
+        pending_record = await self._task_store.get_pending(task_id)
+        if pending_record is None:
             await updater.failed(
-                updater.new_agent_message(
-                    [_text_part("Invalid or missing feedback_id")]
-                )
+                updater.new_agent_message([_text_part("A2A task has expired")])
             )
             return
+        if (
+            pending_record.context_id != (context.context_id or "")
+            or pending_record.feedback_id != feedback_id
+        ):
+            raise InvalidParamsError("Feedback does not match the pending A2A task")
 
+        await updater.start_work()
         record = await self._task_store.claim_pending(
             task_id, context.context_id or "", feedback_id
         )
@@ -281,28 +302,34 @@ class HyperforgeA2AExecutor(AgentExecutor):
             )
             return
 
-        response = context.get_user_input()
-        if not response:
+        relay_topic = f"hyperforge:a2a:relay:{uuid4().hex}"
+        try:
+            await self.app.broker.send_reply(
+                _owner_reply_subject(record.owner_instance_id, task_id),
+                json.dumps(
+                    {
+                        "request_id": record.request_id,
+                        "response": response,
+                        "relay_topic": relay_topic,
+                    }
+                ),
+            )
+        except Exception:  # pragma: no cover - broker failure handling
+            logger.exception("A2A feedback delivery failed")
+            await self._task_store.remove(task_id)
             await updater.failed(
-                updater.new_agent_message([_text_part("Empty feedback response")])
+                updater.new_agent_message(
+                    [
+                        _text_part(
+                            "A2A feedback could not be delivered; resend the request"
+                        )
+                    ]
+                )
             )
             return
 
-        await updater.start_work()
-        relay_topic = f"hyperforge:a2a:relay:{uuid4().hex}"
-        await self.app.broker.send_reply(
-            _owner_reply_subject(record.owner_instance_id, task_id),
-            json.dumps(
-                {
-                    "request_id": record.request_id,
-                    "response": response,
-                    "relay_topic": relay_topic,
-                }
-            ),
-        )
-
         try:
-            async for _cursor, message in self.app.broker.subscribe(relay_topic):
+            async for message in self._subscribe_relay(relay_topic):
                 if isinstance(message, AgentAnswer):
                     answer = message.answer
                     if answer.operation == AnswerOperation.ERROR:
@@ -353,13 +380,26 @@ class HyperforgeA2AExecutor(AgentExecutor):
                 )
             )
 
+    async def _subscribe_relay(self, relay_topic: str) -> AsyncIterator[Any]:
+        cursor = "0"
+        async with asyncio.timeout(self.app.settings.a2a_task_ttl_seconds):
+            while True:
+                try:
+                    async for next_cursor, message in self.app.broker.subscribe(
+                        relay_topic, cursor
+                    ):
+                        cursor = next_cursor
+                        yield message
+                    return
+                except AgentTimeoutError:
+                    continue
+
     async def _stream_until_pause(
         self,
         task_id: str,
         updater: TaskUpdater,
         receiver: WebsocketReceiver,
         response_stream: AsyncIterator[AragAnswer],
-        routing: A2ARouting,
     ) -> None:
         async for msg in response_stream:
             if msg.operation == AnswerOperation.ERROR:
@@ -372,7 +412,6 @@ class HyperforgeA2AExecutor(AgentExecutor):
                     context_id=updater.context_id,
                     feedback_id=msg.feedback.feedback_id,
                     request_id=msg.feedback.request_id,
-                    routing=routing,
                     receiver=receiver,
                     response_stream=response_stream,
                 )
@@ -380,7 +419,6 @@ class HyperforgeA2AExecutor(AgentExecutor):
                     PendingTaskRecord(
                         task_id=task_id,
                         context_id=updater.context_id,
-                        routing=asdict(routing),
                         feedback_id=msg.feedback.feedback_id,
                         request_id=msg.feedback.request_id,
                         owner_instance_id=self._instance_id,
@@ -414,6 +452,13 @@ class HyperforgeA2AExecutor(AgentExecutor):
             if parts:
                 await updater.add_artifact(parts, name="answer")
 
+        await self._discard_pending_task(task_id)
+        await updater.failed(
+            updater.new_agent_message(
+                [_text_part("Hyperforge response stream ended unexpectedly")]
+            )
+        )
+
     def _start_feedback_waiter(self, task_id: str) -> None:
         self._cancel_feedback_waiter(task_id)
         self._pending_waiters[task_id] = asyncio.create_task(
@@ -425,13 +470,21 @@ class HyperforgeA2AExecutor(AgentExecutor):
         if waiter is not None and waiter is not asyncio.current_task():
             waiter.cancel()
 
+    async def _discard_pending_task(self, task_id: str) -> None:
+        pending = self._pending_tasks.pop(task_id, None)
+        if pending is not None:
+            await pending.receiver.queue.put(Shutdown())
+        await self._task_store.remove(task_id)
+
     async def _wait_for_feedback(self, task_id: str) -> None:
+        waiter = asyncio.current_task()
         try:
             payload = await self.app.broker.receive_reply(
                 _owner_reply_subject(self._instance_id, task_id),
                 self.app.settings.a2a_task_ttl_seconds * 1000,
             )
             if payload is None:
+                await self._discard_pending_task(task_id)
                 return
             pending = self._pending_tasks.get(task_id)
             if pending is None:
@@ -447,6 +500,10 @@ class HyperforgeA2AExecutor(AgentExecutor):
             raise
         except Exception:
             logger.exception("A2A feedback owner failed")
+            await self._discard_pending_task(task_id)
+        finally:
+            if self._pending_waiters.get(task_id) is waiter:
+                self._pending_waiters.pop(task_id, None)
 
     async def _relay_until_pause(
         self, task_id: str, pending: PendingA2ATask, relay_topic: str
@@ -462,7 +519,6 @@ class HyperforgeA2AExecutor(AgentExecutor):
                     context_id=pending.context_id,
                     feedback_id=msg.feedback.feedback_id,
                     request_id=msg.feedback.request_id,
-                    routing=pending.routing,
                     receiver=pending.receiver,
                     response_stream=pending.response_stream,
                 )
@@ -470,7 +526,6 @@ class HyperforgeA2AExecutor(AgentExecutor):
                     PendingTaskRecord(
                         task_id=task_id,
                         context_id=pending.context_id,
-                        routing=asdict(pending.routing),
                         feedback_id=msg.feedback.feedback_id,
                         request_id=msg.feedback.request_id,
                         owner_instance_id=self._instance_id,
@@ -487,13 +542,30 @@ class HyperforgeA2AExecutor(AgentExecutor):
                 return
             await self.app.broker.publish(relay_topic, AgentAnswer(answer=msg))
 
+        await self._discard_pending_task(task_id)
+        await self.app.broker.publish(
+            relay_topic,
+            AgentAnswer(
+                answer=AragAnswer(
+                    operation=AnswerOperation.ERROR,
+                    exception=ARAGException(
+                        detail="Hyperforge response stream ended unexpectedly"
+                    ),
+                )
+            ),
+        )
+        await self.app.broker.publish(relay_topic, AgentDone())
+
     async def cancel(self, context: RequestContext, event_queue: EventQueue) -> None:
         task_id = context.task_id or uuid4().hex
         context_id = context.context_id or uuid4().hex
         updater = TaskUpdater(event_queue, task_id, context_id)
         pending = self._pending_tasks.pop(task_id, None)
+        receiver = self._active_receivers.pop(task_id, None)
         self._cancel_feedback_waiter(task_id)
         if pending is not None:
             await pending.receiver.queue.put(Shutdown())
+        elif receiver is not None:
+            await receiver.queue.put(Shutdown())
         await self._task_store.remove(task_id)
         await updater.cancel()

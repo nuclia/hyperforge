@@ -194,9 +194,16 @@ class RedisBroker(Broker):
     async def send_reply(self, key: str, payload: str) -> None:
         trace_headers: dict[str, str] = {}
         opentelemetry.propagate.inject(trace_headers)
-        await self._client.xadd(
-            key, {"msg": payload, "trace": json.dumps(trace_headers)}, maxlen=100
-        )
+        async with self._client.pipeline() as pipe:
+            await (
+                pipe.xadd(
+                    key,
+                    {"msg": payload, "trace": json.dumps(trace_headers)},
+                    maxlen=100,
+                )
+                .expire(key, 300)
+                .execute()
+            )
 
     async def receive_reply(
         self, key: str, timeout_ms: int, lookback_seconds: int = 60
@@ -241,7 +248,14 @@ class RedisBroker(Broker):
                     continue
                 return response[0][1][0][1]["msg"]
         finally:
-            await self._client.delete(key)
+            try:
+                await self._client.delete(key)
+            except Exception:
+                logger.warning(
+                    "Failed to delete Redis reply stream key=%s",
+                    key,
+                    exc_info=True,
+                )
 
     async def initialize(self) -> None:
         pass

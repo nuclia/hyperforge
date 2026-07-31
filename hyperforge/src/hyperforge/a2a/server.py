@@ -71,16 +71,17 @@ async def build_grpc_server(
         keepalive_ms=int(settings.pubsub_keepalive_seconds * 1000),
         cluster_mode=settings.valkey_cluster_mode,
     )
-
-    agent_manager = await AgentManager.from_settings(settings=data_manager_settings)
-    await agent_manager.initialize()
-
-    _load_modules(settings)
-
+    agent_manager = None
     try:
+        agent_manager = await AgentManager.from_settings(settings=data_manager_settings)
+        await agent_manager.initialize()
+
+        _load_modules(settings)
+
         server = await build_grpc_server_from_runtime(settings, agent_manager, broker)
     except Exception:
-        await agent_manager.finalize()
+        if agent_manager is not None:
+            await agent_manager.finalize()
         await broker.finalize()
         raise
 

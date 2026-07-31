@@ -71,7 +71,9 @@ class A2AAgentConfig(ContextAgentConfig):
 
     @model_validator(mode="after")
     def validate_tls_settings(self) -> "A2AAgentConfig":
-        client_certificate_configured = self.tls_client_certificate_chain_path is not None
+        client_certificate_configured = (
+            self.tls_client_certificate_chain_path is not None
+        )
         client_key_configured = self.tls_client_private_key_path is not None
         if client_certificate_configured != client_key_configured:
             raise ValueError(
@@ -83,4 +85,6 @@ class A2AAgentConfig(ContextAgentConfig):
             or client_key_configured
         ) and not self.use_tls:
             raise ValueError("TLS client credentials require use_tls to be true")
+        if self.source.startswith("http://") and self.use_tls:
+            raise ValueError("use_tls requires an HTTPS Agent Card URL")
         return self

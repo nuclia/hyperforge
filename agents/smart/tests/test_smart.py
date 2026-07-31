@@ -252,6 +252,51 @@ async def test_different_feedback_decisions_are_both_requested():
 
 
 @pytest.mark.asyncio
+async def test_cached_feedback_does_not_skip_other_tools_in_same_turn():
+    class Memory:
+        async def add_step(self, **_kwargs):
+            return None
+
+    async def execute_tool_call(_memory, _manager, name, _args):
+        return name, "tool result"
+
+    smart: Any = SimpleNamespace(
+        config=SimpleNamespace(
+            id="operations",
+            module="smart",
+            parallel_tool_calls=False,
+            max_tool_result_bytes=None,
+            max_tool_result_item_bytes=None,
+        ),
+        step_title=lambda title: title,
+        execute_tool_call=execute_tool_call,
+    )
+    smart._process_results = MethodType(SmartAgent._process_results, smart)
+    smart._inspect_result = MethodType(SmartAgent._inspect_result, smart)
+    smart._tool_call_key = SmartAgent._tool_call_key
+    smart._classify_tool_result = SmartAgent._classify_tool_result
+
+    results = await SmartAgent._execute_tool_calls_turn(
+        smart,
+        memory=Memory(),
+        manager=None,
+        messages=[],
+        tool_calls=[
+            (
+                "user_feedback",
+                {"decision_id": "set-duration", "question": "Reduce the set?"},
+            ),
+            ("venue_lookup", {"gate": "C"}),
+        ],
+        turn_label="test",
+        resolved_feedback={"set-duration": "Approved"},
+    )
+
+    assert [name for name, _ in results] == ["user_feedback", "venue_lookup"]
+    assert results[1] == ("venue_lookup", "tool result")
+
+
+@pytest.mark.asyncio
 async def test_executor_runs_tools_returned_with_task_complete():
     smart: Any = SimpleNamespace(
         config=SimpleNamespace(max_iterations=1, extra_prompt=None),
@@ -301,6 +346,16 @@ async def test_executor_runs_tools_returned_with_task_complete():
 
     assert executed_calls == [("a2a_query_of_logistics", {})]
     assert results == [("a2a_query of logistics", "result")]
+
+
+def test_new_feedback_prevents_same_turn_completion():
+    calls = [
+        ("user_feedback", {"decision_id": "approval", "question": "Approve?"}),
+        ("task_complete", {}),
+    ]
+
+    assert SmartAgent._has_unresolved_feedback(calls, {})
+    assert not SmartAgent._has_unresolved_feedback(calls, {"approval": "yes"})
 
 
 @pytest.mark.asyncio

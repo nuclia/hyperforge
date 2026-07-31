@@ -594,13 +594,15 @@ async def test_a2a_grpc_feedback_reply_continues_task(monkeypatch, a2a_task_stor
     assert any("Using EMEA" in text for text in texts)
 
 
-async def test_a2a_client_agent_answers_remote_feedback(monkeypatch, a2a_task_store):
-    captured = {}
+async def test_a2a_client_agent_answers_nested_remote_feedback(
+    monkeypatch, a2a_task_store
+):
+    captured = []
 
     async def feedback_workflow(
         app, receiver, account, agent_id, session, interaction, workflow_id="default"
     ):
-        feedback = Feedback(
+        first_feedback = Feedback(
             request_id="request-1",
             feedback_id="feedback-1",
             question="Which region should I use?",
@@ -609,12 +611,28 @@ async def test_a2a_client_agent_answers_remote_feedback(monkeypatch, a2a_task_st
             data={},
             response_schema={"type": "string"},
         )
-        yield AragAnswer(operation=AnswerOperation.AGENT_REQUEST, feedback=feedback)
-        reply = await receiver.receive_feedback()
-        captured["request_id"] = reply.request_id
-        captured["response"] = reply.response
         yield AragAnswer(
-            operation=AnswerOperation.ANSWER, answer=f"Using {reply.response}"
+            operation=AnswerOperation.AGENT_REQUEST, feedback=first_feedback
+        )
+        first_reply = await receiver.receive_feedback()
+        captured.append((first_reply.request_id, first_reply.response))
+        second_feedback = Feedback(
+            request_id="request-2",
+            feedback_id="feedback-2",
+            question="Which country should I use?",
+            module="test",
+            agent_id=agent_id,
+            data={},
+            response_schema={"type": "string"},
+        )
+        yield AragAnswer(
+            operation=AnswerOperation.AGENT_REQUEST, feedback=second_feedback
+        )
+        second_reply = await receiver.receive_feedback()
+        captured.append((second_reply.request_id, second_reply.response))
+        yield AragAnswer(
+            operation=AnswerOperation.ANSWER,
+            answer=f"Using {second_reply.response} in {first_reply.response}",
         )
         yield AragAnswer(operation=AnswerOperation.DONE)
 
@@ -647,14 +665,13 @@ async def test_a2a_client_agent_answers_remote_feedback(monkeypatch, a2a_task_st
         )
         session.init("a2a-feedback-session")
         memory = session.start_question("Find sales data")
-        requested_feedback = {}
+        requested_feedback = []
+        responses = iter(["EMEA", "Germany"])
 
         async def answer_feedback(feedback):
-            requested_feedback["question"] = feedback.question
-            requested_feedback["schema"] = feedback.response_schema
-            requested_feedback["feedback_id"] = feedback.feedback_id
+            requested_feedback.append((feedback.feedback_id, feedback.question))
             return UserToAgentInteraction(
-                request_id=feedback.request_id, response="EMEA"
+                request_id=feedback.request_id, response=next(responses)
             )
 
         memory.set_feedback_fn(answer_feedback)
@@ -666,14 +683,13 @@ async def test_a2a_client_agent_answers_remote_feedback(monkeypatch, a2a_task_st
     finally:
         await server.stop(grace=1)
 
-    assert requested_feedback == {
-        "question": "Which region should I use?",
-        "schema": {"type": "string"},
-        "feedback_id": "feedback-1",
-    }
-    assert captured == {"request_id": "request-1", "response": "EMEA"}
-    assert context.summary == "Using EMEA"
-    assert [chunk.text for chunk in context.chunks] == ["Using EMEA"]
+    assert requested_feedback == [
+        ("feedback-1", "Which region should I use?"),
+        ("feedback-2", "Which country should I use?"),
+    ]
+    assert captured == [("request-1", "EMEA"), ("request-2", "Germany")]
+    assert context.summary == "Using Germany in EMEA"
+    assert [chunk.text for chunk in context.chunks] == ["Using Germany in EMEA"]
 
 
 def test_parse_routing_metadata_defaults_and_allowed_headers():
@@ -694,8 +710,26 @@ def test_parse_routing_metadata_defaults_and_allowed_headers():
     assert routing.agent_id == "research-agent"
     assert routing.workflow_id == "default"
     assert routing.session == "a2a-context"
-    assert routing.headers == {"Authorization": "Bearer token"}
+    assert routing.headers == {"authorization": "Bearer token"}
     assert routing.arguments == {"limit": "3", "include_archived": "False"}
+
+
+def test_parse_routing_metadata_rejects_duplicate_headers_ignoring_case():
+    with pytest.raises(ValueError, match="duplicate header: authorization"):
+        parse_routing_metadata(
+            {
+                "headers": {
+                    "Authorization": "Bearer first",
+                    "authorization": "Bearer second",
+                }
+            },
+            A2ASettings(
+                a2a_account="account",
+                a2a_agent_id="research-agent",
+                a2a_allowed_forwarded_headers=["authorization"],
+            ),
+            "a2a-context",
+        )
 
 
 async def test_a2a_grpc_rejects_identity_override(monkeypatch, a2a_task_store):

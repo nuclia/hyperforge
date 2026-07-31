@@ -1,5 +1,6 @@
 """Thin helpers around the a2a-sdk gRPC client used by the A2A client agent."""
 
+import ssl
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
@@ -75,6 +76,7 @@ def build_grpc_client(
     def channel_factory(url: str) -> grpc.aio.Channel:
         target = url or source
         if use_tls:
+            assert credentials is not None
             return grpc.aio.secure_channel(target, credentials)
         return grpc.aio.insecure_channel(target)
 
@@ -106,9 +108,25 @@ async def build_a2a_client(
             tls_client_private_key_path,
         )
 
+    if source.startswith("http://") and use_tls:
+        raise ValueError("use_tls requires an HTTPS Agent Card URL")
+
     owns_http_client = http_client is None
     if http_client is None:
-        http_client = httpx.AsyncClient()
+        if use_tls:
+            ssl_context = ssl.create_default_context(
+                cafile=(
+                    str(tls_ca_certificate_path) if tls_ca_certificate_path else None
+                )
+            )
+            if tls_client_certificate_chain_path and tls_client_private_key_path:
+                ssl_context.load_cert_chain(
+                    certfile=tls_client_certificate_chain_path,
+                    keyfile=tls_client_private_key_path,
+                )
+            http_client = httpx.AsyncClient(verify=ssl_context)
+        else:
+            http_client = httpx.AsyncClient()
     try:
         card = await A2ACardResolver(
             httpx_client=http_client,
@@ -265,11 +283,11 @@ def extract_steps_from_stream_response(
 ) -> list[RemoteAgentStep]:
     which = response.WhichOneof("payload")
     if which == "artifact_update":
-        artifacts = [response.artifact_update.artifact]
+        artifacts = iter([response.artifact_update.artifact])
     elif which == "task":
-        artifacts = response.task.artifacts
+        artifacts = iter(response.task.artifacts)
     else:
-        artifacts = []
+        artifacts = iter([])
 
     steps = []
     for artifact in artifacts:
