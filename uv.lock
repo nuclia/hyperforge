@@ -2328,7 +2328,7 @@ wheels = [
 [[package]]
 name = "nuclia"
 version = "4.13.1"
-source = { git = "https://github.com/nuclia/nuclia.py?branch=improve-nua-clint#300c22953e62840555260bb973eeef2bff28fb6e" }
+source = { git = "https://github.com/nuclia/nuclia.py?branch=improve-nua-clint#e7f00fa4cd860fdd59d90ee621c9a707ad9e59f1" }
 dependencies = [
     { name = "aiofiles" },
     { name = "backoff" },

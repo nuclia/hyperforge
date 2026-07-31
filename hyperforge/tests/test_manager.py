@@ -2,7 +2,7 @@ from collections.abc import AsyncIterator
 from unittest.mock import AsyncMock
 
 import pytest
-from nuclia.lib.nua import PredictQueryRequest, PredictRephraseRequest
+from nuclia.lib.nua import GenerateStreamResponse, QueryRequest, RephraseRequest
 from nuclia.lib.nua_responses import ChatModel, RerankModel
 from nuclia_models.predict.generative_responses import GenerativeChunk
 
@@ -25,8 +25,8 @@ async def empty_stream() -> AsyncIterator[GenerativeChunk]:
 @pytest.mark.asyncio
 async def test_manager_delegates_kb_aware_predict_calls() -> None:
     manager, nua = manager_with_nua()
-    query = PredictQueryRequest(text="question")
-    rephrase = PredictRephraseRequest(question="question", user_id="user")
+    query = QueryRequest(text="question")
+    rephrase = RephraseRequest(question="question", user_id="user")
     chat = ChatModel(question="question", user_id="user")
     rerank = RerankModel(question="question", user_id="user", context={"1": "text"})
     headers = {"x-test": "value"}
@@ -40,54 +40,59 @@ async def test_manager_delegates_kb_aware_predict_calls() -> None:
         **headers,
     }
     stream = empty_stream()
-    nua.predict_query.return_value = object()
-    nua.predict_rephrase.return_value = object()
-    nua.predict_chat_stream.return_value = ("learning-id", "model", stream)
-    nua.predict_rerank.return_value = object()
-    nua.predict_tokens.return_value = object()
+    nua.query_predict.return_value = object()
+    nua.rephrase.return_value = object()
+    nua.generate_stream.return_value = GenerateStreamResponse(
+        "learning-id", "model", stream
+    )
+    nua.rerank.return_value = object()
+    nua.tokens_predict.return_value = object()
 
     assert (
-        await manager.predict_query(
+        await manager.query_predict(
             query, kbid="kb", extra_headers=headers, tracking=tracking
         )
-        is nua.predict_query.return_value
+        is nua.query_predict.return_value
     )
     assert (
-        await manager.predict_rephrase(
+        await manager.rephrase(
             rephrase, kbid="kb", extra_headers=headers, tracking=tracking
         )
-        is nua.predict_rephrase.return_value
+        is nua.rephrase.return_value
     )
-    assert await manager.predict_chat_stream(
-        chat, kbid="kb", extra_headers=headers, tracking=tracking
-    ) == ("learning-id", "model", stream)
     assert (
-        await manager.predict_rerank(
+        await manager.generate_stream(
+            chat, kbid="kb", extra_headers=headers, tracking=tracking
+        )
+        is nua.generate_stream.return_value
+    )
+    assert (
+        await manager.rerank(
             rerank, kbid="kb", extra_headers=headers, tracking=tracking
         )
-        is nua.predict_rerank.return_value
+        is nua.rerank.return_value
     )
     assert (
-        await manager.predict_tokens(
+        await manager.tokens_predict(
             "text", kbid="kb", model="model", extra_headers=headers, tracking=tracking
         )
-        is nua.predict_tokens.return_value
+        is nua.tokens_predict.return_value
     )
 
-    nua.predict_query.assert_awaited_once_with(
+    nua.query_predict.assert_awaited_once_with(
         query, kbid="kb", extra_headers=expected_headers
     )
-    nua.predict_rephrase.assert_awaited_once_with(
+    nua.rephrase.assert_awaited_once_with(
         rephrase, kbid="kb", extra_headers=expected_headers
     )
-    nua.predict_chat_stream.assert_awaited_once_with(
-        chat, kbid="kb", extra_headers=expected_headers
+    nua.generate_stream.assert_awaited_once_with(
+        chat, kbid="kb", extra_headers=expected_headers, return_metadata=True
     )
-    nua.predict_rerank.assert_awaited_once_with(
+    nua.rerank.assert_awaited_once_with(
         rerank, kbid="kb", extra_headers=expected_headers
     )
-    nua.predict_tokens.assert_awaited_once_with(
-        "text", kbid="kb", model="model", extra_headers=expected_headers
+    nua.tokens_predict.assert_awaited_once_with(
+        "text", model="model", extra_headers=expected_headers, kbid="kb"
     )
 
 
@@ -103,11 +108,11 @@ async def test_manager_aclose_closes_nua_client() -> None:
 @pytest.mark.asyncio
 async def test_manager_can_omit_rao_origin_header() -> None:
     manager, nua = manager_with_nua(send_rao_origin=False)
-    query = PredictQueryRequest(text="question")
+    query = QueryRequest(text="question")
 
-    await manager.predict_query(query, extra_headers={"x-test": "value"})
+    await manager.query_predict(query, extra_headers={"x-test": "value"})
 
-    nua.predict_query.assert_awaited_once_with(
+    nua.query_predict.assert_awaited_once_with(
         query,
         kbid=None,
         extra_headers={"x-show-consumption": "true", "x-test": "value"},
@@ -124,8 +129,8 @@ async def test_manager_uses_default_headers_for_existing_nua_calls() -> None:
     await manager.remi("question", "answer", ["context"])
 
     headers = {"x-show-consumption": "true", "x-origin": "RAO"}
-    nua.rerank.assert_awaited_once_with(rerank, extra_headers=headers)
+    nua.rerank.assert_awaited_once_with(rerank, extra_headers=headers, kbid=None)
     nua.tokens_predict.assert_awaited_once_with(
-        text="text", model="model", extra_headers=headers
+        "text", model="model", extra_headers=headers, kbid=None
     )
     assert nua.remi.await_args.kwargs["extra_headers"] == headers

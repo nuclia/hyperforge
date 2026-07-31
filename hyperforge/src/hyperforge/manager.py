@@ -3,15 +3,16 @@ from typing import Any, AsyncIterator, Dict, List, Optional, Protocol, Tuple
 
 from nuclia.lib.nua import (
     AsyncNuaClient,
-    PredictQueryInfo,
-    PredictQueryRequest,
-    PredictRephraseRequest,
-    PredictRephraseResponse,
+    GenerateStreamResponse,
+    QueryRequest,
+    RephraseRequest,
 )
 from nuclia.lib.nua_responses import (
     ChatModel,
     Image,
     Message,
+    QueryInfo,
+    RephraseModel,
     RerankModel,
     RerankResponse,
     Tokens,
@@ -96,49 +97,50 @@ class Manager:
     async def aclose(self) -> None:
         await self.nua.aclose()
 
-    async def predict_query(
+    async def query_predict(
         self,
-        request: PredictQueryRequest,
+        request: QueryRequest,
         *,
         kbid: str | None = None,
         extra_headers: dict[str, str] | None = None,
         tracking: TrackingInfo | None = None,
-    ) -> PredictQueryInfo:
-        return await self.nua.predict_query(
+    ) -> QueryInfo:
+        return await self.nua.query_predict(
             request,
             kbid=kbid,
             extra_headers=self._build_extra_headers(tracking, extra_headers),
         )
 
-    async def predict_rephrase(
+    async def rephrase(
         self,
-        request: PredictRephraseRequest,
+        request: RephraseRequest,
         *,
         kbid: str | None = None,
         extra_headers: dict[str, str] | None = None,
         tracking: TrackingInfo | None = None,
-    ) -> PredictRephraseResponse:
-        return await self.nua.predict_rephrase(
+    ) -> RephraseModel:
+        return await self.nua.rephrase(
             request,
             kbid=kbid,
             extra_headers=self._build_extra_headers(tracking, extra_headers),
         )
 
-    async def predict_chat_stream(
+    async def generate_stream(
         self,
         body: ChatModel,
         *,
         kbid: str | None = None,
         extra_headers: dict[str, str] | None = None,
         tracking: TrackingInfo | None = None,
-    ) -> tuple[str, str, AsyncIterator[GenerativeChunk]]:
-        return await self.nua.predict_chat_stream(
+    ) -> GenerateStreamResponse[AsyncIterator[GenerativeChunk]]:
+        return await self.nua.generate_stream(
             body,
             kbid=kbid,
             extra_headers=self._build_extra_headers(tracking, extra_headers),
+            return_metadata=True,
         )
 
-    async def predict_rerank(
+    async def rerank(
         self,
         model: RerankModel,
         *,
@@ -146,36 +148,26 @@ class Manager:
         extra_headers: dict[str, str] | None = None,
         tracking: TrackingInfo | None = None,
     ) -> RerankResponse:
-        return await self.nua.predict_rerank(
+        return await self.nua.rerank(
             model,
             kbid=kbid,
             extra_headers=self._build_extra_headers(tracking, extra_headers),
         )
 
-    async def predict_tokens(
+    async def tokens_predict(
         self,
         text: str,
-        *,
-        kbid: str | None = None,
         model: str | None = None,
         extra_headers: dict[str, str] | None = None,
+        *,
+        kbid: str | None = None,
         tracking: TrackingInfo | None = None,
     ) -> Tokens:
-        return await self.nua.predict_tokens(
+        return await self.nua.tokens_predict(
             text,
-            kbid=kbid,
             model=model,
             extra_headers=self._build_extra_headers(tracking, extra_headers),
-        )
-
-    async def rerank(self, rerank: RerankModel) -> RerankResponse:
-        return await self.nua.rerank(rerank, extra_headers=self._build_extra_headers())
-
-    async def tokens_predict(self, text: str, model: str) -> Tokens:
-        return await self.nua.tokens_predict(
-            text=text,
-            model=model,
-            extra_headers=self._build_extra_headers(),
+            kbid=kbid,
         )
 
     async def remi(
