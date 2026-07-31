@@ -737,7 +737,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                             resolved_feedback is not None
                             and decision_id in resolved_feedback
                         ):
-                            feedback_result = (
+                            cached_feedback_result = (
                                 "user_feedback",
                                 "Feedback resolved. Do not request this feedback again. "
                                 f"Decision ID: {decision_id}\n"
@@ -745,7 +745,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                                 f"Response: {resolved_feedback[decision_id]}",
                             )
                             result_texts = self._process_results(
-                                [feedback_result],
+                                [cached_feedback_result],
                                 collected_contexts=collected_contexts,
                             )
                             if result_texts:
@@ -755,7 +755,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                                         text="\n\n".join(result_texts),
                                     )
                                 )
-                            return [feedback_result]
+                            return [cached_feedback_result]
                         feedback = Feedback(
                             request_id=memory.get_session_id(),
                             question=feedback_question,
@@ -771,7 +771,9 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                         )
                         answer = await memory.send_feedback(feedback)
                         feedback_text = (
-                            answer.response if answer is not None else "(No response received)"
+                            answer.response
+                            if answer is not None
+                            else "(No response received)"
                         )
                         messages.append(Message(author=Author.USER, text=feedback_text))
                         logger.info(f"Received user feedback response: {feedback_text}")

@@ -169,7 +169,10 @@ async def test_feedback_decision_id_survives_rephrasing():
     messages: list[Message] = []
     resolved_feedback: dict[str, str] = {}
 
-    for question in ("Approve the shorter set?", "Can we reduce the set to 60 minutes?"):
+    for question in (
+        "Approve the shorter set?",
+        "Can we reduce the set to 60 minutes?",
+    ):
         await SmartAgent._execute_tool_calls_turn(
             smart,
             memory=memory,
@@ -265,9 +268,7 @@ async def test_executor_runs_tools_returned_with_task_complete():
                             )
                         ),
                         SimpleNamespace(
-                            function=SimpleNamespace(
-                                name="task_complete", arguments={}
-                            )
+                            function=SimpleNamespace(name="task_complete", arguments={})
                         ),
                     ]
                 }
