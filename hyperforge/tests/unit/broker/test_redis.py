@@ -65,14 +65,31 @@ async def test_receive_reply_ignores_cleanup_failure_after_success():
 
 
 @pytest.mark.asyncio
-async def test_receive_reply_cleanup_failure_does_not_mask_read_error():
+async def test_receive_reply_does_not_delete_stream_after_read_error():
     client = AsyncMock()
     client.xread.side_effect = ValueError("read failed")
-    client.delete.side_effect = RuntimeError("cleanup failed")
     broker = RedisBroker(client, "activations", keepalive_ms=20_000)
 
     with pytest.raises(ValueError, match="read failed"):
         await broker.receive_reply("feedback-id", timeout_ms=1_000)
+    client.delete.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_receive_reply_does_not_delete_stream_after_timeout(monkeypatch):
+    client = AsyncMock()
+    client.xread.return_value = []
+    clock = Mock()
+    clock.time.return_value = 100
+    clock.monotonic.side_effect = [0, 0, 2]
+    monkeypatch.setattr("hyperforge.broker.redis.time", clock)
+    broker = RedisBroker(client, "activations", keepalive_ms=20_000)
+
+    result = await broker.receive_reply("feedback-id", timeout_ms=1_000)
+
+    assert result is None
+    client.xread.assert_awaited_once()
+    client.delete.assert_not_awaited()
 
 
 @pytest.mark.parametrize(
