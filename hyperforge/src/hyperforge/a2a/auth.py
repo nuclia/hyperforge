@@ -1,11 +1,22 @@
-from collections.abc import AsyncIterator, Sequence
+from collections.abc import AsyncIterator, Awaitable, Callable, Iterable
 from enum import Enum
-from typing import Any
+from typing import Any, Protocol, cast
 
 import grpc
 import httpx
 
 AGENT_CARD_METHOD = "/lf.a2a.v1.A2AService/GetExtendedAgentCard"
+
+
+class _HandlerCallDetails(Protocol):
+    method: str
+
+
+class _RpcMethodHandler(Protocol):
+    unary_unary: Any
+    unary_stream: Any
+    request_deserializer: Any
+    response_serializer: Any
 
 
 class AuthorizationFailure(Enum):
@@ -60,9 +71,9 @@ class A2AAuthorizerClient:
 
 
 def _bearer_from_metadata(
-    metadata: Sequence[tuple[str, str | bytes]],
+    metadata: Iterable[tuple[str, str | bytes]] | None,
 ) -> str:
-    values = [value for key, value in metadata if key.lower() == "authorization"]
+    values = [value for key, value in metadata or () if key.lower() == "authorization"]
     if len(values) != 1 or not isinstance(values[0], str):
         raise AuthorizationError(AuthorizationFailure.UNAUTHENTICATED)
     scheme, separator, token = values[0].partition(" ")
@@ -91,29 +102,33 @@ class A2AAuthInterceptor(grpc.aio.ServerInterceptor):
 
     async def intercept_service(
         self,
-        continuation: Any,
+        continuation: Callable[
+            [grpc.HandlerCallDetails], Awaitable[grpc.RpcMethodHandler]
+        ],
         handler_call_details: grpc.HandlerCallDetails,
-    ) -> grpc.RpcMethodHandler | None:
+    ) -> grpc.RpcMethodHandler:
         handler = await continuation(handler_call_details)
-        if handler is None or handler_call_details.method == AGENT_CARD_METHOD:
+        method = cast(_HandlerCallDetails, handler_call_details).method
+        if method == AGENT_CARD_METHOD:
             return handler
 
-        if handler.unary_unary:
+        typed_handler = cast(_RpcMethodHandler, handler)
+        if typed_handler.unary_unary:
 
             async def unary_unary(request: Any, context: grpc.aio.ServicerContext):
                 try:
                     await self._authorize(context)
                 except AuthorizationError as error:
                     await self._abort(context, error)
-                return await handler.unary_unary(request, context)
+                return await typed_handler.unary_unary(request, context)
 
             return grpc.unary_unary_rpc_method_handler(
                 unary_unary,
-                request_deserializer=handler.request_deserializer,
-                response_serializer=handler.response_serializer,
+                request_deserializer=typed_handler.request_deserializer,
+                response_serializer=typed_handler.response_serializer,
             )
 
-        if handler.unary_stream:
+        if typed_handler.unary_stream:
 
             async def unary_stream(
                 request: Any, context: grpc.aio.ServicerContext
@@ -122,13 +137,13 @@ class A2AAuthInterceptor(grpc.aio.ServerInterceptor):
                     await self._authorize(context)
                 except AuthorizationError as error:
                     await self._abort(context, error)
-                async for response in handler.unary_stream(request, context):
+                async for response in typed_handler.unary_stream(request, context):
                     yield response
 
             return grpc.unary_stream_rpc_method_handler(
                 unary_stream,
-                request_deserializer=handler.request_deserializer,
-                response_serializer=handler.response_serializer,
+                request_deserializer=typed_handler.request_deserializer,
+                response_serializer=typed_handler.response_serializer,
             )
 
         return handler
