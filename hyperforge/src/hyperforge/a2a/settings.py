@@ -40,6 +40,9 @@ class A2ASettings(BaseSettings):
     # workflow-derived Agent Card.
     a2a_account: Optional[str] = None
     a2a_agent_id: Optional[str] = None
+    a2a_auth_enabled: bool = False
+    a2a_authorizer_url: Optional[str] = None
+    a2a_authorizer_timeout_seconds: float = Field(default=5, gt=0)
     a2a_allowed_forwarded_headers: list[str] = Field(default_factory=list)
     a2a_task_store_prefix: str = "hyperforge:a2a:task"
     a2a_task_ttl_seconds: int = 300
@@ -64,6 +67,10 @@ class A2ASettings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_tls_settings(self) -> "A2ASettings":
+        if self.a2a_auth_enabled and not self.a2a_authorizer_url:
+            raise ValueError(
+                "A2A_AUTHORIZER_URL must be configured when A2A_AUTH_ENABLED is true"
+            )
         if self.a2a_tls_enabled:
             if (
                 not self.a2a_tls_certificate_chain_path

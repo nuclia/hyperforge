@@ -81,13 +81,18 @@ class A2AClientAgent(ContextAgent, Agent[A2AAgentConfig]):
 
         headers: dict[str, str] = {}
         for header in self.config.valid_headers:
-            if header in memory.headers:
+            if header != "authorization" and header in memory.headers:
                 headers[header] = memory.headers[header]
         if headers:
             metadata["headers"] = headers
 
         metadata.update(self.config.extra_metadata)
         return metadata
+
+    def _authorization(self, memory: QuestionMemory) -> str | None:
+        if "authorization" not in self.config.valid_headers:
+            return None
+        return memory.headers.get("authorization")
 
     async def a2a_query(
         self,
@@ -105,6 +110,7 @@ class A2AClientAgent(ContextAgent, Agent[A2AAgentConfig]):
             tls_ca_certificate_path=self.config.tls_ca_certificate_path,
             tls_client_certificate_chain_path=self.config.tls_client_certificate_chain_path,
             tls_client_private_key_path=self.config.tls_client_private_key_path,
+            authorization=self._authorization(memory),
         )
         try:
             try:

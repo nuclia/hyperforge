@@ -16,6 +16,8 @@ from a2a.client import (
     create_client,
     minimal_agent_card,
 )
+from a2a.client.auth import AuthInterceptor, CredentialService
+from a2a.client.client import ClientCallContext
 from a2a.types import a2a_pb2
 from a2a.utils import TransportProtocol
 from google.protobuf import struct_pb2
@@ -42,6 +44,35 @@ class RemoteAgentStep:
     reason: str
     value: str
     agent_path: str
+
+
+class BearerCredentialService(CredentialService):
+    def __init__(self, token: str) -> None:
+        self._token = token.removeprefix("Bearer ").strip()
+
+    async def get_credentials(
+        self,
+        security_scheme_name: str,
+        context: ClientCallContext | None,
+    ) -> str | None:
+        return self._token if security_scheme_name == "bearer" else None
+
+
+def _configure_bearer_auth(card: a2a_pb2.AgentCard) -> None:
+    card.security_schemes["bearer"].CopyFrom(
+        a2a_pb2.SecurityScheme(
+            http_auth_security_scheme=a2a_pb2.HTTPAuthSecurityScheme(scheme="bearer")
+        )
+    )
+    card.security_requirements.append(
+        a2a_pb2.SecurityRequirement(schemes={"bearer": a2a_pb2.StringList()})
+    )
+
+
+def _auth_interceptors(authorization: str | None) -> list[AuthInterceptor]:
+    if not authorization:
+        return []
+    return [AuthInterceptor(BearerCredentialService(authorization))]
 
 
 class ResponseTextAccumulator:
@@ -126,6 +157,7 @@ def build_grpc_client(
     tls_ca_certificate_path: Path | None = None,
     tls_client_certificate_chain_path: Path | None = None,
     tls_client_private_key_path: Path | None = None,
+    authorization: str | None = None,
 ) -> Client:
     """Create an A2A gRPC client targeting ``source`` (host:port)."""
 
@@ -141,7 +173,9 @@ def build_grpc_client(
         accepted_output_modes=["text/plain"],
     )
     card = minimal_agent_card(source, [TransportProtocol.GRPC])
-    return ClientFactory(config).create(card)
+    if authorization:
+        _configure_bearer_auth(card)
+    return ClientFactory(config).create(card, _auth_interceptors(authorization))
 
 
 async def build_a2a_client(
@@ -150,6 +184,8 @@ async def build_a2a_client(
     tls_ca_certificate_path: Path | None = None,
     tls_client_certificate_chain_path: Path | None = None,
     tls_client_private_key_path: Path | None = None,
+    authorization: str | None = None,
+    http_client: httpx.AsyncClient | None = None,
 ) -> Client:
     """Create an A2A client from either a gRPC address or an HTTP Agent Card URL."""
     if not source.startswith(("http://", "https://")):
@@ -159,20 +195,25 @@ async def build_a2a_client(
             tls_ca_certificate_path,
             tls_client_certificate_chain_path,
             tls_client_private_key_path,
+            authorization,
         )
 
-    if source.startswith("https://"):
-        ssl_context = ssl.create_default_context(
-            cafile=(str(tls_ca_certificate_path) if tls_ca_certificate_path else None)
-        )
-        if tls_client_certificate_chain_path and tls_client_private_key_path:
-            ssl_context.load_cert_chain(
-                certfile=tls_client_certificate_chain_path,
-                keyfile=tls_client_private_key_path,
+    owns_http_client = http_client is None
+    if http_client is None:
+        if source.startswith("https://"):
+            ssl_context = ssl.create_default_context(
+                cafile=(
+                    str(tls_ca_certificate_path) if tls_ca_certificate_path else None
+                )
             )
-        http_client = httpx.AsyncClient(verify=ssl_context)
-    else:
-        http_client = httpx.AsyncClient()
+            if tls_client_certificate_chain_path and tls_client_private_key_path:
+                ssl_context.load_cert_chain(
+                    certfile=tls_client_certificate_chain_path,
+                    keyfile=tls_client_private_key_path,
+                )
+            http_client = httpx.AsyncClient(verify=ssl_context)
+        else:
+            http_client = httpx.AsyncClient()
     supported_protocol_bindings: list[str] = [
         TransportProtocol.JSONRPC,
         TransportProtocol.HTTP_JSON,
@@ -205,12 +246,14 @@ async def build_a2a_client(
                 supported_protocol_bindings=supported_protocol_bindings,
                 accepted_output_modes=["text/plain"],
             ),
+            interceptors=_auth_interceptors(authorization),
         )
-        if selected_protocol == TransportProtocol.GRPC:
+        if selected_protocol == TransportProtocol.GRPC and owns_http_client:
             await http_client.aclose()
         return client
     except Exception:
-        await http_client.aclose()
+        if owns_http_client:
+            await http_client.aclose()
         raise
 
 

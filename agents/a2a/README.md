@@ -15,6 +15,11 @@ For direct gRPC connections, set `use_tls` and optionally configure
 client applies `read_timeout_seconds` to the complete remote interaction,
 including any feedback round trips.
 
+To authenticate with the same service-account key used by MCP, include
+`authorization` in the client module's `valid_headers`. The incoming
+`Authorization: Bearer <key>` value is attached to gRPC transport metadata and
+is never serialized into A2A message metadata or workflow configuration.
+
 When a remote A2A task enters `input-required`, the client creates a standard
 Hyperforge feedback request using the remote question and response schema. The
 answer supplied through Hyperforge's normal feedback path resumes the same A2A
@@ -32,6 +37,14 @@ one text input/output skill per configured workflow. Skill IDs use
 Set `A2A_PUBLIC_URL` whenever the server binds a wildcard address or uses TLS;
 this is the address published in the Agent Card. TLS requires a certificate
 chain and private key; configuring a client CA enables mTLS.
+
+SaaS deployments must set `A2A_AUTH_ENABLED=true` and
+`A2A_AUTHORIZER_URL` to the internal regional authorizer base URL. The server
+authorizes task RPCs against
+`POST /authorize/api/v1/agent/<agent_id>/a2a`; Agent Card discovery remains
+public. This server-side authentication configuration is SaaS-only; standalone
+does not expose it. `A2A_AUTHORIZER_TIMEOUT_SECONDS` defaults to 5 seconds, and
+authorizer failures deny the RPC.
 
 The server accepts these optional message metadata fields:
 

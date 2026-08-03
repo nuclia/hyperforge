@@ -168,6 +168,20 @@ def test_secure_agent_card_advertises_configured_public_endpoint(tmp_path):
     assert card.supported_interfaces[0].url == "a2a.example.com:443"
 
 
+def test_authenticated_agent_card_advertises_bearer_requirement():
+    card = build_agent_card(
+        A2ASettings(
+            a2a_grpc_host="127.0.0.1",
+            a2a_auth_enabled=True,
+            a2a_authorizer_url="http://authorizer",
+        )
+    )
+
+    scheme = card.security_schemes["bearer"].http_auth_security_scheme
+    assert scheme.scheme == "bearer"
+    assert "bearer" in card.security_requirements[0].schemes
+
+
 async def test_a2a_grpc_tls_serves_agent_card(tmp_path):
     certificate_path, key_path = _write_test_certificate(tmp_path)
     credentials = grpc.ssl_server_credentials(
@@ -398,7 +412,7 @@ async def test_a2a_client_agent_builds_context_from_streamed_workflow(
         "account": "local",
         "agent_id": "deterministic-agent",
         "workflow_id": "deterministic-workflow",
-        "headers": {"authorization": "Bearer local-demo"},
+        "headers": {},
     }
 
 

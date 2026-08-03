@@ -14,6 +14,7 @@ from a2a.server.request_handlers import DefaultRequestHandler, GrpcHandler
 from a2a.types import a2a_pb2_grpc
 
 from hyperforge.a2a import logger
+from hyperforge.a2a.auth import A2AAuthInterceptor, A2AAuthorizerClient
 from hyperforge.a2a.card import build_agent_card, build_agent_skills
 from hyperforge.a2a.context import A2AServerContext
 from hyperforge.a2a.executor import HyperforgeA2AExecutor
@@ -130,8 +131,21 @@ async def build_grpc_server_from_runtime(
     )
     grpc_handler = GrpcHandler(request_handler=request_handler)
 
+    interceptors = []
+    if settings.a2a_auth_enabled:
+        assert settings.a2a_authorizer_url is not None
+        interceptors.append(
+            A2AAuthInterceptor(
+                A2AAuthorizerClient(
+                    settings.a2a_authorizer_url,
+                    settings.a2a_agent_id,
+                    settings.a2a_authorizer_timeout_seconds,
+                )
+            )
+        )
     server = grpc.aio.server(
-        futures.ThreadPoolExecutor(max_workers=settings.a2a_grpc_max_workers)
+        futures.ThreadPoolExecutor(max_workers=settings.a2a_grpc_max_workers),
+        interceptors=interceptors,
     )
     a2a_pb2_grpc.add_A2AServiceServicer_to_server(grpc_handler, server)
     bind_address = f"{settings.a2a_grpc_host}:{settings.a2a_grpc_port}"

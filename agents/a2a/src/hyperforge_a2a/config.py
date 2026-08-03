@@ -67,6 +67,10 @@ class A2AAgentConfig(ContextAgentConfig):
     valid_headers: List[str] = Field(
         default_factory=list,
         title="Valid headers to forward to the remote A2A agent",
+        description=(
+            "Request headers allowed for delegation. 'authorization' is sent as "
+            "A2A transport authentication and is never included in message metadata."
+        ),
     )
 
     @model_validator(mode="after")

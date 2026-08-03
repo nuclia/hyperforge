@@ -1,9 +1,12 @@
 from unittest.mock import AsyncMock, Mock
 
 import pytest
+from a2a.client.auth import AuthInterceptor
+from a2a.client.interceptors import BeforeArgs
 from a2a.types import a2a_pb2
 
 from hyperforge_a2a.client import (
+    BearerCredentialService,
     RemoteFeedbackRequest,
     ResponseTextAccumulator,
     build_a2a_client,
@@ -38,6 +41,21 @@ def test_build_send_request_sets_text_and_metadata():
     assert request.message.parts[0].text == "hello?"
     assert request.metadata["account"] == "acc"
     assert request.metadata["agent_id"] == "ag"
+
+
+async def test_bearer_credentials_are_added_as_transport_metadata():
+    service = BearerCredentialService("Bearer secret-token")
+    assert await service.get_credentials("bearer", None) == "secret-token"
+    assert await service.get_credentials("other", None) is None
+
+    card = a2a_pb2.AgentCard()
+    card.security_schemes["bearer"].http_auth_security_scheme.scheme = "bearer"
+    card.security_requirements.add().schemes["bearer"].SetInParent()
+    args = BeforeArgs(input=None, method="SendMessage", agent_card=card)
+    await AuthInterceptor(service).before(args)
+
+    assert args.context is not None
+    assert args.context.service_parameters == {"Authorization": "Bearer secret-token"}
 
 
 def test_dict_to_struct_nested():
@@ -155,20 +173,27 @@ def test_response_text_accumulator_reconciles_snapshots_and_ignores_status():
     assert accumulator.texts() == ["answer"]
 
 
-def test_build_metadata_forwards_valid_headers():
+def test_build_metadata_routes_authorization_outside_message_payload():
     agent = _make_agent(
         remote_account="acc",
         remote_agent_id="remote",
         remote_workflow_id="wf",
-        valid_headers=["authorization"],
+        valid_headers=["authorization", "x-trace-id"],
         extra_metadata={"custom": "1"},
     )
-    memory = _Memory({"authorization": "Bearer token", "x-other": "nope"})
+    memory = _Memory(
+        {
+            "authorization": "Bearer token",
+            "x-trace-id": "trace-1",
+            "x-other": "nope",
+        }
+    )
     metadata = agent._build_metadata(memory)
     assert metadata["account"] == "acc"
     assert metadata["agent_id"] == "remote"
     assert metadata["workflow_id"] == "wf"
-    assert metadata["headers"] == {"authorization": "Bearer token"}
+    assert metadata["headers"] == {"x-trace-id": "trace-1"}
+    assert agent._authorization(memory) == "Bearer token"
     assert metadata["custom"] == "1"
 
 
@@ -290,6 +315,29 @@ async def test_discovered_grpc_client_closes_owned_http_client(monkeypatch):
     await build_a2a_client("http://a2a.example.com", use_tls=False)
 
     http_client.aclose.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_discovered_grpc_client_does_not_close_injected_http_client(monkeypatch):
+    card = Mock(supported_interfaces=[Mock(protocol_binding="GRPC")])
+    http_client = AsyncMock()
+    http_client.aclose = AsyncMock()
+    monkeypatch.setattr(
+        "hyperforge_a2a.client.A2ACardResolver.get_agent_card",
+        AsyncMock(return_value=card),
+    )
+    monkeypatch.setattr(
+        "hyperforge_a2a.client.create_client",
+        AsyncMock(return_value=Mock()),
+    )
+
+    await build_a2a_client(
+        "http://a2a.example.com",
+        use_tls=False,
+        http_client=http_client,
+    )
+
+    http_client.aclose.assert_not_awaited()
 
 
 def test_extract_feedback_request_and_build_continuation():

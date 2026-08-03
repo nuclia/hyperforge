@@ -74,7 +74,7 @@ def build_agent_card(
             )
         ]
 
-    return a2a_pb2.AgentCard(
+    card = a2a_pb2.AgentCard(
         name=settings.a2a_agent_name,
         description=settings.a2a_agent_description,
         version=settings.a2a_agent_version,
@@ -93,3 +93,15 @@ def build_agent_card(
         default_output_modes=["text/plain"],
         skills=skills,
     )
+    if settings.a2a_auth_enabled:
+        card.security_schemes["bearer"].CopyFrom(
+            a2a_pb2.SecurityScheme(
+                http_auth_security_scheme=a2a_pb2.HTTPAuthSecurityScheme(
+                    scheme="bearer"
+                )
+            )
+        )
+        card.security_requirements.append(
+            a2a_pb2.SecurityRequirement(schemes={"bearer": a2a_pb2.StringList()})
+        )
+    return card
