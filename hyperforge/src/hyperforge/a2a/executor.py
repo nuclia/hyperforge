@@ -65,6 +65,10 @@ def _owner_reply_subject(owner_instance_id: str, task_id: str) -> str:
     return f"hyperforge:a2a:feedback:{owner_instance_id}:{task_id}"
 
 
+def _owner_cancel_subject(owner_instance_id: str, task_id: str) -> str:
+    return f"hyperforge:a2a:cancel:{owner_instance_id}:{task_id}"
+
+
 def _text_part(text: str) -> a2a_pb2.Part:
     return a2a_pb2.Part(text=text)
 
@@ -179,6 +183,8 @@ class HyperforgeA2AExecutor(AgentExecutor):
         self.app = context
         self._pending_tasks: dict[str, PendingA2ATask] = {}
         self._pending_waiters: dict[str, asyncio.Task[None]] = {}
+        self._cancel_waiters: dict[str, asyncio.Task[None]] = {}
+        self._cancelled_tasks: set[str] = set()
         self._active_receivers: dict[str, WebsocketReceiver] = {}
         self._instance_id = uuid4().hex
         self._task_store = context.task_store
@@ -248,16 +254,21 @@ class HyperforgeA2AExecutor(AgentExecutor):
             workflow_id=routing.workflow_id,
         )
 
+        await self._task_store.save_owner(task_id, self._instance_id)
         self._active_receivers[task_id] = receiver
+        self._start_cancel_waiter(task_id)
         try:
             await self._stream_until_pause(task_id, updater, receiver, response_stream)
-        except Exception as exc:  # pragma: no cover - defensive
+        except Exception:  # pragma: no cover - defensive
             logger.exception("A2A interaction failed")
+            was_cancelled = task_id in self._cancelled_tasks
             self._cancel_feedback_waiter(task_id)
             await self._discard_pending_task(task_id)
-            await updater.failed(
-                updater.new_agent_message([_text_part(f"Internal error: {exc}")])
-            )
+            await self._finish_owned_task(task_id)
+            if not was_cancelled:
+                await updater.failed(
+                    updater.new_agent_message([_text_part("Internal A2A error")])
+                )
         finally:
             self._active_receivers.pop(task_id, None)
 
@@ -402,9 +413,12 @@ class HyperforgeA2AExecutor(AgentExecutor):
         response_stream: AsyncIterator[AragAnswer],
     ) -> None:
         async for msg in response_stream:
+            if task_id in self._cancelled_tasks:
+                await self._finish_owned_task(task_id)
+                return
             if msg.operation == AnswerOperation.ERROR:
                 detail = msg.exception.detail if msg.exception else "Unknown error"
-                self._pending_tasks.pop(task_id, None)
+                await self._finish_owned_task(task_id)
                 await updater.failed(updater.new_agent_message([_text_part(detail)]))
                 return
             if msg.operation == AnswerOperation.AGENT_REQUEST and msg.feedback:
@@ -441,8 +455,8 @@ class HyperforgeA2AExecutor(AgentExecutor):
                 return
             if msg.operation == AnswerOperation.DONE:
                 self._pending_tasks.pop(task_id, None)
-                self._cancel_feedback_waiter(task_id)
                 await self._task_store.remove(task_id)
+                await self._finish_owned_task(task_id)
                 await updater.complete()
                 return
 
@@ -452,7 +466,11 @@ class HyperforgeA2AExecutor(AgentExecutor):
             if parts:
                 await updater.add_artifact(parts, name="answer")
 
+        if task_id in self._cancelled_tasks:
+            await self._finish_owned_task(task_id)
+            return
         await self._discard_pending_task(task_id)
+        await self._finish_owned_task(task_id)
         await updater.failed(
             updater.new_agent_message(
                 [_text_part("Hyperforge response stream ended unexpectedly")]
@@ -470,6 +488,58 @@ class HyperforgeA2AExecutor(AgentExecutor):
         if waiter is not None and waiter is not asyncio.current_task():
             waiter.cancel()
 
+    def _start_cancel_waiter(self, task_id: str) -> None:
+        self._cancel_cancel_waiter(task_id)
+        self._cancel_waiters[task_id] = asyncio.create_task(
+            self._wait_for_cancel(task_id)
+        )
+
+    def _cancel_cancel_waiter(self, task_id: str) -> None:
+        waiter = self._cancel_waiters.pop(task_id, None)
+        if waiter is not None and waiter is not asyncio.current_task():
+            waiter.cancel()
+
+    async def _finish_owned_task(self, task_id: str) -> None:
+        self._cancel_cancel_waiter(task_id)
+        await self._task_store.remove_owner(task_id)
+        self._cancelled_tasks.discard(task_id)
+
+    async def _cancel_local_task(self, task_id: str) -> None:
+        self._cancelled_tasks.add(task_id)
+        self._cancel_cancel_waiter(task_id)
+        pending = self._pending_tasks.pop(task_id, None)
+        receiver = self._active_receivers.pop(task_id, None)
+        self._cancel_feedback_waiter(task_id)
+        if pending is not None:
+            await pending.receiver.queue.put(Shutdown())
+        elif receiver is not None:
+            await receiver.queue.put(Shutdown())
+        await self._task_store.remove(task_id)
+        await self._task_store.remove_owner(task_id)
+        if receiver is None:
+            self._cancelled_tasks.discard(task_id)
+
+    async def _wait_for_cancel(self, task_id: str) -> None:
+        waiter = asyncio.current_task()
+        lease_refresh_ms = max(1, self.app.settings.a2a_task_ttl_seconds * 1000 // 2)
+        try:
+            while task_id in self._active_receivers or task_id in self._pending_tasks:
+                payload = await self.app.broker.receive_reply(
+                    _owner_cancel_subject(self._instance_id, task_id),
+                    lease_refresh_ms,
+                )
+                if payload is not None:
+                    await self._cancel_local_task(task_id)
+                    return
+                await self._task_store.save_owner(task_id, self._instance_id)
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            logger.exception("A2A cancellation listener failed")
+        finally:
+            if self._cancel_waiters.get(task_id) is waiter:
+                self._cancel_waiters.pop(task_id, None)
+
     async def _discard_pending_task(self, task_id: str) -> None:
         pending = self._pending_tasks.pop(task_id, None)
         if pending is not None:
@@ -485,6 +555,7 @@ class HyperforgeA2AExecutor(AgentExecutor):
             )
             if payload is None:
                 await self._discard_pending_task(task_id)
+                await self._finish_owned_task(task_id)
                 return
             pending = self._pending_tasks.get(task_id)
             if pending is None:
@@ -501,6 +572,7 @@ class HyperforgeA2AExecutor(AgentExecutor):
         except Exception:
             logger.exception("A2A feedback owner failed")
             await self._discard_pending_task(task_id)
+            await self._finish_owned_task(task_id)
         finally:
             if self._pending_waiters.get(task_id) is waiter:
                 self._pending_waiters.pop(task_id, None)
@@ -509,8 +581,12 @@ class HyperforgeA2AExecutor(AgentExecutor):
         self, task_id: str, pending: PendingA2ATask, relay_topic: str
     ) -> None:
         async for msg in pending.response_stream:
+            if task_id in self._cancelled_tasks:
+                await self._finish_owned_task(task_id)
+                return
             if msg.operation == AnswerOperation.ERROR:
                 self._pending_tasks.pop(task_id, None)
+                await self._finish_owned_task(task_id)
                 await self.app.broker.publish(relay_topic, AgentAnswer(answer=msg))
                 await self.app.broker.publish(relay_topic, AgentDone())
                 return
@@ -522,6 +598,7 @@ class HyperforgeA2AExecutor(AgentExecutor):
                     receiver=pending.receiver,
                     response_stream=pending.response_stream,
                 )
+                await self._task_store.save_owner(task_id, self._instance_id)
                 await self._task_store.save_pending(
                     PendingTaskRecord(
                         task_id=task_id,
@@ -538,11 +615,16 @@ class HyperforgeA2AExecutor(AgentExecutor):
             if msg.operation == AnswerOperation.DONE:
                 self._pending_tasks.pop(task_id, None)
                 await self._task_store.remove(task_id)
+                await self._finish_owned_task(task_id)
                 await self.app.broker.publish(relay_topic, AgentDone())
                 return
             await self.app.broker.publish(relay_topic, AgentAnswer(answer=msg))
 
+        if task_id in self._cancelled_tasks:
+            await self._finish_owned_task(task_id)
+            return
         await self._discard_pending_task(task_id)
+        await self._finish_owned_task(task_id)
         await self.app.broker.publish(
             relay_topic,
             AgentAnswer(
@@ -560,12 +642,11 @@ class HyperforgeA2AExecutor(AgentExecutor):
         task_id = context.task_id or uuid4().hex
         context_id = context.context_id or uuid4().hex
         updater = TaskUpdater(event_queue, task_id, context_id)
-        pending = self._pending_tasks.pop(task_id, None)
-        receiver = self._active_receivers.pop(task_id, None)
-        self._cancel_feedback_waiter(task_id)
-        if pending is not None:
-            await pending.receiver.queue.put(Shutdown())
-        elif receiver is not None:
-            await receiver.queue.put(Shutdown())
-        await self._task_store.remove(task_id)
+        owner = await self._task_store.get_owner(task_id)
+        if isinstance(owner, str) and owner and owner != self._instance_id:
+            await self.app.broker.send_reply(
+                _owner_cancel_subject(owner, task_id), "cancel"
+            )
+        else:
+            await self._cancel_local_task(task_id)
         await updater.cancel()

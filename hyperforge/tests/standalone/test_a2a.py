@@ -1,10 +1,12 @@
 import socket
+from unittest.mock import AsyncMock
 
 import pytest
 
 from hyperforge.a2a.server import build_grpc_server_from_runtime
 from hyperforge.broker.redis import RedisBroker
 from hyperforge.standalone.agent import StaticAgentManager
+from hyperforge.standalone.app import StandaloneApplication
 from hyperforge.standalone.config import StandAloneAgentConfig, WorkflowConfig
 from hyperforge.standalone.settings import StandaloneSettings
 
@@ -36,6 +38,17 @@ def test_standalone_a2a_settings_reuse_shared_validation():
     assert a2a_settings.valkey_url == "redis://localhost"
     assert a2a_settings.a2a_account == "festival"
     assert a2a_settings.a2a_agent_id == "venue"
+
+
+async def test_standalone_shutdown_delegates_resource_cleanup_to_session_manager():
+    app = StandaloneApplication.__new__(StandaloneApplication)
+    app.a2a_server = AsyncMock()
+    app.session_manager = AsyncMock()
+
+    await app._shutdown()
+
+    app.a2a_server.stop.assert_awaited_once_with(grace=5)
+    app.session_manager.finalize.assert_awaited_once()
 
 
 async def test_static_agent_manager_starts_shared_a2a_server():

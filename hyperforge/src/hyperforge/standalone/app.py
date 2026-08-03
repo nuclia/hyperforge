@@ -366,12 +366,12 @@ class StandaloneApplication(FastAPI):
                     s.a2a_grpc_port,
                 )
         except Exception:
+            if self.a2a_server is not None:
+                await self.a2a_server.stop(grace=0)
             await self.session_manager.finalize()
-            await self.broker.finalize()
             raise
 
     async def _shutdown(self) -> None:
         if self.a2a_server is not None:
             await self.a2a_server.stop(grace=5)
         await self.session_manager.finalize()
-        await self.broker.finalize()

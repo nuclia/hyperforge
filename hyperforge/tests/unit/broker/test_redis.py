@@ -3,6 +3,16 @@ from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from redis.asyncio import Redis
+from redis.exceptions import (
+    ClusterDownError,
+    SlotNotCoveredError,
+)
+from redis.exceptions import (
+    ConnectionError as RedisConnectionError,
+)
+from redis.exceptions import (
+    TimeoutError as RedisTimeoutError,
+)
 
 from hyperforge.broker.redis import RedisBroker
 
@@ -63,6 +73,29 @@ async def test_receive_reply_cleanup_failure_does_not_mask_read_error():
 
     with pytest.raises(ValueError, match="read failed"):
         await broker.receive_reply("feedback-id", timeout_ms=1_000)
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        RedisConnectionError("closed"),
+        RedisTimeoutError("timeout"),
+        ClusterDownError("cluster down"),
+        SlotNotCoveredError("slot missing"),
+    ],
+)
+@pytest.mark.asyncio
+async def test_receive_reply_recovers_from_transient_redis_errors(error, monkeypatch):
+    client = AsyncMock()
+    client.xread.side_effect = [
+        error,
+        [("feedback-id", [("1-0", {"msg": "approved"})])],
+    ]
+    monkeypatch.setattr("hyperforge.broker.redis.asyncio.sleep", AsyncMock())
+    broker = RedisBroker(client, "activations", keepalive_ms=20_000)
+
+    assert await broker.receive_reply("feedback-id", timeout_ms=1_000) == "approved"
+    assert client.xread.await_count == 2
 
 
 class CallbackBetweenReadsRedis:

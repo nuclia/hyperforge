@@ -1,9 +1,11 @@
 from unittest.mock import AsyncMock, Mock
 
 import pytest
+from a2a.types import a2a_pb2
 
 from hyperforge_a2a.client import (
     RemoteFeedbackRequest,
+    ResponseTextAccumulator,
     build_a2a_client,
     build_feedback_request,
     build_send_request,
@@ -90,6 +92,69 @@ def test_extract_step_artifact_without_collecting_it_as_answer_text():
     assert step.reason == "Venue owns access."
 
 
+def test_response_text_accumulator_honors_append_and_replacement():
+    from a2a.types import a2a_pb2
+
+    accumulator = ResponseTextAccumulator()
+    for text, append in (("hel", False), ("lo", True), ("replacement", False)):
+        accumulator.add(
+            a2a_pb2.StreamResponse(
+                artifact_update=a2a_pb2.TaskArtifactUpdateEvent(
+                    task_id="t",
+                    context_id="c",
+                    append=append,
+                    artifact=a2a_pb2.Artifact(
+                        artifact_id="answer-1",
+                        name="answer",
+                        parts=[a2a_pb2.Part(text=text)],
+                    ),
+                )
+            )
+        )
+
+    assert accumulator.texts() == ["replacement"]
+
+
+def test_response_text_accumulator_reconciles_snapshots_and_ignores_status():
+    from a2a.types import a2a_pb2
+
+    accumulator = ResponseTextAccumulator()
+    artifact = a2a_pb2.Artifact(
+        artifact_id="answer-1",
+        name="answer",
+        parts=[a2a_pb2.Part(text="answer")],
+    )
+    accumulator.add(
+        a2a_pb2.StreamResponse(
+            artifact_update=a2a_pb2.TaskArtifactUpdateEvent(artifact=artifact)
+        )
+    )
+    accumulator.add(
+        a2a_pb2.StreamResponse(
+            artifact_update=a2a_pb2.TaskArtifactUpdateEvent(
+                artifact=a2a_pb2.Artifact(
+                    artifact_id="stale", parts=[a2a_pb2.Part(text="stale")]
+                )
+            )
+        )
+    )
+    accumulator.add(
+        a2a_pb2.StreamResponse(
+            task=a2a_pb2.Task(
+                id="t",
+                context_id="c",
+                artifacts=[artifact],
+                status=a2a_pb2.TaskStatus(
+                    state=a2a_pb2.TaskState.TASK_STATE_COMPLETED,
+                    message=a2a_pb2.Message(parts=[a2a_pb2.Part(text="Complete")]),
+                ),
+            )
+        )
+    )
+
+    assert accumulator.texts() == ["answer"]
+
+
 def test_build_metadata_forwards_valid_headers():
     agent = _make_agent(
         remote_account="acc",
@@ -121,8 +186,14 @@ def test_tls_client_credentials_require_tls_and_a_complete_key_pair():
             tls_ca_certificate_path="ca.pem",
         )
 
-    with pytest.raises(ValueError, match="requires an HTTPS"):
-        A2AAgentConfig(source="http://a2a.example.com", use_tls=True)
+    config = A2AAgentConfig(
+        source="https://a2a.example.com",
+        tls_ca_certificate_path="ca.pem",
+    )
+    assert config.use_tls is False
+
+    config = A2AAgentConfig(source="http://a2a.example.com", use_tls=True)
+    assert config.use_tls is True
 
 
 @pytest.mark.asyncio
@@ -151,6 +222,73 @@ async def test_http_client_uses_configured_tls_context(monkeypatch, tmp_path):
         )
 
     async_client.assert_called_once_with(verify=ssl_context)
+    http_client.aclose.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_https_agent_card_can_select_grpc_without_tls(monkeypatch):
+    card = Mock(
+        supported_interfaces=[
+            Mock(protocol_binding="GRPC"),
+        ]
+    )
+    http_client = AsyncMock()
+    monkeypatch.setattr(
+        "hyperforge_a2a.client.httpx.AsyncClient", Mock(return_value=http_client)
+    )
+    grpc_client = Mock()
+    create_client = AsyncMock(return_value=grpc_client)
+    secure_channel = Mock(return_value=Mock())
+    insecure_channel = Mock(return_value=Mock())
+    credentials = Mock()
+    monkeypatch.setattr(
+        "hyperforge_a2a.client.A2ACardResolver.get_agent_card",
+        AsyncMock(return_value=card),
+    )
+    monkeypatch.setattr("hyperforge_a2a.client.create_client", create_client)
+    monkeypatch.setattr(
+        "hyperforge_a2a.client.grpc.ssl_channel_credentials",
+        Mock(return_value=credentials),
+    )
+    monkeypatch.setattr("hyperforge_a2a.client.grpc.aio.secure_channel", secure_channel)
+    monkeypatch.setattr(
+        "hyperforge_a2a.client.grpc.aio.insecure_channel", insecure_channel
+    )
+
+    result = await build_a2a_client("https://a2a.example.com", use_tls=False)
+
+    config = create_client.await_args.kwargs["client_config"]
+    assert result is grpc_client
+    assert config.supported_protocol_bindings == ["JSONRPC", "HTTP+JSON", "GRPC"]
+    config.grpc_channel_factory("a2a.example.com:443")
+    secure_channel.assert_not_called()
+    insecure_channel.assert_called_once_with("a2a.example.com:443")
+    http_client.aclose.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_discovered_grpc_client_closes_owned_http_client(monkeypatch):
+    card = Mock(
+        supported_interfaces=[
+            Mock(protocol_binding="GRPC"),
+        ]
+    )
+    http_client = AsyncMock()
+    http_client.aclose = AsyncMock()
+    monkeypatch.setattr(
+        "hyperforge_a2a.client.httpx.AsyncClient", Mock(return_value=http_client)
+    )
+    monkeypatch.setattr(
+        "hyperforge_a2a.client.A2ACardResolver.get_agent_card",
+        AsyncMock(return_value=card),
+    )
+    monkeypatch.setattr(
+        "hyperforge_a2a.client.create_client",
+        AsyncMock(return_value=Mock()),
+    )
+
+    await build_a2a_client("http://a2a.example.com", use_tls=False)
+
     http_client.aclose.assert_awaited_once()
 
 
@@ -226,15 +364,22 @@ def test_relayed_feedback_uses_local_request_id():
     }
 
 
-def test_failed_remote_task_raises_its_message():
-    from a2a.types import a2a_pb2
-
+@pytest.mark.parametrize(
+    "state",
+    [
+        a2a_pb2.TaskState.TASK_STATE_FAILED,
+        a2a_pb2.TaskState.TASK_STATE_CANCELED,
+        a2a_pb2.TaskState.TASK_STATE_REJECTED,
+        a2a_pb2.TaskState.TASK_STATE_AUTH_REQUIRED,
+    ],
+)
+def test_remote_task_error_raises_its_message(state):
     response = a2a_pb2.StreamResponse(
         status_update=a2a_pb2.TaskStatusUpdateEvent(
             task_id="task-1",
             context_id="context-1",
             status=a2a_pb2.TaskStatus(
-                state=a2a_pb2.TaskState.TASK_STATE_FAILED,
+                state=state,
                 message=a2a_pb2.Message(parts=[a2a_pb2.Part(text="Remote failure")]),
             ),
         )

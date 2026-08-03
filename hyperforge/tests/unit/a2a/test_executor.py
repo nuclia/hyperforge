@@ -69,6 +69,48 @@ async def test_cancel_stops_active_task_before_feedback():
     task_store.remove.assert_awaited_once_with("task")
 
 
+async def test_cancel_routes_to_remote_owner():
+    executor, broker, task_store = _executor()
+    task_store.get_owner.return_value = "other-instance"
+    context = SimpleNamespace(task_id="task", context_id="context")
+
+    await executor.cancel(context, AsyncMock())
+
+    broker.send_reply.assert_awaited_once_with(
+        "hyperforge:a2a:cancel:other-instance:task", "cancel"
+    )
+    task_store.remove.assert_not_awaited()
+
+
+async def test_owner_cancellation_signal_stops_active_task():
+    executor, broker, task_store = _executor()
+    receiver = WebsocketReceiver(websocket=None)
+    executor._active_receivers["task"] = receiver
+    broker.receive_reply.return_value = "cancel"
+
+    await executor._wait_for_cancel("task")
+
+    assert isinstance(receiver.queue.get_nowait(), Shutdown)
+    task_store.remove.assert_awaited_once_with("task")
+    task_store.remove_owner.assert_awaited_once_with("task")
+
+
+async def test_owner_cancellation_listener_renews_after_timeout():
+    executor, broker, task_store = _executor()
+    receiver = WebsocketReceiver(websocket=None)
+    executor._active_receivers["task"] = receiver
+    broker.receive_reply.side_effect = [None, "cancel"]
+
+    await executor._wait_for_cancel("task")
+
+    assert broker.receive_reply.await_count == 2
+    broker.receive_reply.assert_awaited_with(
+        f"hyperforge:a2a:cancel:{executor._instance_id}:task", 500
+    )
+    task_store.save_owner.assert_awaited_once_with("task", executor._instance_id)
+    assert isinstance(receiver.queue.get_nowait(), Shutdown)
+
+
 @pytest.mark.parametrize(
     ("response", "record"),
     [

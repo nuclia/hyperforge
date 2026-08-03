@@ -80,11 +80,15 @@ class A2AAgentConfig(ContextAgentConfig):
                 "TLS client certificate chain and private key must be configured together"
             )
         if (
-            self.tls_ca_certificate_path
-            or client_certificate_configured
-            or client_key_configured
-        ) and not self.use_tls:
-            raise ValueError("TLS client credentials require use_tls to be true")
-        if self.source.startswith("http://") and self.use_tls:
-            raise ValueError("use_tls requires an HTTPS Agent Card URL")
+            (
+                self.tls_ca_certificate_path
+                or client_certificate_configured
+                or client_key_configured
+            )
+            and not self.use_tls
+            and not self.source.startswith("https://")
+        ):
+            raise ValueError(
+                "TLS client credentials require use_tls or an HTTPS Agent Card URL"
+            )
         return self

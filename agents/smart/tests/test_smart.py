@@ -252,6 +252,54 @@ async def test_different_feedback_decisions_are_both_requested():
 
 
 @pytest.mark.asyncio
+async def test_feedback_response_with_upstream_request_id_is_cached():
+    class Memory:
+        def get_session_id(self):
+            return "session-1"
+
+        async def send_feedback(self, _feedback):
+            return UserToAgentInteraction(
+                request_id="upstream-a2a-request", response="Approved"
+            )
+
+        async def add_step(self, **_kwargs):
+            return None
+
+    smart: Any = SimpleNamespace(
+        config=SimpleNamespace(
+            id="operations",
+            module="smart",
+            feedback_timeout=5_000,
+            max_tool_result_bytes=None,
+            max_tool_result_item_bytes=None,
+        ),
+        step_title=lambda title: title,
+    )
+    smart._process_results = MethodType(SmartAgent._process_results, smart)
+    smart._inspect_result = MethodType(SmartAgent._inspect_result, smart)
+    resolved_feedback: dict[str, str] = {}
+    memory: Any = Memory()
+    manager: Any = None
+
+    await SmartAgent._execute_tool_calls_turn(
+        smart,
+        memory=memory,
+        manager=manager,
+        messages=[],
+        tool_calls=[
+            (
+                "user_feedback",
+                {"decision_id": "set-duration", "question": "Approve?"},
+            )
+        ],
+        turn_label="test",
+        resolved_feedback=resolved_feedback,
+    )
+
+    assert resolved_feedback == {"set-duration": "Approved"}
+
+
+@pytest.mark.asyncio
 async def test_cached_feedback_does_not_skip_other_tools_in_same_turn():
     class Memory:
         async def add_step(self, **_kwargs):
@@ -275,11 +323,13 @@ async def test_cached_feedback_does_not_skip_other_tools_in_same_turn():
     smart._inspect_result = MethodType(SmartAgent._inspect_result, smart)
     smart._tool_call_key = SmartAgent._tool_call_key
     smart._classify_tool_result = SmartAgent._classify_tool_result
+    memory: Any = Memory()
+    manager: Any = None
 
     results = await SmartAgent._execute_tool_calls_turn(
         smart,
-        memory=Memory(),
-        manager=None,
+        memory=memory,
+        manager=manager,
         messages=[],
         tool_calls=[
             (
@@ -331,11 +381,13 @@ async def test_executor_runs_tools_returned_with_task_complete():
     smart.choose_tools = choose_tools
     smart._execute_tool_calls_turn = execute_turn
     smart._planner_attempts_from_registry = SmartAgent._planner_attempts_from_registry
+    memory: Any = SimpleNamespace(get_tracking_info=lambda: None)
+    manager: Any = None
 
     results, _, _, _ = await SmartAgent._call_executor(
         smart,
-        memory=SimpleNamespace(get_tracking_info=lambda: None),
-        manager=None,
+        memory=memory,
+        manager=manager,
         question="question",
         steps=[],
         summary="",

@@ -119,7 +119,5 @@ async def test_http_agent_card_discovery_streams_into_context(monkeypatch):
     finally:
         AppStatus.should_exit_event = None
 
-    assert context.summary == (
-        "Working\nExternal answer: Is HTTP A2A supported?\nComplete"
-    )
+    assert context.summary == "External answer: Is HTTP A2A supported?"
     assert [chunk.text for chunk in context.chunks] == [context.summary]

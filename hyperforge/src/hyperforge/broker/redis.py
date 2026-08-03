@@ -8,7 +8,16 @@ from pydantic import TypeAdapter
 from redis.asyncio import Redis, ResponseError
 from redis.asyncio.retry import Retry
 from redis.backoff import ExponentialBackoff
-from redis.exceptions import ConnectionError as RedisConnectionError
+from redis.exceptions import (
+    ClusterDownError,
+    SlotNotCoveredError,
+)
+from redis.exceptions import (
+    ConnectionError as RedisConnectionError,
+)
+from redis.exceptions import (
+    TimeoutError as RedisTimeoutError,
+)
 
 from hyperforge import logger
 from hyperforge.broker import AgentTimeoutError, Broker
@@ -233,7 +242,12 @@ class RedisBroker(Broker):
                         block=block_ms,
                         count=1,
                     )
-                except RedisConnectionError:
+                except (
+                    RedisConnectionError,
+                    RedisTimeoutError,
+                    ClusterDownError,
+                    SlotNotCoveredError,
+                ):
                     reconnect_attempts += 1
                     backoff_s = min(1.0, 0.1 * reconnect_attempts)
                     logger.warning(

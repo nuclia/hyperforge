@@ -1,6 +1,7 @@
 """Durable Redis stores for A2A task state and feedback correlation."""
 
 import base64
+import binascii
 import json
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
@@ -14,6 +15,7 @@ from a2a.types.a2a_pb2 import Task
 from a2a.utils.constants import DEFAULT_LIST_TASKS_PAGE_SIZE
 from a2a.utils.errors import InvalidParamsError
 from a2a.utils.task import decode_page_token, encode_page_token
+from google.protobuf.message import DecodeError
 from redis.asyncio import Redis
 
 
@@ -36,6 +38,12 @@ class PendingTaskRecord:
 
 
 class A2ATaskStore(Protocol):
+    async def save_owner(self, task_id: str, owner_instance_id: str) -> None: ...
+
+    async def get_owner(self, task_id: str) -> str | None: ...
+
+    async def remove_owner(self, task_id: str) -> None: ...
+
     async def save_pending(self, record: PendingTaskRecord) -> None: ...
 
     async def get_pending(self, task_id: str) -> PendingTaskRecord | None: ...
@@ -57,6 +65,20 @@ class RedisA2ATaskStore:
 
     def _key(self, task_id: str) -> str:
         return f"{self._key_prefix}:{task_id}"
+
+    def _owner_key(self, task_id: str) -> str:
+        return f"{self._key_prefix}:owner:{task_id}"
+
+    async def save_owner(self, task_id: str, owner_instance_id: str) -> None:
+        await self._client.set(
+            self._owner_key(task_id), owner_instance_id, ex=self._ttl_seconds
+        )
+
+    async def get_owner(self, task_id: str) -> str | None:
+        return await self._client.get(self._owner_key(task_id))
+
+    async def remove_owner(self, task_id: str) -> None:
+        await self._client.delete(self._owner_key(task_id))
 
     async def save_pending(self, record: PendingTaskRecord) -> None:
         await self._client.set(
@@ -152,7 +174,12 @@ class RedisA2ASDKTaskStore(TaskStore):
     async def get(self, task_id: str, context: ServerCallContext) -> Task | None:
         owner = self._owner_resolver(context)
         value = await self._client.get(self._task_key(owner, task_id))
-        return self._deserialize(value) if value else None
+        if not value:
+            return None
+        try:
+            return self._deserialize(value)
+        except (binascii.Error, DecodeError, ValueError):
+            return None
 
     async def list(
         self,
@@ -164,12 +191,19 @@ class RedisA2ASDKTaskStore(TaskStore):
         tasks: list[Task] = []
         stale_ids: list[str] = []
 
-        for task_id in task_ids:
-            value = await self._client.get(self._task_key(owner, task_id))
+        async with self._client.pipeline() as pipeline:
+            for task_id in task_ids:
+                pipeline.get(self._task_key(owner, task_id))
+            values = await pipeline.execute()
+
+        for task_id, value in zip(task_ids, values):
             if value is None:
                 stale_ids.append(task_id)
                 continue
-            task = self._deserialize(value)
+            try:
+                task = self._deserialize(value)
+            except (binascii.Error, DecodeError, ValueError):
+                continue
             if params.context_id and task.context_id != params.context_id:
                 continue
             if params.status and task.status.state != params.status:

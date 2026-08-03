@@ -14,10 +14,10 @@ from hyperforge.memory import Chunk, Context, QuestionMemory
 
 from hyperforge_a2a.client import (
     RemoteFeedbackRequest,
+    ResponseTextAccumulator,
     build_a2a_client,
     build_feedback_request,
     build_send_request,
-    collect_text_from_stream_response,
     extract_feedback_request,
     raise_for_terminal_task_error,
 )
@@ -97,7 +97,7 @@ class A2AClientAgent(ContextAgent, Agent[A2AAgentConfig]):
         question_uuid: Optional[str] = None,
     ) -> Context:
         t0 = time()
-        texts: List[str] = []
+        response_text = ResponseTextAccumulator()
 
         client = await build_a2a_client(
             self.config.source,
@@ -144,7 +144,7 @@ class A2AClientAgent(ContextAgent, Agent[A2AAgentConfig]):
                                     user_response.response, remote_feedback
                                 )
                                 break
-                            texts.extend(collect_text_from_stream_response(response))
+                            response_text.add(response)
                         request = continuation
             except TimeoutError as exc:
                 raise ValueError(
@@ -153,7 +153,7 @@ class A2AClientAgent(ContextAgent, Agent[A2AAgentConfig]):
         finally:
             await client.close()
 
-        answer = "\n".join(t for t in texts if t)
+        answer = "\n".join(response_text.texts())
 
         context = Context(
             agent_id=self.agent_id,

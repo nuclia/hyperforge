@@ -73,6 +73,20 @@ async def test_redis_a2a_task_store_expires_pending_records(valkey):
         await redis.aclose()  # type: ignore[attr-defined]
 
 
+async def test_redis_a2a_task_store_tracks_execution_owner(valkey):
+    redis = Redis(host=valkey[0], port=valkey[1], decode_responses=True)
+    store = RedisA2ATaskStore(redis, f"test:a2a:task:{uuid4().hex}", 30)
+
+    try:
+        await store.save_owner("task-1", "instance-1")
+        assert await store.get_owner("task-1") == "instance-1"
+
+        await store.remove_owner("task-1")
+        assert await store.get_owner("task-1") is None
+    finally:
+        await redis.aclose()  # type: ignore[attr-defined]
+
+
 async def test_sdk_task_store_is_shared_between_server_instances(valkey):
     redis = Redis(host=valkey[0], port=valkey[1], decode_responses=True)
     prefix = f"test:a2a:sdk-task:{uuid4().hex}"
@@ -120,5 +134,29 @@ async def test_sdk_task_store_uses_ttl_and_cluster_safe_key_tag(valkey):
             context=None,  # type: ignore[arg-type]
         )
         assert not page.tasks
+    finally:
+        await redis.aclose()  # type: ignore[attr-defined]
+
+
+async def test_sdk_task_store_skips_corrupt_tasks(valkey):
+    redis = Redis(host=valkey[0], port=valkey[1], decode_responses=True)
+    prefix = f"test:a2a:sdk-task:{uuid4().hex}"
+    owner = "account:agent"
+    store = RedisA2ASDKTaskStore(redis, prefix, 30, lambda _context: owner)
+
+    try:
+        await store.save(_task("valid"), context=None)  # type: ignore[arg-type]
+        await redis.set(store._task_key(owner, "corrupt"), "not-base64")
+        await redis.zadd(store._index_key(owner), {"corrupt": 1})
+
+        assert await store.get("corrupt", context=None) is None  # type: ignore[arg-type]
+        await redis.set(store._task_key(owner, "corrupt"), "not-base64")
+        await redis.zadd(store._index_key(owner), {"corrupt": 1})
+        page = await store.list(
+            a2a_pb2.ListTasksRequest(),
+            context=None,  # type: ignore[arg-type]
+        )
+
+        assert [task.id for task in page.tasks] == ["valid"]
     finally:
         await redis.aclose()  # type: ignore[attr-defined]
