@@ -26,26 +26,19 @@ from hyperforge_nucliadb.driver_config import (
     NucliaDBConnection,
 )
 
-
-def ignore_nucliadb_api(request):
-    if request.path.startswith("/api/v1/kb/"):
-        return None
-    return request
-
-
 NUA_KEY = os.environ.get(
     "NUA_KEY",
-) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 KB_DE48CFAA_3209_4041_BB64_8604AFF061FB = os.environ.get(
     "KB_DE48CFAA_3209_4041_BB64_8604AFF061FB"
-) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 KB_DF8B4C24_2807_4888_AD6C_AE97357A638B = os.environ.get(
     "KB_DF8B4C24_2807_4888_AD6C_AE97357A638B"
-) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 
 KB_F718BA84_2973_462F_9B15_F300BD260134 = os.environ.get(
     "KB_F718BA84_2973_462F_9B15_F300BD260134"
-) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 
 
 CONFIG = {
@@ -68,8 +61,8 @@ CONFIG = {
             "provider": "nucliadb",
             "identifier": "nuclia-docs",
             "config": {
-                "url": "https://europe-1.dp.progress.cloud/api",
-                "manager": "https://europe-1.dp.progress.cloud/api",
+                "url": "https://europe-1.nuclia.cloud/api",
+                "manager": "https://europe-1.nuclia.cloud/api",
                 "kbid": "df8b4c24-2807-4888-ad6c-ae97357a638b",
                 "key": KB_DF8B4C24_2807_4888_AD6C_AE97357A638B,
                 "filters": [],
@@ -81,8 +74,8 @@ CONFIG = {
             "provider": "nucliadb",
             "identifier": "nuclia-web",
             "config": {
-                "url": "https://europe-1.dp.progress.cloud/api",
-                "manager": "https://europe-1.dp.progress.cloud/api",
+                "url": "https://europe-1.nuclia.cloud/api",
+                "manager": "https://europe-1.nuclia.cloud/api",
                 "kbid": "f718ba84-2973-462f-9b15-f300bd260134",
                 "key": KB_F718BA84_2973_462F_9B15_F300BD260134,
                 "filters": [],
@@ -144,8 +137,8 @@ CONFIG_SIMPLE = {
             "provider": "nucliadb",
             "identifier": "nuclia-docs",
             "config": {
-                "url": "https://europe-1.dp.progress.cloud/api",
-                "manager": "https://europe-1.dp.progress.cloud/api",
+                "url": "https://europe-1.nuclia.cloud/api",
+                "manager": "https://europe-1.nuclia.cloud/api",
                 "kbid": "df8b4c24-2807-4888-ad6c-ae97357a638b",
                 "key": KB_DF8B4C24_2807_4888_AD6C_AE97357A638B,
                 "filters": [],
@@ -257,7 +250,7 @@ async def test_nucliadb_agent():
 
 
 @pytest.mark.asyncio
-@pytest.mark.vcr(ignore_localhost=True, before_record_request=ignore_nucliadb_api)
+@pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["europe-1.dp.progress.cloud"])
 async def test_nucliadb_agent_simple():
     answers = []
 
@@ -283,7 +276,7 @@ async def test_nucliadb_agent_simple():
 
 
 @pytest.mark.asyncio
-@pytest.mark.vcr(ignore_localhost=True, before_record_request=ignore_nucliadb_api)
+@pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["europe-1.dp.progress.cloud"])
 async def test_nucliadb_agent_simple_disable_ai_parameter_search():
     question_memory = await arag_main(
         agent_id="default",
@@ -301,7 +294,7 @@ async def test_nucliadb_agent_simple_disable_ai_parameter_search():
 
 
 @pytest.mark.asyncio
-@pytest.mark.vcr(ignore_localhost=True, before_record_request=ignore_nucliadb_api)
+@pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["europe-1.dp.progress.cloud"])
 async def test_nucliadb_agent_basic_ask():
     config = deepcopy(CONFIG_SIMPLE)
 
@@ -449,7 +442,7 @@ def test_build_ask_request():
         search_configuration="foobar",
     )
     driver = NucliaDBConnection(
-        url="https://europe-1.dp.progress.cloud/api",
+        url="https://europe-1.nuclia.cloud/api",
         manager="foo",
         kbid="df8b4c24-2807-4888-ad6c-ae97357a638b",
         description="foo",

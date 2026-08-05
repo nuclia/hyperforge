@@ -13,24 +13,17 @@ from hyperforge.memory.memory import EphemeralSessionMemory
 from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.pubsub import UserToAgentInteraction
 
-
-def ignore_nucliadb_api(request):
-    if request.path.startswith("/api/v1/kb/"):
-        return None
-    return request
-
-
 NUA_KEY = os.environ.get(
     "NUA_KEY",
-) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 
 
 KB_E103CAF3_F8CB_4161_A57C_AAD1192D0666 = os.environ.get(
     "KB_E103CAF3_F8CB_4161_A57C_AAD1192D0666"
-) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
+) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 
 pytestmark = [
-    pytest.mark.vcr(ignore_localhost=True, before_record_request=ignore_nucliadb_api),
+    pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["europe-1.dp.progress.cloud"]),
     pytest.mark.asyncio,
 ]
 
