@@ -19,6 +19,7 @@ def ignore_nucliadb_api(request):
         return None
     return request
 
+
 NUA_KEY = os.environ.get(
     "NUA_KEY",
 ) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
