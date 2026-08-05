@@ -24,16 +24,12 @@ from hyperforge.interaction import AnswerOperation, AragAnswer, ARAGException
 from hyperforge.pubsub import AgentAnswer, AgentDone, UserToAgentInteraction
 
 # Metadata keys read from the incoming A2A message to route the interaction.
-META_ACCOUNT = "account"
-META_AGENT_ID = "agent_id"
 META_WORKFLOW_ID = "workflow_id"
 META_SESSION = "session"
 META_HEADERS = "headers"
 META_ARGUMENTS = "arguments"
 META_FEEDBACK_ID = "feedback_id"
 _ALLOWED_METADATA = {
-    META_ACCOUNT,
-    META_AGENT_ID,
     META_WORKFLOW_ID,
     META_SESSION,
     META_HEADERS,
@@ -110,14 +106,6 @@ def parse_routing_metadata(
 
     if not settings.a2a_account or not settings.a2a_agent_id:
         raise ValueError("A2A server identity is not configured")
-
-    account = _optional_string(metadata, META_ACCOUNT)
-    if account is not None and account != settings.a2a_account:
-        raise ValueError("A2A metadata 'account' does not match this server")
-
-    agent_id = _optional_string(metadata, META_AGENT_ID)
-    if agent_id is not None and agent_id != settings.a2a_agent_id:
-        raise ValueError("A2A metadata 'agent_id' does not match this server")
 
     raw_headers = _string_mapping(metadata, META_HEADERS)
     headers: dict[str, str] = {}

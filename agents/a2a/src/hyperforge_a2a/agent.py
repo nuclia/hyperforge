@@ -1,6 +1,6 @@
 import asyncio
 from time import time
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List, Optional, cast
 from uuid import uuid4
 
 from a2a.types import a2a_pb2
@@ -15,13 +15,13 @@ from hyperforge.memory import Chunk, Context, QuestionMemory
 from hyperforge_a2a.client import (
     RemoteFeedbackRequest,
     ResponseTextAccumulator,
-    build_a2a_client,
     build_feedback_request,
     build_send_request,
     extract_feedback_request,
     raise_for_terminal_task_error,
 )
 from hyperforge_a2a.config import A2AAgentConfig
+from hyperforge_a2a.driver import A2ADriver
 
 
 def build_local_feedback(
@@ -72,12 +72,7 @@ class A2AClientAgent(ContextAgent, Agent[A2AAgentConfig]):
     }
 
     def _build_metadata(self, memory: QuestionMemory) -> dict[str, Any]:
-        metadata: dict[str, Any] = {}
-        if self.config.remote_account:
-            metadata["account"] = self.config.remote_account
-        if self.config.remote_agent_id:
-            metadata["agent_id"] = self.config.remote_agent_id
-        metadata["workflow_id"] = self.config.remote_workflow_id
+        metadata: dict[str, Any] = {"workflow_id": self.config.remote_workflow_id}
 
         headers: dict[str, str] = {}
         for header in self.config.valid_headers:
@@ -104,17 +99,11 @@ class A2AClientAgent(ContextAgent, Agent[A2AAgentConfig]):
         t0 = time()
         response_text = ResponseTextAccumulator()
 
-        client = await build_a2a_client(
-            self.config.source,
-            self.config.use_tls,
-            tls_ca_certificate_path=self.config.tls_ca_certificate_path,
-            tls_client_certificate_chain_path=self.config.tls_client_certificate_chain_path,
-            tls_client_private_key_path=self.config.tls_client_private_key_path,
-            authorization=self._authorization(memory),
-        )
+        driver = cast(A2ADriver, manager.drivers[self.config.source])
+        client = await driver.client(authorization=self._authorization(memory))
         try:
             try:
-                async with asyncio.timeout(self.config.read_timeout_seconds):
+                async with asyncio.timeout(driver.config.read_timeout_seconds):
                     request: a2a_pb2.SendMessageRequest | None = build_send_request(
                         question, self._build_metadata(memory)
                     )
@@ -129,7 +118,8 @@ class A2AClientAgent(ContextAgent, Agent[A2AAgentConfig]):
                                     local_request_id=memory.get_session_id(),
                                     module=self.config.module,
                                     agent_id=self.agent_id,
-                                    timeout_ms=self.config.read_timeout_seconds * 1000,
+                                    timeout_ms=driver.config.read_timeout_seconds
+                                    * 1000,
                                 )
                                 user_response = await memory.send_feedback(
                                     local_feedback
@@ -154,7 +144,8 @@ class A2AClientAgent(ContextAgent, Agent[A2AAgentConfig]):
                         request = continuation
             except TimeoutError as exc:
                 raise ValueError(
-                    f"A2A request timed out after {self.config.read_timeout_seconds} seconds"
+                    "A2A request timed out after "
+                    f"{driver.config.read_timeout_seconds} seconds"
                 ) from exc
         finally:
             await client.close()

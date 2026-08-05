@@ -3,22 +3,53 @@
 A2A client agent for Hyperforge. It connects to an external Agent2Agent (A2A)
 server and exposes streamed text responses as Hyperforge context.
 
-`source` accepts either a gRPC address such as `localhost:8034` or an HTTP(S)
-base URL such as `http://localhost:9999`. For HTTP(S) sources, the client
-resolves `/.well-known/agent-card.json` and uses the transport advertised by
-the remote Agent Card (JSON-RPC, HTTP+JSON, or gRPC). HTTPS secures discovery;
-`use_tls` independently controls gRPC connections.
+Connection settings belong to an A2A driver. The context module's `source`
+references that driver's identifier and keeps only per-workflow routing options.
+
+```yaml
+drivers:
+  - identifier: remote-a2a
+    name: Remote A2A
+    provider: a2a
+    config:
+      endpoint: https://a2a.example.com/api/v1/account/account-id/agent/agent-id/a2a
+      ca_certificate: |-
+        -----BEGIN CERTIFICATE-----
+        ...
+        -----END CERTIFICATE-----
+      authorization: Bearer service-account-key
+      read_timeout_seconds: 120
+
+context:
+  - module: a2a
+    source: remote-a2a
+    remote_workflow_id: default
+    valid_headers:
+      - authorization
+```
+
+The driver's `endpoint` identifies one remote agent connection and contains its
+account and agent identifiers when required by the server route. It accepts
+either a dedicated gRPC address such as `localhost:8034` or an HTTP(S) base URL
+such as `https://a2a.example.com/api/v1/account/account-id/agent/agent-id/a2a`.
+For HTTP(S), the client resolves `/.well-known/agent-card.json` and uses the
+transport advertised by the remote Agent Card (JSON-RPC, HTTP+JSON, or gRPC).
+A direct gRPC address has no URL path, so it must be dedicated to the configured
+remote agent. HTTPS secures discovery; `use_tls` independently controls direct
+gRPC connections.
 
 For direct gRPC connections, set `use_tls` and optionally configure
-`tls_ca_certificate_path`. Servers requiring mTLS also need both
-`tls_client_certificate_chain_path` and `tls_client_private_key_path`. The
-client applies `read_timeout_seconds` to the complete remote interaction,
-including any feedback round trips.
+`ca_certificate` with PEM content. Servers requiring mTLS also need both
+`client_certificate_chain` and `client_private_key` as PEM content. The driver
+applies `read_timeout_seconds` to the complete remote interaction, including
+any feedback round trips. `authorization` and `client_private_key` are encrypted
+at rest and omitted from driver API responses.
 
-To authenticate with the same service-account key used by MCP, include
-`authorization` in the client module's `valid_headers`. The incoming
-`Authorization: Bearer <key>` value is attached to gRPC transport metadata and
-is never serialized into A2A message metadata or workflow configuration.
+The driver can store a static `authorization` value. When `authorization` is in
+the context module's `valid_headers`, an incoming `Authorization: Bearer <key>`
+overrides that static value for the request. It is attached to transport
+metadata and is never serialized into A2A message metadata or workflow
+configuration.
 
 When a remote A2A task enters `input-required`, the client creates a standard
 Hyperforge feedback request using the remote question and response schema. The
@@ -48,8 +79,6 @@ authorizer failures deny the RPC.
 
 The server accepts these optional message metadata fields:
 
-- `account` and `agent_id`: may repeat the configured server identity. A
-  different value is rejected.
 - `workflow_id`: selects an advertised workflow and defaults to `default`.
   Unknown workflows are rejected.
 - `session`: a non-empty session identifier. It defaults to the A2A context

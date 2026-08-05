@@ -9,6 +9,7 @@ import socket
 from concurrent import futures
 from datetime import datetime, timedelta, timezone
 from ipaddress import ip_address
+from types import SimpleNamespace
 from uuid import uuid4
 
 import grpc
@@ -28,6 +29,8 @@ from hyperforge_a2a.client import (
     extract_steps_from_stream_response,
 )
 from hyperforge_a2a.config import A2AAgentConfig
+from hyperforge_a2a.config_driver import A2AInnerConfig
+from hyperforge_a2a.driver import A2ADriver
 from redis.asyncio import Redis
 
 import hyperforge.a2a.executor as executor_module
@@ -47,6 +50,19 @@ from hyperforge.server.session import SessionManager
 from hyperforge.server.settings import Settings as ServerSettings
 from hyperforge.standalone.agent import StaticAgentManager
 from hyperforge.standalone.config import StandAloneAgentConfig, WorkflowConfig
+
+
+async def _a2a_client(endpoint: str, **config):
+    source = "remote-a2a"
+    client_agent = await A2AClientAgent.from_config(
+        A2AAgentConfig(source=source, **config)
+    )
+    driver = A2ADriver(
+        name="Remote A2A",
+        provider="a2a",
+        config=A2AInnerConfig(endpoint=endpoint),
+    )
+    return client_agent, SimpleNamespace(drivers={source: driver})
 
 
 class _FakeContext:
@@ -311,8 +327,6 @@ async def test_a2a_grpc_round_trip(monkeypatch, a2a_task_store):
         request = build_send_request(
             "what is A2A?",
             {
-                "account": "acc",
-                "agent_id": "myagent",
                 "workflow_id": "wf1",
                 "headers": {"authorization": "Bearer token"},
             },
@@ -376,15 +390,11 @@ async def test_a2a_client_agent_builds_context_from_streamed_workflow(
     )
 
     try:
-        client_agent = await A2AClientAgent.from_config(
-            A2AAgentConfig(
-                id="local-a2a-client",
-                source=f"127.0.0.1:{port}",
-                remote_account="local",
-                remote_agent_id="deterministic-agent",
-                remote_workflow_id="deterministic-workflow",
-                valid_headers=["authorization"],
-            )
+        client_agent, manager = await _a2a_client(
+            f"127.0.0.1:{port}",
+            id="local-a2a-client",
+            remote_workflow_id="deterministic-workflow",
+            valid_headers=["authorization"],
         )
         session = NoMemorySessionMemory(
             MemoryConfig(),
@@ -401,7 +411,7 @@ async def test_a2a_client_agent_builds_context_from_streamed_workflow(
         context = await client_agent.a2a_query(
             "Run the deterministic workflow",
             memory,
-            manager=None,  # type: ignore[arg-type]
+            manager=manager,  # type: ignore[arg-type]
         )
     finally:
         await server.stop(grace=1)
@@ -464,14 +474,10 @@ async def test_a2a_client_server_workflow_end_to_end(monkeypatch, a2a_task_store
     )
 
     try:
-        client_agent = await A2AClientAgent.from_config(
-            A2AAgentConfig(
-                id="local-a2a-client",
-                source=f"127.0.0.1:{port}",
-                remote_account="local",
-                remote_agent_id=remote_agent_id,
-                remote_workflow_id=workflow_id,
-            )
+        client_agent, manager = await _a2a_client(
+            f"127.0.0.1:{port}",
+            id="local-a2a-client",
+            remote_workflow_id=workflow_id,
         )
         session = NoMemorySessionMemory(
             MemoryConfig(),
@@ -485,7 +491,7 @@ async def test_a2a_client_server_workflow_end_to_end(monkeypatch, a2a_task_store
         context = await client_agent.a2a_query(
             "Run the local workflow",
             memory,
-            manager=None,  # type: ignore[arg-type]
+            manager=manager,  # type: ignore[arg-type]
         )
     finally:
         await server.stop(grace=1)
@@ -671,9 +677,7 @@ async def test_a2a_client_agent_answers_nested_remote_feedback(
     )
 
     try:
-        client_agent = await A2AClientAgent.from_config(
-            A2AAgentConfig(id="a2a-client", source=f"127.0.0.1:{port}")
-        )
+        client_agent, manager = await _a2a_client(f"127.0.0.1:{port}", id="a2a-client")
         session = NoMemorySessionMemory(
             MemoryConfig(), "client-agent", "default", cache=NoCache()
         )
@@ -692,7 +696,7 @@ async def test_a2a_client_agent_answers_nested_remote_feedback(
         context = await client_agent.a2a_query(
             "Find sales data",
             memory,
-            manager=None,  # type: ignore[arg-type]
+            manager=manager,  # type: ignore[arg-type]
         )
     finally:
         await server.stop(grace=1)
@@ -746,7 +750,7 @@ def test_parse_routing_metadata_rejects_duplicate_headers_ignoring_case():
         )
 
 
-async def test_a2a_grpc_rejects_identity_override(monkeypatch, a2a_task_store):
+async def test_a2a_grpc_rejects_identity_metadata(monkeypatch, a2a_task_store):
     async def fake_stream_response(*args, **kwargs):  # pragma: no cover - not called
         yield AragAnswer(operation=AnswerOperation.DONE)
 
@@ -784,7 +788,9 @@ async def test_a2a_grpc_rejects_identity_override(monkeypatch, a2a_task_store):
     from a2a.types import a2a_pb2
 
     assert a2a_pb2.TaskState.TASK_STATE_FAILED in states
-    assert any("does not match this server" in text for text in texts)
+    assert any(
+        "Unknown A2A metadata field(s): account, agent_id" in text for text in texts
+    )
 
 
 async def test_a2a_grpc_rejects_unknown_workflow(monkeypatch, a2a_task_store):

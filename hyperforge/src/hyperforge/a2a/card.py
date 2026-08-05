@@ -64,9 +64,8 @@ def build_agent_card(
                 id="ask",
                 name="ask",
                 description=(
-                    "Ask a question to a Hyperforge agent. Provide the target "
-                    "'account', 'agent_id' and optional 'workflow_id' in the "
-                    "message metadata."
+                    "Ask a question to this Hyperforge agent. Optionally provide "
+                    "'workflow_id' in the message metadata."
                 ),
                 tags=["hyperforge", "rag"],
                 input_modes=["text/plain"],

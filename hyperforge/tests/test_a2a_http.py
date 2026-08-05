@@ -1,7 +1,9 @@
 """Tests for consuming an external HTTP/JSON-RPC A2A server."""
 
+from types import SimpleNamespace
+
 import httpx
-import hyperforge_a2a.agent as agent_module
+import hyperforge_a2a.driver as driver_module
 from a2a.helpers import (
     get_message_text,
     new_task_from_user_message,
@@ -23,6 +25,8 @@ from a2a.types import (
 from hyperforge_a2a.agent import A2AClientAgent
 from hyperforge_a2a.client import build_a2a_client
 from hyperforge_a2a.config import A2AAgentConfig
+from hyperforge_a2a.config_driver import A2AInnerConfig
+from hyperforge_a2a.driver import A2ADriver
 from sse_starlette.sse import AppStatus
 from starlette.applications import Starlette
 
@@ -99,10 +103,19 @@ async def test_http_agent_card_discovery_streams_into_context(monkeypatch):
             "http://a2a.test", use_tls=False, http_client=http_client
         )
 
-    monkeypatch.setattr(agent_module, "build_a2a_client", build_test_client)
+    monkeypatch.setattr(driver_module, "build_a2a_client", build_test_client)
 
     client_agent = await A2AClientAgent.from_config(
-        A2AAgentConfig(id="http-a2a", source="http://a2a.test")
+        A2AAgentConfig(id="http-a2a", source="remote-a2a")
+    )
+    manager = SimpleNamespace(
+        drivers={
+            "remote-a2a": A2ADriver(
+                name="Remote A2A",
+                provider="a2a",
+                config=A2AInnerConfig(endpoint="http://a2a.test"),
+            )
+        }
     )
     session = NoMemorySessionMemory(
         MemoryConfig(), "client-agent", "default", cache=NoCache()
@@ -114,7 +127,7 @@ async def test_http_agent_card_discovery_streams_into_context(monkeypatch):
         context = await client_agent.a2a_query(
             "Is HTTP A2A supported?",
             memory,
-            manager=None,  # type: ignore[arg-type]
+            manager=manager,  # type: ignore[arg-type]
         )
     finally:
         AppStatus.should_exit_event = None

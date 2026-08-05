@@ -19,6 +19,7 @@ from hyperforge_a2a.client import (
     raise_for_terminal_task_error,
 )
 from hyperforge_a2a.config import A2AAgentConfig
+from hyperforge_a2a.config_driver import A2AInnerConfig
 
 
 class _Memory:
@@ -175,8 +176,6 @@ def test_response_text_accumulator_reconciles_snapshots_and_ignores_status():
 
 def test_build_metadata_routes_authorization_outside_message_payload():
     agent = _make_agent(
-        remote_account="acc",
-        remote_agent_id="remote",
         remote_workflow_id="wf",
         valid_headers=["authorization", "x-trace-id"],
         extra_metadata={"custom": "1"},
@@ -189,8 +188,8 @@ def test_build_metadata_routes_authorization_outside_message_payload():
         }
     )
     metadata = agent._build_metadata(memory)
-    assert metadata["account"] == "acc"
-    assert metadata["agent_id"] == "remote"
+    assert "account" not in metadata
+    assert "agent_id" not in metadata
     assert metadata["workflow_id"] == "wf"
     assert metadata["headers"] == {"x-trace-id": "trace-1"}
     assert agent._authorization(memory) == "Bearer token"
@@ -199,36 +198,35 @@ def test_build_metadata_routes_authorization_outside_message_payload():
 
 def test_tls_client_credentials_require_tls_and_a_complete_key_pair():
     with pytest.raises(ValueError, match="configured together"):
-        A2AAgentConfig(
-            source="a2a.example.com:443",
+        A2AInnerConfig(
+            endpoint="a2a.example.com:443",
             use_tls=True,
-            tls_client_certificate_chain_path="client.pem",
+            client_certificate_chain="certificate",
         )
 
     with pytest.raises(ValueError, match="require use_tls"):
-        A2AAgentConfig(
-            source="a2a.example.com:443",
-            tls_ca_certificate_path="ca.pem",
+        A2AInnerConfig(
+            endpoint="a2a.example.com:443",
+            ca_certificate="CA",
         )
 
-    config = A2AAgentConfig(
-        source="https://a2a.example.com",
-        tls_ca_certificate_path="ca.pem",
+    config = A2AInnerConfig(
+        endpoint="https://a2a.example.com",
+        ca_certificate="CA",
     )
     assert config.use_tls is False
 
-    config = A2AAgentConfig(source="http://a2a.example.com", use_tls=True)
-    assert config.use_tls is True
+    with pytest.raises(ValueError, match="requires an HTTPS"):
+        A2AInnerConfig(endpoint="http://a2a.example.com", use_tls=True)
 
 
 @pytest.mark.asyncio
-async def test_http_client_uses_configured_tls_context(monkeypatch, tmp_path):
-    ca_path = tmp_path / "ca.pem"
-    ca_path.write_text("CA")
+async def test_http_client_uses_configured_tls_context(monkeypatch):
     ssl_context = Mock()
+    create_default_context = Mock(return_value=ssl_context)
     monkeypatch.setattr(
         "hyperforge_a2a.client.ssl.create_default_context",
-        Mock(return_value=ssl_context),
+        create_default_context,
     )
     http_client = AsyncMock()
     http_client.aclose = AsyncMock()
@@ -243,9 +241,10 @@ async def test_http_client_uses_configured_tls_context(monkeypatch, tmp_path):
         await build_a2a_client(
             "https://a2a.example.com",
             use_tls=True,
-            tls_ca_certificate_path=ca_path,
+            ca_certificate="CA",
         )
 
+    create_default_context.assert_called_once_with(cadata="CA")
     async_client.assert_called_once_with(verify=ssl_context)
     http_client.aclose.assert_awaited_once()
 

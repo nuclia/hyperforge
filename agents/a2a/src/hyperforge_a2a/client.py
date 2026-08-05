@@ -1,8 +1,8 @@
 """Thin helpers around the a2a-sdk gRPC client used by the A2A client agent."""
 
 import ssl
+import tempfile
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any, Optional
 from uuid import uuid4
 
@@ -18,6 +18,7 @@ from a2a.client import (
 )
 from a2a.client.auth import AuthInterceptor, CredentialService
 from a2a.client.client import ClientCallContext
+from a2a.client.interceptors import ClientCallInterceptor
 from a2a.types import a2a_pb2
 from a2a.utils import TransportProtocol
 from google.protobuf import struct_pb2
@@ -69,7 +70,7 @@ def _configure_bearer_auth(card: a2a_pb2.AgentCard) -> None:
     )
 
 
-def _auth_interceptors(authorization: str | None) -> list[AuthInterceptor]:
+def _auth_interceptors(authorization: str | None) -> list[ClientCallInterceptor]:
     if not authorization:
         return []
     return [AuthInterceptor(BearerCredentialService(authorization))]
@@ -122,21 +123,19 @@ def dict_to_struct(data: dict[str, Any]) -> struct_pb2.Struct:
     return struct
 
 
-def _read_pem(path: Path | None) -> bytes | None:
-    return path.read_bytes() if path else None
-
-
 def _grpc_channel_factory(
     use_tls: bool,
-    tls_ca_certificate_path: Path | None,
-    tls_client_certificate_chain_path: Path | None,
-    tls_client_private_key_path: Path | None,
+    ca_certificate: str | None,
+    client_certificate_chain: str | None,
+    client_private_key: str | None,
 ):
     credentials = (
         grpc.ssl_channel_credentials(
-            root_certificates=_read_pem(tls_ca_certificate_path),
-            private_key=_read_pem(tls_client_private_key_path),
-            certificate_chain=_read_pem(tls_client_certificate_chain_path),
+            root_certificates=ca_certificate.encode() if ca_certificate else None,
+            private_key=client_private_key.encode() if client_private_key else None,
+            certificate_chain=(
+                client_certificate_chain.encode() if client_certificate_chain else None
+            ),
         )
         if use_tls
         else None
@@ -154,9 +153,9 @@ def _grpc_channel_factory(
 def build_grpc_client(
     source: str,
     use_tls: bool,
-    tls_ca_certificate_path: Path | None = None,
-    tls_client_certificate_chain_path: Path | None = None,
-    tls_client_private_key_path: Path | None = None,
+    ca_certificate: str | None = None,
+    client_certificate_chain: str | None = None,
+    client_private_key: str | None = None,
     authorization: str | None = None,
 ) -> Client:
     """Create an A2A gRPC client targeting ``source`` (host:port)."""
@@ -165,9 +164,9 @@ def build_grpc_client(
         streaming=True,
         grpc_channel_factory=_grpc_channel_factory(
             use_tls,
-            tls_ca_certificate_path,
-            tls_client_certificate_chain_path,
-            tls_client_private_key_path,
+            ca_certificate,
+            client_certificate_chain,
+            client_private_key,
         ),
         supported_protocol_bindings=[TransportProtocol.GRPC],
         accepted_output_modes=["text/plain"],
@@ -181,9 +180,9 @@ def build_grpc_client(
 async def build_a2a_client(
     source: str,
     use_tls: bool,
-    tls_ca_certificate_path: Path | None = None,
-    tls_client_certificate_chain_path: Path | None = None,
-    tls_client_private_key_path: Path | None = None,
+    ca_certificate: str | None = None,
+    client_certificate_chain: str | None = None,
+    client_private_key: str | None = None,
     authorization: str | None = None,
     http_client: httpx.AsyncClient | None = None,
 ) -> Client:
@@ -192,25 +191,29 @@ async def build_a2a_client(
         return build_grpc_client(
             source,
             use_tls,
-            tls_ca_certificate_path,
-            tls_client_certificate_chain_path,
-            tls_client_private_key_path,
+            ca_certificate,
+            client_certificate_chain,
+            client_private_key,
             authorization,
         )
 
     owns_http_client = http_client is None
     if http_client is None:
         if source.startswith("https://"):
-            ssl_context = ssl.create_default_context(
-                cafile=(
-                    str(tls_ca_certificate_path) if tls_ca_certificate_path else None
-                )
-            )
-            if tls_client_certificate_chain_path and tls_client_private_key_path:
-                ssl_context.load_cert_chain(
-                    certfile=tls_client_certificate_chain_path,
-                    keyfile=tls_client_private_key_path,
-                )
+            ssl_context = ssl.create_default_context(cadata=ca_certificate)
+            if client_certificate_chain and client_private_key:
+                with (
+                    tempfile.NamedTemporaryFile(mode="w") as certificate_file,
+                    tempfile.NamedTemporaryFile(mode="w") as private_key_file,
+                ):
+                    certificate_file.write(client_certificate_chain)
+                    certificate_file.flush()
+                    private_key_file.write(client_private_key)
+                    private_key_file.flush()
+                    ssl_context.load_cert_chain(
+                        certfile=certificate_file.name,
+                        keyfile=private_key_file.name,
+                    )
             http_client = httpx.AsyncClient(verify=ssl_context)
         else:
             http_client = httpx.AsyncClient()
@@ -239,9 +242,9 @@ async def build_a2a_client(
                 httpx_client=http_client,
                 grpc_channel_factory=_grpc_channel_factory(
                     use_tls,
-                    tls_ca_certificate_path,
-                    tls_client_certificate_chain_path,
-                    tls_client_private_key_path,
+                    ca_certificate,
+                    client_certificate_chain,
+                    client_private_key,
                 ),
                 supported_protocol_bindings=supported_protocol_bindings,
                 accepted_output_modes=["text/plain"],
