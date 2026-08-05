@@ -21,12 +21,12 @@ from hyperforge.workflows import WorkflowData
 
 NUA_KEY = os.environ.get(
     "NUA_KEY",
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 
 
 KB_2603EE3A_2EE0_46BA_85A7_A1A2EC5A8FFE = os.environ.get(
     "KB_2603EE3A_2EE0_46BA_85A7_A1A2EC5A8FFE"
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 
 DRIVERS = [
     {

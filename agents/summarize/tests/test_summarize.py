@@ -20,17 +20,17 @@ from hyperforge_summarize.config import SummarizeAgentConfig
 # Real key used when recording; the stub is sufficient for cassette replay.
 NUA_KEY = os.environ.get(
     "NUA_KEY",
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 
 pytestmark = [pytest.mark.vcr(ignore_localhost=True), pytest.mark.asyncio]
 
 DE48CFAA_3209_4041_BB64_8604AFF061FB = os.environ.get(
     "KB_DE48CFAA_3209_4041_BB64_8604AFF061FB"
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 
 DF8B4C24_2807_4888_AD6C_AE97357A638B = os.environ.get(
     "KB_DF8B4C24_2807_4888_AD6C_AE97357A638B"
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 
 CONFIG = {
     "drivers": [
@@ -53,8 +53,8 @@ CONFIG = {
             "identifier": "nucliadb-2",
             "config": {
                 "identifier": "nucliadb-2",
-                "url": "https://europe-1.nuclia.cloud/api",
-                "manager": "https://europe-1.nuclia.cloud/api",
+                "url": "https://europe-1.dp.progress.cloud/api",
+                "manager": "https://europe-1.dp.progress.cloud/api",
                 "kbid": "df8b4c24-2807-4888-ad6c-ae97357a638b",
                 "key": DF8B4C24_2807_4888_AD6C_AE97357A638B,
                 "filters": [],
