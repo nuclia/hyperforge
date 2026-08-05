@@ -76,7 +76,9 @@ CONFIG = {
 
 # Match NUA chats by their stable routing fields; retrieved context in their
 # prompts changes as the documentation KB evolves.
-@pytest.mark.vcr(match_on=["method", "scheme", "host", "port", "path", "query", "nua_chat"])
+@pytest.mark.vcr(
+    match_on=["method", "scheme", "host", "port", "path", "query", "nua_chat"]
+)
 @pytest.mark.parametrize(
     "granularity", (ContextGranularity.PARTIAL_ANSWERS, ContextGranularity.FULL)
 )
@@ -156,7 +158,9 @@ async def test_remi(granularity: ContextGranularity):
     assert "Errors:" not in remi_ctx.summary
 
 
-@pytest.mark.vcr(match_on=["method", "scheme", "host", "port", "path", "query", "nua_chat"])
+@pytest.mark.vcr(
+    match_on=["method", "scheme", "host", "port", "path", "query", "nua_chat"]
+)
 @pytest.mark.parametrize(
     "granularity", [ContextGranularity.PARTIAL_ANSWERS, ContextGranularity.FULL]
 )
