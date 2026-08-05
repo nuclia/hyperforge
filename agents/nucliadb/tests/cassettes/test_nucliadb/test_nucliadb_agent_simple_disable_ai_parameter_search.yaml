@@ -11,7 +11,7 @@ interactions:
       Content-Length:
       - '32'
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
       content-type:
@@ -19,7 +19,7 @@ interactions:
       x-stf-serviceaccount:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/catalog/facets
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/catalog/facets
   response:
     body:
       string: '{"facets":{"/n/i":986,"/n/i/application":1,"/n/i/application/json":1,"/n/i/text":985,"/n/i/text/markdown":985}}'
@@ -53,7 +53,7 @@ interactions:
       Connection:
       - keep-alive
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
       content-type:
@@ -61,7 +61,7 @@ interactions:
       x-stf-serviceaccount:
       - DUMMY
     method: GET
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/labelsets
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/labelsets
   response:
     body:
       string: '{"uuid":"df8b4c24-2807-4888-ad6c-ae97357a638b","labelsets":{"pmm":{"title":"pmm","color":"#DAF3E6","multiple":true,"kind":["RESOURCES"],"labels":[{"title":"Videos","related":"","text":"","uri":""},{"title":"Partner
@@ -101,7 +101,7 @@ interactions:
       Content-Length:
       - '32'
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
       content-type:
@@ -109,7 +109,7 @@ interactions:
       x-stf-serviceaccount:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/catalog/facets
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/catalog/facets
   response:
     body:
       string: '{"facets":{"/s/p":986,"/s/p/ca":3,"/s/p/cy":1,"/s/p/da":1,"/s/p/en":967,"/s/p/eo":4,"/s/p/la":7,"/s/p/nb":1,"/s/p/tl":1,"/s/p/yo":1}}'
@@ -143,7 +143,7 @@ interactions:
       Connection:
       - keep-alive
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
       content-type:
@@ -151,7 +151,7 @@ interactions:
       x-stf-serviceaccount:
       - DUMMY
     method: GET
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b
   response:
     body:
       string: '{"slug":"nuclia-docs","uuid":"df8b4c24-2807-4888-ad6c-ae97357a638b","config":{"uuid":null,"slug":"4f9285c7-7151-4431-94e6-3f1fb0d66aca:nuclia-docs","title":"Nuclia
@@ -186,7 +186,7 @@ interactions:
       Connection:
       - keep-alive
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
       content-type:
@@ -194,7 +194,7 @@ interactions:
       x-stf-serviceaccount:
       - DUMMY
     method: GET
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/configuration
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/configuration
   response:
     body:
       string: '{"resource_labelers_models":null,"paragraph_labelers_models":null,"intent_models":null,"visual_labeling":"disabled","ner_model":"multilingual","relation_model":"base","anonymization_model":"disabled","semantic_model":"multilingual-2024-05-06","semantic_models":["multilingual-2024-05-06"],"default_semantic_model":"multilingual-2024-05-06","semantic_graph_node_models":[],"default_semantic_graph_node_model":null,"semantic_graph_edge_models":[],"default_semantic_graph_edge_model":null,"semantic_vector_similarity":"DOT","semantic_vector_size":1024,"semantic_matryoshka_dims":[],"semantic_threshold":0.4,"generative_model":"chatgpt-azure-4o","user_keys":{"openai":null,"azure_openai":null,"mistral":null,"palm":null,"anthropic":null,"claude3":null,"anthropic_vertex":null,"anthropic_bedrock":null,"azure_mistral":null,"hf_llm":null,"hf_embedding":null,"azure_aii":null,"openai_compat":null},"user_prompts":{"openai":null,"azure_openai":{"system":"You
@@ -233,7 +233,7 @@ interactions:
       Content-Length:
       - '61'
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
       content-type:
@@ -241,7 +241,7 @@ interactions:
       x-stf-serviceaccount:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/search
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/search
   response:
     body:
       string: "{\"resources\":{\"2a0d73029ad24c599d6dc1e117a41897\":{\"id\":\"2a0d73029ad24c599d6dc1e117a41897\",\"slug\":\"docs-agentic-deploy-md\",\"title\":\"docs
@@ -372,7 +372,7 @@ interactions:
       Connection:
       - keep-alive
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
       content-type:
@@ -380,7 +380,7 @@ interactions:
       x-stf-serviceaccount:
       - DUMMY
     method: GET
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/labelset/pmm
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/labelset/pmm
   response:
     body:
       string: '{"title":"pmm","color":"#DAF3E6","multiple":true,"kind":["RESOURCES"],"labels":[{"title":"Videos","related":"","text":"","uri":""},{"title":"Partner
@@ -420,7 +420,7 @@ interactions:
       Content-Length:
       - '18'
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
       content-type:
@@ -428,7 +428,7 @@ interactions:
       x-stf-serviceaccount:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/search
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/search
   response:
     body:
       string: "{\"resources\":{\"2a0d73029ad24c599d6dc1e117a41897\":{\"id\":\"2a0d73029ad24c599d6dc1e117a41897\",\"slug\":\"docs-agentic-deploy-md\",\"title\":\"docs
@@ -565,7 +565,7 @@ interactions:
       Content-Length:
       - '145'
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
       content-type:
@@ -573,7 +573,7 @@ interactions:
       x-stf-serviceaccount:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/predict/run-agents-text
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/predict/run-agents-text
   response:
     body:
       string: '{"results":[{"input_nuclia_tokens":0.0,"output_nuclia_tokens":0.0,"time":0.00010657310485839844,"payloads":[]}]}'
@@ -613,7 +613,7 @@ interactions:
       Content-Length:
       - '347'
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
       content-type:
@@ -621,7 +621,7 @@ interactions:
       x-stf-serviceaccount:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/find
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/find
   response:
     body:
       string: '{"resources":{},"relations":{"entities":{}},"query":"Esboniwch sut
@@ -663,7 +663,7 @@ interactions:
       Content-Length:
       - '352'
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
       content-type:
@@ -671,7 +671,7 @@ interactions:
       x-stf-serviceaccount:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/find
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/find
   response:
     body:
       string: "{\"resources\":{\"4039d76b0fff4962900836ab3fdec9f7\":{\"id\":\"4039d76b0fff4962900836ab3fdec9f7\",\"slug\":\"docs-rag-advanced-consumption-mdx\",\"title\":\"docs
@@ -2296,7 +2296,7 @@ interactions:
       Content-Length:
       - '347'
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
       content-type:
@@ -2304,7 +2304,7 @@ interactions:
       x-stf-serviceaccount:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/find
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/find
   response:
     body:
       string: '{"resources":{},"relations":{"entities":{}},"query":"Esboniwch sut
@@ -2360,13 +2360,13 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
       x-stf-serviceaccount:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/hydrate
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/hydrate
   response:
     body:
       string: '{"resources":{"f02da6c4bdf34596a89a8106f4b0ea9f":{"id":"f02da6c4bdf34596a89a8106f4b0ea9f","slug":"docs-develop-js-sdk-interfaces-PageToken-md","title":"docs
@@ -2421,7 +2421,7 @@ interactions:
       Content-Length:
       - '145'
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
       content-type:
@@ -2429,7 +2429,7 @@ interactions:
       x-stf-serviceaccount:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/predict/run-agents-text
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/predict/run-agents-text
   response:
     body:
       string: '{"results":[{"input_nuclia_tokens":0.0,"output_nuclia_tokens":0.0,"time":0.0001285076141357422,"payloads":[]}]}'
@@ -2469,7 +2469,7 @@ interactions:
       Content-Length:
       - '354'
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
       content-type:
@@ -2477,7 +2477,7 @@ interactions:
       x-stf-serviceaccount:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/find
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/find
   response:
     body:
       string: '{"resources":{},"relations":{"entities":{}},"query":"Sut mae defnyddio''r
@@ -2519,7 +2519,7 @@ interactions:
       Content-Length:
       - '352'
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
       content-type:
@@ -2527,7 +2527,7 @@ interactions:
       x-stf-serviceaccount:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/find
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/find
   response:
     body:
       string: "{\"resources\":{\"6e8250e6b5264156988657a221fd5e94\":{\"id\":\"6e8250e6b5264156988657a221fd5e94\",\"slug\":\"docs-develop-js-sdk-namespaces-Ask-interfaces-ConsumptionAskResponseItem-md\",\"title\":\"docs
@@ -4149,7 +4149,7 @@ interactions:
       Content-Length:
       - '354'
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
       content-type:
@@ -4157,7 +4157,7 @@ interactions:
       x-stf-serviceaccount:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/find
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/find
   response:
     body:
       string: '{"resources":{},"relations":{"entities":{}},"query":"Sut mae defnyddio''r
@@ -4213,13 +4213,13 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nucliadb-sdk/6.13.1.post6414
       x-stf-serviceaccount:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/hydrate
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/hydrate
   response:
     body:
       string: '{"resources":{"b14cf452a3434839a04c111f2ea4dc51":{"id":"b14cf452a3434839a04c111f2ea4dc51","slug":"docs-develop-js-sdk-enums-UsageType-md","title":"docs

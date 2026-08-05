@@ -13,7 +13,7 @@ from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.models import Chunk, Context, MemoryConfig, Rules
 
 NUA_KEY = os.environ.get("NUA_KEY") or cassette_nua_key(
-    "https://europe-1.nuclia.cloud/"
+    "https://europe-1.dp.progress.cloud/"
 )
 VALIDATION_MODEL = "gemini-2.5-flash"
 

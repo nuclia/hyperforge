@@ -15,12 +15,12 @@ from hyperforge.pubsub import UserToAgentInteraction
 
 NUA_KEY = os.environ.get(
     "NUA_KEY",
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 
 
 KB_E103CAF3_F8CB_4161_A57C_AAD1192D0666 = os.environ.get(
     "KB_E103CAF3_F8CB_4161_A57C_AAD1192D0666"
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 
 pytestmark = [
     pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["europe-1.dp.progress.cloud"]),
