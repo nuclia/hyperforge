@@ -9,29 +9,29 @@ interactions:
       Connection:
       - keep-alive
       Host:
-      - europe-1.dp.stashify.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.11.5
       x-nuclia-nuakey:
       - DUMMY
     method: GET
-    uri: https://europe-1.dp.stashify.cloud/api/authorizer/info
+    uri: https://europe-1.dp.progress.cloud/api/authorizer/info
   response:
     body:
-      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"da1740fa-ab3e-4971-b374-7bb31b5dd325","account_id":"39f5fa6e-680a-475e-a757-812597e86d06","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
+      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"9e1317aa-e212-4a59-b794-afee535458a6","account_id":"07c2de7c-fa77-4374-a461-eea314da9dfd","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
       - '227'
       content-type:
       - application/json
       date:
-      - Wed, 05 Aug 2026 07:57:25 GMT
+      - Wed, 05 Aug 2026 08:09:49 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '7'
+      - '69'
     status:
       code: 200
       message: OK
@@ -77,13 +77,13 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.dp.stashify.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.11.5
       x-client-ident:
       - default
       x-message:
-      - 0dfefb8a0b7b40f6a89fc902c85a8d80
+      - 7bd1cbc3b0ac4748a0cad7661bcf202b
       x-origin:
       - RAO
       x-session:
@@ -93,19 +93,21 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.dp.stashify.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: "{\"chunk\":{\"type\":\"object\",\"object\":{\"rephrased_question\":\"Explica
-        el uso de `max_tokens` en espa\xF1ol y proporciona un enlace a la documentaci\xF3n
-        oficial.\",\"rules\":[\"Responde en espa\xF1ol.\",\"Incluye un enlace a la
-        documentaci\xF3n oficial de `max_tokens`.\"],\"reason\":\"La pregunta original
-        es clara pero se puede mejorar ligeramente al especificar que se busca la
-        explicaci\xF3n y el enlace a la documentaci\xF3n de manera expl\xEDcita, adem\xE1s
-        de asegurar que la respuesta sea en espa\xF1ol.\"}}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":7,\"output_tokens\":9,\"timings\":{\"generative\":0.8064458860026207},\"input_nuclia_tokens\":0.007,\"output_nuclia_tokens\":0.009}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.0071,\"output\":0.0092,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+        c\xF3mo usar el par\xE1metro `max_tokens` en espa\xF1ol y proporciona un enlace
+        a la documentaci\xF3n oficial.\",\"rules\":[\"Responde en espa\xF1ol.\",\"Incluye
+        una explicaci\xF3n clara del uso de `max_tokens`.\",\"Proporciona un enlace
+        directo a la documentaci\xF3n relevante sobre `max_tokens`.\"],\"reason\":\"La
+        pregunta original es clara en su intenci\xF3n, pero se ha reformulado ligeramente
+        para mejorar la fluidez y asegurar que se especifica la necesidad de un enlace
+        a la documentaci\xF3n oficial, adem\xE1s de aclarar que la respuesta debe
+        ser en espa\xF1ol.\"}}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":7,\"output_tokens\":11,\"timings\":{\"generative\":1.509255008000764},\"input_nuclia_tokens\":0.007,\"output_nuclia_tokens\":0.011}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.0071,\"output\":0.01144,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -113,17 +115,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Wed, 05 Aug 2026 07:57:25 GMT
+      - Wed, 05 Aug 2026 08:09:50 GMT
       nuclia-learning-id:
-      - 773cc8e292d24a8399e92e28cc05601f
+      - 93f79d882b0547fe98ace3244ab5a9e5
       nuclia-learning-model:
       - gemini-2.5-flash-lite
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '812'
+      - '1517'
       x-nuclia-trace-id:
-      - fc73b490383741aa83d36633cd9a6d98
+      - 7a7703497744d2cbe1f374cdec214bfd
     status:
       code: 200
       message: OK
@@ -162,68 +164,66 @@ interactions:
       \"block-CD\"]).\n11. **IMPORTANT** If any extra instructions are provided, you
       MUST follow them carefully when generating the answer field. These instructions
       may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nExplica
-      el uso de `max_tokens` en espa\u00f1ol y proporciona un enlace a la documentaci\u00f3n
-      oficial.\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n#### Chunk: docs
-      > develop > js sdk > interfaces > PredictAnswerOptions\n```  \n optional max_tokens:
-      number \n \n Defined in \n libs/sdk-core/src/lib/db/search/ask.models.ts:251
+      c\u00f3mo usar el par\u00e1metro `max_tokens` en espa\u00f1ol y proporciona
+      un enlace a la documentaci\u00f3n oficial.\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n####
+      Chunk: docs > rag > advanced > consumption.\n```  Use the max_tokens parameter
+      on the /ask endpoint to set hard limits on: \n - Context size: Limits the amount
+      of retrieved information sent to the LLM \n - Answer length: Limits the length
+      of the generated response \n Important Considerations \n Context Limitations:
+      \n ```\n\n\n---\"\n\n\n**block-AB**\n\n#### Chunk: docs > rag > advanced > openai
+      api compatible models\n```  Description: The maximum number of tokens that the
+      model can generate as output. Again, we should keep in mind that this value
+      summed to the Maximum supported input tokens should not exceed the total context
+      size supported by the model. \n ```\n\n\n---\"\n\n\n**block-AC**\n\n#### Chunk:
+      docs > develop > js sdk > interfaces > PredictAnswerOptions\n```  \n optional
+      generative_model: string \n \n Defined in \n libs/sdk-core/src/lib/db/search/ask.models.ts:250
+      \n \n json_schema? \n \n optional json_schema: object \n \n Defined in \n libs/sdk-core/src/lib/db/search/ask.models.ts:257
+      \n \n max_tokens? \n ```\n\n\n---\"\n\n\n**block-AD**\n\n#### Chunk: docs >
+      develop > python sdk > 05 search\n```  \n SDK: \n \n ```python \n from nuclia
+      import sdk \n from nucliadb_models.search import AskRequest, Reasoning \n search
+      = sdk.NucliaSearch() \n query = AskRequest( \n query= My question with extra
+      reasoning effort , \n max_tokens=5000, \n reasoning=Reasoning( \n display=True,
+      # Show reasoning in the response \n effort= low , # Can be low , medium , or
+      high \n budget_tokens=1024 # How many tokens reasoning can use \n ), \n ) \n
+      search.ask(query=query) \n ``` \n Model Support for Reasoning Options: \n ```\n\n\n---\"\n\n\n**block-AE**\n\n####
+      Chunk: docs > rag > advanced > widget > features\n```  max_tokens: the maximum
+      number of input tokens to put in the final context (including the prompt, the
+      retrieved results and the user question). \n max_output_tokens: the maximum
+      number of tokens to generate. \n ```\n\n\n---\"\n\n\n**block-AF**\n\n#### Chunk:
+      docs > develop > js sdk > interfaces > PredictAnswerOptions\n```  \n optional
+      max_tokens: number \n \n Defined in \n libs/sdk-core/src/lib/db/search/ask.models.ts:251
       \n \n prefer_markdown? \n \n optional prefer_markdown: boolean \n \n Defined
       in \n libs/sdk-core/src/lib/db/search/ask.models.ts:256 \n \n query_context?
-      \n ```\n\n\n---\"\n\n\n**block-AB**\n\n#### Chunk: docs > rag > advanced > consumption.\n```  Use
-      the max_tokens parameter on the /ask endpoint to set hard limits on: \n - Context
-      size: Limits the amount of retrieved information sent to the LLM \n - Answer
-      length: Limits the length of the generated response \n Important Considerations
-      \n Context Limitations: \n ```\n\n\n---\"\n\n\n**block-AC**\n\n#### Chunk: docs
-      > rag > advanced > widget > features\n```  max_tokens: the maximum number of
-      input tokens to put in the final context (including the prompt, the retrieved
-      results and the user question). \n max_output_tokens: the maximum number of
-      tokens to generate. \n ```\n\n\n---\"\n\n\n**block-AD**\n\n#### Chunk: docs
-      > develop > js sdk > interfaces > ChatOptions\n```  \n optional max_tokens:
-      number \\| object \n \n Defines the maximum number of tokens that the model
-      will take as context. \n Defined in \n libs/sdk-core/src/lib/db/search/search.models.ts:112
-      \n \n min_score? \n ```\n\n\n---\"\n\n\n**block-AE**\n\n#### Chunk: docs > rag
-      > advanced > openai api compatible models\n```  \n \n Maximum supported input
-      tokens: \n Description: The maximum number of tokens that the model can accept
-      as input. Be mindful that this takes into account the tokens used in the prompt,
-      query and context. Also take note that some models may provide their context
-      window as the total between input and output tokens, while others may provide
-      it as the input tokens only. \n ```\n\n\n---\"\n\n\n**block-AF**\n\n#### Chunk:
-      docs > develop > python sdk > 05 search\n```  \n SDK: \n \n ```python \n from
-      nuclia import sdk \n from nucliadb_models.search import AskRequest, Reasoning
-      \n search = sdk.NucliaSearch() \n query = AskRequest( \n query= My question
-      with extra reasoning effort , \n max_tokens=5000, \n reasoning=Reasoning( \n
-      display=True, # Show reasoning in the response \n effort= low , # Can be low
-      , medium , or high \n budget_tokens=1024 # How many tokens reasoning can use
-      \n ), \n ) \n search.ask(query=query) \n ``` \n Model Support for Reasoning
-      Options: \n ```\n\n\n---\"\n\n\n**block-AG**\n\n#### Chunk: docs > develop >
-      js sdk > interfaces > PredictAnswerOptions\n```  \n optional generative_model:
-      string \n \n Defined in \n libs/sdk-core/src/lib/db/search/ask.models.ts:250
-      \n \n json_schema? \n \n optional json_schema: object \n \n Defined in \n libs/sdk-core/src/lib/db/search/ask.models.ts:257
-      \n \n max_tokens? \n ```\n\n\n---\"\n\n\n**block-AH**\n\n#### Chunk: docs >
-      develop > js sdk > interfaces > ChatOptions\n```  \n optional highlight: boolean
-      \n \n Inherited from \n BaseSearchOptions.highlight \n Defined in \n libs/sdk-core/src/lib/db/search/search.models.ts:76
-      \n \n keyword_filters? \n \n optional keyword_filters: string[] \\| Filter[]
-      \n \n Inherited from \n BaseSearchOptions.keyword_filters \n Defined in \n libs/sdk-core/src/lib/db/search/search.models.ts:65
-      \n \n max_tokens? \n ```\n\n\n---\"\n\n\n**block-AI**\n\n#### Chunk: docs >
-      rag > advanced > openai api compatible models\n```  Description: The maximum
-      number of tokens that the model can generate as output. Again, we should keep
-      in mind that this value summed to the Maximum supported input tokens should
-      not exceed the total context size supported by the model. \n ```\n\n\n---\"\n\n\n\n\n<END
-      OF CONTEXT>\n\n"}, "citations": false, "citation_threshold": null, "generative_model":
-      "chatgpt-azure-4o-mini", "max_tokens": 8192, "query_context_images": {}, "prefer_markdown":
-      null, "json_schema": {"title": "validate_or_answer", "description": "Validate
-      or answer", "parameters": {"type": "object", "properties": {"reason": {"type":
-      "string", "description": "Reasoning for the answer or validation"}, "answer":
-      {"type": "string", "description": "Partial or complete answer to the user query
-      from the information in the context."}, "missing_info_query": {"type": "string",
-      "description": "Query needed to retrieve the missing information in case the
-      context is not enough to answer the question. If the context does not answer
-      the question at all, just return the original question."}, "useful": {"type":
-      "string", "description": "Is the context useful to answer the question?", "enum":
-      ["yes", "no"]}, "citations": {"type": "array", "items": {"type": "string", "description":
-      "Block ID cited in the answer, e.g. block-AB"}, "description": "List of block
-      IDs cited in the answer, if any"}}, "required": ["reason", "answer", "missing_info_query",
-      "useful", "citations"]}}, "format_prompt": false, "rerank_context": false, "tools":
-      [], "tool_choice": {"type": "required"}, "reasoning": false, "seed": null}'
+      \n ```\n\n\n---\"\n\n\n**block-AG**\n\n#### Chunk: docs > develop > python sdk
+      > 05 search\n```  ::: \n :::warning \n Enabling reasoning can use additional
+      tokens, which may increase your usage costs. \n You may need to increase max_tokens
+      to give the LLM enough room to reason and generate an answer. \n ```\n\n\n---\"\n\n\n**block-AH**\n\n####
+      Chunk: docs > rag > advanced > openai api compatible models\n```  \n \n Maximum
+      supported input tokens: \n Description: The maximum number of tokens that the
+      model can accept as input. Be mindful that this takes into account the tokens
+      used in the prompt, query and context. Also take note that some models may provide
+      their context window as the total between input and output tokens, while others
+      may provide it as the input tokens only. \n ```\n\n\n---\"\n\n\n**block-AI**\n\n####
+      Chunk: docs > develop > js sdk > interfaces > ChatOptions\n```  \n optional
+      max_tokens: number \\| object \n \n Defines the maximum number of tokens that
+      the model will take as context. \n Defined in \n libs/sdk-core/src/lib/db/search/search.models.ts:112
+      \n \n min_score? \n ```\n\n\n---\"\n\n\n\n\n<END OF CONTEXT>\n\n"}, "citations":
+      false, "citation_threshold": null, "generative_model": "chatgpt-azure-4o-mini",
+      "max_tokens": 8192, "query_context_images": {}, "prefer_markdown": null, "json_schema":
+      {"title": "validate_or_answer", "description": "Validate or answer", "parameters":
+      {"type": "object", "properties": {"reason": {"type": "string", "description":
+      "Reasoning for the answer or validation"}, "answer": {"type": "string", "description":
+      "Partial or complete answer to the user query from the information in the context."},
+      "missing_info_query": {"type": "string", "description": "Query needed to retrieve
+      the missing information in case the context is not enough to answer the question.
+      If the context does not answer the question at all, just return the original
+      question."}, "useful": {"type": "string", "description": "Is the context useful
+      to answer the question?", "enum": ["yes", "no"]}, "citations": {"type": "array",
+      "items": {"type": "string", "description": "Block ID cited in the answer, e.g.
+      block-AB"}, "description": "List of block IDs cited in the answer, if any"}},
+      "required": ["reason", "answer", "missing_info_query", "useful", "citations"]}},
+      "format_prompt": false, "rerank_context": false, "tools": [], "tool_choice":
+      {"type": "required"}, "reasoning": false, "seed": null}'
     headers:
       Accept:
       - application/x-ndjson
@@ -232,11 +232,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '7700'
+      - '7535'
       Content-Type:
       - application/json
       Host:
-      - europe-1.dp.stashify.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.11.5
       x-origin:
@@ -246,19 +246,20 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.dp.stashify.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: "{\"chunk\":{\"type\":\"object\",\"object\":{\"reason\":\"The context
-        provides information about the `max_tokens` parameter, explaining its use
-        in limiting context size and answer length. However, it does not provide a
-        direct link to the official documentation.\",\"answer\":\"El par\xE1metro
-        `max_tokens` se utiliza en el endpoint /ask para establecer l\xEDmites estrictos
-        en el tama\xF1o del contexto y en la longitud de la respuesta generada. Esto
-        significa que `max_tokens` limita la cantidad de informaci\xF3n recuperada
-        que se env\xEDa al modelo de lenguaje y tambi\xE9n limita la longitud de la
-        respuesta generada.\",\"missing_info_query\":\"\xBFCu\xE1l es el enlace a
-        la documentaci\xF3n oficial sobre el uso de `max_tokens`?\",\"useful\":\"yes\",\"citations\":[\"block-AB\",\"block-AC\"]}}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":46,\"output_tokens\":18,\"timings\":{\"generative\":2.8625618090009084},\"input_nuclia_tokens\":0.046,\"output_nuclia_tokens\":0.018}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.04581,\"output\":0.018,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+        provides information on how to use the `max_tokens` parameter, including its
+        purpose and considerations. However, it does not provide a direct link to
+        the official documentation.\",\"answer\":\"El par\xE1metro `max_tokens` se
+        utiliza en el endpoint /ask para establecer l\xEDmites en el tama\xF1o del
+        contexto y en la longitud de la respuesta generada. Este par\xE1metro limita
+        la cantidad de informaci\xF3n recuperada que se env\xEDa al modelo de lenguaje
+        y tambi\xE9n limita la longitud de la respuesta generada. Es importante tener
+        en cuenta que el valor de `max_tokens` sumado a los tokens de entrada no debe
+        exceder el tama\xF1o total del contexto soportado por el modelo.\",\"missing_info_query\":\"\xBFCu\xE1l
+        es el enlace a la documentaci\xF3n oficial sobre el par\xE1metro `max_tokens`?\",\"useful\":\"yes\",\"citations\":[\"block-AA\",\"block-AB\",\"block-AE\"]}}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":45,\"output_tokens\":22,\"timings\":{\"generative\":5.024970737998956},\"input_nuclia_tokens\":0.045,\"output_nuclia_tokens\":0.022}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.04488,\"output\":0.0216,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -269,17 +270,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Wed, 05 Aug 2026 07:57:30 GMT
+      - Wed, 05 Aug 2026 08:09:56 GMT
       nuclia-learning-id:
-      - 10e7401f850c48a0afd895ed84ffd566
+      - 7a38f8e9dd32443ca290185b45ac590e
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '2868'
+      - '5033'
       x-nuclia-trace-id:
-      - 78c408e0a8923f91d8d7bd15ba9dcd88
+      - 97bebbe9e4eb4a72b92e307f9d75058e
     status:
       code: 200
       message: OK
@@ -293,27 +294,30 @@ interactions:
       this clearly\n\nAlways follow any additional instructions provided about format,
       style, or domain-specific behavior.", "chat_history": [], "context": [], "query_context":
       {}, "query_context_order": {}, "truncate": true, "user_prompt": {"prompt": "\n##
-      Question\nExplica el uso de `max_tokens` en espa\u00f1ol y proporciona un enlace
-      a la documentaci\u00f3n oficial.\n\n## Provided Context\n[START OF CONTEXT]\n##
-      Retrieval on nuclia-docs Knowledge Box\n\n# Explica el uso de `max_tokens` en
-      espa\u00f1ol y proporciona un enlace a la documentaci\u00f3n oficial.\n\n El
-      par\u00e1metro `max_tokens` se utiliza en el endpoint /ask para establecer l\u00edmites
-      estrictos en el tama\u00f1o del contexto y en la longitud de la respuesta generada.
-      Esto significa que `max_tokens` limita la cantidad de informaci\u00f3n recuperada
-      que se env\u00eda al modelo de lenguaje y tambi\u00e9n limita la longitud de
-      la respuesta generada.\n[END OF CONTEXT]\n\n## Answering Guidelines\n- Carefully
-      read all context; it may be lengthy or detailed\n- Do not omit or overlook any
-      relevant information\n- Existing context summaries are answer attempts produced
-      by retrieval agents. Treat them as first-class evidence and preserve their supported
-      facts.\n- Combine complementary summaries from multiple contexts when the question
-      has multiple parts. Do not require every context to answer the whole question
-      by itself.\n- If a context summary directly answers the question, do not replace
-      it with an insufficient-data answer merely because one retrieved chunk is incomplete;
-      use the chunks for supporting citations.\n- If the context is incomplete or
-      insufficient, state: \"Not enough data to answer this.\"\n- Read carefully any
-      extra instructions below if provided and use them to answer\n\nNow provide your
-      answer to the question: Explica el uso de `max_tokens` en espa\u00f1ol y proporciona
-      un enlace a la documentaci\u00f3n oficial."}, "citations": null, "citation_threshold":
+      Question\nExplica c\u00f3mo usar el par\u00e1metro `max_tokens` en espa\u00f1ol
+      y proporciona un enlace a la documentaci\u00f3n oficial.\n\n## Provided Context\n[START
+      OF CONTEXT]\n## Retrieval on nuclia-docs Knowledge Box\n\n# Explica c\u00f3mo
+      usar el par\u00e1metro `max_tokens` en espa\u00f1ol y proporciona un enlace
+      a la documentaci\u00f3n oficial.\n\n El par\u00e1metro `max_tokens` se utiliza
+      en el endpoint /ask para establecer l\u00edmites en el tama\u00f1o del contexto
+      y en la longitud de la respuesta generada. Este par\u00e1metro limita la cantidad
+      de informaci\u00f3n recuperada que se env\u00eda al modelo de lenguaje y tambi\u00e9n
+      limita la longitud de la respuesta generada. Es importante tener en cuenta que
+      el valor de `max_tokens` sumado a los tokens de entrada no debe exceder el tama\u00f1o
+      total del contexto soportado por el modelo.\n[END OF CONTEXT]\n\n## Answering
+      Guidelines\n- Carefully read all context; it may be lengthy or detailed\n- Do
+      not omit or overlook any relevant information\n- Existing context summaries
+      are answer attempts produced by retrieval agents. Treat them as first-class
+      evidence and preserve their supported facts.\n- Combine complementary summaries
+      from multiple contexts when the question has multiple parts. Do not require
+      every context to answer the whole question by itself.\n- If a context summary
+      directly answers the question, do not replace it with an insufficient-data answer
+      merely because one retrieved chunk is incomplete; use the chunks for supporting
+      citations.\n- If the context is incomplete or insufficient, state: \"Not enough
+      data to answer this.\"\n- Read carefully any extra instructions below if provided
+      and use them to answer\n\nNow provide your answer to the question: Explica c\u00f3mo
+      usar el par\u00e1metro `max_tokens` en espa\u00f1ol y proporciona un enlace
+      a la documentaci\u00f3n oficial."}, "citations": null, "citation_threshold":
       null, "generative_model": "chatgpt-azure-4o-mini", "max_tokens": 5000, "query_context_images":
       {}, "prefer_markdown": null, "json_schema": null, "format_prompt": false, "rerank_context":
       false, "tools": [], "tool_choice": {"type": "auto"}, "reasoning": false, "seed":
@@ -326,17 +330,17 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2627'
+      - '2807'
       Content-Type:
       - application/json
       Host:
-      - europe-1.dp.stashify.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.11.5
       x-client-ident:
       - default
       x-message:
-      - 0dfefb8a0b7b40f6a89fc902c85a8d80
+      - 7bd1cbc3b0ac4748a0cad7661bcf202b
       x-origin:
       - RAO
       x-session:
@@ -346,7 +350,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.dp.stashify.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: "{\"chunk\":{\"type\":\"text\",\"text\":\"El\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
@@ -356,16 +360,14 @@ interactions:
         en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         endpoint\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" /\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ask\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         para\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" establecer\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        l\xEDmites\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" estrict\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"os\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        tama\xF1o\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" del\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        contexto\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" y\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        longitud\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" de\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" respuesta\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        gener\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ada\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        Esto\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" significa\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        que\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" `\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"max\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"`\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        l\xEDmites\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" tama\xF1o\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        del\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" contexto\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        y\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" longitud\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        de\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        respuesta\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" gener\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ada\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        Este\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" par\xE1\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"metro\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         limita\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         cantidad\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" de\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         informaci\xF3n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" recuper\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ada\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
@@ -377,14 +379,29 @@ interactions:
         limita\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         longitud\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" de\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" respuesta\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        gener\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ada\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\\n\\n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"Para\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        gener\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ada\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        Es\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" importante\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        tener\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        cuenta\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" que\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" valor\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        de\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" `\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"max\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"`\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        sum\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ado\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        a\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" los\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" de\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        entrada\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" no\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        debe\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" exced\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"er\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" tama\xF1o\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        total\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" del\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        contexto\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" soport\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ado\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        por\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        modelo\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\\n\\n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"Para\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         m\xE1s\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" informaci\xF3n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\",\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         puedes\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" consultar\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" documentaci\xF3n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        oficial\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" [\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"a\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"qu\xED\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"](\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"https\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"://\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"nu\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"cl\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ia\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".com\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"/docs\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\").\"}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":13,\"output_tokens\":11,\"timings\":{\"generative_first_chunk\":0.5319892059997073,\"generative\":1.600093567998556},\"input_nuclia_tokens\":0.013,\"output_nuclia_tokens\":0.011}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.01266,\"output\":0.01068,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+        oficial\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":14,\"output_tokens\":13,\"timings\":{\"generative_first_chunk\":0.4219976280000992,\"generative\":1.8003466689988272},\"input_nuclia_tokens\":0.014,\"output_nuclia_tokens\":0.013}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.01371,\"output\":0.01284,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -392,17 +409,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Wed, 05 Aug 2026 07:57:34 GMT
+      - Wed, 05 Aug 2026 08:10:02 GMT
       nuclia-learning-id:
-      - 37d96ad3949b41f78aed6026d5f7a024
+      - e0ff422b19b64a198069582d47d83673
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '539'
+      - '428'
       x-nuclia-trace-id:
-      - f9874cc775afb70717e61b611916b70e
+      - c88e5e3b762a13f9ec00fc2ae1886269
     status:
       code: 200
       message: OK

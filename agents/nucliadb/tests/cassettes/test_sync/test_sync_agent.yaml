@@ -9,29 +9,29 @@ interactions:
       Connection:
       - keep-alive
       Host:
-      - europe-1.dp.stashify.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.11.5
       x-nuclia-nuakey:
       - DUMMY
     method: GET
-    uri: https://europe-1.dp.stashify.cloud/api/authorizer/info
+    uri: https://europe-1.dp.progress.cloud/api/authorizer/info
   response:
     body:
-      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"da1740fa-ab3e-4971-b374-7bb31b5dd325","account_id":"39f5fa6e-680a-475e-a757-812597e86d06","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
+      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"9e1317aa-e212-4a59-b794-afee535458a6","account_id":"07c2de7c-fa77-4374-a461-eea314da9dfd","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Content-Length:
       - '227'
       content-type:
       - application/json
       date:
-      - Wed, 05 Aug 2026 07:57:43 GMT
+      - Wed, 05 Aug 2026 08:10:11 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '6'
+      - '7'
     status:
       code: 200
       message: OK
@@ -110,7 +110,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.dp.stashify.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.11.5
       x-origin:
@@ -120,7 +120,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.dp.stashify.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
@@ -134,14 +134,14 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":27,"output_tokens":17,"timings":{"generative":3.083326596999541},"input_nuclia_tokens":0.027,"output_nuclia_tokens":0.017}}
+        {"chunk":{"type":"meta","input_tokens":27,"output_tokens":17,"timings":{"generative":3.321704932997818},"input_nuclia_tokens":0.027,"output_nuclia_tokens":0.017}}
 
         {"chunk":{"normalized_tokens":{"input":0.02733,"output":0.0174,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
         '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -149,17 +149,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Wed, 05 Aug 2026 07:57:50 GMT
+      - Wed, 05 Aug 2026 08:10:16 GMT
       nuclia-learning-id:
-      - 9df2841d21204feab276782bd70217e6
+      - 4d979db5b03242838ffb37473c21713c
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '3089'
+      - '3327'
       x-nuclia-trace-id:
-      - 683ad4b937701608fa28f585ab2c960a
+      - b582eba985fe0e6bdd7c4e0465372858
     status:
       code: 200
       message: OK
@@ -207,13 +207,13 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.dp.stashify.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.11.5
       x-client-ident:
       - default
       x-message:
-      - 4fa44307ec264607b2e493bc8735a2bc
+      - 8984acd31c4d459ead3b940fcae2da3e
       x-origin:
       - RAO
       x-session:
@@ -223,7 +223,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.dp.stashify.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"text","text":"New"}}
@@ -432,7 +432,7 @@ interactions:
 
         {"chunk":{"type":"status","code":"0"}}
 
-        {"chunk":{"type":"meta","input_tokens":12,"output_tokens":12,"timings":{"generative_first_chunk":0.3386507480026921,"generative":1.6827171629993245},"input_nuclia_tokens":0.012,"output_nuclia_tokens":0.012}}
+        {"chunk":{"type":"meta","input_tokens":12,"output_tokens":12,"timings":{"generative_first_chunk":0.6097889899974689,"generative":1.8998295229976065},"input_nuclia_tokens":0.012,"output_nuclia_tokens":0.012}}
 
         {"chunk":{"normalized_tokens":{"input":0.01176,"output":0.01236,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
 
@@ -447,17 +447,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Wed, 05 Aug 2026 07:57:53 GMT
+      - Wed, 05 Aug 2026 08:10:19 GMT
       nuclia-learning-id:
-      - 228aaa2bbde34ab5aeec5879ac99ad8a
+      - d62db6e7ca50459ea209701d038d5370
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '346'
+      - '621'
       x-nuclia-trace-id:
-      - 9603c9f12264f172ba450a12759769cc
+      - a75f3ef14029a9e0ffe13538b7ef022a
     status:
       code: 200
       message: OK

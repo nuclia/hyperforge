@@ -9,29 +9,29 @@ interactions:
       Connection:
       - keep-alive
       Host:
-      - europe-1.dp.stashify.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.11.5
       x-nuclia-nuakey:
       - DUMMY
     method: GET
-    uri: https://europe-1.dp.stashify.cloud/api/authorizer/info
+    uri: https://europe-1.dp.progress.cloud/api/authorizer/info
   response:
     body:
-      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"da1740fa-ab3e-4971-b374-7bb31b5dd325","account_id":"39f5fa6e-680a-475e-a757-812597e86d06","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
+      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"9e1317aa-e212-4a59-b794-afee535458a6","account_id":"07c2de7c-fa77-4374-a461-eea314da9dfd","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
       - '227'
       content-type:
       - application/json
       date:
-      - Wed, 05 Aug 2026 07:56:56 GMT
+      - Wed, 05 Aug 2026 08:09:26 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '190'
+      - '86'
     status:
       code: 200
       message: OK
@@ -77,13 +77,13 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.dp.stashify.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.11.5
       x-client-ident:
       - default
       x-message:
-      - 8ed74a70fcdc44fda2e5768a74ef5b19
+      - be08982cb83945a7933a4f69a8a5c618
       x-origin:
       - RAO
       x-session:
@@ -93,22 +93,21 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.dp.stashify.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: "{\"chunk\":{\"type\":\"object\",\"object\":{\"rephrased_question\":\"Explica
-        c\xF3mo usar el par\xE1metro `max_tokens` para controlar la longitud de las
-        respuestas en espa\xF1ol y proporciona un enlace a la documentaci\xF3n oficial.\",\"rules\":[\"La
-        respuesta debe estar en espa\xF1ol.\",\"Incluye una explicaci\xF3n clara de
-        la funci\xF3n de `max_tokens`.\",\"Proporciona un enlace directo a la documentaci\xF3n
-        relevante.\"],\"reason\":\"La pregunta original es un poco ambigua al decir
-        \\\"max_tokens.answer\\\". La reformulaci\xF3n aclara que se refiere al par\xE1metro
-        `max_tokens` para controlar la longitud de las respuestas. Tambi\xE9n se enfatiza
-        la necesidad de la respuesta en espa\xF1ol y el enlace a la documentaci\xF3n,
-        lo cual ya estaba impl\xEDcito pero se hace expl\xEDcito para mayor claridad.\"}}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":7,\"output_tokens\":14,\"timings\":{\"generative\":1.0897292209992884},\"input_nuclia_tokens\":0.007,\"output_nuclia_tokens\":0.014}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.0071,\"output\":0.01384,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+        c\xF3mo usar el par\xE1metro `max_tokens` en espa\xF1ol, incluyendo un enlace
+        a la documentaci\xF3n oficial.\",\"rules\":[\"Proporcionar una explicaci\xF3n
+        clara y concisa del uso de `max_tokens`.\",\"Incluir un enlace directo a la
+        documentaci\xF3n oficial que trate sobre `max_tokens`.\",\"La respuesta debe
+        estar en espa\xF1ol.\"],\"reason\":\"La pregunta original es clara en su intenci\xF3n,
+        pero la reformulaci\xF3n la hace m\xE1s directa y especifica la necesidad
+        de la documentaci\xF3n oficial y el idioma de respuesta, lo cual asegura que
+        el agente RAG se centre en los aspectos m\xE1s importantes de la solicitud.\"}}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":7,\"output_tokens\":12,\"timings\":{\"generative\":1.108321628998965},\"input_nuclia_tokens\":0.007,\"output_nuclia_tokens\":0.012}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.0071,\"output\":0.01232,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -116,17 +115,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Wed, 05 Aug 2026 07:56:56 GMT
+      - Wed, 05 Aug 2026 08:09:27 GMT
       nuclia-learning-id:
-      - 838119e9aa2e412896d6d3f6fb031f57
+      - 9ae8deaa701c4e8e9f79938c5d4b45bb
       nuclia-learning-model:
       - gemini-2.5-flash-lite
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1096'
+      - '1128'
       x-nuclia-trace-id:
-      - e960ac37fbef63af9c8e7b481a41d3f8
+      - 193468b6e72ffcae7241e7afef4830ad
     status:
       code: 200
       message: OK
@@ -140,35 +139,35 @@ interactions:
       Connection:
       - keep-alive
       Host:
-      - europe-1.dp.stashify.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.11.5
       x-stf-nuakey:
       - DUMMY
     method: GET
-    uri: https://europe-1.dp.stashify.cloud/api/v1/predict/tokens?model=multilingual&text=Explica+c%C3%B3mo+usar+el+par%C3%A1metro+%60max_tokens%60+para+controlar+la+longitud+de+las+respuestas+en+espa%C3%B1ol+y+proporciona+un+enlace+a+la+documentaci%C3%B3n+oficial.
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/tokens?model=multilingual&text=Explica+c%C3%B3mo+usar+el+par%C3%A1metro+%60max_tokens%60+en+espa%C3%B1ol%2C+incluyendo+un+enlace+a+la+documentaci%C3%B3n+oficial.
   response:
     body:
-      string: "{\"tokens\":[{\"text\":\"espa\xF1ol\",\"ner\":\"LANGUAGE\",\"start\":92,\"end\":99}],\"time\":0.009359359741210938,\"input_tokens\":36}"
+      string: "{\"tokens\":[{\"text\":\"espa\xF1ol\",\"ner\":\"LANGUAGE\",\"start\":47,\"end\":54}],\"time\":0.09751224517822266,\"input_tokens\":28}"
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Content-Length:
-      - '115'
+      - '114'
       access-control-expose-headers:
       - X-NUCLIA-TRACE-ID
       content-type:
       - application/json
       date:
-      - Wed, 05 Aug 2026 07:56:58 GMT
+      - Wed, 05 Aug 2026 08:09:28 GMT
       nuclia-learning-model:
       - multilingual
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '16'
+      - '114'
       x-nuclia-trace-id:
-      - b146c40f938c36e41f8ce06ba3cc8959
+      - 84baf889a4ecb1a482bd247299b78b37
     status:
       code: 200
       message: OK
@@ -178,46 +177,45 @@ interactions:
       {}, "truncate": true, "user_prompt": {"prompt": "\n\nInformation about the KB:\n\n#
       nuclia-docs\n\ndescription: Documentation of the Nuclia API, recipies, reference
       \n\nAnd given the question: Explica c\u00f3mo usar el par\u00e1metro `max_tokens`
-      para controlar la longitud de las respuestas en espa\u00f1ol y proporciona un
-      enlace a la documentaci\u00f3n oficial.\n\n## labels: {''pmm'': [''Videos'',
-      ''Partner Content'', ''Softcat'', ''Sales Enablement Assets'', ''KO 26'', ''Data
-      Sheets'', ''Progress Agentic RAG Training Materials 2026'']}\n\n## Facets:\n\n##
-      Content Types\nThe following content types are available in the KB:\n\n- /n/i:
-      994\n- application/json: 1\n- text/markdown: 993\nThe following languages are
-      available in the KB:\n\n- ca: 4\n- cy: 1\n- da: 1\n- en: 974\n- eo: 4\n- la:
-      7\n- nb: 1\n- tl: 1\n- yo: 1\n\n\n# Important rules to follow\n\n\nprompt=''Be
-      polite''\n"}, "citations": false, "citation_threshold": null, "generative_model":
-      "gemini-2.5-flash", "max_tokens": 8192, "query_context_images": {}, "prefer_markdown":
-      null, "json_schema": {"title": "ask_configuration", "description": "Configuration
-      extracted from reasoning engine", "parameters": {"type": "object", "properties":
-      {"link": {"type": "boolean", "description": "The user wants link reference to
-      the answer?"}, "knowledge_scan": {"type": "string", "description": "If the query
-      requires a knowledge aggregation or scan search to answer define the entities,
-      labels and relations to query in the KB. Example queries: How many ..."}, "semantic_query":
-      {"type": "string", "description": "Rephrase this question so its better for
-      semantic retrieval, and keep the rephrased question in the same language as
-      the original. Please define ONLY the question without any explanation. JUST
-      A SENTENCE. DO NOT ADD ANY EXTRA NOTES AT THE END, JUST ONE SENTENCE"}, "lexical_query":
-      {"type": "string", "description": "Rephrase this question so its better for
-      lexical retrieval, translate the lexical rephrased question to cy. Please define
-      ONLY the question without any explanation. JUST A SENTENCE. DO NOT ADD ANY EXTRA
-      NOTES AT THE END, JUST ONE SENTENCE"}, "visual": {"type": "boolean", "description":
-      "Is required an analysis of an image to answer this question, answer with false
-      or true"}, "keywords_filter": {"type": "array", "items": {"type": "string"},
-      "description": "Extract if any the keywords that should appear on the retrieved
-      results and its a must match, make sure that are keywords that are not common
-      words, and that are not the same as the question or answer. Please define ONLY
-      the keywords without any explanation. Only one or two words maximum. JUST A
-      LIST OF KEYWORDS. DO NOT ADD ANY EXTRA NOTES AT THE END, JUST A LIST OF KEYWORDS"},
-      "reason": {"type": "string"}, "entities": {"type": "array", "description": "Entities
-      related to the user question to query in the KB", "items": {"type": "string"}},
-      "relations": {"type": "array", "description": "Relations related to the user
-      question to query in the KB", "items": {"type": "string"}}, "pre_queries": {"type":
-      "array", "items": {"type": "string"}, "description": "Pre queries to run before
-      the main query to gather more information"}}, "required": ["semantic_query",
-      "lexical_query", "visual", "keywords_filter", "reason", "pre_queries"]}}, "format_prompt":
-      false, "rerank_context": false, "tools": [], "tool_choice": {"type": "required"},
-      "reasoning": false, "seed": null}'
+      en espa\u00f1ol, incluyendo un enlace a la documentaci\u00f3n oficial.\n\n##
+      labels: {''pmm'': [''Videos'', ''Partner Content'', ''Softcat'', ''Sales Enablement
+      Assets'', ''KO 26'', ''Data Sheets'', ''Progress Agentic RAG Training Materials
+      2026'']}\n\n## Facets:\n\n## Content Types\nThe following content types are
+      available in the KB:\n\n- /n/i: 994\n- application/json: 1\n- text/markdown:
+      993\nThe following languages are available in the KB:\n\n- ca: 4\n- cy: 1\n-
+      da: 1\n- en: 974\n- eo: 4\n- la: 7\n- nb: 1\n- tl: 1\n- yo: 1\n\n\n# Important
+      rules to follow\n\n\nprompt=''Be polite''\n"}, "citations": false, "citation_threshold":
+      null, "generative_model": "gemini-2.5-flash", "max_tokens": 8192, "query_context_images":
+      {}, "prefer_markdown": null, "json_schema": {"title": "ask_configuration", "description":
+      "Configuration extracted from reasoning engine", "parameters": {"type": "object",
+      "properties": {"link": {"type": "boolean", "description": "The user wants link
+      reference to the answer?"}, "knowledge_scan": {"type": "string", "description":
+      "If the query requires a knowledge aggregation or scan search to answer define
+      the entities, labels and relations to query in the KB. Example queries: How
+      many ..."}, "semantic_query": {"type": "string", "description": "Rephrase this
+      question so its better for semantic retrieval, and keep the rephrased question
+      in the same language as the original. Please define ONLY the question without
+      any explanation. JUST A SENTENCE. DO NOT ADD ANY EXTRA NOTES AT THE END, JUST
+      ONE SENTENCE"}, "lexical_query": {"type": "string", "description": "Rephrase
+      this question so its better for lexical retrieval, translate the lexical rephrased
+      question to cy. Please define ONLY the question without any explanation. JUST
+      A SENTENCE. DO NOT ADD ANY EXTRA NOTES AT THE END, JUST ONE SENTENCE"}, "visual":
+      {"type": "boolean", "description": "Is required an analysis of an image to answer
+      this question, answer with false or true"}, "keywords_filter": {"type": "array",
+      "items": {"type": "string"}, "description": "Extract if any the keywords that
+      should appear on the retrieved results and its a must match, make sure that
+      are keywords that are not common words, and that are not the same as the question
+      or answer. Please define ONLY the keywords without any explanation. Only one
+      or two words maximum. JUST A LIST OF KEYWORDS. DO NOT ADD ANY EXTRA NOTES AT
+      THE END, JUST A LIST OF KEYWORDS"}, "reason": {"type": "string"}, "entities":
+      {"type": "array", "description": "Entities related to the user question to query
+      in the KB", "items": {"type": "string"}}, "relations": {"type": "array", "description":
+      "Relations related to the user question to query in the KB", "items": {"type":
+      "string"}}, "pre_queries": {"type": "array", "items": {"type": "string"}, "description":
+      "Pre queries to run before the main query to gather more information"}}, "required":
+      ["semantic_query", "lexical_query", "visual", "keywords_filter", "reason", "pre_queries"]}},
+      "format_prompt": false, "rerank_context": false, "tools": [], "tool_choice":
+      {"type": "required"}, "reasoning": false, "seed": null}'
     headers:
       Accept:
       - application/x-ndjson
@@ -226,17 +224,17 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '3420'
+      - '3373'
       Content-Type:
       - application/json
       Host:
-      - europe-1.dp.stashify.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.11.5
       x-client-ident:
       - default
       x-message:
-      - 8ed74a70fcdc44fda2e5768a74ef5b19
+      - be08982cb83945a7933a4f69a8a5c618
       x-origin:
       - RAO
       x-session:
@@ -246,17 +244,16 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.dp.stashify.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
-      string: "{\"chunk\":{\"type\":\"object\",\"object\":{\"link\":true,\"semantic_query\":\"Explica
-        el uso del par\xE1metro `max_tokens` para controlar la longitud de las respuestas
-        y proporciona un enlace a la documentaci\xF3n oficial.\",\"lexical_query\":\"Sut
-        i ddefnyddio'r paramedr `max_tokens` i reoli hyd ymatebion a darparu dolen
-        i'r ddogfennaeth swyddogol?\",\"visual\":false,\"keywords_filter\":[\"max_tokens\",\"longitud\",\"respuestas\"],\"reason\":\"The
-        user is asking how to use a specific parameter (`max_tokens`) to control the
-        length of responses and wants a link to the official documentation. This requires
-        a semantic search for the parameter's usage and a link.\",\"pre_queries\":[]}}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":36,\"output_tokens\":97,\"timings\":{\"generative\":1.6855239240012452},\"input_nuclia_tokens\":0.036,\"output_nuclia_tokens\":0.097}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.03564,\"output\":0.097,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+      string: "{\"chunk\":{\"type\":\"object\",\"object\":{\"link\":true,\"semantic_query\":\"Expl\xEDcame
+        c\xF3mo utilizar el par\xE1metro `max_tokens` y d\xF3nde encontrar su documentaci\xF3n
+        oficial.\",\"lexical_query\":\"Sut hawl defnyddio'r paramedr `max_tokens`
+        yn y ddogfennaeth swyddogol?\",\"visual\":false,\"keywords_filter\":[\"max_tokens\",\"par\xE1metro\"],\"reason\":\"La
+        pregunta pide una explicaci\xF3n sobre el uso de `max_tokens` y un enlace
+        a la documentaci\xF3n oficial, por lo que la recuperaci\xF3n sem\xE1ntica
+        y l\xE9xica debe enfocarse en esos t\xE9rminos.\",\"entities\":[],\"relations\":[],\"pre_queries\":[]}}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":35,\"output_tokens\":86,\"timings\":{\"generative\":1.704163222995703},\"input_nuclia_tokens\":0.035,\"output_nuclia_tokens\":0.086}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.03522,\"output\":0.0865,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000
@@ -267,103 +264,55 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Wed, 05 Aug 2026 07:56:58 GMT
+      - Wed, 05 Aug 2026 08:09:28 GMT
       nuclia-learning-id:
-      - a7e8d9326fd649fdaf69d8c6dd824a2e
+      - 11c37d9ef4b74b36971d4441fdcf9fa8
       nuclia-learning-model:
       - gemini-2.5-flash
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1692'
+      - '1722'
       x-nuclia-trace-id:
-      - 96862f234d56fe6dab0110cbd5a26d36
+      - 623be6c00fe1043b6ce09bd614b8e13c
     status:
       code: 200
       message: OK
 - request:
-    body: '{"question": "Explica c\u00f3mo usar el par\u00e1metro `max_tokens` para
-      controlar la longitud de las respuestas en espa\u00f1ol y proporciona un enlace
-      a la documentaci\u00f3n oficial.", "user_id": "arag-ask-rerank", "context":
-      {"c27a1e5f5ddb4b118921345d713401b8/t/page/351-554": " full: boolean \n \n Defined
-      in \n libs/sdk-core/src/lib/db/kb/kb.models.ts:386 \n \n max_messages? \n \n
-      optional max_messages: number \n \n Defined in \n libs/sdk-core/src/lib/db/kb/kb.models.ts:387
-      \n \n name \n \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/ConversationalStrategy\n",
-      "dd41482018924facb5dbb87a7d53f122/t/page/3310-3757": " ) \n time.sleep(wait_time)
-      \n retries += 1 \n else: \n response.raise_for_status() \n raise Exception(
-      Max retries exceeded ) \n Example usage \n url = https://your-endpoint \n headers
-      = { Authorization : Bearer YOUR_ACCESS_TOKEN } \n data = make_request_with_try_after_info(url,
-      headers) \n print(data) \n ``` \n These examples demonstrate how to handle rate
-      limits effectively, ensuring that your application respects the limits and retries
-      appropriately.\n\n\nLink: https://docs.rag.progress.cloud/docs/ingestion/how-to/rate-limiting\n",
-      "dd41482018924facb5dbb87a7d53f122/t/page/1900-2653": " retries = 0 \n while
-      retries < max_retries: \n response = requests.get(url, headers=headers) \n if
-      response.status_code == 200: \n return response.json() \n elif response.status_code
-      == 429: \n wait_time = 2 retries # Exponential backoff: 2^retries \n print(f
-      Rate limit exceeded. Retrying in {wait_time} seconds... ) \n time.sleep(wait_time)
-      \n retries += 1 \n else: \n response.raise_for_status() \n raise Exception(
-      Max retries exceeded ) \n Example usage \n url = https://your-endpoint \n headers
-      = { Authorization : Bearer YOUR_ACCESS_TOKEN } \n data = make_request_with_exponential_backoff(url,
-      headers) \n print(data) \n ``` \n Example 2: Ingestion back pressure limits
-      \n Here''s an example of how to use the try_after key from the response to manage
-      rate limits: \n\n\n\nLink: https://docs.rag.progress.cloud/docs/ingestion/how-to/rate-limiting\n",
-      "4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340": " Use the max_tokens parameter
-      on the /ask endpoint to set hard limits on: \n - Context size: Limits the amount
-      of retrieved information sent to the LLM \n - Answer length: Limits the length
-      of the generated response \n Important Considerations \n Context Limitations:
-      \n\n\n\nLink: https://docs.rag.progress.cloud/docs/rag/advanced/consumption\n",
-      "4039d76b0fff4962900836ab3fdec9f7/t/page/3340-4136": " - Restricting context
-      size may result in less relevant answers since the LLM has less information
-      to work with \n - Balance between cost control and answer quality \n Answer
-      Length Limitations: \n - The LLM might not complete its response if it hits
-      the token limit, potentially cutting sentences mid-way \n - Recommended approach:
-      Include length requirements in your prompt (e.g., Please answer in less than
-      200 words ) rather than relying solely on hard limits \n - This allows the LLM
-      to naturally conclude its response within the desired length \n How to Monitor
-      Token Consumption \n Understanding Token Consumption Data \n You can receive
-      detailed token consumption information from the following endpoints that utilize
-      LLM models: ask, chat, remi, query, sentence, summarize, tokens, and rerank.
-      \n\n\n\nLink: https://docs.rag.progress.cloud/docs/rag/advanced/consumption\n",
-      "4039d76b0fff4962900836ab3fdec9f7/t/page/1650-2326": " \n Large context: Results
-      from using RAG strategies like Full resource or Neighbouring paragraphs , or
-      from using the extra_context parameter \n Long questions: More detailed or complex
-      questions require more input tokens \n Long prompts: Extensive system prompts
-      increase the input token count \n Detailed answers: Comprehensive responses
-      require more output tokens \n Images in context: When using multimodal models,
-      images included in the retrieved context significantly increase token consumption
-      \n \n How to Limit and Control Token Consumption \n Strategy 1: Optimize Your
-      Parameters \n The first approach to reducing token consumption is to fine-tune
-      your request parameters: \n\n\n\nLink: https://docs.rag.progress.cloud/docs/rag/advanced/consumption\n",
-      "4039d76b0fff4962900836ab3fdec9f7/t/page/5396-5615": " - input: Tokens used
-      for the prompt, context, and question \n - output: Tokens used for the generated
-      response \n - image: Tokens used for image processing (when applicable) \n Customer
-      Key Tokens (customer_key_tokens): \n\n\n\nLink: https://docs.rag.progress.cloud/docs/rag/advanced/consumption\n",
-      "b6a6202b9f0d4611a980293ce53337d6/t/page/265-405": " last: boolean \n \n page
-      \n \n page: number \n \n size \n \n size: number \n \n Defined in \n libs/sdk-core/src/lib/db/training/training.models.ts:36\n\n\nLink:
-      https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/TrainingExecutions\n",
-      "220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709": " ::: \n :::warning \n
-      Enabling reasoning can use additional tokens, which may increase your usage
-      costs. \n You may need to increase max_tokens to give the LLM enough room to
-      reason and generate an answer. \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/python-sdk/search\n",
-      "220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276": " \n SDK: \n \n ```python
-      \n from nuclia import sdk \n from nucliadb_models.search import AskRequest,
-      Reasoning \n search = sdk.NucliaSearch() \n query = AskRequest( \n query= My
-      question with extra reasoning effort , \n max_tokens=5000, \n reasoning=Reasoning(
-      \n display=True, # Show reasoning in the response \n effort= low , # Can be
-      low , medium , or high \n budget_tokens=1024 # How many tokens reasoning can
-      use \n ), \n ) \n search.ask(query=query) \n ``` \n Model Support for Reasoning
-      Options: \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/python-sdk/search\n",
-      "44d05174f1954331b62f5e4026f2b01a/t/page/6346-6668": " \n step: Information
-      about the current processing step \n module: The module being executed (e.g.,
-      rephrase , basic_ask , remi ) \n title: Display title for the step \n value:
-      Result of the step \n reason: Explanation for the step \n timeit: Time taken
-      in seconds \n \n input_nuclia_tokens/output_nuclia_tokens: Token usage \n \n
-      \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/python-sdk/rao\n",
-      "50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221": " \n optional max_tokens:
-      number \n \n Defined in \n libs/sdk-core/src/lib/db/search/ask.models.ts:251
-      \n \n prefer_markdown? \n \n optional prefer_markdown: boolean \n \n Defined
-      in \n libs/sdk-core/src/lib/db/search/ask.models.ts:256 \n \n query_context?
-      \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/PredictAnswerOptions\n",
+    body: '{"question": "Explica c\u00f3mo usar el par\u00e1metro `max_tokens` en
+      espa\u00f1ol, incluyendo un enlace a la documentaci\u00f3n oficial.", "user_id":
+      "arag-ask-rerank", "context": {"666b3a9d01f74323b6ca6c9939834bec/t/page/0-1386":
+      "@nuclia/core / Exports / StatsType \n Enumeration: StatsType \n Deprecated
+      \n Table of contents \n Enumeration Members \n \n AI_TOKENS_USED \n BYTES \n
+      CHARS \n DOCS_NO_MEDIA \n MEDIA_SECONDS \n PAGES \n PROCESSING_TIME \n RESOURCES
+      \n SEARCHES \n SUGGESTIONS \n TRAIN_SECONDS \n \n Enumeration Members \n AI_TOKENS_USED
+      \n \u2022 AI_TOKENS_USED = ai_tokens_used \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:206
+      \n \n BYTES \n \u2022 BYTES = bytes \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:200
+      \n \n CHARS \n \u2022 CHARS = chars \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:198
+      \n \n DOCS_NO_MEDIA \n \u2022 DOCS_NO_MEDIA = docs_no_media \n Defined in \n
+      libs/sdk-core/src/lib/db/db.models.ts:205 \n \n MEDIA_SECONDS \n \u2022 MEDIA_SECONDS
+      = media_seconds \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:199 \n
+      \n PAGES \n \u2022 PAGES = pages \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:202
+      \n \n PROCESSING_TIME \n \u2022 PROCESSING_TIME = processing_time \n Defined
+      in \n libs/sdk-core/src/lib/db/db.models.ts:196 \n \n RESOURCES \n \u2022 RESOURCES
+      = resources \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:201 \n \n
+      SEARCHES \n \u2022 SEARCHES = searches \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:197
+      \n \n SUGGESTIONS \n \u2022 SUGGESTIONS = suggestions \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:204
+      \n \n TRAIN_SECONDS \n \u2022 TRAIN_SECONDS = train_seconds \n Defined in \n
+      libs/sdk-core/src/lib/db/db.models.ts:203\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/enums/StatsType\n",
+      "89cc367c149e4f6eab0e06a743d1edba/t/page/2804-3043": " Description: The maximum
+      number of tokens that the model can generate as output. Again, we should keep
+      in mind that this value summed to the Maximum supported input tokens should
+      not exceed the total context size supported by the model. \n\n\n\nLink: https://docs.rag.progress.cloud/docs/rag/advanced/openai-api-compatible-models\n",
+      "9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412": " max_tokens: the maximum
+      number of input tokens to put in the final context (including the prompt, the
+      retrieved results and the user question). \n max_output_tokens: the maximum
+      number of tokens to generate. \n\n\n\nLink: https://docs.rag.progress.cloud/docs/rag/advanced/widget/features\n",
+      "0a003c3f724e45e392a9c8d1ce8800c1/t/page/0-349": "@nuclia/core \u2022 Docs \n
+      \n @nuclia/core / Consumption \n Interface: Consumption \n Properties \n customer_key_tokens
+      \n \n customer_key_tokens: TokenConsumption \n \n Defined in \n libs/sdk-core/src/lib/db/search/ask.models.ts:230
+      \n \n normalized_tokens \n \n normalized_tokens: TokenConsumption \n \n Defined
+      in \n libs/sdk-core/src/lib/db/search/ask.models.ts:229\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/Consumption\n",
       "43004f553e534ffe9c9e735856bd9b23/t/page/480-703": " \n optional max_images:
       string \n \n Defined in \n libs/sdk-core/src/lib/db/kb/kb.models.ts:591 \n \n
       output_tokens \n \n output_tokens: object \n \n default_max? \n \n optional
@@ -374,32 +323,105 @@ interactions:
       \n \n input_tokens: object \n \n max \n \n max: number \n \n min? \n \n optional
       min: number \n \n Defined in \n libs/sdk-core/src/lib/db/kb/kb.models.ts:587
       \n \n max_images? \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/ModelConfig\n",
+      "e8525e64c5b44982b958d32cf6090613/t/page/2808-3011": " \n optional max_tokens:
+      number \\| object \n \n Defines the maximum number of tokens that the model
+      will take as context. \n Defined in \n libs/sdk-core/src/lib/db/search/search.models.ts:112
+      \n \n min_score? \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/ChatOptions\n",
+      "e8525e64c5b44982b958d32cf6090613/t/page/2450-2808": " \n optional highlight:
+      boolean \n \n Inherited from \n BaseSearchOptions.highlight \n Defined in \n
+      libs/sdk-core/src/lib/db/search/search.models.ts:76 \n \n keyword_filters? \n
+      \n optional keyword_filters: string[] \\| Filter[] \n \n Inherited from \n BaseSearchOptions.keyword_filters
+      \n Defined in \n libs/sdk-core/src/lib/db/search/search.models.ts:65 \n \n max_tokens?
+      \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/ChatOptions\n",
+      "50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221": " \n optional max_tokens:
+      number \n \n Defined in \n libs/sdk-core/src/lib/db/search/ask.models.ts:251
+      \n \n prefer_markdown? \n \n optional prefer_markdown: boolean \n \n Defined
+      in \n libs/sdk-core/src/lib/db/search/ask.models.ts:256 \n \n query_context?
+      \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/PredictAnswerOptions\n",
+      "50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/739-977": " \n optional generative_model:
+      string \n \n Defined in \n libs/sdk-core/src/lib/db/search/ask.models.ts:250
+      \n \n json_schema? \n \n optional json_schema: object \n \n Defined in \n libs/sdk-core/src/lib/db/search/ask.models.ts:257
+      \n \n max_tokens? \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/PredictAnswerOptions\n",
       "f02da6c4bdf34596a89a8106f4b0ea9f/t/page/0-299": "@nuclia/core \u2022 Docs \n
       \n @nuclia/core / PageToken \n Interface: PageToken \n Properties \n height
       \n \n height: number \n \n Defined in \n libs/sdk-core/src/lib/db/resource/resource.models.ts:249
       \n \n line \n \n line: number \n \n Defined in \n libs/sdk-core/src/lib/db/resource/resource.models.ts:251
       \n \n text \n \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/PageToken\n",
-      "9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412": " max_tokens: the maximum
-      number of input tokens to put in the final context (including the prompt, the
-      retrieved results and the user question). \n max_output_tokens: the maximum
-      number of tokens to generate. \n\n\n\nLink: https://docs.rag.progress.cloud/docs/rag/advanced/widget/features\n",
-      "e8525e64c5b44982b958d32cf6090613/t/page/2808-3011": " \n optional max_tokens:
-      number \\| object \n \n Defines the maximum number of tokens that the model
-      will take as context. \n Defined in \n libs/sdk-core/src/lib/db/search/search.models.ts:112
-      \n \n min_score? \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/ChatOptions\n",
-      "89cc367c149e4f6eab0e06a743d1edba/t/page/2202-2575": " \n \n Maximum supported
-      input tokens: \n Description: The maximum number of tokens that the model can
-      accept as input. Be mindful that this takes into account the tokens used in
-      the prompt, query and context. Also take note that some models may provide their
-      context window as the total between input and output tokens, while others may
-      provide it as the input tokens only. \n\n\n\nLink: https://docs.rag.progress.cloud/docs/rag/advanced/openai-api-compatible-models\n",
-      "89cc367c149e4f6eab0e06a743d1edba/t/page/2804-3043": " Description: The maximum
-      number of tokens that the model can generate as output. Again, we should keep
-      in mind that this value summed to the Maximum supported input tokens should
-      not exceed the total context size supported by the model. \n\n\n\nLink: https://docs.rag.progress.cloud/docs/rag/advanced/openai-api-compatible-models\n",
-      "42a4cd5a30314e94aa079ed0cfe81381/t/page/502-696": " \n optional max_paragraph:
-      number \n \n Defined in \n libs/sdk-core/src/lib/db/kb/kb.models.ts:536 \n \n
-      name? \n \n optional name: string \n \n Defined in \n libs/sdk-core/src/lib/db/kb/kb.models.ts:535\n\n\nLink:
+      "24ad6997e1fe4a109d67d7802a083678/a/title/0-55": "docs > develop > js sdk >
+      interfaces > TokenConsumption\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/TokenConsumption\n",
+      "6e8250e6b5264156988657a221fd5e94/t/page/0-397": "@nuclia/core \u2022 Docs \n
+      \n @nuclia/core / Ask / ConsumptionAskResponseItem \n Interface: ConsumptionAskResponseItem
+      \n Properties \n customer_key_tokens \n \n customer_key_tokens: TokenConsumption
+      \n \n Defined in \n libs/sdk-core/src/lib/db/search/ask.models.ts:127 \n \n
+      normalized_tokens \n \n normalized_tokens: TokenConsumption \n \n Defined in
+      \n libs/sdk-core/src/lib/db/search/ask.models.ts:126 \n \n type \n \n\n\n\nLink:
+      https://docs.rag.progress.cloud/docs/develop/js-sdk/namespaces/Ask/interfaces/ConsumptionAskResponseItem\n",
+      "7b41750917e349598c846526162ebb68/a/title/0-58": "docs > develop > js sdk >
+      interfaces > NucliaTokensDetails\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/NucliaTokensDetails\n",
+      "4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340": " Use the max_tokens parameter
+      on the /ask endpoint to set hard limits on: \n - Context size: Limits the amount
+      of retrieved information sent to the LLM \n - Answer length: Limits the length
+      of the generated response \n Important Considerations \n Context Limitations:
+      \n\n\n\nLink: https://docs.rag.progress.cloud/docs/rag/advanced/consumption\n",
+      "328ed5b87692439a881303c7c1d4eefc/a/title/0-52": "docs > develop > js sdk >
+      interfaces > Ask.AskTokens\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/Ask.AskTokens\n",
+      "66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833": "@nuclia/core \u2022 Docs
+      \n \n @nuclia/core / UsageType \n Enumeration: UsageType \n Enumeration Members
+      \n AI_TOKENS_USED \n \n AI_TOKENS_USED: ai_tokens_used \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:208
+      \n \n BYTES_PROCESSED \n \n BYTES_PROCESSED: bytes_processed \n \n Defined in
+      \n libs/sdk-core/src/lib/db/db.models.ts:199 \n \n CHARS_PROCESSED \n \n CHARS_PROCESSED:
+      chars_processed \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:200
+      \n \n MEDIA_FILES_PROCESSED \n \n MEDIA_FILES_PROCESSED: media_files_processed
+      \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:202 \n \n MEDIA_SECONDS_PROCESSED
+      \n \n MEDIA_SECONDS_PROCESSED: media_seconds_processed \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:201
+      \n \n NUCLIA_TOKENS \n \n NUCLIA_TOKENS: nuclia_tokens_billed \n \n Defined
+      in \n libs/sdk-core/src/lib/db/db.models.ts:209 \n \n PAGES_PROCESSED \n \n
+      PAGES_PROCESSED: pages_processed \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:203
+      \n \n PARAGRAPHS_PROCESSED \n \n PARAGRAPHS_PROCESSED: paragraphs_processed
+      \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:204 \n \n PRE_PROCESSING_TIME
+      \n \n PRE_PROCESSING_TIME: pre_processing_time \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:196
+      \n \n RESOURCES_PROCESSED \n \n RESOURCES_PROCESSED: resources_processed \n
+      \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:198 \n \n SEARCHES_PERFORMED
+      \n \n SEARCHES_PERFORMED: searches_performed \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:206
+      \n \n SLOW_PROCESSING_TIME \n \n SLOW_PROCESSING_TIME: slow_processing_time
+      \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:197 \n \n SUGGESTIONS_PERFORMED
+      \n \n SUGGESTIONS_PERFORMED: suggestions_performed \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:207
+      \n \n TRAIN_SECONDS \n \n TRAIN_SECONDS: train_seconds \n \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:205\n\n\nLink:
+      https://docs.rag.progress.cloud/docs/develop/js-sdk/enumerations/UsageType\n",
+      "0d01e250360a4d6c91f3baf2de5e7d38/t/page/0-224": "@nuclia/core \u2022 Docs \n
+      \n @nuclia/core / ReasoningConfig \n Interface: ReasoningConfig \n Properties
+      \n budget_tokens? \n \n optional budget_tokens: number \n \n Defined in \n libs/sdk-core/src/lib/db/kb/kb.models.ts:647
+      \n \n effort? \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/ReasoningConfig\n",
+      "b14cf452a3434839a04c111f2ea4dc51/t/page/0-2139": "@nuclia/core / Exports /
+      UsageType \n Enumeration: UsageType \n Table of contents \n Enumeration Members
+      \n \n AI_TOKENS_USED \n BYTES_PROCESSED \n CHARS_PROCESSED \n MEDIA_FILES_PROCESSED
+      \n MEDIA_SECONDS_PROCESSED \n NUCLIA_TOKENS \n PAGES_PROCESSED \n PARAGRAPHS_PROCESSED
+      \n PRE_PROCESSING_TIME \n RESOURCES_PROCESSED \n SEARCHES_PERFORMED \n SLOW_PROCESSING_TIME
+      \n SUGGESTIONS_PERFORMED \n TRAIN_SECONDS \n \n Enumeration Members \n AI_TOKENS_USED
+      \n \u2022 AI_TOKENS_USED = ai_tokens_used \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:190
+      \n \n BYTES_PROCESSED \n \u2022 BYTES_PROCESSED = bytes_processed \n Defined
+      in \n libs/sdk-core/src/lib/db/db.models.ts:181 \n \n CHARS_PROCESSED \n \u2022
+      CHARS_PROCESSED = chars_processed \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:182
+      \n \n MEDIA_FILES_PROCESSED \n \u2022 MEDIA_FILES_PROCESSED = media_files_processed
+      \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:184 \n \n MEDIA_SECONDS_PROCESSED
+      \n \u2022 MEDIA_SECONDS_PROCESSED = media_seconds_processed \n Defined in \n
+      libs/sdk-core/src/lib/db/db.models.ts:183 \n \n NUCLIA_TOKENS \n \u2022 NUCLIA_TOKENS
+      = nuclia_tokens_billed \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:191
+      \n \n PAGES_PROCESSED \n \u2022 PAGES_PROCESSED = pages_processed \n Defined
+      in \n libs/sdk-core/src/lib/db/db.models.ts:185 \n \n PARAGRAPHS_PROCESSED \n
+      \u2022 PARAGRAPHS_PROCESSED = paragraphs_processed \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:186
+      \n \n PRE_PROCESSING_TIME \n \u2022 PRE_PROCESSING_TIME = pre_processing_time
+      \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:178 \n \n RESOURCES_PROCESSED
+      \n \u2022 RESOURCES_PROCESSED = resources_processed \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:180
+      \n \n SEARCHES_PERFORMED \n \u2022 SEARCHES_PERFORMED = searches_performed \n
+      Defined in \n libs/sdk-core/src/lib/db/db.models.ts:188 \n \n SLOW_PROCESSING_TIME
+      \n \u2022 SLOW_PROCESSING_TIME = slow_processing_time \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:179
+      \n \n SUGGESTIONS_PERFORMED \n \u2022 SUGGESTIONS_PERFORMED = suggestions_performed
+      \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:189 \n \n TRAIN_SECONDS
+      \n \u2022 TRAIN_SECONDS = train_seconds \n Defined in \n libs/sdk-core/src/lib/db/db.models.ts:187\n\n\nLink:
+      https://docs.rag.progress.cloud/docs/develop/js-sdk/enums/UsageType\n", "42a4cd5a30314e94aa079ed0cfe81381/t/page/502-696":
+      " \n optional max_paragraph: number \n \n Defined in \n libs/sdk-core/src/lib/db/kb/kb.models.ts:536
+      \n \n name? \n \n optional name: string \n \n Defined in \n libs/sdk-core/src/lib/db/kb/kb.models.ts:535\n\n\nLink:
       https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/SplitStrategy\n"}}'
     headers:
       Accept:
@@ -409,39 +431,39 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '9962'
+      - '12751'
       Content-Type:
       - application/json
       Host:
-      - europe-1.dp.stashify.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.11.5
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.dp.stashify.cloud/api/v1/predict/rerank
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/rerank
   response:
     body:
-      string: '{"context_scores":{"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340":0.8265718221664429,"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412":0.3453260064125061,"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276":0.13741667568683624,"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709":0.11536139249801636,"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221":0.09619516134262085,"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011":0.08525123447179794,"dd41482018924facb5dbb87a7d53f122/t/page/3310-3757":0.033148519694805145,"89cc367c149e4f6eab0e06a743d1edba/t/page/2804-3043":0.0326513797044754,"43004f553e534ffe9c9e735856bd9b23/t/page/212-480":0.020964240655303,"89cc367c149e4f6eab0e06a743d1edba/t/page/2202-2575":0.02025469020009041,"4039d76b0fff4962900836ab3fdec9f7/t/page/3340-4136":0.012771867215633392,"dd41482018924facb5dbb87a7d53f122/t/page/1900-2653":0.011508149094879627,"4039d76b0fff4962900836ab3fdec9f7/t/page/1650-2326":0.009485713206231594,"43004f553e534ffe9c9e735856bd9b23/t/page/480-703":0.009055264294147491,"4039d76b0fff4962900836ab3fdec9f7/t/page/5396-5615":0.005797401536256075,"c27a1e5f5ddb4b118921345d713401b8/t/page/351-554":0.003350423648953438,"42a4cd5a30314e94aa079ed0cfe81381/t/page/502-696":0.0013096056645736098,"44d05174f1954331b62f5e4026f2b01a/t/page/6346-6668":0.000661517377011478,"f02da6c4bdf34596a89a8106f4b0ea9f/t/page/0-299":0.0003514382697176188,"b6a6202b9f0d4611a980293ce53337d6/t/page/265-405":0.0001956353517016396}}'
+      string: '{"context_scores":{"9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412":0.46481049060821533,"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340":0.4441126585006714,"e8525e64c5b44982b958d32cf6090613/t/page/2808-3011":0.18639107048511505,"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221":0.15830442309379578,"e8525e64c5b44982b958d32cf6090613/t/page/2450-2808":0.1296229362487793,"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/739-977":0.11797800660133362,"43004f553e534ffe9c9e735856bd9b23/t/page/212-480":0.09434341639280319,"89cc367c149e4f6eab0e06a743d1edba/t/page/2804-3043":0.06853749603033066,"43004f553e534ffe9c9e735856bd9b23/t/page/480-703":0.041695769876241684,"b14cf452a3434839a04c111f2ea4dc51/t/page/0-2139":0.029256708920001984,"66b6f0dbd883413e98fbbf5b59f049b9/t/page/0-1833":0.023419944569468498,"666b3a9d01f74323b6ca6c9939834bec/t/page/0-1386":0.015663648024201393,"328ed5b87692439a881303c7c1d4eefc/a/title/0-52":0.006744989659637213,"7b41750917e349598c846526162ebb68/a/title/0-58":0.005426943302154541,"0a003c3f724e45e392a9c8d1ce8800c1/t/page/0-349":0.004231587518006563,"24ad6997e1fe4a109d67d7802a083678/a/title/0-55":0.0037072529084980488,"6e8250e6b5264156988657a221fd5e94/t/page/0-397":0.0032730652019381523,"42a4cd5a30314e94aa079ed0cfe81381/t/page/502-696":0.003039649687707424,"0d01e250360a4d6c91f3baf2de5e7d38/t/page/0-224":0.0016356753185391426,"f02da6c4bdf34596a89a8106f4b0ea9f/t/page/0-299":0.0014895173953846097}}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
-      - '1454'
+      - '1428'
       access-control-expose-headers:
       - X-NUCLIA-TRACE-ID
       content-type:
       - application/json
       date:
-      - Wed, 05 Aug 2026 07:57:01 GMT
+      - Wed, 05 Aug 2026 08:09:31 GMT
       nuclia-learning-model:
       - bge-reranker-v2-m3
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '95'
+      - '170'
       x-nuclia-trace-id:
-      - 338f5c8e8ab5c4e13ad42dc6fa176198
+      - d4ee701a6eec616fe4d6fda69c8a5f81
     status:
       code: 200
       message: OK
@@ -480,40 +502,46 @@ interactions:
       \"block-CD\"]).\n11. **IMPORTANT** If any extra instructions are provided, you
       MUST follow them carefully when generating the answer field. These instructions
       may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nExplica
-      c\u00f3mo usar el par\u00e1metro `max_tokens` para controlar la longitud de
-      las respuestas en espa\u00f1ol y proporciona un enlace a la documentaci\u00f3n
-      oficial.\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n#### Chunk: 4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\nTags:
+      c\u00f3mo usar el par\u00e1metro `max_tokens` en espa\u00f1ol, incluyendo un
+      enlace a la documentaci\u00f3n oficial.\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n####
+      Chunk: 9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412\nTags: /k/text\n```  max_tokens:
+      the maximum number of input tokens to put in the final context (including the
+      prompt, the retrieved results and the user question). \n max_output_tokens:
+      the maximum number of tokens to generate. \n\n\n\nLink: https://docs.rag.progress.cloud/docs/rag/advanced/widget/features\n
+      ```\n\n\n---\"\n\n\n**block-AB**\n\n#### Chunk: 4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\nTags:
       /k/text\n```  Use the max_tokens parameter on the /ask endpoint to set hard
       limits on: \n - Context size: Limits the amount of retrieved information sent
       to the LLM \n - Answer length: Limits the length of the generated response \n
       Important Considerations \n Context Limitations: \n\n\n\nLink: https://docs.rag.progress.cloud/docs/rag/advanced/consumption\n
-      ```\n\n\n---\"\n\n\n**block-AB**\n\n#### Chunk: 9f7036a7a6694700b72d52eb58a8326c/t/page/5203-5412\nTags:
-      /k/text\n```  max_tokens: the maximum number of input tokens to put in the final
-      context (including the prompt, the retrieved results and the user question).
-      \n max_output_tokens: the maximum number of tokens to generate. \n\n\n\nLink:
-      https://docs.rag.progress.cloud/docs/rag/advanced/widget/features\n ```\n\n\n---\"\n\n\n**block-AC**\n\n####
-      Chunk: 220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/1790-2276\nTags: /k/text\n```  \n
-      SDK: \n \n ```python \n from nuclia import sdk \n from nucliadb_models.search
-      import AskRequest, Reasoning \n search = sdk.NucliaSearch() \n query = AskRequest(
-      \n query= My question with extra reasoning effort , \n max_tokens=5000, \n reasoning=Reasoning(
-      \n display=True, # Show reasoning in the response \n effort= low , # Can be
-      low , medium , or high \n budget_tokens=1024 # How many tokens reasoning can
-      use \n ), \n ) \n search.ask(query=query) \n ``` \n Model Support for Reasoning
-      Options: \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/python-sdk/search\n
-      ```\n\n\n---\"\n\n\n**block-AD**\n\n#### Chunk: 220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\nTags:
-      /k/text\n```  ::: \n :::warning \n Enabling reasoning can use additional tokens,
-      which may increase your usage costs. \n You may need to increase max_tokens
-      to give the LLM enough room to reason and generate an answer. \n\n\n\nLink:
-      https://docs.rag.progress.cloud/docs/develop/python-sdk/search\n ```\n\n\n---\"\n\n\n**block-AE**\n\n####
-      Chunk: 50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221\nTags: /k/text\n```  \n
-      optional max_tokens: number \n \n Defined in \n libs/sdk-core/src/lib/db/search/ask.models.ts:251
-      \n \n prefer_markdown? \n \n optional prefer_markdown: boolean \n \n Defined
-      in \n libs/sdk-core/src/lib/db/search/ask.models.ts:256 \n \n query_context?
-      \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/PredictAnswerOptions\n
-      ```\n\n\n---\"\n\n\n**block-AF**\n\n#### Chunk: e8525e64c5b44982b958d32cf6090613/t/page/2808-3011\nTags:
+      ```\n\n\n---\"\n\n\n**block-AC**\n\n#### Chunk: e8525e64c5b44982b958d32cf6090613/t/page/2808-3011\nTags:
       /k/text\n```  \n optional max_tokens: number \\| object \n \n Defines the maximum
       number of tokens that the model will take as context. \n Defined in \n libs/sdk-core/src/lib/db/search/search.models.ts:112
       \n \n min_score? \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/ChatOptions\n
+      ```\n\n\n---\"\n\n\n**block-AD**\n\n#### Chunk: 50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/977-1221\nTags:
+      /k/text\n```  \n optional max_tokens: number \n \n Defined in \n libs/sdk-core/src/lib/db/search/ask.models.ts:251
+      \n \n prefer_markdown? \n \n optional prefer_markdown: boolean \n \n Defined
+      in \n libs/sdk-core/src/lib/db/search/ask.models.ts:256 \n \n query_context?
+      \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/PredictAnswerOptions\n
+      ```\n\n\n---\"\n\n\n**block-AE**\n\n#### Chunk: e8525e64c5b44982b958d32cf6090613/t/page/2450-2808\nTags:
+      /k/text\n```  \n optional highlight: boolean \n \n Inherited from \n BaseSearchOptions.highlight
+      \n Defined in \n libs/sdk-core/src/lib/db/search/search.models.ts:76 \n \n keyword_filters?
+      \n \n optional keyword_filters: string[] \\| Filter[] \n \n Inherited from \n
+      BaseSearchOptions.keyword_filters \n Defined in \n libs/sdk-core/src/lib/db/search/search.models.ts:65
+      \n \n max_tokens? \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/ChatOptions\n
+      ```\n\n\n---\"\n\n\n**block-AF**\n\n#### Chunk: 50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/739-977\nTags:
+      /k/text\n```  \n optional generative_model: string \n \n Defined in \n libs/sdk-core/src/lib/db/search/ask.models.ts:250
+      \n \n json_schema? \n \n optional json_schema: object \n \n Defined in \n libs/sdk-core/src/lib/db/search/ask.models.ts:257
+      \n \n max_tokens? \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/PredictAnswerOptions\n
+      ```\n\n\n---\"\n\n\n**block-AG**\n\n#### Chunk: 43004f553e534ffe9c9e735856bd9b23/t/page/212-480\nTags:
+      /k/text\n```  \n optional driver: string \n \n Defined in \n libs/sdk-core/src/lib/db/kb/kb.models.ts:590
+      \n \n input_tokens \n \n input_tokens: object \n \n max \n \n max: number \n
+      \n min? \n \n optional min: number \n \n Defined in \n libs/sdk-core/src/lib/db/kb/kb.models.ts:587
+      \n \n max_images? \n\n\n\nLink: https://docs.rag.progress.cloud/docs/develop/js-sdk/interfaces/ModelConfig\n
+      ```\n\n\n---\"\n\n\n**block-AH**\n\n#### Chunk: 89cc367c149e4f6eab0e06a743d1edba/t/page/2804-3043\nTags:
+      /k/text\n```  Description: The maximum number of tokens that the model can generate
+      as output. Again, we should keep in mind that this value summed to the Maximum
+      supported input tokens should not exceed the total context size supported by
+      the model. \n\n\n\nLink: https://docs.rag.progress.cloud/docs/rag/advanced/openai-api-compatible-models\n
       ```\n\n\n---\"\n\n\n\n\n<END OF CONTEXT>\n\n"}, "citations": false, "citation_threshold":
       null, "generative_model": "chatgpt-azure-4o-mini", "max_tokens": 8192, "query_context_images":
       {}, "prefer_markdown": null, "json_schema": {"title": "validate_or_answer",
@@ -539,11 +567,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '6987'
+      - '7833'
       Content-Type:
       - application/json
       Host:
-      - europe-1.dp.stashify.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.11.5
       x-origin:
@@ -553,19 +581,19 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.dp.stashify.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: "{\"chunk\":{\"type\":\"object\",\"object\":{\"reason\":\"The context
-        provides information on how to use the `max_tokens` parameter to control the
-        length of responses. It specifies that `max_tokens` sets limits on the answer
-        length and context size. Additionally, it includes links to the official documentation
-        for further details.\",\"answer\":\"Para usar el par\xE1metro `max_tokens`,
-        se debe establecer un l\xEDmite en la longitud de la respuesta generada. El
-        par\xE1metro `max_tokens` se utiliza en el endpoint /ask para limitar la longitud
-        de la respuesta generada. Tambi\xE9n se puede usar para limitar el tama\xF1o
-        del contexto. Para m\xE1s detalles, puedes consultar la documentaci\xF3n oficial
-        en el siguiente enlace: https://docs.rag.progress.cloud/docs/rag/advanced/consumption.\",\"missing_info_query\":\"\",\"useful\":\"yes\",\"citations\":[\"block-AA\",\"block-AB\"]}}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":45,\"output_tokens\":20,\"timings\":{\"generative\":4.430337170000712},\"input_nuclia_tokens\":0.045,\"output_nuclia_tokens\":0.02}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.04521,\"output\":0.0198,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+        provides detailed information about the `max_tokens` parameter, including
+        its purpose and links to official documentation. It explains that `max_tokens`
+        sets limits on context size and answer length, which directly addresses the
+        user's question about how to use this parameter.\",\"answer\":\"El par\xE1metro
+        `max_tokens` define el n\xFAmero m\xE1ximo de tokens que el modelo tomar\xE1
+        como contexto. Se utiliza en el endpoint /ask para establecer l\xEDmites en
+        el tama\xF1o del contexto y en la longitud de la respuesta generada. Para
+        m\xE1s detalles, puedes consultar la documentaci\xF3n oficial en el siguiente
+        enlace: https://docs.rag.progress.cloud/docs/rag/advanced/widget/features.\",\"missing_info_query\":\"\",\"useful\":\"yes\",\"citations\":[\"block-AA\",\"block-AB\",\"block-AC\"]}}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":52,\"output_tokens\":19,\"timings\":{\"generative\":3.9760479599935934},\"input_nuclia_tokens\":0.052,\"output_nuclia_tokens\":0.019}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.05154,\"output\":0.01872,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000
@@ -576,17 +604,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Wed, 05 Aug 2026 07:57:01 GMT
+      - Wed, 05 Aug 2026 08:09:31 GMT
       nuclia-learning-id:
-      - 3332506d9f554b70b464562c52d6c050
+      - 34a5830fe85e4f48beb6484f9bf088cd
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '4436'
+      - '3985'
       x-nuclia-trace-id:
-      - dec9ad587d2e1065b9b2e8fd2594ebc4
+      - 7298286281d01765ed4d9710e840871c
     status:
       code: 200
       message: OK
@@ -600,17 +628,15 @@ interactions:
       this clearly\n\nAlways follow any additional instructions provided about format,
       style, or domain-specific behavior.", "chat_history": [], "context": [], "query_context":
       {}, "query_context_order": {}, "truncate": true, "user_prompt": {"prompt": "\n##
-      Question\nExplica c\u00f3mo usar el par\u00e1metro `max_tokens` para controlar
-      la longitud de las respuestas en espa\u00f1ol y proporciona un enlace a la documentaci\u00f3n
-      oficial.\n\n## Provided Context\n[START OF CONTEXT]\n## Retrieval on nuclia-docs
-      Knowledge Box\n\n# Explica c\u00f3mo usar el par\u00e1metro `max_tokens` para
-      controlar la longitud de las respuestas en espa\u00f1ol y proporciona un enlace
-      a la documentaci\u00f3n oficial.\n\n Para usar el par\u00e1metro `max_tokens`,
-      se debe establecer un l\u00edmite en la longitud de la respuesta generada. El
-      par\u00e1metro `max_tokens` se utiliza en el endpoint /ask para limitar la longitud
-      de la respuesta generada. Tambi\u00e9n se puede usar para limitar el tama\u00f1o
-      del contexto. Para m\u00e1s detalles, puedes consultar la documentaci\u00f3n
-      oficial en el siguiente enlace: https://docs.rag.progress.cloud/docs/rag/advanced/consumption.\n[END
+      Question\nExplica c\u00f3mo usar el par\u00e1metro `max_tokens` en espa\u00f1ol,
+      incluyendo un enlace a la documentaci\u00f3n oficial.\n\n## Provided Context\n[START
+      OF CONTEXT]\n## Retrieval on nuclia-docs Knowledge Box\n\n# Explica c\u00f3mo
+      usar el par\u00e1metro `max_tokens` en espa\u00f1ol, incluyendo un enlace a
+      la documentaci\u00f3n oficial.\n\n El par\u00e1metro `max_tokens` define el
+      n\u00famero m\u00e1ximo de tokens que el modelo tomar\u00e1 como contexto. Se
+      utiliza en el endpoint /ask para establecer l\u00edmites en el tama\u00f1o del
+      contexto y en la longitud de la respuesta generada. Para m\u00e1s detalles,
+      puedes consultar la documentaci\u00f3n oficial en el siguiente enlace: https://docs.rag.progress.cloud/docs/rag/advanced/widget/features.\n[END
       OF CONTEXT]\n\n## Answering Guidelines\n- Carefully read all context; it may
       be lengthy or detailed\n- Do not omit or overlook any relevant information\n-
       Existing context summaries are answer attempts produced by retrieval agents.
@@ -622,12 +648,12 @@ interactions:
       the chunks for supporting citations.\n- If the context is incomplete or insufficient,
       state: \"Not enough data to answer this.\"\n- Read carefully any extra instructions
       below if provided and use them to answer\n\nNow provide your answer to the question:
-      Explica c\u00f3mo usar el par\u00e1metro `max_tokens` para controlar la longitud
-      de las respuestas en espa\u00f1ol y proporciona un enlace a la documentaci\u00f3n
-      oficial."}, "citations": null, "citation_threshold": null, "generative_model":
-      "chatgpt-azure-4o-mini", "max_tokens": 5000, "query_context_images": {}, "prefer_markdown":
-      null, "json_schema": null, "format_prompt": false, "rerank_context": false,
-      "tools": [], "tool_choice": {"type": "auto"}, "reasoning": false, "seed": null}'
+      Explica c\u00f3mo usar el par\u00e1metro `max_tokens` en espa\u00f1ol, incluyendo
+      un enlace a la documentaci\u00f3n oficial."}, "citations": null, "citation_threshold":
+      null, "generative_model": "chatgpt-azure-4o-mini", "max_tokens": 5000, "query_context_images":
+      {}, "prefer_markdown": null, "json_schema": null, "format_prompt": false, "rerank_context":
+      false, "tools": [], "tool_choice": {"type": "auto"}, "reasoning": false, "seed":
+      null}'
     headers:
       Accept:
       - application/x-ndjson
@@ -636,17 +662,17 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2903'
+      - '2713'
       Content-Type:
       - application/json
       Host:
-      - europe-1.dp.stashify.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.11.5
       x-client-ident:
       - default
       x-message:
-      - 8ed74a70fcdc44fda2e5768a74ef5b19
+      - be08982cb83945a7933a4f69a8a5c618
       x-origin:
       - RAO
       x-session:
@@ -656,30 +682,29 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.dp.stashify.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
-      string: "{\"chunk\":{\"type\":\"text\",\"text\":\"Para\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        usar\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+      string: "{\"chunk\":{\"type\":\"text\",\"text\":\"El\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         par\xE1\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"metro\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        `\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"max\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"`,\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        se\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" debe\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        establecer\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" un\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        l\xEDmite\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        `\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"max\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"`\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        define\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        n\xFAmero\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" m\xE1ximo\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        de\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" tokens\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        que\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        modelo\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" tom\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ar\xE1\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        como\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" contexto\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        Se\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" utiliza\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        endpoint\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" /\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ask\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        para\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" establecer\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        l\xEDmites\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" tama\xF1o\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        del\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" contexto\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
+        y\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" longitud\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         de\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         respuesta\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" gener\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ada\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        Este\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" par\xE1\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"metro\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        se\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" utiliza\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        endpoint\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" /\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ask\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        para\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" limitar\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        tanto\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        longitud\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" de\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        la\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" respuesta\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        como\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        tama\xF1o\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" del\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        contexto\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         \\n\\n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"Para\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         m\xE1s\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" detalles\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\",\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         puedes\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" consultar\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
@@ -688,10 +713,10 @@ interactions:
         el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" siguiente\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         enlace\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\":\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
         [\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"Document\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"aci\xF3n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        oficial\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"](\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"https\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"://\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"docs\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".r\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ag\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".progress\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".cloud\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"/docs\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"/r\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ag\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"/\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"advanced\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"/\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"cons\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"umption\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\").\"}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":14,\"output_tokens\":10,\"timings\":{\"generative_first_chunk\":0.704960907001805,\"generative\":1.8514365820010426},\"input_nuclia_tokens\":0.014,\"output_nuclia_tokens\":0.01}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.0141,\"output\":0.01008,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+        oficial\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"](\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"https\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"://\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"docs\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".r\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ag\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".progress\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".cloud\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"/docs\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"/r\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ag\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"/\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"advanced\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"/widget\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"/features\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\").\"}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":13,\"output_tokens\":10,\"timings\":{\"generative_first_chunk\":0.5052020049915882,\"generative\":2.3873363719903864},\"input_nuclia_tokens\":0.013,\"output_nuclia_tokens\":0.01}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.01308,\"output\":0.00984,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -699,17 +724,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Wed, 05 Aug 2026 07:57:06 GMT
+      - Wed, 05 Aug 2026 08:09:36 GMT
       nuclia-learning-id:
-      - 969ce81ad5f24d799cf1bfae4efb53a4
+      - c6f18ca3532e4d3e908e7993e16d843d
       nuclia-learning-model:
       - chatgpt-azure-4o-mini
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '711'
+      - '515'
       x-nuclia-trace-id:
-      - cead86b163db939c5ca30c224ebd395c
+      - 7ba9eff357ef774e3eaf5989655dc566
     status:
       code: 200
       message: OK
