@@ -1,4 +1,5 @@
 import logging
+from html import escape
 from urllib.parse import urlencode
 
 from cryptography.fernet import InvalidToken
@@ -13,13 +14,13 @@ from hyperforge.api.v1.utils import tracer
 
 logger = logging.getLogger(__name__)
 
-RENDER = """\
+RENDER_TEMPLATE = """\
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Progress Agentic RAG</title>
+    <title>Hyperforge</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -43,6 +44,11 @@ RENDER = """\
         }
         .logo {
             width: 180px;
+            margin-bottom: 2rem;
+        }
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 600;
             margin-bottom: 2rem;
         }
         .icon {
@@ -70,7 +76,7 @@ RENDER = """\
 </head>
 <body>
     <div class="card">
-        <img class="logo" src="https://rag.progress.cloud/assets/logos/logo.svg" alt="Progress Agentic RAG" onerror="this.style.display='none'">
+        __AUTH_SUCCESS_BRANDING__
         <div class="icon icon--success">&#10003;</div>
         <h1>Authentication successful</h1>
         <p>Authentication complete. You can close this window and return to the application.</p>
@@ -78,6 +84,17 @@ RENDER = """\
 </body>
 </html>
 """
+
+
+def _render_auth_success(settings: Settings) -> str:
+    if settings.auth_success_logo_url:
+        branding = (
+            f'<img class="logo" src="{escape(settings.auth_success_logo_url, quote=True)}" '
+            'alt="Hyperforge">'
+        )
+    else:
+        branding = '<div class="brand">Hyperforge</div>'
+    return RENDER_TEMPLATE.replace("__AUTH_SUCCESS_BRANDING__", branding)
 
 
 def _build_oauth_subject(
@@ -144,7 +161,7 @@ async def oauth_callback(
             subject,
         )
 
-    return HTMLResponse(content=RENDER)
+    return HTMLResponse(content=_render_auth_success(settings))
 
 
 @router.get(
@@ -224,4 +241,4 @@ async def mcp_oauth_callback_generic(
         return HTMLResponse(
             content=f"OAuth authorization failed ({error}{desc})", status_code=400
         )
-    return HTMLResponse(content=RENDER)
+    return HTMLResponse(content=_render_auth_success(settings))

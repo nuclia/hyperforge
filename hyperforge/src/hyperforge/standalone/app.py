@@ -329,6 +329,7 @@ class StandaloneApplication(FastAPI):
             local_openai=s.local_openai,
             internal_nucliadb=False,
             internal_nucliadb_url=None,
+            auth_success_logo_url=s.auth_success_logo_url,
             standalone=True,
         )
 
