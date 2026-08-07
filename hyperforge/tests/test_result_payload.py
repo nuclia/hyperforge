@@ -83,6 +83,38 @@ def test_agent_overrides_take_precedence_over_deployment_defaults(monkeypatch):
     assert budget == ResultPayloadBudget(max_bytes=80, max_item_bytes=40)
 
 
+def test_agent_kb_overrides_are_converted_to_bytes(monkeypatch):
+    monkeypatch.setenv("HYPERFORGE_TOOL_RESULT_MAX_BYTES", "100")
+    monkeypatch.setenv("HYPERFORGE_TOOL_RESULT_MAX_ITEM_BYTES", "50")
+
+    budget = budget_from_config(
+        SimpleNamespace(
+            max_tool_result_kb=256,
+            max_tool_result_item_kb=64,
+            max_tool_result_bytes=None,
+            max_tool_result_item_bytes=None,
+        )
+    )
+
+    assert budget == ResultPayloadBudget(
+        max_bytes=256 * 1024,
+        max_item_bytes=64 * 1024,
+    )
+
+
+def test_legacy_byte_overrides_take_precedence_over_kb_values():
+    budget = budget_from_config(
+        SimpleNamespace(
+            max_tool_result_kb=256,
+            max_tool_result_item_kb=64,
+            max_tool_result_bytes=80,
+            max_tool_result_item_bytes=40,
+        )
+    )
+
+    assert budget == ResultPayloadBudget(max_bytes=80, max_item_bytes=40)
+
+
 def test_rejects_deployment_item_limit_above_total_limit():
     with pytest.raises(ValueError, match="max_item_bytes cannot exceed max_bytes"):
         ResultPayloadSettings(max_bytes=32, max_item_bytes=64)
