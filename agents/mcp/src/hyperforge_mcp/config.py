@@ -1,10 +1,18 @@
 from enum import Enum
-from typing import Dict, List, Literal
+from math import ceil
+from typing import Any, Dict, List, Literal
 
 from hyperforge.context.config import ContextAgentConfig
 from hyperforge.llm_config import LLMConfig, LLMField, llm_defaults
-from pydantic import Field
+from hyperforge.result_payload import (
+    BYTES_PER_KB,
+    ResultPayloadSettings,
+    migrate_legacy_byte_limits,
+)
+from pydantic import Field, model_validator
 from pydantic.config import ConfigDict
+
+_DEFAULT_TOOL_RESULT_BUDGET = ResultPayloadSettings()
 
 
 class Transport(str, Enum):
@@ -15,20 +23,30 @@ class Transport(str, Enum):
 class MCPAgentConfig(ContextAgentConfig):
     model_config = ConfigDict(title="MCP")
     module: Literal["mcp"] = "mcp"
-    max_tool_result_bytes: int | None = Field(
-        default=None,
+    max_tool_result_kb: int = Field(
+        default=ceil(_DEFAULT_TOOL_RESULT_BUDGET.max_bytes / BYTES_PER_KB),
         ge=1,
-        title="Tool result byte limit override",
-        description="Optional override of the deployment tool-result byte limit.",
-        json_schema_extra={"widget": WidgetType.NOT_SHOWN},
+        title="Maximum tool result (KB)",
+        description=(
+            "Maximum total size accepted from one MCP tool call. Larger results "
+            "are rejected before they are sent to the LLM."
+        ),
     )
-    max_tool_result_item_bytes: int | None = Field(
-        default=None,
+    max_tool_result_item_kb: int = Field(
+        default=ceil(_DEFAULT_TOOL_RESULT_BUDGET.max_item_bytes / BYTES_PER_KB),
         ge=1,
-        title="Tool result item byte limit override",
-        description="Optional override of the deployment tool-result item byte limit.",
-        json_schema_extra={"widget": WidgetType.NOT_SHOWN},
+        title="Maximum tool result item (KB)",
+        description=(
+            "Maximum size accepted for one item or content block in an MCP tool "
+            "result. It cannot be greater than the total result limit."
+        ),
     )
+
+    @model_validator(mode="before")
+    @classmethod
+    def migrate_byte_limits(cls, value: Any) -> Any:
+        return migrate_legacy_byte_limits(value)
+
     transport: Transport = Field(Transport.HTTP, title="Proper transport mechanism")
     source: str = Field(
         ...,

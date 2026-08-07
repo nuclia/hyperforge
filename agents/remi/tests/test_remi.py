@@ -9,7 +9,7 @@ from hyperforge_remi.config import ContextGranularity
 
 NUA_KEY = os.environ.get(
     "NUA_KEY",
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 
 KB_DF8B4C24_2807_4888_AD6C_AE97357A638B = os.environ.get(
     "KB_DF8B4C24_2807_4888_AD6C_AE97357A638B", "DUMMY_KEY"
@@ -32,8 +32,8 @@ CONFIG = {
             "identifier": "nuclia-docs",
             "name": "nuclia-docs",
             "config": {
-                "url": "https://europe-1.nuclia.cloud/api",
-                "manager": "https://europe-1.nuclia.cloud/api",
+                "url": "https://europe-1.dp.progress.cloud/api",
+                "manager": "https://europe-1.dp.progress.cloud/api",
                 "kbid": "df8b4c24-2807-4888-ad6c-ae97357a638b",
                 "key": KB_DF8B4C24_2807_4888_AD6C_AE97357A638B,
                 "filters": [],
@@ -74,8 +74,11 @@ CONFIG = {
 }
 
 
-# Match on body since we send parallel requests and otherwise they get played back in a different order
-@pytest.mark.vcr(match_on=["method", "scheme", "host", "port", "path", "query", "body"])
+# Match NUA chats by their stable routing fields; retrieved context in their
+# prompts changes as the documentation KB evolves.
+@pytest.mark.vcr(
+    match_on=["method", "scheme", "host", "port", "path", "query", "nua_chat"]
+)
 @pytest.mark.parametrize(
     "granularity", (ContextGranularity.PARTIAL_ANSWERS, ContextGranularity.FULL)
 )
@@ -155,7 +158,9 @@ async def test_remi(granularity: ContextGranularity):
     assert "Errors:" not in remi_ctx.summary
 
 
-@pytest.mark.vcr(match_on=["method", "scheme", "host", "port", "path", "query", "body"])
+@pytest.mark.vcr(
+    match_on=["method", "scheme", "host", "port", "path", "query", "nua_chat"]
+)
 @pytest.mark.parametrize(
     "granularity", [ContextGranularity.PARTIAL_ANSWERS, ContextGranularity.FULL]
 )

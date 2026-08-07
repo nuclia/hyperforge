@@ -444,14 +444,17 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 and all(isinstance(item, Context) for item in result)
                 else []
             )
-            texts = (
-                [
-                    *[chunk.render() for ctx in contexts for chunk in ctx.chunks],
-                    *[value for ctx in contexts for value in ctx.structured],
-                ]
-                if contexts
-                else [str(result)]
-            )
+            texts = []
+            for context in contexts:
+                if context.summary.strip():
+                    texts.append(context.summary)
+                else:
+                    texts.extend(chunk.render() for chunk in context.chunks)
+                    texts.extend(context.structured)
+            if not texts and contexts:
+                texts = [""]
+            if not contexts:
+                texts = [str(result)]
         return inspect_text_blocks(texts, budget_from_config(self.config))
 
     async def choose_tools(

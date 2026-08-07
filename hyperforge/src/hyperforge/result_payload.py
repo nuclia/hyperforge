@@ -1,10 +1,30 @@
 """Bound external connector results before they can be sent to an LLM."""
 
 from dataclasses import dataclass
-from typing import Any, Sequence
+from math import ceil
+from typing import Any, Mapping, Sequence
 
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+BYTES_PER_KB = 1024
+
+
+def migrate_legacy_byte_limits(value: Any) -> Any:
+    """Convert stored byte-based agent limits to the current KB fields."""
+    if not isinstance(value, Mapping):
+        return value
+
+    migrated = dict(value)
+    legacy_fields = (
+        ("max_tool_result_bytes", "max_tool_result_kb"),
+        ("max_tool_result_item_bytes", "max_tool_result_item_kb"),
+    )
+    for legacy_field, kb_field in legacy_fields:
+        legacy_value = migrated.pop(legacy_field, None)
+        if kb_field not in migrated and legacy_value is not None:
+            migrated[kb_field] = ceil(legacy_value / BYTES_PER_KB)
+    return migrated
 
 
 @dataclass(frozen=True)
@@ -69,11 +89,21 @@ class OversizedResult:
 def budget_from_config(config: Any) -> ResultPayloadBudget:
     """Resolve optional agent overrides against deployment-level defaults."""
     settings = ResultPayloadSettings()
-    max_bytes = config.max_tool_result_bytes or settings.max_bytes
-    max_item_bytes = config.max_tool_result_item_bytes or settings.max_item_bytes
+    legacy_max_bytes = getattr(config, "max_tool_result_bytes", None)
+    legacy_max_item_bytes = getattr(config, "max_tool_result_item_bytes", None)
+    max_kb = getattr(config, "max_tool_result_kb", None)
+    max_item_kb = getattr(config, "max_tool_result_item_kb", None)
+    max_bytes = legacy_max_bytes or (
+        max_kb * BYTES_PER_KB if max_kb is not None else settings.max_bytes
+    )
+    max_item_bytes = legacy_max_item_bytes or (
+        max_item_kb * BYTES_PER_KB
+        if max_item_kb is not None
+        else settings.max_item_bytes
+    )
     if max_item_bytes > max_bytes:
         raise ValueError(
-            "max_tool_result_item_bytes cannot exceed max_tool_result_bytes"
+            "The tool result item limit cannot exceed the total result limit"
         )
     return ResultPayloadBudget(max_bytes=max_bytes, max_item_bytes=max_item_bytes)
 

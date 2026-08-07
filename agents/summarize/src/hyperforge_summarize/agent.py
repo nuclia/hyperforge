@@ -46,6 +46,9 @@ SUMMARIZE_PROMPT_CONVERSATIONAL = """
 ## Answering Guidelines
 - Carefully read all context; it may be lengthy or detailed
 - Do not omit or overlook any relevant information
+- Existing context summaries are answer attempts produced by retrieval agents. Treat them as first-class evidence and preserve their supported facts.
+- Combine complementary summaries from multiple contexts when the question has multiple parts. Do not require every context to answer the whole question by itself.
+- If a context summary directly answers the question, do not replace it with an insufficient-data answer merely because one retrieved chunk is incomplete; use the chunks for supporting citations.
 - If the context is incomplete or insufficient, try to provide a partial answer and encourage the user to clarify their question
 - Read carefully any extra instructions below if provided and use them to answer
 
@@ -90,6 +93,9 @@ SUMMARIZE_PROMPT = """
 ## Answering Guidelines
 - Carefully read all context; it may be lengthy or detailed
 - Do not omit or overlook any relevant information
+- Existing context summaries are answer attempts produced by retrieval agents. Treat them as first-class evidence and preserve their supported facts.
+- Combine complementary summaries from multiple contexts when the question has multiple parts. Do not require every context to answer the whole question by itself.
+- If a context summary directly answers the question, do not replace it with an insufficient-data answer merely because one retrieved chunk is incomplete; use the chunks for supporting citations.
 - If the context is incomplete or insufficient, state: "Not enough data to answer this."
 - Read carefully any extra instructions below if provided and use them to answer
 
@@ -352,11 +358,11 @@ def build_answer_citations(answer: str, contexts: list[Context]) -> AnswerCitati
             # This is a citation to a summarized context
             for chunk in context.chunks:
                 if (
-                    not context.citations or chunk.chunk_id in context.citations
+                    context.citations is None or chunk.chunk_id in context.citations
                 ) and chunk.origin_url:
                     origin_urls.append(chunk.origin_url)
 
-            if not origin_urls:
+            if not origin_urls and context.citations is None:
                 for chunk in context.chunks:
                     if chunk.origin_url:
                         origin_urls.append(chunk.origin_url)
@@ -413,10 +419,18 @@ def normalize_chunk_level_citations(answer: str, contexts: list[Context]) -> str
             continue
         context = contexts_by_citation_id.get(context_citation_id)
         if chunk_index is None and context is not None and context.chunks:
-            targets_by_marker[marker] = [
-                f"{citation_id}-{index}" for index in range(len(context.chunks))
+            selected_indices = [
+                index
+                for index, chunk in enumerate(context.chunks)
+                if context.citations is None or chunk.chunk_id in context.citations
             ]
-            changed = True
+            targets_by_marker[marker] = [
+                f"{citation_id}-{index}" for index in selected_indices
+            ]
+            if selected_indices:
+                changed = True
+            else:
+                targets_by_marker[marker] = [citation_id]
         else:
             targets_by_marker[marker] = [citation_id]
 
