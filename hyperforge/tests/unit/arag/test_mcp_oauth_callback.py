@@ -117,7 +117,9 @@ def test_valid_state_publishes_sdk_state_and_returns_200(client):
 
 def test_auth_success_uses_configured_logo(client):
     tc, app = client
-    app.settings.auth_success_logo_url = 'https://example.com/logo.svg?size=large&theme="light"'
+    app.settings.auth_success_logo_url = (
+        'https://example.com/logo.svg?size=large&theme="light"'
+    )
 
     resp = tc.get(f"/api/auth/mcp/callback?state={_make_state()}&code=mycode")
 
