@@ -9,11 +9,35 @@ from hyperforge_smart.agent import RegisteredAgent, SmartAgent, ToolError
 from hyperforge_smart.config import SmartAgentConfig
 
 
+def test_payload_limits_are_visible_in_kb_with_friendly_defaults():
+    config = SmartAgentConfig()
+    schema = SmartAgentConfig.model_json_schema()["properties"]
+
+    assert config.max_tool_result_kb == 64
+    assert config.max_tool_result_item_kb == 16
+    assert schema["max_tool_result_kb"]["title"] == "Maximum tool result (KB)"
+    assert "widget" not in schema["max_tool_result_kb"]
+    assert "max_tool_result_bytes" not in schema
+
+
+def test_legacy_byte_limits_are_migrated_to_kb():
+    config = SmartAgentConfig.model_validate(
+        {
+            "max_tool_result_bytes": 65 * 1024,
+            "max_tool_result_item_bytes": 17 * 1024,
+        }
+    )
+
+    assert config.max_tool_result_kb == 65
+    assert config.max_tool_result_item_kb == 17
+    assert "max_tool_result_bytes" not in config.model_dump()
+
+
 def test_process_results_replaces_an_oversized_context_with_retry_guidance():
     agent = SmartAgent(
         SmartAgentConfig(
-            max_tool_result_bytes=32,
-            max_tool_result_item_bytes=32,
+            max_tool_result_kb=1,
+            max_tool_result_item_kb=1,
         )
     )
     result = Context(
@@ -22,7 +46,7 @@ def test_process_results_replaces_an_oversized_context_with_retry_guidance():
         question="question",
         source="test",
         agent="test",
-        chunks=[Chunk(chunk_id="large", text="x" * 100)],
+        chunks=[Chunk(chunk_id="large", text="x" * 2048)],
     )
     collected_contexts: list[Context] = []
 
@@ -32,7 +56,7 @@ def test_process_results_replaces_an_oversized_context_with_retry_guidance():
 
     assert len(texts) == 1
     assert "safety budget" in texts[0]
-    assert "x" * 100 not in texts[0]
+    assert "x" * 2048 not in texts[0]
     assert len(collected_contexts) == 1
     assert "safety budget" in collected_contexts[0].chunks[0].text
     assert collected_contexts[0].chunks[0].text != result.chunks[0].text
@@ -41,8 +65,8 @@ def test_process_results_replaces_an_oversized_context_with_retry_guidance():
 def test_process_results_budgets_a_context_summary_before_raw_chunks():
     agent = SmartAgent(
         SmartAgentConfig(
-            max_tool_result_bytes=32,
-            max_tool_result_item_bytes=32,
+            max_tool_result_kb=1,
+            max_tool_result_item_kb=1,
         )
     )
     result = Context(
@@ -52,7 +76,7 @@ def test_process_results_budgets_a_context_summary_before_raw_chunks():
         source="test",
         agent="test",
         summary="The answer is Haverhill.",
-        chunks=[Chunk(chunk_id="large", text="x" * 100)],
+        chunks=[Chunk(chunk_id="large", text="x" * 2048)],
     )
     collected_contexts: list[Context] = []
 
@@ -67,25 +91,25 @@ def test_process_results_budgets_a_context_summary_before_raw_chunks():
 def test_process_results_replaces_an_oversized_tool_error():
     agent = SmartAgent(
         SmartAgentConfig(
-            max_tool_result_bytes=32,
-            max_tool_result_item_bytes=32,
+            max_tool_result_kb=1,
+            max_tool_result_item_kb=1,
         )
     )
-    error = ToolError(tool_name="search", tool_arguments={}, error="x" * 100)
+    error = ToolError(tool_name="search", tool_arguments={}, error="x" * 2048)
 
     texts = agent._process_results([("search", error)])
 
     assert len(texts) == 1
     assert "safety budget" in texts[0]
-    assert "x" * 100 not in texts[0]
+    assert "x" * 2048 not in texts[0]
 
 
 @pytest.mark.asyncio
 async def test_report_tool_error_records_a_safe_rejection_step():
     agent = SmartAgent(
         SmartAgentConfig(
-            max_tool_result_bytes=32,
-            max_tool_result_item_bytes=32,
+            max_tool_result_kb=1,
+            max_tool_result_item_kb=1,
         )
     )
     memory = MagicMock(add_step=AsyncMock())
@@ -93,18 +117,18 @@ async def test_report_tool_error_records_a_safe_rejection_step():
     _, error = await agent._report_tool_error(
         memory=memory,
         title="LLM Execution error",
-        error="x" * 100,
+        error="x" * 2048,
         tool_name="search",
         tool_arguments={},
     )
 
     assert "safety budget" in error.error
-    assert "x" * 100 not in error.error
+    assert "x" * 2048 not in error.error
     assert (
         memory.add_step.await_args.kwargs["step_title"]
         == "Smart agent: Tool result rejected"
     )
-    assert "observed_bytes=100" in memory.add_step.await_args.kwargs["step_value"]
+    assert "observed_bytes=2048" in memory.add_step.await_args.kwargs["step_value"]
 
 
 class OversizedResultAgent(ContextAgent):
@@ -117,7 +141,7 @@ class OversizedResultAgent(ContextAgent):
             question="question",
             source="test",
             agent="test",
-            chunks=[Chunk(chunk_id="large", text="x" * 100)],
+            chunks=[Chunk(chunk_id="large", text="x" * 2048)],
         )
 
 
@@ -142,8 +166,8 @@ class BoundedResultAgent(ContextAgent):
 async def test_execute_tool_call_records_an_oversized_result_step():
     agent = SmartAgent(
         SmartAgentConfig(
-            max_tool_result_bytes=32,
-            max_tool_result_item_bytes=32,
+            max_tool_result_kb=1,
+            max_tool_result_item_kb=1,
         )
     )
     agent.registered_agents = [
@@ -175,15 +199,15 @@ async def test_execute_tool_call_records_an_oversized_result_step():
         == "Smart agent: Tool result rejected"
     )
     assert "observed_bytes=" in memory.add_step.await_args.kwargs["step_value"]
-    assert "byte_limit=32" in memory.add_step.await_args.kwargs["step_value"]
+    assert "byte_limit=1024" in memory.add_step.await_args.kwargs["step_value"]
 
 
 @pytest.mark.asyncio
 async def test_execute_tool_call_does_not_reject_a_bounded_context():
     agent = SmartAgent(
         SmartAgentConfig(
-            max_tool_result_bytes=100,
-            max_tool_result_item_bytes=64,
+            max_tool_result_kb=1,
+            max_tool_result_item_kb=1,
         )
     )
     agent.registered_agents = [

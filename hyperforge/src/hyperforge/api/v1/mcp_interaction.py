@@ -281,7 +281,7 @@ async def mcp_interaction_protected_resource_metadata(
     }
 
 
-@router.delete("/api/v1/agent/{agent_id}/session/{session}/mcp")
+@router.delete("/api/v1/agent/{agent_id}/session/{session}/mcp", tags=["MCP"])
 @requires_one([AgentRole.MEMBER])
 async def mcp_handler_delete(
     request: Request,
@@ -298,8 +298,8 @@ async def mcp_handler_delete(
         del app.sses[(agent_id, session)]
 
 
-@router.get("/api/v1/agent/{agent_id}/session/{session}/mcp")
-@router.post("/api/v1/agent/{agent_id}/session/{session}/mcp")
+@router.get("/api/v1/agent/{agent_id}/session/{session}/mcp", tags=["MCP"])
+@router.post("/api/v1/agent/{agent_id}/session/{session}/mcp", tags=["MCP"])
 @requires_one([AgentRole.MEMBER])
 async def interaction_mcp_handler(
     request: Request,

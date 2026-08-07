@@ -399,13 +399,13 @@ async def websocket_endpoint(
     "/api/v1/agent/{agent_id}/session/{session}",
     status_code=200,
     description="Interact session",
-    tags=["Retrieval Agent"],
+    tags=["Sessions"],
 )
 @router.post(
     "/api/v1/agent/{agent_id}/workflow/{workflow_id}/session/{session}",
     status_code=200,
     description="Interact session",
-    tags=["Retrieval Agent"],
+    tags=["Sessions"],
 )
 @requires_one([AgentRole.MEMBER])
 async def interaction(
