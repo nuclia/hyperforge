@@ -38,6 +38,12 @@ A direct gRPC address has no URL path, so it must be dedicated to the configured
 remote agent. HTTPS secures discovery; `use_tls` independently controls direct
 gRPC connections.
 
+SaaS validates A2A endpoints and Agent Card interfaces and rejects private or
+otherwise non-public network addresses. Standalone allows private endpoints by
+default so localhost, Docker, and internal network agents continue to work. Set
+`ALLOW_PRIVATE_NETWORK_ENDPOINTS=false` in Standalone to enable the same
+protection.
+
 For direct gRPC connections, set `use_tls` and optionally configure
 `ca_certificate` with PEM content. Servers requiring mTLS also need both
 `client_certificate_chain` and `client_private_key` as PEM content. The driver

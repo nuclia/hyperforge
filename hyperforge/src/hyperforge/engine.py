@@ -153,6 +153,7 @@ async def get_state(
     account: Optional[str] = None,
     kbid: Optional[str] = None,
     local_openai_model_klass: Optional[type[NuaBaseModel]] = None,
+    allow_private_network_endpoints: bool = False,
 ) -> State:
     nua: AsyncNuaClient
     if internal_nua:
@@ -187,7 +188,11 @@ async def get_state(
         )
         nua = NoopNuaClient()
 
-    manager = await Manager.from_config(drivers=config.drivers, nua=nua)
+    manager = await Manager.from_config(
+        drivers=config.drivers,
+        nua=nua,
+        allow_private_network_endpoints=allow_private_network_endpoints,
+    )
     agent = await RetrievalAgent.from_config_class(config)
 
     return State(manager=manager, agent=agent)

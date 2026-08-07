@@ -1,5 +1,6 @@
 import pytest
 from hyperforge.db.encryption import dump_without_encrypted_fields, encrypt_fields
+from hyperforge.manager import Manager
 
 from hyperforge_a2a.config_driver import A2ADriverConfig, A2AInnerConfig
 from hyperforge_a2a.driver import A2ADriver
@@ -24,6 +25,7 @@ def test_a2a_driver_config_validates_tls_pair():
         A2AInnerConfig(endpoint="http://a2a.example.com", use_tls=True)
 
 
+@pytest.mark.asyncio
 async def test_a2a_driver_initializes_from_config():
     config = A2ADriverConfig(
         identifier="remote-a2a",
@@ -41,6 +43,25 @@ async def test_a2a_driver_initializes_from_config():
     assert driver.name == "Remote A2A"
     assert driver.config.endpoint == "a2a.example.com:443"
     assert driver.config.authorization == "Bearer secret"
+
+
+@pytest.mark.asyncio
+async def test_manager_applies_private_network_policy_to_driver(monkeypatch):
+    config = A2ADriverConfig(
+        identifier="remote-a2a",
+        name="Remote A2A",
+        provider="a2a",
+        config=A2AInnerConfig(endpoint="localhost:8034"),
+    )
+
+    monkeypatch.setattr("hyperforge.manager.get_driver_klass", lambda _: A2ADriver)
+    manager = await Manager.from_config(
+        drivers=[config],
+        nua=None,  # type: ignore[arg-type]
+        allow_private_network_endpoints=True,
+    )
+
+    assert manager.drivers["remote-a2a"].allow_private_network_endpoints is True
 
 
 def test_a2a_driver_encrypts_and_omits_secrets(monkeypatch):
@@ -79,6 +100,7 @@ def test_a2a_driver_encrypts_and_omits_secrets(monkeypatch):
         (None, "Bearer static"),
     ],
 )
+@pytest.mark.asyncio
 async def test_a2a_driver_authorization_precedence(monkeypatch, delegated, expected):
     captured = {}
 

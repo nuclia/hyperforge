@@ -1,12 +1,31 @@
+import asyncio
 import ipaddress
 import socket
+from urllib.parse import urlparse
 
-import aiodns
 from httpx import AsyncClient, AsyncHTTPTransport
 
 
 class PrivateUrlError(Exception):
     pass
+
+
+async def ensure_public_endpoint(endpoint: str) -> None:
+    parsed = urlparse(endpoint if "://" in endpoint else f"//{endpoint}")
+    if parsed.hostname is None:
+        raise PrivateUrlError("A valid endpoint hostname is required")
+
+    try:
+        addresses = await asyncio.get_running_loop().getaddrinfo(
+            parsed.hostname,
+            None,
+            type=socket.SOCK_STREAM,
+        )
+    except OSError as exc:
+        raise PrivateUrlError("Could not lookup hostname") from exc
+
+    if any(not ipaddress.ip_address(address[4][0]).is_global for address in addresses):
+        raise PrivateUrlError("Cannot access private network resources")
 
 
 class SafeTransport(AsyncHTTPTransport):
@@ -15,29 +34,17 @@ class SafeTransport(AsyncHTTPTransport):
 
     @staticmethod
     async def is_private_address(hostname: str) -> bool:
-        resolver = aiodns.DNSResolver()
-        addr = await resolver.gethostbyname(hostname, socket.AF_INET)
-        for address in addr.addresses:
-            if ipaddress.ip_address(address).is_private:
-                return True
-            if (
-                not ipaddress.ip_address(address).is_private
-                and not ipaddress.ip_address(address).is_global
-            ):
-                # Matches shared address space (100.64.0.0/10 range) that should be non-routeable and
-                # not be used for public internet. Let's consider it internal
-                return True
+        try:
+            await ensure_public_endpoint(hostname)
+        except PrivateUrlError:
+            return True
         return False
 
     async def handle_async_request(self, request):
         url = request.url
-        try:
-            hostname = url.host if url.host is not None else url.path
-            if await self.is_private_address(hostname):
-                raise PrivateUrlError("Cannot access private network resources")
-        except aiodns.error.DNSError:
-            raise PrivateUrlError("Could not lookup hostname")
-
+        hostname = url.host if url.host is not None else url.path
+        if await self.is_private_address(hostname):
+            raise PrivateUrlError("Cannot access private network resources")
         return await super().handle_async_request(request)
 
 

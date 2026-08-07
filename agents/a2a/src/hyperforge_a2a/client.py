@@ -23,6 +23,7 @@ from a2a.types import a2a_pb2
 from a2a.utils import TransportProtocol
 from google.protobuf import struct_pb2
 from google.protobuf.json_format import MessageToDict
+from hyperforge.utils.http import SafeTransport, ensure_public_endpoint
 
 
 @dataclass(frozen=True)
@@ -185,8 +186,11 @@ async def build_a2a_client(
     client_private_key: str | None = None,
     authorization: str | None = None,
     http_client: httpx.AsyncClient | None = None,
+    allow_private_network_endpoints: bool = False,
 ) -> Client:
     """Create an A2A client from either a gRPC address or an HTTP Agent Card URL."""
+    if not allow_private_network_endpoints:
+        await ensure_public_endpoint(source)
     if not source.startswith(("http://", "https://")):
         return build_grpc_client(
             source,
@@ -214,9 +218,17 @@ async def build_a2a_client(
                         certfile=certificate_file.name,
                         keyfile=private_key_file.name,
                     )
-            http_client = httpx.AsyncClient(verify=ssl_context)
+            if allow_private_network_endpoints:
+                http_client = httpx.AsyncClient(verify=ssl_context)
+            else:
+                http_client = httpx.AsyncClient(
+                    transport=SafeTransport(verify=ssl_context)
+                )
         else:
-            http_client = httpx.AsyncClient()
+            if allow_private_network_endpoints:
+                http_client = httpx.AsyncClient()
+            else:
+                http_client = httpx.AsyncClient(transport=SafeTransport())
     supported_protocol_bindings: list[str] = [
         TransportProtocol.JSONRPC,
         TransportProtocol.HTTP_JSON,
@@ -227,6 +239,9 @@ async def build_a2a_client(
             httpx_client=http_client,
             base_url=source,
         ).get_agent_card()
+        if not allow_private_network_endpoints:
+            for interface in card.supported_interfaces:
+                await ensure_public_endpoint(interface.url)
         selected_protocol = next(
             (
                 interface.protocol_binding

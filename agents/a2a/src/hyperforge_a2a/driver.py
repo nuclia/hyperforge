@@ -30,4 +30,5 @@ class A2ADriver(Driver):
             client_certificate_chain=self.config.client_certificate_chain,
             client_private_key=self.config.client_private_key,
             authorization=authorization or self.config.authorization,
+            allow_private_network_endpoints=self.allow_private_network_endpoints,
         )

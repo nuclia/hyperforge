@@ -29,20 +29,21 @@ from hyperforge_a2a.client import (
     extract_steps_from_stream_response,
 )
 from hyperforge_a2a.config import A2AAgentConfig
-from hyperforge_a2a.config_driver import A2AInnerConfig
+from hyperforge_a2a.config_driver import A2ADriverConfig, A2AInnerConfig
 from hyperforge_a2a.driver import A2ADriver
 from redis.asyncio import Redis
 
 import hyperforge.a2a.executor as executor_module
-import hyperforge.server.session as session_module
 from hyperforge.a2a.card import build_agent_card, build_agent_skills
 from hyperforge.a2a.executor import HyperforgeA2AExecutor, parse_routing_metadata
 from hyperforge.a2a.settings import A2ASettings
 from hyperforge.a2a.task_store import RedisA2ATaskStore
 from hyperforge.broker.local import LocalBroker
-from hyperforge.engine import State
+from hyperforge.configure import load_all_configurations, scan
 from hyperforge.interaction import AnswerOperation, AragAnswer, Feedback
+from hyperforge.manager import Manager
 from hyperforge.memory.memory import NoMemorySessionMemory
+from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.models import MemoryConfig, Step
 from hyperforge.pubsub import UserToAgentInteraction
 from hyperforge.server.cache import NoCache
@@ -50,6 +51,8 @@ from hyperforge.server.session import SessionManager
 from hyperforge.server.settings import Settings as ServerSettings
 from hyperforge.standalone.agent import StaticAgentManager
 from hyperforge.standalone.config import StandAloneAgentConfig, WorkflowConfig
+
+NUA_KEY = cassette_nua_key("https://europe-1.dp.stashify.cloud/")
 
 
 async def _a2a_client(endpoint: str, **config):
@@ -61,6 +64,7 @@ async def _a2a_client(endpoint: str, **config):
         name="Remote A2A",
         provider="a2a",
         config=A2AInnerConfig(endpoint=endpoint),
+        allow_private_network_endpoints=True,
     )
     return client_agent, SimpleNamespace(drivers={source: driver})
 
@@ -84,6 +88,38 @@ class _FakeAgentManager:
             from hyperforge.db import exceptions
 
             raise exceptions.NotFoundError("Workflow not found")
+
+
+class _InMemoryA2ATaskStore:
+    def __init__(self):
+        self.owners = {}
+        self.pending = {}
+
+    async def save_owner(self, task_id, owner_instance_id):
+        self.owners[task_id] = owner_instance_id
+
+    async def get_owner(self, task_id):
+        return self.owners.get(task_id)
+
+    async def remove_owner(self, task_id):
+        self.owners.pop(task_id, None)
+
+    async def save_pending(self, record):
+        self.pending[record.task_id] = record
+
+    async def get_pending(self, task_id):
+        return self.pending.get(task_id)
+
+    async def claim_pending(self, task_id, context_id, feedback_id):
+        record = self.pending.get(task_id)
+        if record is None:
+            return None
+        if record.context_id != context_id or record.feedback_id != feedback_id:
+            return None
+        return self.pending.pop(task_id)
+
+    async def remove(self, task_id):
+        self.pending.pop(task_id, None)
 
 
 class _DeterministicWorkflow:
@@ -426,32 +462,46 @@ async def test_a2a_client_agent_builds_context_from_streamed_workflow(
     }
 
 
-async def test_a2a_client_server_workflow_end_to_end(monkeypatch, a2a_task_store):
-    """Run client, A2A server, broker, and deterministic workflow in one process."""
+@pytest.mark.vcr(ignore_localhost=True)
+@pytest.mark.asyncio
+async def test_a2a_client_server_workflow_end_to_end(monkeypatch):
+    """Run configured client, A2A server, broker, and NUA workflow end to end."""
+    for module in ("hyperforge_static", "hyperforge_summarize"):
+        scan(module)
+        load_all_configurations(module)
+
     broker = LocalBroker(keepalive_ms=1_000)
-    remote_agent_id = "deterministic-agent"
-    workflow_id = "deterministic-workflow"
+    remote_agent_id = "remote-agent"
+    workflow_id = "default"
     agent_manager = StaticAgentManager(
         {
             remote_agent_id: StandAloneAgentConfig(
-                workflows={workflow_id: WorkflowConfig(name="Deterministic")}
+                workflows={
+                    workflow_id: WorkflowConfig(
+                        name="A2A E2E",
+                        context=[
+                            {
+                                "module": "static",
+                                "title": "Release status",
+                                "context": "The A2A release is ready for production.",
+                            }
+                        ],
+                        generation=[{"module": "summarize"}],
+                    )
+                }
             )
         }
     )
     worker = SessionManager(
-        settings=ServerSettings(health_check_enabled=False),
+        settings=ServerSettings(
+            health_check_enabled=False,
+            external_nua_api_key=NUA_KEY,
+            standalone=True,
+            allow_private_network_endpoints=True,
+        ),
         broker=broker,
         agent_manager=agent_manager,
         cache=NoCache(),
-    )
-
-    async def deterministic_state(**_):
-        return State(manager=None, agent=_DeterministicWorkflow())
-
-    monkeypatch.setattr(
-        session_module,
-        "get_state",
-        deterministic_state,
     )
     await worker.initialize(health_check=False)
 
@@ -467,17 +517,32 @@ async def test_a2a_client_server_workflow_end_to_end(monkeypatch, a2a_task_store
                 a2a_settings,
                 agent_manager=agent_manager,
                 broker=broker,
-                task_store=a2a_task_store,
+                task_store=_InMemoryA2ATaskStore(),
             )
         ),
         port,
     )
 
     try:
-        client_agent, manager = await _a2a_client(
-            f"127.0.0.1:{port}",
-            id="local-a2a-client",
-            remote_workflow_id=workflow_id,
+        client_agent = await A2AClientAgent.from_config(
+            A2AAgentConfig(
+                source="remote-a2a",
+                id="local-a2a-client",
+                remote_workflow_id=workflow_id,
+            )
+        )
+        monkeypatch.setattr("hyperforge.manager.get_driver_klass", lambda _: A2ADriver)
+        manager = await Manager.from_config(
+            drivers=[
+                A2ADriverConfig(
+                    identifier="remote-a2a",
+                    name="Remote A2A",
+                    provider="a2a",
+                    config=A2AInnerConfig(endpoint=f"127.0.0.1:{port}"),
+                )
+            ],
+            nua=None,  # type: ignore[arg-type]
+            allow_private_network_endpoints=True,
         )
         session = NoMemorySessionMemory(
             MemoryConfig(),
@@ -486,18 +551,18 @@ async def test_a2a_client_server_workflow_end_to_end(monkeypatch, a2a_task_store
             cache=None,  # type: ignore[arg-type]
         )
         session.init("local-a2a-session")
-        memory = session.start_question("Run the local workflow")
+        memory = session.start_question("Is the A2A release ready?")
 
         context = await client_agent.a2a_query(
-            "Run the local workflow",
+            "Is the A2A release ready?",
             memory,
-            manager=manager,  # type: ignore[arg-type]
+            manager=manager,
         )
     finally:
         await server.stop(grace=1)
         await worker.finalize()
 
-    assert context.summary == "The deterministic workflow completed."
+    assert "ready" in context.summary.lower()
     assert [chunk.text for chunk in context.chunks] == [context.summary]
 
 

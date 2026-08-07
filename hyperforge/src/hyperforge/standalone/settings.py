@@ -73,6 +73,10 @@ class StandaloneSettings(BaseSettings):
         default=False,
         description="Whether to use Redis Cluster mode (only used if broker_redis_dsn is set).",
     )
+    allow_private_network_endpoints: bool = Field(
+        default=True,
+        description="Allow drivers to connect to private network endpoints.",
+    )
 
     # ------------------------------------------------------------------
     # Optional A2A gRPC server

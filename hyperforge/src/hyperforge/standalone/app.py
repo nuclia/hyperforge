@@ -332,6 +332,7 @@ class StandaloneApplication(FastAPI):
             internal_nucliadb=False,
             internal_nucliadb_url=None,
             standalone=True,
+            allow_private_network_endpoints=s.allow_private_network_endpoints,
         )
 
         # use redis as cache backend if provided

@@ -45,5 +45,6 @@ class Settings(BaseSettings):
     # the kbid for internal NUA calls from the account_id request header
     # instead.
     standalone: bool = False
+    allow_private_network_endpoints: bool = False
 
     health_check_enabled: bool = True

@@ -5,6 +5,7 @@ import pytest
 
 from hyperforge.a2a.server import build_grpc_server_from_runtime
 from hyperforge.broker.redis import RedisBroker
+from hyperforge.server.settings import Settings as ServerSettings
 from hyperforge.standalone.agent import StaticAgentManager
 from hyperforge.standalone.app import StandaloneApplication
 from hyperforge.standalone.config import StandAloneAgentConfig, WorkflowConfig
@@ -24,6 +25,17 @@ def test_standalone_a2a_requires_redis():
         settings.a2a_settings()
 
 
+def test_private_network_endpoint_defaults_are_environment_safe():
+    assert ServerSettings().allow_private_network_endpoints is False
+    assert StandaloneSettings().allow_private_network_endpoints is True
+    assert (
+        StandaloneSettings(
+            allow_private_network_endpoints=False
+        ).allow_private_network_endpoints
+        is False
+    )
+
+
 def test_standalone_a2a_settings_reuse_shared_validation():
     settings = StandaloneSettings(
         a2a_enabled=True,
@@ -40,6 +52,7 @@ def test_standalone_a2a_settings_reuse_shared_validation():
     assert a2a_settings.a2a_agent_id == "venue"
 
 
+@pytest.mark.asyncio
 async def test_standalone_shutdown_delegates_resource_cleanup_to_session_manager():
     app = StandaloneApplication.__new__(StandaloneApplication)
     app.a2a_server = AsyncMock()
@@ -51,6 +64,7 @@ async def test_standalone_shutdown_delegates_resource_cleanup_to_session_manager
     app.session_manager.finalize.assert_awaited_once()
 
 
+@pytest.mark.asyncio
 async def test_static_agent_manager_starts_shared_a2a_server():
     port = _free_port()
     settings = StandaloneSettings(

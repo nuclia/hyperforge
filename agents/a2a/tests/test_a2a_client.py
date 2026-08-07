@@ -1,9 +1,10 @@
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, Mock, call
 
 import pytest
 from a2a.client.auth import AuthInterceptor
 from a2a.client.interceptors import BeforeArgs
 from a2a.types import a2a_pb2
+from hyperforge.utils.http import PrivateUrlError
 
 from hyperforge_a2a.client import (
     BearerCredentialService,
@@ -20,6 +21,64 @@ from hyperforge_a2a.client import (
 )
 from hyperforge_a2a.config import A2AAgentConfig
 from hyperforge_a2a.config_driver import A2AInnerConfig
+
+
+@pytest.mark.asyncio
+async def test_direct_grpc_endpoint_is_validated(monkeypatch):
+    validate = AsyncMock(side_effect=PrivateUrlError("private"))
+    monkeypatch.setattr("hyperforge_a2a.client.ensure_public_endpoint", validate)
+
+    with pytest.raises(PrivateUrlError, match="private"):
+        await build_a2a_client("localhost:50051", use_tls=False)
+
+    validate.assert_awaited_once_with("localhost:50051")
+
+
+@pytest.mark.asyncio
+async def test_private_endpoint_can_be_allowed_by_runtime(monkeypatch):
+    validate = AsyncMock()
+    build_grpc_client = Mock(return_value=Mock())
+    monkeypatch.setattr("hyperforge_a2a.client.ensure_public_endpoint", validate)
+    monkeypatch.setattr("hyperforge_a2a.client.build_grpc_client", build_grpc_client)
+
+    await build_a2a_client(
+        "localhost:50051",
+        use_tls=False,
+        allow_private_network_endpoints=True,
+    )
+
+    validate.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_rejects_private_agent_card_interface(monkeypatch):
+    card = Mock(
+        supported_interfaces=[
+            Mock(url="http://localhost:8000", protocol_binding="JSONRPC")
+        ]
+    )
+    validate = AsyncMock(
+        side_effect=[None, PrivateUrlError("private advertised interface")]
+    )
+    monkeypatch.setattr("hyperforge_a2a.client.ensure_public_endpoint", validate)
+    monkeypatch.setattr(
+        "hyperforge_a2a.client.A2ACardResolver.get_agent_card",
+        AsyncMock(return_value=card),
+    )
+
+    with pytest.raises(PrivateUrlError, match="private advertised interface"):
+        await build_a2a_client(
+            "https://public.example.com",
+            use_tls=False,
+            http_client=AsyncMock(),
+        )
+
+    validate.assert_has_awaits(
+        [
+            call("https://public.example.com"),
+            call("http://localhost:8000"),
+        ]
+    )
 
 
 class _Memory:
@@ -44,6 +103,7 @@ def test_build_send_request_sets_text_and_metadata():
     assert request.metadata["agent_id"] == "ag"
 
 
+@pytest.mark.asyncio
 async def test_bearer_credentials_are_added_as_transport_metadata():
     service = BearerCredentialService("Bearer secret-token")
     assert await service.get_credentials("bearer", None) == "secret-token"
@@ -242,6 +302,7 @@ async def test_http_client_uses_configured_tls_context(monkeypatch):
             "https://a2a.example.com",
             use_tls=True,
             ca_certificate="CA",
+            allow_private_network_endpoints=True,
         )
 
     create_default_context.assert_called_once_with(cadata="CA")
@@ -279,7 +340,11 @@ async def test_https_agent_card_can_select_grpc_without_tls(monkeypatch):
         "hyperforge_a2a.client.grpc.aio.insecure_channel", insecure_channel
     )
 
-    result = await build_a2a_client("https://a2a.example.com", use_tls=False)
+    result = await build_a2a_client(
+        "https://a2a.example.com",
+        use_tls=False,
+        allow_private_network_endpoints=True,
+    )
 
     config = create_client.await_args.kwargs["client_config"]
     assert result is grpc_client
@@ -311,7 +376,11 @@ async def test_discovered_grpc_client_closes_owned_http_client(monkeypatch):
         AsyncMock(return_value=Mock()),
     )
 
-    await build_a2a_client("http://a2a.example.com", use_tls=False)
+    await build_a2a_client(
+        "http://a2a.example.com",
+        use_tls=False,
+        allow_private_network_endpoints=True,
+    )
 
     http_client.aclose.assert_awaited_once()
 
@@ -334,6 +403,7 @@ async def test_discovered_grpc_client_does_not_close_injected_http_client(monkey
         "http://a2a.example.com",
         use_tls=False,
         http_client=http_client,
+        allow_private_network_endpoints=True,
     )
 
     http_client.aclose.assert_not_awaited()

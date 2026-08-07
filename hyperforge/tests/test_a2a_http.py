@@ -100,7 +100,10 @@ async def test_http_agent_card_discovery_streams_into_context(monkeypatch):
             base_url="http://a2a.test",
         )
         return await build_a2a_client(
-            "http://a2a.test", use_tls=False, http_client=http_client
+            "http://a2a.test",
+            use_tls=False,
+            http_client=http_client,
+            allow_private_network_endpoints=True,
         )
 
     monkeypatch.setattr(driver_module, "build_a2a_client", build_test_client)

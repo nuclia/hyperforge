@@ -18,6 +18,7 @@ async def test_ephemeral_session_is_not_cached():
             local_openai=None,
             external_nua_api_key=None,
             standalone=False,
+            allow_private_network_endpoints=False,
         ),
         broker=None,  # type: ignore[arg-type]
         agent_manager=SimpleNamespace(get_agent_config=AsyncMock()),
