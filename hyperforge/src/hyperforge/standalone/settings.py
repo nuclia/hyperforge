@@ -43,6 +43,13 @@ class StandaloneSettings(BaseSettings):
             "Set false only for local/dev HTTP deployments."
         ),
     )
+    auth_success_logo_url: Optional[str] = Field(
+        default=None,
+        description=(
+            "Logo URL shown on the OAuth success page. "
+            "When unset, the Hyperforge name is shown instead."
+        ),
+    )
 
     # ------------------------------------------------------------------
     # Agent runner
