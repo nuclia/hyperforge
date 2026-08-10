@@ -4,8 +4,6 @@ from nuclia.lib.nua import AsyncNuaClient
 from nuclia.sdk import AsyncNucliaAuth
 from pydantic import BaseModel
 
-from hyperforge.nua import AsyncInternalNuaClient
-
 
 class NuaBaseModel(BaseModel):
     async def connect(self):
@@ -37,6 +35,9 @@ class NoopNuaClient(AsyncNuaClient):  # pragma: no cover
             "configured.  Set EXTERNAL_NUA_API_KEY, INTERNAL_NUA=true, "
             "or LOCAL_OPENAI to enable LLM-based agents."
         )
+
+    async def aclose(self) -> None:
+        pass
 
     async def generate(self, *args: Any, **kwargs: Any) -> Any:  # type: ignore[override]
         self._not_configured("generate")
@@ -72,4 +73,4 @@ class NUAConnection(NuaBaseModel):
 
     @classmethod
     async def connect_internal(cls, kbid: str | None, account: str | None, url: str):
-        return AsyncInternalNuaClient(kbid=kbid, account=account, url=url)
+        return AsyncNuaClient.internal(url=url, kbid=kbid, account=account)
