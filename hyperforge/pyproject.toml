@@ -62,8 +62,6 @@ dev = [
     "inline_snapshot",
     "sqlalchemy_utils",
 ]
-[tool.uv.sources]
-nuclia = { git = "https://github.com/nuclia/nuclia.py", branch = "improve-nua-clint" }
 
 [tool.uv.build-backend]
 # Include additional non-Python asset files

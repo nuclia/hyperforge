@@ -997,7 +997,7 @@ requires-dist = [
     { name = "mcp", specifier = ">=1.26.0" },
     { name = "mmh3" },
     { name = "mrflagly", specifier = ">=0.2.11" },
-    { name = "nuclia", git = "https://github.com/nuclia/nuclia.py?branch=improve-nua-clint" },
+    { name = "nuclia", specifier = ">=4.14.0" },
     { name = "nuclia-models", specifier = ">=0.59.0" },
     { name = "nucliadb-models", specifier = ">=6.13.1.post6414" },
     { name = "nucliadb-sdk", specifier = ">=6.13.1.post6414" },
@@ -2328,7 +2328,7 @@ wheels = [
 [[package]]
 name = "nuclia"
 version = "4.14.0"
-source = { git = "https://github.com/nuclia/nuclia.py?branch=improve-nua-clint#32bb8980abca072e6d97d7c69290afa6b90ec1ec" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiofiles" },
     { name = "backoff" },
@@ -2347,6 +2347,10 @@ dependencies = [
     { name = "tabulate" },
     { name = "tqdm" },
     { name = "websockets" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e3/30/daf550a3362adc0268b32f02d358b867fe3afebb00f0c0c097d2dd720525/nuclia-4.14.0.tar.gz", hash = "sha256:7c25a4fb8232805a0ca615403d6c51fef79d263be6b8b070684f1e16e013ffda", size = 388582, upload-time = "2026-08-10T07:32:12.963Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ee/22/f52337d44423cc38b2c2c8c7122ce31d06473ae65233e7e410b2a541e110/nuclia-4.14.0-py3-none-any.whl", hash = "sha256:45ed012297cfd1d1496cac60b45aaa3582686273f6ea590b8be647455f92b765", size = 148568, upload-time = "2026-08-10T07:32:11.584Z" },
 ]
 
 [[package]]
