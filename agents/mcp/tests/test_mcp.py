@@ -18,7 +18,7 @@ from .mcp_server_token import (
 
 NUA_KEY = os.environ.get(
     "NUA_KEY",
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 pytestmark = [pytest.mark.vcr(ignore_localhost=True), pytest.mark.asyncio]
 
 
