@@ -43,6 +43,19 @@ from hyperforge_mcp.tools import (
     SIMPLE_TOOL_CHOICE_PROMPT,
 )
 
+
+def _tool_parameters(input_schema: Any) -> Dict[str, Any]:
+    properties = (
+        input_schema.get("properties", {}) if isinstance(input_schema, dict) else {}
+    )
+    if not isinstance(properties, dict):
+        return {}
+    return {
+        name: dict(schema) if isinstance(schema, dict) else {"type": "string"}
+        for name, schema in properties.items()
+    }
+
+
 MAX_NUM_TURNS = 10
 
 
@@ -876,27 +889,10 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         published: Dict[str, FunctionDefinition] = {}
 
         for tool in self.tools:
-            input_schema = tool.inputSchema or {}
-            properties = (
-                input_schema.get("properties", {})
-                if isinstance(input_schema, dict)
-                else {}
-            )
-            params: Dict[str, Any] = {
-                name: {
-                    "type": info.get("type", "string")
-                    if isinstance(info, dict)
-                    else "string",
-                    "description": info.get("description", "")
-                    if isinstance(info, dict)
-                    else "",
-                }
-                for name, info in properties.items()
-            }
             published[tool.name] = FunctionDefinition(
                 name=tool.name,
                 description=tool.description or tool.name,
-                parameters=params,
+                parameters=_tool_parameters(tool.inputSchema),
             )
             setattr(self, tool.name, self._make_tool_caller(tool.name))
 

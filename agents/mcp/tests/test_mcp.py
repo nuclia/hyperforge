@@ -8,6 +8,8 @@ from hyperforge.interaction import AragAnswer
 from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.utils.http import SafeTransport
 
+from hyperforge_mcp.agent import _tool_parameters
+
 from .mcp_server import run
 from .mcp_server_no_prompt import run_mcp_server_no_prompt
 from .mcp_server_prompts import run_mcp_server_prompt
@@ -20,6 +22,26 @@ NUA_KEY = os.environ.get(
     "NUA_KEY",
 ) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 pytestmark = [pytest.mark.vcr(ignore_localhost=True), pytest.mark.asyncio]
+
+
+async def test_tool_parameters_preserve_array_item_schema():
+    parameters = _tool_parameters(
+        {
+            "properties": {
+                "repo_types": {
+                    "type": "array",
+                    "description": "Repository types to search",
+                    "items": {"type": "string", "enum": ["model", "dataset"]},
+                }
+            }
+        }
+    )
+
+    assert parameters["repo_types"] == {
+        "type": "array",
+        "description": "Repository types to search",
+        "items": {"type": "string", "enum": ["model", "dataset"]},
+    }
 
 
 CONFIG = {
