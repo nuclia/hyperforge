@@ -1,12 +1,19 @@
 import json
 from typing import Any, AsyncIterator, Dict, List, Optional, Protocol, Tuple, Union
 
-from nuclia.lib.nua import AsyncNuaClient
+from nuclia.lib.nua import (
+    AsyncNuaClient,
+    GenerateStreamResponse,
+    QueryRequest,
+    RephraseRequest,
+)
 from nuclia.lib.nua_responses import (
     ChatModel,
     Image,
     Message,
+    QueryInfo,
     Reasoning,
+    RephraseModel,
     RerankModel,
     RerankResponse,
     Tokens,
@@ -99,16 +106,18 @@ class Manager:
     drivers: Dict[str, Driver]
     nua: AsyncNuaClient
 
-    def __init__(self) -> None:
+    def __init__(self, *, send_rao_origin: bool = True) -> None:
         self.drivers: Dict[str, Driver] = {}
+        self.send_rao_origin = send_rao_origin
 
     @classmethod
     async def from_config(
         cls,
         drivers: List[DriverConfig],
         nua: AsyncNuaClient,
+        send_rao_origin: bool = True,
     ):
-        manager = cls()
+        manager = cls(send_rao_origin=send_rao_origin)
 
         manager.nua = nua
         for driver in drivers:
@@ -126,11 +135,81 @@ class Manager:
                 result.append(key)
         return result
 
-    async def rerank(self, rerank: RerankModel) -> RerankResponse:
-        return await self.nua.rerank(rerank)
+    async def aclose(self) -> None:
+        await self.nua.aclose()
 
-    async def tokens_predict(self, text: str, model: str) -> Tokens:
-        return await self.nua.tokens_predict(text=text, model=model)
+    async def query_predict(
+        self,
+        request: QueryRequest,
+        *,
+        kbid: str | None = None,
+        extra_headers: dict[str, str] | None = None,
+        tracking: TrackingInfo | None = None,
+    ) -> QueryInfo:
+        return await self.nua.query_predict(
+            request,
+            kbid=kbid,
+            extra_headers=self._build_extra_headers(tracking, extra_headers),
+        )
+
+    async def rephrase(
+        self,
+        request: RephraseRequest,
+        *,
+        kbid: str | None = None,
+        extra_headers: dict[str, str] | None = None,
+        tracking: TrackingInfo | None = None,
+    ) -> RephraseModel:
+        return await self.nua.rephrase(
+            request,
+            kbid=kbid,
+            extra_headers=self._build_extra_headers(tracking, extra_headers),
+        )
+
+    async def generate_stream(
+        self,
+        body: ChatModel,
+        *,
+        kbid: str | None = None,
+        extra_headers: dict[str, str] | None = None,
+        tracking: TrackingInfo | None = None,
+    ) -> GenerateStreamResponse[AsyncIterator[GenerativeChunk]]:
+        return await self.nua.generate_stream(
+            body,
+            kbid=kbid,
+            extra_headers=self._build_extra_headers(tracking, extra_headers),
+            return_metadata=True,
+        )
+
+    async def rerank(
+        self,
+        model: RerankModel,
+        *,
+        kbid: str | None = None,
+        extra_headers: dict[str, str] | None = None,
+        tracking: TrackingInfo | None = None,
+    ) -> RerankResponse:
+        return await self.nua.rerank(
+            model,
+            kbid=kbid,
+            extra_headers=self._build_extra_headers(tracking, extra_headers),
+        )
+
+    async def tokens_predict(
+        self,
+        text: str,
+        model: str | None = None,
+        extra_headers: dict[str, str] | None = None,
+        *,
+        kbid: str | None = None,
+        tracking: TrackingInfo | None = None,
+    ) -> Tokens:
+        return await self.nua.tokens_predict(
+            text,
+            model=model,
+            extra_headers=self._build_extra_headers(tracking, extra_headers),
+            kbid=kbid,
+        )
 
     async def remi(
         self, question: str | None, answer: str | None, contexts: List[str] | None
@@ -142,19 +221,25 @@ class Manager:
                 question=question,
                 answer=answer,
                 contexts=contexts,
-            )
+            ),
+            extra_headers=self._build_extra_headers(),
         )
         return remi_response
 
     def _build_extra_headers(
         self,
         tracking: TrackingInfo | None = None,
+        extra_headers: dict[str, str] | None = None,
     ) -> dict[str, str]:
-        headers: dict[str, str] = {"x-show-consumption": "true", "x-origin": "RAO"}
+        headers = {"x-show-consumption": "true"}
+        if self.send_rao_origin:
+            headers["x-origin"] = "RAO"
         if tracking is not None:
             headers["x-client-ident"] = tracking.rao_id
             headers["x-session"] = tracking.session
             headers["x-message"] = tracking.message
+        if extra_headers is not None:
+            headers.update(extra_headers)
         return headers
 
     async def execute_raw(
@@ -222,7 +307,7 @@ class Manager:
             await callback.emit_streaming_chunk(agent_request=f"{module}@{agent_path}")
 
         async for chunk in self.nua.generate_stream(
-            body=item, extra_headers={"x-show-consumption": "true", "x-origin": "RAO"}
+            body=item, extra_headers=self._build_extra_headers()
         ):
             c = chunk.chunk
             if isinstance(c, TextGenerativeResponse):
@@ -289,7 +374,7 @@ class Manager:
                 max_tokens=max_tokens,
                 chat_history=chat_history,
             ),
-            extra_headers={"x-show-consumption": "true", "x-origin": "RAO"},
+            extra_headers=self._build_extra_headers(),
         ):
             yield chunk
 
