@@ -13,9 +13,7 @@ from hyperforge.llm_config import (
 
 
 class SampleConfig(BaseModel):
-    model: LLMField = Field(
-        default=LLMConfig(model_id=llm_defaults.default)
-    )
+    model: LLMField = Field(default=LLMConfig(model_id=llm_defaults.default))
 
 
 class TestLLMFieldBackwardsCompat:
