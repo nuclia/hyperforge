@@ -44,14 +44,14 @@ class ContextAgentConfig(AgentConfig):
         },
     )
     context_validation_model: LLMField = Field(
-        default_factory=lambda: LLMConfig(model_id=llm_defaults.default),
+        default=LLMConfig(model_id=llm_defaults.default),
         title="Context validation model",
         description="Model used to validate the agent's generated context and generate an answer attempt to the user's question.",
         # Backward compatibility with frontend and stored configurations
         validation_alias=AliasChoices("context_validation_model", "summarize_model"),
     )
     rephrase_model: LLMField = Field(
-        default_factory=lambda: LLMConfig(model_id=llm_defaults.default),
+        default=LLMConfig(model_id=llm_defaults.default),
         title="Rephrase model",
         description="Model used to rephrase the question based on context (only used in agents that follow others in a chain)",
     )

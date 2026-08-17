@@ -42,7 +42,7 @@ class AskAgentConfig(ContextAgentConfig):
         },
     )
     configuration_model: LLMField = Field(
-        default_factory=lambda: LLMConfig(model_id=llm_defaults.fast),
+        default=LLMConfig(model_id=llm_defaults.fast),
         title="Generative model",
         description="Model used to generate the configuration",
     )

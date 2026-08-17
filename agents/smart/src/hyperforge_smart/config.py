@@ -107,12 +107,12 @@ class SmartAgentConfig(ContextAgentConfig):
         },
     )
     planner_model: LLMField = Field(
-        default_factory=lambda: LLMConfig(model_id=llm_defaults.smart),
+        default=LLMConfig(model_id=llm_defaults.smart),
         title="Planner model",
         description="Model used to plan the actions to take",
     )
     executor_model: LLMField = Field(
-        default_factory=lambda: LLMConfig(model_id=llm_defaults.smart),
+        default=LLMConfig(model_id=llm_defaults.smart),
         title="Executor model",
         description=("Model used to select and execute the tools."),
     )

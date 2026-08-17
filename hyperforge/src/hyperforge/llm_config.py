@@ -10,7 +10,7 @@ Usage in agent configs:
 
     class MyAgentConfig(AgentConfig):
         planner_model: LLMField = Field(
-            default_factory=lambda: LLMConfig(model_id=llm_defaults.smart)
+            default=LLMConfig(model_id=llm_defaults.smart)
         )
 """
 

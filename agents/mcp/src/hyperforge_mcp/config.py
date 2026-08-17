@@ -55,7 +55,7 @@ class MCPAgentConfig(ContextAgentConfig):
         },
     )
     tool_choice_model: LLMField = Field(
-        default_factory=lambda: LLMConfig(model_id=llm_defaults.smart),
+        default=LLMConfig(model_id=llm_defaults.smart),
         title="Tool choice model",
         description="Model used to choose the tool to use",
     )
@@ -76,7 +76,7 @@ class MCPAgentConfig(ContextAgentConfig):
         default=5, title="Maximum number of tool calls before stopping"
     )
     sampling_model: LLMField = Field(
-        default_factory=lambda: LLMConfig(model_id=llm_defaults.fast),
+        default=LLMConfig(model_id=llm_defaults.fast),
         title="Sampling model",
         description="Model used for sampling",
     )
@@ -101,7 +101,7 @@ class MultiMCPAgentConfig(ContextAgentConfig):
         default_factory=list, title="List of MCP agent configurations"
     )
     summarize_model: LLMField = Field(
-        default_factory=lambda: LLMConfig(model_id=llm_defaults.default),
+        default=LLMConfig(model_id=llm_defaults.default),
         title="Summarize model",
         description="Model used to summarize results",
     )
@@ -110,7 +110,7 @@ class MultiMCPAgentConfig(ContextAgentConfig):
     )
     interaction: bool = Field(default=True, title="Enable interaction with the user")
     tool_choice_model: LLMField = Field(
-        default_factory=lambda: LLMConfig(model_id=llm_defaults.smart),
+        default=LLMConfig(model_id=llm_defaults.smart),
         title="Tool choice model",
         description="Model used to choose the tool to use",
     )

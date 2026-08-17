@@ -94,7 +94,7 @@ class ConditionalAgentConfig(AgentConfig):
         description="Source to evaluate the condition on. ",
     )
     model: LLMField = Field(
-        default_factory=lambda: LLMConfig(model_id=llm_defaults.reasoning),
+        default=LLMConfig(model_id=llm_defaults.reasoning),
         title="Generative model",
         description="Model used to assess the condition",
     )

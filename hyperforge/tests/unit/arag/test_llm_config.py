@@ -14,7 +14,7 @@ from hyperforge.llm_config import (
 
 class SampleConfig(BaseModel):
     model: LLMField = Field(
-        default_factory=lambda: LLMConfig(model_id=llm_defaults.default)
+        default=LLMConfig(model_id=llm_defaults.default)
     )
 
 
@@ -37,6 +37,17 @@ class TestLLMFieldBackwardsCompat:
         data = config.model_dump()
         config2 = SampleConfig.model_validate(data)
         assert config2.model.model_id == "gpt-5"
+
+    def test_default_is_included_in_json_schema(self):
+        default = SampleConfig.model_json_schema()["properties"]["model"]["default"]
+
+        assert default["model_id"] == llm_defaults.default
+
+    def test_default_is_not_shared_between_instances(self):
+        first = SampleConfig()
+        second = SampleConfig()
+
+        assert first.model is not second.model
 
 
 class TestSimpleReasoningResolution:

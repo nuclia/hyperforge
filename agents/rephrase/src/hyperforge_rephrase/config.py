@@ -19,7 +19,7 @@ class RephraseAgentConfig(AgentConfig):
     session_info: bool = False
     history: bool = False
     model: LLMField = Field(
-        default_factory=lambda: LLMConfig(model_id=llm_defaults.default),
+        default=LLMConfig(model_id=llm_defaults.default),
         title="Generative model",
         description="Model used to generate the rephrased question",
     )

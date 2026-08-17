@@ -51,7 +51,7 @@ class ExternalCallAgentConfig(AgentConfig):
         title="Headers to use on the API call ",
     )
     model: LLMField = Field(
-        default_factory=lambda: LLMConfig(model_id=llm_defaults.reasoning),
+        default=LLMConfig(model_id=llm_defaults.reasoning),
         title="Generative model",
         description="Model used to extract the parameters to call the URL",
     )

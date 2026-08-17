@@ -32,7 +32,7 @@ class AdvancedAskAgentConfig(ContextAgentConfig):
         },
     )
     generative_model: LLMField = Field(
-        default_factory=lambda: LLMConfig(model_id=llm_defaults.default),
+        default=LLMConfig(model_id=llm_defaults.default),
         title="Generative model",
         description="Model used to generate answers",
     )
