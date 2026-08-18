@@ -3,7 +3,7 @@ theme: default
 title: Hyperforge Architecture
 info: |
   ## Hyperforge Architecture
-  An agentic runtime built on top of NucliaDB.
+  An agentic runtime.
 class: text-center
 highlighter: shiki
 drawings:
@@ -14,7 +14,7 @@ mdc: true
 
 # Hyperforge
 
-## Agentic Runtime on top of NucliaDB
+## Agentic Runtime
 
 API ⇄ Worker · WebSocket & MCP · Smart / Restricted / NucliaDB / Search agents · Memory · NUA · OAuth
 
@@ -60,37 +60,27 @@ layout: default
 
 # Two Services, One Broker
 
-The **API** and the **Worker** are deployed independently and **never call each other directly** — they talk over a **Redis/Valkey Stream broker**.
+API and Worker deploy independently and **never call each other directly** — they talk over a **Redis/Valkey Stream broker**.
 
-```mermaid {scale: 0.62}
+```mermaid {scale: 0.5}
 graph LR
-  subgraph Client
-    C[Browser / MCP Caller]
+  C[Client] <-->|WS / ndjson / MCP| WS
+  subgraph API["API · hyperforge-api"]
+    WS[Endpoints + AgentManager]
   end
-
-  subgraph API["API service · hyperforge-api"]
-    WS[WebSocket / HTTP / MCP endpoints]
-    AM1[AgentManager · Postgres config]
-  end
-
   subgraph Broker["Redis / Valkey Streams"]
     ACT[(arag.activate)]
     ANS[(answer stream)]
     RPY[(reply channel)]
   end
-
-  subgraph Worker["Worker service · hyperforge-server"]
-    SM[SessionManager]
-    RA[RetrievalAgent + Agents]
+  subgraph Worker["Worker · hyperforge-server"]
+    SM[SessionManager + Agents]
   end
-
-  C <-->|WebSocket / ndjson / MCP| WS
   WS -->|StartInteraction| ACT
   ACT -->|XREADGROUP| SM
-  SM --> RA
-  RA -->|AgentAnswer / ping / done| ANS
+  SM -->|AgentAnswer / ping / done| ANS
   ANS --> WS
-  WS -->|feedback · oauth callback| RPY
+  WS -->|feedback · oauth| RPY
   RPY --> SM
 ```
 
@@ -121,14 +111,14 @@ layout: two-cols-header
 
 Discriminated union on `op`:
 
-| op | message |
-|----|---------|
-| `ping` | `AgentPing` (keepalive) |
-| `answer` | `AgentAnswer` → `AragAnswer` |
-| `done` | `AgentDone` |
-| `oauth` | `OAuthRequest` |
-| `agent_request` | `AgentToUserRequest` |
-| `user_response` | `UserToAgentInteraction` |
+| op              | message                      |
+| --------------- | ---------------------------- |
+| `ping`          | `AgentPing` (keepalive)      |
+| `answer`        | `AgentAnswer` → `AragAnswer` |
+| `done`          | `AgentDone`                  |
+| `oauth`         | `OAuthRequest`               |
+| `agent_request` | `AgentToUserRequest`         |
+| `user_response` | `UserToAgentInteraction`     |
 
 Subjects are templated per interaction:
 `arag.{account}.{agent_id}.{workflow_id}.{session}.{question}.answer`
@@ -139,26 +129,24 @@ layout: default
 
 # End-to-End Interaction Flow
 
-```mermaid {scale: 0.6}
+```mermaid {scale: 0.5}
 sequenceDiagram
   participant C as Client
   participant A as API
   participant B as Broker
-  participant W as Worker (SessionManager)
+  participant W as Worker
   participant N as NucliaDB / NUA
-
   C->>A: Question (WS / HTTP / MCP)
-  A->>A: validate workflow, gen question_id
-  A->>B: publish StartInteraction (+ trace headers)
+  A->>B: publish StartInteraction (+ trace)
   A->>B: subscribe answer subject
   B->>W: activation (XREADGROUP)
-  W->>N: load agent config + State + memory
+  W->>N: load config + State + memory
   W->>N: run agents (retrieval / LLM)
   W-->>B: START · steps · ping · REASONING
   W-->>B: AragAnswer(ANSWER) · DONE
   B-->>A: relay messages
   A-->>C: stream frames
-  W->>N: persist memory (question_memory.save)
+  W->>N: persist memory (save)
 ```
 
 ---
@@ -189,15 +177,15 @@ State machine `Expecting`: QUESTION | FEEDBACK | NOTHING
 
 `operation` field (`AnswerOperation`):
 
-| # | op | meaning |
-|---|----|---------|
-| 2 | START | run started |
-| 0 | ANSWER | full answer |
-| 6 | ANSWER_CHUNK | token stream |
-| 7 | REASONING | reasoning trace |
-| 5 | AGENT_REQUEST | elicitation / oauth |
-| 3 | DONE | finished |
-| 4 | ERROR | failure |
+| #   | op            | meaning             |
+| --- | ------------- | ------------------- |
+| 2   | START         | run started         |
+| 0   | ANSWER        | full answer         |
+| 6   | ANSWER_CHUNK  | token stream        |
+| 7   | REASONING     | reasoning trace     |
+| 5   | AGENT_REQUEST | elicitation / oauth |
+| 3   | DONE          | finished            |
+| 4   | ERROR         | failure             |
 
 Carries `answer`, `step`, `context`, `citations`, `feedback`, `oauth`, `data_visualizations`…
 
@@ -529,24 +517,59 @@ layout: default
 
 # Use Cases — Connecting Multiple Sources
 
-A **retrieval experience** declares multiple **drivers** (sources) and multiple **context agents**, fanned out in parallel.
+A **retrieval experience** declares multiple **drivers** (sources) and context agents, fanned out in parallel.
 
-```mermaid {scale: 0.58}
-graph TD
-  Q[User question] --> RA[RetrievalAgent]
-  RA --> P[preprocess]
-  P --> CTX{context · parallel gather}
+```mermaid {scale: 0.45}
+graph LR
+  Q[Question] --> P[preprocess]
+  P --> CTX{context · parallel}
   CTX --> KB1[NucliaDB KB A]
   CTX --> KB2[NucliaDB KB B]
-  CTX --> G[Google search]
+  CTX --> G[Google]
   CTX --> PX[Perplexity]
-  CTX --> MCP[External MCP servers]
-  KB1 & KB2 & G & PX & MCP --> GEN[generation · LLM via NUA]
+  CTX --> MCP[External MCP]
+  KB1 & KB2 & G & PX & MCP --> GEN[generation · NUA]
   GEN --> POST[postprocess]
-  POST --> ANS[Answer + citations + visualizations]
+  POST --> ANS[Answer + citations + viz]
 ```
 
-**Use cases = named workflows** — each agent can host many workflows, each with its own parameters, rules & pipeline, and each exposed as an MCP tool.
+**Use cases = named workflows** — each agent hosts many workflows, each with its own parameters, rules & pipeline, and each exposed as an MCP tool.
+
+---
+layout: two-cols-header
+---
+
+# Use Case — Database via MCP → Passthrough
+
+Query a **database** exposed through an **MCP server**, shape results with a **custom context agent**, and return them **verbatim** — no LLM at generation.
+
+::left::
+
+```mermaid {scale: 0.42}
+graph LR
+  Q[Question] --> CTX[context step]
+  subgraph CTX[context step]
+    CA[Custom Agent]
+    MC[MCPAgent · client]
+  end
+  CA -->|tool call| MC
+  MC <-->|SQL tool| DB[(Database)]
+  MC -->|rows → Chunk / Context| CA
+  CA --> GEN
+  subgraph GEN[generation step]
+    PT[PassthroughAgent · rich_context]
+  end
+  PT --> ANS[Answer verbatim + citations]
+```
+
+::right::
+
+## How it's wired
+
+- **Driver** — `MCPHTTPDriver` / `MCPStdioDriver` → DB's MCP server
+- **Context** — **custom agent** calls the MCP tool (`preload` finds `run_sql`), rows → `Chunk` / `Context`
+- **Generation** — `PassthroughAgent` (`rich_context`) emits rows **verbatim**, no LLM call
+- **Auth** — header / bearer **passthrough** (`valid_headers`, MCP OAuth)
 
 ---
 layout: center

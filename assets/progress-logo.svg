@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" fill="none">
+  <g fill="#5CE500">
+    <path d="M18 12c14 0 24 9 24 22 0 12-9 21-23 21h-9v13H0V12h18zm-1 32c8 0 13-4 13-10 0-6-5-10-13-10h-7v20h7z"/>
+  </g>
+  <text x="52" y="52" font-family="Helvetica, Arial, sans-serif" font-size="40" font-weight="700" fill="#4a4a4a" letter-spacing="-1">Progress</text>
+</svg>
