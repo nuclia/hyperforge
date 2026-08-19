@@ -89,8 +89,12 @@ jobs:
     steps:
       - id: selected
         shell: bash
+        env:
+          ALL_CHANGED: ${{ needs.changes.outputs.all }}
+          CHANGED_PACKAGES: ${{ needs.changes.outputs.packages }}
+          PACKAGE: ${{ matrix.package }}
         run: |
-          if [[ "${{ needs.changes.outputs.all }}" == true ]] || jq -e --arg package "${{ matrix.package }}" 'index($package)' <<< '${{ needs.changes.outputs.packages }}' > /dev/null; then
+          if [[ "$ALL_CHANGED" == true ]] || jq -e --arg package "$PACKAGE" 'index($package)' <<< "$CHANGED_PACKAGES" > /dev/null; then
             echo "run=true" >> "$GITHUB_OUTPUT"
           else
             echo "run=false" >> "$GITHUB_OUTPUT"
@@ -163,8 +167,12 @@ jobs:
     steps:
       - id: selected
         shell: bash
+        env:
+          ALL_CHANGED: ${{ needs.changes.outputs.all }}
+          CHANGED_PACKAGES: ${{ needs.changes.outputs.packages }}
+          PACKAGE: ${{ matrix.package }}
         run: |
-          if [[ "${{ needs.changes.outputs.all }}" == true ]] || jq -e --arg package "${{ matrix.package }}" 'index($package)' <<< '${{ needs.changes.outputs.packages }}' > /dev/null; then
+          if [[ "$ALL_CHANGED" == true ]] || jq -e --arg package "$PACKAGE" 'index($package)' <<< "$CHANGED_PACKAGES" > /dev/null; then
             echo "run=true" >> "$GITHUB_OUTPUT"
           else
             echo "run=false" >> "$GITHUB_OUTPUT"
