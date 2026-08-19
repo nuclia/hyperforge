@@ -1,0 +1,262 @@
+name: Package Tests
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    name: Detect changed packages
+    runs-on: ubuntu-24.04
+    outputs:
+      all: ${{ steps.filter.outputs.all }}
+      packages: ${{ steps.filter.outputs.packages }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - id: filter
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base="${{ github.event.pull_request.base.sha }}"
+          else
+            base="${{ github.event.before }}"
+          fi
+
+          # A first push has no previous commit to compare against.
+          if [[ "$base" == "0000000000000000000000000000000000000000" ]]; then
+            base="$(git rev-parse HEAD^)"
+          fi
+
+          changed="$(git diff --name-only "$base" "$GITHUB_SHA")"
+          all=false
+          if grep -Eq '^(hyperforge/|hyperforge\.mk|pyproject\.toml|uv\.lock|mypy\.ini|ruff\.toml|bump\.py|HYPERFORGE\.Dockerfile|\.github/workflows/package-tests\.yaml)' <<< "$changed"; then
+            all=true
+          fi
+
+          packages='[]'
+          for package in hyperforge agents/conditional agents/external agents/generate agents/google agents/historical agents/http agents/mcp agents/nucliadb agents/passthrough agents/perplexity agents/perplexity_search agents/related agents/remi agents/rephrase agents/restart agents/restricted agents/smart agents/static agents/static_string agents/summarize; do
+            if [[ "$all" == true ]] || grep -qF "${package}/" <<< "$changed"; then
+              packages="$(jq -cn --argjson packages "$packages" --arg package "$package" '$packages + [$package]')"
+            fi
+          done
+
+          echo "all=$all" >> "$GITHUB_OUTPUT"
+          echo "packages=$packages" >> "$GITHUB_OUTPUT"
+
+  test:
+    name: Test ${{ matrix.package }}
+    needs: changes
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - hyperforge
+          - agents/conditional
+          - agents/external
+          - agents/generate
+          - agents/google
+          - agents/historical
+          - agents/http
+          - agents/mcp
+          - agents/nucliadb
+          - agents/passthrough
+          - agents/perplexity
+          - agents/perplexity_search
+          - agents/related
+          - agents/remi
+          - agents/rephrase
+          - agents/restart
+          - agents/restricted
+          - agents/smart
+          - agents/static
+          - agents/static_string
+          - agents/summarize
+    steps:
+      - id: selected
+        shell: bash
+        run: |
+          if [[ "${{ needs.changes.outputs.all }}" == true ]] || jq -e --arg package "${{ matrix.package }}" 'index($package)' <<< '${{ needs.changes.outputs.packages }}' > /dev/null; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        if: steps.selected.outputs.run == 'true'
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        if: steps.selected.outputs.run == 'true'
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          enable-cache: false
+          python-version: "3.12"
+
+      - name: Install package dependencies with uv
+        if: steps.selected.outputs.run == 'true'
+        run: uv sync --group dev
+
+      - name: Lint
+        if: steps.selected.outputs.run == 'true'
+        working-directory: ${{ matrix.package }}
+        run: make lint
+
+      - name: Run tests
+        if: steps.selected.outputs.run == 'true'
+        working-directory: ${{ matrix.package }}
+        run: make test
+        env:
+          NUA_KEY: ${{ secrets.NUA_KEY }}
+          KB_DF8B4C24_2807_4888_AD6C_AE97357A638B: ${{ secrets.KB_DF8B4C24_2807_4888_AD6C_AE97357A638B }}
+          KB_DE48CFAA_3209_4041_BB64_8604AFF061FB: ${{ secrets.KB_DE48CFAA_3209_4041_BB64_8604AFF061FB }}
+
+      - name: Skip unchanged package
+        if: steps.selected.outputs.run != 'true'
+        run: echo "${{ matrix.package }} was not affected by this change."
+
+  build_wheels:
+    name: Build wheels ${{ matrix.package }}
+    if: github.event_name == 'push'
+    needs: [changes, test]
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - hyperforge
+          - agents/conditional
+          - agents/external
+          - agents/generate
+          - agents/google
+          - agents/historical
+          - agents/http
+          - agents/mcp
+          - agents/nucliadb
+          - agents/passthrough
+          - agents/perplexity
+          - agents/perplexity_search
+          - agents/related
+          - agents/remi
+          - agents/rephrase
+          - agents/restart
+          - agents/restricted
+          - agents/smart
+          - agents/static
+          - agents/static_string
+          - agents/summarize
+    steps:
+      - id: selected
+        shell: bash
+        run: |
+          if [[ "${{ needs.changes.outputs.all }}" == true ]] || jq -e --arg package "${{ matrix.package }}" 'index($package)' <<< '${{ needs.changes.outputs.packages }}' > /dev/null; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        if: steps.selected.outputs.run == 'true'
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        if: steps.selected.outputs.run == 'true'
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          enable-cache: false
+          python-version: "3.12"
+
+      - name: Set dependency versions in requirements
+        if: steps.selected.outputs.run == 'true'
+        run: python bump.py --package="${{ matrix.package }}" --build="${{ github.run_number }}"
+
+      - name: Build wheels
+        if: steps.selected.outputs.run == 'true'
+        run: uv build "${{ matrix.package }}"
+
+      - name: Publish package to PyPI
+        if: steps.selected.outputs.run == 'true'
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
+
+      - name: Skip unchanged package
+        if: steps.selected.outputs.run != 'true'
+        run: echo "${{ matrix.package }} was not affected by this change."
+
+  build_and_push_docker_image:
+    name: Build and push Docker image
+    if: github.event_name == 'push' && (needs.changes.outputs.all == 'true' || contains(fromJSON(needs.changes.outputs.packages), 'hyperforge'))
+    needs: [changes, build_wheels]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Log in to GitHub Container Registry
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+
+      - name: Build Docker image
+        env:
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+          IMAGE_SHA_TAG: ${{ github.sha }}
+          IMAGE_REF_TAG: ${{ github.ref_name }}
+        run: docker build -f HYPERFORGE.Dockerfile -t "ghcr.io/$REPOSITORY_OWNER/hyperforge:$IMAGE_SHA_TAG" -t "ghcr.io/$REPOSITORY_OWNER/hyperforge:$IMAGE_REF_TAG" .
+
+      - name: Push Docker image
+        env:
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+          IMAGE_SHA_TAG: ${{ github.sha }}
+          IMAGE_REF_TAG: ${{ github.ref_name }}
+        run: |
+          docker push "ghcr.io/$REPOSITORY_OWNER/hyperforge:$IMAGE_SHA_TAG"
+          docker push "ghcr.io/$REPOSITORY_OWNER/hyperforge:$IMAGE_REF_TAG"
+
+  notify-teams-fail:
+    name: Notify Teams on failure
+    needs: [test, build_wheels, build_and_push_docker_image]
+    if: failure() && github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Send Teams notification
+        env:
+          REF_NAME: ${{ github.ref_name }}
+          RUN_NUMBER: ${{ github.run_number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          COMMIT_SHA: ${{ github.sha }}
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"@type\": \"MessageCard\",
+              \"@context\": \"http://schema.org/extensions\",
+              \"themeColor\": \"FF0000\",
+              \"summary\": \"Package CI failed\",
+              \"sections\": [{
+                \"activityTitle\": \"**Package CI failed on \`${REF_NAME}\`**\",
+                \"activityText\": \"Run [#${RUN_NUMBER}](${RUN_URL}) failed for commit \`${COMMIT_SHA}\`.\"
+              }]
+            }" \
+            "$TEAMS_WEBHOOK_URL"
