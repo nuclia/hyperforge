@@ -1,0 +1,34 @@
+shared:
+  - hyperforge/
+  - hyperforge.mk
+  - pyproject.toml
+  - uv.lock
+  - mypy.ini
+  - ruff.toml
+  - bump.py
+  - HYPERFORGE.Dockerfile
+  - .github/packages.yaml
+  - .github/workflows/package-tests.yaml
+
+packages:
+  - hyperforge
+  - agents/conditional
+  - agents/external
+  - agents/generate
+  - agents/google
+  - agents/historical
+  - agents/http
+  - agents/mcp
+  - agents/nucliadb
+  - agents/passthrough
+  - agents/perplexity
+  - agents/perplexity_search
+  - agents/related
+  - agents/remi
+  - agents/rephrase
+  - agents/restart
+  - agents/restricted
+  - agents/smart
+  - agents/static
+  - agents/static_string
+  - agents/summarize

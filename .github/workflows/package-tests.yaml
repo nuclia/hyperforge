@@ -19,110 +19,85 @@ jobs:
     name: Detect changed packages
     runs-on: ubuntu-24.04
     outputs:
-      all: ${{ steps.filter.outputs.all }}
-      packages: ${{ steps.filter.outputs.packages }}
+      packages: ${{ steps.packages.outputs.packages }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          fetch-depth: 0
+          fetch-depth: ${{ github.event_name == 'pull_request' && 1 || 0 }}
           persist-credentials: false
 
-      - id: filter
+      - id: changed-files
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
+        with:
+          json: true
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          enable-cache: false
+          python-version: "3.12"
+
+      - id: packages
         shell: bash
+        env:
+          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            base="${{ github.event.pull_request.base.sha }}"
-          else
-            base="${{ github.event.before }}"
-          fi
+          packages="$(uv run --with pyyaml python <<'PYTHON'
+          import json
+          import os
 
-          # A first push has no previous commit to compare against.
-          if [[ "$base" == "0000000000000000000000000000000000000000" ]]; then
-            base="$(git rev-parse HEAD^)"
-          fi
+          import yaml
 
-          changed="$(git diff --name-only "$base" "$GITHUB_SHA")"
-          all=false
-          if grep -Eq '^(hyperforge/|hyperforge\.mk|pyproject\.toml|uv\.lock|mypy\.ini|ruff\.toml|bump\.py|HYPERFORGE\.Dockerfile|\.github/workflows/package-tests\.yaml)' <<< "$changed"; then
-            all=true
-          fi
+          with open(".github/packages.yaml") as manifest:
+              config = yaml.safe_load(manifest)
 
-          packages='[]'
-          for package in hyperforge agents/conditional agents/external agents/generate agents/google agents/historical agents/http agents/mcp agents/nucliadb agents/passthrough agents/perplexity agents/perplexity_search agents/related agents/remi agents/rephrase agents/restart agents/restricted agents/smart agents/static agents/static_string agents/summarize; do
-            if [[ "$all" == true ]] || grep -qF "${package}/" <<< "$changed"; then
-              packages="$(jq -cn --argjson packages "$packages" --arg package "$package" '$packages + [$package]')"
-            fi
-          done
-
-          echo "all=$all" >> "$GITHUB_OUTPUT"
+          changed = json.loads(os.environ["CHANGED_FILES"])
+          shared_changed = any(
+              path.startswith(entry) if entry.endswith("/") else path == entry
+              for path in changed
+              for entry in config["shared"]
+          )
+          selected = config["packages"] if shared_changed else [
+              package
+              for package in config["packages"]
+              if any(path.startswith(f"{package}/") for path in changed)
+          ]
+          print(json.dumps(selected, separators=(",", ":")))
+          PYTHON
+          )"
           echo "packages=$packages" >> "$GITHUB_OUTPUT"
 
   test:
     name: Test ${{ matrix.package }}
+    if: needs.changes.outputs.packages != '[]'
     needs: changes
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
-        package:
-          - hyperforge
-          - agents/conditional
-          - agents/external
-          - agents/generate
-          - agents/google
-          - agents/historical
-          - agents/http
-          - agents/mcp
-          - agents/nucliadb
-          - agents/passthrough
-          - agents/perplexity
-          - agents/perplexity_search
-          - agents/related
-          - agents/remi
-          - agents/rephrase
-          - agents/restart
-          - agents/restricted
-          - agents/smart
-          - agents/static
-          - agents/static_string
-          - agents/summarize
+        package: ${{ fromJSON(needs.changes.outputs.packages) }}
     steps:
-      - id: selected
-        shell: bash
-        env:
-          ALL_CHANGED: ${{ needs.changes.outputs.all }}
-          CHANGED_PACKAGES: ${{ needs.changes.outputs.packages }}
-          PACKAGE: ${{ matrix.package }}
-        run: |
-          if [[ "$ALL_CHANGED" == true ]] || jq -e --arg package "$PACKAGE" 'index($package)' <<< "$CHANGED_PACKAGES" > /dev/null; then
-            echo "run=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "run=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        if: steps.selected.outputs.run == 'true'
         with:
           persist-credentials: false
 
       - name: Install uv
-        if: steps.selected.outputs.run == 'true'
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           enable-cache: false
           python-version: "3.12"
 
       - name: Install package dependencies with uv
-        if: steps.selected.outputs.run == 'true'
         run: uv sync --group dev
 
       - name: Lint
-        if: steps.selected.outputs.run == 'true'
         working-directory: ${{ matrix.package }}
         run: make lint
 
       - name: Run tests
-        if: steps.selected.outputs.run == 'true'
         working-directory: ${{ matrix.package }}
         run: make test
         env:
@@ -130,86 +105,26 @@ jobs:
           KB_DF8B4C24_2807_4888_AD6C_AE97357A638B: ${{ secrets.KB_DF8B4C24_2807_4888_AD6C_AE97357A638B }}
           KB_DE48CFAA_3209_4041_BB64_8604AFF061FB: ${{ secrets.KB_DE48CFAA_3209_4041_BB64_8604AFF061FB }}
 
-      - name: Skip unchanged package
-        if: steps.selected.outputs.run != 'true'
-        run: echo "${{ matrix.package }} was not affected by this change."
-
-  build_wheels:
-    name: Build wheels ${{ matrix.package }}
-    if: github.event_name == 'push'
-    needs: [changes, test]
-    runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        package:
-          - hyperforge
-          - agents/conditional
-          - agents/external
-          - agents/generate
-          - agents/google
-          - agents/historical
-          - agents/http
-          - agents/mcp
-          - agents/nucliadb
-          - agents/passthrough
-          - agents/perplexity
-          - agents/perplexity_search
-          - agents/related
-          - agents/remi
-          - agents/rephrase
-          - agents/restart
-          - agents/restricted
-          - agents/smart
-          - agents/static
-          - agents/static_string
-          - agents/summarize
-    steps:
-      - id: selected
-        shell: bash
-        env:
-          ALL_CHANGED: ${{ needs.changes.outputs.all }}
-          CHANGED_PACKAGES: ${{ needs.changes.outputs.packages }}
-          PACKAGE: ${{ matrix.package }}
-        run: |
-          if [[ "$ALL_CHANGED" == true ]] || jq -e --arg package "$PACKAGE" 'index($package)' <<< "$CHANGED_PACKAGES" > /dev/null; then
-            echo "run=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "run=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        if: steps.selected.outputs.run == 'true'
-        with:
-          persist-credentials: false
-
-      - name: Install uv
-        if: steps.selected.outputs.run == 'true'
-        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
-        with:
-          enable-cache: false
-          python-version: "3.12"
-
       - name: Set dependency versions in requirements
-        if: steps.selected.outputs.run == 'true'
-        run: python bump.py --package="${{ matrix.package }}" --build="${{ github.run_number }}"
+        if: github.event_name == 'push'
+        env:
+          PACKAGE: ${{ matrix.package }}
+        run: python bump.py --package="$PACKAGE" --build="${{ github.run_number }}"
 
       - name: Build wheels
-        if: steps.selected.outputs.run == 'true'
-        run: uv build "${{ matrix.package }}"
+        if: github.event_name == 'push'
+        env:
+          PACKAGE: ${{ matrix.package }}
+        run: uv build "$PACKAGE"
 
       - name: Publish package to PyPI
-        if: steps.selected.outputs.run == 'true'
+        if: github.event_name == 'push'
         uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
 
-      - name: Skip unchanged package
-        if: steps.selected.outputs.run != 'true'
-        run: echo "${{ matrix.package }} was not affected by this change."
-
-  build_and_push_docker_image:
+  docker:
     name: Build and push Docker image
-    if: github.event_name == 'push' && (needs.changes.outputs.all == 'true' || contains(fromJSON(needs.changes.outputs.packages), 'hyperforge'))
-    needs: [changes, build_wheels]
+    if: always() && github.event_name == 'push' && contains(fromJSON(needs.changes.outputs.packages), 'hyperforge') && needs.test.result == 'success'
+    needs: [changes, test]
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -241,9 +156,24 @@ jobs:
           docker push "ghcr.io/$REPOSITORY_OWNER/hyperforge:$IMAGE_SHA_TAG"
           docker push "ghcr.io/$REPOSITORY_OWNER/hyperforge:$IMAGE_REF_TAG"
 
+  package-tests:
+    name: Package tests
+    if: always()
+    needs: [changes, test]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Verify package tests
+        env:
+          TEST_RESULT: ${{ needs.test.result }}
+        run: |
+          if [[ "$TEST_RESULT" != success && "$TEST_RESULT" != skipped ]]; then
+            exit 1
+          fi
+          echo "All selected package tests completed successfully."
+
   notify-teams-fail:
     name: Notify Teams on failure
-    needs: [test, build_wheels, build_and_push_docker_image]
+    needs: [test, docker, package-tests]
     if: failure() && github.event_name == 'push'
     runs-on: ubuntu-24.04
     steps:
