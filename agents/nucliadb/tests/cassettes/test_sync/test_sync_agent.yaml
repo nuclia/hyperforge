@@ -9,35 +9,29 @@ interactions:
       Connection:
       - keep-alive
       Host:
-      - europe-1.stashify.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
-      - nucliadb-sdk/6.13.1.post6414
-      content-type:
-      - application/json
-      x-stf-serviceaccount:
+      - nuclia.py/4.14.0
+      x-nuclia-nuakey:
       - DUMMY
     method: GET
-    uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/labelsets
+    uri: https://europe-1.dp.progress.cloud/api/authorizer/info
   response:
     body:
-      string: '{"uuid":"e103caf3-f8cb-4161-a57c-aad1192d0666","labelsets":{}}'
+      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"9e1317aa-e212-4a59-b794-afee535458a6","account_id":"07c2de7c-fa77-4374-a461-eea314da9dfd","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
-      - '62'
-      access-control-expose-headers:
-      - X-NUCLIA-TRACE-ID
+      - '227'
       content-type:
       - application/json
       date:
-      - Wed, 15 Jul 2026 08:11:46 GMT
+      - Wed, 19 Aug 2026 09:44:53 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '11'
-      x-nuclia-trace-id:
-      - 62616391a3adf1b4f807f505e08c6479
+      - '5'
     status:
       code: 200
       message: OK
@@ -55,7 +49,7 @@ interactions:
       Host:
       - europe-1.stashify.cloud
       User-Agent:
-      - nucliadb-sdk/6.13.1.post6414
+      - nucliadb-sdk/6.15.1.post6905
       content-type:
       - application/json
       x-stf-serviceaccount:
@@ -75,13 +69,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 15 Jul 2026 08:11:46 GMT
+      - Wed, 19 Aug 2026 09:44:54 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '9'
+      - '11'
       x-nuclia-trace-id:
-      - 06cce9aa129eb823e772a09a85dfab3e
+      - 0d78772cc31dd2ea6708b7f2422dbfd1
     status:
       code: 200
       message: OK
@@ -97,49 +91,7 @@ interactions:
       Host:
       - europe-1.stashify.cloud
       User-Agent:
-      - nucliadb-sdk/6.13.1.post6414
-      content-type:
-      - application/json
-      x-stf-serviceaccount:
-      - DUMMY
-    method: GET
-    uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/configuration
-  response:
-    body:
-      string: '{"resource_labelers_models":null,"paragraph_labelers_models":null,"intent_models":null,"visual_labeling":"disabled","ner_model":"multilingual","relation_model":"base","anonymization_model":"disabled","semantic_model":"multilingual-2024-05-06","semantic_models":["multilingual-2024-05-06"],"default_semantic_model":"multilingual-2024-05-06","semantic_graph_node_models":[],"default_semantic_graph_node_model":null,"semantic_graph_edge_models":[],"default_semantic_graph_edge_model":null,"semantic_vector_similarity":"DOT","semantic_vector_size":1024,"semantic_matryoshka_dims":[],"semantic_threshold":0.4,"generative_model":"chatgpt-azure-4o","user_keys":null,"user_prompts":null,"summary":"simple","summary_model":"chatgpt-azure-4o","summary_prompt":null,"prefer_markdown_generative_response":false,"allow_all_default_models":true,"semantic_model_configs":{"multilingual-2024-05-06":{"similarity":0,"size":1024,"threshold":0.4,"max_tokens":2048,"matryoshka_dims":[],"external":false}},"semantic_graph_node_model_configs":{},"semantic_graph_edge_model_configs":{}}'
-    headers:
-      Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
-      Content-Length:
-      - '1063'
-      access-control-expose-headers:
-      - X-NUCLIA-TRACE-ID
-      content-type:
-      - application/json
-      date:
-      - Wed, 15 Jul 2026 08:11:46 GMT,Wed, 15 Jul 2026 08:11:45 GMT
-      via:
-      - 1.1 google
-      x-envoy-upstream-service-time:
-      - '44'
-      x-nuclia-trace-id:
-      - ec29106837a7f246d9a3cd30f974d507
-    status:
-      code: 200
-      message: OK
-- request:
-    body: ''
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Host:
-      - europe-1.stashify.cloud
-      User-Agent:
-      - nucliadb-sdk/6.13.1.post6414
+      - nucliadb-sdk/6.15.1.post6905
       content-type:
       - application/json
       x-stf-serviceaccount:
@@ -160,13 +112,141 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 15 Jul 2026 08:11:45 GMT
+      - Wed, 19 Aug 2026 09:44:54 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '12'
+      x-nuclia-trace-id:
+      - a7718980b70e4049a3c90e999f669222
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"prefixes": [{"prefix": "/s/p"}]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '32'
+      Host:
+      - europe-1.stashify.cloud
+      User-Agent:
+      - nucliadb-sdk/6.15.1.post6905
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/catalog/facets
+  response:
+    body:
+      string: '{"facets":{"/s/p":2,"/s/p/en":1,"/s/p/et":1}}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '45'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Wed, 19 Aug 2026 09:44:54 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
       - '10'
       x-nuclia-trace-id:
-      - b8fcc282ca965a9247f9876114310c45
+      - 090e4636b52671424bf317ecdced89f2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.stashify.cloud
+      User-Agent:
+      - nucliadb-sdk/6.15.1.post6905
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: GET
+    uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/configuration
+  response:
+    body:
+      string: '{"resource_labelers_models":null,"paragraph_labelers_models":null,"intent_models":null,"visual_labeling":"disabled","ner_model":"multilingual","relation_model":"base","anonymization_model":"disabled","semantic_model":"multilingual-2024-05-06","semantic_models":["multilingual-2024-05-06"],"default_semantic_model":"multilingual-2024-05-06","semantic_graph_node_models":[],"default_semantic_graph_node_model":null,"semantic_graph_edge_models":[],"default_semantic_graph_edge_model":null,"semantic_vector_similarity":"DOT","semantic_vector_size":1024,"semantic_matryoshka_dims":[],"semantic_threshold":0.4,"generative_model":"chatgpt-azure-4o","user_keys":null,"user_prompts":null,"summary":"simple","summary_model":"chatgpt-azure-4o","summary_prompt":null,"prefer_markdown_generative_response":false,"allow_all_default_models":true,"semantic_model_configs":{"multilingual-2024-05-06":{"similarity":0,"size":1024,"threshold":0.4,"max_tokens":2048,"matryoshka_dims":[],"external":false}},"semantic_graph_node_model_configs":{},"semantic_graph_edge_model_configs":{}}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '1063'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Wed, 19 Aug 2026 09:44:54 GMT,Wed, 19 Aug 2026 09:44:54 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '51'
+      x-nuclia-trace-id:
+      - 7107b343b34dc8e372cb03e57460c04e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.stashify.cloud
+      User-Agent:
+      - nucliadb-sdk/6.15.1.post6905
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: GET
+    uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/labelsets
+  response:
+    body:
+      string: '{"uuid":"e103caf3-f8cb-4161-a57c-aad1192d0666","labelsets":{}}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '62'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Wed, 19 Aug 2026 09:44:54 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '12'
+      x-nuclia-trace-id:
+      - da562f8b91da82d3bba6a25ddcb5f055
     status:
       code: 200
       message: OK
@@ -184,7 +264,7 @@ interactions:
       Host:
       - europe-1.stashify.cloud
       User-Agent:
-      - nucliadb-sdk/6.13.1.post6414
+      - nucliadb-sdk/6.15.1.post6905
       content-type:
       - application/json
       x-stf-serviceaccount:
@@ -193,8 +273,8 @@ interactions:
     uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/search
   response:
     body:
-      string: "{\"resources\":{\"866f34bfe00a53e9265df7699d9b264b\":{\"id\":\"866f34bfe00a53e9265df7699d9b264b\",\"slug\":\"1fec86515e41e88ff6b36d14e6b5353c\",\"title\":\"Business
-        Context and Product Vision 2026 1_self_signed.pdf\",\"summary\":\"\",\"icon\":\"application/pdf\",\"thumbnail\":\"/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/resource/866f34bfe00a53e9265df7699d9b264b/file/866f34bfe00a53e9265df7699d9b264b/download/extracted/file_thumbnail\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-03-06T20:13:26.353143\",\"modified\":\"2026-03-06T20:13:26.337843\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false},\"c9a5194ebf7df8267828c2836c851618\":{\"id\":\"c9a5194ebf7df8267828c2836c851618\",\"slug\":\"3b0eb7ff8bb529dd0fe607c18c2a8b60\",\"title\":\"testsubfolder.docx\",\"summary\":\"\",\"icon\":\"application/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"thumbnail\":\"/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/resource/c9a5194ebf7df8267828c2836c851618/file/c9a5194ebf7df8267828c2836c851618/download/extracted/file_thumbnail\",\"metadata\":{\"metadata\":{},\"language\":\"et\",\"languages\":[\"et\",\"eo\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-03-06T20:13:31.590367\",\"modified\":\"2026-03-06T20:13:31.541535\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false}},\"paragraphs\":{\"results\":[{\"score\":0.0,\"rid\":\"c9a5194ebf7df8267828c2836c851618\",\"field_type\":\"f\",\"field\":\"c9a5194ebf7df8267828c2836c851618\",\"text\":\"
+      string: "{\"resources\":{\"c9a5194ebf7df8267828c2836c851618\":{\"id\":\"c9a5194ebf7df8267828c2836c851618\",\"slug\":\"3b0eb7ff8bb529dd0fe607c18c2a8b60\",\"title\":\"testsubfolder.docx\",\"summary\":\"\",\"icon\":\"application/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"thumbnail\":\"/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/resource/c9a5194ebf7df8267828c2836c851618/file/c9a5194ebf7df8267828c2836c851618/download/extracted/file_thumbnail\",\"metadata\":{\"metadata\":{},\"language\":\"et\",\"languages\":[\"et\",\"eo\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-03-06T20:13:31.590367\",\"modified\":\"2026-03-06T20:13:31.541535\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false},\"866f34bfe00a53e9265df7699d9b264b\":{\"id\":\"866f34bfe00a53e9265df7699d9b264b\",\"slug\":\"1fec86515e41e88ff6b36d14e6b5353c\",\"title\":\"Business
+        Context and Product Vision 2026 1_self_signed.pdf\",\"summary\":\"\",\"icon\":\"application/pdf\",\"thumbnail\":\"/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/resource/866f34bfe00a53e9265df7699d9b264b/file/866f34bfe00a53e9265df7699d9b264b/download/extracted/file_thumbnail\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-03-06T20:13:26.353143\",\"modified\":\"2026-03-06T20:13:26.337843\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false}},\"paragraphs\":{\"results\":[{\"score\":0.0,\"rid\":\"c9a5194ebf7df8267828c2836c851618\",\"field_type\":\"f\",\"field\":\"c9a5194ebf7df8267828c2836c851618\",\"text\":\"
         \\n test \\n \\n \\n \",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":15},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"c9a5194ebf7df8267828c2836c851618\",\"field_type\":\"a\",\"field\":\"title\",\"text\":\"testsubfolder.docx\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":18},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"866f34bfe00a53e9265df7699d9b264b\",\"field_type\":\"a\",\"field\":\"title\",\"text\":\"Business
         Context and Product Vision 2026 1_self_signed.pdf\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":58},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"866f34bfe00a53e9265df7699d9b264b\",\"field_type\":\"f\",\"field\":\"866f34bfe00a53e9265df7699d9b264b\",\"text\":\"\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":23,\"index\":87,\"start\":17609,\"end\":17609},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"866f34bfe00a53e9265df7699d9b264b\",\"field_type\":\"f\",\"field\":\"866f34bfe00a53e9265df7699d9b264b\",\"text\":\"essence
         of urban life, highlighting the contrast between nature and architecture.
@@ -267,57 +347,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 15 Jul 2026 08:11:46 GMT
+      - Wed, 19 Aug 2026 09:44:54 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '83'
+      - '74'
       x-nuclia-trace-id:
-      - a404e84041846ea307457daf6eb58c41
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"prefixes": [{"prefix": "/s/p"}]}'
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '32'
-      Host:
-      - europe-1.stashify.cloud
-      User-Agent:
-      - nucliadb-sdk/6.13.1.post6414
-      content-type:
-      - application/json
-      x-stf-serviceaccount:
-      - DUMMY
-    method: POST
-    uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/catalog/facets
-  response:
-    body:
-      string: '{"facets":{"/s/p":2,"/s/p/en":1,"/s/p/et":1}}'
-    headers:
-      Alt-Svc:
-      - h3=":443"; ma=2592000
-      Content-Length:
-      - '45'
-      access-control-expose-headers:
-      - X-NUCLIA-TRACE-ID
-      content-type:
-      - application/json
-      date:
-      - Wed, 15 Jul 2026 08:11:46 GMT
-      via:
-      - 1.1 google
-      x-envoy-upstream-service-time:
-      - '8'
-      x-nuclia-trace-id:
-      - 4de18165366b92863300cd8674d67a15
+      - 49107a2c1d3f9eb92acf9933b0cf1644
     status:
       code: 200
       message: OK
@@ -335,7 +371,7 @@ interactions:
       Host:
       - europe-1.stashify.cloud
       User-Agent:
-      - nucliadb-sdk/6.13.1.post6414
+      - nucliadb-sdk/6.15.1.post6905
       content-type:
       - application/json
       x-stf-serviceaccount:
@@ -344,8 +380,8 @@ interactions:
     uri: https://europe-1.stashify.cloud/api/v1/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/search
   response:
     body:
-      string: "{\"resources\":{\"866f34bfe00a53e9265df7699d9b264b\":{\"id\":\"866f34bfe00a53e9265df7699d9b264b\",\"slug\":\"1fec86515e41e88ff6b36d14e6b5353c\",\"title\":\"Business
-        Context and Product Vision 2026 1_self_signed.pdf\",\"summary\":\"\",\"icon\":\"application/pdf\",\"thumbnail\":\"/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/resource/866f34bfe00a53e9265df7699d9b264b/file/866f34bfe00a53e9265df7699d9b264b/download/extracted/file_thumbnail\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-03-06T20:13:26.353143\",\"modified\":\"2026-03-06T20:13:26.337843\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false},\"c9a5194ebf7df8267828c2836c851618\":{\"id\":\"c9a5194ebf7df8267828c2836c851618\",\"slug\":\"3b0eb7ff8bb529dd0fe607c18c2a8b60\",\"title\":\"testsubfolder.docx\",\"summary\":\"\",\"icon\":\"application/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"thumbnail\":\"/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/resource/c9a5194ebf7df8267828c2836c851618/file/c9a5194ebf7df8267828c2836c851618/download/extracted/file_thumbnail\",\"metadata\":{\"metadata\":{},\"language\":\"et\",\"languages\":[\"et\",\"eo\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-03-06T20:13:31.590367\",\"modified\":\"2026-03-06T20:13:31.541535\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false}},\"paragraphs\":{\"results\":[{\"score\":0.0,\"rid\":\"c9a5194ebf7df8267828c2836c851618\",\"field_type\":\"f\",\"field\":\"c9a5194ebf7df8267828c2836c851618\",\"text\":\"
+      string: "{\"resources\":{\"c9a5194ebf7df8267828c2836c851618\":{\"id\":\"c9a5194ebf7df8267828c2836c851618\",\"slug\":\"3b0eb7ff8bb529dd0fe607c18c2a8b60\",\"title\":\"testsubfolder.docx\",\"summary\":\"\",\"icon\":\"application/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"thumbnail\":\"/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/resource/c9a5194ebf7df8267828c2836c851618/file/c9a5194ebf7df8267828c2836c851618/download/extracted/file_thumbnail\",\"metadata\":{\"metadata\":{},\"language\":\"et\",\"languages\":[\"et\",\"eo\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-03-06T20:13:31.590367\",\"modified\":\"2026-03-06T20:13:31.541535\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false},\"866f34bfe00a53e9265df7699d9b264b\":{\"id\":\"866f34bfe00a53e9265df7699d9b264b\",\"slug\":\"1fec86515e41e88ff6b36d14e6b5353c\",\"title\":\"Business
+        Context and Product Vision 2026 1_self_signed.pdf\",\"summary\":\"\",\"icon\":\"application/pdf\",\"thumbnail\":\"/kb/e103caf3-f8cb-4161-a57c-aad1192d0666/resource/866f34bfe00a53e9265df7699d9b264b/file/866f34bfe00a53e9265df7699d9b264b/download/extracted/file_thumbnail\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-03-06T20:13:26.353143\",\"modified\":\"2026-03-06T20:13:26.337843\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false}},\"paragraphs\":{\"results\":[{\"score\":0.0,\"rid\":\"c9a5194ebf7df8267828c2836c851618\",\"field_type\":\"f\",\"field\":\"c9a5194ebf7df8267828c2836c851618\",\"text\":\"
         \\n test \\n \\n \\n \",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":15},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"c9a5194ebf7df8267828c2836c851618\",\"field_type\":\"a\",\"field\":\"title\",\"text\":\"testsubfolder.docx\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":18},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"866f34bfe00a53e9265df7699d9b264b\",\"field_type\":\"a\",\"field\":\"title\",\"text\":\"Business
         Context and Product Vision 2026 1_self_signed.pdf\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":58},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"866f34bfe00a53e9265df7699d9b264b\",\"field_type\":\"f\",\"field\":\"866f34bfe00a53e9265df7699d9b264b\",\"text\":\"\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":23,\"index\":87,\"start\":17609,\"end\":17609},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"866f34bfe00a53e9265df7699d9b264b\",\"field_type\":\"f\",\"field\":\"866f34bfe00a53e9265df7699d9b264b\",\"text\":\"essence
         of urban life, highlighting the contrast between nature and architecture.
@@ -418,13 +454,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 15 Jul 2026 08:11:46 GMT
+      - Wed, 19 Aug 2026 09:44:54 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '72'
+      - '58'
       x-nuclia-trace-id:
-      - 6ef6d9d55c3663b19fa9a9f78c3dbc56
+      - b0cc1fddbd8250aa557b2f4b0cce5f6f
     status:
       code: 200
       message: OK
@@ -442,7 +478,7 @@ interactions:
       Host:
       - europe-1.stashify.cloud
       User-Agent:
-      - nucliadb-sdk/6.13.1.post6414
+      - nucliadb-sdk/6.15.1.post6905
       content-type:
       - application/json
       x-stf-serviceaccount:
@@ -588,24 +624,24 @@ interactions:
         280 mnx,\\\" \\\"Delivery schedule,\\\" and \\\"New mascara-international
         brands 06.\\\" Visible objects include a woman sitting on a bench holding
         a smartphone, with storefronts in the background featuring signage in Hindi.\",\"id\":\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/11635-12070\",\"labels\":[],\"position\":{\"page_number\":15,\"index\":60,\"start\":11635,\"end\":12070,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":true,\"reference\":\"image_15_0.jpg\",\"is_a_table\":false,\"relevant_relations\":null}}}}}},\"relations\":{\"entities\":{}},\"query\":\"New
-        employees at ADP\",\"rephrased_query\":null,\"total\":11,\"page_number\":0,\"page_size\":20,\"next_page\":true,\"shards\":[\"ea8e2a0d-1d34-4f0a-aac9-f9e26a3e48dd\"],\"min_score\":{\"semantic\":0.4,\"bm25\":0.0},\"best_matches\":[\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/4766-6189\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/3054-3424\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/16815-17085\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/4148-4399\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/19109-20048\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/17085-17354\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/14158-14258\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/2193-2360\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/1388-2043\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/46719-47227\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/8847-9067\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/49179-49670\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/40988-41333\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/55634-56168\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/27462-27669\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/7044-7374\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/31881-32155\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/41776-42205\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/53354-53655\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/11635-12070\"]}"
+        employees at ADP\",\"rephrased_query\":null,\"total\":11,\"page_number\":0,\"page_size\":20,\"next_page\":true,\"shards\":[\"ea8e2a0d-1d34-4f0a-aac9-f9e26a3e48dd\"],\"min_score\":{\"semantic\":0.4,\"bm25\":0.0},\"best_matches\":[\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/4766-6189\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/3054-3424\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/16815-17085\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/4148-4399\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/19109-20048\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/17085-17354\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/14158-14258\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/2193-2360\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/1388-2043\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/46719-47227\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/8847-9067\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/49179-49670\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/40988-41333\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/55634-56168\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/27462-27669\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/7044-7374\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/31881-32155\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/41776-42205\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/53354-53655\",\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/11635-12070\"],\"search_after\":\"eyJhZnRlciI6eyJzY29yZSI6NC45MTI5OTI5NTQyNTQxNSwic2hhcmQiOiJlYThlMmEwZDFkMzQ0ZjBhYWFjOWY5ZTI2YTNlNDhkZCIsImRvY2FkZHIiOjM4fSwic2tpcCI6WyI4NjZmMzRiZmUwMGE1M2U5MjY1ZGY3Njk5ZDliMjY0Yi9mLzg2NmYzNGJmZTAwYTUzZTkyNjVkZjc2OTlkOWIyNjRiLzQ2NzE5LTQ3MjI3IiwiODY2ZjM0YmZlMDBhNTNlOTI2NWRmNzY5OWQ5YjI2NGIvZi84NjZmMzRiZmUwMGE1M2U5MjY1ZGY3Njk5ZDliMjY0Yi80OTE3OS00OTY3MCIsIjg2NmYzNGJmZTAwYTUzZTkyNjVkZjc2OTlkOWIyNjRiL2YvODY2ZjM0YmZlMDBhNTNlOTI2NWRmNzY5OWQ5YjI2NGIvMTM4OC0yMDQzIiwiODY2ZjM0YmZlMDBhNTNlOTI2NWRmNzY5OWQ5YjI2NGIvZi84NjZmMzRiZmUwMGE1M2U5MjY1ZGY3Njk5ZDliMjY0Yi8xOTEwOS0yMDA0OCIsIjg2NmYzNGJmZTAwYTUzZTkyNjVkZjc2OTlkOWIyNjRiL2YvODY2ZjM0YmZlMDBhNTNlOTI2NWRmNzY5OWQ5YjI2NGIvODg0Ny05MDY3IiwiODY2ZjM0YmZlMDBhNTNlOTI2NWRmNzY5OWQ5YjI2NGIvZi84NjZmMzRiZmUwMGE1M2U5MjY1ZGY3Njk5ZDliMjY0Yi80NzY2LTYxODkiLCI4NjZmMzRiZmUwMGE1M2U5MjY1ZGY3Njk5ZDliMjY0Yi9mLzg2NmYzNGJmZTAwYTUzZTkyNjVkZjc2OTlkOWIyNjRiLzE3MDg1LTE3MzU0IiwiODY2ZjM0YmZlMDBhNTNlOTI2NWRmNzY5OWQ5YjI2NGIvZi84NjZmMzRiZmUwMGE1M2U5MjY1ZGY3Njk5ZDliMjY0Yi80MDk4OC00MTMzMyIsIjg2NmYzNGJmZTAwYTUzZTkyNjVkZjc2OTlkOWIyNjRiL2YvODY2ZjM0YmZlMDBhNTNlOTI2NWRmNzY5OWQ5YjI2NGIvNTU2MzQtNTYxNjgiLCI4NjZmMzRiZmUwMGE1M2U5MjY1ZGY3Njk5ZDliMjY0Yi9mLzg2NmYzNGJmZTAwYTUzZTkyNjVkZjc2OTlkOWIyNjRiLzMwNTQtMzQyNCIsIjg2NmYzNGJmZTAwYTUzZTkyNjVkZjc2OTlkOWIyNjRiL2YvODY2ZjM0YmZlMDBhNTNlOTI2NWRmNzY5OWQ5YjI2NGIvMTQxNTgtMTQyNTgiLCI4NjZmMzRiZmUwMGE1M2U5MjY1ZGY3Njk5ZDliMjY0Yi9mLzg2NmYzNGJmZTAwYTUzZTkyNjVkZjc2OTlkOWIyNjRiLzMxODgxLTMyMTU1IiwiODY2ZjM0YmZlMDBhNTNlOTI2NWRmNzY5OWQ5YjI2NGIvZi84NjZmMzRiZmUwMGE1M2U5MjY1ZGY3Njk5ZDliMjY0Yi83MDQ0LTczNzQiLCI4NjZmMzRiZmUwMGE1M2U5MjY1ZGY3Njk5ZDliMjY0Yi9mLzg2NmYzNGJmZTAwYTUzZTkyNjVkZjc2OTlkOWIyNjRiLzUzMzU0LTUzNjU1IiwiODY2ZjM0YmZlMDBhNTNlOTI2NWRmNzY5OWQ5YjI2NGIvZi84NjZmMzRiZmUwMGE1M2U5MjY1ZGY3Njk5ZDliMjY0Yi80MTQ4LTQzOTkiLCI4NjZmMzRiZmUwMGE1M2U5MjY1ZGY3Njk5ZDliMjY0Yi9mLzg2NmYzNGJmZTAwYTUzZTkyNjVkZjc2OTlkOWIyNjRiLzI3NDYyLTI3NjY5IiwiODY2ZjM0YmZlMDBhNTNlOTI2NWRmNzY5OWQ5YjI2NGIvZi84NjZmMzRiZmUwMGE1M2U5MjY1ZGY3Njk5ZDliMjY0Yi8yMTkzLTIzNjAiLCI4NjZmMzRiZmUwMGE1M2U5MjY1ZGY3Njk5ZDliMjY0Yi9mLzg2NmYzNGJmZTAwYTUzZTkyNjVkZjc2OTlkOWIyNjRiLzQxNzc2LTQyMjA1IiwiODY2ZjM0YmZlMDBhNTNlOTI2NWRmNzY5OWQ5YjI2NGIvZi84NjZmMzRiZmUwMGE1M2U5MjY1ZGY3Njk5ZDliMjY0Yi8xMTYzNS0xMjA3MCJdfQ==\"}"
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Length:
-      - '21298'
+      - '23512'
       access-control-expose-headers:
       - X-NUCLIA-TRACE-ID
       content-type:
       - application/json
       date:
-      - Wed, 15 Jul 2026 08:11:46 GMT
+      - Wed, 19 Aug 2026 09:44:54 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '211'
+      - '344'
       x-nuclia-trace-id:
-      - bb2a2eeda272f7552a41d9daf69d1007
+      - 3fe78dc6b27072df1d40c11955c06cef
     status:
       code: 200
       message: OK
@@ -621,7 +657,7 @@ interactions:
       Host:
       - europe-1.stashify.cloud
       User-Agent:
-      - nucliadb-sdk/6.13.1.post6414
+      - nucliadb-sdk/6.15.1.post6905
       content-type:
       - application/json
       x-stf-serviceaccount:
@@ -643,13 +679,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Wed, 15 Jul 2026 08:11:46 GMT
+      - Wed, 19 Aug 2026 09:44:55 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '13'
+      - '14'
       x-nuclia-trace-id:
-      - be28dbb88d633ae604fb6cea3d461a55
+      - 402811eb67af4cf28c187346946c07d9
     status:
       code: 200
       message: OK
@@ -672,7 +708,7 @@ interactions:
       Host:
       - europe-1.stashify.cloud
       User-Agent:
-      - nucliadb-sdk/6.13.1.post6414
+      - nucliadb-sdk/6.15.1.post6905
       X-SHOW-CONSUMPTION:
       - 'true'
       content-type:
@@ -707,8 +743,9 @@ interactions:
         as\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" a\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         Senior\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" Software\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         Engineer\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\",\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        also\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" in\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        Hyderabad\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" [\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"1\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"]\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        also\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" located\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        in\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" Hyderabad\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        [\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"1\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"]\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         [\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"2\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"].\\n\\n\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"[\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"1\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"]:\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         block\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"-\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"AB\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
         \ \\n\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"[\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"2\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"]:\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
@@ -2120,10 +2157,10 @@ interactions:
         sync_config_019cade7-c177-77c5-99c2-c8771f85cf91\\nsync_metadata:\\n  auth_provider:
         sharefile_oauth\\n  content_hash: 866f34bfe00a53e9265df7699d9b264b\\n  file_id:
         fi3567d8-8bbe-96ac-4e21-132d539a9e53\\nurl: ''\\n\",\"parent\":\"866f34bfe00a53e9265df7699d9b264b/a/title\",\"augmentation_type\":\"metadata_extension\"}},\"fields\":{\"866f34bfe00a53e9265df7699d9b264b/a/title\":{\"id\":\"866f34bfe00a53e9265df7699d9b264b/a/title\",\"text\":\"Business
-        Context and Product Vision 2026 1_self_signed.pdf\",\"augmentation_type\":\"field_extension\"}}}}}\n{\"item\":{\"type\":\"footnote_citations\",\"footnote_to_context\":{\"block-AB\":\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/3054-3424\",\"block-AD\":\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/4148-4399\"}}}\n{\"item\":{\"type\":\"metadata\",\"tokens\":{\"input\":943,\"output\":10,\"input_nuclia\":0.943,\"output_nuclia\":0.01},\"timings\":{\"generative_first_chunk\":1.450395756000944,\"generative_total\":2.7534563170047477}}}\n{\"item\":{\"type\":\"consumption\",\"normalized_tokens\":{\"input\":0.94299,\"output\":0.00972,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0}}}\n"
+        Context and Product Vision 2026 1_self_signed.pdf\",\"augmentation_type\":\"field_extension\"}}}}}\n{\"item\":{\"type\":\"footnote_citations\",\"footnote_to_context\":{\"block-AB\":\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/3054-3424\",\"block-AD\":\"866f34bfe00a53e9265df7699d9b264b/f/866f34bfe00a53e9265df7699d9b264b/4148-4399\"}}}\n{\"item\":{\"type\":\"metadata\",\"tokens\":{\"input\":943,\"output\":10,\"input_nuclia\":0.943,\"output_nuclia\":0.01},\"timings\":{\"generative_first_chunk\":1.8118165870000666,\"generative_total\":2.6905254350003815}}}\n{\"item\":{\"type\":\"consumption\",\"normalized_tokens\":{\"input\":0.94299,\"output\":0.00984,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0}}}\n"
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -2131,15 +2168,441 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Wed, 15 Jul 2026 08:11:46 GMT
+      - Wed, 19 Aug 2026 09:44:55 GMT
       nuclia-learning-id:
-      - d5de8633afd345d0b14bd067304be32b
+      - 9ea3b90dc4e547819b86aed2ef298bc7
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '2575'
+      - '2626'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"question": "", "retrieval": true, "user_id": "rao_answer_summary-sync",
+      "system": null, "chat_history": [], "context": [], "query_context": {}, "query_context_order":
+      {}, "truncate": true, "user_prompt": {"prompt": "\nBased on the provided context
+      and user question, perform the following tasks:\n\n1. Select only information
+      directly relevant to the question.\n2. Break down compound sentences into simple,
+      single-idea statements. Preserve original phrasing when possible.\n3. For any
+      named entity with descriptive details, separate those details into distinct
+      propositions.\n4. Ensure clarity by replacing pronouns (e.g., \"it\", \"he\",
+      \"she\", \"they\", \"this\", \"that\") with the full names of the entities they
+      reference, and add necessary modifiers to clarify meaning.\n5. The context may
+      be delimited by tags such as <START OF CONTEXT> and <END OF CONTEXT>. Treat
+      everything between these tags as context.\n6. Assess whether the context sufficiently
+      answers the question. If it answers it partially, provide the answer; if it
+      does not answer it fully, specify what information is missing to answer the
+      question.\n7. If the context does not answer the question at all, just return
+      the original question as the missing information.\n8. The `citations` field
+      consists ONLY in a list of block IDs that are relevant to the answer, following
+      these rules:\n  - Use the format: block-AB\n  - Just mention the block IDs,
+      do NOT include any other text.\n  - Just mention the blocks actually relevant
+      and that contain information used in the answer, do NOT include blocks that
+      are not relevant.\n  - No duplicates.\n9. Do NOT hallucinate block IDs. Only
+      use those provided in the context.\n10. Your output must be a JSON object with
+      the following fields:\n    - \"reason\": Explain your reasoning for the answer
+      or validation.\n    - \"answer\": Provide a partial or complete answer to the
+      user query strictly from the information in the context. If there isn''t enough
+      information to even provide a partial answer, leave ''answer'' empty.\n    -
+      \"missing_info_query\": If the context is insufficient, specify what information
+      is missing in a query shape; otherwise, leave it empty. Just return the query
+      needed to retrieve the missing information.\n    - \"useful\": Indicate if the
+      context is useful to answer the question (\"yes\" or \"no\").\n    - \"citations\":
+      List the IDs of the blocks relevant to the answer, if any (e.g., [\"block-AB\",
+      \"block-CD\"]).\n11. **IMPORTANT** If any extra instructions are provided, you
+      MUST follow them carefully when generating the answer field. These instructions
+      may specify the format, style, tools to use, or other requirements for the answer.\n\n<QUESTION>\nNew
+      employees at ADP\n\n<START OF CONTEXT>\n\nContext:\n\n**block-AA**\n\n#### Chunk:
+      Business Context and Product Vision 2026 1_self_signed.pdf\n```  \n 5\u00a9
+      2025 Progress Software Corporation and/or its subsidiaries or affiliates. All
+      rights reserved. \n \n Welcome to the Team \n \n Vamshi Shanigala \n Coop/Intern
+      Technical 2 \n \n MarkLogic \n Hyderabad \n \n Nathan Van Gheem \n Enterprise
+      Architect \n \n PDP \n Raleigh \n \n Shivabalu Thouta \n Software Engineer,
+      Senior \n \n MarkLogic \n Hyderabad \n \n https://www.progress.com/ \n \n   ```\n\n\n---\"\n\n\n**block-AB**\n\n####
+      Chunk: Business Context and Product Vision 2026 1_self_signed.pdf\n```  \n 6\u00a9
+      2025 Progress Software Corporation and/or its subsidiaries or affiliates. All
+      rights reserved. \n \n Welcome to the Team \n \n Aleix Ruiz de Villa \n Scientific
+      Advisor \n \n PDP \n Spain \n \n Casimiro Pio Carrino \n Scientific Advisor
+      \n \n PDP \n Spain \n \n ```\n\n\n---\"\n\n\n\n\n<END OF CONTEXT>\n\n"}, "citations":
+      false, "citation_threshold": null, "generative_model": "chatgpt-azure-4o-mini",
+      "max_tokens": 8192, "query_context_images": {}, "prefer_markdown": null, "json_schema":
+      {"title": "validate_or_answer", "description": "Validate or answer", "parameters":
+      {"type": "object", "properties": {"reason": {"type": "string", "description":
+      "Reasoning for the answer or validation"}, "answer": {"type": "string", "description":
+      "Partial or complete answer to the user query from the information in the context."},
+      "missing_info_query": {"type": "string", "description": "Query needed to retrieve
+      the missing information in case the context is not enough to answer the question.
+      If the context does not answer the question at all, just return the original
+      question."}, "useful": {"type": "string", "description": "Is the context useful
+      to answer the question?", "enum": ["yes", "no"]}, "citations": {"type": "array",
+      "items": {"type": "string", "description": "Block ID cited in the answer, e.g.
+      block-AB"}, "description": "List of block IDs cited in the answer, if any"}},
+      "required": ["reason", "answer", "missing_info_query", "useful", "citations"]}},
+      "format_prompt": false, "rerank_context": false, "tools": [], "tool_choice":
+      {"type": "required"}, "reasoning": false, "seed": null, "image_generation":
+      false}'
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '4901'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nuclia.py/4.14.0
+      x-origin:
+      - RAO
+      x-show-consumption:
+      - 'true'
+      x-stf-nuakey:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"object","object":{"reason":"The context provides
+        names and roles of new employees at ADP, including their locations. However,
+        it does not specify the total number of new employees or any additional details
+        about their onboarding process. Therefore, the context partially answers the
+        question by listing some new employees but lacks comprehensive information.","answer":"New
+        employees at ADP include: Vamshi Shanigala, Coop/Intern Technical 2, located
+        in Hyderabad; Nathan Van Gheem, Enterprise Architect, located in Raleigh;
+        Shivabalu Thouta, Software Engineer, Senior, located in Hyderabad; Aleix Ruiz
+        de Villa, Scientific Advisor, located in Spain; and Casimiro Pio Carrino,
+        Scientific Advisor, located in Spain.","missing_info_query":"What is the total
+        number of new employees at ADP and details about their onboarding process?","useful":"yes","citations":["block-AA","block-AB"]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":27,"output_tokens":22,"timings":{"generative":3.159276455990039},"input_nuclia_tokens":0.027,"output_nuclia_tokens":0.022}}
+
+        {"chunk":{"normalized_tokens":{"input":0.02733,"output":0.02196,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Wed, 19 Aug 2026 09:44:59 GMT
+      nuclia-learning-id:
+      - 81fbb7b3037f45c08032178c9bbf4c57
+      nuclia-learning-model:
+      - chatgpt-azure-4o-mini
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '3165'
       x-nuclia-trace-id:
-      - ff0273c5d7ddd3d7462448d4c88ef51b
+      - d3c005fecd827a917495f9bbbb86ea64
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"question": "", "retrieval": true, "user_id": "summarize", "system": "You
+      are a helpful AI assistant. Your role is to provide accurate, clear, and well-structured
+      answers based strictly on the information provided to you.\nKey principles:\n-
+      Answer only using the information in the provided context\n- Do not use external
+      knowledge, assumptions, or prior experience\n- Maintain a professional and informative
+      tone\n- Be concise yet thorough\n- If information is insufficient, acknowledge
+      this clearly\n\nAlways follow any additional instructions provided about format,
+      style, or domain-specific behavior.", "chat_history": [], "context": [], "query_context":
+      {}, "query_context_order": {}, "truncate": true, "user_prompt": {"prompt": "\n##
+      Question\nNew employees at ADP\n\n## Provided Context\n[START OF CONTEXT]\n##
+      Retrieval on nuclia-sync Knowledge Box\n\n# New employees at ADP\n\n New employees
+      at ADP include: Vamshi Shanigala, Coop/Intern Technical 2, located in Hyderabad;
+      Nathan Van Gheem, Enterprise Architect, located in Raleigh; Shivabalu Thouta,
+      Software Engineer, Senior, located in Hyderabad; Aleix Ruiz de Villa, Scientific
+      Advisor, located in Spain; and Casimiro Pio Carrino, Scientific Advisor, located
+      in Spain.\n[END OF CONTEXT]\n\n## Answering Guidelines\n- Carefully read all
+      context; it may be lengthy or detailed\n- Do not omit or overlook any relevant
+      information\n- Existing context summaries are answer attempts produced by retrieval
+      agents. Treat them as first-class evidence and preserve their supported facts.\n-
+      Combine complementary summaries from multiple contexts when the question has
+      multiple parts. Do not require every context to answer the whole question by
+      itself.\n- If a context summary directly answers the question, do not replace
+      it with an insufficient-data answer merely because one retrieved chunk is incomplete;
+      use the chunks for supporting citations.\n- If the context is incomplete or
+      insufficient, state: \"Not enough data to answer this.\"\n- Read carefully any
+      extra instructions below if provided and use them to answer\n\nNow provide your
+      answer to the question: New employees at ADP"}, "citations": null, "citation_threshold":
+      null, "generative_model": "chatgpt-azure-4o-mini", "max_tokens": 5000, "query_context_images":
+      {}, "prefer_markdown": null, "json_schema": null, "format_prompt": false, "rerank_context":
+      false, "tools": [], "tool_choice": {"type": "auto"}, "reasoning": false, "seed":
+      null, "image_generation": false}'
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2439'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nuclia.py/4.14.0
+      x-client-ident:
+      - default
+      x-message:
+      - 7317957327c8436f9c1904d3bbd4547f
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+      x-stf-nuakey:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"text","text":"New"}}
+
+        {"chunk":{"type":"text","text":" employees"}}
+
+        {"chunk":{"type":"text","text":" at"}}
+
+        {"chunk":{"type":"text","text":" AD"}}
+
+        {"chunk":{"type":"text","text":"P"}}
+
+        {"chunk":{"type":"text","text":" include"}}
+
+        {"chunk":{"type":"text","text":":\n\n"}}
+
+        {"chunk":{"type":"text","text":"1"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" **"}}
+
+        {"chunk":{"type":"text","text":"V"}}
+
+        {"chunk":{"type":"text","text":"am"}}
+
+        {"chunk":{"type":"text","text":"shi"}}
+
+        {"chunk":{"type":"text","text":" Shan"}}
+
+        {"chunk":{"type":"text","text":"ig"}}
+
+        {"chunk":{"type":"text","text":"ala"}}
+
+        {"chunk":{"type":"text","text":"**"}}
+
+        {"chunk":{"type":"text","text":" -"}}
+
+        {"chunk":{"type":"text","text":" Coop"}}
+
+        {"chunk":{"type":"text","text":"/"}}
+
+        {"chunk":{"type":"text","text":"Intern"}}
+
+        {"chunk":{"type":"text","text":" Technical"}}
+
+        {"chunk":{"type":"text","text":" "}}
+
+        {"chunk":{"type":"text","text":"2"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" located"}}
+
+        {"chunk":{"type":"text","text":" in"}}
+
+        {"chunk":{"type":"text","text":" Hyderabad"}}
+
+        {"chunk":{"type":"text","text":"\n"}}
+
+        {"chunk":{"type":"text","text":"2"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" **"}}
+
+        {"chunk":{"type":"text","text":"Nathan"}}
+
+        {"chunk":{"type":"text","text":" Van"}}
+
+        {"chunk":{"type":"text","text":" G"}}
+
+        {"chunk":{"type":"text","text":"heem"}}
+
+        {"chunk":{"type":"text","text":"**"}}
+
+        {"chunk":{"type":"text","text":" -"}}
+
+        {"chunk":{"type":"text","text":" Enterprise"}}
+
+        {"chunk":{"type":"text","text":" Architect"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" located"}}
+
+        {"chunk":{"type":"text","text":" in"}}
+
+        {"chunk":{"type":"text","text":" Raleigh"}}
+
+        {"chunk":{"type":"text","text":"\n"}}
+
+        {"chunk":{"type":"text","text":"3"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" **"}}
+
+        {"chunk":{"type":"text","text":"Sh"}}
+
+        {"chunk":{"type":"text","text":"iv"}}
+
+        {"chunk":{"type":"text","text":"ab"}}
+
+        {"chunk":{"type":"text","text":"alu"}}
+
+        {"chunk":{"type":"text","text":" Th"}}
+
+        {"chunk":{"type":"text","text":"out"}}
+
+        {"chunk":{"type":"text","text":"a"}}
+
+        {"chunk":{"type":"text","text":"**"}}
+
+        {"chunk":{"type":"text","text":" -"}}
+
+        {"chunk":{"type":"text","text":" Software"}}
+
+        {"chunk":{"type":"text","text":" Engineer"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" Senior"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" located"}}
+
+        {"chunk":{"type":"text","text":" in"}}
+
+        {"chunk":{"type":"text","text":" Hyderabad"}}
+
+        {"chunk":{"type":"text","text":"\n"}}
+
+        {"chunk":{"type":"text","text":"4"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" **"}}
+
+        {"chunk":{"type":"text","text":"Ale"}}
+
+        {"chunk":{"type":"text","text":"ix"}}
+
+        {"chunk":{"type":"text","text":" Ruiz"}}
+
+        {"chunk":{"type":"text","text":" de"}}
+
+        {"chunk":{"type":"text","text":" Villa"}}
+
+        {"chunk":{"type":"text","text":"**"}}
+
+        {"chunk":{"type":"text","text":" -"}}
+
+        {"chunk":{"type":"text","text":" Scientific"}}
+
+        {"chunk":{"type":"text","text":" Advisor"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" located"}}
+
+        {"chunk":{"type":"text","text":" in"}}
+
+        {"chunk":{"type":"text","text":" Spain"}}
+
+        {"chunk":{"type":"text","text":"\n"}}
+
+        {"chunk":{"type":"text","text":"5"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" **"}}
+
+        {"chunk":{"type":"text","text":"Cas"}}
+
+        {"chunk":{"type":"text","text":"im"}}
+
+        {"chunk":{"type":"text","text":"iro"}}
+
+        {"chunk":{"type":"text","text":" P"}}
+
+        {"chunk":{"type":"text","text":"io"}}
+
+        {"chunk":{"type":"text","text":" Carr"}}
+
+        {"chunk":{"type":"text","text":"ino"}}
+
+        {"chunk":{"type":"text","text":"**"}}
+
+        {"chunk":{"type":"text","text":" -"}}
+
+        {"chunk":{"type":"text","text":" Scientific"}}
+
+        {"chunk":{"type":"text","text":" Advisor"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" located"}}
+
+        {"chunk":{"type":"text","text":" in"}}
+
+        {"chunk":{"type":"text","text":" Spain"}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":12,"output_tokens":12,"timings":{"generative_first_chunk":0.3660533739894163,"generative":1.554632233994198},"input_nuclia_tokens":0.012,"output_nuclia_tokens":0.012}}
+
+        {"chunk":{"normalized_tokens":{"input":0.01179,"output":0.01224,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Wed, 19 Aug 2026 09:45:02 GMT
+      nuclia-learning-id:
+      - a81acb955eaa4bb3a8a1e7cdaa9100a6
+      nuclia-learning-model:
+      - chatgpt-azure-4o-mini
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '373'
+      x-nuclia-trace-id:
+      - d3c005fecd827a917495f9bbbb86ea64
     status:
       code: 200
       message: OK
