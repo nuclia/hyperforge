@@ -68,7 +68,7 @@ jobs:
           echo "packages=$packages" >> "$GITHUB_OUTPUT"
 
   test:
-    name: Test ${{ matrix.package }}
+    name: Test
     if: needs.changes.outputs.packages != '[]'
     needs: changes
     runs-on: ubuntu-24.04
@@ -101,7 +101,7 @@ jobs:
         run: make test
 
   publish:
-    name: Publish ${{ matrix.package }}
+    name: Publish
     if: github.event_name == 'push' && needs.changes.outputs.packages != '[]'
     needs: [changes, test]
     runs-on: ubuntu-24.04
@@ -137,7 +137,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
 
   docker:
-    name: Build and push Docker image
+    name: Build and push image
     if: always() && github.event_name == 'push' && contains(fromJSON(needs.changes.outputs.packages), 'hyperforge') && needs.test.result == 'success' && needs.publish.result == 'success'
     needs: [changes, test, publish]
     runs-on: ubuntu-24.04
