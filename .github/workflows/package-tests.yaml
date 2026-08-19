@@ -40,7 +40,7 @@ jobs:
       - id: packages
         shell: bash
         env:
-          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+          CHANGED_FILES: ${{ steps.changed-files.outputs.all_modified_files }}
         run: |
           packages="$(uv run --with pyyaml python <<'PYTHON'
           import json
@@ -74,7 +74,6 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
-      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -100,31 +99,47 @@ jobs:
       - name: Run tests
         working-directory: ${{ matrix.package }}
         run: make test
-        env:
-          NUA_KEY: ${{ secrets.NUA_KEY }}
-          KB_DF8B4C24_2807_4888_AD6C_AE97357A638B: ${{ secrets.KB_DF8B4C24_2807_4888_AD6C_AE97357A638B }}
-          KB_DE48CFAA_3209_4041_BB64_8604AFF061FB: ${{ secrets.KB_DE48CFAA_3209_4041_BB64_8604AFF061FB }}
+
+  publish:
+    name: Publish ${{ matrix.package }}
+    if: github.event_name == 'push' && needs.changes.outputs.packages != '[]'
+    needs: [changes, test]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.changes.outputs.packages) }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          enable-cache: false
+          python-version: "3.12"
 
       - name: Set dependency versions in requirements
-        if: github.event_name == 'push'
         env:
           PACKAGE: ${{ matrix.package }}
         run: python bump.py --package="$PACKAGE" --build="${{ github.run_number }}"
 
       - name: Build wheels
-        if: github.event_name == 'push'
         env:
           PACKAGE: ${{ matrix.package }}
         run: uv build "$PACKAGE"
 
       - name: Publish package to PyPI
-        if: github.event_name == 'push'
         uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
 
   docker:
     name: Build and push Docker image
-    if: always() && github.event_name == 'push' && contains(fromJSON(needs.changes.outputs.packages), 'hyperforge') && needs.test.result == 'success'
-    needs: [changes, test]
+    if: always() && github.event_name == 'push' && contains(fromJSON(needs.changes.outputs.packages), 'hyperforge') && needs.test.result == 'success' && needs.publish.result == 'success'
+    needs: [changes, test, publish]
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -164,8 +179,12 @@ jobs:
     steps:
       - name: Verify package tests
         env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
           TEST_RESULT: ${{ needs.test.result }}
         run: |
+          if [[ "$CHANGES_RESULT" != success ]]; then
+            exit 1
+          fi
           if [[ "$TEST_RESULT" != success && "$TEST_RESULT" != skipped ]]; then
             exit 1
           fi
@@ -173,7 +192,7 @@ jobs:
 
   notify-teams-fail:
     name: Notify Teams on failure
-    needs: [test, docker, package-tests]
+    needs: [changes, test, publish, docker, package-tests]
     if: failure() && github.event_name == 'push'
     runs-on: ubuntu-24.04
     steps:
