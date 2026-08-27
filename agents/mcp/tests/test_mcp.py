@@ -6,7 +6,6 @@ import pytest
 from hyperforge.engine import main as arag_main
 from hyperforge.interaction import AragAnswer
 from hyperforge.minimal_fixtures import cassette_nua_key
-from hyperforge.utils.http import SafeTransport
 
 from hyperforge_mcp.agent import _tool_parameters
 
@@ -86,7 +85,10 @@ CONFIG = {
 
 @pytest.fixture
 async def disable_safe_transport():
-    with patch.object(SafeTransport, "is_private_address", return_value=False):
+    with patch(
+        "hyperforge.utils.http._resolve_public_addresses",
+        return_value=["127.0.0.1"],
+    ):
         yield
 
 

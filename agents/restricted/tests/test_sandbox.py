@@ -17,9 +17,15 @@ from hyperforge_restricted.model import (
 async def sandbox_conn():
     with tempfile.TemporaryDirectory() as path:
         socket = f"{path}/sandbox.sock"
-        with patch(
-            "hyperforge_restricted.sandbox.settings.sandbox_socket",
-            socket,
+        with (
+            patch(
+                "hyperforge_restricted.sandbox.settings.sandbox_socket",
+                socket,
+            ),
+            patch(
+                "hyperforge_restricted.sandbox.settings.sandbox_verify",
+                False,
+            ),
         ):
             task = asyncio.create_task(sandbox.run_sandbox_server())
 

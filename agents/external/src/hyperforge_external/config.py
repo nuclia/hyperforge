@@ -65,6 +65,13 @@ class ExternalCallAgentConfig(AgentConfig):
         title="URL to call",
         description="",
     )
+    timeout: int = Field(default=30, ge=1, le=300)
+    max_response_bytes: int = Field(
+        default=1024 * 1024,
+        ge=1,
+        le=10 * 1024 * 1024,
+        description="Maximum accepted HTTP response size in bytes",
+    )
 
     @field_validator("url")
     def validate_url(cls, v):

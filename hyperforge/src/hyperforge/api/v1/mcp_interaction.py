@@ -4,7 +4,7 @@ from functools import partial
 from typing import TYPE_CHECKING, Any, Iterable, Sequence
 
 import anyio
-from fastapi import Header
+from fastapi import Header, HTTPException
 from mcp.server.fastmcp.exceptions import ResourceError
 from mcp.server.lowlevel.helper_types import ReadResourceContents
 from mcp.server.lowlevel.server import Server as MCPServer
@@ -310,6 +310,23 @@ async def interaction_mcp_handler(
     x_stf_account_type: str = Header(..., include_in_schema=False),
 ):
     app: HTTPApplication = request.app
+    runtime_settings = getattr(app, "_standalone_settings", app.settings)
+    max_request_bytes = runtime_settings.mcp_max_request_bytes
+    max_response_bytes = runtime_settings.mcp_max_response_bytes
+    content_length = request.headers.get("content-length")
+    if content_length is not None:
+        try:
+            if int(content_length) > max_request_bytes:
+                raise HTTPException(status_code=413, detail="MCP request is too large")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid Content-Length") from None
+
+    body_bytes = bytearray()
+    async for chunk in request.stream():
+        if len(body_bytes) + len(chunk) > max_request_bytes:
+            raise HTTPException(status_code=413, detail="MCP request is too large")
+        body_bytes.extend(chunk)
+
     agent_manager: AgentManager = request.app.agent_manager
     request._headers._list.append((MCP_SESSION_ID_HEADER.encode(), session.encode()))
 
@@ -380,16 +397,26 @@ async def interaction_mcp_handler(
     response_status = 200
     response_headers: dict[str, str] = {}
     body_chunks: list[bytes] = []
+    response_bytes = 0
+    response_too_large = False
 
     async def intercepting_send(message: MutableMapping[str, Any]) -> None:
-        nonlocal response_status
+        nonlocal response_status, response_bytes, response_too_large
         if message["type"] == "http.response.start":
             response_status = message["status"]
             response_headers.update(
                 {k.decode(): v.decode() for k, v in message.get("headers", [])}
             )
         elif message["type"] == "http.response.body":
-            body_chunks.append(message.get("body", b""))
+            chunk = message.get("body", b"")
+            if not chunk or response_too_large:
+                return
+            response_bytes += len(chunk)
+            if response_bytes > max_response_bytes:
+                response_too_large = True
+                body_chunks.clear()
+                return
+            body_chunks.append(chunk)
 
     # Pre-read the body before passing to the MCP transport.
     # Fix for FastAPI/Starlette 1.x
@@ -397,14 +424,17 @@ async def interaction_mcp_handler(
     # TODO: consider rewriting this handler to use the official StreamableHTTPSessionManager
     # This does not happen in arag due to older versions of FastAPI/Starlette.
 
-    body_bytes = await request.body()
     body_sent = False
 
     async def patched_receive():
         nonlocal body_sent
         if not body_sent:
             body_sent = True
-            return {"type": "http.request", "body": body_bytes, "more_body": False}
+            return {
+                "type": "http.request",
+                "body": bytes(body_bytes),
+                "more_body": False,
+            }
         while True:
             msg = await request._receive()
             if msg["type"] == "http.disconnect":
@@ -421,6 +451,9 @@ async def interaction_mcp_handler(
 
         # Terminate the transport after the request is handled
         await http_transport.terminate()
+
+    if response_too_large:
+        return Response(content="MCP response is too large", status_code=502)
 
     return Response(
         content=b"".join(body_chunks),

@@ -1,11 +1,8 @@
-import ipaddress
-import socket
 import urllib.parse
 from collections.abc import Iterable
 from enum import Enum
 from typing import Any, Dict, Optional, Tuple
 
-import aiodns
 from nuclia_models.predict.generative_responses import GenerativeFullResponse
 
 
@@ -22,19 +19,13 @@ def iterate_tools_resp(
 
 def sync_check_dns(url: str) -> Optional[str]:
     parsed_url = urllib.parse.urlparse(url)
-    error = None
-    try:
-        if parsed_url.hostname is None:
-            hostname = parsed_url.path
-        else:
-            hostname = parsed_url.hostname
-        addr = socket.gethostbyname_ex(hostname)
-        for addres in addr[2]:
-            if ipaddress.ip_address(addres).is_private:
-                error = "Its a private address"
-    except aiodns.error.DNSError:
-        error = "Could not find this URL"
-    return error
+    if parsed_url.scheme.lower() not in {"http", "https"}:
+        return "URL must use HTTP or HTTPS"
+    if parsed_url.hostname is None:
+        return "URL must include a hostname"
+    if parsed_url.username is not None or parsed_url.password is not None:
+        return "Credentials are not allowed in URLs"
+    return None
 
 
 def sync_dns_validation(url: str) -> str:
@@ -45,24 +36,7 @@ def sync_dns_validation(url: str) -> str:
 
 
 async def check_dns(url: str) -> str:
-    parsed_url = urllib.parse.urlparse(url)
-    resolver = aiodns.DNSResolver()
-    error = None
-    try:
-        if parsed_url.hostname is None:
-            hostname = parsed_url.path
-        else:
-            hostname = parsed_url.hostname
-        addr = await resolver.gethostbyname(hostname, socket.AF_INET)
-        for addres in addr.addresses:
-            if ipaddress.ip_address(addres).is_private:
-                error = "Its a private address"
-    except aiodns.error.DNSError:
-        error = "Could not find this URL"
-
-    if error is not None:
-        raise ValueError(error)
-    return url
+    return sync_dns_validation(url)
 
 
 class WidgetType(str, Enum):
