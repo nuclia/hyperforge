@@ -168,9 +168,9 @@ class StandaloneAuthBackend(AuthenticationBackend):
         if scheme.lower() != "basic" or not encoded:
             raise AuthenticationError("Invalid administrator credentials")
         try:
-            username, separator, password = base64.b64decode(
-                encoded, validate=True
-            ).decode("utf-8").partition(":")
+            username, separator, password = (
+                base64.b64decode(encoded, validate=True).decode("utf-8").partition(":")
+            )
         except (ValueError, UnicodeDecodeError):
             raise AuthenticationError("Invalid administrator credentials") from None
         if not separator or not (

@@ -319,7 +319,9 @@ async def interaction_mcp_handler(
             if int(content_length) > max_request_bytes:
                 raise HTTPException(status_code=413, detail="MCP request is too large")
         except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid Content-Length") from None
+            raise HTTPException(
+                status_code=400, detail="Invalid Content-Length"
+            ) from None
 
     body_bytes = bytearray()
     async for chunk in request.stream():
