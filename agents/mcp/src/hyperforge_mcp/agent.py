@@ -201,7 +201,6 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                 },
                 tracking=memory.get_tracking_info(),
             )
-            breakpoint()
             prompt_id: str = resp["prompt_id"]
             await memory.add_step(
                 step_module=self.config.module,

@@ -526,7 +526,6 @@ class Manager:
         max_tokens: int = 8192,
         tracking: TrackingInfo | None = None,
     ) -> Tuple[Dict[str, Any], float, float, str | None]:
-        breakpoint()
         try:
             resp = await self.nua.generate(
                 body=ChatModel(
@@ -558,7 +557,6 @@ class Manager:
         else:
             input_tokens = resp.consumption.normalized_tokens.input
             output_tokens = resp.consumption.normalized_tokens.output
-        breakpoint()
         return (
             resp.object,
             input_tokens,
