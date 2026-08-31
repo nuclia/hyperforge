@@ -34,3 +34,9 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=20s --retries=3 \
     CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health/ready', timeout=2)"]
 CMD ["hyperforge-api"]
+
+# OCI metadata: links this image to the GitHub repo as a package, with source + license.
+LABEL org.opencontainers.image.source="https://github.com/nuclia/hyperforge" \
+    org.opencontainers.image.description="Agentic workflow on top of NUA" \
+    org.opencontainers.image.licenses="Apache-2.0" \
+    org.opencontainers.image.authors="Nuclia Team"
