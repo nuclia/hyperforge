@@ -247,7 +247,7 @@ async def test_standalone_ui_requires_admin_credentials(local_agents_config):
 
 async def test_standalone_security_defaults():
     settings = StandaloneSettings()
-    assert settings.host == "127.0.0.1"
+    assert settings.host == "0.0.0.0"
     assert settings.cors_allow_origin == []
 
 
