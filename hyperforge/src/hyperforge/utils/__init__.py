@@ -17,7 +17,7 @@ def iterate_tools_resp(
                     yield tool.function.name, used_params
 
 
-def sync_check_dns(url: str) -> Optional[str]:
+def validate_url(url: str) -> Optional[str]:
     parsed_url = urllib.parse.urlparse(url)
     if parsed_url.scheme.lower() not in {"http", "https"}:
         return "URL must use HTTP or HTTPS"
@@ -29,14 +29,10 @@ def sync_check_dns(url: str) -> Optional[str]:
 
 
 def sync_dns_validation(url: str) -> str:
-    error = sync_check_dns(url)
+    error = validate_url(url)
     if error is not None:
         raise ValueError(error)
     return url
-
-
-async def check_dns(url: str) -> str:
-    return sync_dns_validation(url)
 
 
 class WidgetType(str, Enum):
