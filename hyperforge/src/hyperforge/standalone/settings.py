@@ -35,7 +35,7 @@ class StandaloneSettings(BaseSettings):
     # HTTP server
     # ------------------------------------------------------------------
 
-    host: str = Field(default="127.0.0.1", description="Listen host.")
+    host: str = Field(default="0.0.0.0", description="Listen host.")
     port: int = Field(default=8080, description="Listen port.")
     log_level: str = Field(default="INFO", description="Log level (uvicorn + app).")
     debug: bool = Field(default=False, description="Enable debug mode.")
