@@ -92,7 +92,7 @@ class SafeNetworkBackend(httpcore.AsyncNetworkBackend):
 class SafeTransport(AsyncHTTPTransport):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self._pool._network_backend = SafeNetworkBackend()
+        self._pool._network_backend = SafeNetworkBackend()  # type: ignore
 
     async def handle_async_request(self, request: Request) -> Response:
         validate_public_http_url(str(request.url))
