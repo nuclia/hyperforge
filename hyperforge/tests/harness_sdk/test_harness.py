@@ -1384,7 +1384,7 @@ async def test_malformed_tool_arguments_do_not_run_handler() -> None:
 
 
 @pytest.mark.asyncio
-async def test_tool_failure_log_includes_actionable_detail(caplog) -> None:
+async def test_tool_failure_log_includes_actionable_detail(mocker) -> None:
     async def fail(_harness: AgentHarness, _value: ToolInput) -> ToolOutput:
         raise ValueError("identity field is invalid")
 
@@ -1392,13 +1392,18 @@ async def test_tool_failure_log_includes_actionable_detail(caplog) -> None:
         model="test-model", model_client=Model(), tools=[HarnessTool("validate", fail)]
     )
     call = HarnessToolCall(id="call-42", name="validate", arguments={"value": "x"})
+    warning = mocker.patch("hyperforge.harness_sdk.harness.logger.warning")
 
     await harness._execute_tool_call(call)
 
-    assert (
-        "Agent tool execution failed: tool=validate call_id=call-42 "
-        "error_type=ValueError error=identity field is invalid"
-    ) in caplog.text
+    assert warning.call_count == 1
+    assert warning.call_args.args[:4] == (
+        "Agent tool execution failed: tool=%s call_id=%s error_type=%s error=%s",
+        "validate",
+        "call-42",
+        "ValueError",
+    )
+    assert str(warning.call_args.args[4]) == "identity field is invalid"
 
 
 def test_tool_requires_pydantic_handler_annotations() -> None:
