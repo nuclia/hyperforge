@@ -8,7 +8,7 @@ from hyperforge.context.agent import ContextAgent
 from hyperforge.definition import FunctionDefinition
 from hyperforge.manager import Manager
 from hyperforge.memory import Chunk, Context, QuestionMemory
-from hyperforge.models import ExternalUsage
+from hyperforge.models import ExternalUsage, ExternalUsageOperation
 from hyperforge_perplexity.driver import PerplexityDriver
 
 from hyperforge_perplexity_search.config import PerplexitySearchAgentConfig
@@ -103,7 +103,12 @@ class PerplexitySearchAgent(ContextAgent, Agent[PerplexitySearchAgentConfig]):
             else "No results found",
             timeit=time() - t0,
             external_usage=[
-                ExternalUsage(provider="perplexity", model="search", requests=1)
+                ExternalUsage(
+                    operation=ExternalUsageOperation.INTERNET_SEARCH,
+                    provider="perplexity",
+                    model="search",
+                    requests=1,
+                )
             ],
         )
         return context
