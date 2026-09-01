@@ -13,13 +13,17 @@ class UsageLimits:
     max_input_tokens: int | None = None
     max_output_tokens: int | None = None
     max_time: float | None = None
+    max_spawn_depth: int = 1
+    max_concurrent_agents: int = 4
     max_codemode_runtime_seconds: float = DEFAULT_CODEMODE_RUNTIME_SECONDS
     max_codemode_memory_bytes: int = DEFAULT_CODEMODE_MEMORY_BYTES
 
     def __post_init__(self) -> None:
         for name, value in vars(self).items():
-            if value is not None and value <= 0:
+            if value is not None and value <= 0 and name != "max_spawn_depth":
                 raise ValueError(f"{name} must be greater than zero")
+        if self.max_spawn_depth < 0:
+            raise ValueError("max_spawn_depth must be non-negative")
 
 
 @dataclass

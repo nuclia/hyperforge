@@ -106,6 +106,30 @@ class NucliaChatCompletionsError(RuntimeError):
         self.provider_data = provider_data or {}
 
 
+def _request_error_detail(
+    exc: httpx.RequestError | httpx.HTTPStatusError,
+) -> tuple[str, dict[str, Any]]:
+    response = exc.response if isinstance(exc, httpx.HTTPStatusError) else None
+    status = response.status_code if response is not None else None
+    response_body = response.text.strip()[:2000] if response is not None else ""
+    request = exc.request
+    url = str(request.url) if request is not None else "unknown URL"
+    detail = str(exc).strip() or repr(exc)
+    parts = [f"{type(exc).__name__} for {url}"]
+    if status is not None:
+        parts.append(f"status={status}")
+    if response_body:
+        parts.append(f"response={response_body}")
+    parts.append(f"error={detail}")
+    return "; ".join(parts), {
+        "http_status": status,
+        "url": url,
+        "response_body": response_body or None,
+        "error_type": type(exc).__name__,
+        "error": detail,
+    }
+
+
 class NucliaChatCompletionsClient:
     """Chat-completions transport backed by Hyperforge's shared NUA client."""
 
@@ -172,13 +196,10 @@ class NucliaChatCompletionsClient:
                     yield chunk
                 return
             except (httpx.RequestError, httpx.HTTPStatusError) as exc:
+                detail, provider_data = _request_error_detail(exc)
                 error = NucliaChatCompletionsError(
-                    f"Nuclia chat completions request failed: {exc}",
-                    provider_data={
-                        "http_status": exc.response.status_code
-                        if isinstance(exc, httpx.HTTPStatusError)
-                        else None
-                    },
+                    f"Nuclia chat completions request failed: {detail}",
+                    provider_data=provider_data,
                 )
             except NucliaChatCompletionsError as exc:
                 error = exc

@@ -615,7 +615,7 @@ async def test_spawn_agent_returns_wait_result_at_conversation_limit() -> None:
     harness = AgentHarness(
         model="test-model",
         model_client=SlowChildModel(),
-        max_concurrent_agents=2,
+        usage_limits=UsageLimits(max_concurrent_agents=2),
     )
     first = await spawn_agent(
         harness, SpawnAgentInput(prompt="first", include_history=False)
@@ -658,8 +658,7 @@ async def test_concurrent_agent_limit_is_shared_with_descendants() -> None:
     harness = AgentHarness(
         model="test-model",
         model_client=SlowChildModel(),
-        max_spawn_depth=2,
-        max_concurrent_agents=2,
+        usage_limits=UsageLimits(max_spawn_depth=2, max_concurrent_agents=2),
     )
     spawned = await spawn_agent(
         harness, SpawnAgentInput(prompt="child", include_history=False)
@@ -1382,6 +1381,24 @@ async def test_malformed_tool_arguments_do_not_run_handler() -> None:
         )
 
     assert called is False
+
+
+@pytest.mark.asyncio
+async def test_tool_failure_log_includes_actionable_detail(caplog) -> None:
+    async def fail(_harness: AgentHarness, _value: ToolInput) -> ToolOutput:
+        raise ValueError("identity field is invalid")
+
+    harness = AgentHarness(
+        model="test-model", model_client=Model(), tools=[HarnessTool("validate", fail)]
+    )
+    call = HarnessToolCall(id="call-42", name="validate", arguments={"value": "x"})
+
+    await harness._execute_tool_call(call)
+
+    assert (
+        "Agent tool execution failed: tool=validate call_id=call-42 "
+        "error_type=ValueError error=identity field is invalid"
+    ) in caplog.text
 
 
 def test_tool_requires_pydantic_handler_annotations() -> None:

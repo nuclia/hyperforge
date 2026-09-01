@@ -1,5 +1,6 @@
 from collections.abc import AsyncIterator
 
+import httpx
 import pytest
 
 from hyperforge.harness_sdk import (
@@ -8,6 +9,7 @@ from hyperforge.harness_sdk import (
     HarnessMessage,
     HarnessToolCall,
     NucliaChatCompletionsClient,
+    NucliaChatCompletionsError,
     NucliaModelClient,
 )
 
@@ -87,6 +89,39 @@ async def test_chat_completions_retries_pre_stream_generation_errors() -> None:
 
     assert nua.attempts == 3
     assert [chunk.choices[0].delta.content for chunk in chunks] == ["hello"]
+
+
+@pytest.mark.asyncio
+async def test_chat_completions_http_error_includes_response_detail() -> None:
+    request = httpx.Request("POST", "https://predict.example/chat")
+    response = httpx.Response(
+        408, request=request, json={"detail": "Timeout connecting to generative API"}
+    )
+
+    class FakeNua:
+        async def chat_completions_stream(self, payload, **kwargs):
+            raise httpx.HTTPStatusError("", request=request, response=response)
+            yield {}
+
+    client = NucliaChatCompletionsClient(FakeNua())
+
+    with pytest.raises(NucliaChatCompletionsError) as raised:
+        _ = [
+            chunk
+            async for chunk in client.stream(
+                ChatCompletionRequest(
+                    messages=[{"role": "user", "content": "hi"}], model="model"
+                )
+            )
+        ]
+
+    message = str(raised.value)
+    assert "status=408" in message
+    assert "Timeout connecting to generative API" in message
+    assert (
+        raised.value.provider_data["response_body"]
+        == '{"detail":"Timeout connecting to generative API"}'
+    )
 
 
 @pytest.mark.asyncio

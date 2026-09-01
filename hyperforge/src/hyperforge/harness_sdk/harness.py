@@ -66,8 +66,6 @@ class HarnessConfig:
     tags: tuple[str, ...]
     feedback_enabled: bool
     usage_limits: UsageLimits
-    max_spawn_depth: int
-    max_concurrent_agents: int
     event_queue_size: int
 
 
@@ -292,18 +290,10 @@ class AgentHarness:
         tags: Iterable[str] = (),
         feedback_enabled: bool = False,
         usage_limits: UsageLimits | None = None,
-        max_spawn_depth: int = 1,
-        max_concurrent_agents: int = 4,
         spawn_depth: int = 0,
         parent_agent_id: str | None = None,
         event_queue_size: int = DEFAULT_EVENT_QUEUE_SIZE,
     ) -> None:
-        if max_spawn_depth < 0:
-            raise ValueError("max_spawn_depth must be non-negative")
-        if max_concurrent_agents < 1:
-            raise ValueError("max_concurrent_agents must be positive")
-        if spawn_depth < 0 or spawn_depth > max_spawn_depth:
-            raise ValueError("spawn_depth must be between zero and max_spawn_depth")
         if event_queue_size <= 0:
             raise ValueError("event_queue_size must be positive")
         normalized_tools = tuple(
@@ -313,6 +303,8 @@ class AgentHarness:
         normalized_context = dict(execution_context or {})
         normalized_tags = tuple(dict.fromkeys(tags))
         normalized_limits = usage_limits or UsageLimits()
+        if spawn_depth < 0 or spawn_depth > normalized_limits.max_spawn_depth:
+            raise ValueError("spawn_depth must be between zero and max_spawn_depth")
         self._config = HarnessConfig(
             model=model,
             reasoning_effort=reasoning_effort,
@@ -327,8 +319,6 @@ class AgentHarness:
             tags=normalized_tags,
             feedback_enabled=feedback_enabled,
             usage_limits=normalized_limits,
-            max_spawn_depth=max_spawn_depth,
-            max_concurrent_agents=max_concurrent_agents,
             event_queue_size=event_queue_size,
         )
         self.model = self._config.model
@@ -344,8 +334,8 @@ class AgentHarness:
         self.category = self._config.category
         self.tags = list(self._config.tags)
         self.usage_limits = self._config.usage_limits
-        self.max_spawn_depth = self._config.max_spawn_depth
-        self.max_concurrent_agents = self._config.max_concurrent_agents
+        self.max_spawn_depth = self.usage_limits.max_spawn_depth
+        self.max_concurrent_agents = self.usage_limits.max_concurrent_agents
         self.spawn_depth = spawn_depth
         self.parent_agent_id = parent_agent_id
         self.usage = HarnessUsage()
@@ -992,7 +982,11 @@ class AgentHarness:
             )
         except Exception as exc:
             logger.warning(
-                "Agent tool execution failed",
+                "Agent tool execution failed: tool=%s call_id=%s error_type=%s error=%s",
+                call.name,
+                call.id,
+                type(exc).__name__,
+                exc,
                 extra={
                     "conversation_id": self.conversation_id,
                     "turn_id": self._turn_id,
@@ -1051,8 +1045,6 @@ class AgentHarness:
             tags=self._config.tags,
             feedback_enabled=self._config.feedback_enabled,
             usage_limits=self._config.usage_limits,
-            max_spawn_depth=self._config.max_spawn_depth,
-            max_concurrent_agents=self._config.max_concurrent_agents,
             spawn_depth=self.spawn_depth + 1,
             parent_agent_id=self.agent_id,
             event_queue_size=self._config.event_queue_size,

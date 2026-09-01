@@ -99,12 +99,6 @@ async def test_harness_agent_runs_configured_legacy_agent_as_tool(monkeypatch) -
         {
             "model": "test-model",
             "agents": [{"id": "source", "module": "published"}],
-            "workflow": {
-                "id": "default",
-                "name": "Default",
-                "description": None,
-                "parameters": None,
-            },
         }
     )
     agent = await HarnessAgent.from_config_class(config)

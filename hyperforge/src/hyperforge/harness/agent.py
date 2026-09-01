@@ -57,7 +57,6 @@ class HarnessAgent:
             reasoning_effort=self.config.reasoning_effort,
             tools=tools,
             system_prompt=system_prompt,
-            title=self.config.workflow.name,
             conversation_id=memory.get_session_id(),
             disabled_core_tools=[
                 *self.config.disabled_core_tools,
@@ -79,8 +78,6 @@ class HarnessAgent:
             },
             feedback_enabled=self.config.feedback_enabled,
             usage_limits=self.config.usage_limits,
-            max_spawn_depth=self.config.max_spawn_depth,
-            max_concurrent_agents=self.config.max_concurrent_agents,
         )
         history = await memory.get_chat_history()
         harness.add_messages(
