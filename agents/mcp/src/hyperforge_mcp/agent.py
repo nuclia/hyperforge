@@ -901,6 +901,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                 name=tool.name,
                 description=tool.description or tool.name,
                 parameters=_tool_parameters(tool.inputSchema),
+                input_schema=tool.inputSchema,
             )
             setattr(self, tool.name, self._make_tool_caller(tool.name))
 

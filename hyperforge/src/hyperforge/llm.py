@@ -1,6 +1,10 @@
-from typing import Any
+import json
+from collections.abc import AsyncIterator
+from typing import Any, Self
 
-from nuclia.lib.nua import AsyncNuaClient
+import httpx
+from nuclia.lib.nua import AsyncNuaClient as NucliaAsyncNuaClient
+from nuclia.lib.nua import NuaEndpoint
 from nuclia.sdk import AsyncNucliaAuth
 from pydantic import BaseModel
 
@@ -12,6 +16,60 @@ class NuaBaseModel(BaseModel):
     @classmethod
     async def connect_internal(cls, kbid: str | None, account: str | None, url: str):
         raise NotImplementedError("Must implement connect_internal method in subclass")
+
+
+class AsyncNuaClient(NucliaAsyncNuaClient):
+    """Hyperforge NUA client, including the chat-completions compatibility API."""
+
+    @classmethod
+    def internal(
+        cls,
+        url: str,
+        kbid: str | None = None,
+        account: str | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> Self:
+        return cls(
+            region=url,
+            account=account or "",
+            headers=headers,
+            endpoint=NuaEndpoint.INTERNAL,
+            kbid=kbid,
+        )
+
+    async def chat_completions_stream(
+        self, payload: dict[str, Any], *, timeout: float = 5 * 60
+    ) -> AsyncIterator[dict[str, Any]]:
+        path = (
+            "/api/internal/predict/compat/chat/completions"
+            if self.endpoint == NuaEndpoint.INTERNAL
+            else "/api/v1/predict/compat/chat/completions"
+        )
+        request = {**payload, "stream": True}
+        async with self.stream_client.stream(
+            "POST",
+            f"{self.url}{path}",
+            json=request,
+            headers={"accept": "text/event-stream"},
+            timeout=timeout,
+        ) as response:
+            if response.status_code != 200:
+                detail = (await response.aread()).decode(errors="replace")
+                error = httpx.HTTPStatusError(
+                    f"Nuclia chat completions API error: {response.status_code} - {detail}",
+                    request=response.request,
+                    response=response,
+                )
+                raise error
+            async for line in response.aiter_lines():
+                line = line.strip()
+                if not line or line.startswith(":") or line.startswith("event:"):
+                    continue
+                if line == "data: [DONE]":
+                    return
+                if line.startswith("data:"):
+                    line = line[5:].lstrip()
+                yield json.loads(line)
 
 
 class NoopNuaClient(AsyncNuaClient):  # pragma: no cover
@@ -60,16 +118,25 @@ class NoopNuaClient(AsyncNuaClient):  # pragma: no cover
     async def query(self, *args: Any, **kwargs: Any) -> Any:  # type: ignore[override]
         self._not_configured("query")
 
+    async def chat_completions_stream(
+        self, payload: dict[str, Any], *, timeout: float = 5 * 60
+    ) -> AsyncIterator[dict[str, Any]]:
+        self._not_configured("chat_completions_stream")
+        if False:
+            yield {}
+
 
 class NUAConnection(NuaBaseModel):
     key: str
 
-    async def connect(self):
+    async def connect(self, *, base_url: str | None = None):
         na = AsyncNucliaAuth()
         client_id, account_type, account, base_region = await na.validate_nua(self.key)
         if account is None or base_region is None:
             raise Exception("Could not connect to NUA")
-        return AsyncNuaClient(token=self.key, account=account, region=base_region)
+        return AsyncNuaClient(
+            token=self.key, account=account, region=base_url or base_region
+        )
 
     @classmethod
     async def connect_internal(cls, kbid: str | None, account: str | None, url: str):

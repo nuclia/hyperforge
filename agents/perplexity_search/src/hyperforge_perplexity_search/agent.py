@@ -28,6 +28,7 @@ class PerplexitySearchAgent(ContextAgent, Agent[PerplexitySearchAgentConfig]):
     __published_functions__: ClassVar[Dict[str, FunctionDefinition]] = {
         "internet_search": FunctionDefinition(
             name="internet_search",
+            method="search",
             description="Performs an internet search using Perplexity and returns the results as context to answer questions. Does not generate an answer, only search and return the results as context.",
             parameters={
                 "question": {
