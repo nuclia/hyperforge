@@ -59,7 +59,15 @@ class HarnessAgent:
             system_prompt=system_prompt,
             title=self.config.workflow.name,
             conversation_id=memory.get_session_id(),
-            disabled_core_tools=self.config.disabled_core_tools,
+            disabled_core_tools=[
+                *self.config.disabled_core_tools,
+                # Since we're not using the storage adapter implementation,
+                # we need to disable these tools that require storage access
+                # across sessions.
+                "remember",
+                "recall",
+                "forget",
+            ],
             execution_context={
                 "user_id": memory.session.user_info.get("id", "system"),
                 "conversation_metadata": {

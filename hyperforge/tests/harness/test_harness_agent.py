@@ -43,6 +43,9 @@ class FakeNua:
             message["role"] == "system" and "- Be concise" in message["content"]
             for message in payload["messages"]
         )
+        assert not {"remember", "recall", "forget"} & {
+            tool["function"]["name"] for tool in payload["tools"]
+        }
         if self.calls == 1:
             tool = next(
                 item
