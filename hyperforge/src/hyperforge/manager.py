@@ -515,6 +515,55 @@ class Manager:
             output_tokens,
         )
 
+    async def execute_json_reasoning(
+        self,
+        prompt: str,
+        user_id: str,
+        schema: Dict[str, Any],
+        model: ModelParam,
+        images: Dict[str, Image] = {},
+        system: Optional[str] = None,
+        max_tokens: int = 8192,
+        tracking: TrackingInfo | None = None,
+    ) -> Tuple[Dict[str, Any], float, float, str | None]:
+        try:
+            resp = await self.nua.generate(
+                body=ChatModel(
+                    user_id=user_id,
+                    question="",
+                    user_prompt=UserPrompt(prompt=prompt),
+                    generative_model=_resolve_model_id(model),
+                    reasoning=build_reasoning(model),
+                    format_prompt=False,
+                    query_context_images=images,
+                    json_schema=schema,
+                    system=system,
+                    max_tokens=max_tokens,
+                    citations=False,
+                ),
+                extra_headers=self._build_extra_headers(tracking),
+            )
+
+        except ValidationError as e:
+            convert_errors(e)
+            raise
+
+        if resp.object is None:
+            raise Exception("No object")
+
+        if resp.consumption is None or resp.consumption.normalized_tokens is None:
+            input_tokens = 0.0
+            output_tokens = 0.0
+        else:
+            input_tokens = resp.consumption.normalized_tokens.input
+            output_tokens = resp.consumption.normalized_tokens.output
+        return (
+            resp.object,
+            input_tokens,
+            output_tokens,
+            resp.reasoning,
+        )
+
     async def execute_json_citation(
         self,
         question: str,

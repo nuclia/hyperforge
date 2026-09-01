@@ -30,7 +30,7 @@ WORKER_CPU_LIMIT = 1
 
 class SandboxSettings(BaseSettings):
     # Verify that the sandbox is secure on startup or raise an exception
-    sandbox_verify: bool = False
+    sandbox_verify: bool = True
 
     # Socket for the sandbox server to listen to
     sandbox_socket: str | None = None

@@ -28,7 +28,13 @@ class HTTPStaticAgentConfig(ContextAgentConfig):
         description="Optional POST field id to include the question in the request body",
     )
     timeout: int = Field(
-        default=10, description="Timeout for the HTTP request in seconds"
+        default=10, ge=1, le=300, description="Timeout for the HTTP request in seconds"
+    )
+    max_response_bytes: int = Field(
+        default=1024 * 1024,
+        ge=1,
+        le=10 * 1024 * 1024,
+        description="Maximum accepted HTTP response size in bytes",
     )
 
     @field_validator("url")

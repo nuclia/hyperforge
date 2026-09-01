@@ -176,8 +176,15 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
 
         if final_prompt is None:
             # We will use LLM to choose the prompt
-            prompt_feedback_str = PROMPT_CHOOSE_TEMPLATE.render(prompts=self.prompts)
-            resp, input_tokens, output_tokens = await manager.execute_json(
+            prompt_feedback_str = PROMPT_CHOOSE_TEMPLATE.render(
+                prompts=self.prompts, task_description=question
+            )
+            (
+                resp,
+                input_tokens,
+                output_tokens,
+                reasoning,
+            ) = await manager.execute_json_reasoning(
                 model=self.config.tool_choice_model,
                 prompt=prompt_feedback_str,
                 user_id="mcp_no_feedback",
