@@ -30,7 +30,15 @@ from mcp.client.streamable_http import GetSessionIdCallback
 from mcp.shared.context import RequestContext
 from mcp.shared.message import SessionMessage
 from mcp.shared.session import RequestResponder
-from nuclia.lib.nua_responses import Author, ChatModel, Image, Message, Tool, UserPrompt
+from nuclia.lib.nua_responses import (
+    Author,
+    ChatModel,
+    Image,
+    Message,
+    Tool,
+    ToolChoiceAuto,
+    UserPrompt,
+)
 from nuclia_models.predict.generative_responses import GenerativeFullResponse
 from pydantic import FileUrl
 
@@ -375,6 +383,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             generative_model=self.config.tool_choice_model.model_id,
             reasoning=build_reasoning(self.config.tool_choice_model),
             tools=tools,
+            tool_choice=ToolChoiceAuto(),
             user_prompt=UserPrompt(
                 prompt="Choose the best tool or tools for the task, select task_complete if no more tools are needed according to the user request and previous interactions"
             ),
@@ -950,14 +959,15 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
 
         total_input_tokens += input_tokens
         total_output_tokens += output_tokens
-        for tool_name, tool_arguments in iterate_tools_resp(resp):
+        tool_calls = list(iterate_tools_resp(resp))
+        for tool_name, tool_arguments in tool_calls:
             await self.process_tool(
                 memory, tool_name, tool_arguments, context, messages, images
             )
 
-        if self.config.work_chain is False:
+        if self.config.work_chain is False or not tool_calls:
             logger.debug("Exiting loop on tool")
-            return input_tokens, output_tokens
+            return total_input_tokens, total_output_tokens
 
         count = 0
         finished = False
@@ -972,7 +982,11 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             )
             total_input_tokens += input_tokens
             total_output_tokens += output_tokens
-            for tool_name, tool_arguments in iterate_tools_resp(resp):
+            tool_calls = list(iterate_tools_resp(resp))
+            if not tool_calls:
+                logger.debug("Exiting loop because no tool was selected")
+                break
+            for tool_name, tool_arguments in tool_calls:
                 if tool_name == "task_complete":
                     logger.debug("Exiting loop on task_complete tool")
                     finished = True
