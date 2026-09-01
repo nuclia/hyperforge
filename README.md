@@ -20,12 +20,17 @@ NucliaDB Agentic API service, and a set of reusable Hyperforge agent packages.
 
 ## Packages
 
-The workspace is managed with `uv` and Python 3.10 or newer.
+The workspace is managed with `uv` and Python 3.12 or newer.
 
 Core packages:
 
 - `hyperforge`: agentic framework runtime and API.
 - `nucliadb_agentic_api`: NucliaDB Agentic API service.
+
+Framework guides:
+
+- [Harness SDK](docs/harness-sdk.md): build asynchronous tool-loop agents with
+  streaming events, persistence, limits, feedback, memory, and sub-agents.
 
 Agent packages:
 
