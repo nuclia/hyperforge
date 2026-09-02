@@ -21,6 +21,7 @@ from nuclia.lib.nua_responses import (
     ChatModel,
     Message,
     Tool,
+    ToolChoiceAuto,
     UserPrompt,
 )
 from pydantic import BaseModel, ConfigDict, Field
@@ -478,6 +479,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             generative_model=model.model_id,
             reasoning=build_reasoning(model),
             tools=tools,
+            tool_choice=ToolChoiceAuto(),
             user_prompt=UserPrompt(
                 prompt=f"{system}\n\nChoose the best tool or tools for the task. Call task_complete when you have enough information."
             ),
