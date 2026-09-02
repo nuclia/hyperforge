@@ -364,7 +364,7 @@ async def test_a2a_grpc_round_trip(monkeypatch, a2a_task_store):
             "what is A2A?",
             {
                 "workflow_id": "wf1",
-                "headers": {"authorization": "Bearer token"},
+                "headers": {"authorization": "test-header-value"},
             },
         )
         texts: list[str] = []
@@ -386,7 +386,7 @@ async def test_a2a_grpc_round_trip(monkeypatch, a2a_task_store):
     assert captured["agent_id"] == "myagent"
     assert captured["workflow_id"] == "wf1"
     assert captured["question"] == "what is A2A?"
-    assert captured["headers"].get("authorization") == "Bearer token"
+    assert captured["headers"].get("authorization") == "test-header-value"
 
 
 async def test_a2a_client_agent_builds_context_from_streamed_workflow(
@@ -441,7 +441,7 @@ async def test_a2a_client_agent_builds_context_from_streamed_workflow(
         session.init("local-a2a-session")
         memory = session.start_question(
             "Run the deterministic workflow",
-            headers={"authorization": "Bearer local-demo"},
+            headers={"authorization": "test-header-value"},
         )
 
         context = await client_agent.a2a_query(
@@ -778,7 +778,7 @@ async def test_a2a_client_agent_answers_nested_remote_feedback(
 def test_parse_routing_metadata_defaults_and_allowed_headers():
     routing = parse_routing_metadata(
         {
-            "headers": {"Authorization": "Bearer token"},
+            "headers": {"Authorization": "test-header-value"},
             "arguments": {"limit": 3, "include_archived": False},
         },
         A2ASettings(
@@ -793,7 +793,7 @@ def test_parse_routing_metadata_defaults_and_allowed_headers():
     assert routing.agent_id == "research-agent"
     assert routing.workflow_id == "default"
     assert routing.session == "a2a-context"
-    assert routing.headers == {"authorization": "Bearer token"}
+    assert routing.headers == {"authorization": "test-header-value"}
     assert routing.arguments == {"limit": "3", "include_archived": "False"}
 
 
@@ -802,8 +802,8 @@ def test_parse_routing_metadata_rejects_duplicate_headers_ignoring_case():
         parse_routing_metadata(
             {
                 "headers": {
-                    "Authorization": "Bearer first",
-                    "authorization": "Bearer second",
+                    "Authorization": "test-header-value-one",
+                    "authorization": "test-header-value-two",
                 }
             },
             A2ASettings(
