@@ -27,12 +27,17 @@ async def test_send_reply_expires_stream():
     client.pipeline = Mock(return_value=pipeline_context)
     pipeline.xadd.return_value = pipeline
     pipeline.expire.return_value = pipeline
-    broker = RedisBroker(client, "activations", keepalive_ms=20_000)
+    broker = RedisBroker(
+        client,
+        "activations",
+        keepalive_ms=20_000,
+        stream_ttl_seconds=600,
+    )
 
     await broker.send_reply("feedback-id", "approved")
 
     pipeline.xadd.assert_called_once()
-    pipeline.expire.assert_called_once_with("feedback-id", 300)
+    pipeline.expire.assert_called_once_with("feedback-id", 600)
     pipeline.execute.assert_awaited_once()
 
 

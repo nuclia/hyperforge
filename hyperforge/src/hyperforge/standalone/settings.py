@@ -69,6 +69,10 @@ class StandaloneSettings(BaseSettings):
         default=20,
         description="Interval between keepalive pings on the answer stream.",
     )
+    pubsub_stream_ttl_seconds: int = Field(
+        default=300,
+        description="Seconds to retain broker streams in Redis.",
+    )
     broker_redis_dsn: Optional[str] = Field(
         default=None,
         description=(
@@ -145,6 +149,7 @@ class StandaloneSettings(BaseSettings):
             valkey_cluster_mode=self.broker_redis_cluster_mode,
             activate_subject=self.broker_redis_activate_subject,
             pubsub_keepalive_seconds=self.pubsub_keepalive_seconds,
+            pubsub_stream_ttl_seconds=self.pubsub_stream_ttl_seconds,
         )
 
     # ------------------------------------------------------------------

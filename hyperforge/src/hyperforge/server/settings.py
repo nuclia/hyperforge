@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     )
     oauth_subject: str = "arag.{account}.{agent_id}.{workflow_id}.{session}.{question}.oauth.{oauth_uuid}"
     pubsub_keepalive_seconds: float = 20
+    pubsub_stream_ttl_seconds: int = 300
 
     internal_nua_api: str = "http://predict.learning.svc.cluster.local:8080"
     internal_nua: bool = False

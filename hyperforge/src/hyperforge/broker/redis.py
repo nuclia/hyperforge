@@ -31,13 +31,21 @@ _REDIS_RETRY_BACKOFF_BASE_SECONDS = 0.1
 _REDIS_RETRY_BACKOFF_CAP_SECONDS = 1.0
 _REDIS_SUBSCRIBE_ACTIVATIONS_RETRY_SLEEP_SECONDS = 1
 _REPLY_READ_BLOCK_MAX_MS = 2000
+_DEFAULT_STREAM_TTL_SECONDS = 300
 
 
 class RedisBroker(Broker):
-    def __init__(self, client: Redis, activate_subject: str, keepalive_ms: int):
+    def __init__(
+        self,
+        client: Redis,
+        activate_subject: str,
+        keepalive_ms: int,
+        stream_ttl_seconds: int = _DEFAULT_STREAM_TTL_SECONDS,
+    ):
         self._client = client
         self._activate_subject = activate_subject
         self._keepalive_ms = int(keepalive_ms)
+        self._stream_ttl_seconds = int(stream_ttl_seconds)
 
     @property
     def keepalive_seconds(self) -> float:
@@ -55,6 +63,7 @@ class RedisBroker(Broker):
         activate_subject: str,
         keepalive_ms: int,
         cluster_mode: bool = False,
+        stream_ttl_seconds: int = _DEFAULT_STREAM_TTL_SECONDS,
     ) -> "RedisBroker":
         client_kwargs = cls._client_kwargs(keepalive_ms)
         if cluster_mode:
@@ -73,7 +82,12 @@ class RedisBroker(Broker):
                 url,
                 **client_kwargs,
             )  # type: ignore[call-overload]
-        return cls(client, activate_subject, keepalive_ms)
+        return cls(
+            client,
+            activate_subject,
+            keepalive_ms,
+            stream_ttl_seconds=stream_ttl_seconds,
+        )
 
     @staticmethod
     def _client_kwargs(keepalive_ms: int) -> dict[str, Any]:
@@ -160,7 +174,7 @@ class RedisBroker(Broker):
         async with self._client.pipeline() as pipe:
             await (
                 pipe.xadd(topic, {"msg": message.model_dump_json()}, maxlen=100)
-                .expire(topic, 300)
+                .expire(topic, self._stream_ttl_seconds)
                 .execute()
             )
 
@@ -210,7 +224,7 @@ class RedisBroker(Broker):
                     {"msg": payload, "trace": json.dumps(trace_headers)},
                     maxlen=100,
                 )
-                .expire(key, 300)
+                .expire(key, self._stream_ttl_seconds)
                 .execute()
             )
 

@@ -352,6 +352,7 @@ class StandaloneApplication(FastAPI):
                 s.broker_redis_activate_subject,
                 int(s.pubsub_keepalive_seconds * 1000),
                 cluster_mode=s.broker_redis_cluster_mode,
+                stream_ttl_seconds=s.pubsub_stream_ttl_seconds,
             )
 
         # LRU caches for MCP server instances (mirrors HTTPApplication).
@@ -369,6 +370,7 @@ class StandaloneApplication(FastAPI):
             valkey_url="redis://localhost",
             question_timeout_seconds=s.question_timeout_seconds,
             pubsub_keepalive_seconds=s.pubsub_keepalive_seconds,
+            pubsub_stream_ttl_seconds=s.pubsub_stream_ttl_seconds,
             internal_nua=s.internal_nua,
             internal_nua_api=s.internal_nua_api,
             external_nua_api_key=s.external_nua_api_key,
