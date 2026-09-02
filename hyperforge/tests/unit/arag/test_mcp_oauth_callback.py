@@ -46,6 +46,7 @@ def _inject_key(monkeypatch):
 def _make_app():
     """Return a minimal FastAPI app that mounts only the oauth router."""
     from fastapi import FastAPI
+
     from hyperforge.api.settings import Settings
     from hyperforge.api.v1.router import router
 
@@ -112,6 +113,32 @@ def test_valid_state_publishes_sdk_state_and_returns_200(client):
     assert params["code"] == ["mycode"]
     # The published state must be sdk_state (not the full Fernet token).
     assert params["state"] == [sdk_nonce]
+
+
+def test_auth_success_uses_configured_logo(client):
+    tc, app = client
+    app.settings.auth_success_logo_url = (
+        'https://example.com/logo.svg?size=large&theme="light"'
+    )
+
+    resp = tc.get(f"/api/auth/mcp/callback?state={_make_state()}&code=mycode")
+
+    assert resp.status_code == 200
+    assert (
+        'src="https://example.com/logo.svg?size=large&amp;theme=&quot;light&quot;"'
+        in resp.text
+    )
+    assert '<div class="brand">Hyperforge</div>' not in resp.text
+
+
+def test_auth_success_uses_text_when_logo_is_not_configured(client):
+    tc, _ = client
+
+    resp = tc.get(f"/api/auth/mcp/callback?state={_make_state()}&code=mycode")
+
+    assert resp.status_code == 200
+    assert '<div class="brand">Hyperforge</div>' in resp.text
+    assert '<img class="logo"' not in resp.text
 
 
 def test_valid_state_can_be_used_twice(client):

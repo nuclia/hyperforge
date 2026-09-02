@@ -1,6 +1,7 @@
 from typing import Literal, Optional
 
 from hyperforge.agent import AgentConfig
+from hyperforge.llm_config import LLMConfig, LLMField, llm_defaults
 from hyperforge.utils import WidgetType
 from pydantic import Field
 from pydantic.config import ConfigDict
@@ -25,11 +26,10 @@ class SummarizeAgentConfig(AgentConfig):
             "widget": WidgetType.EXPANDABLE_TEXTAREA,
         },
     )
-    model: str = Field(
-        default="chatgpt-azure-4o-mini",
+    model: LLMField = Field(
+        default=LLMConfig(model_id=llm_defaults.default),
         title="Generative model",
         description="Model used to generate the response",
-        json_schema_extra={"widget": WidgetType.MODEL_SELECT},
     )
     images: bool = False
     conversational: bool = False

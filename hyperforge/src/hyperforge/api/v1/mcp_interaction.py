@@ -4,7 +4,7 @@ from functools import partial
 from typing import TYPE_CHECKING, Any, Iterable, Sequence
 
 import anyio
-from fastapi import Header
+from fastapi import Header, HTTPException
 from mcp.server.fastmcp.exceptions import ResourceError
 from mcp.server.lowlevel.helper_types import ReadResourceContents
 from mcp.server.lowlevel.server import Server as MCPServer
@@ -33,11 +33,13 @@ from starlette.responses import Response
 
 from hyperforge.api.authentication import requires_one
 from hyperforge.api.models import InteractionRequest
+from hyperforge.api.settings import Settings as ApiSettings
 from hyperforge.api.v1.interaction import WebsocketReceiver, stream_response
 from hyperforge.db.agents import AgentManager
 from hyperforge.interaction import AnswerOperation
 from hyperforge.prompts import PromptConfig
 from hyperforge.pubsub import UserToAgentInteraction
+from hyperforge.standalone.oauth import force_https_metadata, get_enabled_mcp_auth
 from hyperforge.workflows import WorkflowData
 
 if TYPE_CHECKING:
@@ -93,9 +95,10 @@ async def call_tool(
             raise ResourceError(f"Missing required parameter: {parameter}")
 
     question = f"Calling tool: {workflow.description or workflow.name} with arguments: {arguments}"
+    interaction_headers = _prepare_interaction_headers(app, agent_id, headers)
 
     interaction = InteractionRequest(
-        question=question, headers=dict(headers.items()), arguments=arguments
+        question=question, headers=interaction_headers, arguments=arguments
     )
     mcp_session = mcp_server.request_context.session
     websocket = WebsocketReceiver(websocket=None)
@@ -121,7 +124,8 @@ async def call_tool(
             )
             websocket.queue.put_nowait(
                 UserToAgentInteraction(
-                    request_id=msg.feedback.request_id, response=result.content
+                    request_id=msg.feedback.request_id,
+                    response=result.content,  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
                 )
             )
         elif msg.operation == AnswerOperation.ANSWER:
@@ -167,6 +171,71 @@ async def read_resource(
     raise ResourceError(f"Unknown uri: {uri}")
 
 
+def _prepare_interaction_headers(
+    app: "HTTPApplication", agent_id: str, headers: Headers
+) -> dict[str, str]:
+    interaction_headers = dict(headers.items())
+    authorization = headers.get("authorization")
+    if authorization is not None:
+        interaction_headers["authorization"] = authorization
+
+    return interaction_headers
+
+
+def _default_oauth_metadata(app: "HTTPApplication") -> tuple[list[str], list[str]]:
+    if isinstance(app.settings, ApiSettings):
+        return [app.settings.hydra_public_url], app.settings.hydra_scopes_supported
+    return [], []
+
+
+def _get_mcp_auth_config(app: "HTTPApplication", agent_id: str):
+    return get_enabled_mcp_auth(app._agents_cfg, agent_id)
+
+
+def _get_first_enabled_mcp_auth_config(app: "HTTPApplication"):
+    agents_cfg = getattr(app, "_agents_cfg", None)
+    if isinstance(agents_cfg, dict):
+        for agent_id in agents_cfg:
+            auth_config = get_enabled_mcp_auth(agents_cfg, agent_id)
+            if auth_config is not None:
+                return auth_config
+    return None
+
+
+@router.get("/.well-known/oauth-protected-resource")
+async def mcp_interaction_protected_resource_metadata_root(
+    request: Request,
+):
+    """
+    Root protected resource metadata endpoint for MCP client compatibility.
+    """
+    app: "HTTPApplication" = request.app
+    auth_config = _get_first_enabled_mcp_auth_config(app)
+    default_authorization_server, default_scopes_supported = _default_oauth_metadata(
+        app
+    )
+    authorization_servers = (
+        [auth_config.authorization_server]
+        if auth_config is not None and auth_config.authorization_server is not None
+        else default_authorization_server
+    )
+    scopes_supported = (
+        auth_config.scopes_supported
+        if auth_config is not None
+        else default_scopes_supported
+    )
+    resource = (
+        auth_config.protected_resource
+        if auth_config is not None and auth_config.protected_resource is not None
+        else str(request.base_url).rstrip("/")
+    )
+    return {
+        "resource": resource,
+        "scopes_supported": scopes_supported,
+        "authorization_servers": authorization_servers,
+    }
+
+
 @router.get(
     "/.well-known/oauth-protected-resource/api/v1/agent/{agent_id}/session/{session}/mcp"
 )
@@ -183,17 +252,36 @@ async def mcp_interaction_protected_resource_metadata(
     mcp_url = request.url_for(
         "interaction_mcp_handler", agent_id=agent_id, session=session
     )
-    mcp_url_https = str(mcp_url).replace(
-        "http://", "https://"
-    )  # Ensure the URL uses https
+    force_https = force_https_metadata(app)
+    auth_config = _get_mcp_auth_config(app, agent_id)
+    resource = (
+        auth_config.protected_resource
+        if auth_config is not None and auth_config.protected_resource is not None
+        else str(mcp_url.replace(scheme="https"))
+        if force_https
+        else str(mcp_url)
+    )
+    default_authorization_server, default_scopes_supported = _default_oauth_metadata(
+        app
+    )
+    authorization_servers = (
+        [auth_config.authorization_server]
+        if auth_config is not None and auth_config.authorization_server is not None
+        else default_authorization_server
+    )
+    scopes_supported = (
+        auth_config.scopes_supported
+        if auth_config is not None
+        else default_scopes_supported
+    )
     return {
-        "resource": mcp_url_https,
-        "scopes_supported": app.settings.hydra_scopes_supported,
-        "authorization_servers": [app.settings.hydra_public_url],
+        "resource": resource,
+        "scopes_supported": scopes_supported,
+        "authorization_servers": authorization_servers,
     }
 
 
-@router.delete("/api/v1/agent/{agent_id}/session/{session}/mcp")
+@router.delete("/api/v1/agent/{agent_id}/session/{session}/mcp", tags=["MCP"])
 @requires_one([AgentRole.MEMBER])
 async def mcp_handler_delete(
     request: Request,
@@ -210,8 +298,8 @@ async def mcp_handler_delete(
         del app.sses[(agent_id, session)]
 
 
-@router.get("/api/v1/agent/{agent_id}/session/{session}/mcp")
-@router.post("/api/v1/agent/{agent_id}/session/{session}/mcp")
+@router.get("/api/v1/agent/{agent_id}/session/{session}/mcp", tags=["MCP"])
+@router.post("/api/v1/agent/{agent_id}/session/{session}/mcp", tags=["MCP"])
 @requires_one([AgentRole.MEMBER])
 async def interaction_mcp_handler(
     request: Request,
@@ -222,6 +310,25 @@ async def interaction_mcp_handler(
     x_stf_account_type: str = Header(..., include_in_schema=False),
 ):
     app: HTTPApplication = request.app
+    runtime_settings = getattr(app, "_standalone_settings", app.settings)
+    max_request_bytes = runtime_settings.mcp_max_request_bytes
+    max_response_bytes = runtime_settings.mcp_max_response_bytes
+    content_length = request.headers.get("content-length")
+    if content_length is not None:
+        try:
+            if int(content_length) > max_request_bytes:
+                raise HTTPException(status_code=413, detail="MCP request is too large")
+        except ValueError:
+            raise HTTPException(
+                status_code=400, detail="Invalid Content-Length"
+            ) from None
+
+    body_bytes = bytearray()
+    async for chunk in request.stream():
+        if len(body_bytes) + len(chunk) > max_request_bytes:
+            raise HTTPException(status_code=413, detail="MCP request is too large")
+        body_bytes.extend(chunk)
+
     agent_manager: AgentManager = request.app.agent_manager
     request._headers._list.append((MCP_SESSION_ID_HEADER.encode(), session.encode()))
 
@@ -292,28 +399,63 @@ async def interaction_mcp_handler(
     response_status = 200
     response_headers: dict[str, str] = {}
     body_chunks: list[bytes] = []
+    response_bytes = 0
+    response_too_large = False
 
     async def intercepting_send(message: MutableMapping[str, Any]) -> None:
-        nonlocal response_status
+        nonlocal response_status, response_bytes, response_too_large
         if message["type"] == "http.response.start":
             response_status = message["status"]
             response_headers.update(
                 {k.decode(): v.decode() for k, v in message.get("headers", [])}
             )
         elif message["type"] == "http.response.body":
-            body_chunks.append(message.get("body", b""))
+            chunk = message.get("body", b"")
+            if not chunk or response_too_large:
+                return
+            response_bytes += len(chunk)
+            if response_bytes > max_response_bytes:
+                response_too_large = True
+                body_chunks.clear()
+                return
+            body_chunks.append(chunk)
+
+    # Pre-read the body before passing to the MCP transport.
+    # Fix for FastAPI/Starlette 1.x
+    # which consumes the ASGI receive callable internally before the route handler runs.
+    # TODO: consider rewriting this handler to use the official StreamableHTTPSessionManager
+    # This does not happen in arag due to older versions of FastAPI/Starlette.
+
+    body_sent = False
+
+    async def patched_receive():
+        nonlocal body_sent
+        if not body_sent:
+            body_sent = True
+            return {
+                "type": "http.request",
+                "body": bytes(body_bytes),
+                "more_body": False,
+            }
+        while True:
+            msg = await request._receive()
+            if msg["type"] == "http.disconnect":
+                return msg
 
     async with anyio.create_task_group() as tg:
         # Start the server task
         await tg.start(run_stateless_server)
 
-        # Handle the HTTP request via the intercepting send
+        # Handle the HTTP request via the patched receive
         await http_transport.handle_request(
-            request.scope, request._receive, intercepting_send
+            request.scope, patched_receive, intercepting_send
         )
 
         # Terminate the transport after the request is handled
         await http_transport.terminate()
+
+    if response_too_large:
+        return Response(content="MCP response is too large", status_code=502)
 
     return Response(
         content=b"".join(body_chunks),

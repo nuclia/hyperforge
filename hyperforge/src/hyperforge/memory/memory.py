@@ -32,6 +32,7 @@ from hyperforge.models import (
     AnswerCitations,
     Chunk,
     Context,
+    ExternalUsage,
     HistoryQuestionAnswer,
     MemoryConfig,
     Rule,
@@ -709,15 +710,18 @@ class QuestionMemory:
             "final_answer": self.final_answer,
         }
 
-    async def save_context(self, flow_id: str, context: Context):
+    async def save_context(
+        self, flow_id: str, context: Context, agent_id: str | None = None
+    ):
         context.original_question_uuid = self.original_question_uuid
         context.actual_question_uuid = self.actual_question_uuid
         self.contexts.append(context)
         if self.agent_contexts.get(flow_id) is None:
             self.agent_contexts[flow_id] = {}
-        if self.agent_contexts[flow_id].get(context.agent_id) is None:
-            self.agent_contexts[flow_id][context.agent_id] = []
-        self.agent_contexts[flow_id][context.agent_id].append(context)
+        context_agent_id = agent_id or context.agent_id
+        if self.agent_contexts[flow_id].get(context_agent_id) is None:
+            self.agent_contexts[flow_id][context_agent_id] = []
+        self.agent_contexts[flow_id][context_agent_id].append(context)
         if self.callback_fn is not None:
             await self.callback_fn(AragAnswer(context=context))
 
@@ -741,18 +745,21 @@ class QuestionMemory:
             context.summary for context in contexts if context.summary.strip() != ""
         ]
 
-    def list_contexts_markdown(self) -> list[str]:
+    def list_contexts_markdown(self, include_summaries: bool = False) -> list[str]:
         contexts_str = []
         for context in self.contexts:
             result = ""
             if context.citations_id is not None:
                 if context.title:
-                    result += f"## [{context.citations_id}] {context.title}\n\n"
+                    result += f"## Context [{context.citations_id}] {context.title}\n\n"
                 else:
-                    result += f"## [{context.citations_id}]\n\n"
+                    result += f"## Context [{context.citations_id}]\n\n"
             else:
                 if context.title:
                     result += f"## {context.title}\n\n"
+            if include_summaries and context.summary.strip() != "":
+                result += f"### Existing context summary\n\n{context.summary}\n\n"
+            result += "### Context chunks\n\n"
             result += f"{context.context_markdown()}"
             contexts_str.append(result)
         return contexts_str
@@ -774,11 +781,14 @@ class QuestionMemory:
                 chunks_str.append(result)
         return chunks_str
 
-    def contexts_markdown(self) -> str:
+    def contexts_markdown(self, include_summaries: bool = False) -> str:
         """
-        Returns the concatenated contexts as a single string. Includes full context (i.e: all the chunk texts)
+        Returns the concatenated contexts as a single string. Includes full context
+        (i.e: all the chunk texts), and optionally existing context summaries.
         """
-        return "\n\n".join(self.list_contexts_markdown())
+        return "\n\n".join(
+            self.list_contexts_markdown(include_summaries=include_summaries)
+        )
 
     def list_contexts_minimal(
         self,
@@ -832,6 +842,7 @@ class QuestionMemory:
         step_reason: Optional[str] = None,
         error: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
+        external_usage: Optional[List[ExternalUsage]] = None,
     ):
         new_step = Step(
             original_question_uuid=self.original_question_uuid,
@@ -846,6 +857,7 @@ class QuestionMemory:
             output_nuclia_tokens=output_nuclia_tokens,
             error=error,
             metadata=metadata,
+            external_usage=external_usage,
         )
         self.steps.append(new_step)
         if self.callback_fn is not None:

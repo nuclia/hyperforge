@@ -1,8 +1,9 @@
 import asyncio
+import json
 import logging
 from dataclasses import dataclass, field
 from time import time
-from typing import Any, ClassVar, Dict, List, Optional, Tuple
+from typing import Any, ClassVar, Dict, List, Literal, Optional, Tuple
 from uuid import uuid4
 
 from hyperforge.agent import Agent
@@ -10,15 +11,17 @@ from hyperforge.configure import agent
 from hyperforge.context.agent import ContextAgent, build_context_agent
 from hyperforge.definition import FunctionDefinition
 from hyperforge.interaction import Feedback
-from hyperforge.manager import Manager
+from hyperforge.manager import Manager, build_reasoning
 from hyperforge.memory.memory import QuestionMemory
 from hyperforge.models import Chunk, Context, TrackingInfo
+from hyperforge.result_payload import budget_from_config, inspect_text_blocks
 from hyperforge.utils import iterate_tools_resp
 from nuclia.lib.nua_responses import (
     Author,
     ChatModel,
     Message,
     Tool,
+    ToolChoiceAuto,
     UserPrompt,
 )
 from pydantic import BaseModel, ConfigDict, Field
@@ -54,6 +57,29 @@ class ToolError:
         return self.error
 
 
+@dataclass
+class SkippedToolCall:
+    """Represents a tool call that was intentionally skipped by the orchestrator."""
+
+    tool_name: str
+    tool_arguments: Dict[str, Any]
+    reason: str
+
+    def __str__(self) -> str:
+        return self.reason
+
+
+ToolOutcome = Literal["useful", "empty", "error"]
+
+
+@dataclass
+class ToolAttempt:
+    tool_name: str
+    tool_arguments: Dict[str, Any]
+    outcome: ToolOutcome
+    detail: str
+
+
 TASK_COMPLETE_TOOL = Tool(
     name="task_complete",
     description="Call this tool when you have gathered enough information to answer the question and no more tools are needed.",
@@ -87,6 +113,7 @@ class PlanIteration:
     plan_summary: str = ""
     results: List[Tuple[str, Any]] = field(default_factory=list)
     results_summary: str = ""
+    tool_attempts: List[ToolAttempt] = field(default_factory=list)
 
 
 class RegisteredAgent(BaseModel):
@@ -133,6 +160,71 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
     }
     config: SmartAgentConfig
     registered_agents: List[RegisteredAgent]
+
+    @staticmethod
+    def _normalize_tool_arguments(value: Any) -> Any:
+        if isinstance(value, dict):
+            return {
+                key: SmartAgent._normalize_tool_arguments(value[key])
+                for key in sorted(value)
+            }
+        if isinstance(value, list):
+            return [SmartAgent._normalize_tool_arguments(item) for item in value]
+        return value
+
+    @classmethod
+    def _tool_call_key(cls, tool_name: str, tool_arguments: Dict[str, Any]) -> str:
+        normalized_arguments = cls._normalize_tool_arguments(tool_arguments or {})
+        return json.dumps(
+            {"tool_name": tool_name, "tool_arguments": normalized_arguments},
+            sort_keys=True,
+            ensure_ascii=True,
+            default=str,
+        )
+
+    @staticmethod
+    def _context_has_useful_content(context: Context) -> bool:
+        return any(
+            [
+                bool(context.chunks),
+                bool(context.structured),
+                bool(context.json_objects),
+                bool(context.prompts),
+                bool(context.images),
+                bool(context.summary.strip()),
+                bool(context.image_urls),
+            ]
+        )
+
+    @classmethod
+    def _classify_tool_result(cls, result: Any) -> ToolOutcome:
+        if isinstance(result, (ToolError, SkippedToolCall)):
+            return "error"
+        if result is None:
+            return "empty"
+        if isinstance(result, Context):
+            return "useful" if cls._context_has_useful_content(result) else "empty"
+        if isinstance(result, list):
+            if not result:
+                return "empty"
+            if all(isinstance(item, Context) for item in result):
+                return (
+                    "useful"
+                    if any(cls._context_has_useful_content(item) for item in result)
+                    else "empty"
+                )
+            return "useful"
+        if isinstance(result, str):
+            return "useful" if result.strip() else "empty"
+        if isinstance(result, (dict, tuple, set)):
+            return "useful" if len(result) > 0 else "empty"
+        return "useful"
+
+    @staticmethod
+    def _planner_attempts_from_registry(
+        attempted_tool_calls: Dict[str, ToolAttempt],
+    ) -> List[ToolAttempt]:
+        return list(attempted_tool_calls.values())
 
     async def inner_from_config(
         self, config: SmartAgentConfig, agent_id: Optional[str] = None
@@ -241,20 +333,46 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 lines.append(f"- **{tool_name}**: {description}\n{params_text}")
         return "\n\n".join(lines) if lines else "(no tools available)"
 
+    def _reactive_tools(
+        self,
+        tools: List[Tool],
+        attempted_tool_calls: Dict[str, ToolAttempt],
+    ) -> List[Tool]:
+        """Hide parameterless tools after they returned no result in this run."""
+        available_tools = []
+        for tool in tools:
+            properties = tool.parameters.get("properties", {})
+            empty_call_key = self._tool_call_key(tool.name, {})
+            empty_attempt = attempted_tool_calls.get(empty_call_key)
+            if (
+                not properties
+                and empty_attempt is not None
+                and empty_attempt.outcome == "empty"
+            ):
+                continue
+            available_tools.append(tool)
+        return available_tools
+
     def _process_results(
         self,
         results: List[Tuple[str, Any]],
-        context: Optional[Context] = None,
+        collected_contexts: Optional[List[Context]] = None,
     ) -> List[str]:
-        """Process tool results: optionally update context chunks, always return text summaries.
+        """Process tool results and optionally retain each returned context.
 
         ToolError results are included in the text summaries (so the LLM
         is aware of the failure) but are never stored in the context.
         """
         result_texts: List[str] = []
         for action_info, result in results:
+            overflow = self._inspect_result(result)
             if isinstance(result, ToolError):
-                result_texts.append(f"[{action_info}]:\n{result.error}")
+                error_text = overflow.render() if overflow is not None else result.error
+                result_texts.append(f"[{action_info}]:\n{error_text}")
+                continue
+
+            if isinstance(result, SkippedToolCall):
+                result_texts.append(f"[{action_info}]:\n{result.reason}")
                 continue
 
             if isinstance(result, Context):
@@ -266,32 +384,79 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             else:
                 contexts = []
 
-            if context is not None:
+            if overflow is not None:
+                error_text = overflow.render()
+                result_texts.append(f"[{action_info}]:\n{error_text}")
+                if collected_contexts is not None:
+                    collected_contexts.append(
+                        self._synthetic_result_context(action_info, error_text)
+                    )
+                continue
+
+            if collected_contexts is not None:
                 if contexts:
                     for ctx in contexts:
                         for chunk in ctx.chunks:
                             chunk.action = action_info
-                            context.chunks.append(chunk)
-                        if ctx.structured:
-                            for structured in ctx.structured:
-                                if structured:
-                                    context.structured.append(structured)
+                        collected_contexts.append(ctx)
                 else:
-                    context.chunks.append(
-                        Chunk(
-                            chunk_id=uuid4().hex,
-                            text=str(result),
-                            action=action_info,
-                            origin_agent=self.config.module,  # TODO: track origin agent in a better way for text results (this is a corner case, ideally tools return Context objects)
-                        )
+                    collected_contexts.append(
+                        self._synthetic_result_context(action_info, str(result))
                     )
 
             for ctx in contexts:
-                result_texts.append(f"[{action_info}]:\n{ctx.context_markdown()}")
+                if ctx.summary:
+                    result_texts.append(f"[{action_info}]:\n{ctx.summary}")
+                else:
+                    result_texts.append(f"[{action_info}]:\n{ctx.context_markdown()}")
             if not contexts:
                 result_texts.append(f"[{action_info}]:\n{result}")
 
         return result_texts
+
+    def _synthetic_result_context(self, action_info: str, text: str) -> Context:
+        return Context(
+            agent_id=self.config.id or "smart_agent",
+            original_question_uuid=None,
+            actual_question_uuid=None,
+            question="",
+            source="smart_agent",
+            agent="smart_agent",
+            title=action_info,
+            chunks=[
+                Chunk(
+                    chunk_id=uuid4().hex,
+                    text=text,
+                    action=action_info,
+                    origin_agent=self.config.module,
+                )
+            ],
+        )
+
+    def _inspect_result(self, result: Any):
+        if isinstance(result, ToolError):
+            texts = [result.error]
+        else:
+            contexts = (
+                [result]
+                if isinstance(result, Context)
+                else result
+                if isinstance(result, list)
+                and all(isinstance(item, Context) for item in result)
+                else []
+            )
+            texts = []
+            for context in contexts:
+                if context.summary.strip():
+                    texts.append(context.summary)
+                else:
+                    texts.extend(chunk.render() for chunk in context.chunks)
+                    texts.extend(context.structured)
+            if not texts and contexts:
+                texts = [""]
+            if not contexts:
+                texts = [str(result)]
+        return inspect_text_blocks(texts, budget_from_config(self.config))
 
     async def choose_tools(
         self,
@@ -311,8 +476,10 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         item = ChatModel(
             question="",
             user_id=f"smart_planner-{self.config.module}",
-            generative_model=model,
+            generative_model=model.model_id,
+            reasoning=build_reasoning(model),
             tools=tools,
+            tool_choice=ToolChoiceAuto(),
             user_prompt=UserPrompt(
                 prompt=f"{system}\n\nChoose the best tool or tools for the task. Call task_complete when you have enough information."
             ),
@@ -334,12 +501,17 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         tool_arguments: Dict[str, Any],
     ) -> Tuple[str, ToolError]:
         """Log a tool error to memory and return a ToolError result."""
+        overflow = inspect_text_blocks([error], budget_from_config(self.config))
+        if overflow is not None:
+            error = overflow.render()
         await memory.add_step(
             step_module=self.config.module,
-            step_title=self.step_title(title),
+            step_title=self.step_title(
+                "Tool result rejected" if overflow is not None else title
+            ),
             step_reason=error,
             step_agent_path=f"/context/{self.config.id or 'default'}",
-            step_value="Error",
+            step_value=overflow.trace_value() if overflow is not None else "Error",
             timeit=0,
         )
         return tool_name, ToolError(
@@ -430,6 +602,16 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         action_info = f"{function_id} of {agent_id}"
         if tool_arguments:
             action_info += f" with parameters {tool_arguments}"
+        overflow = self._inspect_result(result)
+        if overflow is not None:
+            await memory.add_step(
+                step_module=self.config.module,
+                step_title=self.step_title("Tool result rejected"),
+                step_reason=f"{action_info} exceeded the configured LLM context safety budget.",
+                step_agent_path=f"/context/{self.config.id or 'default'}",
+                step_value=overflow.trace_value(),
+                timeit=0,
+            )
         return action_info, result
 
     async def _preload_registered_agents(
@@ -460,7 +642,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         manager: Manager,
         question_uuid: Optional[str] = None,
         extra_context: Optional[Dict[str, Any]] = None,
-    ) -> Context:
+    ) -> List[Context]:
         """Entry point: dispatches to the appropriate reasoning mode."""
         if question_uuid is None:
             question_uuid = uuid4().hex
@@ -468,9 +650,21 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         await self._preload_registered_agents(manager, memory)
 
         session_context_parts: List[str] = []
+        reactive_history_messages: List[Message] = []
 
         if self.config.history:
-            qa_history, interactions = await memory.context_history()
+            if self.config.planning_mode == "reactive":
+                reactive_history_messages = await memory.get_chat_history()
+                interactions = sum(
+                    1
+                    for message in reactive_history_messages
+                    if message.author == Author.USER
+                )
+            else:
+                qa_history, interactions = await memory.context_history()
+                session_context_parts.append(
+                    f"## Previous questions and answers in this session:\n{qa_history}"
+                )
             await memory.add_step(
                 step_module=self.config.module,
                 step_title=self.step_title("History check"),
@@ -482,9 +676,6 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
                 input_nuclia_tokens=0.0,
                 output_nuclia_tokens=0.0,
-            )
-            session_context_parts.append(
-                f"## Previous questions and answers in this session:\n{qa_history}"
             )
 
         session_context = "\n\n".join(session_context_parts)
@@ -505,6 +696,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             question_uuid=question_uuid,
             extra_context=extra_context,
             session_context=session_context,
+            history_messages=reactive_history_messages,
         )
 
     async def _execute_tool_calls_turn(
@@ -514,7 +706,8 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         messages: List[Message],
         tool_calls: List[Tuple[str, Any]],
         turn_label: str,
-        context: Optional[Context] = None,
+        collected_contexts: Optional[List[Context]] = None,
+        attempted_tool_calls: Optional[Dict[str, ToolAttempt]] = None,
     ) -> List[Tuple[str, Any]]:
         """Handle one turn of tool calls.
 
@@ -572,7 +765,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                             feedback_text,
                         )
                         result_texts = self._process_results(
-                            [feedback_result], context=context
+                            [feedback_result], collected_contexts=collected_contexts
                         )
                         if result_texts:
                             messages.append(
@@ -585,14 +778,77 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             return []
 
         # --- normal tool execution path ---
-        results = await asyncio.gather(
-            *[
-                self.execute_tool_call(memory, manager, name, args)
-                for name, args in tool_calls
-                if name != "task_complete"
-            ]
+        attempted_tool_calls = (
+            attempted_tool_calls if attempted_tool_calls is not None else {}
         )
-        result_texts = self._process_results(list(results), context=context)
+        skipped_results: List[Tuple[str, Any]] = []
+        calls_to_execute: List[Tuple[str, Dict[str, Any]]] = []
+
+        for name, args in tool_calls:
+            if name == "task_complete":
+                continue
+            tool_arguments = args or {}
+            tool_key = self._tool_call_key(name, tool_arguments)
+            previous_attempt = attempted_tool_calls.get(tool_key)
+            if previous_attempt is not None and previous_attempt.outcome in {
+                "empty",
+                "error",
+            }:
+                skipped_results.append(
+                    (
+                        name,
+                        SkippedToolCall(
+                            tool_name=name,
+                            tool_arguments=tool_arguments,
+                            reason=(
+                                "Skipped repeated tool call because the same tool "
+                                "with the same arguments already returned an "
+                                f"{previous_attempt.outcome} result in this run."
+                            ),
+                        ),
+                    )
+                )
+                continue
+
+            attempted_tool_calls[tool_key] = ToolAttempt(
+                tool_name=name,
+                tool_arguments=tool_arguments,
+                outcome="useful",
+                detail="pending",
+            )
+            calls_to_execute.append((name, tool_arguments))
+
+        executed_results = []
+        if calls_to_execute:
+            executed_results = await asyncio.gather(
+                *[
+                    self.execute_tool_call(memory, manager, name, args)
+                    for name, args in calls_to_execute
+                ]
+            )
+
+        results = [*executed_results, *skipped_results]
+        for (tool_name, tool_arguments), (_, result) in zip(
+            calls_to_execute, executed_results
+        ):
+            tool_key = self._tool_call_key(tool_name, tool_arguments)
+            attempted_tool_calls[tool_key] = ToolAttempt(
+                tool_name=tool_name,
+                tool_arguments=tool_arguments,
+                outcome=self._classify_tool_result(result),
+                detail=str(result),
+            )
+        for _, skipped_result in skipped_results:
+            tool_key = self._tool_call_key(
+                skipped_result.tool_name, skipped_result.tool_arguments
+            )
+            previous_attempt = attempted_tool_calls.get(tool_key)
+            if previous_attempt is not None:
+                previous_attempt.detail = str(skipped_result)
+
+        result_texts = self._process_results(
+            list(results), collected_contexts=collected_contexts
+        )
         result_summary = "; ".join(
             f"{info}: {'context' if isinstance(res, Context) else type(res).__name__}"
             for info, res in results
@@ -619,11 +875,12 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         question_uuid: str,
         extra_context: Optional[Dict[str, Any]] = None,
         session_context: str = "",
-    ) -> Context:
+        history_messages: Optional[List[Message]] = None,
+    ) -> List[Context]:
         t0 = time()
 
         tools = self.build_tools()
-        messages: List[Message] = []
+        messages: List[Message] = list(history_messages or [])
         if session_context:
             messages.append(
                 Message(
@@ -636,27 +893,21 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             )
         messages.append(Message(author=Author.USER, text=question))
 
-        context = Context(
-            agent_id=self.config.id or "smart_agent",
-            original_question_uuid=memory.original_question_uuid,
-            actual_question_uuid=question_uuid,
-            question=question,
-            source="smart_agent",
-            agent="smart_agent",
-            title=self.config.title or "Smart Agent Results",
-        )
+        contexts: List[Context] = []
 
         iteration = 0
         finished = False
         total_input_tokens = 0.0
         total_output_tokens = 0.0
+        attempted_tool_calls: Dict[str, ToolAttempt] = {}
         while not finished and iteration < self.config.max_iterations:
             iteration += 1
+            available_tools = self._reactive_tools(tools, attempted_tool_calls)
 
             resp, input_tokens, output_tokens = await self.choose_tools(
                 manager,
                 messages,
-                tools,
+                available_tools,
                 tracking=memory.get_tracking_info(),
             )
             total_input_tokens += input_tokens
@@ -686,12 +937,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 output_nuclia_tokens=output_tokens,
             )
 
-            if not tool_calls:
-                finished = True
-                break
-
-            # Check for task_complete before executing
-            if any(name == "task_complete" for name, _ in tool_calls):
+            if not tool_calls or any(name == "task_complete" for name, _ in tool_calls):
                 finished = True
                 break
 
@@ -702,7 +948,8 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 messages=messages,
                 tool_calls=tool_calls,
                 turn_label=f"iteration {iteration}/{self.config.max_iterations}",
-                context=context,
+                collected_contexts=contexts,
+                attempted_tool_calls=attempted_tool_calls,
             )
 
         reason = (
@@ -721,7 +968,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             output_nuclia_tokens=total_output_tokens,
         )
 
-        return context
+        return contexts
 
     async def _call_planner(
         self,
@@ -779,7 +1026,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         steps: List[Dict[str, Any]],
         summary: str,
         tools: List[Tool],
-    ) -> Tuple[List[Tuple[str, Any]], float, float]:
+    ) -> Tuple[List[Tuple[str, Any]], float, float, List[ToolAttempt]]:
         """Run the executor LLM turn: call tools guided by the current plan steps."""
         system = PLAN_EXECUTE_EXECUTOR_SYSTEM_PROMPT_TEMPLATE.render(
             question=question,
@@ -796,6 +1043,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         total_output_tokens = 0.0
         finished = False
         max_executor_turns = self.config.max_iterations
+        attempted_tool_calls: Dict[str, ToolAttempt] = {}
 
         executor_turn = 0
         while not finished and executor_turn < max_executor_turns:
@@ -822,10 +1070,16 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 messages=messages,
                 tool_calls=tool_calls,
                 turn_label=f"executor turn {executor_turn}/{max_executor_turns}",
+                attempted_tool_calls=attempted_tool_calls,
             )
             all_results.extend(results)
 
-        return all_results, total_input_tokens, total_output_tokens
+        return (
+            all_results,
+            total_input_tokens,
+            total_output_tokens,
+            self._planner_attempts_from_registry(attempted_tool_calls),
+        )
 
     async def _plan_and_execute(
         self,
@@ -835,25 +1089,19 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         question_uuid: str,
         extra_context: Optional[Dict[str, Any]] = None,
         session_context: str = "",
-    ) -> Context:
+    ) -> List[Context]:
         """Plan-execute reasoning mode: planner drafts a plan, executor runs tools, repeat."""
         t0 = time()
         agent_path = f"/context/{self.config.id or 'default'}"
 
-        context = Context(
-            agent_id=self.config.id or "smart_agent",
-            original_question_uuid=memory.original_question_uuid,
-            actual_question_uuid=question_uuid,
-            question=question,
-            source="smart_agent",
-            agent="smart_agent",
-            title=self.config.title or "Smart Agent Results",
-        )
+        contexts: List[Context] = []
 
         history: List[PlanIteration] = []
         iteration = 0
         total_input_tokens = 0.0
         total_output_tokens = 0.0
+        status = "done"
+        steps: List[Dict[str, Any]] = []
 
         # Build tools once for the entire plan-execute cycle
         tools = self.build_tools()
@@ -916,6 +1164,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
                 iteration_results,
                 exec_in_tokens,
                 exec_out_tokens,
+                iteration_attempts,
             ) = await self._call_executor(
                 memory=memory,
                 manager=manager,
@@ -927,12 +1176,19 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             total_input_tokens += exec_in_tokens
             total_output_tokens += exec_out_tokens
 
-            result_texts = self._process_results(iteration_results, context=context)
+            result_texts = self._process_results(
+                iteration_results, collected_contexts=contexts
+            )
             results_summary = (
                 "\n\n".join(result_texts) if result_texts else "(no results)"
             )
-            current_iteration.results = iteration_results
+            for action_info, result in iteration_results:
+                overflow = self._inspect_result(result)
+                current_iteration.results.append(
+                    (action_info, overflow.render() if overflow is not None else result)
+                )
             current_iteration.results_summary = results_summary
+            current_iteration.tool_attempts = iteration_attempts
             history.append(current_iteration)
 
             exec_result_summary = (
@@ -972,7 +1228,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             output_nuclia_tokens=total_output_tokens,
         )
 
-        return context
+        return contexts
 
     async def _get_question_context(
         self,
@@ -983,7 +1239,7 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         flow_id: str,
         extra_context: Optional[Dict[str, Any]] = None,
     ) -> List[Tuple[str, str]]:
-        context = await self.smart_planner(
+        contexts = await self.smart_planner(
             memory=memory,
             manager=manager,
             question_uuid=question_uuid,
@@ -991,8 +1247,8 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
             extra_context=extra_context,
         )
 
-        missing = await self.save_ctx_and_return_missing(
-            context=context,
+        missing = await self.save_contexts_and_return_missing(
+            contexts=contexts,
             question=question,
             memory=memory,
             manager=manager,

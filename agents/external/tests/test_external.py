@@ -1,13 +1,14 @@
 import os
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
+import httpx
 import pytest
 from hyperforge.engine import main as arag_main
 from hyperforge.minimal_fixtures import cassette_nua_key
 
 NUA_KEY = os.environ.get(
     "NUA_KEY",
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 
 CONFIG = {
     "drivers": [],
@@ -55,12 +56,12 @@ CONFIG = {
 @pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_external(mocker):
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_response.content = b"oki doki"
+    request = httpx.Request("POST", "https://example.com/aaa")
+    mock_response = httpx.Response(200, content=b"oki doki", request=request)
 
     mock_client = AsyncMock()
-    mock_client.request = AsyncMock(return_value=mock_response)
+    mock_client.build_request.return_value = request
+    mock_client.send = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
 
@@ -87,4 +88,4 @@ async def test_external(mocker):
         "partner" in question_memory.steps[-2].reason
         or "Peugeot" in question_memory.steps[-2].reason
     )
-    assert mock_client.request.called
+    assert mock_client.send.called

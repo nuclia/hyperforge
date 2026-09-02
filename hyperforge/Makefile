@@ -1,3 +1,4 @@
+REPO_ROOT := ..
 include ../hyperforge.mk
 
 .PHONY: test-cov

@@ -8,12 +8,6 @@ from hyperforge.interaction import AragAnswer
 from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.models import Context
 from hyperforge.utils.http import PrivateUrlError
-from hyperforge_nucliadb.advanced_ask_agent import build_ask_request
-from hyperforge_nucliadb.advanced_ask_config import AdvancedAskAgentConfig
-from hyperforge_nucliadb.ask.hydrate import hydrate_images
-from hyperforge_nucliadb.driver_config import (
-    NucliaDBConnection,
-)
 from nucliadb_models import filters as ndb_filters
 from nucliadb_models.hydration import (
     Hydrated,
@@ -25,9 +19,16 @@ from nucliadb_models.hydration import (
 )
 from nucliadb_models.search import AskRequest, Image
 
+from hyperforge_nucliadb.advanced_ask_agent import build_ask_request
+from hyperforge_nucliadb.advanced_ask_config import AdvancedAskAgentConfig
+from hyperforge_nucliadb.ask.hydrate import hydrate_images
+from hyperforge_nucliadb.driver_config import (
+    NucliaDBConnection,
+)
+
 NUA_KEY = os.environ.get(
     "NUA_KEY",
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 KB_DE48CFAA_3209_4041_BB64_8604AFF061FB = os.environ.get(
     "KB_DE48CFAA_3209_4041_BB64_8604AFF061FB"
 ) or cassette_nua_key("https://europe-1.nuclia.cloud/")
@@ -474,13 +475,17 @@ def test_build_ask_request():
 
 @pytest.mark.asyncio
 async def test_nucliadb_not_localhost():
+    config = deepcopy(CONFIG_LOCAL)
+    config["preprocess"] = []
+    config["generation"] = []
+
     with pytest.raises(PrivateUrlError):
         await arag_main(
             agent_id="default",
             internal_nua=False,
-            external_nua_api_key=NUA_KEY,
+            external_nua_api_key=None,
             question="Como usar max_tokens.answer. En español y dame link a la doucmentación",
-            config=CONFIG_LOCAL,
+            config=config,
             loaded_modules=[
                 "hyperforge_nucliadb",
                 "hyperforge_summarize",

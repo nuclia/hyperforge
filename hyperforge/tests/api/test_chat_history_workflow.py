@@ -2,12 +2,13 @@ import os
 from copy import deepcopy
 
 import pytest
+
 from hyperforge.engine import main as arag_main
 from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.models import HistoryQuestionAnswer
 
 NUA_KEY = os.environ.get("NUA_KEY") or cassette_nua_key(
-    "https://europe-1.nuclia.cloud/"
+    "https://europe-1.dp.progress.cloud/"
 )
 
 pytestmark = [
