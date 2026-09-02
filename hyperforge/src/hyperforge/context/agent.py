@@ -8,13 +8,15 @@ from hyperforge import logger
 from hyperforge.configure import get_agent_klass
 from hyperforge.context.config import ContextAgentConfig
 from hyperforge.definition import FunctionDefinition
-from hyperforge.manager import Manager
+from hyperforge.manager import Manager, ModelParam
 from hyperforge.memory import Context, QuestionMemory
 from hyperforge.prompts import (
     NEXT_REPHRASE_JSON_SCHEMA,
     NEXT_REPHRASE_PROMPT_SYSTEM,
     NEXT_REPHRASE_PROMPT_TEMPLATE,
     VALIDATE_JSON_SCHEMA,
+    VALIDATE_MULTIPLE_CONTEXTS_JSON_SCHEMA,
+    VALIDATE_MULTIPLE_CONTEXTS_PROMPT_TEMPLATE,
     VALIDATE_OR_ANSWER_PROMPT_TEMPLATE,
 )
 from hyperforge.trace import trace_agent
@@ -42,7 +44,7 @@ async def build_context_agent(config: ContextAgentConfig) -> "ContextAgent":
     assert issubclass(agent_class, ContextAgent), (
         f"Agent {config.module} is not a ContextAgent"
     )
-    return await agent_class.from_config(config)
+    return await agent_class.from_config(config)  # type: ignore[return-type]  # ty: ignore[invalid-return-type]
 
 
 class ContextAgent:
@@ -75,6 +77,144 @@ class ContextAgent:
             self.fallback = await build_context_agent(config.fallback)
         if config.next_agent:
             self.next_agent = await build_context_agent(config.next_agent)
+
+    async def validate_contexts_and_answer(
+        self,
+        memory: QuestionMemory,
+        manager: Manager,
+        contexts: list[Context],
+        question: str,
+        images: bool = False,
+        fast_answer: bool = False,
+        user_id: str = "rao_answer_summary",
+        use_stored_context_prompts: bool = False,
+        title: Optional[str] = None,
+    ) -> Tuple[Literal["yes", "no", "error"], Optional[str], Optional[str]]:
+        """Validate several contexts and update each relevant context independently."""
+        t0 = time()
+        model = self.context_config.context_validation_model
+        module = self.context_config.module
+        ident = self.context_config.id if self.context_config.id else "default"
+        title = title or self.context_config.title or module
+        context_by_id = {context.id: context for context in contexts}
+        existing_summaries = {context.id: context.summary for context in contexts}
+        existing_citations = {context.id: context.citations for context in contexts}
+        block_targets: dict[str, tuple[str, str]] = {}
+        prompt_contexts = []
+        validation_images = {}
+        block_index = 0
+
+        for context_index, context in enumerate(contexts):
+            context.citations = None
+            blocks = {}
+            for chunk in context.chunks:
+                block_id = generate_ctx_block_id(block_index)
+                block_index += 1
+                blocks[block_id] = chunk.render()
+                block_targets[block_id] = (context.id, chunk.chunk_id)
+            for structured_index, structured in enumerate(context.structured):
+                block_id = generate_ctx_block_id(block_index)
+                block_index += 1
+                blocks[block_id] = structured
+                block_targets[block_id] = (
+                    context.id,
+                    f"structured-{structured_index}",
+                )
+            prompt_contexts.append(
+                {
+                    "context_id": context.id,
+                    "title": context.title,
+                    "summary": context.summary,
+                    "blocks": blocks,
+                }
+            )
+            validation_images.update(
+                {
+                    f"context-{context_index}-{image_id}": image
+                    for image_id, image in context.images.items()
+                }
+            )
+
+        prompt = VALIDATE_MULTIPLE_CONTEXTS_PROMPT_TEMPLATE.render(
+            question=question,
+            contexts=prompt_contexts,
+        )
+        try:
+            response, input_tokens, output_tokens = await manager.execute_json(
+                user_id=user_id + f"-{module}",
+                images=validation_images if images else {},
+                prompt=prompt,
+                schema=VALIDATE_MULTIPLE_CONTEXTS_JSON_SCHEMA,
+                model=model,
+            )
+        except Exception as e:
+            # Keep source-agent citations available for a safe prune if the
+            # validation request fails after the contexts were retrieved.
+            for context in contexts:
+                context.citations = existing_citations[context.id]
+            error_message = f"Error executing validation of contexts for {module} with question '{question}': {e}"
+            await memory.add_step(
+                step_module=module,
+                step_title=f"{title}: Context summary error",
+                step_reason="Error in summary generation",
+                step_value="Error in summary generation",
+                timeit=time() - t0,
+                step_agent_path=f"/context/{ident}",
+                error=error_message,
+            )
+            return "error", question, error_message
+
+        aggregated_results: dict[str, tuple[list[str], list[str]]] = {}
+        for context_result in response.get("contexts", []):
+            context_id = context_result.get("context_id")
+            if context_id not in context_by_id:
+                continue
+            answers, cited_items = aggregated_results.setdefault(context_id, ([], []))
+            answer = context_result.get("answer", "")
+            if answer and answer not in answers:
+                answers.append(answer)
+            for block_id in dict.fromkeys(context_result.get("citations", [])):
+                target = block_targets.get(block_id)
+                if (
+                    target is not None
+                    and target[0] == context_id
+                    and target[1] not in cited_items
+                ):
+                    cited_items.append(target[1])
+
+        relevant_contexts = 0
+        for context in contexts:
+            answers, cited_items = aggregated_results.get(context.id, ([], []))
+            existing_summary = existing_summaries[context.id]
+            if not answers and not cited_items and not existing_summary.strip():
+                continue
+
+            relevant_contexts += 1
+            if existing_summary.strip():
+                # Preserve answer attempts produced by the source agent. The
+                # aggregate validator selects contexts and citations; it must
+                # not replace a source answer with a narrower restatement.
+                context.summary = existing_summary
+                context.citations = existing_citations[context.id] or cited_items or []
+            elif answers:
+                context.summary = "\n".join(answers)
+                context.citations = cited_items or existing_citations[context.id] or []
+            else:
+                context.citations = cited_items or existing_citations[context.id] or []
+                context.summary = ""
+
+        missing = response.get("missing_info_query") or None
+        await memory.add_step(
+            step_module=module,
+            step_title=f"{title}: Context validation",
+            step_reason=f"Selected {relevant_contexts} of {len(contexts)} contexts",
+            step_value="No missing information" if not missing else missing,
+            timeit=time() - t0,
+            input_nuclia_tokens=input_tokens,
+            output_nuclia_tokens=output_tokens,
+            step_agent_path=f"/context/{ident}",
+        )
+        return "yes" if relevant_contexts else "no", missing, None
 
     async def validate_ctx_and_answer(
         self,
@@ -170,9 +310,7 @@ class ContextAgent:
             ]
             context.citations = cited_chunks
 
-        context.summary = (
-            answer if "not enough data to answer this" not in answer.lower() else ""
-        )
+        context.summary = answer
 
         await memory.add_step(
             step_module=module,
@@ -197,7 +335,7 @@ class ContextAgent:
         ident: str,
         question: str,
         question_uuid: str,
-        model: str = "",
+        model: ModelParam = "",
         module: str = "agent",
         user_id: str = "next",
         title: Optional[str] = None,
@@ -237,6 +375,7 @@ class ContextAgent:
                 error=error_message,
             )
             return question, question_uuid
+        # Keep this guard until all context agents expose structured no-context status.
         if (
             rephrased_question.strip() != ""
             and needed is True
@@ -374,4 +513,72 @@ class ContextAgent:
             return missing_question
         else:
             await memory.save_context(flow_id=flow_id, context=context)
+        return None
+
+    async def save_contexts_and_return_missing(
+        self,
+        *,
+        memory: QuestionMemory,
+        manager: Manager,
+        question: str,
+        contexts: list[Context],
+        flow_id: str,
+    ) -> tuple[str, str] | None:
+        """Validate, prune, and save several contexts as one retrieval result."""
+        should_validate = (
+            self.fallback is not None
+            or self.next_agent is not None
+            or self.context_config.prune_context
+        ) and self.context_config.context_validation_model
+
+        # Retrieval agents that already return an answer and its selected
+        # citations have completed context validation themselves. Re-running a
+        # second validator can discard valid facts or rewrite multiple partial
+        # contexts. Preserve and prune these source contexts directly.
+        source_contexts_complete = bool(contexts) and all(
+            context.summary.strip() and context.citations is not None
+            for context in contexts
+        )
+
+        if should_validate and not source_contexts_complete:
+            useful, missing, validate_error = await self.validate_contexts_and_answer(
+                memory,
+                manager,
+                contexts,
+                question=question,
+                images=any(context.images for context in contexts),
+            )
+            if useful == "yes" or validate_error is not None:
+                for context in contexts:
+                    if self.context_config.prune_context:
+                        if context.citations is None:
+                            continue
+                        if context.citations == []:
+                            if not context.summary:
+                                continue
+                            context.chunks = []
+                            context.structured = []
+                        else:
+                            context.prune_to_citations()
+                    elif context.citations is None:
+                        continue
+                    await memory.save_context(
+                        flow_id=flow_id, context=context, agent_id=self.agent_id
+                    )
+            return (
+                None
+                if missing is None or missing.strip() == ""
+                else (uuid4().hex, missing)
+            )
+
+        for context in contexts:
+            if self.context_config.prune_context:
+                if context.citations == []:
+                    context.chunks = []
+                    context.structured = []
+                elif context.citations is not None:
+                    context.prune_to_citations()
+            await memory.save_context(
+                flow_id=flow_id, context=context, agent_id=self.agent_id
+            )
         return None

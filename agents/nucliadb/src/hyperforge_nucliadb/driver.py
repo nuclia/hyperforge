@@ -1,9 +1,10 @@
 import asyncio
 from asyncio import gather
 from functools import reduce
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import httpx
+from hyperforge import logger
 from hyperforge.configure import driver
 from hyperforge.driver import Driver
 from hyperforge.models import Facets
@@ -37,7 +38,6 @@ from nucliadb_models.search import (
 )
 from nucliadb_sdk.v2 import NucliaDBAsync
 
-from hyperforge import logger
 from hyperforge_nucliadb.driver_config import (
     ManagerConnection,
     NucliaDBConfig,
@@ -111,14 +111,10 @@ class NucliaDBDriver(Driver):
 
     async def labels(self) -> Dict[str, List[str]]:
         labelsets = await self.driver.get_labelsets(kbid=self.config.kbid)
-        result = {}
-        for labelset in labelsets.labelsets:
-            labels = await self.driver.get_labelset(
-                kbid=self.config.kbid, labelset=labelset
-            )
-            result[labelset] = [x.title for x in labels.labels]
-
-        return result
+        return {
+            labelset_id: [label.title for label in labelset.labels]
+            for labelset_id, labelset in labelsets.labelsets.items()
+        }
 
     async def field_facets(self) -> Dict[str, int]:
         field_labels = {}
@@ -347,7 +343,7 @@ class NucliaDBDriver(Driver):
         return await self.driver.catalog(content=q, kbid=self.config.kbid)
 
     async def get_resource_by_id(
-        self, rid: str, query_params: Optional[Dict[str, str]] = None
+        self, rid: str, query_params: Optional[Dict[str, Union[str, List[str]]]] = None
     ) -> Optional[Resource]:
         return await self.driver.get_resource_by_id(
             kbid=self.config.kbid, rid=rid, query_params=query_params

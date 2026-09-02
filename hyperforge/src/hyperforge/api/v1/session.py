@@ -33,7 +33,7 @@ from hyperforge.api.v1.router import router
     "/api/v1/agent/{agent_id}/sessions",
     status_code=200,
     description="Create session",
-    tags=["Retrieval Agent"],
+    tags=["Sessions"],
 )
 @requires_one([StashRoles.OWNER])
 @requires_nucliadb_memory
@@ -68,7 +68,7 @@ async def create_session(
     "/api/v1/agent/{agent_id}/session/{session}",
     status_code=200,
     description="Create session",
-    tags=["Retrieval Agent"],
+    tags=["Sessions"],
 )
 @requires_one([StashRoles.OWNER])
 @requires_nucliadb_memory
@@ -101,7 +101,7 @@ async def patch_session(
     "/api/v1/agent/{agent_id}/session/{session}",
     status_code=200,
     description="Delete session",
-    tags=["Retrieval Agent"],
+    tags=["Sessions"],
 )
 @requires_one([StashRoles.OWNER])
 @requires_nucliadb_memory
@@ -129,7 +129,7 @@ async def delete_session(
     "/api/v1/agent/{agent_id}/sessions",
     status_code=200,
     description="Create session",
-    tags=["Retrieval Agent"],
+    tags=["Sessions"],
 )
 @requires_one([StashRoles.OWNER])
 @requires_nucliadb_memory
@@ -157,7 +157,7 @@ async def get_sessions(
     "/api/v1/agent/{agent_id}/session/{session}",
     status_code=200,
     description="Create session",
-    tags=["Retrieval Agent"],
+    tags=["Sessions"],
 )
 @requires_one([StashRoles.OWNER])
 @requires_nucliadb_memory

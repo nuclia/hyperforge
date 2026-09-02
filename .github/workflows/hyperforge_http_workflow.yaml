@@ -47,6 +47,10 @@ jobs:
             - name: Install package dependencies with uv
               run: uv sync --group dev
 
+            - name: Lint
+              working-directory: agents/http
+              run: make lint
+
             - name: Run tests
               working-directory: agents/http
               run: make test

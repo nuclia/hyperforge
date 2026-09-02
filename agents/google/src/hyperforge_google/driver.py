@@ -1,3 +1,6 @@
+import json
+
+from google.auth import load_credentials_from_dict
 from google.genai import Client
 from hyperforge.configure import driver
 from hyperforge.driver import Driver
@@ -17,17 +20,24 @@ class GoogleDriver(Driver):
 
     @classmethod
     async def init(cls, driver: GoogleDriverConfig) -> Self:
-        creds = None
+        credentials = None
+        location = None
         if driver.config.vertexai:
-            from google.auth import load_credentials_from_file
-
-            creds, _ = load_credentials_from_file(driver.config.credentials)
+            if driver.config.credentials:
+                info = json.loads(driver.config.credentials)
+                credentials, project = load_credentials_from_dict(
+                    info,
+                    scopes=["https://www.googleapis.com/auth/cloud-platform"],
+                )
+        else:
+            project = driver.config.location
+            location = driver.config.location
         client = Client(
             vertexai=driver.config.vertexai,
-            credentials=creds,
+            credentials=credentials,
             api_key=driver.config.api_key,
-            project=driver.config.project,
-            location=driver.config.location,
+            project=project,
+            location=location,
         )
         return cls(
             client=client,

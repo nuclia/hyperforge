@@ -7,7 +7,7 @@ from nucliadb_telemetry.logs import setup_logging
 from nucliadb_telemetry.settings import LogLevel, LogSettings
 from sentry_sdk.integrations.excepthook import ExcepthookIntegration
 
-from hyperforge_restricted import sandbox
+from hyperforge.codemode import sandbox
 from hyperforge.server.settings import Settings
 
 
@@ -32,6 +32,12 @@ async def run_metrics_server(port: int):
     await server.serve()
 
 
+async def run_servers(metrics_port: int) -> None:
+    async with asyncio.TaskGroup() as tasks:
+        tasks.create_task(run_metrics_server(metrics_port))
+        tasks.create_task(sandbox.run_sandbox_server())
+
+
 def run():  # pragma: no cover
     settings = Settings()
     sandbox_settings = sandbox.SandboxSettings()
@@ -49,12 +55,8 @@ def run():  # pragma: no cover
         )
     )
 
-    loop = asyncio.get_event_loop()
-
-    loop.create_task(run_metrics_server(sandbox_settings.sandbox_metrics_port))
-    loop.create_task(sandbox.run_sandbox_server())
-    try:
-        loop.run_forever()
-    finally:
-        loop.run_until_complete(loop.shutdown_asyncgens())
-        loop.close()
+    if sandbox_settings.sandbox_socket is None:
+        raise RuntimeError("SANDBOX_SOCKET is required for the sandbox server")
+    if sandbox_settings.sandbox_token is None:
+        raise RuntimeError("SANDBOX_TOKEN is required for the sandbox server")
+    asyncio.run(run_servers(sandbox_settings.sandbox_metrics_port))

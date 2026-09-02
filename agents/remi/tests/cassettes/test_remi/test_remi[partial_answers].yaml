@@ -1,0 +1,1068 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nuclia.py/4.11.5
+      x-nuclia-nuakey:
+      - DUMMY
+    method: GET
+    uri: https://europe-1.dp.progress.cloud/api/authorizer/info
+  response:
+    body:
+      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"da1740fa-ab3e-4971-b374-7bb31b5dd325","account_id":"39f5fa6e-680a-475e-a757-812597e86d06","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '227'
+      content-type:
+      - application/json
+      date:
+      - Wed, 05 Aug 2026 07:25:06 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '181'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nucliadb-sdk/6.13.1.post6414
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: GET
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b
+  response:
+    body:
+      string: '{"slug":"nuclia-docs","uuid":"df8b4c24-2807-4888-ad6c-ae97357a638b","config":{"uuid":null,"slug":"4f9285c7-7151-4431-94e6-3f1fb0d66aca:nuclia-docs","title":"Nuclia
+        Docs","description":"","learning_configuration":null,"external_index_provider":null,"configured_external_index_provider":{"type":"unset"},"similarity":null,"hidden_resources_enabled":false,"hidden_resources_hide_on_creation":false,"enforce_security":false},"model":null}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '434'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Wed, 05 Aug 2026 07:25:07 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '7'
+      x-nuclia-trace-id:
+      - 77c09affbb63058428112e02b6e0577e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"prefixes": [{"prefix": "/s/p"}]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '32'
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nucliadb-sdk/6.13.1.post6414
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/catalog/facets
+  response:
+    body:
+      string: '{"facets":{"/s/p":994,"/s/p/ca":4,"/s/p/cy":1,"/s/p/da":1,"/s/p/en":974,"/s/p/eo":4,"/s/p/la":7,"/s/p/nb":1,"/s/p/tl":1,"/s/p/yo":1}}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '133'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Wed, 05 Aug 2026 07:25:07 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '11'
+      x-nuclia-trace-id:
+      - a06a66db616b4ddf356c33edb91ce1dc
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"prefixes": [{"prefix": "/n/i"}]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '32'
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nucliadb-sdk/6.13.1.post6414
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/catalog/facets
+  response:
+    body:
+      string: '{"facets":{"/n/i":994,"/n/i/application":1,"/n/i/application/json":1,"/n/i/text":993,"/n/i/text/markdown":993}}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '111'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Wed, 05 Aug 2026 07:25:07 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '16'
+      x-nuclia-trace-id:
+      - 2070672102fb2273476ec7740963d35c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nucliadb-sdk/6.13.1.post6414
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: GET
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/labelsets
+  response:
+    body:
+      string: '{"uuid":"df8b4c24-2807-4888-ad6c-ae97357a638b","labelsets":{"pmm":{"title":"pmm","color":"#DAF3E6","multiple":true,"kind":["RESOURCES"],"labels":[{"title":"Videos","related":"","text":"","uri":""},{"title":"Partner
+        Content","related":"","text":"","uri":""},{"title":"Softcat","related":"","text":"","uri":""},{"title":"Sales
+        Enablement Assets","related":"","text":"","uri":""},{"title":"KO 26","related":"","text":"","uri":""},{"title":"Data
+        Sheets","related":"","text":"","uri":""},{"title":"Progress Agentic RAG Training
+        Materials 2026","related":"","text":"","uri":""}]}}}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '575'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Wed, 05 Aug 2026 07:25:07 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '8'
+      x-nuclia-trace-id:
+      - 84efb0ffd10560d8d0e42e0233c08656
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"features": ["keyword"], "faceted": ["/classification.labels"]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '61'
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nucliadb-sdk/6.13.1.post6414
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/search
+  response:
+    body:
+      string: "{\"resources\":{\"7c9e318a8fcc4c9485b8639fdbe93b38\":{\"id\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"slug\":\"docs-develop-nua-md\",\"title\":\"docs
+        > develop > nua\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-07-29T07:32:38.792855\",\"modified\":\"2026-07-29T07:32:38.792869\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false}},\"paragraphs\":{\"results\":[{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        ::: \\n Processing \\n Push a file \\n Processing data works in 2 steps: \\n
+        \\n First you will upload the file with /processing/upload, which returns
+        an upload token. \\n Then you will put this token in the processing queue
+        with /processing/push so the file is processed. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":6,\"start\":1627,\"end\":1890},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        json \\n { \\n webhook_config : { \\n uri : http://some.where/my-custom-webhook
+        , \\n headers : { \\n api-key : xxxxxxxxxx \\n } \\n } \\n } \\n Also, you
+        can choose to use a fixed uri on your token, and provide the headers in the
+        /push calls. In this case you don't need to provide the uri parameter. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":23,\"start\":9053,\"end\":9339},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        Get a NUA key \\n In order to use the Nuclia Understanding API (NUA), you
+        first need to generate an API key. \\n There are two options to create an
+        API key: \\n \\n Using the Agentic RAG dashboard top-right menu: \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":1,\"start\":496,\"end\":703},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        Note: If you have a Knowledge Box and want to use the predict endpoints, they
+        are proxied through the /api/v1/kb//predict endpoint. You will need to provide
+        a KB's regular authentication, a NUA API key will not be necessary.\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":28,\"start\":10377,\"end\":10603},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        The payload received from /requests is based on the fdbwriter.BrokerMessage
+        provided by writer.proto. \\n Streamed results \\n The /processing/requests//results
+        endpoint is similar but it returns directly the decoded results as a stream.
+        You can call it like this: \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":18,\"start\":7453,\"end\":7716},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        Processing happens asynchronously, so you will need to regularly check the
+        queue output using one of the two endpoints available to retrieve the results.
+        \\n Protobuffer results \\n The /processing/requests/ endpoint returns a protobuffer
+        payload with the processing results. You can call it like this: \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":12,\"start\":5098,\"end\":5399},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        \\n id: nua \\n title: Nuclia Understanding API \\n \\n Using the Nuclia Understanding
+        API \\n The Nuclia Understanding API (NUA) allows you to process data outside
+        of a Knowledge Box. It is a set of endpoints that allow you to send data to
+        the Progress Agentic RAG platform for processing, or to make calls to models
+        to generate text, summaries, or other outputs. The information is stored temporarily
+        for the duration of the processing, nothing remains in the ProgressAgentic
+        RAG cloud infrastructure. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":496},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        shell \\n curl 'https://.dp.progress.cloud/api/v1/processing/requests/' \\\\
+        \\n -H 'X-NUCLIA-NUAKEY: Bearer ' \\n The response is a JSON object containing
+        completed indicating if the processing is complete or not, and in case it
+        is,a response string. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":13,\"start\":5399,\"end\":5644},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        ::: \\n In Python, you can use nucliadb_protos to decode the results: \\n
+        ```python \\n import base64 \\n import requests \\n from nucliadb_protos.writer_pb2
+        import BrokerMessage \\n processing_id = THE_PROCESSING_ID_YOU_RECEIVED_FROM_PUSH
+        \\n res = requests.get(f'https://europe-1.nuclia.cloud/api/v1/processing/requests/{processing_id}',headers={
+        \\n X-NUCLIA-NUAKEY : Bearer YOUR_NUA_KEY , \\n }).json() \\n if payload in
+        res: \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":16,\"start\":6812,\"end\":7224},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        shell \\n curl 'https://.dp.progress.cloud/api/v1/processing/push' \\\\ \\n
+        -X POST \\\\ \\n -H 'X-NUCLIA-NUAKEY: Bearer ' \\\\ \\n -H 'Content-Type:
+        application/json' \\\\ \\n --data-raw '{ filefield :{ my_file_1 : eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1cm46cHJveHkiLCJzdWIiOiJmaWxlIiwiYXVkIjoidXJuOnByb3h5IiwiZXhwIjoxNjU1ODkxODYyLCJpYXQiOjE2NTU4ODgyNjIsImp0aSI6ImIzMGY4ZTJlNmY3MjQ4OWM5MjJmMTQzNjVjYTdkM2M1Iiwic2l6ZSI6NjM0NywiYnVja2V0X25hbWUiOiJldXJvcGUtMS1zdG9yYWdlLXByb3h5IiwidXJpIjoiMDczNDI5YjRjODM1NDlmMjhjM2U1MzhiOTBhZDFhZTUiLCJkcml2ZXIiOjAsImNvbnRlbnRfdHlwZSI6ImFwcGxpY2F0aW9uL29jdGV0LXN0cmVhbSIsImZpbGVuYW1lIjoiIiwicGFzc3dvcmQiOm51bGwsImxhbmd1YWdlIjpudWxsLCJzb3VyY2UiOjAsIm1kNSI6Ik1qaGlaREpoTkdWaVpHVXhNVGMzTnpFd1lqazRPRE5tT1RjeE1UVXpNR1k9In0.W8wfVj04aYicREYXRatCTb8F8-PD4Ph7MmiTliHi6DI
+        }}' \\n Push text \\n Instead of uploading a file and then pushing it to the
+        queue, you can also push some text directly to the queue. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":9,\"start\":2730,\"end\":3646},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        It may also be used to create (or delete) Knowledge Boxes via the API \u2013
+        for example, if you need to automate Knowledge Box creation. In that case
+        you will need to select the Allow management of Knowledge Boxes checkbox during
+        the NUA key creation. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":4,\"start\":1170,\"end\":1420},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        /predict/rerank reranks a list of results to improve the relevance of the
+        top results. \\n /predict/sentence computes the embedding of a sentence. \\n
+        /predict/summarize summarizes a text. \\n \\n The calls must provides the
+        X-NUCLIA-NUAKEY header with your NUA key: \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":26,\"start\":9847,\"end\":10108},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        shell \\n curl 'https://.dp.progress.cloud/api/v1/processing/requests//results'
+        \\\\ \\n -H 'X-NUCLIA-NUAKEY: Bearer ' \\n Moreover the data_types parameter
+        allows you to filter the results by data type. For example: \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":19,\"start\":7716,\"end\":7926},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        \\n Here is a typical example: \\n shell \\n curl 'https://.dp.progress.cloud/api/v1/processing/upload'
+        \\\\ \\n -X POST \\\\ \\n -H X-NUCLIA-NUAKEY: Bearer  \\\\ \\n -H 'content-type:
+        ' \\\\ \\n -T /path/to/file \\n Will return something like: \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":7,\"start\":1890,\"end\":2109},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        :::note \\n If an error occurs when posting the result to the webhook URL,
+        the result is stored in the queue and can be retrieved by calling the /pull
+        endpoint (see previous section). The error message is appended to the result.
+        \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":24,\"start\":9339,\"end\":9568},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        pb = BrokerMessage() \\n pb.ParseFromString( \\n base64.b64decode(res[ payload
+        ]) \\n ) \\n print(pb) \\n else: \\n print('No payload') \\n ``` \\n For other
+        languages, Nuclia protobuffer models can be found on the NucliaDB GitHub repository.
+        \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":17,\"start\":7224,\"end\":7453},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        ::: \\n Model calls \\n The predict endpoints offer various services: \\n
+        \\n /predict/chat makes a direct call to an LLM. \\n /predict/remi calls the
+        REMi model to measure the quality of a RAG response. \\n /predict/rephrase
+        rephrases a question to make it more suitable for a RAG query. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":25,\"start\":9568,\"end\":9847},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1cm46cHJveHkiLCJzdWIiOiJmaWxlIiwiYXVkIjoidXJuOnByb3h5IiwiZXhwIjoxNjU1ODkyMDgwLCJpYXQiOjE2NTU4ODg0ODAsImp0aSI6ImFmN2ZmYjU1ZjAxMjRlMzM5MmRjMDY5MmM2NWI5NzY3Iiwic2l6ZSI6ODk3LCJidWNrZXRfbmFtZSI6ImV1cm9wZS0xLXN0b3JhZ2UtcHJveHkiLCJ1cmkiOiIwZDg2YTFmYTcxN2Q0NDUxYTAwM2Q1NGIyNzM2YTA0ZSIsImRyaXZlciI6MCwiY29udGVudF90eXBlIjoiYXBwbGljYXRpb24vb2N0ZXQtc3RyZWFtIiwiZmlsZW5hbWUiOiIiLCJwYXNzd29yZCI6bnVsbCwibGFuZ3VhZ2UiOm51bGwsInNvdXJjZSI6MCwibWQ1IjpudWxsfQ.VItLa_fUen2Pt5W2440Bjwc7Zx64rv6mJnRMFIdao5o
+        \\n That is your upload token. Now you can push this token to the processing
+        queue with: \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":8,\"start\":2109,\"end\":2730},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        Also at any level, if an attribute exceeds a certain size, it will be put
+        in a downloadable file and will be replaced in the document by a file pointer.
+        This will consist of { file : { uri : JWT_TOKEN }}. The rule is that if the
+        size of the message is greater than 1000000 characters, the biggest parts
+        will be moved to downloadable files. First, the compression process will target
+        vectors. If that is not enough, it will target large field metadata, and finally
+        it will target extracted text. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":15,\"start\":6315,\"end\":6812},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        In this case, any time a new result is available Nuclia will post it (i.e.
+        make an actual POST call) to this URL, sending the protobuffer result as payload.
+        \\n To use a webhook, you will need to fill in the Webhook URL field in the
+        NUA key creation form when you create your key. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":21,\"start\":8236,\"end\":8517},\"fuzzy_result\":false}],\"facets\":{},\"query\":\"\",\"total\":5358,\"page_number\":0,\"page_size\":20,\"next_page\":true,\"min_score\":0.0},\"shards\":[\"306cbabb-72a5-417c-827f-7874e205c858\"]}"
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '12190'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Wed, 05 Aug 2026 07:25:07 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '51'
+      x-nuclia-trace-id:
+      - 2ea9d8408bc51f8e84f136ddcbe7d60f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nucliadb-sdk/6.13.1.post6414
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: GET
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/configuration
+  response:
+    body:
+      string: '{"resource_labelers_models":null,"paragraph_labelers_models":null,"intent_models":null,"visual_labeling":"disabled","ner_model":"multilingual","relation_model":"base","anonymization_model":"disabled","semantic_model":"multilingual-2024-05-06","semantic_models":["multilingual-2024-05-06"],"default_semantic_model":"multilingual-2024-05-06","semantic_graph_node_models":[],"default_semantic_graph_node_model":null,"semantic_graph_edge_models":[],"default_semantic_graph_edge_model":null,"semantic_vector_similarity":"DOT","semantic_vector_size":1024,"semantic_matryoshka_dims":[],"semantic_threshold":0.4,"generative_model":"chatgpt-azure-4o","user_keys":{"openai":null,"azure_openai":null,"mistral":null,"palm":null,"anthropic":null,"claude3":null,"anthropic_vertex":null,"anthropic_bedrock":null,"azure_mistral":null,"hf_llm":null,"hf_embedding":null,"azure_aii":null,"openai_compat":null},"user_prompts":{"openai":null,"azure_openai":{"system":"You
+        are an IT expert, express yourself like one. If you do not find an answer
+        in the context, please say \"Right now I don''t have enough context to answer
+        your question. Please contact us at support@nuclia.com\". ","prompt":""},"palm":null,"anthropic":null,"claude3":null,"anthropic_vertex":null,"anthropic_bedrock":null,"text_generation":null,"mistral":null,"azure_mistral":null,"hf_llm":null,"openai_url":null,"vertex_llama":null,"deepseek":null,"openai_compat":null,"nova":null},"summary":"simple","summary_model":"claude-4-5-sonnet","summary_prompt":null,"prefer_markdown_generative_response":false,"allow_all_default_models":true,"semantic_model_configs":{"multilingual-2024-05-06":{"similarity":0,"size":1024,"threshold":0.4,"max_tokens":2048,"matryoshka_dims":[],"external":false}},"semantic_graph_node_model_configs":{},"semantic_graph_edge_model_configs":{}}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '1814'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Wed, 05 Aug 2026 07:25:07 GMT,Wed, 05 Aug 2026 07:25:07 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '32'
+      x-nuclia-trace-id:
+      - cf5d406a18a91a5d487d4be36ca9b99e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"faceted": ["/k"]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '18'
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nucliadb-sdk/6.13.1.post6414
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/search
+  response:
+    body:
+      string: "{\"resources\":{\"831a4c9bcc2e49d6a1f2a84c811f4fb6\":{\"id\":\"831a4c9bcc2e49d6a1f2a84c811f4fb6\",\"slug\":\"docs-management-nucliadb-deploy-01-basics-md\",\"title\":\"docs
+        > management > nucliadb > deploy > 01 basics\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-07-16T08:13:36.319511\",\"modified\":\"2026-07-16T08:13:36.319522\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false},\"5c4166eea30d4b329fb3f141e395781a\":{\"id\":\"5c4166eea30d4b329fb3f141e395781a\",\"slug\":\"docs-develop-js-sdk-interfaces-KeyValueContainsFilter-md\",\"title\":\"docs
+        > develop > js sdk > interfaces > KeyValueContainsFilter\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"fr\",\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-07-17T09:13:32.136172\",\"modified\":\"2026-08-03T13:14:39.313725\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false},\"7c9e318a8fcc4c9485b8639fdbe93b38\":{\"id\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"slug\":\"docs-develop-nua-md\",\"title\":\"docs
+        > develop > nua\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-07-29T07:32:38.792855\",\"modified\":\"2026-07-29T07:32:38.792869\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false},\"9ae2d3a90d0d452db50f170c535905d4\":{\"id\":\"9ae2d3a90d0d452db50f170c535905d4\",\"slug\":\"docs-develop-js-sdk-interfaces-KeyValueEqualFilter-md\",\"title\":\"docs
+        > develop > js sdk > interfaces > KeyValueEqualFilter\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-07-17T09:11:44.148330\",\"modified\":\"2026-08-03T13:16:53.789716\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false},\"5ae74950b55c4d60b754fa706314b24a\":{\"id\":\"5ae74950b55c4d60b754fa706314b24a\",\"slug\":\"docs-management-nucliadb-deploy-06-file_storage-md\",\"title\":\"docs
+        > management > nucliadb > deploy > 06 file_storage\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-07-16T08:13:35.152238\",\"modified\":\"2026-07-16T08:13:35.152248\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false},\"b5eec709afcf4068a4211a16f1a79576\":{\"id\":\"b5eec709afcf4068a4211a16f1a79576\",\"slug\":\"docs-develop-js-sdk-type-aliases-KeyValueFilterExpression-md\",\"title\":\"docs
+        > develop > js sdk > type aliases > KeyValueFilterExpression\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-07-17T09:16:41.330227\",\"modified\":\"2026-08-03T13:19:49.747344\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false},\"09305118c7314e1483068fb9a588578f\":{\"id\":\"09305118c7314e1483068fb9a588578f\",\"slug\":\"docs-develop-js-sdk-interfaces-KeyValueRangeFilter-md\",\"title\":\"docs
+        > develop > js sdk > interfaces > KeyValueRangeFilter\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-07-17T09:12:59.683605\",\"modified\":\"2026-08-03T13:15:39.704705\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false},\"78943baafe6a49848b4b29e683eaa983\":{\"id\":\"78943baafe6a49848b4b29e683eaa983\",\"slug\":\"docs-develop-js-sdk-interfaces-NUAClientResponse-md\",\"title\":\"docs
+        > develop > js sdk > interfaces > NUAClientResponse\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"ca\",\"languages\":[\"eo\",\"ca\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-07-28T13:26:37.201678\",\"modified\":\"2026-08-03T13:16:09.581726\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false},\"14b3bd967e2b44ba98372a8d9a0716b6\":{\"id\":\"14b3bd967e2b44ba98372a8d9a0716b6\",\"slug\":\"docs-develop-js-sdk-interfaces-NUAClientEditPayload-md\",\"title\":\"docs
+        > develop > js sdk > interfaces > NUAClientEditPayload\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\",\"eo\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-07-28T13:27:28.455426\",\"modified\":\"2026-08-03T13:14:53.788626\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false},\"d97695fece7948c59cb9b95404b3a5f9\":{\"id\":\"d97695fece7948c59cb9b95404b3a5f9\",\"slug\":\"docs-management-nucliadb-deploy-05-access-md\",\"title\":\"docs
+        > management > nucliadb > deploy > 05 access\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-07-16T08:13:36.926639\",\"modified\":\"2026-07-16T08:13:36.926650\",\"last_seqid\":0,\"last_account_seq\":null,\"queue\":\"private\",\"hidden\":false}},\"paragraphs\":{\"results\":[{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        ::: \\n Processing \\n Push a file \\n Processing data works in 2 steps: \\n
+        \\n First you will upload the file with /processing/upload, which returns
+        an upload token. \\n Then you will put this token in the processing queue
+        with /processing/push so the file is processed. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":6,\"start\":1627,\"end\":1890},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        json \\n { \\n webhook_config : { \\n uri : http://some.where/my-custom-webhook
+        , \\n headers : { \\n api-key : xxxxxxxxxx \\n } \\n } \\n } \\n Also, you
+        can choose to use a fixed uri on your token, and provide the headers in the
+        /push calls. In this case you don't need to provide the uri parameter. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":23,\"start\":9053,\"end\":9339},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        Get a NUA key \\n In order to use the Nuclia Understanding API (NUA), you
+        first need to generate an API key. \\n There are two options to create an
+        API key: \\n \\n Using the Agentic RAG dashboard top-right menu: \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":1,\"start\":496,\"end\":703},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        Note: If you have a Knowledge Box and want to use the predict endpoints, they
+        are proxied through the /api/v1/kb//predict endpoint. You will need to provide
+        a KB's regular authentication, a NUA API key will not be necessary.\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":28,\"start\":10377,\"end\":10603},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        The payload received from /requests is based on the fdbwriter.BrokerMessage
+        provided by writer.proto. \\n Streamed results \\n The /processing/requests//results
+        endpoint is similar but it returns directly the decoded results as a stream.
+        You can call it like this: \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":18,\"start\":7453,\"end\":7716},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        Processing happens asynchronously, so you will need to regularly check the
+        queue output using one of the two endpoints available to retrieve the results.
+        \\n Protobuffer results \\n The /processing/requests/ endpoint returns a protobuffer
+        payload with the processing results. You can call it like this: \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":12,\"start\":5098,\"end\":5399},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        \\n id: nua \\n title: Nuclia Understanding API \\n \\n Using the Nuclia Understanding
+        API \\n The Nuclia Understanding API (NUA) allows you to process data outside
+        of a Knowledge Box. It is a set of endpoints that allow you to send data to
+        the Progress Agentic RAG platform for processing, or to make calls to models
+        to generate text, summaries, or other outputs. The information is stored temporarily
+        for the duration of the processing, nothing remains in the ProgressAgentic
+        RAG cloud infrastructure. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":496},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        shell \\n curl 'https://.dp.progress.cloud/api/v1/processing/requests/' \\\\
+        \\n -H 'X-NUCLIA-NUAKEY: Bearer ' \\n The response is a JSON object containing
+        completed indicating if the processing is complete or not, and in case it
+        is,a response string. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":13,\"start\":5399,\"end\":5644},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        ::: \\n In Python, you can use nucliadb_protos to decode the results: \\n
+        ```python \\n import base64 \\n import requests \\n from nucliadb_protos.writer_pb2
+        import BrokerMessage \\n processing_id = THE_PROCESSING_ID_YOU_RECEIVED_FROM_PUSH
+        \\n res = requests.get(f'https://europe-1.nuclia.cloud/api/v1/processing/requests/{processing_id}',headers={
+        \\n X-NUCLIA-NUAKEY : Bearer YOUR_NUA_KEY , \\n }).json() \\n if payload in
+        res: \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":16,\"start\":6812,\"end\":7224},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        shell \\n curl 'https://.dp.progress.cloud/api/v1/processing/push' \\\\ \\n
+        -X POST \\\\ \\n -H 'X-NUCLIA-NUAKEY: Bearer ' \\\\ \\n -H 'Content-Type:
+        application/json' \\\\ \\n --data-raw '{ filefield :{ my_file_1 : eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1cm46cHJveHkiLCJzdWIiOiJmaWxlIiwiYXVkIjoidXJuOnByb3h5IiwiZXhwIjoxNjU1ODkxODYyLCJpYXQiOjE2NTU4ODgyNjIsImp0aSI6ImIzMGY4ZTJlNmY3MjQ4OWM5MjJmMTQzNjVjYTdkM2M1Iiwic2l6ZSI6NjM0NywiYnVja2V0X25hbWUiOiJldXJvcGUtMS1zdG9yYWdlLXByb3h5IiwidXJpIjoiMDczNDI5YjRjODM1NDlmMjhjM2U1MzhiOTBhZDFhZTUiLCJkcml2ZXIiOjAsImNvbnRlbnRfdHlwZSI6ImFwcGxpY2F0aW9uL29jdGV0LXN0cmVhbSIsImZpbGVuYW1lIjoiIiwicGFzc3dvcmQiOm51bGwsImxhbmd1YWdlIjpudWxsLCJzb3VyY2UiOjAsIm1kNSI6Ik1qaGlaREpoTkdWaVpHVXhNVGMzTnpFd1lqazRPRE5tT1RjeE1UVXpNR1k9In0.W8wfVj04aYicREYXRatCTb8F8-PD4Ph7MmiTliHi6DI
+        }}' \\n Push text \\n Instead of uploading a file and then pushing it to the
+        queue, you can also push some text directly to the queue. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":9,\"start\":2730,\"end\":3646},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        It may also be used to create (or delete) Knowledge Boxes via the API \u2013
+        for example, if you need to automate Knowledge Box creation. In that case
+        you will need to select the Allow management of Knowledge Boxes checkbox during
+        the NUA key creation. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":4,\"start\":1170,\"end\":1420},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        /predict/rerank reranks a list of results to improve the relevance of the
+        top results. \\n /predict/sentence computes the embedding of a sentence. \\n
+        /predict/summarize summarizes a text. \\n \\n The calls must provides the
+        X-NUCLIA-NUAKEY header with your NUA key: \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":26,\"start\":9847,\"end\":10108},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        shell \\n curl 'https://.dp.progress.cloud/api/v1/processing/requests//results'
+        \\\\ \\n -H 'X-NUCLIA-NUAKEY: Bearer ' \\n Moreover the data_types parameter
+        allows you to filter the results by data type. For example: \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":19,\"start\":7716,\"end\":7926},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        \\n Here is a typical example: \\n shell \\n curl 'https://.dp.progress.cloud/api/v1/processing/upload'
+        \\\\ \\n -X POST \\\\ \\n -H X-NUCLIA-NUAKEY: Bearer  \\\\ \\n -H 'content-type:
+        ' \\\\ \\n -T /path/to/file \\n Will return something like: \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":7,\"start\":1890,\"end\":2109},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        :::note \\n If an error occurs when posting the result to the webhook URL,
+        the result is stored in the queue and can be retrieved by calling the /pull
+        endpoint (see previous section). The error message is appended to the result.
+        \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":24,\"start\":9339,\"end\":9568},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        pb = BrokerMessage() \\n pb.ParseFromString( \\n base64.b64decode(res[ payload
+        ]) \\n ) \\n print(pb) \\n else: \\n print('No payload') \\n ``` \\n For other
+        languages, Nuclia protobuffer models can be found on the NucliaDB GitHub repository.
+        \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":17,\"start\":7224,\"end\":7453},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        ::: \\n Model calls \\n The predict endpoints offer various services: \\n
+        \\n /predict/chat makes a direct call to an LLM. \\n /predict/remi calls the
+        REMi model to measure the quality of a RAG response. \\n /predict/rephrase
+        rephrases a question to make it more suitable for a RAG query. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":25,\"start\":9568,\"end\":9847},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ1cm46cHJveHkiLCJzdWIiOiJmaWxlIiwiYXVkIjoidXJuOnByb3h5IiwiZXhwIjoxNjU1ODkyMDgwLCJpYXQiOjE2NTU4ODg0ODAsImp0aSI6ImFmN2ZmYjU1ZjAxMjRlMzM5MmRjMDY5MmM2NWI5NzY3Iiwic2l6ZSI6ODk3LCJidWNrZXRfbmFtZSI6ImV1cm9wZS0xLXN0b3JhZ2UtcHJveHkiLCJ1cmkiOiIwZDg2YTFmYTcxN2Q0NDUxYTAwM2Q1NGIyNzM2YTA0ZSIsImRyaXZlciI6MCwiY29udGVudF90eXBlIjoiYXBwbGljYXRpb24vb2N0ZXQtc3RyZWFtIiwiZmlsZW5hbWUiOiIiLCJwYXNzd29yZCI6bnVsbCwibGFuZ3VhZ2UiOm51bGwsInNvdXJjZSI6MCwibWQ1IjpudWxsfQ.VItLa_fUen2Pt5W2440Bjwc7Zx64rv6mJnRMFIdao5o
+        \\n That is your upload token. Now you can push this token to the processing
+        queue with: \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":8,\"start\":2109,\"end\":2730},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        Also at any level, if an attribute exceeds a certain size, it will be put
+        in a downloadable file and will be replaced in the document by a file pointer.
+        This will consist of { file : { uri : JWT_TOKEN }}. The rule is that if the
+        size of the message is greater than 1000000 characters, the biggest parts
+        will be moved to downloadable files. First, the compression process will target
+        vectors. If that is not enough, it will target large field metadata, and finally
+        it will target extracted text. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":15,\"start\":6315,\"end\":6812},\"fuzzy_result\":false},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"text\":\"
+        In this case, any time a new result is available Nuclia will post it (i.e.
+        make an actual POST call) to this URL, sending the protobuffer result as payload.
+        \\n To use a webhook, you will need to fill in the Webhook URL field in the
+        NUA key creation form when you create your key. \\n\",\"labels\":[],\"start_seconds\":null,\"end_seconds\":null,\"position\":{\"page_number\":0,\"index\":21,\"start\":8236,\"end\":8517},\"fuzzy_result\":false}],\"facets\":{\"/k\":{\"/k/text\":5358}},\"query\":\"\",\"total\":5358,\"page_number\":0,\"page_size\":20,\"next_page\":true,\"min_score\":0.0},\"fulltext\":{\"results\":[{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"14b3bd967e2b44ba98372a8d9a0716b6\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"14b3bd967e2b44ba98372a8d9a0716b6\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"78943baafe6a49848b4b29e683eaa983\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"78943baafe6a49848b4b29e683eaa983\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"b5eec709afcf4068a4211a16f1a79576\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"b5eec709afcf4068a4211a16f1a79576\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"5c4166eea30d4b329fb3f141e395781a\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"5c4166eea30d4b329fb3f141e395781a\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"09305118c7314e1483068fb9a588578f\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"09305118c7314e1483068fb9a588578f\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"9ae2d3a90d0d452db50f170c535905d4\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"9ae2d3a90d0d452db50f170c535905d4\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"831a4c9bcc2e49d6a1f2a84c811f4fb6\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"831a4c9bcc2e49d6a1f2a84c811f4fb6\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"d97695fece7948c59cb9b95404b3a5f9\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]},{\"score\":0.0,\"rid\":\"d97695fece7948c59cb9b95404b3a5f9\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"5ae74950b55c4d60b754fa706314b24a\",\"field_type\":\"t\",\"field\":\"page\",\"labels\":[]},{\"score\":0.0,\"rid\":\"5ae74950b55c4d60b754fa706314b24a\",\"field_type\":\"a\",\"field\":\"title\",\"labels\":[]}],\"facets\":{},\"query\":\"\",\"total\":2029,\"page_number\":0,\"page_size\":20,\"next_page\":true,\"min_score\":0.0},\"shards\":[\"306cbabb-72a5-417c-827f-7874e205c858\"]}"
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '19708'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Wed, 05 Aug 2026 07:25:08 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '63'
+      x-nuclia-trace-id:
+      - 33c8f2bcfd28b1d84522dcef25da6097
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"query": "What is Progress Agentic RAG?", "filters": [], "citations":
+      true, "generative_model": "chatgpt-azure-4o-mini"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '114'
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nucliadb-sdk/6.13.1.post6414
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/ask
+  response:
+    body:
+      string: "{\"item\":{\"type\":\"answer\",\"text\":\"Progress\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        Agent\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"ic\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        R\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"AG\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        is\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" an\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        API\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" that\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        enhances\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" applications\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        with\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" powerful\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        search\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" capabilities\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        by\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" indexing\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        and\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" processing\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        various\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" types\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        of\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" data\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\",\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        including\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" audio\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        and\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" video\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        files\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\".\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        It\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" utilizes\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        natural\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" language\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        processing\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" and\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        machine\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" learning\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        to\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" understand\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        the\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" search\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"er's\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        intent\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" and\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        deliver\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" relevant\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        results\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\".\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        Additionally\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\",\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        it\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" offers\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        features\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" like\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        automatic\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" indexing\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        of\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" page\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        contents\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" and\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        integration\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" with\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        various\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" AI\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        models\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" for\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        generating\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" answers\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        and\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" processing\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
+        data\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\".\"}}\n{\"item\":{\"type\":\"retrieval\",\"results\":{\"resources\":{\"0d4445df40ee4daeb4bb6d609f2b64b1\":{\"id\":\"0d4445df40ee4daeb4bb6d609f2b64b1\",\"slug\":\"docs-rag-advanced-connect-your-own-azure-openai-acct-md\",\"title\":\"docs
+        > rag > advanced > connect your own azure openai acct\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-01-15T14:36:48.862567\",\"modified\":\"2026-06-09T08:07:50.247127\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"0d4445df40ee4daeb4bb6d609f2b64b1/t/page/3184-3468\":{\"score\":0.8507168292999268,\"score_type\":\"RERANKER\",\"order\":3,\"text\":\"
+        Select Azure OpenAI as the LLM provider \\n Enable Use your own Azure OpenAI
+        key \\n Enter: \\n API Key \\n Endpoint URL \\n Deployment Name \\n Model
+        Name \\n Save the configuration \\n Test answer generation \\n \\n Outcome
+        \\n \\n Progress Agentic RAG uses your Azure-hosted LLM for answer generation
+        \\n \",\"id\":\"0d4445df40ee4daeb4bb6d609f2b64b1/t/page/3184-3468\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":3184,\"end\":3468,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false},\"0d4445df40ee4daeb4bb6d609f2b64b1/t/page/2859-3184\":{\"score\":0.36161547899246216,\"score_type\":\"RERANKER\",\"order\":16,\"text\":\"
+        6. Configure Azure OpenAI in Progress Agentic RAG \\n This step connects your
+        deployed model to Progress Agentic RAG. \\n Required Configuration Values
+        \\n | Field | Source | \\n | --------------- | ------- | \\n | API Key | Foundry
+        | \\n | Endpoint URL | Foundry | \\n | Deployment Name | Foundry | \\n | Model
+        Name | Foundry | \\n Steps \\n \\n\",\"id\":\"0d4445df40ee4daeb4bb6d609f2b64b1/t/page/2859-3184\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":2859,\"end\":3184,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"9e6238e3377d41699643ba954dd500fa\":{\"id\":\"9e6238e3377d41699643ba954dd500fa\",\"slug\":\"docs-ingestion-how-to-extract-strategies-md\",\"title\":\"docs
+        > ingestion > how to > extract strategies\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-06-13T08:13:07.100304\",\"modified\":\"2026-06-09T08:18:12.970227\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"9e6238e3377d41699643ba954dd500fa/t/page/2317-2576\":{\"score\":0.5746932029724121,\"score_type\":\"RERANKER\",\"order\":10,\"text\":\"
+        Apart from cutting-edge table and text extraction capabilities, \U0001F415
+        pagehound-v1 is capable of extracting embedded images from full page scans,
+        making it possible to apply Progress' Agentic RAG image processing pipeline
+        to them, enabling search capabilities. \\n\",\"id\":\"9e6238e3377d41699643ba954dd500fa/t/page/2317-2576\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":2317,\"end\":2576,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"7a58f44f10fc423f83239c0b733057c1\":{\"id\":\"7a58f44f10fc423f83239c0b733057c1\",\"slug\":\"docs-develop-dotnet-sdk-index-md\",\"title\":\"docs
+        > develop > dotnet sdk > index\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\",\"sk\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-02-24T16:03:48.411403\",\"modified\":\"2026-06-09T08:17:38.462625\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"7a58f44f10fc423f83239c0b733057c1/t/page/0-226\":{\"score\":0.6728693246841431,\"score_type\":\"RERANKER\",\"order\":7,\"text\":\"Progress.Nuclia
+        .NET SDK \\n A comprehensive .NET SDK for Progress Agentic RAG's NucliaDb,
+        providing RAG (Retrieval-Augmented Generation) capabilities with knowledge
+        base management, AI-powered search, and resource operations. \\n\",\"id\":\"7a58f44f10fc423f83239c0b733057c1/t/page/0-226\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":226,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"e6605960cc46412da0e5e5404f511d53\":{\"id\":\"e6605960cc46412da0e5e5404f511d53\",\"slug\":\"docs-intro-md\",\"title\":\"docs
+        > intro\",\"summary\":\"When teams knit together vector databases, machine
+        learning pipelines, large language models, ranking algorithms, and interfaces
+        into specific products, they are only providing one or two of these capabilities.\\nNuclea
+        delivers all four out of the box.\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"sr\",\"ca\",\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2023-08-03T08:57:16.630817\",\"modified\":\"2026-06-09T08:07:20.822319\",\"last_seqid\":1741334,\"last_account_seq\":67150,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"e6605960cc46412da0e5e5404f511d53/t/page/0-301\":{\"score\":0.689723789691925,\"score_type\":\"RERANKER\",\"order\":6,\"text\":\"
+        \\n id: intro \\n slug: / \\n title: Agentic RAG documentation \\n \\n Agentic
+        RAG, the RAG-as-a-Service platform \\n Agentic RAG automatically delivers
+        AI search and Generative Answers on top of your unstructured data, and provides
+        knowledge in the form of trusted answers, in any language, and from any data.
+        \\n\",\"id\":\"e6605960cc46412da0e5e5404f511d53/t/page/0-301\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":301,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"252561e259d84800889a576b1e8a35c9\":{\"id\":\"252561e259d84800889a576b1e8a35c9\",\"slug\":\"docs-rag-advanced-connect-vertex-ai-acct-md\",\"title\":\"docs
+        > rag > advanced > connect vertex ai acct\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-01-26T08:02:00.906568\",\"modified\":\"2026-06-09T08:07:44.679374\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"252561e259d84800889a576b1e8a35c9/t/page/0-328\":{\"score\":0.7316341996192932,\"score_type\":\"RERANKER\",\"order\":5,\"text\":\"
+        \\n id: connect-vertex-ai-acct \\n title: Connect your own Google Vertex AI
+        \\n \\n Integrating Google Vertex AI with Progress Agentic RAG \\n This guide
+        provides step-by-step instructions for deploying Google Vertex AI and integrating
+        it with Progress Agentic RAG to enable AI-powered search capabilities using
+        Google's Gemini models. \\n\",\"id\":\"252561e259d84800889a576b1e8a35c9/t/page/0-328\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":328,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"fd64185262eb403c82456d7111ed3345\":{\"id\":\"fd64185262eb403c82456d7111ed3345\",\"slug\":\"docs-rag-advanced-byok-aws-berock-assume-role-md\",\"title\":\"docs
+        > rag > advanced > byok aws berock assume role\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-12-18T13:54:44.059147\",\"modified\":\"2026-06-09T08:07:40.547430\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"fd64185262eb403c82456d7111ed3345/t/page/2483-2747\":{\"score\":0.38242971897125244,\"score_type\":\"RERANKER\",\"order\":14,\"text\":\"
+        For more details on these requirements, please refer to the official AWS Bedrock
+        Model Access Documentation. \\n Generate Configuration in Progress Agentic
+        RAG \\n \\n \\n Log in to Progress Agentic RAG and navigate to Manage Account
+        > Models > AWS Bedrock Integration. \\n\",\"id\":\"fd64185262eb403c82456d7111ed3345/t/page/2483-2747\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":2483,\"end\":2747,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"bef9fbb057dc46fa9c2bf121a7967efa\":{\"id\":\"bef9fbb057dc46fa9c2bf121a7967efa\",\"slug\":\"docs-rag-how-to-remi-md\",\"title\":\"docs
+        > rag > how to > remi\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:51:59.392903\",\"modified\":\"2026-06-26T08:59:41.701319\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"bef9fbb057dc46fa9c2bf121a7967efa/t/page/1594-1930\":{\"score\":0.32713067531585693,\"score_type\":\"RERANKER\",\"order\":18,\"text\":\"
+        \\n https://.dp.progress.cloud/api/v1/kb/ \\n \\n \\n Knowledge Box API Key:
+        The This key is used to interact with the Knowledge Box API. To obtain this
+        key, you can follow the instructions here. \\n \\n \\n NUA API Key: This key
+        is used to interact with the Agentic RAG Understanding API. To obtain this
+        key, you can follow the instructions here. \\n\",\"id\":\"bef9fbb057dc46fa9c2bf121a7967efa/t/page/1594-1930\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":1594,\"end\":1930,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"399b7a3a66a0468580fb0fd752fc40cd\":{\"id\":\"399b7a3a66a0468580fb0fd752fc40cd\",\"slug\":\"docs-rag-advanced-connect-gemini-keys-md\",\"title\":\"docs
+        > rag > advanced > connect gemini keys\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-02-04T13:46:30.392047\",\"modified\":\"2026-06-09T08:07:41.267808\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"399b7a3a66a0468580fb0fd752fc40cd/t/page/846-1053\":{\"score\":0.5691343545913696,\"score_type\":\"RERANKER\",\"order\":11,\"text\":\"
+        \\n Finalize Connection \\n \\n Navigate to the Progress Agentic RAG dashboard.
+        \\n When selecting an LLM in AI models or Agent , toggle on Use your Google
+        Gemini Key . \\n Enter your API key. \\n Save configuration. \\n\",\"id\":\"399b7a3a66a0468580fb0fd752fc40cd/t/page/846-1053\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":846,\"end\":1053,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false},\"399b7a3a66a0468580fb0fd752fc40cd/t/page/301-618\":{\"score\":0.3698839247226715,\"score_type\":\"RERANKER\",\"order\":15,\"text\":\"
+        Prerequisites \\n \\n You have an active Google account with access to Google
+        AI Studio (https://aistudio.google.com/) \\n You have access to Progress Agentic
+        RAG. \\n \\n Generate & Locate Your API Key \\n \\n Navigate to Google AI
+        Studio (https://aistudio.google.com/) \\n Click on Get API key in the left
+        sidebar at the bottom. \\n\",\"id\":\"399b7a3a66a0468580fb0fd752fc40cd/t/page/301-618\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":301,\"end\":618,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"46477109e5db4b198b08d39cce0d363c\":{\"id\":\"46477109e5db4b198b08d39cce0d363c\",\"slug\":\"docs-management-security-05-public-ips-md\",\"title\":\"docs
+        > management > security > 05 public ips\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-07-16T08:13:28.912083\",\"modified\":\"2026-07-16T08:13:28.912097\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"46477109e5db4b198b08d39cce0d363c/t/page/418-652\":{\"score\":0.8682692646980286,\"score_type\":\"RERANKER\",\"order\":2,\"text\":\"
+        Outbound \u2014 the source IP addresses that Progress Agentic RAG uses when
+        making connections to your systems (e.g., webhooks, sync agents, or other
+        integrations). Allowlist these if you restrict inbound traffic to your infrastructure.
+        \\n\",\"id\":\"46477109e5db4b198b08d39cce0d363c/t/page/418-652\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":418,\"end\":652,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false},\"46477109e5db4b198b08d39cce0d363c/t/page/208-418\":{\"score\":0.6285214424133301,\"score_type\":\"RERANKER\",\"order\":8,\"text\":\"
+        \\n Inbound \u2014 the IP addresses that Progress Agentic RAG receives requests
+        on. Allowlist these if you restrict outbound traffic from your infrastructure
+        and need to reach our services (e.g., calling our APIs). \\n\",\"id\":\"46477109e5db4b198b08d39cce0d363c/t/page/208-418\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":208,\"end\":418,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"36489cbab30247fea4edcbe8ba6d93d6\":{\"id\":\"36489cbab30247fea4edcbe8ba6d93d6\",\"slug\":\"docs-management-authentication-mdx\",\"title\":\"docs
+        > management > authentication.\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2024-07-18T15:30:46.369763\",\"modified\":\"2026-06-26T08:59:51.921782\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"36489cbab30247fea4edcbe8ba6d93d6/t/page/4972-5293\":{\"score\":0.3301471471786499,\"score_type\":\"RERANKER\",\"order\":17,\"text\":\"
+        Generate and Use User Key \\n \\n \\n This method is meant to be used from
+        the Agentic RAG frontend applications but if you need it for testing purpose,
+        you can obtain a token by going to [https://rag.progress.cloud/redirect?display=token]
+        \\n Then in the API calls, include it in the `Authorization` header as a Bearer
+        token: \\n\",\"id\":\"36489cbab30247fea4edcbe8ba6d93d6/t/page/4972-5293\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":4972,\"end\":5293,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"73c3dde3c4cc45c7a9aabaf19d1578a1\":{\"id\":\"73c3dde3c4cc45c7a9aabaf19d1578a1\",\"slug\":\"docs-rag-advanced-bring-your-own-anthropic-acct-md\",\"title\":\"docs
+        > rag > advanced > bring your own anthropic acct\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-01-20T14:58:49.310838\",\"modified\":\"2026-06-09T08:07:46.863851\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"73c3dde3c4cc45c7a9aabaf19d1578a1/t/page/292-560\":{\"score\":0.5028190016746521,\"score_type\":\"RERANKER\",\"order\":13,\"text\":\"
+        Prerequisites \\n \\n You have an active Anthropic account (https://console.anthropic.com/)
+        \\n Billing is enabled in your Anthropic console. \\n You have access to Progress
+        Agentic RAG. \\n \\n Generate & Locate Your API Key \\n \\n Expand the sidebar
+        on the top left hand corner. \\n\",\"id\":\"73c3dde3c4cc45c7a9aabaf19d1578a1/t/page/292-560\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":292,\"end\":560,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"c1d73c95e26d44eea84e63919a836289\":{\"id\":\"c1d73c95e26d44eea84e63919a836289\",\"slug\":\"docs-ingestion-how-to-integrate-nextjs-md\",\"title\":\"docs
+        > ingestion > how to > integrate nextjs\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"de\",\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:52:04.780909\",\"modified\":\"2026-06-26T08:59:44.635729\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"c1d73c95e26d44eea84e63919a836289/t/page/837-1226\":{\"score\":0.9353464841842651,\"score_type\":\"RERANKER\",\"order\":1,\"text\":\"
+        Agentic RAG is an API able to index and process any kind of data, including
+        audio and video files, to boost applications with powerful search & RAG capability.
+        \\n Indexing page contents automatically \\n The Agentic RAG Dashboard is
+        an easy way to index files or web pages by yourself. That's nice for testing
+        purpose, but it is definitely better to index your Next.js pages automatically.
+        \\n\",\"id\":\"c1d73c95e26d44eea84e63919a836289/t/page/837-1226\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":837,\"end\":1226,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false},\"c1d73c95e26d44eea84e63919a836289/t/page/1666-2203\":{\"score\":0.5552845597267151,\"score_type\":\"RERANKER\",\"order\":12,\"text\":\"
+        ```js \\n const { Nuclia } = require( @nuclia/core ); \\n require( localstorage-polyfill
+        ); \\n require( isomorphic-unfetch ); \\n const nuclia = new Nuclia({ \\n
+        backend: https://accounts.progress.cloud/api , \\n zone: europe-1 , \\n knowledgeBox:
+        , \\n apiKey: , \\n }); \\n // code to push data to Agentic RAG (detailed
+        later) \\n ``` \\n As you can see, you need to provide a Agentic RAG API key.
+        An API key is necessary when adding or modifying contents in a knowledge box.
+        You can get your API key in the Agentic RAG Dashboard, in the API keys section:
+        \\n\",\"id\":\"c1d73c95e26d44eea84e63919a836289/t/page/1666-2203\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":1666,\"end\":2203,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"22f855bc36c34e6c82182ebd33d3dbc4\":{\"id\":\"22f855bc36c34e6c82182ebd33d3dbc4\",\"slug\":\"docs-ingestion-how-to-integrate-strapi-md\",\"title\":\"docs
+        > ingestion > how to > integrate strapi\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:52:04.222223\",\"modified\":\"2026-06-26T08:59:45.897854\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"22f855bc36c34e6c82182ebd33d3dbc4/t/page/300-661\":{\"score\":0.974821150302887,\"score_type\":\"RERANKER\",\"order\":0,\"text\":\"
+        Agentic RAG is the best search API to do it! \\n Agentic RAG is an API able
+        to index and process any kind of data, including audio and video files, to
+        boost applications with powerful search capability, using natural language
+        processing and machine learning to understand the searcher's intent and return
+        results that are more relevant to the searcher's needs. \\n\",\"id\":\"22f855bc36c34e6c82182ebd33d3dbc4/t/page/300-661\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":300,\"end\":661,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"7c9e318a8fcc4c9485b8639fdbe93b38\":{\"id\":\"7c9e318a8fcc4c9485b8639fdbe93b38\",\"slug\":\"docs-develop-nua-md\",\"title\":\"docs
+        > develop > nua\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-07-29T07:32:38.792855\",\"modified\":\"2026-07-29T07:32:38.792869\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"7c9e318a8fcc4c9485b8639fdbe93b38/t/page/0-496\":{\"score\":0.8438951373100281,\"score_type\":\"RERANKER\",\"order\":4,\"text\":\"
+        \\n id: nua \\n title: Nuclia Understanding API \\n \\n Using the Nuclia Understanding
+        API \\n The Nuclia Understanding API (NUA) allows you to process data outside
+        of a Knowledge Box. It is a set of endpoints that allow you to send data to
+        the Progress Agentic RAG platform for processing, or to make calls to models
+        to generate text, summaries, or other outputs. The information is stored temporarily
+        for the duration of the processing, nothing remains in the ProgressAgentic
+        RAG cloud infrastructure. \\n\",\"id\":\"7c9e318a8fcc4c9485b8639fdbe93b38/t/page/0-496\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":496,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false},\"7c9e318a8fcc4c9485b8639fdbe93b38/t/page/934-1170\":{\"score\":0.5865820646286011,\"score_type\":\"RERANKER\",\"order\":9,\"text\":\"
+        \\n \\n Once you have the API key, you can use it in the NUA endpoints by
+        setting the header X-NUCLIA-NUAKEY in each request. \\n The primary usage
+        of a NUA key is to allow running data processing jobs on the Progress Agentic
+        RAG platform. \\n\",\"id\":\"7c9e318a8fcc4c9485b8639fdbe93b38/t/page/934-1170\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":934,\"end\":1170,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false},\"7c9e318a8fcc4c9485b8639fdbe93b38/t/page/703-934\":{\"score\":0.31205546855926514,\"score_type\":\"RERANKER\",\"order\":19,\"text\":\"
+        Click on NUA keys . \\n Click on the Create new Progress Agentic RAG Understanding
+        API key button. \\n \\n Fill out the form and submit it. \\n \\n \\n Using
+        the Nuclia API /api/v1/account/{your_account}/nua_client endpoint (see Reference).
+        \\n\",\"id\":\"7c9e318a8fcc4c9485b8639fdbe93b38/t/page/703-934\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":703,\"end\":934,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}}},\"query\":\"What
+        is Progress Agentic RAG?\",\"total\":20,\"page_number\":0,\"page_size\":20,\"next_page\":false,\"autofilters\":[],\"min_score\":{\"bm25\":0.0},\"best_matches\":[\"22f855bc36c34e6c82182ebd33d3dbc4/t/page/300-661\",\"c1d73c95e26d44eea84e63919a836289/t/page/837-1226\",\"46477109e5db4b198b08d39cce0d363c/t/page/418-652\",\"0d4445df40ee4daeb4bb6d609f2b64b1/t/page/3184-3468\",\"7c9e318a8fcc4c9485b8639fdbe93b38/t/page/0-496\",\"252561e259d84800889a576b1e8a35c9/t/page/0-328\",\"e6605960cc46412da0e5e5404f511d53/t/page/0-301\",\"7a58f44f10fc423f83239c0b733057c1/t/page/0-226\",\"46477109e5db4b198b08d39cce0d363c/t/page/208-418\",\"7c9e318a8fcc4c9485b8639fdbe93b38/t/page/934-1170\",\"9e6238e3377d41699643ba954dd500fa/t/page/2317-2576\",\"399b7a3a66a0468580fb0fd752fc40cd/t/page/846-1053\",\"c1d73c95e26d44eea84e63919a836289/t/page/1666-2203\",\"73c3dde3c4cc45c7a9aabaf19d1578a1/t/page/292-560\",\"fd64185262eb403c82456d7111ed3345/t/page/2483-2747\",\"399b7a3a66a0468580fb0fd752fc40cd/t/page/301-618\",\"0d4445df40ee4daeb4bb6d609f2b64b1/t/page/2859-3184\",\"36489cbab30247fea4edcbe8ba6d93d6/t/page/4972-5293\",\"bef9fbb057dc46fa9c2bf121a7967efa/t/page/1594-1930\",\"7c9e318a8fcc4c9485b8639fdbe93b38/t/page/703-934\"]},\"best_matches\":[{\"id\":\"22f855bc36c34e6c82182ebd33d3dbc4/t/page/300-661\"},{\"id\":\"c1d73c95e26d44eea84e63919a836289/t/page/837-1226\"},{\"id\":\"46477109e5db4b198b08d39cce0d363c/t/page/418-652\"},{\"id\":\"0d4445df40ee4daeb4bb6d609f2b64b1/t/page/3184-3468\"},{\"id\":\"7c9e318a8fcc4c9485b8639fdbe93b38/t/page/0-496\"},{\"id\":\"252561e259d84800889a576b1e8a35c9/t/page/0-328\"},{\"id\":\"e6605960cc46412da0e5e5404f511d53/t/page/0-301\"},{\"id\":\"7a58f44f10fc423f83239c0b733057c1/t/page/0-226\"},{\"id\":\"46477109e5db4b198b08d39cce0d363c/t/page/208-418\"},{\"id\":\"7c9e318a8fcc4c9485b8639fdbe93b38/t/page/934-1170\"},{\"id\":\"9e6238e3377d41699643ba954dd500fa/t/page/2317-2576\"},{\"id\":\"399b7a3a66a0468580fb0fd752fc40cd/t/page/846-1053\"},{\"id\":\"c1d73c95e26d44eea84e63919a836289/t/page/1666-2203\"},{\"id\":\"73c3dde3c4cc45c7a9aabaf19d1578a1/t/page/292-560\"},{\"id\":\"fd64185262eb403c82456d7111ed3345/t/page/2483-2747\"},{\"id\":\"399b7a3a66a0468580fb0fd752fc40cd/t/page/301-618\"},{\"id\":\"0d4445df40ee4daeb4bb6d609f2b64b1/t/page/2859-3184\"},{\"id\":\"36489cbab30247fea4edcbe8ba6d93d6/t/page/4972-5293\"},{\"id\":\"bef9fbb057dc46fa9c2bf121a7967efa/t/page/1594-1930\"},{\"id\":\"7c9e318a8fcc4c9485b8639fdbe93b38/t/page/703-934\"}]}}\n{\"item\":{\"type\":\"status\",\"code\":\"0\",\"status\":\"success\"}}\n{\"item\":{\"type\":\"augmented_context\",\"augmented\":{\"paragraphs\":{},\"fields\":{}}}}\n{\"item\":{\"type\":\"citations\",\"citations\":{\"22f855bc36c34e6c82182ebd33d3dbc4/t/page/300-661\":[[0,458]],\"c1d73c95e26d44eea84e63919a836289/t/page/837-1226\":[[0,458]],\"7a58f44f10fc423f83239c0b733057c1/t/page/0-226\":[[0,458]],\"399b7a3a66a0468580fb0fd752fc40cd/t/page/301-618\":[[0,458]],\"9e6238e3377d41699643ba954dd500fa/t/page/2317-2576\":[[0,458]],\"7c9e318a8fcc4c9485b8639fdbe93b38/t/page/0-496\":[[0,458]],\"73c3dde3c4cc45c7a9aabaf19d1578a1/t/page/292-560\":[[0,458]],\"c1d73c95e26d44eea84e63919a836289/t/page/1666-2203\":[[0,458]],\"0d4445df40ee4daeb4bb6d609f2b64b1/t/page/2859-3184\":[[0,458]],\"7c9e318a8fcc4c9485b8639fdbe93b38/t/page/703-934\":[[0,458]],\"399b7a3a66a0468580fb0fd752fc40cd/t/page/846-1053\":[[0,458]]}}}\n{\"item\":{\"type\":\"metadata\",\"tokens\":{\"input\":45,\"output\":9,\"input_nuclia\":0.045,\"output_nuclia\":0.009},\"timings\":{\"generative_first_chunk\":0.7326291089993902,\"generative_total\":1.9452681740076514}}}\n"
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - NUCLIA-LEARNING-ID,X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Wed, 05 Aug 2026 07:25:08 GMT
+      nuclia-learning-id:
+      - dbdb01fafe7f49e9aa5b0746733014a0
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1078'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"question": "", "retrieval": true, "user_id": "summarize", "system": "You
+      are a helpful AI assistant. Your role is to provide accurate, clear, and well-structured
+      answers based strictly on the information provided to you.\nKey principles:\n-
+      Answer only using the information in the provided context\n- Do not use external
+      knowledge, assumptions, or prior experience\n- Maintain a professional and informative
+      tone\n- Be concise yet thorough\n- If information is insufficient, acknowledge
+      this clearly\n\nAlways follow any additional instructions provided about format,
+      style, or domain-specific behavior.", "chat_history": [], "context": [], "query_context":
+      {}, "query_context_order": {}, "truncate": true, "user_prompt": {"prompt": "\n##
+      Question\nWhat is Progress Agentic RAG?\n\n## Provided Context\n[START OF CONTEXT]\n##
+      Nuclia Docs Retrieval Agent\n\n# What is Progress Agentic RAG?\n\n Progress
+      Agentic RAG is an API that enhances applications with powerful search capabilities
+      by indexing and processing various types of data, including audio and video
+      files. It utilizes natural language processing and machine learning to understand
+      the searcher''s intent and deliver relevant results. Additionally, it offers
+      features like automatic indexing of page contents and integration with various
+      AI models for generating answers and processing data.\n[END OF CONTEXT]\n\n##
+      Answering Guidelines\n- Carefully read all context; it may be lengthy or detailed\n-
+      Do not omit or overlook any relevant information\n- Existing context summaries
+      are answer attempts produced by retrieval agents. Treat them as first-class
+      evidence and preserve their supported facts.\n- Combine complementary summaries
+      from multiple contexts when the question has multiple parts. Do not require
+      every context to answer the whole question by itself.\n- If a context summary
+      directly answers the question, do not replace it with an insufficient-data answer
+      merely because one retrieved chunk is incomplete; use the chunks for supporting
+      citations.\n- If the context is incomplete or insufficient, state: \"Not enough
+      data to answer this.\"\n- Read carefully any extra instructions below if provided
+      and use them to answer\n\nNow provide your answer to the question: What is Progress
+      Agentic RAG?"}, "citations": null, "citation_threshold": null, "generative_model":
+      "chatgpt-azure-4o-mini", "max_tokens": 5000, "query_context_images": {}, "prefer_markdown":
+      null, "json_schema": null, "format_prompt": false, "rerank_context": false,
+      "tools": [], "tool_choice": {"type": "auto"}, "reasoning": false, "seed": null}'
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2544'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nuclia.py/4.11.5
+      x-client-ident:
+      - default
+      x-message:
+      - 1708e66b6f0d48b28ae19610d32d75e1
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+      x-stf-nuakey:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"text","text":"Progress"}}
+
+        {"chunk":{"type":"text","text":" Agent"}}
+
+        {"chunk":{"type":"text","text":"ic"}}
+
+        {"chunk":{"type":"text","text":" R"}}
+
+        {"chunk":{"type":"text","text":"AG"}}
+
+        {"chunk":{"type":"text","text":" is"}}
+
+        {"chunk":{"type":"text","text":" an"}}
+
+        {"chunk":{"type":"text","text":" API"}}
+
+        {"chunk":{"type":"text","text":" designed"}}
+
+        {"chunk":{"type":"text","text":" to"}}
+
+        {"chunk":{"type":"text","text":" enhance"}}
+
+        {"chunk":{"type":"text","text":" applications"}}
+
+        {"chunk":{"type":"text","text":" with"}}
+
+        {"chunk":{"type":"text","text":" advanced"}}
+
+        {"chunk":{"type":"text","text":" search"}}
+
+        {"chunk":{"type":"text","text":" capabilities"}}
+
+        {"chunk":{"type":"text","text":" by"}}
+
+        {"chunk":{"type":"text","text":" indexing"}}
+
+        {"chunk":{"type":"text","text":" and"}}
+
+        {"chunk":{"type":"text","text":" processing"}}
+
+        {"chunk":{"type":"text","text":" various"}}
+
+        {"chunk":{"type":"text","text":" types"}}
+
+        {"chunk":{"type":"text","text":" of"}}
+
+        {"chunk":{"type":"text","text":" data"}}
+
+        {"chunk":{"type":"text","text":","}}
+
+        {"chunk":{"type":"text","text":" including"}}
+
+        {"chunk":{"type":"text","text":" audio"}}
+
+        {"chunk":{"type":"text","text":" and"}}
+
+        {"chunk":{"type":"text","text":" video"}}
+
+        {"chunk":{"type":"text","text":" files"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" It"}}
+
+        {"chunk":{"type":"text","text":" employs"}}
+
+        {"chunk":{"type":"text","text":" natural"}}
+
+        {"chunk":{"type":"text","text":" language"}}
+
+        {"chunk":{"type":"text","text":" processing"}}
+
+        {"chunk":{"type":"text","text":" and"}}
+
+        {"chunk":{"type":"text","text":" machine"}}
+
+        {"chunk":{"type":"text","text":" learning"}}
+
+        {"chunk":{"type":"text","text":" to"}}
+
+        {"chunk":{"type":"text","text":" comprehend"}}
+
+        {"chunk":{"type":"text","text":" the"}}
+
+        {"chunk":{"type":"text","text":" search"}}
+
+        {"chunk":{"type":"text","text":"er''s"}}
+
+        {"chunk":{"type":"text","text":" intent"}}
+
+        {"chunk":{"type":"text","text":" and"}}
+
+        {"chunk":{"type":"text","text":" deliver"}}
+
+        {"chunk":{"type":"text","text":" relevant"}}
+
+        {"chunk":{"type":"text","text":" results"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" Key"}}
+
+        {"chunk":{"type":"text","text":" features"}}
+
+        {"chunk":{"type":"text","text":" include"}}
+
+        {"chunk":{"type":"text","text":" automatic"}}
+
+        {"chunk":{"type":"text","text":" indexing"}}
+
+        {"chunk":{"type":"text","text":" of"}}
+
+        {"chunk":{"type":"text","text":" page"}}
+
+        {"chunk":{"type":"text","text":" contents"}}
+
+        {"chunk":{"type":"text","text":" and"}}
+
+        {"chunk":{"type":"text","text":" integration"}}
+
+        {"chunk":{"type":"text","text":" with"}}
+
+        {"chunk":{"type":"text","text":" various"}}
+
+        {"chunk":{"type":"text","text":" AI"}}
+
+        {"chunk":{"type":"text","text":" models"}}
+
+        {"chunk":{"type":"text","text":" for"}}
+
+        {"chunk":{"type":"text","text":" generating"}}
+
+        {"chunk":{"type":"text","text":" answers"}}
+
+        {"chunk":{"type":"text","text":" and"}}
+
+        {"chunk":{"type":"text","text":" processing"}}
+
+        {"chunk":{"type":"text","text":" data"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":12,"output_tokens":9,"timings":{"generative_first_chunk":1.0238924200002657,"generative":1.8147307340004772},"input_nuclia_tokens":0.012,"output_nuclia_tokens":0.009}}
+
+        {"chunk":{"normalized_tokens":{"input":0.01167,"output":0.00864,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Wed, 05 Aug 2026 07:25:10 GMT
+      nuclia-learning-id:
+      - b3272632eaca405badd01757c7d60a8d
+      nuclia-learning-model:
+      - chatgpt-azure-4o-mini
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1033'
+      x-nuclia-trace-id:
+      - 8765d0f10987f9e75c33ca4e12cd9689
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"user_id": "arag_evaluate", "question": null, "answer": "Progress Agentic
+      RAG is an API designed to enhance applications with advanced search capabilities
+      by indexing and processing various types of data, including audio and video
+      files. It employs natural language processing and machine learning to comprehend
+      the searcher''s intent and deliver relevant results. Key features include automatic
+      indexing of page contents and integration with various AI models for generating
+      answers and processing data.", "contexts": ["## Nuclia Docs Retrieval Agent\n\n#
+      What is Progress Agentic RAG?\n\n Progress Agentic RAG is an API that enhances
+      applications with powerful search capabilities by indexing and processing various
+      types of data, including audio and video files. It utilizes natural language
+      processing and machine learning to understand the searcher''s intent and deliver
+      relevant results. Additionally, it offers features like automatic indexing of
+      page contents and integration with various AI models for generating answers
+      and processing data."]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1045'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nuclia.py/4.11.5
+      x-stf-nuakey:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/remi
+  response:
+    body:
+      string: '{"time":0.1853013038635254,"answer_relevance":null,"context_relevance":[],"groundedness":[5]}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '93'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Wed, 05 Aug 2026 07:25:12 GMT
+      nuclia-learning-model:
+      - Llama-REMi-v1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '191'
+      x-nuclia-trace-id:
+      - a5decec39af14b66bc24093a617fa9a4
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"user_id": "arag_evaluate", "question": "What is Progress Agentic RAG?",
+      "answer": "Progress Agentic RAG is an API designed to enhance applications with
+      advanced search capabilities by indexing and processing various types of data,
+      including audio and video files. It employs natural language processing and
+      machine learning to comprehend the searcher''s intent and deliver relevant results.
+      Key features include automatic indexing of page contents and integration with
+      various AI models for generating answers and processing data.", "contexts":
+      null}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '544'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nuclia.py/4.11.5
+      x-stf-nuakey:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/remi
+  response:
+    body:
+      string: '{"time":0.6617584228515625,"answer_relevance":{"score":4,"reason":""},"context_relevance":[],"groundedness":[]}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '111'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Wed, 05 Aug 2026 07:25:12 GMT
+      nuclia-learning-model:
+      - Llama-REMi-v1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '668'
+      x-nuclia-trace-id:
+      - 95d0fa831051bd0d8b94812ea279652a
+    status:
+      code: 200
+      message: OK
+version: 1
