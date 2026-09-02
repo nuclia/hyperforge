@@ -6,6 +6,7 @@ from typing import Any
 
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.hashes import SHA256, SHA384, SHA512
+import httpx
 from hyperforge.db import settings
 from hyperforge.standalone.settings import StandaloneSettings
 from starlette.authentication import AuthenticationError
@@ -51,7 +52,7 @@ class JWKSCache:
             if expires_at > now:
                 return jwks
 
-        async with safe_http_client(timeout=10) as client:
+        async with httpx.AsyncClient(timeout=10) as client:
             request = client.build_request("GET", url)
             response = await client.send(request, stream=True, follow_redirects=True)
             try:
