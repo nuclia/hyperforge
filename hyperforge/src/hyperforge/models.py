@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from enum import Enum
 from typing import (
     Any,
     Dict,
@@ -110,7 +111,14 @@ class VegaLiteVisualization(BaseModel):
 Visualization = Union[VegaLiteVisualization]
 
 
+class ExternalUsageOperation(str, Enum):
+    INTERNET_SEARCH = "internet_search"
+
+
 class ExternalUsage(BaseModel):
+    operation: ExternalUsageOperation = Field(
+        description="The external operation that generated this usage.",
+    )
     provider: str = Field(
         description="The external provider that generated this usage.",
         examples=["perplexity", "google", "brave"],

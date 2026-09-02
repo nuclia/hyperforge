@@ -20,7 +20,7 @@ from hyperforge.interaction import (
     PromptFeedbackSchema,
     ValidationFeedbackSchema,
 )
-from hyperforge.manager import Manager
+from hyperforge.manager import Manager, build_reasoning
 from hyperforge.memory import QuestionMemory
 from hyperforge.models import Chunk, Context, Prompt, TrackingInfo
 from hyperforge.result_payload import budget_from_config, inspect_text_blocks
@@ -30,7 +30,15 @@ from mcp.client.streamable_http import GetSessionIdCallback
 from mcp.shared.context import RequestContext
 from mcp.shared.message import SessionMessage
 from mcp.shared.session import RequestResponder
-from nuclia.lib.nua_responses import Author, ChatModel, Image, Message, Tool, UserPrompt
+from nuclia.lib.nua_responses import (
+    Author,
+    ChatModel,
+    Image,
+    Message,
+    Tool,
+    ToolChoiceAuto,
+    UserPrompt,
+)
 from nuclia_models.predict.generative_responses import GenerativeFullResponse
 from pydantic import FileUrl
 
@@ -42,6 +50,19 @@ from hyperforge_mcp.tools import (
     PROMPT_CHOOSE_TEMPLATE,
     SIMPLE_TOOL_CHOICE_PROMPT,
 )
+
+
+def _tool_parameters(input_schema: Any) -> Dict[str, Any]:
+    properties = (
+        input_schema.get("properties", {}) if isinstance(input_schema, dict) else {}
+    )
+    if not isinstance(properties, dict):
+        return {}
+    return {
+        name: dict(schema) if isinstance(schema, dict) else {"type": "string"}
+        for name, schema in properties.items()
+    }
+
 
 MAX_NUM_TURNS = 10
 
@@ -163,8 +184,15 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
 
         if final_prompt is None:
             # We will use LLM to choose the prompt
-            prompt_feedback_str = PROMPT_CHOOSE_TEMPLATE.render(prompts=self.prompts)
-            resp, input_tokens, output_tokens = await manager.execute_json(
+            prompt_feedback_str = PROMPT_CHOOSE_TEMPLATE.render(
+                prompts=self.prompts, task_description=question
+            )
+            (
+                resp,
+                input_tokens,
+                output_tokens,
+                reasoning,
+            ) = await manager.execute_json_reasoning(
                 model=self.config.tool_choice_model,
                 prompt=prompt_feedback_str,
                 user_id="mcp_no_feedback",
@@ -352,8 +380,10 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             question="",
             user_id="mcp_agent",
             query_context_images=images,
-            generative_model=self.config.tool_choice_model,
+            generative_model=self.config.tool_choice_model.model_id,
+            reasoning=build_reasoning(self.config.tool_choice_model),
             tools=tools,
+            tool_choice=ToolChoiceAuto(),
             user_prompt=UserPrompt(
                 prompt="Choose the best tool or tools for the task, select task_complete if no more tools are needed according to the user request and previous interactions"
             ),
@@ -876,27 +906,11 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         published: Dict[str, FunctionDefinition] = {}
 
         for tool in self.tools:
-            input_schema = tool.inputSchema or {}
-            properties = (
-                input_schema.get("properties", {})
-                if isinstance(input_schema, dict)
-                else {}
-            )
-            params: Dict[str, Any] = {
-                name: {
-                    "type": info.get("type", "string")
-                    if isinstance(info, dict)
-                    else "string",
-                    "description": info.get("description", "")
-                    if isinstance(info, dict)
-                    else "",
-                }
-                for name, info in properties.items()
-            }
             published[tool.name] = FunctionDefinition(
                 name=tool.name,
                 description=tool.description or tool.name,
-                parameters=params,
+                parameters=_tool_parameters(tool.inputSchema),
+                input_schema=tool.inputSchema,
             )
             setattr(self, tool.name, self._make_tool_caller(tool.name))
 
@@ -946,14 +960,15 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
 
         total_input_tokens += input_tokens
         total_output_tokens += output_tokens
-        for tool_name, tool_arguments in iterate_tools_resp(resp):
+        tool_calls = list(iterate_tools_resp(resp))
+        for tool_name, tool_arguments in tool_calls:
             await self.process_tool(
                 memory, tool_name, tool_arguments, context, messages, images
             )
 
-        if self.config.work_chain is False:
+        if self.config.work_chain is False or not tool_calls:
             logger.debug("Exiting loop on tool")
-            return input_tokens, output_tokens
+            return total_input_tokens, total_output_tokens
 
         count = 0
         finished = False
@@ -968,7 +983,11 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             )
             total_input_tokens += input_tokens
             total_output_tokens += output_tokens
-            for tool_name, tool_arguments in iterate_tools_resp(resp):
+            tool_calls = list(iterate_tools_resp(resp))
+            if not tool_calls:
+                logger.debug("Exiting loop because no tool was selected")
+                break
+            for tool_name, tool_arguments in tool_calls:
                 if tool_name == "task_complete":
                     logger.debug("Exiting loop on task_complete tool")
                     finished = True
@@ -1011,7 +1030,8 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             question="",
             user_id=self.config.id or "mcp_agent",
             query_context_images=images,
-            generative_model=self.config.sampling_model,
+            generative_model=self.config.sampling_model.model_id,
+            reasoning=build_reasoning(self.config.sampling_model),
             format_prompt=False,
             system=params.systemPrompt,
             context=new_messages,
@@ -1036,7 +1056,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         return CreateMessageResult(
             role="user",
             content=types.TextContent(type="text", text=resp.answer),
-            model=self.config.sampling_model,
+            model=self.config.sampling_model.model_id,
         )
 
     async def elicitation_callback(

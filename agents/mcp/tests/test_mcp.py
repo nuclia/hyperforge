@@ -1,12 +1,16 @@
 import os
 from copy import deepcopy
-from unittest.mock import patch
+from types import SimpleNamespace
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from hyperforge.engine import main as arag_main
 from hyperforge.interaction import AragAnswer
 from hyperforge.minimal_fixtures import cassette_nua_key
-from hyperforge.utils.http import SafeTransport
+from nuclia.lib.nua_responses import Tool, ToolChoiceAuto
+
+from hyperforge_mcp.agent import MCPAgent, _tool_parameters
+from hyperforge_mcp.config import MCPAgentConfig
 
 from .mcp_server import run
 from .mcp_server_no_prompt import run_mcp_server_no_prompt
@@ -20,6 +24,87 @@ NUA_KEY = os.environ.get(
     "NUA_KEY",
 ) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 pytestmark = [pytest.mark.vcr(ignore_localhost=True), pytest.mark.asyncio]
+
+
+async def test_tool_parameters_preserve_array_item_schema():
+    parameters = _tool_parameters(
+        {
+            "properties": {
+                "repo_types": {
+                    "type": "array",
+                    "description": "Repository types to search",
+                    "items": {"type": "string", "enum": ["model", "dataset"]},
+                }
+            }
+        }
+    )
+
+    assert parameters["repo_types"] == {
+        "type": "array",
+        "description": "Repository types to search",
+        "items": {"type": "string", "enum": ["model", "dataset"]},
+    }
+
+
+async def test_choose_tool_uses_auto_tool_choice():
+    mcp_agent = MCPAgent(
+        MCPAgentConfig.model_validate(
+            {
+                "id": "mcp-test",
+                "module": "mcp",
+                "source": "mcphttp-01",
+            }
+        )
+    )
+    captured_items = []
+
+    async def execute_raw(item, tracking=None):
+        captured_items.append(item)
+        return SimpleNamespace(tools=None), 0.0, 0.0
+
+    await mcp_agent.choose_tool(
+        manager=SimpleNamespace(execute_raw=execute_raw),
+        images=[],
+        messages=[],
+        extra_tools=[
+            Tool(name="task_complete", description="", parameters={"type": "object"})
+        ],
+    )
+
+    assert isinstance(captured_items[0].tool_choice, ToolChoiceAuto)
+
+
+async def test_mcp_interaction_stops_when_no_tool_is_selected():
+    mcp_agent = MCPAgent(
+        MCPAgentConfig.model_validate(
+            {
+                "id": "mcp-test",
+                "module": "mcp",
+                "source": "mcphttp-01",
+                "work_chain": True,
+                "max_turns": 5,
+            }
+        )
+    )
+    choose_tool = AsyncMock(return_value=(SimpleNamespace(tools=None), 1.0, 2.0))
+
+    with (
+        patch.object(
+            MCPAgent,
+            "get_tool_selection_prompt",
+            AsyncMock(return_value=([], [])),
+        ),
+        patch.object(MCPAgent, "choose_tool", choose_tool),
+    ):
+        tokens = await mcp_agent.mcp_interaction(
+            memory=SimpleNamespace(get_tracking_info=lambda: None),
+            manager=SimpleNamespace(),
+            question="No tool is needed",
+            context=SimpleNamespace(),
+        )
+
+    assert tokens == (1.0, 2.0)
+    choose_tool.assert_awaited_once()
 
 
 CONFIG = {
@@ -64,7 +149,10 @@ CONFIG = {
 
 @pytest.fixture
 async def disable_safe_transport():
-    with patch.object(SafeTransport, "is_private_address", return_value=False):
+    with patch(
+        "hyperforge.utils.http._resolve_public_addresses",
+        return_value=["127.0.0.1"],
+    ):
         yield
 
 

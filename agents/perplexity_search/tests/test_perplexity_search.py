@@ -7,7 +7,7 @@ from hyperforge.manager import Manager
 from hyperforge.memory import Context
 from hyperforge.memory.memory import EphemeralSessionMemory
 from hyperforge.minimal_fixtures import cassette_nua_key
-from hyperforge.models import MemoryConfig, Rules
+from hyperforge.models import ExternalUsageOperation, MemoryConfig, Rules
 from nuclia.lib.nua import AsyncNuaClient
 
 from hyperforge_perplexity_search.agent import PerplexitySearchAgent
@@ -83,6 +83,7 @@ async def test_perplexity_search():
     usage = next(step.external_usage for step in memory.steps if step.external_usage)
     assert len(usage) == 1
     event = usage[0]
+    assert event.operation == ExternalUsageOperation.INTERNET_SEARCH
     assert event.provider == "perplexity"
     assert event.model == "search"
     assert event.input_tokens == 0
