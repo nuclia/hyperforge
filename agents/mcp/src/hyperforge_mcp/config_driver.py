@@ -18,8 +18,6 @@ def _redirect_uris_schema_default(schema: Dict[str, Any]) -> None:
 
 
 class MCPHTTPInnerConfig(EncryptedPayload):
-    encrypted_fields: ClassVar[list[str]] = ["client_secret"]
-
     uri: str
     timeout: float = 60 * 5
     headers: Dict[str, str] = Field(default_factory=dict)
@@ -120,7 +118,7 @@ class MCPStdioServer(str, Enum):
 
 
 class MCPStdioInnerConfig(EncryptedPayload):
-    encrypted_fields: ClassVar[list[str]] = []
+    encrypted_fields: ClassVar[list[str]] = ["env"]
 
     server: MCPStdioServer
     env: dict[str, str] | None = None

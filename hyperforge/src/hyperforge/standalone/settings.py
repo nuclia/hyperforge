@@ -13,11 +13,15 @@ a JSON config file pointed to by ``agents_config``.
 from pathlib import Path
 from typing import Optional
 
-from pydantic import AliasChoices, Field
-from pydantic_settings import BaseSettings
+from pydantic import AliasChoices, Field, SecretStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class StandaloneSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+    )
+
     # ------------------------------------------------------------------
     # Agent config file
     # ------------------------------------------------------------------
@@ -41,6 +45,13 @@ class StandaloneSettings(BaseSettings):
             "When true, force https URLs in OAuth protected-resource metadata links "
             "emitted by MCP auth challenges and metadata endpoints. "
             "Set false only for local/dev HTTP deployments."
+        ),
+    )
+    auth_success_logo_url: Optional[str] = Field(
+        default=None,
+        description=(
+            "Logo URL shown on the OAuth success page. "
+            "When unset, the Hyperforge name is shown instead."
         ),
     )
 
@@ -109,13 +120,28 @@ class StandaloneSettings(BaseSettings):
     )
 
     in_memory_cache_size: int = 3000
+    mcp_max_request_bytes: int = Field(default=1024 * 1024, ge=1)
+    mcp_max_response_bytes: int = Field(default=4 * 1024 * 1024, ge=1)
 
     cors_allow_origin: list[str] = Field(
-        default_factory=lambda: ["*"],
+        default_factory=list,
         description=(
             "List of allowed origins for CORS. Defaults to ['*'] which allows all origins. "
             "In production, it's recommended to set this to the specific origins that should be allowed."
         ),
+    )
+
+    ui_admin_username: str = Field(
+        default="admin", description="Username for the standalone configuration UI."
+    )
+    ui_admin_password: SecretStr | None = Field(
+        default=None,
+        description="Password that enables and protects the standalone configuration UI.",
+    )
+
+    enforce_public_urls: bool = Field(
+        default=False,
+        description="Whether to enforce that only public URLs are allowed.",
     )
 
     load_modules: list[str] = []
@@ -138,4 +164,9 @@ class StandaloneSettings(BaseSettings):
     standalone_application_class: str = Field(
         default="hyperforge.standalone.app.StandaloneApplication",
         description="Dotted-name of the StandaloneApplication class to use.",
+    )
+
+    static_folder: str = Field(
+        default=str(Path(__file__).parent.parent / "static"),
+        description="Path to the static folder for the frontend.",
     )

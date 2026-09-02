@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Literal, Optional, cast
 from hyperforge import PROMPT_ENVIRONMENT
 from hyperforge.agent import Agent, AgentConfig
 from hyperforge.configure import get_agent_config_klass, get_agent_klass
+from hyperforge.llm_config import LLMConfig, LLMField, llm_defaults
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import QuestionMemory
 from hyperforge.trace import trace_agent
@@ -92,11 +93,10 @@ class ConditionalAgentConfig(AgentConfig):
         title="Evaluate condition on",
         description="Source to evaluate the condition on. ",
     )
-    model: str = Field(
-        default="chatgpt-o3-mini",
+    model: LLMField = Field(
+        default=LLMConfig(model_id=llm_defaults.reasoning),
         title="Generative model",
         description="Model used to assess the condition",
-        json_schema_extra={"widget": WidgetType.MODEL_SELECT},
     )
 
     @field_serializer("then", "else_")

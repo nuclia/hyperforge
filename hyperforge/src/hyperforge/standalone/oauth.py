@@ -10,6 +10,11 @@ from cryptography.hazmat.primitives.hashes import SHA256, SHA384, SHA512
 from starlette.authentication import AuthenticationError
 
 from hyperforge.standalone.config import StandAloneAgentConfig, StandaloneMCPAuthConfig
+from hyperforge.standalone.settings import StandaloneSettings
+from hyperforge.utils.http import (
+    read_limited_response,
+    validate_public_http_url,
+)
 
 _HASHES = {
     "RS256": SHA256(),
@@ -31,8 +36,13 @@ def force_https_metadata(app: Any) -> bool:
 class JWKSCache:
     ttl_seconds: int = 300
     _values: dict[str, tuple[float, dict[str, Any]]] = field(default_factory=dict)
+    standalone_settings: StandaloneSettings = field(
+        default_factory=lambda: StandaloneSettings()
+    )
 
     async def get(self, url: str) -> dict[str, Any]:
+        if self.standalone_settings.enforce_public_urls:
+            validate_public_http_url(url, https_only=True)
         now = time.time()
         cached = self._values.get(url)
         if cached is not None:
@@ -41,9 +51,14 @@ class JWKSCache:
                 return jwks
 
         async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.get(url)
-            response.raise_for_status()
-        jwks = response.json()
+            request = client.build_request("GET", url)
+            response = await client.send(request, stream=True, follow_redirects=True)
+            try:
+                response.raise_for_status()
+                content = await read_limited_response(response, 1024 * 1024)
+            finally:
+                await response.aclose()
+        jwks = json.loads(content)
         self._values[url] = (now + self.ttl_seconds, jwks)
         return jwks
 

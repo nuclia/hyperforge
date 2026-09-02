@@ -1,0 +1,135 @@
+"""Tests for hyperforge.db.llm_migration_utils."""
+
+import json
+import uuid
+
+import pytest
+from sqlalchemy import text
+
+from hyperforge.db.llm_migration_utils import migrate_llm_models, walk_and_replace
+from hyperforge.llm_config import LLM_CONFIG_TYPE
+
+
+class TestWalkAndReplace:
+    def test_replaces_matching_model_id(self):
+        config = {
+            "planner_model": {"_type": LLM_CONFIG_TYPE, "model_id": "chatgpt-4.1"},
+            "executor_model": {
+                "_type": LLM_CONFIG_TYPE,
+                "model_id": "gemini-2.5-flash",
+            },
+            "unrelated": "hello",
+        }
+        modified = walk_and_replace(
+            config,
+            {"chatgpt-4.1": "chatgpt-4.5", "gemini-2.5-flash": "gemini-3.0-flash"},
+        )
+        assert modified is True
+        assert config["planner_model"]["model_id"] == "chatgpt-4.5"
+        assert config["executor_model"]["model_id"] == "gemini-3.0-flash"
+        assert config["unrelated"] == "hello"
+
+    def test_preserves_uuid_suffix(self):
+        custom_uuid = str(uuid.uuid4())
+        config = {"_type": LLM_CONFIG_TYPE, "model_id": f"chatgpt-4.1/{custom_uuid}"}
+        walk_and_replace(config, {"chatgpt-4.1": "chatgpt-4.5"})
+        assert config["model_id"] == f"chatgpt-4.5/{custom_uuid}"
+
+    def test_ignores_dicts_without_discriminator(self):
+        config = {
+            "model_id": "chatgpt-4.1",  # no _type
+            "nested": {"_type": "other", "model_id": "chatgpt-4.1"},  # wrong _type
+        }
+        modified = walk_and_replace(config, {"chatgpt-4.1": "chatgpt-4.5"})
+        assert modified is False
+
+    def test_recurses_into_nested_structures(self):
+        config = {
+            "agents": [
+                {"config": {"_type": LLM_CONFIG_TYPE, "model_id": "chatgpt-4.1"}}
+            ]
+        }
+        modified = walk_and_replace(config, {"chatgpt-4.1": "chatgpt-4.5"})
+        assert modified is True
+        assert config["agents"][0]["config"]["model_id"] == "chatgpt-4.5"
+
+
+class TestMigrateLLMModelsDB:
+    """Integration test exercising migrate_llm_models against a real PostgreSQL."""
+
+    @pytest.fixture(autouse=True)
+    def _seed_data(self, test_db):
+        """Insert test rows into retrieval_agent_generation."""
+        self.row_id = str(uuid.uuid4())
+        generation_config = {
+            "module": "summarize",
+            "model": {"_type": LLM_CONFIG_TYPE, "model_id": "chatgpt-4.1"},
+            "nested_agents": [
+                {
+                    "planner_model": {
+                        "_type": LLM_CONFIG_TYPE,
+                        "model_id": "gemini-2.5-flash",
+                    }
+                }
+            ],
+        }
+        # Insert parent rows to satisfy FK chain:
+        # retrieval_agent_config -> retrieval_agent_workflow -> retrieval_agent_generation
+        test_db.execute(
+            text(
+                "INSERT INTO retrieval_agent_config (account, agent_id, rules, memory) "
+                "VALUES (:account, :agent_id, '[]'::jsonb, '{}'::jsonb) "
+                "ON CONFLICT DO NOTHING"
+            ),
+            {"account": "test-account", "agent_id": "test-agent"},
+        )
+        test_db.execute(
+            text(
+                "INSERT INTO retrieval_agent_workflow (account, agent_id, workflow_id, name) "
+                "VALUES (:account, :agent_id, :workflow_id, :name) "
+                "ON CONFLICT DO NOTHING"
+            ),
+            {
+                "account": "test-account",
+                "agent_id": "test-agent",
+                "workflow_id": "test-workflow",
+                "name": "test",
+            },
+        )
+        test_db.execute(
+            text(
+                "INSERT INTO retrieval_agent_generation "
+                "(id, account, agent_id, workflow_id, generation) "
+                "VALUES (:id, :account, :agent_id, :workflow_id, :generation)"
+            ),
+            {
+                "id": self.row_id,
+                "account": "test-account",
+                "agent_id": "test-agent",
+                "workflow_id": "test-workflow",
+                "generation": json.dumps(generation_config),
+            },
+        )
+        test_db.commit()
+
+    def test_migrate_replaces_models_in_db(self, test_db):
+        total = migrate_llm_models(
+            test_db,
+            {"chatgpt-4.1": "chatgpt-4.5", "gemini-2.5-flash": "gemini-3.0-flash"},
+        )
+        test_db.commit()
+
+        assert total >= 1
+
+        # Read back and verify
+        row = test_db.execute(
+            text("SELECT generation FROM retrieval_agent_generation WHERE id = :id"),
+            {"id": self.row_id},
+        ).fetchone()
+        config = row[0] if isinstance(row[0], dict) else json.loads(row[0])
+
+        assert config["model"]["model_id"] == "chatgpt-4.5"
+        assert (
+            config["nested_agents"][0]["planner_model"]["model_id"]
+            == "gemini-3.0-flash"
+        )
