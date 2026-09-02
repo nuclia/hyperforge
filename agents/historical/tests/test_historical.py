@@ -1,12 +1,11 @@
 from unittest.mock import AsyncMock, patch
 
-import pytest
-from hyperforge.manager import Manager
 from hyperforge.memory.memory import EphemeralSessionMemory
 from hyperforge.models import MemoryConfig, Rules
+from nucliadb_models.search import KnowledgeboxFindResults
+
 from hyperforge_historical.agent import HistoricalAgent
 from hyperforge_historical.config import HistoricalAgentConfig
-from nucliadb_models.search import KnowledgeboxFindResults
 
 
 def make_agent(all_sessions: bool = False) -> HistoricalAgent:

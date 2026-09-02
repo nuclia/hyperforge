@@ -1,6 +1,8 @@
 from httpx import AsyncClient
 from nucliadb_models.resource import KnowledgeBoxObj
 
+from hyperforge.llm_config import llm_defaults
+
 HEADERS = {
     "X-STF-USER": "user1",
     "X-STF-ACCOUNT": "nuclia",
@@ -32,3 +34,8 @@ async def test_arag_new_schema(arag_kb: KnowledgeBoxObj, arag_api: AsyncClient):
         assert key in agents
     for key in ["nucliadb", "sync"]:
         assert key in drivers
+
+    summarize_model_schema = agents["generation"]["summarize"]["config_schema"][
+        "properties"
+    ]["model"]
+    assert summarize_model_schema["default"]["model_id"] == llm_defaults.default

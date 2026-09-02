@@ -1,6 +1,7 @@
 """Session management functions for ARAG agents with NucliaDB memory."""
 
 from typing import Optional
+from uuid import UUID
 
 from nucliadb_models import (
     CreateResourcePayload,
@@ -17,6 +18,14 @@ from nucliadb_sdk.v2.exceptions import NotFoundError
 from hyperforge import logger
 from hyperforge.api.models import INFO_FIELD_ID
 from hyperforge.memory.memory import QUESTION_ANSWERS_FIELD
+
+
+def _is_uuid(value: str) -> bool:
+    try:
+        UUID(value)
+        return True
+    except (ValueError, TypeError):
+        return False
 
 
 async def create_session_resource(
@@ -94,6 +103,54 @@ async def get_session_resource(
     )
 
 
+async def get_session_resource_by_slug(
+    ndb: NucliaDBAsync,
+    agent_id: str,
+    slug: str,
+    show: Optional[list[str]] = None,
+) -> Resource:
+    """Get a session resource by slug."""
+    query_params = {}
+    if show:
+        query_params["show"] = show
+
+    return await ndb.get_resource_by_slug(
+        slug=slug,
+        kbid=agent_id,
+        query_params=query_params,
+    )
+
+
+async def resolve_session_id(
+    ndb: NucliaDBAsync,
+    agent_id: str,
+    session: str,
+) -> str | None:
+    """Resolve a client-provided session identifier to the NucliaDB resource id."""
+    try:
+        UUID(session)
+    except ValueError:
+        try:
+            resource = await get_session_resource_by_slug(
+                ndb, agent_id, session, show=["basic"]
+            )
+        except NotFoundError:
+            return None
+        return resource.id
+
+    try:
+        await get_session_resource(ndb, agent_id, session, show=["basic"])
+        return session
+    except NotFoundError:
+        try:
+            resource = await get_session_resource_by_slug(
+                ndb, agent_id, session, show=["basic"]
+            )
+        except NotFoundError:
+            return None
+        return resource.id
+
+
 async def session_exists(
     ndb: NucliaDBAsync,
     agent_id: str,
@@ -110,11 +167,18 @@ async def session_exists(
         True if session exists, False otherwise
     """
     try:
-        await ndb.get_resource_by_id(
-            rid=session_id,
-            kbid=agent_id,
-            query_params={"show": ["basic"]},
-        )
+        if _is_uuid(session_id):
+            await ndb.get_resource_by_id(
+                rid=session_id,
+                kbid=agent_id,
+                query_params={"show": ["basic"]},
+            )
+        else:
+            await ndb.get_resource_by_slug(
+                slug=session_id,
+                kbid=agent_id,
+                query_params={"show": ["basic"]},
+            )
         return True
     except NotFoundError:
         return False

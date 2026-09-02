@@ -3,16 +3,15 @@
 from unittest.mock import AsyncMock
 from urllib.parse import parse_qs
 
+import hyperforge_mcp.http as http_module
 import pytest
 from cryptography.fernet import Fernet
-from starlette.testclient import TestClient
-
-import hyperforge_mcp.http as http_module
 from hyperforge_mcp.http import (
     MCPOAuthRoutingParams,
     decrypt_mcp_oauth_state,
     encrypt_mcp_oauth_state,
 )
+from starlette.testclient import TestClient
 
 # ---------------------------------------------------------------------------
 # Test Fernet key - injected via env var so EncryptionSettings picks it up.
@@ -114,6 +113,32 @@ def test_valid_state_publishes_sdk_state_and_returns_200(client):
     assert params["code"] == ["mycode"]
     # The published state must be sdk_state (not the full Fernet token).
     assert params["state"] == [sdk_nonce]
+
+
+def test_auth_success_uses_configured_logo(client):
+    tc, app = client
+    app.settings.auth_success_logo_url = (
+        'https://example.com/logo.svg?size=large&theme="light"'
+    )
+
+    resp = tc.get(f"/api/auth/mcp/callback?state={_make_state()}&code=mycode")
+
+    assert resp.status_code == 200
+    assert (
+        'src="https://example.com/logo.svg?size=large&amp;theme=&quot;light&quot;"'
+        in resp.text
+    )
+    assert '<div class="brand">Hyperforge</div>' not in resp.text
+
+
+def test_auth_success_uses_text_when_logo_is_not_configured(client):
+    tc, _ = client
+
+    resp = tc.get(f"/api/auth/mcp/callback?state={_make_state()}&code=mycode")
+
+    assert resp.status_code == 200
+    assert '<div class="brand">Hyperforge</div>' in resp.text
+    assert '<img class="logo"' not in resp.text
 
 
 def test_valid_state_can_be_used_twice(client):

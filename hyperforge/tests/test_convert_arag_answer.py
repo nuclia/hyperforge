@@ -3,6 +3,9 @@
 import json
 
 import pytest
+from mcp.types import EmbeddedResource, ImageContent, TextContent, TextResourceContents
+from nuclia.lib.nua_responses import Image
+
 from hyperforge.api.v1.mcp_content import convert_arag_answer_to_content
 from hyperforge.interaction import AnswerOperation, AragAnswer, ARAGException
 from hyperforge.models import (
@@ -14,8 +17,6 @@ from hyperforge.models import (
     Step,
     VegaLiteVisualization,
 )
-from mcp.types import EmbeddedResource, ImageContent, TextContent, TextResourceContents
-from nuclia.lib.nua_responses import Image
 
 # ============================================================================
 # Fixtures & Helpers

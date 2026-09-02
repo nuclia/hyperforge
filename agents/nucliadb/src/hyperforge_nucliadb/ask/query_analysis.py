@@ -2,9 +2,9 @@ import re
 from dataclasses import dataclass
 from typing import Optional
 
+from hyperforge import logger
 from lingua import LanguageDetectorBuilder
 
-from hyperforge import logger
 from hyperforge_nucliadb.ask.config import AskAgentConfig
 from hyperforge_nucliadb.ask.kb_analysis import KnowledgeBoxInfo
 

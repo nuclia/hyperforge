@@ -1,20 +1,40 @@
+COMPONENTS := \
+	hyperforge \
+	agents/conditional \
+	agents/external \
+	agents/generate \
+	agents/google \
+	agents/historical \
+	agents/http \
+	agents/mcp \
+	agents/nucliadb \
+	agents/passthrough \
+	agents/perplexity \
+	agents/perplexity_search \
+	agents/related \
+	agents/remi \
+	agents/rephrase \
+	agents/restart \
+	agents/restricted \
+	agents/smart \
+	agents/static \
+	agents/static_string \
+	agents/summarize
+
 install:
 	uv sync
 
 install-test:
 	uv sync --group dev
 
-fmt:
-	uv run ruff format hyperforge agents 
-	uv run ruff check hyperforge agents --select I --fix 
+format fmt:
+	@for dir in $(COMPONENTS); do $(MAKE) -C $$dir format || exit 1; done
 
 extract-openai:
 	uv run arag-extract-openapi  $(DOCS_FILE) $(API_VERSION) $(HASH)
 
 lint:
-	uv run ruff check hyperforge agents 
-	uv run ruff format --check hyperforge agents 
-	uv run mypy hyperforge agents
+	@for dir in $(COMPONENTS); do $(MAKE) -C $$dir lint || exit 1; done
 
 start_local_db:
 	brew services start postgresql
@@ -47,17 +67,4 @@ dockers:
 	docker build -t arag . -f HYPERFORGE.Dockerfile
 
 all-tests:
-	make -C hyperforge test
-	make -C agents/smart test
-	make -C agents/perplexity test
-	make -C agents/perplexity_search test
-	make -C agents/google test
-	make -C agents/conditional test
-	make -C agents/external test
-	make -C agents/generate test
-	make -C agents/nucliadb test
-	make -C agents/passthrough test
-	make -C agents/remi test
-	make -C agents/smart test
-	make -C agents/summarize test
-	make -C agents/static test
+	@for dir in $(COMPONENTS); do $(MAKE) -C $$dir test || exit 1; done

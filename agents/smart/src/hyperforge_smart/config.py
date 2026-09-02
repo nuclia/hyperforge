@@ -1,17 +1,55 @@
+from math import ceil
 from typing import Any, Dict, List, Literal, Optional, Tuple
 
 from hyperforge.configure import get_agent_config_klass
 from hyperforge.context.config import ContextAgentConfig
+from hyperforge.llm_config import LLMConfig, LLMField, llm_defaults
+from hyperforge.result_payload import (
+    BYTES_PER_KB,
+    ResultPayloadSettings,
+    migrate_legacy_byte_limits,
+)
 from hyperforge.utils import WidgetType
-from pydantic import BaseModel, Field, field_serializer, field_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    field_serializer,
+    field_validator,
+    model_validator,
+)
 from pydantic.config import ConfigDict
 
 PlanningMode = Literal["reactive", "plan_execute"]
+_DEFAULT_TOOL_RESULT_BUDGET = ResultPayloadSettings()
 
 
 class SmartAgentConfig(ContextAgentConfig):
     model_config = ConfigDict(title="Smart agent")
     module: Literal["smart"] = "smart"
+    max_tool_result_kb: int = Field(
+        default=ceil(_DEFAULT_TOOL_RESULT_BUDGET.max_bytes / BYTES_PER_KB),
+        ge=1,
+        title="Maximum tool result (KB)",
+        description=(
+            "Maximum total size accepted from one tool call. Larger results are "
+            "rejected before they are sent to the LLM."
+        ),
+    )
+    max_tool_result_item_kb: int = Field(
+        default=ceil(_DEFAULT_TOOL_RESULT_BUDGET.max_item_bytes / BYTES_PER_KB),
+        ge=1,
+        title="Maximum tool result item (KB)",
+        description=(
+            "Maximum size accepted for one item or content block in a tool result. "
+            "It cannot be greater than the total result limit."
+        ),
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def migrate_byte_limits(cls, value: Any) -> Any:
+        return migrate_legacy_byte_limits(value)
+
     planning_mode: PlanningMode = Field(
         default="reactive",
         title="Planning mode",
@@ -68,17 +106,15 @@ class SmartAgentConfig(ContextAgentConfig):
             "widget": WidgetType.NOT_SHOWN,
         },
     )
-    planner_model: str = Field(
-        default="chatgpt-4.1",
+    planner_model: LLMField = Field(
+        default=LLMConfig(model_id=llm_defaults.smart),
         title="Planner model",
         description="Model used to plan the actions to take",
-        json_schema_extra={"widget": WidgetType.MODEL_SELECT},
     )
-    executor_model: str = Field(
-        default="chatgpt-4.1",
+    executor_model: LLMField = Field(
+        default=LLMConfig(model_id=llm_defaults.smart),
         title="Executor model",
         description=("Model used to select and execute the tools."),
-        json_schema_extra={"widget": WidgetType.MODEL_SELECT},
     )
     max_iterations: int = Field(
         default=5,
@@ -121,7 +157,7 @@ class SmartAgentConfig(ContextAgentConfig):
     def is_smart_agent(cls, value: list[Dict[str, Any]]) -> list[BaseModel]:
         if value is None:
             return value
-        result = []
+        result: list[BaseModel] = []
         for agent_cfg in value:
             module = agent_cfg.get("module")
             if module is None:
@@ -130,4 +166,4 @@ class SmartAgentConfig(ContextAgentConfig):
             agent_config_klass = get_agent_config_klass(module)
             agent_config_instance = agent_config_klass.model_validate(agent_cfg)
             result.append(agent_config_instance)
-        return result  # type: ignore
+        return result

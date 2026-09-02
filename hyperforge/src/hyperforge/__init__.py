@@ -1,6 +1,6 @@
 import logging
 
-import fire  # type: ignore
+import fire
 import jinja2
 
 # Jinja vulnerability is not a concern since this is used to format a string prompt, not to render HTML

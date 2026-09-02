@@ -17,7 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-requires-python = ">=3.10, <4"
+requires-python = ">=3.12, <4"
 dependencies = ["hyperforge"]
 
 [dependency-groups]
@@ -46,3 +46,6 @@ asyncio_mode = "auto"
 
 # Exclude specific files from being packaged
 source-exclude = ["tests/**", "*.pyc"]
+
+[tool.ruff]
+extend = "../../ruff.toml"

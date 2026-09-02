@@ -16,29 +16,27 @@ import uvicorn
 from cryptography.fernet import Fernet
 from httpx import AsyncClient
 from httpx._transports.asgi import ASGITransport
-from nuclia.config import NuaKey, Selection
-from nuclia.data import get_auth
-from nuclia.sdk import NucliaPredict
 from nucliadb_models.resource import KnowledgeBoxObj
 from nucliadb_sdk import NucliaDB, NucliaDBAsync
 from nucliadb_sdk.tests.fixtures import NucliaFixture
-from pytest_docker_fixtures import images  # type: ignore  # type: ignore
-from pytest_docker_fixtures.containers.pg import pg_image  # type: ignore
-from pytest_docker_fixtures.containers.valkey import valkey_image  # type: ignore
+from pytest_docker_fixtures import images
+from pytest_docker_fixtures.containers.pg import pg_image
+from pytest_docker_fixtures.containers.valkey import valkey_image
 from redis.asyncio import Redis
 from sqlalchemy import create_engine
-from sqlalchemy_utils import (  # type: ignore
+from sqlalchemy_utils import (
     create_database,
     database_exists,
     drop_database,
 )
 
-import hyperforge  # noqa: F401
+import hyperforge
 from hyperforge.api.app import HTTPApplication
 from hyperforge.api.settings import Settings
 from hyperforge.broker.redis import RedisBroker
 from hyperforge.db.agents import AgentManager
 from hyperforge.db.settings import DataManagerSettings
+from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.models import MemoryConfig, NucliaDBMemoryConfig, Rules
 from hyperforge.server.cache import ValkeyCache
 from hyperforge.server.session import SessionManager
@@ -47,10 +45,9 @@ from hyperforge.utils.http import SafeTransport
 
 _package_path = pathlib.Path(hyperforge.__file__).parent.absolute()
 
-NUA = os.environ.get("NUA_KEY", "DUMMY")
-
-images.settings["nucliadb"]["env"]["NUA_API_KEY"] = NUA
-images.settings["nucliadb"]["env"]["DUMMY_PREDICT"] = "False"
+# Keep the test NucliaDB self-contained. This applies when recording and
+# replaying cassettes so local search results do not depend on an external NUA.
+images.settings["nucliadb"]["env"]["dummy_predict"] = "True"  # type: ignore
 
 
 NUCLIA_Make_article = "https://storage.googleapis.com/ncl-testbed-gcp-stage-1/test_nucliadb/articles.export"
@@ -72,13 +69,6 @@ async def init_fixture(
     generative_model: str = "chatgpt-azure-4o",
     kbid: str | None = None,
 ):
-    async with AsyncClient() as client:
-        resp = await client.get(
-            f"http://{nucliadb.host}:{nucliadb.port}/api/v1/config-check",
-            headers={"X-NUCLIADB-ROLES": "READER"},
-        )
-        assert resp.status_code == 200, "NUA KEY not configured"
-        assert resp.json()["nua_api_key"]["valid"], "NUA KEY not valid"
     sdk = nucliadb_sdk.NucliaDB(region="on-prem", url=nucliadb.url)
     slug = dataset_slug
     learning_configuration = {
@@ -99,23 +89,6 @@ async def init_fixture(
         },
         "generative_model": generative_model,
     }
-
-    if kbid is not None:
-        auth = get_auth()
-        auth._config.nuas_token = [
-            NuaKey(
-                client_id="nucliadb",
-                region="europe-1",
-                account="nuclia",
-                token=NUA,
-                account_type="service",
-            )
-        ]
-        auth._config.default = Selection(nua="nucliadb")
-        np = NucliaPredict()
-        np.del_config(
-            kbid,
-        )
 
     kb_obj = sdk.create_knowledge_box(
         uuid=kbid, slug=slug, learning_configuration=learning_configuration
@@ -162,7 +135,7 @@ async def arag_settings(sdk_async: NucliaDBAsync, valkey_url: str):
     )
 
 
-images.settings["postgresql"].update(
+images.settings["postgresql"].update(  # type: ignore
     {
         "version": "16.1",
         "env": {
@@ -384,7 +357,8 @@ async def arag_server(
         internal_nucliadb_url=sdk.base_url,
         internal_nua=False,
         local_openai=None,
-        external_nua_api_key=NUA,
+        external_nua_api_key=os.environ.get("NUA_KEY")
+        or cassette_nua_key("https://europe-1.dp.progress.cloud/"),
     )
     broker = RedisBroker.from_url(
         url=valkey_url,

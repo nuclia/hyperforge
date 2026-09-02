@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Any, Dict, Literal, Optional
 
 from hyperforge.agent import AgentConfig
+from hyperforge.llm_config import LLMConfig, LLMField, llm_defaults
 from hyperforge.utils import WidgetType, sync_dns_validation
 from pydantic import Field, field_validator
 from pydantic.config import ConfigDict
@@ -49,11 +50,10 @@ class ExternalCallAgentConfig(AgentConfig):
         {},
         title="Headers to use on the API call ",
     )
-    model: str = Field(
-        default="chatgpt-o3-mini",
+    model: LLMField = Field(
+        default=LLMConfig(model_id=llm_defaults.reasoning),
         title="Generative model",
         description="Model used to extract the parameters to call the URL",
-        json_schema_extra={"widget": WidgetType.MODEL_SELECT},
     )
     context: bool = Field(
         False,
@@ -64,6 +64,13 @@ class ExternalCallAgentConfig(AgentConfig):
         ...,
         title="URL to call",
         description="",
+    )
+    timeout: int = Field(default=30, ge=1, le=300)
+    max_response_bytes: int = Field(
+        default=1024 * 1024,
+        ge=1,
+        le=10 * 1024 * 1024,
+        description="Maximum accepted HTTP response size in bytes",
     )
 
     @field_validator("url")
