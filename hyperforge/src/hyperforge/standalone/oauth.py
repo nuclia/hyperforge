@@ -6,6 +6,8 @@ from typing import Any
 
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.hashes import SHA256, SHA384, SHA512
+from hyperforge.db import settings
+from hyperforge.standalone.settings import StandaloneSettings
 from starlette.authentication import AuthenticationError
 
 from hyperforge.standalone.config import StandAloneAgentConfig, StandaloneMCPAuthConfig
@@ -35,9 +37,13 @@ def force_https_metadata(app: Any) -> bool:
 class JWKSCache:
     ttl_seconds: int = 300
     _values: dict[str, tuple[float, dict[str, Any]]] = field(default_factory=dict)
+    standalone_settings: StandaloneSettings = field(
+        default_factory=lambda: StandaloneSettings()
+    )
 
     async def get(self, url: str) -> dict[str, Any]:
-        validate_public_http_url(url, https_only=True)
+        if self.standalone_settings.enforce_public_urls:
+            validate_public_http_url(url, https_only=True)
         now = time.time()
         cached = self._values.get(url)
         if cached is not None:
