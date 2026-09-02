@@ -4,17 +4,15 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
+import httpx
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.hashes import SHA256, SHA384, SHA512
-import httpx
-from hyperforge.db import settings
-from hyperforge.standalone.settings import StandaloneSettings
 from starlette.authentication import AuthenticationError
 
 from hyperforge.standalone.config import StandAloneAgentConfig, StandaloneMCPAuthConfig
+from hyperforge.standalone.settings import StandaloneSettings
 from hyperforge.utils.http import (
     read_limited_response,
-    safe_http_client,
     validate_public_http_url,
 )
 
