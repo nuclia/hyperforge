@@ -2,7 +2,7 @@ import uuid
 from enum import Enum
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from hyperforge.models import (
     Answer,
@@ -11,6 +11,7 @@ from hyperforge.models import (
     Step,
     Visualization,
 )
+from hyperforge.utils.http import validate_public_http_url
 
 # Models used between client and API for itneraction requests/responses/streams
 
@@ -65,6 +66,11 @@ class Provider(Enum):
 
 class OAuthAuthenticateURL(BaseModel):
     oauth_url: str
+
+    @field_validator("oauth_url")
+    @classmethod
+    def validate_oauth_url(cls, value: str) -> str:
+        return validate_public_http_url(value, https_only=True)
 
 
 class OAuthFeedbackReturnSchema(BaseModel):

@@ -91,8 +91,28 @@ def standalone_settings():
 
 
 @pytest.fixture
+def standalone_settings_http_metadata():
+    return StandaloneSettings(
+        agents_config=Path("/dev/null"),
+        external_nua_api_key="dummy",
+        debug=False,
+        mcp_force_https_metadata=False,
+    )
+
+
+@pytest.fixture
 async def client(agents_config, standalone_settings):
     app = StandaloneApplication(agents_config, standalone_settings)
+    async with (
+        app.router.lifespan_context(app),
+        AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client,
+    ):
+        yield client
+
+
+@pytest.fixture
+async def client_http_metadata(agents_config, standalone_settings_http_metadata):
+    app = StandaloneApplication(agents_config, standalone_settings_http_metadata)
     async with (
         app.router.lifespan_context(app),
         AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client,
@@ -357,6 +377,19 @@ async def test_protected_resource_metadata_uses_agent_oauth_config(
     }
 
 
+async def test_protected_resource_metadata_root_uses_first_enabled_agent_config(
+    client: AsyncClient,
+):
+    response = await client.get("/.well-known/oauth-protected-resource")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "resource": AUDIENCE,
+        "scopes_supported": ["openid", "offline_access", REQUIRED_SCOPE],
+        "authorization_servers": ["https://auth.example.test"],
+    }
+
+
 async def test_protected_resource_metadata_without_auth_has_no_hydra_fallback(
     client: AsyncClient,
 ):
@@ -372,6 +405,37 @@ async def test_protected_resource_metadata_without_auth_has_no_hydra_fallback(
     }
 
 
+async def test_protected_resource_metadata_root_without_auth_has_no_hydra_fallback(
+    load_agents, standalone_settings
+):
+    cfg = StandaloneConfig.validate_python(
+        {
+            OPEN_AGENT_ID: {
+                "title": "Open Agent",
+                "workflows": {
+                    "default": {
+                        "name": "default",
+                        "generation": [{"module": "summarize"}],
+                    }
+                },
+            },
+        }
+    )
+    app = StandaloneApplication(cfg, standalone_settings)
+    async with (
+        app.router.lifespan_context(app),
+        AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client,
+    ):
+        response = await client.get("/.well-known/oauth-protected-resource")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "resource": "http://test",
+        "scopes_supported": [],
+        "authorization_servers": [],
+    }
+
+
 async def test_prepare_interaction_headers_forwards_authorization(agents_config):
     app = SimpleNamespace(_agents_cfg=agents_config)
     headers = Headers({"Authorization": "Bearer user-token", "X-Other": "value"})
@@ -380,3 +444,28 @@ async def test_prepare_interaction_headers_forwards_authorization(agents_config)
 
     assert prepared["authorization"] == "Bearer user-token"
     assert prepared["x-other"] == "value"
+
+
+async def test_protected_mcp_default_metadata_url_allows_http_when_flag_disabled(
+    client_http_metadata: AsyncClient,
+):
+    challenge_response = await client_http_metadata.delete(
+        f"/api/v1/agent/{DEFAULT_METADATA_AGENT_ID}/session/s1/mcp"
+    )
+
+    assert challenge_response.status_code == 401
+    header = challenge_response.headers["www-authenticate"]
+    assert (
+        "http://test/.well-known/oauth-protected-resource/api/v1/agent/default-metadata-agent/session/s1/mcp"
+        in header
+    )
+    assert "https://test/.well-known/oauth-protected-resource/" not in header
+
+    metadata_response = await client_http_metadata.get(
+        f"/.well-known/oauth-protected-resource/api/v1/agent/{DEFAULT_METADATA_AGENT_ID}/session/s1/mcp"
+    )
+
+    assert metadata_response.status_code == 200
+    assert metadata_response.json()["resource"] == (
+        f"http://test/api/v1/agent/{DEFAULT_METADATA_AGENT_ID}/session/s1/mcp"
+    )

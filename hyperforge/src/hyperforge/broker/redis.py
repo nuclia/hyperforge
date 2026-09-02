@@ -193,7 +193,13 @@ class RedisBroker(Broker):
             key, {"msg": payload, "trace": json.dumps(trace_headers)}, maxlen=100
         )
 
-    async def receive_reply(self, key: str, timeout_ms: int) -> str | None:
+    async def receive_reply(
+        self, key: str, timeout_ms: int, lookback_seconds: int = 60
+    ) -> str | None:
+        # Keep a stable cursor across blocking-read retries. Recomputing the
+        # cursor as "$" on every XREAD can skip a reply that is published after
+        # one block expires but before the next XREAD starts.
+        cursor = f"{int((time.time() - lookback_seconds) * 1000)}-0"
         deadline = time.monotonic() + (timeout_ms / 1000)
         reconnect_attempts = 0
 
@@ -208,7 +214,7 @@ class RedisBroker(Broker):
 
             try:
                 response = await self._client.xread(
-                    {key: "$"},
+                    {key: cursor},
                     block=block_ms,
                     count=1,
                 )

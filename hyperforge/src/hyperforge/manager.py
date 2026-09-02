@@ -1,11 +1,19 @@
 import json
-from typing import Any, AsyncIterator, Dict, List, Optional, Protocol, Tuple
+from typing import Any, AsyncIterator, Dict, List, Optional, Protocol, Tuple, Union
 
-from nuclia.lib.nua import AsyncNuaClient
+from nuclia.lib.nua import (
+    AsyncNuaClient,
+    GenerateStreamResponse,
+    QueryRequest,
+    RephraseRequest,
+)
 from nuclia.lib.nua_responses import (
     ChatModel,
     Image,
     Message,
+    QueryInfo,
+    Reasoning,
+    RephraseModel,
     RerankModel,
     RerankResponse,
     Tokens,
@@ -31,7 +39,47 @@ from pydantic_core import ErrorDetails, ValidationError
 from hyperforge.configure import get_driver_klass
 from hyperforge.driver import Driver, DriverConfig
 from hyperforge.interaction import StreamingChunk
+from hyperforge.llm_config import LLMConfig
 from hyperforge.models import TrackingInfo
+
+# Type alias for parameters that accept either a plain model ID string
+# or a structured LLMConfig object. This keeps backwards compatibility
+# with agents that still pass raw strings.
+ModelParam = Union[str, LLMConfig]
+
+
+def _resolve_model_id(model: ModelParam) -> str:
+    """Extract the model identifier string from a ModelParam.
+
+    If `model` is already a string, return it as-is.
+    If it's an LLMConfig, return its `model_id` field.
+    """
+    if isinstance(model, str):
+        return model
+    return model.model_id
+
+
+def build_reasoning(model: ModelParam) -> Union[Reasoning, bool]:
+    """Build a NUA Reasoning object from a ModelParam.
+
+    If `model` is a plain string or has no reasoning configured, returns False
+    (reasoning disabled). Otherwise, builds a `Reasoning` object from the
+    LLMConfig's effective reasoning settings. NUA handles any necessary
+    effort/budget_tokens normalization server-side.
+    """
+    if isinstance(model, str):
+        return False
+    effective = model.get_effective_reasoning()
+    if effective is None:
+        return False
+    kwargs: dict[str, Any] = {}
+    if effective.effort is not None:
+        kwargs["effort"] = effective.effort.value
+    if effective.budget_tokens is not None:
+        kwargs["budget_tokens"] = effective.budget_tokens
+    if not kwargs:
+        return False
+    return Reasoning(**kwargs)
 
 
 class StreamCallback(Protocol):
@@ -58,16 +106,18 @@ class Manager:
     drivers: Dict[str, Driver]
     nua: AsyncNuaClient
 
-    def __init__(self) -> None:
+    def __init__(self, *, send_rao_origin: bool = True) -> None:
         self.drivers: Dict[str, Driver] = {}
+        self.send_rao_origin = send_rao_origin
 
     @classmethod
     async def from_config(
         cls,
         drivers: List[DriverConfig],
         nua: AsyncNuaClient,
+        send_rao_origin: bool = True,
     ):
-        manager = cls()
+        manager = cls(send_rao_origin=send_rao_origin)
 
         manager.nua = nua
         for driver in drivers:
@@ -85,11 +135,81 @@ class Manager:
                 result.append(key)
         return result
 
-    async def rerank(self, rerank: RerankModel) -> RerankResponse:
-        return await self.nua.rerank(rerank)
+    async def aclose(self) -> None:
+        await self.nua.aclose()
 
-    async def tokens_predict(self, text: str, model: str) -> Tokens:
-        return await self.nua.tokens_predict(text=text, model=model)
+    async def query_predict(
+        self,
+        request: QueryRequest,
+        *,
+        kbid: str | None = None,
+        extra_headers: dict[str, str] | None = None,
+        tracking: TrackingInfo | None = None,
+    ) -> QueryInfo:
+        return await self.nua.query_predict(
+            request,
+            kbid=kbid,
+            extra_headers=self._build_extra_headers(tracking, extra_headers),
+        )
+
+    async def rephrase(
+        self,
+        request: RephraseRequest,
+        *,
+        kbid: str | None = None,
+        extra_headers: dict[str, str] | None = None,
+        tracking: TrackingInfo | None = None,
+    ) -> RephraseModel:
+        return await self.nua.rephrase(
+            request,
+            kbid=kbid,
+            extra_headers=self._build_extra_headers(tracking, extra_headers),
+        )
+
+    async def generate_stream(
+        self,
+        body: ChatModel,
+        *,
+        kbid: str | None = None,
+        extra_headers: dict[str, str] | None = None,
+        tracking: TrackingInfo | None = None,
+    ) -> GenerateStreamResponse[AsyncIterator[GenerativeChunk]]:
+        return await self.nua.generate_stream(
+            body,
+            kbid=kbid,
+            extra_headers=self._build_extra_headers(tracking, extra_headers),
+            return_metadata=True,
+        )
+
+    async def rerank(
+        self,
+        model: RerankModel,
+        *,
+        kbid: str | None = None,
+        extra_headers: dict[str, str] | None = None,
+        tracking: TrackingInfo | None = None,
+    ) -> RerankResponse:
+        return await self.nua.rerank(
+            model,
+            kbid=kbid,
+            extra_headers=self._build_extra_headers(tracking, extra_headers),
+        )
+
+    async def tokens_predict(
+        self,
+        text: str,
+        model: str | None = None,
+        extra_headers: dict[str, str] | None = None,
+        *,
+        kbid: str | None = None,
+        tracking: TrackingInfo | None = None,
+    ) -> Tokens:
+        return await self.nua.tokens_predict(
+            text,
+            model=model,
+            extra_headers=self._build_extra_headers(tracking, extra_headers),
+            kbid=kbid,
+        )
 
     async def remi(
         self, question: str | None, answer: str | None, contexts: List[str] | None
@@ -101,19 +221,25 @@ class Manager:
                 question=question,
                 answer=answer,
                 contexts=contexts,
-            )
+            ),
+            extra_headers=self._build_extra_headers(),
         )
         return remi_response
 
     def _build_extra_headers(
         self,
         tracking: TrackingInfo | None = None,
+        extra_headers: dict[str, str] | None = None,
     ) -> dict[str, str]:
-        headers: dict[str, str] = {"x-show-consumption": "true", "x-origin": "RAO"}
+        headers = {"x-show-consumption": "true"}
+        if self.send_rao_origin:
+            headers["x-origin"] = "RAO"
         if tracking is not None:
             headers["x-client-ident"] = tracking.rao_id
             headers["x-session"] = tracking.session
             headers["x-message"] = tracking.message
+        if extra_headers is not None:
+            headers.update(extra_headers)
         return headers
 
     async def execute_raw(
@@ -181,7 +307,7 @@ class Manager:
             await callback.emit_streaming_chunk(agent_request=f"{module}@{agent_path}")
 
         async for chunk in self.nua.generate_stream(
-            body=item, extra_headers={"x-show-consumption": "true", "x-origin": "RAO"}
+            body=item, extra_headers=self._build_extra_headers()
         ):
             c = chunk.chunk
             if isinstance(c, TextGenerativeResponse):
@@ -223,7 +349,7 @@ class Manager:
         self,
         prompt: str,
         user_id: str,
-        model: str,
+        model: ModelParam,
         query_context_images: Dict[str, Image] = {},
         system: Optional[str] = None,
         max_tokens: int = 2000,
@@ -242,12 +368,13 @@ class Manager:
                 question="",
                 user_prompt=UserPrompt(prompt=prompt),
                 format_prompt=False,
-                generative_model=model,
+                generative_model=_resolve_model_id(model),
+                reasoning=build_reasoning(model),
                 query_context_images=query_context_images,
                 max_tokens=max_tokens,
                 chat_history=chat_history,
             ),
-            extra_headers={"x-show-consumption": "true", "x-origin": "RAO"},
+            extra_headers=self._build_extra_headers(),
         ):
             yield chunk
 
@@ -255,7 +382,7 @@ class Manager:
         self,
         prompt: str,
         user_id: str,
-        model: str,
+        model: ModelParam,
         query_context_images: Dict[str, Image] = {},
         system: Optional[str] = None,
         max_tokens: int = 2000,
@@ -270,7 +397,8 @@ class Manager:
                     question="",
                     user_prompt=UserPrompt(prompt=prompt),
                     format_prompt=False,
-                    generative_model=model,
+                    generative_model=_resolve_model_id(model),
+                    reasoning=build_reasoning(model),
                     query_context_images=query_context_images,
                     max_tokens=max_tokens,
                     chat_history=chat_history,
@@ -300,7 +428,7 @@ class Manager:
         self,
         prompt: str,
         user_id: str,
-        model: str,
+        model: ModelParam,
         images: Dict[str, Image],
         system: Optional[str] = None,
         tracking: TrackingInfo | None = None,
@@ -312,7 +440,8 @@ class Manager:
                     user_id=user_id,
                     user_prompt=UserPrompt(prompt=prompt),
                     format_prompt=False,
-                    generative_model=model,
+                    generative_model=_resolve_model_id(model),
+                    reasoning=build_reasoning(model),
                     query_context_images=images,
                     system=system,
                 ),
@@ -342,7 +471,7 @@ class Manager:
         prompt: str,
         user_id: str,
         schema: Dict[str, Any],
-        model: str,
+        model: ModelParam,
         images: Dict[str, Image] = {},
         system: Optional[str] = None,
         max_tokens: int = 8192,
@@ -354,7 +483,8 @@ class Manager:
                     user_id=user_id,
                     question="",
                     user_prompt=UserPrompt(prompt=prompt),
-                    generative_model=model,
+                    generative_model=_resolve_model_id(model),
+                    reasoning=build_reasoning(model),
                     format_prompt=False,
                     query_context_images=images,
                     json_schema=schema,
@@ -385,12 +515,61 @@ class Manager:
             output_tokens,
         )
 
+    async def execute_json_reasoning(
+        self,
+        prompt: str,
+        user_id: str,
+        schema: Dict[str, Any],
+        model: ModelParam,
+        images: Dict[str, Image] = {},
+        system: Optional[str] = None,
+        max_tokens: int = 8192,
+        tracking: TrackingInfo | None = None,
+    ) -> Tuple[Dict[str, Any], float, float, str | None]:
+        try:
+            resp = await self.nua.generate(
+                body=ChatModel(
+                    user_id=user_id,
+                    question="",
+                    user_prompt=UserPrompt(prompt=prompt),
+                    generative_model=_resolve_model_id(model),
+                    reasoning=build_reasoning(model),
+                    format_prompt=False,
+                    query_context_images=images,
+                    json_schema=schema,
+                    system=system,
+                    max_tokens=max_tokens,
+                    citations=False,
+                ),
+                extra_headers=self._build_extra_headers(tracking),
+            )
+
+        except ValidationError as e:
+            convert_errors(e)
+            raise
+
+        if resp.object is None:
+            raise Exception("No object")
+
+        if resp.consumption is None or resp.consumption.normalized_tokens is None:
+            input_tokens = 0.0
+            output_tokens = 0.0
+        else:
+            input_tokens = resp.consumption.normalized_tokens.input
+            output_tokens = resp.consumption.normalized_tokens.output
+        return (
+            resp.object,
+            input_tokens,
+            output_tokens,
+            resp.reasoning,
+        )
+
     async def execute_json_citation(
         self,
         question: str,
         user_id: str,
         schema: Dict[str, Any],
-        model: str,
+        model: ModelParam,
         contexts: List[str] = [],
         images: Dict[str, Image] = {},
         system: Optional[str] = None,
@@ -402,7 +581,8 @@ class Manager:
                     user_id=user_id,
                     question=question,
                     query_context=contexts,
-                    generative_model=model,
+                    generative_model=_resolve_model_id(model),
+                    reasoning=build_reasoning(model),
                     format_prompt=True,
                     query_context_images=images,
                     json_schema=schema,
