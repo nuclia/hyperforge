@@ -1,12 +1,12 @@
 from time import time
 
+from hyperforge import PROMPT_ENVIRONMENT, logger
 from hyperforge.agent import Agent
 from hyperforge.exceptions import MaxRetries
 from hyperforge.manager import Manager
 from hyperforge.memory import QuestionMemory
 from hyperforge.trace import trace_agent
 
-from hyperforge import PROMPT_ENVIRONMENT, logger
 from hyperforge_restart.config import RestartAgentConfig
 
 REPHRASE_PROMPT = """
@@ -89,7 +89,7 @@ class RestartAgent(Agent[RestartAgentConfig]):
 
         # retrieve all paragraphs and ask to rephrase on the NUA API
         new_questions = information.get("questions", [])
-        reason = information.get("reason", [])
+        reason = information.get("reason", "")
         answered = information.get("answered", False)
 
         if retry >= self.config.retries and not answered:

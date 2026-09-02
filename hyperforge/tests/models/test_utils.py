@@ -3,9 +3,11 @@ from __future__ import annotations
 from enum import Enum
 from typing import List, Optional, Union
 
-from hyperforge.api.utils import to_strict_json_schema
 from inline_snapshot import snapshot
 from pydantic import BaseModel, Field
+
+from hyperforge.api.utils import to_strict_json_schema
+from hyperforge.models import Context, JSONObject
 
 
 class Table(str, Enum):
@@ -347,3 +349,110 @@ def test_nested_inline_ref_expansion() -> None:
             "additionalProperties": False,
         }
     )
+
+
+# ---------------------------------------------------------------------------
+# JSONObject model
+# ---------------------------------------------------------------------------
+
+
+def test_json_object_minimal():
+    """JSONObject can be created with only json_object (all other fields optional)."""
+    obj = JSONObject(json_object={"key": "value"})
+    assert obj.json_object == {"key": "value"}
+    assert obj.json_schema is None
+    assert obj.metadata == {}
+    assert obj.id is not None  # auto-generated uuid
+
+
+def test_json_object_with_schema():
+    """JSONObject stores a JSON schema alongside the object."""
+    schema = {"type": "object", "properties": {"key": {"type": "string"}}}
+    obj = JSONObject(
+        json_schema=schema,
+        json_object={"key": "value"},
+    )
+    assert obj.json_schema == schema
+    assert obj.json_object == {"key": "value"}
+
+
+def test_json_object_with_metadata():
+    """JSONObject stores arbitrary metadata."""
+    obj = JSONObject(
+        json_object={"x": 1},
+        metadata={"source": "test", "confidence": 0.9},
+    )
+    assert obj.metadata == {"source": "test", "confidence": 0.9}
+
+
+def test_json_object_explicit_id():
+    """JSONObject accepts an explicit id and does not override it."""
+    obj = JSONObject(json_object={}, id="my-custom-id")
+    assert obj.id == "my-custom-id"
+
+
+def test_json_object_unique_ids():
+    """Two JSONObjects without explicit ids get different auto-generated ids."""
+    a = JSONObject(json_object={})
+    b = JSONObject(json_object={})
+    assert a.id != b.id
+
+
+def test_json_object_roundtrip():
+    """JSONObject survives model_dump / model_validate round-trip."""
+    obj = JSONObject(
+        json_schema={"type": "object"},
+        json_object={"answer": 42},
+        metadata={"tag": "roundtrip"},
+    )
+    dumped = obj.model_dump()
+    restored = JSONObject.model_validate(dumped)
+    assert restored.json_object == obj.json_object
+    assert restored.json_schema == obj.json_schema
+    assert restored.metadata == obj.metadata
+    assert restored.id == obj.id
+
+
+# ---------------------------------------------------------------------------
+# Context.json_objects field
+# ---------------------------------------------------------------------------
+
+
+def _make_context(**kwargs) -> Context:
+    defaults = dict(
+        original_question_uuid=None,
+        actual_question_uuid=None,
+        question="Q",
+        source="test",
+        agent="test-agent",
+    )
+    return Context(**{**defaults, **kwargs})
+
+
+def test_context_json_objects_defaults_empty():
+    """Context.json_objects is an empty list when not provided."""
+    ctx = _make_context()
+    assert ctx.json_objects == []
+
+
+def test_context_json_objects_stores_items():
+    """Context.json_objects holds JSONObject instances."""
+    objs = [
+        JSONObject(json_object={"a": 1}),
+        JSONObject(json_object={"b": 2}),
+    ]
+    ctx = _make_context(json_objects=objs)
+    assert len(ctx.json_objects) == 2
+    assert ctx.json_objects[0].json_object == {"a": 1}
+    assert ctx.json_objects[1].json_object == {"b": 2}
+
+
+def test_context_json_objects_roundtrip():
+    """Context.json_objects survives model_dump / model_validate round-trip."""
+    objs = [JSONObject(json_object={"key": "val"}, metadata={"m": 1})]
+    ctx = _make_context(json_objects=objs)
+    dumped = ctx.model_dump()
+    restored = Context.model_validate(dumped)
+    assert len(restored.json_objects) == 1
+    assert restored.json_objects[0].json_object == {"key": "val"}
+    assert restored.json_objects[0].metadata == {"m": 1}

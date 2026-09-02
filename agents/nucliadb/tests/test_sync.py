@@ -15,14 +15,17 @@ from hyperforge.pubsub import UserToAgentInteraction
 
 NUA_KEY = os.environ.get(
     "NUA_KEY",
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 
 
 KB_E103CAF3_F8CB_4161_A57C_AAD1192D0666 = os.environ.get(
     "KB_E103CAF3_F8CB_4161_A57C_AAD1192D0666"
 ) or cassette_nua_key("https://europe-1.nuclia.cloud/")
 
-pytestmark = [pytest.mark.vcr(ignore_localhost=True), pytest.mark.asyncio]
+pytestmark = [
+    pytest.mark.vcr(ignore_localhost=True),
+    pytest.mark.asyncio,
+]
 
 CONFIG = {
     "drivers": [
@@ -36,7 +39,7 @@ CONFIG = {
                 "kbid": "e103caf3-f8cb-4161-a57c-aad1192d0666",
                 "key": KB_E103CAF3_F8CB_4161_A57C_AAD1192D0666,
                 "filters": [],
-                "description": "Nuclia Sync driver for testing",
+                "description": "Nuclia Sync source for testing",
                 "connection_ids": ["019cade7-c177-77c5-99c2-c8771f85cf91"],
             },
         },
@@ -84,7 +87,7 @@ def _mock_sync_response(
     )
 
 
-async def test_sync_agent(arag_api: AsyncClient):
+async def test_sync_agent():
     sync_driver_config = cast(dict[str, Any], CONFIG["drivers"][0]["config"])  # type: ignore
     sync_base_url = f"{sync_driver_config['url']}/v1/kb/{sync_driver_config['kbid']}"
 

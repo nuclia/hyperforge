@@ -1,7 +1,7 @@
 from typing import Dict, List, Literal, Optional
 
 from hyperforge.agent import AgentConfig
-from hyperforge.utils import WidgetType
+from hyperforge.llm_config import LLMConfig, LLMField, llm_defaults
 from pydantic import Field
 from pydantic.config import ConfigDict
 
@@ -18,11 +18,10 @@ class RephraseAgentConfig(AgentConfig):
     extend: bool = True
     session_info: bool = False
     history: bool = False
-    model: str = Field(
-        default="gemini-2.5-flash-lite",
+    model: LLMField = Field(
+        default=LLMConfig(model_id=llm_defaults.default),
         title="Generative model",
         description="Model used to generate the rephrased question",
-        json_schema_extra={"widget": WidgetType.MODEL_SELECT},
     )
     module: Literal["rephrase"] = "rephrase"
     split_question: bool = False

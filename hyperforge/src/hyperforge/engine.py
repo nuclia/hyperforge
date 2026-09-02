@@ -1,14 +1,16 @@
 import logging
 from dataclasses import dataclass
-from typing import Any, Awaitable, Callable, Dict, Optional, Tuple, cast
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple, cast
 
 from nuclia.lib.nua import AsyncNuaClient
 
 from hyperforge.configure import GLOBAL_REGISTRY, load_all_configurations
+from hyperforge.harness import HarnessAgent, HarnessAgentConfig
 from hyperforge.interaction import AragAnswer
 from hyperforge.llm import NoopNuaClient, NuaBaseModel, NUAConnection
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import BaseSessionMemory, QuestionMemory, SessionMemory
+from hyperforge.models import HistoryQuestionAnswer
 from hyperforge.retrieval.agent import RetrievalAgent
 from hyperforge.retrieval.config import RetrievalAgentConfig
 
@@ -17,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class State:
-    agent: RetrievalAgent
+    agent: RetrievalAgent | HarnessAgent
     manager: Manager
 
 
@@ -30,7 +32,7 @@ async def init(
     local_openai_model: Optional[str] = None,
     external_nua_api_key: Optional[str] = None,
     loaded_modules: list[str] = [],
-    retrieval_config: Optional[RetrievalAgentConfig] = None,
+    retrieval_config: Optional[RetrievalAgentConfig | HarnessAgentConfig] = None,
     session_id: str = "default_session",
     memory_klass: type[BaseSessionMemory] = SessionMemory,
 ) -> Tuple[State, SessionMemory]:
@@ -46,7 +48,10 @@ async def init(
     if retrieval_config is None:
         if config is None:
             raise ValueError("Either config or retrieval_config must be provided")
-        retrieval_config = RetrievalAgentConfig.model_validate(config)
+        config_class = (
+            HarnessAgentConfig if "agents" in config else RetrievalAgentConfig
+        )
+        retrieval_config = config_class.model_validate(config)
 
     state = await get_state(
         agent_id=agent_id,
@@ -77,14 +82,16 @@ async def main(
     external_nua_api_key: Optional[str] = None,
     question: str = "",
     loaded_modules: list[str] = [],
-    retrieval_config: Optional[RetrievalAgentConfig] = None,
+    retrieval_config: Optional[RetrievalAgentConfig | HarnessAgentConfig] = None,
     callback: Optional[Callable[[AragAnswer], Awaitable[None]]] = None,
     session_id: str = "default_session",
     user_metadata: Optional[Dict[str, str]] = None,
     headers: Optional[Dict[str, str]] = None,
     memory_klass: type[BaseSessionMemory] = SessionMemory,
     streaming: bool = False,
+    chat_history: Optional[List[HistoryQuestionAnswer]] = None,
 ) -> QuestionMemory:
+    state: State | None = None
     try:
         state, session_memory = await init(
             config=config,
@@ -99,7 +106,9 @@ async def main(
             session_id=session_id,
             memory_klass=memory_klass,
         )
-        question_memory = session_memory.start_question(question, streaming=streaming)
+        question_memory = session_memory.start_question(
+            question, streaming=streaming, chat_history=chat_history
+        )
         if callback is not None:
             question_memory.set_callback_fn(callback)
 
@@ -119,13 +128,15 @@ async def main(
     except Exception as e:
         raise e
     finally:
+        if state is not None and state.manager is not None:
+            await state.manager.aclose()
         GLOBAL_REGISTRY.clear()
     return question_memory
 
 
 async def engine(
     manager: Manager,
-    agent: RetrievalAgent,
+    agent: RetrievalAgent | HarnessAgent,
     question_memory: QuestionMemory,
     user_metadata: Optional[Dict[str, str]] = None,
 ) -> None:
@@ -140,7 +151,7 @@ async def engine(
 
 async def get_state(
     agent_id: str,
-    config: RetrievalAgentConfig,
+    config: RetrievalAgentConfig | HarnessAgentConfig,
     internal_nua_api: str = "http://predict.learning.svc.cluster.local:8080",
     internal_nua: bool = False,
     local_openai: Optional[str] = None,
@@ -184,6 +195,9 @@ async def get_state(
         nua = NoopNuaClient()
 
     manager = await Manager.from_config(drivers=config.drivers, nua=nua)
-    agent = await RetrievalAgent.from_config_class(config)
+    if isinstance(config, HarnessAgentConfig):
+        agent = await HarnessAgent.from_config_class(config)
+    else:
+        agent = await RetrievalAgent.from_config_class(config)
 
     return State(manager=manager, agent=agent)

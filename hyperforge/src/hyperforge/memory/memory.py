@@ -1,7 +1,7 @@
 import logging
 from collections import OrderedDict
 from datetime import datetime, timezone
-from typing import Awaitable, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple, Union, cast
 from uuid import uuid4
 
 from nuclia.lib.nua_responses import Author, Image, Message
@@ -32,6 +32,7 @@ from hyperforge.models import (
     AnswerCitations,
     Chunk,
     Context,
+    ExternalUsage,
     HistoryQuestionAnswer,
     MemoryConfig,
     Rule,
@@ -54,6 +55,28 @@ logger = logging.getLogger("arag.memory")
 
 # NucliaDB storage
 QUESTION_ANSWERS_FIELD: str = "qas"
+
+
+def _qa_list_to_context_string(history: List[HistoryQuestionAnswer]) -> Tuple[str, int]:
+    """Format a list of Q&A pairs into the prompt context string used by agents."""
+    result = "".join(
+        f"- Question: {qa.question}\n- Answer: {qa.answer}\n" for qa in history
+    )
+    return result, len(history)
+
+
+def _qa_list_to_chat_messages(history: List[HistoryQuestionAnswer]) -> List[Message]:
+    """Convert a list of Q&A pairs into the alternating User/Nuclia Message list used by LLMs."""
+    return [
+        msg
+        for qa in history
+        for msg in (
+            Message(author=Author.USER, text=qa.question),
+            Message(author=Author.NUCLIA, text=qa.answer),
+        )
+    ]
+
+
 CONTEXT_FIELD: str = "context"
 STEPS_FIELD: str = "steps"
 USER_INFO_FIELD: str = "user_info"
@@ -65,6 +88,7 @@ class BaseSessionMemory:
 
     agent_id: str = ""
     workflow_id: str = ""
+    account_id: str = ""
     kbid: Optional[str] = None
 
     # User information dictionary
@@ -112,34 +136,13 @@ class BaseSessionMemory:
         return KnowledgeboxFindResults(total=0, resources={})
 
     async def get_chat_history(self) -> List[Message]:
-        qas = await self.qa_history()
-        result = []
-        for qa in qas:
-            result.append(
-                Message(
-                    author=Author.USER,
-                    text=qa.question,
-                )
-            )
-            result.append(
-                Message(
-                    author=Author.NUCLIA,
-                    text=qa.answer,
-                )
-            )
-        return result
+        return _qa_list_to_chat_messages(await self.qa_history())
 
     async def qa_history(self) -> list[HistoryQuestionAnswer]:
         return []
 
     async def context_history(self) -> Tuple[str, int]:
-        result = ""
-        interactions = 0
-        for qa in await self.qa_history():
-            result += f"- Question: {qa.question}\n"
-            result += f"- Answer: {qa.answer}\n"
-            interactions += 1
-        return result, interactions
+        return _qa_list_to_context_string(await self.qa_history())
 
     def start_question(
         self,
@@ -149,6 +152,7 @@ class BaseSessionMemory:
         headers: Dict[str, str] = {},
         arguments: Dict[str, str] = {},
         streaming: bool = False,
+        chat_history: Optional[List[HistoryQuestionAnswer]] = None,
     ) -> "QuestionMemory":
         return QuestionMemory(
             self,
@@ -158,6 +162,7 @@ class BaseSessionMemory:
             headers=headers,
             arguments=arguments,
             streaming=streaming,
+            chat_history=chat_history,
         )
 
     async def save(self, question: "QuestionMemory") -> None:
@@ -183,6 +188,7 @@ class NoMemorySessionMemory(BaseSessionMemory):
         headers: Dict[str, str] = {},
         arguments: Dict[str, str] = {},
         streaming: bool = False,
+        chat_history: Optional[List[HistoryQuestionAnswer]] = None,
     ) -> "QuestionMemory":
         return QuestionMemory(
             self,
@@ -192,6 +198,7 @@ class NoMemorySessionMemory(BaseSessionMemory):
             headers=headers,
             arguments=arguments,
             streaming=streaming,
+            chat_history=chat_history,
         )
 
     async def save(self, question: "QuestionMemory") -> None:
@@ -199,6 +206,18 @@ class NoMemorySessionMemory(BaseSessionMemory):
 
     async def qa_history(self) -> list[HistoryQuestionAnswer]:
         return []
+
+    async def set_source(self, source: Source):
+        entry = CachedNucliaDBSource(
+            cache=self.cache, agent_id=self.agent_id, source=source.id
+        )
+        await entry.set(source)
+
+    async def get_source(self, source_id: str) -> Source | None:
+        entry = CachedNucliaDBSource(
+            cache=self.cache, agent_id=self.agent_id, source=source_id
+        )
+        return await entry.get()
 
 
 class EphemeralSessionMemory(BaseSessionMemory):
@@ -250,6 +269,7 @@ class EphemeralSessionMemory(BaseSessionMemory):
         headers: Dict[str, str] = {},
         arguments: Dict[str, str] = {},
         streaming: bool = False,
+        chat_history: Optional[List[HistoryQuestionAnswer]] = None,
     ) -> "QuestionMemory":
         return QuestionMemory(
             self,
@@ -259,6 +279,7 @@ class EphemeralSessionMemory(BaseSessionMemory):
             headers=headers,
             arguments=arguments,
             streaming=streaming,
+            chat_history=chat_history,
         )
 
     async def save(self, question: "QuestionMemory") -> None:
@@ -580,9 +601,20 @@ class QuestionMemory:
         headers: Dict[str, str] | None = None,
         arguments: Dict[str, str] | None = None,
         streaming: bool = False,
+        chat_history: Optional[List[HistoryQuestionAnswer]] = None,
     ):
         self.session = session
         self.started_at = datetime.now(timezone.utc)
+
+        # Client-managed chat history. When set (even to an empty list), overrides
+        # server-side session history for agents that use previous Q&A context
+        # (rephrase, summarize, smart, etc.). None means "not set — use server-side
+        # history". [] means "override with no history". Intended for ephemeral
+        # sessions where the client is responsible for maintaining conversation state.
+        # Note: search_in_questions() performs semantic search over NucliaDB-stored
+        # conversation history and is NOT affected by this field. The HistoricalAgent
+        # uses that method and therefore does not benefit from client-managed history.
+        self._client_chat_history: Optional[List[HistoryQuestionAnswer]] = chat_history
 
         # Start of a new question by the user
         self.original_question = question
@@ -622,6 +654,10 @@ class QuestionMemory:
         """Returns the workflow ID for the current question. The workflow ID is a unique identifier that is shared across all questions and interactions that belong to the same workflow. This can be used to group related interactions together, and to keep track of the conversation history in a coherent way."""
         return self.session.workflow_id
 
+    def get_account_id(self) -> str:
+        """Returns the account ID for the current question."""
+        return self.session.account_id
+
     def context_user_info(self) -> str:
         """Returns a string with user information that can be used in the context of the agent. This can include information such as user preferences, user history, or any other relevant information about the user that can help the agent to generate a more personalized and accurate response."""
         return self.session.context_user_info()
@@ -649,11 +685,19 @@ class QuestionMemory:
         return await self.session.get_source(source_id)
 
     async def context_history(self) -> Tuple[str, int]:
-        """Returns a string with the context history of the conversation. This can include information such as previous questions and answers, relevant information that has been previously discussed in the conversation, or any other relevant information that can help the agent to generate a more accurate and personalized response."""
+        """Returns a string with the context history of the conversation. This can include information such as previous questions and answers, relevant information that has been previously discussed in the conversation, or any other relevant information that can help the agent to generate a more accurate and personalized response.
+
+        When the client sets chat_history in the request (even to an empty list), it overrides any server-side session history. None means "not set — use server-side history"."""
+        if self._client_chat_history is not None:
+            return _qa_list_to_context_string(self._client_chat_history)
         return await self.session.context_history()
 
     async def get_chat_history(self) -> list[Message]:
-        """Returns a list of tuples with the chat history of the conversation. Each tuple contains a question and an answer. This can be used to keep track of the conversation history in a more structured way, and to provide more context to the agent when generating a response."""
+        """Returns a list of tuples with the chat history of the conversation. Each tuple contains a question and an answer. This can be used to keep track of the conversation history in a more structured way, and to provide more context to the agent when generating a response.
+
+        When the client sets chat_history in the request (even to an empty list), it overrides any server-side session history. None means "not set — use server-side history"."""
+        if self._client_chat_history is not None:
+            return _qa_list_to_chat_messages(self._client_chat_history)
         return await self.session.get_chat_history()
 
     def stats(self):
@@ -666,15 +710,18 @@ class QuestionMemory:
             "final_answer": self.final_answer,
         }
 
-    async def save_context(self, flow_id: str, context: Context):
+    async def save_context(
+        self, flow_id: str, context: Context, agent_id: str | None = None
+    ):
         context.original_question_uuid = self.original_question_uuid
         context.actual_question_uuid = self.actual_question_uuid
         self.contexts.append(context)
         if self.agent_contexts.get(flow_id) is None:
             self.agent_contexts[flow_id] = {}
-        if self.agent_contexts[flow_id].get(context.agent_id) is None:
-            self.agent_contexts[flow_id][context.agent_id] = []
-        self.agent_contexts[flow_id][context.agent_id].append(context)
+        context_agent_id = agent_id or context.agent_id
+        if self.agent_contexts[flow_id].get(context_agent_id) is None:
+            self.agent_contexts[flow_id][context_agent_id] = []
+        self.agent_contexts[flow_id][context_agent_id].append(context)
         if self.callback_fn is not None:
             await self.callback_fn(AragAnswer(context=context))
 
@@ -698,18 +745,21 @@ class QuestionMemory:
             context.summary for context in contexts if context.summary.strip() != ""
         ]
 
-    def list_contexts_markdown(self) -> list[str]:
+    def list_contexts_markdown(self, include_summaries: bool = False) -> list[str]:
         contexts_str = []
         for context in self.contexts:
             result = ""
             if context.citations_id is not None:
                 if context.title:
-                    result += f"## [{context.citations_id}] {context.title}\n\n"
+                    result += f"## Context [{context.citations_id}] {context.title}\n\n"
                 else:
-                    result += f"## [{context.citations_id}]\n\n"
+                    result += f"## Context [{context.citations_id}]\n\n"
             else:
                 if context.title:
                     result += f"## {context.title}\n\n"
+            if include_summaries and context.summary.strip() != "":
+                result += f"### Existing context summary\n\n{context.summary}\n\n"
+            result += "### Context chunks\n\n"
             result += f"{context.context_markdown()}"
             contexts_str.append(result)
         return contexts_str
@@ -731,11 +781,14 @@ class QuestionMemory:
                 chunks_str.append(result)
         return chunks_str
 
-    def contexts_markdown(self) -> str:
+    def contexts_markdown(self, include_summaries: bool = False) -> str:
         """
-        Returns the concatenated contexts as a single string. Includes full context (i.e: all the chunk texts)
+        Returns the concatenated contexts as a single string. Includes full context
+        (i.e: all the chunk texts), and optionally existing context summaries.
         """
-        return "\n\n".join(self.list_contexts_markdown())
+        return "\n\n".join(
+            self.list_contexts_markdown(include_summaries=include_summaries)
+        )
 
     def list_contexts_minimal(
         self,
@@ -788,6 +841,8 @@ class QuestionMemory:
         step_value: Optional[str] = None,
         step_reason: Optional[str] = None,
         error: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        external_usage: Optional[List[ExternalUsage]] = None,
     ):
         new_step = Step(
             original_question_uuid=self.original_question_uuid,
@@ -801,6 +856,8 @@ class QuestionMemory:
             input_nuclia_tokens=input_nuclia_tokens,
             output_nuclia_tokens=output_nuclia_tokens,
             error=error,
+            metadata=metadata,
+            external_usage=external_usage,
         )
         self.steps.append(new_step)
         if self.callback_fn is not None:

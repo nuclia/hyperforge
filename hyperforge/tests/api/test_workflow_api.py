@@ -2,13 +2,14 @@ import datetime
 
 import pytest
 from httpx import AsyncClient
+from nucliadb_models.resource import KnowledgeBoxObj
+
 from hyperforge.db.agents import (
     WORKFLOW_PURGE_RETENTION,
     retrieval_agent_generation,
     retrieval_agent_workflow,
 )
 from hyperforge.db.workflow_cleanup import cleanup_deleted_workflows
-from nucliadb_models.resource import KnowledgeBoxObj
 
 pytestmark = [
     pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["test"]),

@@ -18,7 +18,7 @@ from pydantic import ValidationError
 from hyperforge import logger
 from hyperforge.api.authentication import requires_one
 from hyperforge.api.models import AgentRole, InteractionRequest
-from hyperforge.api.session import create_session_resource, session_exists
+from hyperforge.api.session import create_session_resource, resolve_session_id
 from hyperforge.api.settings import Settings
 from hyperforge.api.utils import agent_has_nucliadb_memory
 from hyperforge.api.v1.router import router
@@ -50,25 +50,28 @@ async def ensure_session_exists(
     agent_id: str,
     session: str,
     create_if_not_exists: bool,
-) -> Optional[str]:
+) -> tuple[str, Optional[str]]:
     """
     Check if session exists and create it if needed.
 
     Returns:
-        None if session exists or was created successfully.
-        Error message string if session doesn't exist and shouldn't be created.
+        The effective session id and None if the session exists or was created.
+        The original session id and an error message if the session doesn't exist
+        and shouldn't be created.
     """
-    # Check if session exists
-    if await session_exists(ndb, agent_id, session):
-        return None
+    # Check if session exists. The client may pass either the resource UUID or
+    # the session slug, but the memory layer needs the NucliaDB resource UUID.
+    existing_session_id = await resolve_session_id(ndb, agent_id, session)
+    if existing_session_id is not None:
+        return existing_session_id, None
 
     # Session doesn't exist
     if not create_if_not_exists:
-        return f"Session '{session}' does not exist"
+        return session, f"Session '{session}' does not exist"
 
     # Create the session
     try:
-        await create_session_resource(
+        created = await create_session_resource(
             ndb=ndb,
             agent_id=agent_id,
             slug=session,
@@ -76,10 +79,10 @@ async def ensure_session_exists(
             summary="Auto-created session",
             data="",
         )
-        return None
+        return created.uuid, None
     except Exception as e:
         logger.exception(f"Error creating session {session} for agent {agent_id}: {e}")
-        return f"Failed to create session: {str(e)}"
+        return session, f"Failed to create session: {str(e)}"
 
 
 class Shutdown:
@@ -208,6 +211,7 @@ async def stream_response(
         question=interaction.question,
         headers=interaction.headers,
         arguments=interaction.arguments,
+        chat_history=interaction.chat_history,
         workflow_id=workflow_id,
         streaming=interaction.streaming,
     )
@@ -332,7 +336,7 @@ async def websocket_endpoint(
             agent_manager, x_stf_account, agent_id, workflow_id
         ):
             ndb: NucliaDBAsync = websocket.app.arag_reader
-            error_message = await ensure_session_exists(
+            session, error_message = await ensure_session_exists(
                 ndb, agent_id, session, create_session_if_not_exists
             )
             if error_message:
@@ -395,13 +399,13 @@ async def websocket_endpoint(
     "/api/v1/agent/{agent_id}/session/{session}",
     status_code=200,
     description="Interact session",
-    tags=["Retrieval Agent"],
+    tags=["Sessions"],
 )
 @router.post(
     "/api/v1/agent/{agent_id}/workflow/{workflow_id}/session/{session}",
     status_code=200,
     description="Interact session",
-    tags=["Retrieval Agent"],
+    tags=["Sessions"],
 )
 @requires_one([AgentRole.MEMBER])
 async def interaction(

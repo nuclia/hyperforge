@@ -1,6 +1,7 @@
 from time import time
 from typing import Any, Dict, List, Optional, Tuple
 
+from hyperforge import logger
 from hyperforge.agent import Agent
 from hyperforge.context.agent import ContextAgent
 from hyperforge.interaction import Feedback, PromptFeedbackSchema
@@ -12,7 +13,6 @@ from hyperforge.utils import iterate_tools_resp
 from mcp import types
 from nuclia.lib.nua_responses import Image, Message
 
-from hyperforge import logger
 from hyperforge_mcp.agent import EXIT_LOOP_TOOLS, MCPAgent
 from hyperforge_mcp.config import MCPAgentConfig, MultiMCPAgentConfig
 from hyperforge_mcp.tools import (
@@ -24,7 +24,7 @@ from hyperforge_mcp.tools import (
 
 
 class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
-    config: MultiMCPAgentConfig  # type: ignore
+    config: MultiMCPAgentConfig
     agents: list[MCPAgent]
     main_agent: MCPAgent
 
@@ -102,7 +102,10 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
         images: list[Image],
     ):
         t0 = time()
-        prompt_feedback = TOOLS_CHOOSE_TEMPLATE.render(tools=self.main_agent.tools)
+        prompt = " ".join([m.text for m in messages])
+        prompt_feedback = TOOLS_CHOOSE_TEMPLATE.render(
+            tools=self.main_agent.tools, task_description=prompt
+        )
         resp, input_tokens, output_tokens = await manager.execute_json(
             model=self.config.tool_choice_model,
             prompt=prompt_feedback,
@@ -178,7 +181,7 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
         if agent_obj is None:
             # We will use LLM to choose the prompt
             prompt_feedback_str = PROMPT_CHOOSE_TEMPLATE.render(
-                prompts=self.main_agent.prompts
+                prompts=self.main_agent.prompts, task_description=question
             )
             resp, input_tokens, output_tokens = await manager.execute_json(
                 model=self.config.tool_choice_model,
@@ -284,7 +287,7 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
             try:
                 await agent.initialize(manager, memory)
             except KeyError:
-                raise Exception("No MCP driver found")
+                raise Exception("No MCP source found")
             response, input_tokens, output_tokens = await self.summarize_tools(
                 manager,
                 agent.tools,
@@ -294,7 +297,7 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
             global_output_tokens += output_tokens
             self.main_agent.tools.append(
                 types.Tool(name=agent.config.id, description=response, inputSchema={})
-            )  # type: ignore
+            )
 
             response, input_tokens, output_tokens = await self.summarize_prompts(
                 manager,
@@ -305,7 +308,7 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
             global_output_tokens += output_tokens
             self.main_agent.prompts.append(
                 types.Prompt(name=agent.config.id, description=response)
-            )  # type: ignore
+            )
 
         context = Context(
             agent_id=self.agent_id,

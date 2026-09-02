@@ -8,6 +8,7 @@ from hyperforge.context.agent import ContextAgent
 from hyperforge.definition import FunctionDefinition
 from hyperforge.manager import Manager
 from hyperforge.memory import Chunk, Context, QuestionMemory
+from hyperforge.models import ExternalUsage, ExternalUsageOperation
 from hyperforge_perplexity.driver import PerplexityDriver
 
 from hyperforge_perplexity_search.config import PerplexitySearchAgentConfig
@@ -27,6 +28,7 @@ class PerplexitySearchAgent(ContextAgent, Agent[PerplexitySearchAgentConfig]):
     __published_functions__: ClassVar[Dict[str, FunctionDefinition]] = {
         "internet_search": FunctionDefinition(
             name="internet_search",
+            method="search",
             description="Performs an internet search using Perplexity and returns the results as context to answer questions. Does not generate an answer, only search and return the results as context.",
             parameters={
                 "question": {
@@ -51,7 +53,7 @@ class PerplexitySearchAgent(ContextAgent, Agent[PerplexitySearchAgentConfig]):
                 Optional[PerplexityDriver], manager.drivers.get(self.config.source)
             )
         if self.driver is None:
-            raise Exception("Perplexity driver does not exist")
+            raise Exception("Perplexity source does not exist")
 
         response = await self.driver.client.search.create(
             query=question,
@@ -101,8 +103,14 @@ class PerplexitySearchAgent(ContextAgent, Agent[PerplexitySearchAgentConfig]):
             if chunks
             else "No results found",
             timeit=time() - t0,
-            input_nuclia_tokens=0,
-            output_nuclia_tokens=0,
+            external_usage=[
+                ExternalUsage(
+                    operation=ExternalUsageOperation.INTERNET_SEARCH,
+                    provider="perplexity",
+                    model="search",
+                    requests=1,
+                )
+            ],
         )
         return context
 
@@ -121,7 +129,7 @@ class PerplexitySearchAgent(ContextAgent, Agent[PerplexitySearchAgentConfig]):
             )
 
         if self.driver is None:
-            raise Exception("Perplexity driver does not exist")
+            raise Exception("Perplexity source does not exist")
 
         context = await self.search(
             question,

@@ -41,7 +41,7 @@ from hyperforge_nucliadb.sync.driver import SyncDriver
     description="Provide answer questions from synched resources. This agent is responsible for handling the authentication flow and resource validation for synched resources, and then providing the valid resources to the Basic Ask Agent to answer questions.",
     config_schema=SyncAskAgentConfig,
 )
-class SyncAskAgent(BasicAskAgent):  # type: ignore
+class SyncAskAgent(BasicAskAgent):
     sources: Dict[str, SyncDriver]
     settings: OAuthSettings = OAuthSettings()
 
@@ -157,7 +157,7 @@ class SyncAskAgent(BasicAskAgent):  # type: ignore
                     or len(driver.sync_configs[sync_config_id]) == 0
                 ):
                     raise Exception(
-                        f"Connection ID {sync_config_id} not found in driver sync configs"
+                        f"Connection ID {sync_config_id} not found in source sync configs"
                     )
                 inner_connection_id = driver.sync_configs[sync_config_id][0]
                 creds_providers[sync_config_id] = driver.information[

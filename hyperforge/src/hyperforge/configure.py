@@ -123,9 +123,9 @@ def get_caller_module(
     """
     Pulled out of pyramid
     """
-    module_globals = sys._getframe(level).f_globals  # type: ignore
+    module_globals = sys._getframe(level).f_globals
     module_name = module_globals.get("__name__") or "__main__"
-    module = sys.modules[module_name]  # type: ignore
+    module = sys.modules[module_name]
     return module
 
 
@@ -251,7 +251,7 @@ def load_driver(
     driver_id = registration.id
     registration.klass = resolve_dotted_name(klass)
     if driver_id is None:
-        raise Exception("Driver configuration must have an 'id' field")
+        raise Exception("Source configuration must have an 'id' field")
     if driver_id in _context.drivers:
         # Already registered
         return
@@ -340,15 +340,15 @@ def get_agent_klass(module: str, _context: Registry = GLOBAL_REGISTRY) -> Type["
 
 def validate_driver(item: Any, _context: Registry = GLOBAL_REGISTRY):
     if not isinstance(item, dict):
-        raise ValueError("Driver configuration must be a dictionary")
+        raise ValueError("Source configuration must be a dictionary")
 
     provider = item.get("provider")
     if provider is None:
-        raise ValueError("Driver configuration must have a 'provider' field")
+        raise ValueError("Source configuration must have a 'provider' field")
 
     if provider not in _context.drivers:
         raise ValueError(
-            f"Driver module '{provider}' is not registered in the drivers registry"
+            f"Source module '{provider}' is not registered in the drivers registry"
         )
     return _context.drivers[provider].config_schema.model_validate(item)
 
@@ -358,7 +358,7 @@ def get_driver_config_klass(
 ) -> Type["DriverConfig"]:
     driver = _context.drivers.get(provider)
     if driver is None:
-        raise Exception(f"Driver module '{provider}' is not registered")
+        raise Exception(f"Source module '{provider}' is not registered")
 
     return driver.config_schema
 
@@ -507,12 +507,19 @@ def enabled_agent(
 
 
 def create_agent_schema(agent: AgentRegistry) -> Dict[str, Any]:
+    published_functions = (
+        agent.klass.__published_functions__ if agent.klass is not None else {}
+    )
     return {
         "id": agent.id,
         "agent_type": agent.agent_type,
         "title": agent.title,
         "description": agent.description,
         "config_schema": agent.config_schema.model_json_schema(),
+        "functions": {
+            function_id: definition.description
+            for function_id, definition in published_functions.items()
+        },
     }
 
 

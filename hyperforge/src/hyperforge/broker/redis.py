@@ -1,15 +1,27 @@
 import asyncio
 import json
-from typing import AsyncIterator, cast
+import time
+from typing import Any, AsyncIterator, cast
 
 import opentelemetry.propagate
 from pydantic import TypeAdapter
 from redis.asyncio import Redis, ResponseError
+from redis.asyncio.retry import Retry
+from redis.backoff import ExponentialBackoff
+from redis.exceptions import ConnectionError as RedisConnectionError
 
 from hyperforge import logger
 from hyperforge.broker import AgentTimeoutError, Broker
 from hyperforge.pubsub import AgentMessage, StartInteraction
 from hyperforge.redis_utils import ManualStreamKeysRedisCluster
+
+_REDIS_CONNECT_TIMEOUT_SECONDS = 5
+_REDIS_HEALTH_CHECK_INTERVAL_SECONDS = 30
+_REDIS_RETRY_ATTEMPTS = 3
+_REDIS_RETRY_BACKOFF_BASE_SECONDS = 0.1
+_REDIS_RETRY_BACKOFF_CAP_SECONDS = 1.0
+_REDIS_SUBSCRIBE_ACTIVATIONS_RETRY_SLEEP_SECONDS = 1
+_REPLY_READ_BLOCK_MAX_MS = 2000
 
 
 class RedisBroker(Broker):
@@ -30,21 +42,43 @@ class RedisBroker(Broker):
         keepalive_ms: int,
         cluster_mode: bool = False,
     ) -> "RedisBroker":
+        client_kwargs = cls._client_kwargs(keepalive_ms)
         if cluster_mode:
+            # redis-py cluster client does not accept retry_on_timeout.
+            client_kwargs.pop("retry_on_timeout", None)
             client = cast(
                 Redis,
                 ManualStreamKeysRedisCluster.from_url(
                     url=url,
-                    decode_responses=True,
                     dynamic_startup_nodes=False,
+                    **client_kwargs,
                 ),
             )
         else:
             client = Redis.from_url(
                 url,
-                decode_responses=True,
-            )
+                **client_kwargs,
+            )  # type: ignore[call-overload]
         return cls(client, activate_subject, keepalive_ms)
+
+    @staticmethod
+    def _client_kwargs(keepalive_ms: int) -> dict[str, Any]:
+        retry = Retry(
+            backoff=ExponentialBackoff(
+                base=_REDIS_RETRY_BACKOFF_BASE_SECONDS,
+                cap=_REDIS_RETRY_BACKOFF_CAP_SECONDS,
+            ),
+            retries=_REDIS_RETRY_ATTEMPTS,
+        )
+        return {
+            "decode_responses": True,
+            "socket_timeout": keepalive_ms / 1000,
+            "socket_connect_timeout": _REDIS_CONNECT_TIMEOUT_SECONDS,
+            "health_check_interval": _REDIS_HEALTH_CHECK_INTERVAL_SECONDS,
+            "socket_keepalive": True,
+            "retry": retry,
+            "retry_on_timeout": True,
+        }
 
     async def publish_activation(
         self, msg: StartInteraction, trace: dict[str, str]
@@ -55,9 +89,8 @@ class RedisBroker(Broker):
             maxlen=100,
         )
 
-    async def subscribe_activations(
-        self,
-    ) -> AsyncIterator[tuple[StartInteraction, dict[str, str]]]:
+    async def _ensure_consumer_group(self) -> None:
+        """Create the stream and consumer group if they don't exist."""
         try:
             await self._client.xgroup_create(
                 name=self._activate_subject,
@@ -67,6 +100,11 @@ class RedisBroker(Broker):
         except ResponseError as e:
             if "BUSYGROUP" not in str(e):
                 raise
+
+    async def subscribe_activations(
+        self,
+    ) -> AsyncIterator[tuple[StartInteraction, dict[str, str]]]:
+        await self._ensure_consumer_group()
 
         while True:
             try:
@@ -89,9 +127,20 @@ class RedisBroker(Broker):
             except (asyncio.CancelledError, KeyboardInterrupt):
                 logger.info("Activation subscription cancelled, exiting...")
                 break
+            except ResponseError as e:
+                if "NOGROUP" in str(e):
+                    logger.warning("Consumer group lost, re-creating...")
+                    await self._ensure_consumer_group()
+                else:
+                    logger.exception(
+                        "Error while subscribing to activations, retrying..."
+                    )
+                    await asyncio.sleep(
+                        _REDIS_SUBSCRIBE_ACTIVATIONS_RETRY_SLEEP_SECONDS
+                    )
             except Exception:
                 logger.exception("Error while subscribing to activations, retrying...")
-                await asyncio.sleep(1)
+                await asyncio.sleep(_REDIS_SUBSCRIBE_ACTIVATIONS_RETRY_SLEEP_SECONDS)
 
     async def publish(self, topic: str, message: AgentMessage) -> None:
         async with self._client.pipeline() as pipe:
@@ -144,18 +193,48 @@ class RedisBroker(Broker):
             key, {"msg": payload, "trace": json.dumps(trace_headers)}, maxlen=100
         )
 
-    async def receive_reply(self, key: str, timeout_ms: int) -> str | None:
-        response = await self._client.xread(
-            {key: "$"},
-            block=timeout_ms,
-            count=1,
-        )
-        if not response:
-            return None
-        return response[0][1][0][1]["msg"]
+    async def receive_reply(
+        self, key: str, timeout_ms: int, lookback_seconds: int = 60
+    ) -> str | None:
+        # Keep a stable cursor across blocking-read retries. Recomputing the
+        # cursor as "$" on every XREAD can skip a reply that is published after
+        # one block expires but before the next XREAD starts.
+        cursor = f"{int((time.time() - lookback_seconds) * 1000)}-0"
+        deadline = time.monotonic() + (timeout_ms / 1000)
+        reconnect_attempts = 0
+
+        while True:
+            remaining_s = deadline - time.monotonic()
+            if remaining_s <= 0:
+                return None
+
+            # Keep each blocking read short so transient socket closures/failovers
+            # can be recovered within the same overall timeout budget.
+            block_ms = min(_REPLY_READ_BLOCK_MAX_MS, max(1, int(remaining_s * 1000)))
+
+            try:
+                response = await self._client.xread(
+                    {key: cursor},
+                    block=block_ms,
+                    count=1,
+                )
+            except RedisConnectionError:
+                reconnect_attempts += 1
+                backoff_s = min(1.0, 0.1 * reconnect_attempts)
+                logger.warning(
+                    "Redis connection closed while receiving reply key=%s; retrying (attempt=%d)",
+                    key,
+                    reconnect_attempts,
+                )
+                await asyncio.sleep(backoff_s)
+                continue
+
+            if not response:
+                continue
+            return response[0][1][0][1]["msg"]
 
     async def initialize(self) -> None:
         pass
 
     async def finalize(self) -> None:
-        await self._client.aclose()  # type: ignore[attr-defined]
+        await self._client.aclose()  # type: ignore[attr-defined]  # ty: ignore[unresolved-attribute]

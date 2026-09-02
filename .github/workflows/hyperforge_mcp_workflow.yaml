@@ -47,6 +47,10 @@ jobs:
             - name: Install package dependencies with uv
               run: uv sync --group dev
 
+            - name: Lint
+              working-directory: agents/mcp
+              run: make lint
+
             - name: Run tests
               working-directory: agents/mcp
               run: make test

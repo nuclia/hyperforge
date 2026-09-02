@@ -56,7 +56,7 @@ def extract_openapi_command(component_id: str, title: str, router: APIRouter):
     document["x-metadata"] = {
         component_id: {
             "commit": commit_id,
-            "last_updated": datetime.datetime.utcnow().isoformat(),
+            "last_updated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         }
     }
 

@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     running_environment: str = "stage"
     zone: str = "stashify"
     load_modules: list[str] = []
+    auth_success_logo_url: Optional[str] = None
 
     # Set to True when running as a standalone server (i.e. not inside the
     # full learning cluster).  In standalone mode the agent_id is a human-
@@ -45,3 +46,5 @@ class Settings(BaseSettings):
     # the kbid for internal NUA calls from the account_id request header
     # instead.
     standalone: bool = False
+
+    health_check_enabled: bool = True

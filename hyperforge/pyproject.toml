@@ -8,7 +8,7 @@ version = "1.0.0"
 authors = [{ name = "AI Data Team", email = "learning@nuclia.com" }]
 description = "Agentic Framework for Orchestrated Runtime, Governance, and Execution"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
@@ -17,23 +17,27 @@ license = "Apache-2.0"
 dependencies = [
     "alembic",
     "pydantic",
-    "nuclia>=4.9.25",
-    "nuclia-models>=0.52.1",
+    "nuclia>=4.14.0",
+    "nuclia-models>=0.59.0",
     "nucliadb-models>=6.13.1.post6414",
     "nucliadb-sdk>=6.13.1.post6414",
-    "nucliadb-telemetry[otel]",
+    "nucliadb-telemetry[otel]>=6.15.0",
+    "hyperforge-restricted",
     "pydantic_settings",
     "mcp>=1.26.0",
     "prometheus_client",
     "mrflagly>=0.2.11",
     "aiodns",
-    "httpx",
+    "httpx>=0.28.1,<0.29",
+    "httpcore>=1.0.9,<1.1",
     "jinja2",
+    "jsonschema",
+    "RestrictedPython",
     "databases[asyncpg]",
     "sqlalchemy",
     "cryptography",
     "mmh3",
-    "psycopg2",
+    "psycopg2-binary",
     "tenacity",
     "websockets",
     "redis[hiredis]>=6.4.0",
@@ -43,6 +47,7 @@ dependencies = [
     "sentry_sdk",
     "fastapi",
     "starlette>1.0.0",
+    "uvicorn>=0.30.0",
 ]
 
 
@@ -87,3 +92,6 @@ hyperforge-sandbox = "hyperforge.server:sandbox.run"
 hyperforge-extract-openapi = "hyperforge.api.commands:extract_openapi"
 hyperforge-workflows-cleanup-cronjob = "hyperforge.agents.workflow_cleanup:run"
 hyperforge-standalone = "hyperforge.standalone:run.run"
+
+[tool.ruff]
+extend = "../ruff.toml"

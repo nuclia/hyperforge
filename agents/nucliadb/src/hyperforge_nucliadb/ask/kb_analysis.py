@@ -9,7 +9,6 @@ from nuclia.lib.nua_responses import SemanticConfig
 class KnowledgeBoxInfo:
     content_types: Dict[str, int]
     languages: Dict[str, int]
-    facets: Dict[str, int]
     paragraph_facets: Dict[str, int]
     entity_model: str
     generative_model: str
@@ -22,8 +21,6 @@ def get_knowledge_base_analysis(source: Source):
     content_types = {}
     languages: Dict[str, int] = {}
 
-    facets: Dict[str, int] = {}
-
     for key, count in source.facets_native.facets.items():
         if key.startswith("/n/i"):
             content_type = key.replace("/n/i/", "")
@@ -32,14 +29,11 @@ def get_knowledge_base_analysis(source: Source):
         elif key.startswith("/s/p/"):
             language = key.replace("/s/p/", "")
             languages[language] = count
-        else:
-            facets[key] = count
 
     return KnowledgeBoxInfo(
         paragraph_facets=source.paragraph_facets,
         content_types=content_types,
         languages=languages,
-        facets=facets,
         semantic_models=source.learning_configuration.semantic_models,
         entity_model=source.learning_configuration.ner_model,
         generative_model=source.learning_configuration.generative_model,

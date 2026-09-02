@@ -1,9 +1,10 @@
 import abc
 import uuid
-from typing import Any, Generic, List, Optional, Self, TypeVar
+from typing import Any, ClassVar, Dict, Generic, List, Optional, Self, TypeVar
 
 from pydantic import BaseModel, Field
 
+from hyperforge.definition import FunctionDefinition
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import QuestionMemory
 from hyperforge.utils import WidgetType
@@ -34,6 +35,7 @@ T_Config = TypeVar("T_Config", bound=AgentConfig)
 
 class Agent(Generic[T_Config]):
     __root_agent__: bool = False
+    __published_functions__: ClassVar[Dict[str, FunctionDefinition]] = {}
     agent_id: str
     config: T_Config
 

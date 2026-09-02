@@ -2,6 +2,10 @@ import os
 from typing import Any
 
 from httpx import AsyncClient
+from hyperforge_mcp.agent import MCPAgent
+from hyperforge_mcp.config import MCPAgentConfig, Transport
+from nucliadb_models.resource import KnowledgeBoxObj
+
 from hyperforge.configure import get_driver_config_instance
 from hyperforge.llm import NUAConnection
 from hyperforge.manager import Manager
@@ -14,18 +18,15 @@ from hyperforge.models import Rule, Rules
 from hyperforge.prompts import PromptConfig
 from hyperforge.server.session import SessionManager
 from hyperforge.workflows import WorkflowData
-from hyperforge_mcp.agent import MCPAgent
-from hyperforge_mcp.config import MCPAgentConfig, Transport
-from nucliadb_models.resource import KnowledgeBoxObj
 
 NUA_KEY = os.environ.get(
     "NUA_KEY",
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 
 
 KB_2603EE3A_2EE0_46BA_85A7_A1A2EC5A8FFE = os.environ.get(
     "KB_2603EE3A_2EE0_46BA_85A7_A1A2EC5A8FFE"
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 
 DRIVERS = [
     {
@@ -306,6 +307,18 @@ async def test_mcp_protected_resource_metadata(
     body = resp.json()
     assert body == {
         "resource": f"https://{arag_api_http}/api/v1/agent/agent-id/session/session-id/mcp",
+        "scopes_supported": ["offline_access", "openid"],
+        "authorization_servers": ["https://oauth.progress.cloud"],
+    }
+
+
+async def test_mcp_protected_resource_metadata_root(arag_api_http: str):
+    http_client = AsyncClient(base_url=f"http://{arag_api_http}")
+    resp = await http_client.get("/.well-known/oauth-protected-resource")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body == {
+        "resource": f"http://{arag_api_http}",
         "scopes_supported": ["offline_access", "openid"],
         "authorization_servers": ["https://oauth.progress.cloud"],
     }

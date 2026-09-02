@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from enum import Enum
 from typing import (
     Any,
     Dict,
@@ -110,6 +111,40 @@ class VegaLiteVisualization(BaseModel):
 Visualization = Union[VegaLiteVisualization]
 
 
+class ExternalUsageOperation(str, Enum):
+    INTERNET_SEARCH = "internet_search"
+
+
+class ExternalUsage(BaseModel):
+    operation: ExternalUsageOperation = Field(
+        description="The external operation that generated this usage.",
+    )
+    provider: str = Field(
+        description="The external provider that generated this usage.",
+        examples=["perplexity", "google", "brave"],
+    )
+    model: str = Field(
+        description="The model identifier that was used. Might also refer to specific api or request type.",
+        examples=["sonar", "gemini-3.5-flash", "search"],
+    )
+    input_tokens: int = Field(
+        default=0,
+        description="Number of raw input tokens used for this request. This number is forwarded from the external provider.",
+    )
+    output_tokens: int = Field(
+        default=0,
+        description="Number of raw output tokens generated for this request. This number is forwarded from the external provider.",
+    )
+    image: int = Field(
+        default=0,
+        description="Usage specific to images. Might refer to image tokens, images generated, or images processed.",
+    )
+    requests: int = Field(
+        default=1,
+        description="Number of requests made to the external provider.",
+    )
+
+
 class Step(BaseModel):
     original_question_uuid: Optional[str]
     actual_question_uuid: Optional[str]
@@ -122,6 +157,8 @@ class Step(BaseModel):
     input_nuclia_tokens: Optional[float]
     output_nuclia_tokens: Optional[float]
     error: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
+    external_usage: Optional[list[ExternalUsage]] = None
 
     def __str__(self):
         return f"({self.timeit:.2f}s) {self.module}: {self.title} \n {self.value} \n {self.reason} \n NT:({self.input_nuclia_tokens}:{self.output_nuclia_tokens})"
@@ -180,9 +217,9 @@ class Chunk(BaseModel):
         citations_id: Optional[str] = None,
     ) -> str:
         if citations_id:
-            lines = [f"## Chunk: [{citations_id}] {self.title or self.chunk_id}"]
+            lines = [f"#### Chunk: [{citations_id}] {self.title or self.chunk_id}"]
         else:
-            lines = [f"## Chunk: {self.title or self.chunk_id}"]
+            lines = [f"#### Chunk: {self.title or self.chunk_id}"]
         if self.action:
             lines.append(f"Result of running: {self.action}")
         if self.labels:
@@ -248,6 +285,25 @@ CONTEXT_TEMPLATE = """
 CONTEXT_PROMPT_TEMPLATE = PROMPT_ENVIRONMENT.from_string(CONTEXT_TEMPLATE)
 
 
+class JSONObject(BaseModel):
+    json_schema: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="JSON schema that defines the structure of the JSON object.",
+    )
+    json_object: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="The actual JSON object that conforms to the provided JSON schema.",
+    )
+    metadata: Optional[Dict[str, Any]] = Field(
+        default_factory=dict,
+        description="Optional metadata associated with the JSON object.",
+    )
+    id: Optional[str] = Field(
+        default_factory=lambda: uuid.uuid4().hex,
+        description="Unique identifier for this JSON object instance.",
+    )
+
+
 class Context(BaseModel):
     id: str = Field(
         default_factory=lambda: uuid.uuid4().hex,
@@ -260,6 +316,7 @@ class Context(BaseModel):
     images: Dict[str, Image] = Field(default_factory=dict)
     prompts: List[Prompt] = Field(default_factory=list)
     structured: List[str] = Field(default_factory=list)
+    json_objects: List[JSONObject] = Field(default_factory=list)
     source: str
     agent: str
     # XXX: This is not actually a summary, but an answer attempt for now!
@@ -315,8 +372,13 @@ class Context(BaseModel):
                 },
             )
             return
+        cited_chunk_ids = {
+            citation_id
+            for citation_id in self.citations
+            if not citation_id.startswith("structured-")
+        }
         self.chunks = [
-            chunk for chunk in self.chunks if chunk.chunk_id in self.citations
+            chunk for chunk in self.chunks if chunk.chunk_id in cited_chunk_ids
         ]
         self.structured = [
             s
