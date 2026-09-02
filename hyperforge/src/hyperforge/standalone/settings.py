@@ -139,6 +139,11 @@ class StandaloneSettings(BaseSettings):
         description="Password that enables and protects the standalone configuration UI.",
     )
 
+    enforce_public_urls: bool = Field(
+        default=False,
+        description="Whether to enforce that only public URLs are allowed.",
+    )
+
     load_modules: list[str] = []
     # ------------------------------------------------------------------
     # Pluggable module classes
