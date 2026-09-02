@@ -5,6 +5,7 @@ Spins up a real gRPC A2A server backed by the production
 drives it with the a2a-sdk gRPC client used by the A2A client agent.
 """
 
+import os
 import socket
 from concurrent import futures
 from datetime import datetime, timedelta, timezone
@@ -52,7 +53,9 @@ from hyperforge.server.settings import Settings as ServerSettings
 from hyperforge.standalone.agent import StaticAgentManager
 from hyperforge.standalone.config import StandAloneAgentConfig, WorkflowConfig
 
-NUA_KEY = cassette_nua_key("https://europe-1.dp.stashify.cloud/")
+NUA_KEY = os.environ.get("NUA_KEY") or cassette_nua_key(
+    "https://europe-1.dp.stashify.cloud/"
+)
 
 
 async def _a2a_client(endpoint: str, **config):
