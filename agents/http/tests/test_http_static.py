@@ -1,6 +1,7 @@
 import os
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
+import httpx
 import pytest
 from hyperforge.engine import main as arag_main
 from hyperforge.interaction import AragAnswer
@@ -46,12 +47,16 @@ CONFIG = {
 async def test_http_static_get(mocker):
     answers = []
 
-    mock_response = MagicMock()
-    mock_response.status_code = 200
-    mock_response.content = b"Experts from the University of Nuclia have found that waking up relaxed can be achieved by following a consistent sleep schedule, creating a calming bedtime routine, and ensuring a comfortable sleep environment. Also, if your alarm is a an BetterStack call, it will help you clear your mind"
+    request = httpx.Request("GET", "https://example.com/context")
+    mock_response = httpx.Response(
+        200,
+        content=b"Experts from the University of Nuclia have found that waking up relaxed can be achieved by following a consistent sleep schedule, creating a calming bedtime routine, and ensuring a comfortable sleep environment. Also, if your alarm is a an BetterStack call, it will help you clear your mind",
+        request=request,
+    )
 
     mock_client = AsyncMock()
-    mock_client.get = AsyncMock(return_value=mock_response)
+    mock_client.build_request.return_value = request
+    mock_client.send = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
 

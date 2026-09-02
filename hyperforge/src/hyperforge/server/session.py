@@ -380,6 +380,13 @@ class SessionManager:
             errors.capture_exception(e)
             error = ARAGException(detail=str(e))
             observation.set_status("error")
+        finally:
+            if state.manager is not None:
+                try:
+                    await state.manager.aclose()
+                except Exception as e:
+                    logger.exception("Error closing Manager")
+                    errors.capture_exception(e)
 
         observation.end()
         answer_running.dec()

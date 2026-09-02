@@ -102,7 +102,10 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
         images: list[Image],
     ):
         t0 = time()
-        prompt_feedback = TOOLS_CHOOSE_TEMPLATE.render(tools=self.main_agent.tools)
+        prompt = " ".join([m.text for m in messages])
+        prompt_feedback = TOOLS_CHOOSE_TEMPLATE.render(
+            tools=self.main_agent.tools, task_description=prompt
+        )
         resp, input_tokens, output_tokens = await manager.execute_json(
             model=self.config.tool_choice_model,
             prompt=prompt_feedback,
@@ -178,7 +181,7 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
         if agent_obj is None:
             # We will use LLM to choose the prompt
             prompt_feedback_str = PROMPT_CHOOSE_TEMPLATE.render(
-                prompts=self.main_agent.prompts
+                prompts=self.main_agent.prompts, task_description=question
             )
             resp, input_tokens, output_tokens = await manager.execute_json(
                 model=self.config.tool_choice_model,

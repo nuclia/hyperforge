@@ -5,6 +5,7 @@ import { connectChat } from '@/api/chatWs'
 import type { ChatSocket } from '@/api/chatWs'
 import { AnswerOperation } from '@/types/arag'
 import type { AragAnswer, AragContext, AragStep, Feedback } from '@/types/arag'
+import { safeOAuthUrl } from '@/utils/oauthUrl'
 
 export interface ChatMessage {
   id: string
@@ -186,7 +187,7 @@ function _applyChunk(msg: ChatMessage, chunk: AragAnswer) {
       // from a WS message handler is reliably blocked by browsers since
       // there's no preceding user gesture. The agent resumes on its own
       // once OAuth completes, so we don't pause streaming here.
-      msg.pendingOAuthUrl = chunk.oauth.oauth_url
+      msg.pendingOAuthUrl = safeOAuthUrl(chunk.oauth.oauth_url)
     }
   }
   if (chunk.operation === AnswerOperation.ERROR && chunk.exception) {

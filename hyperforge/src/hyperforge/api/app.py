@@ -16,7 +16,7 @@ from prometheus_client import CONTENT_TYPE_LATEST
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.responses import PlainTextResponse
 
-from hyperforge.api import SERVICE_NAME, internal, logger, v1
+from hyperforge.api import SERVICE_NAME, logger, v1
 from hyperforge.api.authentication import RaoAuthenticationBackend
 from hyperforge.api.logging import set_sentry
 from hyperforge.api.settings import Settings
@@ -74,7 +74,6 @@ class HTTPApplication(FastAPI):
         self.settings = settings
         self.data_manager_settings = data_manager_settings
         self._agents_cfg = {}
-        self.include_router(internal.router)
         self.include_router(v1.router)
         self.include_router(router)
         self.add_middleware(

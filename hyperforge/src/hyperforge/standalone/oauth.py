@@ -4,12 +4,16 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-import httpx
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.hashes import SHA256, SHA384, SHA512
 from starlette.authentication import AuthenticationError
 
 from hyperforge.standalone.config import StandAloneAgentConfig, StandaloneMCPAuthConfig
+from hyperforge.utils.http import (
+    read_limited_response,
+    safe_http_client,
+    validate_public_http_url,
+)
 
 _HASHES = {
     "RS256": SHA256(),
@@ -33,6 +37,7 @@ class JWKSCache:
     _values: dict[str, tuple[float, dict[str, Any]]] = field(default_factory=dict)
 
     async def get(self, url: str) -> dict[str, Any]:
+        validate_public_http_url(url, https_only=True)
         now = time.time()
         cached = self._values.get(url)
         if cached is not None:
@@ -40,10 +45,15 @@ class JWKSCache:
             if expires_at > now:
                 return jwks
 
-        async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.get(url)
-            response.raise_for_status()
-        jwks = response.json()
+        async with safe_http_client(timeout=10) as client:
+            request = client.build_request("GET", url)
+            response = await client.send(request, stream=True, follow_redirects=True)
+            try:
+                response.raise_for_status()
+                content = await read_limited_response(response, 1024 * 1024)
+            finally:
+                await response.aclose()
+        jwks = json.loads(content)
         self._values[url] = (now + self.ttl_seconds, jwks)
         return jwks
 

@@ -15,7 +15,7 @@ from hyperforge.memory.memory import EphemeralSessionMemory, MemoryConfig
 from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.models import Context, HistoryQuestionAnswer, Rules
 from hyperforge.pubsub import UserToAgentInteraction
-from nuclia.lib.nua_responses import Author, Message
+from nuclia.lib.nua_responses import Author, Message, ToolChoiceAuto
 
 from hyperforge_smart.agent import RegisteredAgent, SmartAgent
 from hyperforge_smart.config import SmartAgentConfig
@@ -408,6 +408,33 @@ def test_new_feedback_prevents_same_turn_completion():
 
     assert SmartAgent._has_unresolved_feedback(calls, {})
     assert not SmartAgent._has_unresolved_feedback(calls, {"approval": "yes"})
+
+
+@pytest.mark.asyncio
+async def test_choose_tools_uses_auto_tool_choice():
+    smart_agent = SmartAgent(
+        config=SmartAgentConfig.model_validate(
+            {
+                "id": "smart-test",
+                "module": "smart",
+                "title": "Smart Agent",
+                "planning_mode": "reactive",
+            }
+        )
+    )
+    captured_items = []
+
+    async def execute_raw(item, tracking=None):
+        captured_items.append(item)
+        return SimpleNamespace(), 0.0, 0.0
+
+    await smart_agent.choose_tools(
+        manager=SimpleNamespace(execute_raw=execute_raw),
+        messages=[],
+        tools=[],
+    )
+
+    assert isinstance(captured_items[0].tool_choice, ToolChoiceAuto)
 
 
 @pytest.mark.asyncio

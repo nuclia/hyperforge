@@ -11,7 +11,7 @@ from hyperforge.configure import agent
 from hyperforge.context.agent import ContextAgent, build_context_agent
 from hyperforge.definition import FunctionDefinition
 from hyperforge.interaction import Feedback
-from hyperforge.manager import Manager
+from hyperforge.manager import Manager, build_reasoning
 from hyperforge.memory.memory import QuestionMemory
 from hyperforge.models import Chunk, Context, TrackingInfo
 from hyperforge.result_payload import budget_from_config, inspect_text_blocks
@@ -21,6 +21,7 @@ from nuclia.lib.nua_responses import (
     ChatModel,
     Message,
     Tool,
+    ToolChoiceAuto,
     UserPrompt,
 )
 from pydantic import BaseModel, ConfigDict, Field
@@ -479,8 +480,10 @@ class SmartAgent(Agent[SmartAgentConfig], ContextAgent):
         item = ChatModel(
             question="",
             user_id=f"smart_planner-{self.config.module}",
-            generative_model=model,
+            generative_model=model.model_id,
+            reasoning=build_reasoning(model),
             tools=tools,
+            tool_choice=ToolChoiceAuto(),
             user_prompt=UserPrompt(
                 prompt=f"{system}\n\nChoose the best tool or tools for the task. Call task_complete when you have enough information."
             ),

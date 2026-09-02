@@ -9,7 +9,7 @@ from hyperforge.context.agent import ContextAgent
 from hyperforge.definition import FunctionDefinition
 from hyperforge.manager import Manager
 from hyperforge.memory import Chunk, Context, QuestionMemory
-from hyperforge.models import ExternalUsage
+from hyperforge.models import ExternalUsage, ExternalUsageOperation
 from hyperforge.utils.http import safe_http_client
 from nuclia.lib.nua_responses import Image
 from perplexity.types import ChatMessageInput
@@ -157,6 +157,7 @@ class PerplexityAgent(ContextAgent, Agent[PerplexityAgentConfig]):
             timeit=time() - t0,
             external_usage=[
                 ExternalUsage(
+                    operation=ExternalUsageOperation.INTERNET_SEARCH,
                     provider="perplexity",
                     model="sonar-pro",
                     input_tokens=(usage.prompt_tokens or 0) if usage else 0,

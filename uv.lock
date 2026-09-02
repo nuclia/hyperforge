@@ -1072,9 +1072,11 @@ dependencies = [
     { name = "cryptography" },
     { name = "databases", extra = ["asyncpg"] },
     { name = "fastapi" },
+    { name = "httpcore" },
     { name = "httpx" },
     { name = "hyperforge-restricted" },
     { name = "jinja2" },
+    { name = "jsonschema" },
     { name = "lru-dict" },
     { name = "mcp" },
     { name = "mmh3" },
@@ -1085,10 +1087,11 @@ dependencies = [
     { name = "nucliadb-sdk" },
     { name = "nucliadb-telemetry", extra = ["otel"] },
     { name = "prometheus-client" },
-    { name = "psycopg2" },
+    { name = "psycopg2-binary" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "redis", extra = ["hiredis"] },
+    { name = "restrictedpython" },
     { name = "ruff" },
     { name = "sentry-sdk" },
     { name = "sqlalchemy" },
@@ -1122,23 +1125,26 @@ requires-dist = [
     { name = "cryptography" },
     { name = "databases", extras = ["asyncpg"] },
     { name = "fastapi" },
-    { name = "httpx" },
+    { name = "httpcore", specifier = ">=1.0.9,<1.1" },
+    { name = "httpx", specifier = ">=0.28.1,<0.29" },
     { name = "hyperforge-restricted", editable = "agents/restricted" },
     { name = "jinja2" },
+    { name = "jsonschema" },
     { name = "lru-dict" },
     { name = "mcp", specifier = ">=1.26.0" },
     { name = "mmh3" },
     { name = "mrflagly", specifier = ">=0.2.11" },
-    { name = "nuclia", specifier = ">=4.11.5" },
+    { name = "nuclia", specifier = ">=4.14.0" },
     { name = "nuclia-models", specifier = ">=0.59.0" },
     { name = "nucliadb-models", specifier = ">=6.13.1.post6414" },
     { name = "nucliadb-sdk", specifier = ">=6.13.1.post6414" },
     { name = "nucliadb-telemetry", extras = ["otel"], specifier = ">=6.15.0" },
     { name = "prometheus-client" },
-    { name = "psycopg2" },
+    { name = "psycopg2-binary" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "redis", extras = ["hiredis"], specifier = ">=6.4.0" },
+    { name = "restrictedpython" },
     { name = "ruff", specifier = ">=0.15.10" },
     { name = "sentry-sdk" },
     { name = "sqlalchemy" },
@@ -2503,7 +2509,7 @@ wheels = [
 
 [[package]]
 name = "nuclia"
-version = "4.11.5"
+version = "4.14.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiofiles" },
@@ -2524,37 +2530,37 @@ dependencies = [
     { name = "tqdm" },
     { name = "websockets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/30/14/d274a3c4b964458f1fadca12bd87d329607d22c4b24eb7f6650692276732/nuclia-4.11.5.tar.gz", hash = "sha256:a0987100b2b6186399321de1be1ced9d0ee654cdd5abd344611fe977d2f01aba", size = 286122, upload-time = "2026-06-22T09:53:56.632Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e3/30/daf550a3362adc0268b32f02d358b867fe3afebb00f0c0c097d2dd720525/nuclia-4.14.0.tar.gz", hash = "sha256:7c25a4fb8232805a0ca615403d6c51fef79d263be6b8b070684f1e16e013ffda", size = 388582, upload-time = "2026-08-10T07:32:12.963Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c6/f0/4cce7d66568c081ee27b320e2c5f469db71040014315dcca1c6ad1a2612a/nuclia-4.11.5-py3-none-any.whl", hash = "sha256:c84973675d84c9d6db48806a28a69c8313ce4b3e336f27cc4b8e86ed4b1637ae", size = 117622, upload-time = "2026-06-22T09:53:54.87Z" },
+    { url = "https://files.pythonhosted.org/packages/ee/22/f52337d44423cc38b2c2c8c7122ce31d06473ae65233e7e410b2a541e110/nuclia-4.14.0-py3-none-any.whl", hash = "sha256:45ed012297cfd1d1496cac60b45aaa3582686273f6ea590b8be647455f92b765", size = 148568, upload-time = "2026-08-10T07:32:11.584Z" },
 ]
 
 [[package]]
 name = "nuclia-models"
-version = "0.59.0"
+version = "0.62.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic", extra = ["email"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a6/02/8b59bd33b568e8931d7b033ea4186b22a4e03a2a032bbb02179514ceb38c/nuclia_models-0.59.0.tar.gz", hash = "sha256:378f10172ba75319b98839c4a96f8e1590a2f8278196e620ad03badc6fe9dc77", size = 25374, upload-time = "2026-06-21T21:19:44.586Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/de/91/7ede9ea267a15941dbd038d94517c0cbdf4b4f65bc5c52a6ae7c960cf182/nuclia_models-0.62.0.tar.gz", hash = "sha256:664ab2ba3850532a5ff61dc30584fbd7c3f4b30420a070bce225756ba684b88a", size = 28437, upload-time = "2026-07-09T08:37:31.83Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1a/9b/497803b29faa5b1e90950a245dd316100c00e67ad3136090b8448a27f39e/nuclia_models-0.59.0-py3-none-any.whl", hash = "sha256:b64de9f07c072a6677982b1a938177f7b5d1c6b0f1f686a36dd6e3310af797dc", size = 29890, upload-time = "2026-06-21T21:19:43.41Z" },
+    { url = "https://files.pythonhosted.org/packages/30/d5/cb77ac6a9ece79591981ec4dfa4e8449343ab151f3ef372b5fe8df5adfd7/nuclia_models-0.62.0-py3-none-any.whl", hash = "sha256:776a8e12b90bc82a23114c715363764845c890f12953fe395a2f78e472e74ba8", size = 33703, upload-time = "2026-07-09T08:37:30.878Z" },
 ]
 
 [[package]]
 name = "nucliadb-models"
-version = "6.13.1.post6414"
+version = "6.15.1.post6905"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c3/c9/ba5b925b955eb290279c4096659862f6d8d7770dc33354437d70973404e8/nucliadb_models-6.13.1.post6414-py3-none-any.whl", hash = "sha256:039ed3ecb02deced8751be7e8cc42792d234694f7599ea01c30c983ad7668e6f", size = 81883, upload-time = "2026-05-29T05:10:57.821Z" },
+    { url = "https://files.pythonhosted.org/packages/48/92/da40415d8bd97eec2a462ae6838ea22a4360d119a65cb696060f273111a5/nucliadb_models-6.15.1.post6905-py3-none-any.whl", hash = "sha256:8ff2d95eaaf61ceb82ccd746caaaf4bcdad7fb6bdae2632d0af94d53b8be35e5", size = 82074, upload-time = "2026-07-30T10:54:58.12Z" },
 ]
 
 [[package]]
 name = "nucliadb-sdk"
-version = "6.13.1.post6414"
+version = "6.15.1.post6905"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
@@ -2564,7 +2570,7 @@ dependencies = [
     { name = "pydantic" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/44/6f/8b4923e68a10d5f4127b7fdea5867946b3150a4252aeec6b2a2ff0463d76/nucliadb_sdk-6.13.1.post6414-py3-none-any.whl", hash = "sha256:88ea8ebf21d546d8318f85b3ee4a2c9f37223af6210a413e44f3cf16f8fcce5d", size = 18020, upload-time = "2026-05-29T05:11:03.66Z" },
+    { url = "https://files.pythonhosted.org/packages/72/73/ef4cf14513cb762bf3f92518bf3d69b105e8e5b51ea92534a2e88c5b02c8/nucliadb_sdk-6.15.1.post6905-py3-none-any.whl", hash = "sha256:33bba605f29eab70f7a84b3b5651d414ed96bb8a101178e6552d7e59c1c1c103", size = 18236, upload-time = "2026-07-30T10:55:02.003Z" },
 ]
 
 [[package]]
@@ -2991,17 +2997,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/c5/f5/65d838092fd01c44d16037953fd4c2cc851e783de9b8f02b27ec4ffd906f/protobuf-6.33.5-cp39-abi3-manylinux2014_s390x.whl", hash = "sha256:8afa18e1d6d20af15b417e728e9f60f3aa108ee76f23c3b2c07a2c3b546d3afd", size = 339411, upload-time = "2026-01-29T21:51:27.446Z" },
     { url = "https://files.pythonhosted.org/packages/9b/53/a9443aa3ca9ba8724fdfa02dd1887c1bcd8e89556b715cfbacca6b63dbec/protobuf-6.33.5-cp39-abi3-manylinux2014_x86_64.whl", hash = "sha256:cbf16ba3350fb7b889fca858fb215967792dc125b35c7976ca4818bee3521cf0", size = 323465, upload-time = "2026-01-29T21:51:28.925Z" },
     { url = "https://files.pythonhosted.org/packages/57/bf/2086963c69bdac3d7cff1cc7ff79b8ce5ea0bec6797a017e1be338a46248/protobuf-6.33.5-py3-none-any.whl", hash = "sha256:69915a973dd0f60f31a08b8318b73eab2bd6a392c79184b3612226b0a3f8ec02", size = 170687, upload-time = "2026-01-29T21:51:32.557Z" },
-]
-
-[[package]]
-name = "psycopg2"
-version = "2.9.10"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/62/51/2007ea29e605957a17ac6357115d0c1a1b60c8c984951c19419b3474cdfd/psycopg2-2.9.10.tar.gz", hash = "sha256:12ec0b40b0273f95296233e8750441339298e6a572f7039da5b260e3c8b60e11", size = 385672, upload-time = "2024-10-16T11:24:54.832Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/3d/16/4623fad6076448df21c1a870c93a9774ad8a7b4dd1660223b59082dd8fec/psycopg2-2.9.10-cp312-cp312-win32.whl", hash = "sha256:65a63d7ab0e067e2cdb3cf266de39663203d38d6a8ed97f5ca0cb315c73fe067", size = 1025113, upload-time = "2024-10-16T11:18:40.148Z" },
-    { url = "https://files.pythonhosted.org/packages/66/de/baed128ae0fc07460d9399d82e631ea31a1f171c0c4ae18f9808ac6759e3/psycopg2-2.9.10-cp312-cp312-win_amd64.whl", hash = "sha256:4a579d6243da40a7b3182e0430493dbd55950c493d8c68f4eec0b302f6bbf20e", size = 1163951, upload-time = "2024-10-16T11:18:44.377Z" },
-    { url = "https://files.pythonhosted.org/packages/ae/49/a6cfc94a9c483b1fa401fbcb23aca7892f60c7269c5ffa2ac408364f80dc/psycopg2-2.9.10-cp313-cp313-win_amd64.whl", hash = "sha256:91fd603a2155da8d0cfcdbf8ab24a2d54bca72795b90d2a3ed2b6da8d979dee2", size = 2569060, upload-time = "2025-01-04T20:09:15.28Z" },
 ]
 
 [[package]]
