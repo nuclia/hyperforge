@@ -5,7 +5,6 @@ Spins up a real gRPC A2A server backed by the production
 drives it with the a2a-sdk gRPC client used by the A2A client agent.
 """
 
-import os
 import socket
 from concurrent import futures
 from datetime import datetime, timedelta, timezone
@@ -32,6 +31,7 @@ from hyperforge_a2a.client import (
 from hyperforge_a2a.config import A2AAgentConfig
 from hyperforge_a2a.config_driver import A2ADriverConfig, A2AInnerConfig
 from hyperforge_a2a.driver import A2ADriver
+from nuclia_models.predict.generative_responses import GenerativeFullResponse
 from redis.asyncio import Redis
 
 import hyperforge.a2a.executor as executor_module
@@ -44,7 +44,6 @@ from hyperforge.configure import load_all_configurations, scan
 from hyperforge.interaction import AnswerOperation, AragAnswer, Feedback
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import NoMemorySessionMemory
-from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.models import MemoryConfig, Step
 from hyperforge.pubsub import UserToAgentInteraction
 from hyperforge.server.cache import NoCache
@@ -52,10 +51,6 @@ from hyperforge.server.session import SessionManager
 from hyperforge.server.settings import Settings as ServerSettings
 from hyperforge.standalone.agent import StaticAgentManager
 from hyperforge.standalone.config import StandAloneAgentConfig, WorkflowConfig
-
-NUA_KEY = os.environ.get("NUA_KEY") or cassette_nua_key(
-    "https://europe-1.dp.stashify.cloud/"
-)
 
 
 async def _a2a_client(endpoint: str, **config):
@@ -465,13 +460,17 @@ async def test_a2a_client_agent_builds_context_from_streamed_workflow(
     }
 
 
-@pytest.mark.vcr(ignore_localhost=True)
 @pytest.mark.asyncio
 async def test_a2a_client_server_workflow_end_to_end(monkeypatch):
-    """Run configured client, A2A server, broker, and NUA workflow end to end."""
+    """Run configured client, A2A server, broker, and workflow end to end."""
     for module in ("hyperforge_static", "hyperforge_summarize"):
         scan(module)
         load_all_configurations(module)
+
+    async def execute_raw(*_args, **_kwargs):
+        return GenerativeFullResponse(answer="The A2A release is ready."), 0.0, 0.0
+
+    monkeypatch.setattr(Manager, "execute_raw", execute_raw)
 
     broker = LocalBroker(keepalive_ms=1_000)
     remote_agent_id = "remote-agent"
@@ -498,7 +497,6 @@ async def test_a2a_client_server_workflow_end_to_end(monkeypatch):
     worker = SessionManager(
         settings=ServerSettings(
             health_check_enabled=False,
-            external_nua_api_key=NUA_KEY,
             standalone=True,
             allow_private_network_endpoints=True,
         ),
