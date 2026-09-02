@@ -111,14 +111,10 @@ class NucliaDBDriver(Driver):
 
     async def labels(self) -> Dict[str, List[str]]:
         labelsets = await self.driver.get_labelsets(kbid=self.config.kbid)
-        result = {}
-        for labelset in labelsets.labelsets:
-            labels = await self.driver.get_labelset(
-                kbid=self.config.kbid, labelset=labelset
-            )
-            result[labelset] = [x.title for x in labels.labels]
-
-        return result
+        return {
+            labelset_id: [label.title for label in labelset.labels]
+            for labelset_id, labelset in labelsets.labelsets.items()
+        }
 
     async def field_facets(self) -> Dict[str, int]:
         field_labels = {}

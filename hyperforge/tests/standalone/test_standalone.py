@@ -1,5 +1,6 @@
 import json
 import socket
+from base64 import b64encode
 from pathlib import Path
 from typing import Any, Optional
 from unittest.mock import patch
@@ -12,6 +13,7 @@ from httpx._transports.asgi import ASGITransport
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 from mcp.types import TextContent
+from pydantic import SecretStr
 from websockets.asyncio.client import connect
 
 from hyperforge.api.models import (
@@ -208,6 +210,45 @@ async def test_standalone_http_post(standalone_client: AsyncClient):
     assert answer_msgs, "Expected at least one message with an answer"
     assert answer_msgs[-1].answer is not None
     assert "42" in answer_msgs[-1].answer
+
+
+async def test_standalone_ui_is_disabled_without_password(
+    standalone_client: AsyncClient,
+):
+    response = await standalone_client.get("/api/v1/ui/config")
+    assert response.status_code == 404
+
+
+async def test_standalone_ui_requires_admin_credentials(local_agents_config):
+    settings = STANDALONE_SETTINGS.model_copy(
+        update={"ui_admin_password": SecretStr("secret-password")}
+    )
+    app = StandaloneApplication(local_agents_config, settings)
+    with patch("hyperforge.server.session.get_state", return_value=_mock_state):
+        async with (
+            app.router.lifespan_context(app),
+            AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test"
+            ) as client,
+        ):
+            response = await client.get("/api/v1/ui/config")
+            assert response.status_code == 401
+            assert response.headers["www-authenticate"].startswith("Basic ")
+
+            response = await client.get(
+                "/api/v1/ui/config",
+                headers={
+                    "Authorization": "Basic "
+                    + b64encode(b"admin:secret-password").decode()
+                },
+            )
+            assert response.status_code == 200
+
+
+async def test_standalone_security_defaults():
+    settings = StandaloneSettings()
+    assert settings.host == "0.0.0.0"
+    assert settings.cors_allow_origin == []
 
 
 async def test_standalone_http_post_unknown_agent(standalone_client: AsyncClient):
