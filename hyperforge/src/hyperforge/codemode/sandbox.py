@@ -137,8 +137,6 @@ class SandboxRunner:
             await asyncio.gather(controller_task, return_exceptions=True)
 
     async def _run_remotely(self, request: WorkerExecutionRequest):
-        if settings.sandbox_token is None:
-            raise RuntimeError("SANDBOX_TOKEN is required for remote codemode")
         rx, tx = await asyncio.open_unix_connection(self.socket)
         reader, writer = SandboxReader(rx), SandboxWriter(tx)
         try:
@@ -385,8 +383,6 @@ execution_observer = nucliadb_telemetry.metrics.Observer("arag_sandbox_execution
 async def run_sandbox_server():
     assert settings.sandbox_socket is not None
     sandbox_token = settings.sandbox_token
-    if sandbox_token is None:
-        raise RuntimeError("SANDBOX_TOKEN is required for the sandbox server")
     if settings.sandbox_verify:
         _verify_connectivity()
 
@@ -397,7 +393,9 @@ async def run_sandbox_server():
             async with asyncio.timeout(1):
                 msg = await reader.read_message()
                 assert isinstance(msg, SandboxMessage.Run)
-                if not hmac.compare_digest(msg.token or "", sandbox_token):
+                if sandbox_token is not None and not hmac.compare_digest(
+                    msg.token or "", sandbox_token
+                ):
                     raise PermissionError("Invalid sandbox token")
         except (AssertionError, PermissionError, TimeoutError, ValueError):
             logger.warning("Rejected invalid sandbox connection")
