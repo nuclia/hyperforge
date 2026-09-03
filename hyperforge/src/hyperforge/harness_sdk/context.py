@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from .models import HarnessContextReference, HarnessContextType
 
-type ContextFormatter = Callable[[BaseModel], str]
+ContextModelT = TypeVar("ContextModelT", bound=BaseModel)
+type ContextFormatter = Callable[[Any], str]
 
 
 @dataclass(frozen=True)
@@ -20,12 +21,45 @@ class ContextDefinition:
 _DEFINITIONS: dict[HarnessContextType, ContextDefinition] = {}
 
 
+class RetrievalContext(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+
 def register_context(
     context_type: HarnessContextType,
-    schema: type[BaseModel],
-    formatter: ContextFormatter | None = None,
-) -> None:
-    _DEFINITIONS[context_type] = ContextDefinition(schema=schema, formatter=formatter)
+    schema: type[ContextModelT],
+) -> Callable[[Callable[[ContextModelT], str]], Callable[[ContextModelT], str]]:
+    def decorator(
+        formatter: Callable[[ContextModelT], str],
+    ) -> Callable[[ContextModelT], str]:
+        _DEFINITIONS[context_type] = ContextDefinition(
+            schema=schema, formatter=formatter
+        )
+        return formatter
+
+    return decorator
+
+
+@register_context(HarnessContextType.RETRIEVAL, RetrievalContext)
+def _format_retrieval_context(context: RetrievalContext) -> str:
+    content = {
+        key: (
+            [
+                {
+                    item_key: item_value
+                    for item_key, item_value in item.items()
+                    if item_key not in {"images"}
+                    and item_value not in (None, "", [], {})
+                }
+                for item in value
+            ]
+            if key == "items" and isinstance(value, list)
+            else value
+        )
+        for key, value in context.model_dump(mode="json").items()
+        if key not in {"images"} and value not in (None, "", [], {})
+    }
+    return json.dumps(content, sort_keys=True, default=str, separators=(",", ":"))
 
 
 def make_context(
@@ -43,27 +77,15 @@ def make_context(
 
 
 def format_context(reference: HarnessContextReference) -> str:
-    if reference.type == HarnessContextType.RETRIEVAL:
-        values = reference.content.get("items", [reference.content])
-        visible = [
-            {
-                key: value
-                for key, value in item.items()
-                if key not in {"images"} and value not in (None, "", [], {})
-            }
-            for item in values
-        ]
-        return json.dumps(visible, sort_keys=True, default=str, separators=(",", ":"))
     definition = _DEFINITIONS.get(reference.type)
-    if definition is None:
-        return json.dumps(
-            reference.content, sort_keys=True, default=str, separators=(",", ":")
-        )
-    value = definition.schema.model_validate(reference.content)
-    if definition.formatter is not None:
-        return definition.formatter(value)
+    content = reference.content
+    if definition is not None:
+        value = definition.schema.model_validate(content)
+        if definition.formatter is not None:
+            return definition.formatter(value)
+        content = value.model_dump(mode="json")
     return json.dumps(
-        value.model_dump(mode="json"),
+        content,
         sort_keys=True,
         default=str,
         separators=(",", ":"),
