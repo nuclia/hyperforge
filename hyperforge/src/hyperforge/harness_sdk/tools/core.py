@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from re import findall
 from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel
@@ -64,19 +65,32 @@ class ListOutput(BaseModel):
     items: list[dict[str, Any]]
 
 
+_SEARCH_STOP_WORDS = {"a", "an", "and", "for", "or", "the", "to"}
+
+
+def _search_terms(value: str) -> set[str]:
+    return {
+        term
+        for term in findall(r"[\w]+", value.casefold().replace("_", " "))
+        if term not in _SEARCH_STOP_WORDS
+    }
+
+
 @tool(description="Search for additional tools that can be activated.")
 async def search_tools(
     harness: AgentHarness, input_value: SearchToolsInput
 ) -> ListOutput:
-    terms = input_value.query.casefold().split()
+    terms = _search_terms(input_value.query)
     candidates: list[tuple[int, HarnessTool[Any, Any]]] = []
     for candidate in harness._external_tools:
         if not candidate.lazy_load or candidate.name in harness._active_lazy_tools:
             continue
-        searchable = f"{candidate.name} {candidate.description}".casefold()
-        if terms and not all(term in searchable for term in terms):
+        name_terms = _search_terms(candidate.name)
+        searchable_terms = name_terms | _search_terms(candidate.description)
+        matching_terms = terms & searchable_terms
+        if terms and not matching_terms:
             continue
-        score = sum(2 if term in candidate.name.casefold() else 1 for term in terms)
+        score = sum(2 if term in name_terms else 1 for term in matching_terms)
         candidates.append((score, candidate))
     candidates.sort(key=lambda item: (-item[0], item[1].name))
     limit = max(1, min(input_value.limit, 50))
