@@ -10,7 +10,7 @@ from hyperforge.codemode import (
 from hyperforge.codemode.sandbox import settings
 from hyperforge.definition import FunctionDefinition
 
-from . import HarnessTool, tool
+from . import AgentContext, HarnessTool, tool
 
 CODEMODE_TOOL_NAME = "codemode"
 OUTPUT_FUNCTION_NAME = "output"
@@ -31,7 +31,8 @@ class CodemodeOutput(BaseModel):
         "call output(value) to return a result."
     ),
 )
-async def codemode(harness: Any, input_value: CodemodeInput) -> CodemodeOutput:
+async def codemode(context: AgentContext, input_value: CodemodeInput) -> CodemodeOutput:
+    harness = context.harness
     tools = {
         tool.name: tool
         for tool in harness.iter_tools()
@@ -54,7 +55,9 @@ async def codemode(harness: Any, input_value: CodemodeInput) -> CodemodeOutput:
         harness.usage.tool_calls += 1
         harness._check_limit("max_tool_calls", harness.usage.tool_calls)
         arguments = _tool_arguments(tool, task.args, task.keyword_args)
-        output = await tool.execute(harness, arguments)
+        output = await tool.execute(
+            AgentContext(harness=harness, name=tool.name), arguments
+        )
         return output.model_dump(mode="json")
 
     runner = (

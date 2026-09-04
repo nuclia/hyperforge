@@ -6,7 +6,6 @@ import logging
 import time
 import uuid
 from collections.abc import AsyncIterator, Iterable, Mapping
-from contextvars import ContextVar
 from dataclasses import dataclass, field
 from typing import Any, Literal, NamedTuple
 
@@ -24,7 +23,7 @@ from .models import (
     HarnessToolCall,
 )
 from .storage import HarnessStorageProtocol, InMemoryHarnessStorage
-from .tools import HarnessTool
+from .tools import AgentContext, HarnessTool
 from .tools.core import DictOutput, SendMessageInput, SpawnAgentInput, create_core_tools
 from .usage import HarnessUsage, UsageLimitExceeded, UsageLimits
 
@@ -356,9 +355,6 @@ class AgentHarness:
         self._run_lock = asyncio.Lock()
         self._active_task: asyncio.Task[Any] | None = None
         self._turn_id: str | None = None
-        self._current_tool_call: ContextVar[HarnessToolCall | None] = ContextVar(
-            f"current_tool_call_{self.agent_id}", default=None
-        )
         self._last_event_id: str | None = None
         self._external_tools = list(self._config.tools)
         self._tools = {tool.name: tool for tool in self._external_tools}
@@ -529,17 +525,6 @@ class AgentHarness:
     @property
     def turn_id(self) -> str | None:
         return self._turn_id
-
-    @property
-    def current_tool_call(self) -> HarnessToolCall | None:
-        """The tool call currently being executed, if any.
-
-        Backed by a ContextVar: the value is local to the asyncio task that
-        runs the tool, so it is only meaningful when accessed from within
-        that task (e.g. inside a tool's ``execute()``). Reads from any other
-        task or after execution finishes return ``None``.
-        """
-        return self._current_tool_call.get()
 
     async def request_feedback(
         self,
@@ -969,65 +954,62 @@ class AgentHarness:
 
     async def _execute_tool_call(self, call: HarnessToolCall) -> HarnessMessage:
         assert call.id is not None
-        current_tool_call = self._current_tool_call.set(call)
+        await self.emit(
+            HarnessEventType.TOOL_REQUESTED,
+            {"call": call.model_dump(mode="json")},
+        )
+        tool = self._tools.get(call.name)
         try:
+            output: BaseModel | None = None
+            if tool is None:
+                raise ValueError(f"Unknown tool: {call.name}")
+            elif tool.lazy_load and tool.name not in self._active_lazy_tools:
+                raise ValueError(f"Tool is not active: {call.name}")
+            else:
+                context = AgentContext(harness=self, name=call.name, id=call.id)
+                output = await tool.execute(context, call.arguments)
+                result = output.model_dump(mode="json")
+                reference = tool.context(output)
+                content = format_context(reference)
             await self.emit(
-                HarnessEventType.TOOL_REQUESTED,
-                {"call": call.model_dump(mode="json")},
+                HarnessEventType.TOOL_COMPLETED,
+                {"call_id": call.id, "tool": call.name, "result": result},
             )
-            tool = self._tools.get(call.name)
-            try:
-                output: BaseModel | None = None
-                if tool is None:
-                    raise ValueError(f"Unknown tool: {call.name}")
-                elif tool.lazy_load and tool.name not in self._active_lazy_tools:
-                    raise ValueError(f"Tool is not active: {call.name}")
-                else:
-                    output = await tool.execute(self, call.arguments)
-                    result = output.model_dump(mode="json")
-                    reference = tool.context(output)
-                    content = format_context(reference)
-                await self.emit(
-                    HarnessEventType.TOOL_COMPLETED,
-                    {"call_id": call.id, "tool": call.name, "result": result},
-                )
-                return HarnessMessage(
-                    role="tool",
-                    tool_call_id=call.id,
-                    tool_name=call.name,
-                    content=content,
-                    context=reference,
-                )
-            except Exception as exc:
-                logger.warning(
-                    "Agent tool execution failed: tool=%s call_id=%s error_type=%s error=%s",
-                    call.name,
-                    call.id,
-                    type(exc).__name__,
-                    exc,
-                    extra={
-                        "conversation_id": self.conversation_id,
-                        "turn_id": self._turn_id,
-                        "agent_id": self.agent_id,
-                        "call_id": call.id,
-                        "tool": call.name,
-                        "error_type": type(exc).__name__,
-                        "error": str(exc),
-                    },
-                )
-                result = {"error": str(exc)}
-                await self.emit(
-                    HarnessEventType.TOOL_FAILED,
-                    {"call_id": call.id, "tool": call.name, "result": result},
-                )
-                return HarnessMessage(
-                    role="tool",
-                    tool_call_id=call.id,
-                    tool_name=call.name,
-                    content=json.dumps(result, default=str, separators=(",", ":")),
-                )
-        finally:
-            self._current_tool_call.reset(current_tool_call)
+            return HarnessMessage(
+                role="tool",
+                tool_call_id=call.id,
+                tool_name=call.name,
+                content=content,
+                context=reference,
+            )
+        except Exception as exc:
+            logger.warning(
+                "Agent tool execution failed: tool=%s call_id=%s error_type=%s error=%s",
+                call.name,
+                call.id,
+                type(exc).__name__,
+                exc,
+                extra={
+                    "conversation_id": self.conversation_id,
+                    "turn_id": self._turn_id,
+                    "agent_id": self.agent_id,
+                    "call_id": call.id,
+                    "tool": call.name,
+                    "error_type": type(exc).__name__,
+                    "error": str(exc),
+                },
+            )
+            result = {"error": str(exc)}
+            await self.emit(
+                HarnessEventType.TOOL_FAILED,
+                {"call_id": call.id, "tool": call.name, "result": result},
+            )
+            return HarnessMessage(
+                role="tool",
+                tool_call_id=call.id,
+                tool_name=call.name,
+                content=json.dumps(result, default=str, separators=(",", ":")),
+            )
 
     def _install_core_tools(self, feedback_enabled: bool) -> None:
         core_tools = create_core_tools(feedback_enabled=feedback_enabled)
