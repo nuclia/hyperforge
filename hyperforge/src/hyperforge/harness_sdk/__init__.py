@@ -39,8 +39,19 @@ from .models import (
     HarnessToolCall,
 )
 from .storage import HarnessStorageProtocol, InMemoryHarnessStorage
-from .tools import HarnessTool, tool
-from .tools.codemode import CodemodeInput, CodemodeOutput, codemode
+from .tools import HarnessTool, ToolInheritancePolicy, tool
+from .tools.codemode import (
+    CodeModeCapability,
+    CodeModeExecutionLimiter,
+    CodemodeInput,
+    CodeModeLimits,
+    CodemodeOutput,
+    CodeModeResultAdapter,
+    codemode,
+    context_codemode_result_adapter,
+    create_codemode_tool,
+    raw_codemode_result_adapter,
+)
 from .usage import HarnessUsage, UsageLimitExceeded, UsageLimits
 
 __all__ = [
@@ -55,6 +66,10 @@ __all__ = [
     "ChatCompletionToolCallDelta",
     "ChatCompletionToolCallFunctionDelta",
     "ChatCompletionUsage",
+    "CodeModeCapability",
+    "CodeModeExecutionLimiter",
+    "CodeModeLimits",
+    "CodeModeResultAdapter",
     "CodemodeInput",
     "CodemodeOutput",
     "HarnessAgentToTool",
@@ -78,14 +93,18 @@ __all__ = [
     "NucliaChatCompletionsClient",
     "NucliaChatCompletionsError",
     "ReasoningEffort",
+    "ToolInheritancePolicy",
     "UsageLimitExceeded",
     "UsageLimits",
     "context_schema",
     "codemode",
+    "context_codemode_result_adapter",
     "create_agent",
+    "create_codemode_tool",
     "format_context",
     "make_context",
     "register_context",
+    "raw_codemode_result_adapter",
     "tool",
     "published_agent_to_tools",
     "preload_published_agent_to_tools",

@@ -1,11 +1,17 @@
 from .model import (
+    MAX_PROTOCOL_BYTES,
     RestrictedPythonTask,
     SandboxMessage,
     WorkerError,
     WorkerExecutionRequest,
     WorkerTypes,
+    decode_json_value,
+    decode_protocol_value,
     deserialize,
+    encode_protocol_value,
+    encode_sandbox_message,
     serialize,
+    validate_protocol_value,
 )
 from .sandbox import (
     InsecureSandbox,
@@ -21,6 +27,7 @@ from .worker import PythonAgentWorker
 
 __all__ = [
     "InsecureSandbox",
+    "MAX_PROTOCOL_BYTES",
     "PythonAgentWorker",
     "RestrictedPythonTask",
     "SandboxMessage",
@@ -32,8 +39,13 @@ __all__ = [
     "WorkerExecutionRequest",
     "WorkerError",
     "WorkerTypes",
+    "decode_json_value",
+    "decode_protocol_value",
+    "encode_sandbox_message",
     "deserialize",
+    "encode_protocol_value",
     "run_sandbox_server",
     "serialize",
     "settings",
+    "validate_protocol_value",
 ]

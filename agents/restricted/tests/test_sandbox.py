@@ -114,6 +114,26 @@ async def test_sandbox_runtime_limit(sandbox_conn, long_timeout):
     assert "timed out" in message.error
 
 
+async def test_sandbox_enforces_server_runtime_ceiling(
+    sandbox_conn, long_timeout, monkeypatch
+):
+    monkeypatch.setattr(sandbox.settings, "sandbox_max_session_runtime_seconds", 0.1)
+    request = WorkerExecutionRequest(
+        code="while True: pass",
+        question="Q?",
+        local_vars={},
+        global_vars={},
+        function_names={},
+    )
+    (rx, tx) = sandbox_conn
+    await tx.write_message(SandboxMessage.Run(request, token="test-token"))
+
+    message = await rx.read_message()
+
+    assert isinstance(message, SandboxMessage.Error)
+    assert "timed out" in message.error
+
+
 async def test_sandbox_function_call(sandbox_conn, long_timeout):
     request = WorkerExecutionRequest(
         code="show(msg=foo())",
@@ -178,3 +198,91 @@ async def test_restricted_agent_rejects_undeclared_callback():
 
     with pytest.raises(ValueError, match="not authorized"):
         await agent.handle_queue_item(None, None, task)
+
+
+async def test_sandbox_rejects_wrong_token(sandbox_conn):
+    request = WorkerExecutionRequest(
+        code="", question="Q?", local_vars={}, global_vars={}, function_names={}
+    )
+    (rx, tx) = sandbox_conn
+
+    await tx.write_message(SandboxMessage.Run(request, token="wrong-token"))
+
+    with pytest.raises(asyncio.IncompleteReadError):
+        await rx.read_message()
+
+
+async def test_remote_runner_requires_token(monkeypatch, tmp_path):
+    monkeypatch.setattr(sandbox.settings, "sandbox_token", None)
+
+    async def callback(_task):
+        return None
+
+    runner = sandbox.SandboxRunner.remote(str(tmp_path / "unused.sock"), callback)
+    request = WorkerExecutionRequest(
+        code="", question="Q?", local_vars={}, global_vars={}, function_names={}
+    )
+
+    with pytest.raises(RuntimeError, match="SANDBOX_TOKEN is required"):
+        await runner.run(request)
+
+
+async def test_sandbox_rejects_concurrent_session(
+    sandbox_conn, long_timeout, monkeypatch
+):
+    request = WorkerExecutionRequest(
+        code="foo()",
+        question="Q?",
+        local_vars={},
+        global_vars={},
+        function_names={
+            "self": {
+                "foo": FunctionDefinition(name="foo", description="", parameters={})
+            }
+        },
+    )
+    monkeypatch.setattr(sandbox.settings, "sandbox_max_concurrent_sessions", 1)
+    first_rx, first_tx = sandbox_conn
+    await first_tx.write_message(SandboxMessage.Run(request, token="test-token"))
+    assert isinstance(await first_rx.read_message(), SandboxMessage.Request)
+
+    second_rx_raw, second_tx_raw = await asyncio.open_unix_connection(
+        sandbox.settings.sandbox_socket
+    )
+    second_rx = sandbox.SandboxReader(second_rx_raw)
+    second_tx = sandbox.SandboxWriter(second_tx_raw)
+    try:
+        await second_tx.write_message(SandboxMessage.Run(request, token="test-token"))
+        response = await second_rx.read_message()
+        assert isinstance(response, SandboxMessage.Error)
+        assert "concurrency limit" in response.error
+    finally:
+        second_tx.close()
+        await second_tx.wait_closed()
+
+    await first_tx.write_message(SandboxMessage.Response(result=None))
+    assert isinstance(await first_rx.read_message(), SandboxMessage.Done)
+
+
+def test_sandbox_settings_default_to_private_optional_metrics() -> None:
+    configured = sandbox.SandboxSettings()
+
+    assert configured.sandbox_metrics_enabled is False
+    assert configured.sandbox_metrics_host == "127.0.0.1"
+    assert configured.sandbox_socket_mode == "0600"
+    assert configured.sandbox_max_session_runtime_seconds == 60
+    assert configured.sandbox_max_session_memory_bytes == 512 * 1024 * 1024
+
+
+def test_sandbox_settings_accept_shared_group_socket_mode() -> None:
+    configured = sandbox.SandboxSettings(
+        sandbox_socket_mode="0660", sandbox_socket_group="sandbox"
+    )
+
+    assert configured.sandbox_socket_mode == "0660"
+    assert configured.sandbox_socket_group == "sandbox"
+
+
+def test_sandbox_settings_reject_invalid_socket_mode() -> None:
+    with pytest.raises(ValueError, match="octal mode"):
+        sandbox.SandboxSettings(sandbox_socket_mode="invalid")

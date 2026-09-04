@@ -21,8 +21,10 @@ from hyperforge.harness_sdk import (
     UsageLimitExceeded,
     UsageLimits,
     codemode,
+    create_codemode_tool,
     tool,
 )
+from hyperforge.harness_sdk.execution import current_tool_call_id
 from hyperforge.harness_sdk.harness import (
     EMPTY_RESPONSE_RETRY_PROMPT,
     AgentResult,
@@ -91,6 +93,58 @@ def test_codemode_can_be_registered_explicitly() -> None:
     )
 
     assert "codemode" in {tool.name for tool in harness.iter_tools()}
+
+
+def test_scoped_codemode_is_not_inherited_by_default() -> None:
+    async def execute(_harness: AgentHarness, value: ToolInput) -> ToolOutput:
+        return ToolOutput(value=value.value)
+
+    ordinary = HarnessTool("ordinary", execute)
+    scoped = create_codemode_tool(capabilities=())
+    harness = AgentHarness(
+        model="test-model",
+        model_client=Model(),
+        tools=[ordinary, scoped],
+    )
+
+    child = harness._create_child("child", include_history=False)
+
+    assert "ordinary" in child._tools
+    assert "codemode" not in child._tools
+
+
+@pytest.mark.asyncio
+async def test_current_tool_call_id_is_isolated_between_parallel_calls() -> None:
+    ready = asyncio.Event()
+    seen: dict[str, str | None] = {}
+    count = 0
+
+    async def execute(harness: AgentHarness, value: ToolInput) -> ToolOutput:
+        del harness
+        nonlocal count
+        count += 1
+        if count == 2:
+            ready.set()
+        await ready.wait()
+        await asyncio.sleep(0)
+        seen[value.value] = current_tool_call_id()
+        return ToolOutput(value=value.value)
+
+    first = HarnessTool("first", execute)
+    second = HarnessTool("second", execute)
+    harness = AgentHarness(
+        model="test-model", model_client=Model(), tools=[first, second]
+    )
+
+    await harness._execute_tool_calls(
+        [
+            HarnessToolCall(id="first-call", name="first", arguments={"value": "a"}),
+            HarnessToolCall(id="second-call", name="second", arguments={"value": "b"}),
+        ]
+    )
+
+    assert seen == {"a": "first-call", "b": "second-call"}
+    assert current_tool_call_id() is None
 
 
 def test_turn_loop_clears_pending_tool_result_after_non_empty_response() -> None:
