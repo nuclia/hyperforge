@@ -639,6 +639,7 @@ class QuestionMemory:
         self.data_visualizations = []
         self.final_answer_urls = []
         self.agent_contexts = {}
+        self.generation_rules = OrderedDict()
 
         self.set_actual_question(question, question_id)
 

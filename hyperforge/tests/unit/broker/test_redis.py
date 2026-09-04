@@ -1,9 +1,123 @@
 from typing import Any, cast
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 from redis.asyncio import Redis
+from redis.exceptions import (
+    ClusterDownError,
+    SlotNotCoveredError,
+)
+from redis.exceptions import (
+    ConnectionError as RedisConnectionError,
+)
+from redis.exceptions import (
+    TimeoutError as RedisTimeoutError,
+)
 
 from hyperforge.broker.redis import RedisBroker
+
+
+@pytest.mark.asyncio
+async def test_send_reply_expires_stream():
+    client = AsyncMock()
+    pipeline_context = AsyncMock()
+    pipeline = MagicMock()
+    pipeline.execute = AsyncMock()
+    pipeline_context.__aenter__.return_value = pipeline
+    client.pipeline = Mock(return_value=pipeline_context)
+    pipeline.xadd.return_value = pipeline
+    pipeline.expire.return_value = pipeline
+    broker = RedisBroker(
+        client,
+        "activations",
+        keepalive_ms=20_000,
+        stream_ttl_seconds=600,
+    )
+
+    await broker.send_reply("feedback-id", "approved")
+
+    pipeline.xadd.assert_called_once()
+    pipeline.expire.assert_called_once_with("feedback-id", 600)
+    pipeline.execute.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_receive_reply_consumes_response_published_before_waiting():
+    client = AsyncMock()
+    client.xread.return_value = [("feedback-id", [("1-0", {"msg": "approved"})])]
+    broker = RedisBroker(client, "activations", keepalive_ms=20_000)
+
+    result = await broker.receive_reply("feedback-id", timeout_ms=1_000)
+
+    assert result == "approved"
+    client.xread.assert_awaited_once()
+    streams = client.xread.await_args.args[0]
+    assert streams["feedback-id"] != "$"
+    assert client.xread.await_args.kwargs["count"] == 1
+    client.delete.assert_awaited_once_with("feedback-id")
+
+
+@pytest.mark.asyncio
+async def test_receive_reply_ignores_cleanup_failure_after_success():
+    client = AsyncMock()
+    client.xread.return_value = [("feedback-id", [("1-0", {"msg": "approved"})])]
+    client.delete.side_effect = RuntimeError("cleanup failed")
+    broker = RedisBroker(client, "activations", keepalive_ms=20_000)
+
+    result = await broker.receive_reply("feedback-id", timeout_ms=1_000)
+
+    assert result == "approved"
+
+
+@pytest.mark.asyncio
+async def test_receive_reply_does_not_delete_stream_after_read_error():
+    client = AsyncMock()
+    client.xread.side_effect = ValueError("read failed")
+    broker = RedisBroker(client, "activations", keepalive_ms=20_000)
+
+    with pytest.raises(ValueError, match="read failed"):
+        await broker.receive_reply("feedback-id", timeout_ms=1_000)
+    client.delete.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_receive_reply_does_not_delete_stream_after_timeout(monkeypatch):
+    client = AsyncMock()
+    client.xread.return_value = []
+    clock = Mock()
+    clock.time.return_value = 100
+    clock.monotonic.side_effect = [0, 0, 2]
+    monkeypatch.setattr("hyperforge.broker.redis.time", clock)
+    broker = RedisBroker(client, "activations", keepalive_ms=20_000)
+
+    result = await broker.receive_reply("feedback-id", timeout_ms=1_000)
+
+    assert result is None
+    client.xread.assert_awaited_once()
+    client.delete.assert_not_awaited()
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        RedisConnectionError("closed"),
+        RedisTimeoutError("timeout"),
+        ClusterDownError("cluster down"),
+        SlotNotCoveredError("slot missing"),
+    ],
+)
+@pytest.mark.asyncio
+async def test_receive_reply_recovers_from_transient_redis_errors(error, monkeypatch):
+    client = AsyncMock()
+    client.xread.side_effect = [
+        error,
+        [("feedback-id", [("1-0", {"msg": "approved"})])],
+    ]
+    monkeypatch.setattr("hyperforge.broker.redis.asyncio.sleep", AsyncMock())
+    broker = RedisBroker(client, "activations", keepalive_ms=20_000)
+
+    assert await broker.receive_reply("feedback-id", timeout_ms=1_000) == "approved"
+    assert client.xread.await_count == 2
 
 
 class CallbackBetweenReadsRedis:
@@ -12,6 +126,10 @@ class CallbackBetweenReadsRedis:
     def __init__(self) -> None:
         self.calls = 0
         self.cursors: list[str] = []
+        self.deleted_keys: list[str] = []
+
+    async def delete(self, key: str) -> None:
+        self.deleted_keys.append(key)
 
     async def xread(
         self,
@@ -52,3 +170,4 @@ async def test_receive_reply_does_not_miss_callback_between_blocking_reads():
     assert payload == "oauth-callback"
     assert client.calls == 2
     assert client.cursors[0] == client.cursors[1]
+    assert client.deleted_keys == ["oauth-key"]

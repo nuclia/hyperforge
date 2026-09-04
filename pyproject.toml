@@ -5,6 +5,7 @@ version = "1.0.0"
 dependencies = [
     "hyperforge",
     "hyperforge_nucliadb",
+    "hyperforge_a2a",
     "hyperforge_rephrase",
     "hyperforge_summarize",
     "hyperforge_static",
@@ -31,6 +32,7 @@ dependencies = [
 members = [
     "hyperforge",
     "agents/nucliadb",
+    "agents/a2a",
     "agents/rephrase",
     "agents/summarize",
     "agents/static",
@@ -60,6 +62,7 @@ managed = true
 [tool.uv.sources]
 hyperforge = { workspace = true }
 hyperforge_nucliadb = { workspace = true }
+hyperforge_a2a = { workspace = true }
 hyperforge_rephrase = { workspace = true }
 hyperforge_summarize = { workspace = true }
 hyperforge_static = { workspace = true }

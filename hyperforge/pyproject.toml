@@ -48,6 +48,7 @@ dependencies = [
     "fastapi",
     "starlette>1.0.0",
     "uvicorn>=0.30.0",
+    "a2a-sdk[grpc,http-server]>=1.0,<2",
 ]
 
 
@@ -88,6 +89,7 @@ asyncio_mode = "auto"
 [project.scripts]
 hyperforge-api = "hyperforge.api:commands.run"
 hyperforge-server = "hyperforge.server:run.run"
+hyperforge-a2a-grpc = "hyperforge.a2a.run:run"
 hyperforge-sandbox = "hyperforge.server:sandbox.run"
 hyperforge-extract-openapi = "hyperforge.api.commands:extract_openapi"
 hyperforge-workflows-cleanup-cronjob = "hyperforge.agents.workflow_cleanup:run"
