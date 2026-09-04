@@ -8,7 +8,7 @@ from concurrent.futures import Executor, ThreadPoolExecutor
 from concurrent.futures import Future as ConcurrentFuture
 from multiprocessing import Pipe, Process
 from multiprocessing.connection import Connection
-from typing import Any, Callable, Coroutine
+from typing import Any, Awaitable, Callable, Coroutine
 
 import httpx
 import nucliadb_telemetry.metrics
@@ -25,7 +25,6 @@ from .model import (
 from .worker import PythonAgentWorker
 
 logger = logging.getLogger("hyperforge_codemode_sandbox")
-WORKER_CPU_LIMIT = 1
 WORKER_EXIT_TIMEOUT = 1
 MAX_PACKET_BYTES = 16 * 1024 * 1024
 
@@ -35,6 +34,7 @@ class SandboxSettings(BaseSettings):
     sandbox_socket: str | None = None
     sandbox_metrics_port: int = 8091
     sandbox_token: str | None = None
+    sandbox_callback_wait_seconds: float = 1.0
 
 
 settings = SandboxSettings()
@@ -60,8 +60,16 @@ class SandboxRunner:
         socket: str,
         callback: Callable[[RestrictedPythonTask], Coroutine[Any, Any, WorkerTypes]],
         debug: bool = False,
+        *,
+        token: str | Callable[[], str] | None = None,
     ) -> "SandboxRunner":
-        return cls(pool=None, socket=socket, callback=callback, debug=debug)
+        return cls(
+            pool=None,
+            socket=socket,
+            callback=callback,
+            debug=debug,
+            token=token,
+        )
 
     @classmethod
     def isolated_process(
@@ -78,12 +86,14 @@ class SandboxRunner:
         socket: str | None,
         callback: Callable[[RestrictedPythonTask], Coroutine[Any, Any, WorkerTypes]],
         debug: bool,
+        token: str | Callable[[], str] | None = None,
     ):
         self.pool = pool
         self.socket = socket
         self.callback = callback
         self.debug = debug
         self.isolated = False
+        self.token = token
 
     async def run(self, request: WorkerExecutionRequest):
         if self.pool is not None:
@@ -137,14 +147,19 @@ class SandboxRunner:
             await asyncio.gather(controller_task, return_exceptions=True)
 
     async def _run_remotely(self, request: WorkerExecutionRequest):
-        if settings.sandbox_token is None:
+        token_source = self.token
+        if token_source is None:
+            token = SandboxSettings().sandbox_token
+        elif isinstance(token_source, str):
+            token = token_source
+        else:
+            token = token_source()
+        if token is None:
             raise RuntimeError("SANDBOX_TOKEN is required for remote codemode")
         rx, tx = await asyncio.open_unix_connection(self.socket)
         reader, writer = SandboxReader(rx), SandboxWriter(tx)
         try:
-            await writer.write_message(
-                SandboxMessage.Run(run=request, token=settings.sandbox_token)
-            )
+            await writer.write_message(SandboxMessage.Run(run=request, token=token))
             while True:
                 try:
                     msg = await reader.read_message()
@@ -291,9 +306,15 @@ class SandboxReader:
 
 
 class SandboxSession:
-    def __init__(self, reader: SandboxReader, writer: SandboxWriter):
+    def __init__(
+        self,
+        reader: SandboxReader,
+        writer: SandboxWriter,
+        callback_wait_seconds: float = 1.0,
+    ):
         self.reader = reader
         self.writer = writer
+        self.callback_wait_seconds = callback_wait_seconds
         self.runner = SandboxRunner(
             pool=None, socket=None, callback=self._callback, debug=False
         )
@@ -303,7 +324,7 @@ class SandboxSession:
     async def run(self, request: WorkerExecutionRequest):
         self.task, self.process = self.runner.run_in_process(request)
         try:
-            await self._start_timeout(WORKER_CPU_LIMIT)
+            await self._start_timeout(self.callback_wait_seconds)
             if request.max_runtime_seconds is None:
                 clean_exit = await self.task
             else:
@@ -358,7 +379,7 @@ class SandboxSession:
             self.task.cancel()
             return None
         assert isinstance(response, SandboxMessage.Response)
-        await self._start_timeout(WORKER_CPU_LIMIT)
+        await self._start_timeout(self.callback_wait_seconds)
         return response.result
 
     async def _start_timeout(self, timeout: float):
@@ -382,12 +403,15 @@ agents_running = prometheus_client.Gauge(
 execution_observer = nucliadb_telemetry.metrics.Observer("arag_sandbox_execution")
 
 
-async def run_sandbox_server():
-    assert settings.sandbox_socket is not None
-    sandbox_token = settings.sandbox_token
-    if sandbox_token is None:
+async def run_sandbox_server(
+    *, token_verifier: Callable[[str], Awaitable[bool]] | None = None
+):
+    server_settings = SandboxSettings()
+    assert server_settings.sandbox_socket is not None
+    sandbox_token = server_settings.sandbox_token
+    if token_verifier is None and sandbox_token is None:
         raise RuntimeError("SANDBOX_TOKEN is required for the sandbox server")
-    if settings.sandbox_verify:
+    if server_settings.sandbox_verify:
         _verify_connectivity()
 
     async def handler(rx: asyncio.StreamReader, tx: asyncio.StreamWriter):
@@ -397,10 +421,16 @@ async def run_sandbox_server():
             async with asyncio.timeout(1):
                 msg = await reader.read_message()
                 assert isinstance(msg, SandboxMessage.Run)
-                if not hmac.compare_digest(msg.token or "", sandbox_token):
+                token = msg.token or ""
+                valid_token = (
+                    await token_verifier(token)
+                    if token_verifier is not None
+                    else hmac.compare_digest(token, sandbox_token or "")
+                )
+                if not valid_token:
                     raise PermissionError("Invalid sandbox token")
-        except (AssertionError, PermissionError, TimeoutError, ValueError):
-            logger.warning("Rejected invalid sandbox connection")
+        except Exception as exc:
+            logger.warning("Rejected invalid sandbox connection: %r", exc)
             writer.close()
             await writer.wait_closed()
             return
@@ -409,7 +439,9 @@ async def run_sandbox_server():
         observation = execution_observer()
         observation.start()
         try:
-            session = SandboxSession(reader, writer)
+            session = SandboxSession(
+                reader, writer, SandboxSettings().sandbox_callback_wait_seconds
+            )
             await session.run(msg.run)
         except Exception as exc:
             observation.set_status("error")
@@ -420,7 +452,7 @@ async def run_sandbox_server():
             writer.close()
             await writer.wait_closed()
 
-    server = await asyncio.start_unix_server(handler, settings.sandbox_socket)
-    os.chmod(settings.sandbox_socket, 0o600)
+    server = await asyncio.start_unix_server(handler, server_settings.sandbox_socket)
+    os.chmod(server_settings.sandbox_socket, 0o600)
     async with server:
         await server.serve_forever()

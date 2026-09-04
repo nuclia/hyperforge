@@ -9,6 +9,7 @@ from hyperforge.harness_sdk import (
     AgentHarness,
     CodemodeInput,
     ModelDelta,
+    ToolCallContext,
     UsageLimits,
     codemode,
     tool,
@@ -24,7 +25,7 @@ class UpperOutput(BaseModel):
 
 
 @tool(description="Uppercase a value")
-async def upper(_: AgentHarness, input_value: UpperInput) -> UpperOutput:
+async def upper(_: ToolCallContext, input_value: UpperInput) -> UpperOutput:
     return UpperOutput(value=input_value.value.upper())
 
 
@@ -54,7 +55,7 @@ async def test_codemode_calls_registered_tools_and_returns_output() -> None:
     )
 
     result = await codemode.execute(
-        harness,
+        ToolCallContext(harness=harness, name=codemode.name),
         CodemodeInput(
             code="result = upper(value='hello')\noutput(result['value'])"
         ).model_dump(),
@@ -74,7 +75,7 @@ async def test_codemode_counts_nested_tool_calls() -> None:
 
     with pytest.raises(RuntimeError, match="max_tool_calls"):
         await codemode.execute(
-            harness,
+            ToolCallContext(harness=harness, name=codemode.name),
             CodemodeInput(code="upper(value='one')\nupper(value='two')").model_dump(),
         )
 
@@ -89,7 +90,7 @@ async def test_codemode_propagates_tool_validation_errors() -> None:
 
     with pytest.raises(RuntimeError, match="Invalid upper arguments"):
         await codemode.execute(
-            harness,
+            ToolCallContext(harness=harness, name=codemode.name),
             CodemodeInput(code="upper(missing='value')").model_dump(),
         )
 
@@ -110,7 +111,10 @@ async def test_codemode_supports_common_aggregation_patterns(
 ) -> None:
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
-    result = await codemode.execute(harness, CodemodeInput(code=code).model_dump())
+    result = await codemode.execute(
+        ToolCallContext(harness=harness, name=codemode.name),
+        CodemodeInput(code=code).model_dump(),
+    )
 
     assert result.value == expected
 
@@ -120,7 +124,7 @@ async def test_codemode_preserves_context_when_calling_tools() -> None:
     request_context = ContextVar("request_context", default="missing")
 
     @tool()
-    async def read_context(_: AgentHarness, _input_value: UpperInput) -> UpperOutput:
+    async def read_context(_: ToolCallContext, _input_value: UpperInput) -> UpperOutput:
         return UpperOutput(value=request_context.get())
 
     harness = AgentHarness(
@@ -129,7 +133,7 @@ async def test_codemode_preserves_context_when_calling_tools() -> None:
     token = request_context.set("available")
     try:
         result = await codemode.execute(
-            harness,
+            ToolCallContext(harness=harness, name=codemode.name),
             CodemodeInput(
                 code="result = read_context(value='unused')\noutput(result['value'])"
             ).model_dump(),
@@ -150,7 +154,7 @@ async def test_codemode_enforces_runtime_limit() -> None:
 
     with pytest.raises(RuntimeError, match="timed out"):
         await codemode.execute(
-            harness,
+            ToolCallContext(harness=harness, name=codemode.name),
             CodemodeInput(code="while True: pass").model_dump(),
         )
 
@@ -161,7 +165,7 @@ async def test_codemode_blocks_process_control_exceptions() -> None:
 
     with pytest.raises(RuntimeError, match="SystemExit.*not defined"):
         await codemode.execute(
-            harness,
+            ToolCallContext(harness=harness, name=codemode.name),
             CodemodeInput(code="raise SystemExit(1)").model_dump(),
         )
 
@@ -177,6 +181,6 @@ async def test_codemode_enforces_memory_limit() -> None:
 
     with pytest.raises(RuntimeError):
         await codemode.execute(
-            harness,
+            ToolCallContext(harness=harness, name=codemode.name),
             CodemodeInput(code="output('x' * (1024 * 1024 * 1024))").model_dump(),
         )
