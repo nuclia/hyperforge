@@ -23,7 +23,7 @@ from .models import (
     HarnessToolCall,
 )
 from .storage import HarnessStorageProtocol, InMemoryHarnessStorage
-from .tools import AgentContext, HarnessTool
+from .tools import HarnessTool, ToolCallContext
 from .tools.core import DictOutput, SendMessageInput, SpawnAgentInput, create_core_tools
 from .usage import HarnessUsage, UsageLimitExceeded, UsageLimits
 
@@ -966,7 +966,7 @@ class AgentHarness:
             elif tool.lazy_load and tool.name not in self._active_lazy_tools:
                 raise ValueError(f"Tool is not active: {call.name}")
             else:
-                context = AgentContext(harness=self, name=call.name, id=call.id)
+                context = ToolCallContext(harness=self, name=call.name, id=call.id)
                 output = await tool.execute(context, call.arguments)
                 result = output.model_dump(mode="json")
                 reference = tool.context(output)

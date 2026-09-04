@@ -16,13 +16,13 @@ if TYPE_CHECKING:
     from ..harness import AgentHarness
 
 type ToolHandler[InputT: BaseModel, OutputT: BaseModel] = Callable[
-    [AgentContext, InputT], Awaitable[OutputT]
+    [ToolCallContext, InputT], Awaitable[OutputT]
 ]
 type ContextFactory[OutputT: BaseModel] = Callable[[OutputT], HarnessContextReference]
 
 
 @dataclass(frozen=True)
-class AgentContext:
+class ToolCallContext:
     """Execution context passed to a tool handler.
 
     Provides the harness along with the identity of the tool call
@@ -55,7 +55,7 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
             )
         globalns = dict(getattr(self.handler, "__globals__", {}))
         globalns.setdefault("AgentHarness", object)
-        globalns.setdefault("AgentContext", AgentContext)
+        globalns.setdefault("ToolCallContext", ToolCallContext)
         hints = get_type_hints(self.handler, globalns=globalns)
         input_model = hints.get(parameters[1].name)
         output_model = hints.get("return")
@@ -79,12 +79,12 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
         return self._parameters
 
     def __call__(
-        self, context: AgentContext, input_value: InputT
+        self, context: ToolCallContext, input_value: InputT
     ) -> Awaitable[OutputT]:
         return self.handler(context, input_value)
 
     async def execute(
-        self, context: AgentContext, arguments: dict[str, Any]
+        self, context: ToolCallContext, arguments: dict[str, Any]
     ) -> OutputT:
         if error := arguments.get("_tool_error"):
             raise ValueError(str(error))
@@ -137,4 +137,4 @@ def _is_model_type(value: Any) -> bool:
     return isinstance(value, type) and issubclass(value, BaseModel)
 
 
-__all__ = ["AgentContext", "ContextFactory", "HarnessTool", "ToolHandler", "tool"]
+__all__ = ["ContextFactory", "HarnessTool", "ToolCallContext", "ToolHandler", "tool"]

@@ -7,7 +7,7 @@ from typing import Any
 from pydantic import BaseModel
 
 from ..models import HarnessEventType, HarnessMemory, HarnessMessage
-from . import AgentContext, HarnessTool, tool
+from . import HarnessTool, ToolCallContext, tool
 
 
 class RememberInput(BaseModel):
@@ -75,7 +75,7 @@ def _search_terms(value: str) -> set[str]:
 
 @tool(description="Search for additional tools that can be activated.")
 async def search_tools(
-    context: AgentContext, input_value: SearchToolsInput
+    context: ToolCallContext, input_value: SearchToolsInput
 ) -> ListOutput:
     harness = context.harness
     terms = _search_terms(input_value.query)
@@ -102,7 +102,7 @@ async def search_tools(
 
 @tool(description="Activate additional tools by their exact names.")
 async def activate_tools(
-    context: AgentContext, input_value: ActivateToolsInput
+    context: ToolCallContext, input_value: ActivateToolsInput
 ) -> DictOutput:
     harness = context.harness
     names = list(dict.fromkeys(input_value.names))
@@ -118,7 +118,7 @@ async def activate_tools(
 
 
 @tool()
-async def remember(context: AgentContext, input_value: RememberInput) -> DictOutput:
+async def remember(context: ToolCallContext, input_value: RememberInput) -> DictOutput:
     harness = context.harness
     memory = HarnessMemory(
         id=uuid.uuid4().hex,
@@ -135,7 +135,7 @@ async def remember(context: AgentContext, input_value: RememberInput) -> DictOut
 
 
 @tool()
-async def recall(context: AgentContext, input_value: RecallInput) -> ListOutput:
+async def recall(context: ToolCallContext, input_value: RecallInput) -> ListOutput:
     harness = context.harness
     memories = await harness.storage.recall(
         scope=input_value.scope,
@@ -145,7 +145,7 @@ async def recall(context: AgentContext, input_value: RecallInput) -> ListOutput:
 
 
 @tool()
-async def forget(context: AgentContext, input_value: ForgetInput) -> DictOutput:
+async def forget(context: ToolCallContext, input_value: ForgetInput) -> DictOutput:
     harness = context.harness
     await harness.storage.forget(input_value.id)
     await harness.emit(HarnessEventType.MEMORY_FORGOTTEN, {"id": input_value.id})
@@ -154,25 +154,25 @@ async def forget(context: AgentContext, input_value: ForgetInput) -> DictOutput:
 
 @tool()
 async def spawn_agent(
-    context: AgentContext, input_value: SpawnAgentInput
+    context: ToolCallContext, input_value: SpawnAgentInput
 ) -> DictOutput:
     return await context.harness._child_agents.spawn(input_value)
 
 
 @tool()
 async def send_message(
-    context: AgentContext, input_value: SendMessageInput
+    context: ToolCallContext, input_value: SendMessageInput
 ) -> DictOutput:
     return await context.harness._child_agents.send_message(input_value)
 
 
 @tool()
-async def wait_agent(context: AgentContext, input_value: AgentIdInput) -> DictOutput:
+async def wait_agent(context: ToolCallContext, input_value: AgentIdInput) -> DictOutput:
     return await context.harness._child_agents.wait(input_value.agent_id)
 
 
 @tool()
-async def compact(context: AgentContext, input_value: CompactInput) -> DictOutput:
+async def compact(context: ToolCallContext, input_value: CompactInput) -> DictOutput:
     harness = context.harness
     harness.messages = [
         HarnessMessage(role="system", content=harness.system_prompt),
@@ -188,7 +188,7 @@ async def compact(context: AgentContext, input_value: CompactInput) -> DictOutpu
 
 
 @tool()
-async def feedback(context: AgentContext, input_value: FeedbackInput) -> DictOutput:
+async def feedback(context: ToolCallContext, input_value: FeedbackInput) -> DictOutput:
     response = await context.harness.request_feedback(
         question=input_value.question,
         response_schema={

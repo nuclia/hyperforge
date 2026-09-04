@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field
 
 from hyperforge.definition import FunctionDefinition
 from hyperforge.harness_sdk import (
-    AgentContext,
     AgentHarness,
     HarnessEvent,
     HarnessEventType,
@@ -19,6 +18,7 @@ from hyperforge.harness_sdk import (
     LLMCallError,
     ModelDelta,
     NucliaModelClient,
+    ToolCallContext,
     UsageLimitExceeded,
     UsageLimits,
     codemode,
@@ -351,7 +351,7 @@ async def test_abandoning_run_stream_cancels_turn() -> None:
 async def test_agent_loop_executes_parallel_tools_and_synthesizes_answer() -> None:
     calls = []
 
-    async def upper(_context: AgentContext, value: ToolInput) -> ToolOutput:
+    async def upper(_context: ToolCallContext, value: ToolInput) -> ToolOutput:
         calls.append(value.value)
         await asyncio.sleep(0)
         return ToolOutput(value=value.value.upper())
@@ -415,9 +415,9 @@ async def test_agent_loop_executes_parallel_tools_and_synthesizes_answer() -> No
 
 @pytest.mark.asyncio
 async def test_tool_context_matches_requested_event() -> None:
-    observed: list[AgentContext] = []
+    observed: list[ToolCallContext] = []
 
-    async def inspect(context: AgentContext, value: ToolInput) -> ToolOutput:
+    async def inspect(context: ToolCallContext, value: ToolInput) -> ToolOutput:
         observed.append(context)
         return ToolOutput(value=value.value)
 
@@ -448,7 +448,7 @@ async def test_tool_context_is_isolated_for_parallel_tools() -> None:
     started = 0
     observed: dict[str, tuple[str | None, str | None]] = {}
 
-    async def inspect(context: AgentContext, value: ToolInput) -> ToolOutput:
+    async def inspect(context: ToolCallContext, value: ToolInput) -> ToolOutput:
         nonlocal started
         started += 1
         if started == 2:
@@ -481,9 +481,9 @@ async def test_tool_context_is_isolated_for_parallel_tools() -> None:
 
 @pytest.mark.asyncio
 async def test_tool_context_available_during_cancellation() -> None:
-    seen: list[AgentContext] = []
+    seen: list[ToolCallContext] = []
 
-    async def slow(context: AgentContext, value: ToolInput) -> ToolOutput:
+    async def slow(context: ToolCallContext, value: ToolInput) -> ToolOutput:
         seen.append(context)
         await asyncio.sleep(60)
         return ToolOutput(value=value.value)
@@ -504,9 +504,9 @@ async def test_tool_context_available_during_cancellation() -> None:
 
 @pytest.mark.asyncio
 async def test_tool_context_available_during_tool_failure() -> None:
-    seen: list[AgentContext] = []
+    seen: list[ToolCallContext] = []
 
-    async def fail(context: AgentContext, _value: ToolInput) -> ToolOutput:
+    async def fail(context: ToolCallContext, _value: ToolInput) -> ToolOutput:
         seen.append(context)
         raise ValueError("failed")
 
@@ -731,13 +731,13 @@ async def test_spawn_agent_returns_wait_result_at_conversation_limit() -> None:
         usage_limits=UsageLimits(max_concurrent_agents=2),
     )
     first = await spawn_agent(
-        AgentContext(harness=harness, name="spawn_agent"),
+        ToolCallContext(harness=harness, name="spawn_agent"),
         SpawnAgentInput(prompt="first", include_history=False),
     )
     first_id = first.value["agent_id"]
 
     blocked = await spawn_agent(
-        AgentContext(harness=harness, name="spawn_agent"),
+        ToolCallContext(harness=harness, name="spawn_agent"),
         SpawnAgentInput(prompt="second", include_history=False),
     )
 
@@ -754,11 +754,11 @@ async def test_spawn_agent_returns_wait_result_at_conversation_limit() -> None:
 
     release.set()
     await wait_agent(
-        AgentContext(harness=harness, name="wait_agent"),
+        ToolCallContext(harness=harness, name="wait_agent"),
         AgentIdInput(agent_id=first_id),
     )
     next_spawn = await spawn_agent(
-        AgentContext(harness=harness, name="spawn_agent"),
+        ToolCallContext(harness=harness, name="spawn_agent"),
         SpawnAgentInput(prompt="second", include_history=False),
     )
     assert "agent_id" in next_spawn.value
@@ -780,13 +780,13 @@ async def test_concurrent_agent_limit_is_shared_with_descendants() -> None:
         usage_limits=UsageLimits(max_spawn_depth=2, max_concurrent_agents=2),
     )
     spawned = await spawn_agent(
-        AgentContext(harness=harness, name="spawn_agent"),
+        ToolCallContext(harness=harness, name="spawn_agent"),
         SpawnAgentInput(prompt="child", include_history=False),
     )
     child, _ = harness.children[spawned.value["agent_id"]]
 
     blocked = await spawn_agent(
-        AgentContext(harness=child, name="spawn_agent"),
+        ToolCallContext(harness=child, name="spawn_agent"),
         SpawnAgentInput(prompt="grandchild", include_history=False),
     )
 
@@ -853,17 +853,17 @@ async def test_wait_agent_returns_stable_failure_result() -> None:
 
     harness = AgentHarness(model="test-model", model_client=FailingModel())
     spawned = await spawn_agent(
-        AgentContext(harness=harness, name="spawn_agent"),
+        ToolCallContext(harness=harness, name="spawn_agent"),
         SpawnAgentInput(prompt="fail", include_history=False),
     )
     child_id = spawned.value["agent_id"]
     input_value = AgentIdInput(agent_id=child_id)
 
     first = await wait_agent(
-        AgentContext(harness=harness, name="wait_agent"), input_value
+        ToolCallContext(harness=harness, name="wait_agent"), input_value
     )
     second = await wait_agent(
-        AgentContext(harness=harness, name="wait_agent"), input_value
+        ToolCallContext(harness=harness, name="wait_agent"), input_value
     )
 
     assert first == second
@@ -889,14 +889,14 @@ async def test_wait_agent_returns_when_child_fails_before_terminal_event() -> No
         model="test-model", model_client=Model(), storage=FailingStorage()
     )
     spawned = await spawn_agent(
-        AgentContext(harness=harness, name="spawn_agent"),
+        ToolCallContext(harness=harness, name="spawn_agent"),
         SpawnAgentInput(prompt="fail", include_history=False),
     )
     child_id = spawned.value["agent_id"]
 
     result = await asyncio.wait_for(
         wait_agent(
-            AgentContext(harness=harness, name="wait_agent"),
+            ToolCallContext(harness=harness, name="wait_agent"),
             AgentIdInput(agent_id=child_id),
         ),
         timeout=1,
@@ -911,7 +911,7 @@ async def test_wait_agent_returns_when_child_fails_before_terminal_event() -> No
 
 @pytest.mark.asyncio
 async def test_harness_runs_tool_loop_and_resumes_history() -> None:
-    async def upper(_context: AgentContext, value: ToolInput) -> ToolOutput:
+    async def upper(_context: ToolCallContext, value: ToolInput) -> ToolOutput:
         return ToolOutput(value=value.value.upper())
 
     storage = InMemoryHarnessStorage()
@@ -960,7 +960,7 @@ async def test_default_storage_is_ephemeral() -> None:
     ],
 )
 async def test_usage_limits(limits: UsageLimits, model: Model) -> None:
-    async def upper(_context: AgentContext, value: ToolInput) -> ToolOutput:
+    async def upper(_context: ToolCallContext, value: ToolInput) -> ToolOutput:
         return ToolOutput(value=value.value.upper())
 
     harness = AgentHarness(
@@ -993,7 +993,7 @@ async def test_tool_call_and_output_token_limits() -> None:
             else:
                 yield ModelDelta(text="done", output_tokens=2)
 
-    async def upper(_context: AgentContext, value: ToolInput) -> ToolOutput:
+    async def upper(_context: ToolCallContext, value: ToolInput) -> ToolOutput:
         return ToolOutput(value=value.value.upper())
 
     tool = HarnessTool("upper", upper)
@@ -1046,7 +1046,7 @@ async def test_interrupt_cancels_active_tool_work() -> None:
     started = asyncio.Event()
     cancelled = asyncio.Event()
 
-    async def slow_tool(_context: AgentContext, _value: ToolInput) -> ToolOutput:
+    async def slow_tool(_context: ToolCallContext, _value: ToolInput) -> ToolOutput:
         started.set()
         try:
             await asyncio.sleep(60)
@@ -1074,7 +1074,7 @@ async def test_interrupt_cancels_active_tool_work() -> None:
 async def test_interrupt_mid_tool_can_run_again_and_reload() -> None:
     started = asyncio.Event()
 
-    async def slow(_context: AgentContext, value: ToolInput) -> ToolOutput:
+    async def slow(_context: ToolCallContext, value: ToolInput) -> ToolOutput:
         started.set()
         await asyncio.sleep(60)
         return ToolOutput(value=value.value)
@@ -1149,7 +1149,7 @@ async def test_spawn_depth_defaults_to_one() -> None:
     current = harness
     for expected_depth in range(1, 2):
         spawned = await spawn_agent(
-            AgentContext(harness=current, name="spawn_agent"),
+            ToolCallContext(harness=current, name="spawn_agent"),
             SpawnAgentInput(prompt=f"depth {expected_depth}"),
         )
         child, _ = current.children[spawned.value["agent_id"]]
@@ -1158,7 +1158,7 @@ async def test_spawn_depth_defaults_to_one() -> None:
     assert "spawn_agent" not in current._tools
     with pytest.raises(ValueError, match="Maximum spawn depth"):
         await spawn_agent(
-            AgentContext(harness=current, name="spawn_agent"),
+            ToolCallContext(harness=current, name="spawn_agent"),
             SpawnAgentInput(prompt="too deep"),
         )
     await harness._stop_children()
@@ -1263,7 +1263,7 @@ async def test_llm_only_passes_registered_tools() -> None:
             self.tools = kwargs["tools"]
             yield ModelDelta(text="ok")
 
-    async def execute(_context: AgentContext, value: ToolInput) -> ToolOutput:
+    async def execute(_context: ToolCallContext, value: ToolInput) -> ToolOutput:
         return ToolOutput(value=value.value)
 
     registered = HarnessTool("registered", execute)
@@ -1276,7 +1276,7 @@ async def test_llm_only_passes_registered_tools() -> None:
 
 
 def test_agent_rejects_tools_that_conflict_with_core_tools() -> None:
-    async def execute(_context: AgentContext, value: ToolInput) -> ToolOutput:
+    async def execute(_context: ToolCallContext, value: ToolInput) -> ToolOutput:
         return ToolOutput(value=value.value)
 
     with pytest.raises(ValueError, match="conflict with core tools: remember"):
@@ -1288,7 +1288,7 @@ def test_agent_rejects_tools_that_conflict_with_core_tools() -> None:
 
 
 def test_agent_allows_disabled_core_tool_name() -> None:
-    async def execute(_context: AgentContext, value: ToolInput) -> ToolOutput:
+    async def execute(_context: ToolCallContext, value: ToolInput) -> ToolOutput:
         return ToolOutput(value=value.value)
 
     tool = HarnessTool("remember", execute)
@@ -1312,7 +1312,7 @@ async def test_llm_does_not_expose_inactive_lazy_tool_explicitly() -> None:
             self.tools = kwargs["tools"]
             yield ModelDelta(text="ok")
 
-    async def execute(_context: AgentContext, value: ToolInput) -> ToolOutput:
+    async def execute(_context: ToolCallContext, value: ToolInput) -> ToolOutput:
         return ToolOutput(value=value.value)
 
     lazy = HarnessTool("lazy", execute, lazy_load=True)
@@ -1367,7 +1367,7 @@ async def test_lazy_tool_can_be_searched_activated_and_used() -> None:
             else:
                 yield ModelDelta(text="HI")
 
-    async def upper(_context: AgentContext, value: ToolInput) -> ToolOutput:
+    async def upper(_context: ToolCallContext, value: ToolInput) -> ToolOutput:
         return ToolOutput(value=value.value.upper())
 
     harness = AgentHarness(
@@ -1388,7 +1388,7 @@ async def test_lazy_tool_can_be_searched_activated_and_used() -> None:
 
 @pytest.mark.asyncio
 async def test_search_tools_matches_natural_language_query() -> None:
-    async def execute(_context: AgentContext, value: ToolInput) -> ToolOutput:
+    async def execute(_context: ToolCallContext, value: ToolInput) -> ToolOutput:
         return ToolOutput(value=value.value)
 
     harness = AgentHarness(
@@ -1411,7 +1411,7 @@ async def test_search_tools_matches_natural_language_query() -> None:
     )
 
     result = await search_tools(
-        AgentContext(harness=harness, name="search_tools"),
+        ToolCallContext(harness=harness, name="search_tools"),
         SearchToolsInput(
             query="create a dataset, upload data, import files, or manage datasets"
         ),
@@ -1426,7 +1426,7 @@ async def test_search_tools_matches_natural_language_query() -> None:
 @pytest.mark.asyncio
 async def test_tool_decorator_configures_lazy_loading_and_preserves_calls() -> None:
     @tool(description="Convert text", lazy_load=True)
-    async def upper(_context: AgentContext, value: ToolInput) -> ToolOutput:
+    async def upper(_context: ToolCallContext, value: ToolInput) -> ToolOutput:
         return ToolOutput(value=value.value.upper())
 
     assert isinstance(upper, HarnessTool)
@@ -1440,7 +1440,7 @@ def test_tool_schema_preserves_descriptions() -> None:
     class DescribedInput(BaseModel):
         value: str = Field(description="Value to transform")
 
-    async def execute(_context: AgentContext, _value: DescribedInput) -> ToolOutput:
+    async def execute(_context: ToolCallContext, _value: DescribedInput) -> ToolOutput:
         return ToolOutput(value="ok")
 
     tool = HarnessTool("described", execute)
@@ -1457,7 +1457,7 @@ def test_tool_schema_flattens_nested_references() -> None:
         nested: Nested
         values: list[Nested]
 
-    async def execute(_context: AgentContext, _value: NestedInput) -> ToolOutput:
+    async def execute(_context: ToolCallContext, _value: NestedInput) -> ToolOutput:
         return ToolOutput(value="ok")
 
     schema = HarnessTool("nested", execute).parameters
@@ -1524,11 +1524,13 @@ async def test_published_tool_validates_the_advertised_input_schema() -> None:
 
     with pytest.raises(ValueError, match="Invalid lookup arguments"):
         await tool.execute(
-            AgentContext(harness=harness, name=tool.name),
+            ToolCallContext(harness=harness, name=tool.name),
             {"kind": "invalid", "limit": 1},
         )
     with pytest.raises(ValueError, match="Invalid lookup arguments"):
-        await tool.execute(AgentContext(harness=harness, name=tool.name), {"kind": "a"})
+        await tool.execute(
+            ToolCallContext(harness=harness, name=tool.name), {"kind": "a"}
+        )
 
     assert called is False
 
@@ -1540,7 +1542,7 @@ async def test_malformed_tool_arguments_do_not_run_handler() -> None:
     class OptionalInput(BaseModel):
         value: str = "default"
 
-    async def execute(_context: AgentContext, _value: OptionalInput) -> ToolOutput:
+    async def execute(_context: ToolCallContext, _value: OptionalInput) -> ToolOutput:
         nonlocal called
         called = True
         return ToolOutput(value="ok")
@@ -1550,7 +1552,7 @@ async def test_malformed_tool_arguments_do_not_run_handler() -> None:
 
     with pytest.raises(ValueError, match="Malformed tool arguments"):
         await tool.execute(
-            AgentContext(harness=harness, name=tool.name),
+            ToolCallContext(harness=harness, name=tool.name),
             {"_tool_error": "Malformed tool arguments: invalid JSON"},
         )
 
@@ -1559,7 +1561,7 @@ async def test_malformed_tool_arguments_do_not_run_handler() -> None:
 
 @pytest.mark.asyncio
 async def test_tool_failure_log_includes_actionable_detail(mocker) -> None:
-    async def fail(_context: AgentContext, _value: ToolInput) -> ToolOutput:
+    async def fail(_context: ToolCallContext, _value: ToolInput) -> ToolOutput:
         raise ValueError("identity field is invalid")
 
     harness = AgentHarness(
@@ -1710,7 +1712,7 @@ async def test_published_agent_manager_uses_existing_nua_api() -> None:
     tool = AgentHarness.to_tools(LegacyAgent(), manager=manager)[0]
     harness = AgentHarness(model="model", model_client=Model(), tools=[tool])
     output = await tool.execute(
-        AgentContext(harness=harness, name=tool.name), {"question": "hello"}
+        ToolCallContext(harness=harness, name=tool.name), {"question": "hello"}
     )
     assert output.value == "legacy answer"
 

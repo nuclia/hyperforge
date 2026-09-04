@@ -23,7 +23,7 @@ from hyperforge.memory.memory import BaseSessionMemory
 from hyperforge.models import Context, MemoryConfig, Rules
 
 from .models import HarnessContextReference, HarnessContextType
-from .tools import AgentContext, HarnessTool
+from .tools import HarnessTool, ToolCallContext
 
 if TYPE_CHECKING:
     from hyperforge.agent import Agent as HyperforgeAgent
@@ -64,7 +64,7 @@ class HarnessAgentToTool:
 
     def as_tool(self) -> HarnessTool[AgentToolInput, AgentToolOutput]:
         async def execute(
-            context: AgentContext, input_value: AgentToolInput
+            context: ToolCallContext, input_value: AgentToolInput
         ) -> AgentToolOutput:
             harness = context.harness
             memory = self.memory_factory(harness, input_value.prompt)
@@ -144,7 +144,7 @@ def _published_function_tool(
     input_model = _published_input_model(method, function_id, definition)
 
     async def execute(
-        context: AgentContext, input_value: BaseModel
+        context: ToolCallContext, input_value: BaseModel
     ) -> PublishedFunctionOutput:
         harness = context.harness
         compat_manager = manager or _compat_manager(harness)
