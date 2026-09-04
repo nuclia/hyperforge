@@ -413,6 +413,118 @@ async def test_agent_loop_executes_parallel_tools_and_synthesizes_answer() -> No
 
 
 @pytest.mark.asyncio
+async def test_current_tool_call_matches_requested_event() -> None:
+    observed: list[HarnessToolCall] = []
+
+    async def inspect(harness: AgentHarness, value: ToolInput) -> ToolOutput:
+        current = harness.current_tool_call
+        assert current is not None
+        observed.append(current)
+        return ToolOutput(value=value.value)
+
+    harness = AgentHarness(
+        model="test-model",
+        model_client=Model(),
+        tools=[HarnessTool("inspect", inspect)],
+    )
+    call = HarnessToolCall(id="call-current", name="inspect", arguments={"value": "x"})
+
+    assert harness.current_tool_call is None
+    await harness._execute_tool_call(call)
+    requested = [
+        event
+        async for event in harness.history()
+        if event.type == HarnessEventType.TOOL_REQUESTED
+    ]
+
+    assert observed == [call]
+    assert requested[0].payload["call"]["id"] == observed[0].id
+    assert harness.current_tool_call is None
+
+
+@pytest.mark.asyncio
+async def test_current_tool_call_is_task_local_for_parallel_tools() -> None:
+    ready = asyncio.Event()
+    started = 0
+    observed: dict[str, tuple[str | None, str | None]] = {}
+
+    async def inspect(harness: AgentHarness, value: ToolInput) -> ToolOutput:
+        nonlocal started
+        started += 1
+        if started == 2:
+            ready.set()
+        before = harness.current_tool_call
+        await ready.wait()
+        await asyncio.sleep(0)
+        after = harness.current_tool_call
+        observed[value.value] = (
+            before.id if before is not None else None,
+            after.id if after is not None else None,
+        )
+        return ToolOutput(value=value.value)
+
+    harness = AgentHarness(
+        model="test-model",
+        model_client=Model(),
+        tools=[HarnessTool("inspect", inspect)],
+    )
+    await asyncio.gather(
+        harness._execute_tool_call(
+            HarnessToolCall(id="call-a", name="inspect", arguments={"value": "a"})
+        ),
+        harness._execute_tool_call(
+            HarnessToolCall(id="call-b", name="inspect", arguments={"value": "b"})
+        ),
+    )
+
+    assert observed == {
+        "a": ("call-a", "call-a"),
+        "b": ("call-b", "call-b"),
+    }
+    assert harness.current_tool_call is None
+
+
+@pytest.mark.asyncio
+async def test_current_tool_call_is_cleared_after_cancellation() -> None:
+    async def slow(harness: AgentHarness, value: ToolInput) -> ToolOutput:
+        assert harness.current_tool_call is not None
+        await asyncio.sleep(60)
+        return ToolOutput(value=value.value)
+
+    harness = AgentHarness(
+        model="test-model",
+        model_client=Model(),
+        tools=[HarnessTool("slow", slow)],
+    )
+    call = HarnessToolCall(id="call-slow", name="slow", arguments={"value": "x"})
+
+    with pytest.raises(TimeoutError):
+        async with asyncio.timeout(0.01):
+            await harness._execute_tool_call(call)
+
+    assert harness.current_tool_call is None
+
+
+@pytest.mark.asyncio
+async def test_current_tool_call_is_cleared_after_tool_failure() -> None:
+    async def fail(harness: AgentHarness, _value: ToolInput) -> ToolOutput:
+        assert harness.current_tool_call is not None
+        raise ValueError("failed")
+
+    harness = AgentHarness(
+        model="test-model",
+        model_client=Model(),
+        tools=[HarnessTool("fail", fail)],
+    )
+    call = HarnessToolCall(id="call-fail", name="fail", arguments={"value": "x"})
+
+    message = await harness._execute_tool_call(call)
+
+    assert message.content == '{"error":"failed"}'
+    assert harness.current_tool_call is None
+
+
+@pytest.mark.asyncio
 async def test_agent_loop_applies_live_steering_before_completion() -> None:
     first_call_started = asyncio.Event()
     release_first_call = asyncio.Event()

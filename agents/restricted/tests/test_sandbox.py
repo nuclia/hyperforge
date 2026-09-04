@@ -1,7 +1,6 @@
 import asyncio
 import os
 import tempfile
-from unittest.mock import patch
 
 import pytest
 from hyperforge.codemode import sandbox
@@ -17,47 +16,29 @@ from hyperforge_restricted.config import PythonAgentConfig
 
 
 @pytest.fixture
-async def sandbox_conn():
+async def sandbox_conn(monkeypatch):
     with tempfile.TemporaryDirectory() as path:
         socket = f"{path}/sandbox.sock"
-        with (
-            patch(
-                "hyperforge.codemode.sandbox.settings.sandbox_socket",
-                socket,
-            ),
-            patch(
-                "hyperforge.codemode.sandbox.settings.sandbox_verify",
-                False,
-            ),
-            patch(
-                "hyperforge.codemode.sandbox.settings.sandbox_token",
-                "test-token",
-            ),
-        ):
-            task = asyncio.create_task(sandbox.run_sandbox_server())
+        monkeypatch.setenv("SANDBOX_SOCKET", socket)
+        monkeypatch.setenv("SANDBOX_VERIFY", "false")
+        monkeypatch.setenv("SANDBOX_TOKEN", "test-token")
+        task = asyncio.create_task(sandbox.run_sandbox_server())
 
-            await asyncio.sleep(0.1)  # Wait for the server to start
-            assert oct(os.stat(socket).st_mode & 0o777) == "0o600"
-            (rx, tx) = await asyncio.open_unix_connection(socket)
-            yield (sandbox.SandboxReader(rx), sandbox.SandboxWriter(tx))
+        await asyncio.sleep(0.1)
+        assert oct(os.stat(socket).st_mode & 0o777) == "0o600"
+        (rx, tx) = await asyncio.open_unix_connection(socket)
+        yield (sandbox.SandboxReader(rx), sandbox.SandboxWriter(tx))
 
-            tx.close()
-            await tx.wait_closed()
-            task.cancel()
-            await asyncio.gather(task, return_exceptions=True)
+        tx.close()
+        await tx.wait_closed()
+        task.cancel()
+        await asyncio.gather(task, return_exceptions=True)
 
 
 @pytest.fixture
-async def long_timeout():
-    """
-    On CI, process startup plus RestrictedPython compilation can exceed the default
-    timeout under coverage. Use a larger limit here to avoid flaky failures.
-    """
-    with patch(
-        "hyperforge.codemode.sandbox.WORKER_CPU_LIMIT",
-        15,
-    ):
-        yield
+async def long_timeout(monkeypatch):
+    monkeypatch.setenv("SANDBOX_CALLBACK_WAIT_SECONDS", "15")
+    yield
 
 
 async def test_sandbox_no_code(sandbox_conn, long_timeout):
