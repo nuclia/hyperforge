@@ -532,6 +532,13 @@ class AgentHarness:
 
     @property
     def current_tool_call(self) -> HarnessToolCall | None:
+        """The tool call currently being executed, if any.
+
+        Backed by a ContextVar: the value is local to the asyncio task that
+        runs the tool, so it is only meaningful when accessed from within
+        that task (e.g. inside a tool's ``execute()``). Reads from any other
+        task or after execution finishes return ``None``.
+        """
         return self._current_tool_call.get()
 
     async def request_feedback(
