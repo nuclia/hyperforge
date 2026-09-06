@@ -256,6 +256,7 @@ code_mode = create_codemode_tool(
     limits=CodeModeLimits(
         max_source_bytes=64 * 1024,
         max_result_bytes=256 * 1024,
+        max_cumulative_result_bytes=1024 * 1024,
         max_output_bytes=256 * 1024,
         max_nested_calls=10,
     ),
@@ -290,12 +291,13 @@ Capability names must be public, non-keyword Python identifiers and must not
 conflict with worker names such as `codemode`, `output`, `save`, `question`,
 `agent_id`, `dataclass`, `Chunk`, `Context`, `List`, `Any`, or `Dict`.
 
-`CodeModeLimits` applies source, projected-result, final-output, and nested-call
-limits to each invocation. Values are measured as UTF-8 JSON bytes where
-applicable. `CodeModeExecutionLimiter` provides fail-fast admission control. The
-default instance is process-wide; pass one shared application-owned instance to
-limit a particular run or group of tools. Existing runtime and memory limits
-remain configured through `UsageLimits`:
+`CodeModeLimits` applies source, per-call projected-result, cumulative
+projected-result, final-output, and nested-call limits to each invocation.
+Values are measured as UTF-8 JSON bytes where applicable, and the cumulative
+cap must be at least the per-call cap. `CodeModeExecutionLimiter` provides
+fail-fast admission control. The default instance is process-wide; pass one
+shared application-owned instance to limit a particular run or group of tools.
+Existing runtime and memory limits remain configured through `UsageLimits`:
 
 ```python
 from hyperforge.harness_sdk import UsageLimits
@@ -309,7 +311,15 @@ usage_limits = UsageLimits(
 
 The normal `max_tool_calls` count includes the outer Code Mode call and every
 nested capability call exactly once. `max_nested_calls` independently bounds one
-generated program.
+generated program. Generated code must call `output(value)` with exactly one
+value, exactly once; a missing, empty, or repeated `output` call fails the
+invocation. The optional `question` input is exposed to generated code as the
+worker's `question` variable.
+
+Pass `runner=` to inject a custom `CodeModeRunner` for deterministic tests; the
+default runner uses the remote sandbox, or the isolated local process when
+`remote_required=False`. An injected runner bypasses the socket and token
+fail-closed checks and owns its callback lifecycle.
 
 Each nested call emits `TOOL_REQUESTED`, followed by `TOOL_COMPLETED` or
 `TOOL_FAILED`, with a stable call ID. Event payloads have `codemode=true`,
@@ -348,7 +358,10 @@ Sandbox deployment settings use secure defaults:
   concurrent authentication handshakes.
 - `SANDBOX_MAX_SESSION_RUNTIME_SECONDS=60` and
   `SANDBOX_MAX_SESSION_MEMORY_BYTES=536870912` impose server-owned ceilings even
-  when a client omits limits.
+  when a client omits limits. The remote client also bounds each connection by
+  the requested runtime (or the session ceiling when no runtime is requested)
+  plus `SANDBOX_TIMEOUT_SLACK_SECONDS=10`, so a hung sandbox cannot stall a
+  caller indefinitely.
 - `SANDBOX_SOCKET_MODE=0600` restricts the socket to its owner.
 - `SANDBOX_SOCKET_GROUP` optionally changes group ownership. Use an explicitly
   provisioned shared group with `SANDBOX_SOCKET_MODE=0660` when the API and

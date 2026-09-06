@@ -7,6 +7,7 @@ from typing import Any
 import pytest
 from pydantic import BaseModel
 
+from hyperforge.codemode import RestrictedPythonTask, WorkerExecutionRequest
 from hyperforge.harness_sdk import (
     AgentHarness,
     CodeModeCapability,
@@ -286,7 +287,7 @@ async def test_scoped_codemode_sanitizes_formatted_context_events() -> None:
     scoped = local_codemode(CodeModeCapability(lookup))
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
-    await scoped.execute(harness, {"code": "lookup(value='safe')"})
+    await scoped.execute(harness, {"code": "lookup(value='safe'); output(None)"})
 
     events = [event async for event in harness.history()]
     completed = next(
@@ -308,7 +309,7 @@ async def test_scoped_codemode_does_not_persist_opaque_string_results() -> None:
     scoped = local_codemode(CodeModeCapability(upper, result_adapter=project))
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
-    await scoped.execute(harness, {"code": "upper(value='safe')"})
+    await scoped.execute(harness, {"code": "upper(value='safe'); output(None)"})
 
     events = [event async for event in harness.history()]
     completed = next(
@@ -331,7 +332,7 @@ async def test_scoped_codemode_does_not_persist_nested_opaque_strings() -> None:
     scoped = local_codemode(CodeModeCapability(upper, result_adapter=project))
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
-    await scoped.execute(harness, {"code": "upper(value='safe')"})
+    await scoped.execute(harness, {"code": "upper(value='safe'); output(None)"})
 
     events = [event async for event in harness.history()]
     completed = next(
@@ -354,7 +355,7 @@ async def test_scoped_codemode_does_not_persist_non_finite_json_numbers() -> Non
     scoped = local_codemode(CodeModeCapability(upper, result_adapter=project))
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
-    await scoped.execute(harness, {"code": "upper(value='safe')"})
+    await scoped.execute(harness, {"code": "upper(value='safe'); output(None)"})
 
     events = [event async for event in harness.history()]
     completed = next(
@@ -530,7 +531,7 @@ async def test_scoped_codemode_emits_projected_completion_event() -> None:
             HarnessToolCall(
                 id="outer-call",
                 name="codemode",
-                arguments={"code": "upper(value='safe')"},
+                arguments={"code": "upper(value='safe'); output(None)"},
             )
         ]
     )
@@ -542,6 +543,8 @@ async def test_scoped_codemode_emits_projected_completion_event() -> None:
         HarnessEventType.TOOL_COMPLETED,
     ]
     assert nested[1].payload["result"] == {"value": {"type": "string", "utf8_bytes": 4}}
+    assert nested[1].payload["result_bytes"] == len('{"value":"SAFE"}')
+    assert nested[1].payload["duration_ms"] >= 0
     assert nested[0].payload["call"]["id"] == nested[1].payload["call_id"]
 
 
@@ -631,6 +634,136 @@ async def test_scoped_codemode_fails_closed_without_remote_socket(
 
     with pytest.raises(RuntimeError, match="SANDBOX_SOCKET is absent"):
         await scoped.execute(harness, {"code": "output(None)"})
+
+
+@pytest.mark.asyncio
+async def test_scoped_codemode_fails_closed_without_remote_token(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(codemode_module.settings, "sandbox_socket", "/unused.sock")
+    monkeypatch.setattr(codemode_module.settings, "sandbox_token", None)
+    scoped = create_codemode_tool(capabilities=())
+    harness = AgentHarness(model="test", model_client=UnusedModel())
+
+    with pytest.raises(RuntimeError, match="SANDBOX_TOKEN is absent"):
+        await scoped.execute(harness, {"code": "output(None)"})
+
+
+class RecordingRunner:
+    def __init__(self, tasks: list[RestrictedPythonTask]) -> None:
+        self.tasks = tasks
+        self.requests: list[WorkerExecutionRequest] = []
+        self.results: dict[str, Any] = {}
+
+    async def run(self, request: WorkerExecutionRequest, dispatch: Any) -> None:
+        self.requests.append(request)
+        for task in self.tasks:
+            self.results[task.function] = await dispatch(task)
+
+
+def worker_task(function: str, *args: Any, **kwargs: Any) -> RestrictedPythonTask:
+    return RestrictedPythonTask(
+        function=function, agent="harness", args=args, keyword_args=kwargs
+    )
+
+
+@pytest.mark.asyncio
+async def test_scoped_codemode_uses_injected_runner_without_sandbox(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(codemode_module.settings, "sandbox_socket", None)
+    monkeypatch.setattr(codemode_module.settings, "sandbox_token", None)
+    runner = RecordingRunner(
+        [
+            worker_task("upper", "hello"),
+            worker_task("output", {"done": True}),
+        ]
+    )
+    scoped = create_codemode_tool(
+        capabilities=(CodeModeCapability(upper, result_adapter=value_adapter),),
+        runner=runner,
+    )
+    harness = AgentHarness(model="test", model_client=UnusedModel())
+
+    result = await scoped.execute(
+        harness, {"code": "upper('hello'); output({'done': True})", "question": "Q?"}
+    )
+
+    assert result.value == {"done": True}
+    request = runner.requests[0]
+    assert request.code == "upper('hello'); output({'done': True})"
+    assert request.question == "Q?"
+    assert set(request.function_names["harness"]) == {"upper", "output"}
+    assert runner.results["upper"] == {"value": "HELLO"}
+    assert harness.usage.tool_calls == 1
+
+
+@pytest.mark.asyncio
+async def test_scoped_codemode_output_must_be_called_exactly_once() -> None:
+    runner = RecordingRunner(
+        [worker_task("output", 1), worker_task("output", 2)],
+    )
+    scoped = create_codemode_tool(capabilities=(), runner=runner)
+    harness = AgentHarness(model="test", model_client=UnusedModel())
+
+    with pytest.raises(ValueError, match="may only be called once"):
+        await scoped.execute(harness, {"code": "output(1); output(2)"})
+
+
+@pytest.mark.asyncio
+async def test_scoped_codemode_output_requires_a_value() -> None:
+    runner = RecordingRunner([worker_task("output")])
+    scoped = create_codemode_tool(capabilities=(), runner=runner)
+    harness = AgentHarness(model="test", model_client=UnusedModel())
+
+    with pytest.raises(ValueError, match="output requires a value"):
+        await scoped.execute(harness, {"code": "output()"})
+
+
+@pytest.mark.asyncio
+async def test_scoped_codemode_requires_output_call() -> None:
+    runner = RecordingRunner([])
+    scoped = create_codemode_tool(capabilities=(), runner=runner)
+    harness = AgentHarness(model="test", model_client=UnusedModel())
+
+    with pytest.raises(ValueError, match="must call output\\(value\\) exactly once"):
+        await scoped.execute(harness, {"code": "1 + 1"})
+
+
+@pytest.mark.asyncio
+async def test_scoped_codemode_enforces_cumulative_result_limit() -> None:
+    runner = RecordingRunner([worker_task("upper", "hi"), worker_task("upper", "ok")])
+    scoped = create_codemode_tool(
+        capabilities=(CodeModeCapability(upper, result_adapter=value_adapter),),
+        runner=runner,
+        limits=CodeModeLimits(max_result_bytes=20, max_cumulative_result_bytes=20),
+    )
+    harness = AgentHarness(model="test", model_client=UnusedModel())
+
+    with pytest.raises(RuntimeError, match="capability 'upper' failed"):
+        await scoped.execute(harness, {"code": "upper('hi'); upper('ok')"})
+
+    events = [event async for event in harness.history()]
+    nested = [event for event in events if event.payload.get("nested")]
+    assert [event.type for event in nested] == [
+        HarnessEventType.TOOL_REQUESTED,
+        HarnessEventType.TOOL_COMPLETED,
+        HarnessEventType.TOOL_REQUESTED,
+        HarnessEventType.TOOL_FAILED,
+    ]
+    assert nested[-1].payload["result"] == {"error": "RuntimeError"}
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"max_cumulative_result_bytes": 0},
+        {"max_result_bytes": 1024, "max_cumulative_result_bytes": 512},
+    ],
+)
+def test_scoped_codemode_rejects_inconsistent_result_limits(kwargs: dict):
+    with pytest.raises(ValueError, match="max_cumulative_result_bytes"):
+        CodeModeLimits(**kwargs)
 
 
 @pytest.mark.parametrize(

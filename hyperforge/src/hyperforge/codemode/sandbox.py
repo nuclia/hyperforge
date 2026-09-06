@@ -52,6 +52,9 @@ class SandboxSettings(BaseSettings):
         default=60, gt=0, allow_inf_nan=False
     )
     sandbox_max_session_memory_bytes: int = Field(default=512 * 1024 * 1024, gt=0)
+    sandbox_timeout_slack_seconds: float = Field(
+        default=10.0, ge=0, allow_inf_nan=False
+    )
 
     @field_validator("sandbox_socket_mode")
     @classmethod
@@ -138,9 +141,12 @@ class SandboxRunner:
             if not isinstance(message, SandboxMessage.Run):
                 raise ValueError("Invalid sandbox run request")
             try:
-                if message.run.max_runtime_seconds is None:
-                    return await self._run_with_remote_admission(message.run)
-                async with asyncio.timeout(message.run.max_runtime_seconds):
+                runtime = message.run.max_runtime_seconds
+                if runtime is None:
+                    runtime = settings.sandbox_max_session_runtime_seconds
+                async with asyncio.timeout(
+                    runtime + settings.sandbox_timeout_slack_seconds
+                ):
                     return await self._run_with_remote_admission(message.run)
             except TimeoutError as exc:
                 raise RuntimeError("Codemode execution timed out") from exc

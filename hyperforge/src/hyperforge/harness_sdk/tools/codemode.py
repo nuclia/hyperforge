@@ -4,9 +4,10 @@ import json
 import keyword
 import math
 import threading
+import time
 import uuid
 from dataclasses import dataclass
-from typing import Any, Awaitable, Callable
+from typing import Any, Awaitable, Callable, Protocol
 
 from pydantic import BaseModel
 
@@ -32,6 +33,7 @@ CODEMODE_TOOL_NAME = "codemode"
 OUTPUT_FUNCTION_NAME = "output"
 DEFAULT_MAX_SOURCE_BYTES = 64 * 1024
 DEFAULT_MAX_RESULT_BYTES = 1024 * 1024
+DEFAULT_MAX_CUMULATIVE_RESULT_BYTES = 4 * 1024 * 1024
 DEFAULT_MAX_OUTPUT_BYTES = 1024 * 1024
 DEFAULT_MAX_NESTED_CALLS = 20
 DEFAULT_MAX_CONCURRENT_EXECUTIONS = 4
@@ -65,17 +67,22 @@ _SENSITIVE_FIELD_PARTS = (
     "authorization",
     "cookie",
     "credential",
+    "passwd",
     "password",
+    "private_key",
+    "privatekey",
     "secret",
     "token",
 )
 type CodeModeResultAdapter = Callable[
     [HarnessTool[Any, Any], BaseModel], Any | Awaitable[Any]
 ]
+type CodeModeDispatch = Callable[[RestrictedPythonTask], Awaitable[Any]]
 
 
 class CodemodeInput(BaseModel):
     code: str
+    question: str = ""
 
 
 class CodemodeOutput(BaseModel):
@@ -96,6 +103,20 @@ def raw_codemode_result_adapter(
     return output.model_dump(mode="json")
 
 
+class CodeModeRunner(Protocol):
+    """Executes a Code Mode request, routing worker callbacks through dispatch.
+
+    Injections are intended for deterministic tests; production tools use the
+    default remote sandbox (or the isolated local process when
+    ``remote_required=False``). An injected runner owns its callback lifecycle:
+    pending callbacks it leaves behind are not tracked for slot retention.
+    """
+
+    async def run(
+        self, request: WorkerExecutionRequest, dispatch: CodeModeDispatch
+    ) -> Any: ...
+
+
 @dataclass(frozen=True)
 class CodeModeCapability:
     tool: HarnessTool[Any, Any]
@@ -106,6 +127,7 @@ class CodeModeCapability:
 class CodeModeLimits:
     max_source_bytes: int = DEFAULT_MAX_SOURCE_BYTES
     max_result_bytes: int = DEFAULT_MAX_RESULT_BYTES
+    max_cumulative_result_bytes: int = DEFAULT_MAX_CUMULATIVE_RESULT_BYTES
     max_output_bytes: int = DEFAULT_MAX_OUTPUT_BYTES
     max_nested_calls: int = DEFAULT_MAX_NESTED_CALLS
 
@@ -113,6 +135,8 @@ class CodeModeLimits:
         for name, value in vars(self).items():
             if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
                 raise ValueError(f"{name} must be a positive integer")
+        if self.max_cumulative_result_bytes < self.max_result_bytes:
+            raise ValueError("max_cumulative_result_bytes must be >= max_result_bytes")
 
 
 class CodeModeExecutionLimiter:
@@ -206,6 +230,7 @@ async def codemode(harness: Any, input_value: CodemodeInput) -> CodemodeOutput:
     await runner.run(
         WorkerExecutionRequest(
             code=input_value.code,
+            question=input_value.question,
             local_vars={},
             global_vars={},
             function_names={"harness": definitions},
@@ -222,11 +247,17 @@ def create_codemode_tool(
     limits: CodeModeLimits = CodeModeLimits(),
     execution_limiter: CodeModeExecutionLimiter = _process_execution_limiter,
     remote_required: bool = True,
+    runner: CodeModeRunner | None = None,
     inheritance: ToolInheritancePolicy = ToolInheritancePolicy.DO_NOT_INHERIT,
     name: str = CODEMODE_TOOL_NAME,
     description: str | None = None,
 ) -> HarnessTool[CodemodeInput, CodemodeOutput]:
-    """Create a Code Mode tool with only the explicitly supplied capabilities."""
+    """Create a Code Mode tool with only the explicitly supplied capabilities.
+
+    ``runner`` defaults to the remote sandbox (or the isolated local process
+    when ``remote_required=False``); inject a ``CodeModeRunner`` for
+    deterministic tests without any sandbox environment.
+    """
     if not isinstance(capabilities, tuple):
         raise TypeError("capabilities must be an immutable tuple")
     capability_map: dict[str, CodeModeCapability] = {}
@@ -270,10 +301,16 @@ def create_codemode_tool(
                 f"{source_size} > {limits.max_source_bytes} bytes"
             )
         socket = settings.sandbox_socket
-        if remote_required and socket is None:
-            raise RuntimeError(
-                "Remote Code Mode execution is required but SANDBOX_SOCKET is absent"
-            )
+        if runner is None and remote_required:
+            if socket is None:
+                raise RuntimeError(
+                    "Remote Code Mode execution is required but SANDBOX_SOCKET "
+                    "is absent"
+                )
+            if not settings.sandbox_token:
+                raise RuntimeError(
+                    "Remote Code Mode execution is required but SANDBOX_TOKEN is absent"
+                )
         execution_limiter.acquire()
         return await _execute_scoped_codemode(
             harness,
@@ -282,6 +319,7 @@ def create_codemode_tool(
             limits,
             socket,
             execution_limiter,
+            runner,
         )
 
     execute.__name__ = name
@@ -301,19 +339,19 @@ async def _execute_scoped_codemode(
     limits: CodeModeLimits,
     socket: str | None,
     execution_limiter: CodeModeExecutionLimiter,
+    runner: CodeModeRunner | None = None,
 ) -> CodemodeOutput:
     capability_map = {capability.tool.name: capability for capability in capabilities}
     result = CodemodeOutput()
+    output_state = _OutputState()
     nested_calls = 0
+    cumulative_result_bytes = 0
     parent_call_id = current_tool_call_id()
 
     async def dispatch(task: RestrictedPythonTask) -> Any:
-        nonlocal nested_calls
+        nonlocal nested_calls, cumulative_result_bytes
         if task.function == OUTPUT_FUNCTION_NAME:
-            value = _output_value(task)
-            result.value = _normalize_worker_value(
-                value, limits.max_output_bytes, "Code Mode output"
-            )
+            result.value = output_state.record(task, limits.max_output_bytes)
             return None
 
         capability = capability_map.get(task.function)
@@ -340,6 +378,7 @@ async def _execute_scoped_codemode(
             },
         )
         token = set_current_tool_call_id(call_id)
+        started = time.perf_counter()
         try:
             harness.usage.tool_calls += 1
             harness._check_limit("max_tool_calls", harness.usage.tool_calls)
@@ -353,11 +392,18 @@ async def _execute_scoped_codemode(
             projected = capability.result_adapter(capability.tool, output)
             if inspect.isawaitable(projected):
                 projected = await projected
-            normalized = _normalize_worker_value(
+            normalized, result_bytes = _normalize_worker_value(
                 projected,
                 limits.max_result_bytes,
                 f"Code Mode result from {capability.tool.name}",
             )
+            cumulative_result_bytes += result_bytes
+            if cumulative_result_bytes > limits.max_cumulative_result_bytes:
+                raise RuntimeError(
+                    "Code Mode cumulative result limit exceeded: "
+                    f"{cumulative_result_bytes} > "
+                    f"{limits.max_cumulative_result_bytes} bytes"
+                )
             sanitized_result = _sanitize_event_value(normalized)
         except BaseException as exc:
             reset_current_tool_call_id(token)
@@ -367,6 +413,7 @@ async def _execute_scoped_codemode(
                     "call_id": call_id,
                     "tool": capability.tool.name,
                     "result": {"error": type(exc).__name__},
+                    "duration_ms": round((time.perf_counter() - started) * 1000, 3),
                     **marker,
                 },
             )
@@ -384,16 +431,20 @@ async def _execute_scoped_codemode(
                     "call_id": call_id,
                     "tool": capability.tool.name,
                     "result": sanitized_result,
+                    "duration_ms": round((time.perf_counter() - started) * 1000, 3),
+                    "result_bytes": result_bytes,
                     **marker,
                 },
             )
             return normalized
 
-    runner = (
-        SandboxRunner.remote(socket, dispatch)
-        if socket is not None
-        else SandboxRunner.isolated_process(dispatch)
-    )
+    sandbox_runner: SandboxRunner | None = None
+    if runner is None:
+        sandbox_runner = (
+            SandboxRunner.remote(socket, dispatch)
+            if socket is not None
+            else SandboxRunner.isolated_process(dispatch)
+        )
     try:
         definitions = {
             capability.tool.name: FunctionDefinition(
@@ -408,20 +459,47 @@ async def _execute_scoped_codemode(
             description="Set the value returned by Code Mode.",
             parameters={"value": {}},
         )
-        await runner.run(
-            WorkerExecutionRequest(
-                code=input_value.code,
-                local_vars={},
-                global_vars={},
-                function_names={"harness": definitions},
-                max_runtime_seconds=harness.usage_limits.max_codemode_runtime_seconds,
-                max_memory_bytes=harness.usage_limits.max_codemode_memory_bytes,
-            )
+        worker_request = WorkerExecutionRequest(
+            code=input_value.code,
+            question=input_value.question,
+            local_vars={},
+            global_vars={},
+            function_names={"harness": definitions},
+            max_runtime_seconds=harness.usage_limits.max_codemode_runtime_seconds,
+            max_memory_bytes=harness.usage_limits.max_codemode_memory_bytes,
         )
+        if runner is not None:
+            await runner.run(worker_request, dispatch)
+        elif sandbox_runner is not None:
+            await sandbox_runner.run(worker_request)
     finally:
-        if not runner.run_when_callbacks_complete(execution_limiter.release):
+        hold = (
+            sandbox_runner.run_when_callbacks_complete
+            if sandbox_runner is not None
+            else None
+        )
+        if hold is None or not hold(execution_limiter.release):
             execution_limiter.release()
+    if not output_state.called:
+        raise ValueError("Code Mode must call output(value) exactly once")
     return result
+
+
+class _OutputState:
+    """Validate output(value) calls: exactly one call, exactly one value."""
+
+    def __init__(self) -> None:
+        self.called = False
+
+    def record(self, task: RestrictedPythonTask, max_output_bytes: int) -> Any:
+        if self.called:
+            raise ValueError("output(value) may only be called once")
+        value = _output_value(task)
+        normalized, _ = _normalize_worker_value(
+            value, max_output_bytes, "Code Mode output"
+        )
+        self.called = True
+        return normalized
 
 
 def _output_value(task: RestrictedPythonTask) -> Any:
@@ -431,10 +509,12 @@ def _output_value(task: RestrictedPythonTask) -> Any:
         raise ValueError("output accepts one value")
     if task.keyword_args.keys() - {"value"}:
         raise ValueError("output accepts only the 'value' keyword")
-    return task.args[0] if task.args else task.keyword_args.get("value")
+    if not task.args and "value" not in task.keyword_args:
+        raise ValueError("output requires a value")
+    return task.args[0] if task.args else task.keyword_args["value"]
 
 
-def _normalize_worker_value(value: Any, max_bytes: int, label: str) -> Any:
+def _normalize_worker_value(value: Any, max_bytes: int, label: str) -> tuple[Any, int]:
     if isinstance(value, BaseModel):
         raise TypeError(
             f"{label} must be projected to serializable worker values, not a model"
@@ -442,7 +522,7 @@ def _normalize_worker_value(value: Any, max_bytes: int, label: str) -> Any:
     try:
         _reject_reserved_model_markers(value, label)
         encoded = encode_protocol_value(value, label, max_bytes=max_bytes)
-        return json.loads(encoded)
+        return json.loads(encoded), len(encoded)
     except (RecursionError, TypeError, ValueError) as exc:
         if "exceeds maximum size" in str(exc):
             raise ValueError(str(exc)) from exc
@@ -515,7 +595,7 @@ def _scoped_description(
 ) -> str:
     introduction = description or (
         "Execute restricted Python code using only the scoped capabilities below; "
-        "call output(value) to return a result."
+        "call output(value) exactly once to return a result."
     )
     if not capabilities:
         return introduction
@@ -555,9 +635,11 @@ def _tool_arguments(
 
 __all__ = [
     "CodeModeCapability",
+    "CodeModeDispatch",
     "CodeModeExecutionLimiter",
     "CodeModeLimits",
     "CodeModeResultAdapter",
+    "CodeModeRunner",
     "CodemodeInput",
     "CodemodeOutput",
     "RESERVED_CAPABILITY_NAMES",

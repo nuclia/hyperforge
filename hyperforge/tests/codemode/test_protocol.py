@@ -264,3 +264,57 @@ async def test_remote_session_limit_is_shared_across_event_loops(
     await asyncio.gather(*(asyncio.to_thread(run_in_new_loop) for _ in range(6)))
 
     assert maximum_active == 2
+
+
+@pytest.mark.asyncio
+async def test_remote_run_timeout_adds_slack_to_requested_runtime(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(sandbox.settings, "sandbox_timeout_slack_seconds", 5.0)
+    completed = []
+
+    async def slow_admission(_runner: SandboxRunner, _request: WorkerExecutionRequest):
+        await asyncio.sleep(0.05)
+        completed.append(True)
+
+    async def callback(_task: RestrictedPythonTask):
+        return None
+
+    monkeypatch.setattr(SandboxRunner, "_run_with_remote_admission", slow_admission)
+    runner = SandboxRunner.remote("/unused.sock", callback)
+    request = WorkerExecutionRequest(
+        code="",
+        local_vars={},
+        global_vars={},
+        function_names={},
+        max_runtime_seconds=0.01,
+    )
+
+    await runner.run(request)
+
+    assert completed == [True]
+
+
+@pytest.mark.asyncio
+async def test_remote_run_without_requested_runtime_uses_server_ceiling(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(sandbox.settings, "sandbox_timeout_slack_seconds", 0.0)
+    monkeypatch.setattr(sandbox.settings, "sandbox_max_session_runtime_seconds", 0.05)
+
+    async def hanging_admission(
+        _runner: SandboxRunner, _request: WorkerExecutionRequest
+    ):
+        await asyncio.Future()
+
+    async def callback(_task: RestrictedPythonTask):
+        return None
+
+    monkeypatch.setattr(SandboxRunner, "_run_with_remote_admission", hanging_admission)
+    runner = SandboxRunner.remote("/unused.sock", callback)
+    request = WorkerExecutionRequest(
+        code="", local_vars={}, global_vars={}, function_names={}
+    )
+
+    with pytest.raises(RuntimeError, match="timed out"):
+        await runner.run(request)
