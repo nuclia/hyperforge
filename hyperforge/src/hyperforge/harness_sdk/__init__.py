@@ -39,7 +39,7 @@ from .models import (
     HarnessToolCall,
 )
 from .storage import HarnessStorageProtocol, InMemoryHarnessStorage
-from .tools import HarnessTool, ToolInheritancePolicy, tool
+from .tools import HarnessTool, ToolCallContext, ToolInheritancePolicy, tool
 from .tools.codemode import (
     CodeModeCapability,
     CodeModeDispatch,
@@ -59,6 +59,7 @@ from .usage import HarnessUsage, UsageLimitExceeded, UsageLimits
 __all__ = [
     "SYSTEM_PROMPT",
     "AgentHarness",
+    "ToolCallContext",
     "AgentResult",
     "ChatCompletionChunk",
     "ChatCompletionChoice",

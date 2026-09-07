@@ -20,6 +20,7 @@ from hyperforge.harness_sdk import (
     HarnessTool,
     HarnessToolCall,
     ModelDelta,
+    ToolCallContext,
     UsageLimits,
     codemode,
     create_codemode_tool,
@@ -27,6 +28,11 @@ from hyperforge.harness_sdk import (
     tool,
 )
 from hyperforge.harness_sdk.tools import codemode as codemode_module
+
+
+def _ctx(harness: Any) -> ToolCallContext:
+    return ToolCallContext(harness=harness, name="test")
+
 
 
 class UpperInput(BaseModel):
@@ -43,7 +49,7 @@ class SensitiveOutput(BaseModel):
 
 
 @tool(description="Uppercase a value")
-async def upper(_: AgentHarness, input_value: UpperInput) -> UpperOutput:
+async def upper(_: ToolCallContext, input_value: UpperInput) -> UpperOutput:
     return UpperOutput(value=input_value.value.upper())
 
 
@@ -96,7 +102,7 @@ async def test_codemode_calls_registered_tools_and_returns_output() -> None:
     )
 
     result = await codemode.execute(
-        harness,
+        ToolCallContext(harness=harness, name=codemode.name),
         CodemodeInput(
             code="result = upper(value='hello')\noutput(result['value'])"
         ).model_dump(),
@@ -116,7 +122,7 @@ async def test_codemode_counts_nested_tool_calls() -> None:
 
     with pytest.raises(RuntimeError, match="max_tool_calls"):
         await codemode.execute(
-            harness,
+            ToolCallContext(harness=harness, name=codemode.name),
             CodemodeInput(code="upper(value='one')\nupper(value='two')").model_dump(),
         )
 
@@ -131,7 +137,7 @@ async def test_codemode_propagates_tool_validation_errors() -> None:
 
     with pytest.raises(RuntimeError, match="Invalid upper arguments"):
         await codemode.execute(
-            harness,
+            ToolCallContext(harness=harness, name=codemode.name),
             CodemodeInput(code="upper(missing='value')").model_dump(),
         )
 
@@ -152,7 +158,10 @@ async def test_codemode_supports_common_aggregation_patterns(
 ) -> None:
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
-    result = await codemode.execute(harness, CodemodeInput(code=code).model_dump())
+    result = await codemode.execute(
+        ToolCallContext(harness=harness, name=codemode.name),
+        CodemodeInput(code=code).model_dump(),
+    )
 
     assert result.value == expected
 
@@ -162,7 +171,7 @@ async def test_codemode_preserves_context_when_calling_tools() -> None:
     request_context = ContextVar("request_context", default="missing")
 
     @tool()
-    async def read_context(_: AgentHarness, _input_value: UpperInput) -> UpperOutput:
+    async def read_context(_: ToolCallContext, _input_value: UpperInput) -> UpperOutput:
         return UpperOutput(value=request_context.get())
 
     harness = AgentHarness(
@@ -171,7 +180,7 @@ async def test_codemode_preserves_context_when_calling_tools() -> None:
     token = request_context.set("available")
     try:
         result = await codemode.execute(
-            harness,
+            ToolCallContext(harness=harness, name=codemode.name),
             CodemodeInput(
                 code="result = read_context(value='unused')\noutput(result['value'])"
             ).model_dump(),
@@ -192,7 +201,7 @@ async def test_codemode_enforces_runtime_limit() -> None:
 
     with pytest.raises(RuntimeError, match="timed out"):
         await codemode.execute(
-            harness,
+            ToolCallContext(harness=harness, name=codemode.name),
             CodemodeInput(code="while True: pass").model_dump(),
         )
 
@@ -203,7 +212,7 @@ async def test_codemode_blocks_process_control_exceptions() -> None:
 
     with pytest.raises(RuntimeError, match="SystemExit.*not defined"):
         await codemode.execute(
-            harness,
+            ToolCallContext(harness=harness, name=codemode.name),
             CodemodeInput(code="raise SystemExit(1)").model_dump(),
         )
 
@@ -219,7 +228,7 @@ async def test_codemode_enforces_memory_limit() -> None:
 
     with pytest.raises(RuntimeError):
         await codemode.execute(
-            harness,
+            ToolCallContext(harness=harness, name=codemode.name),
             CodemodeInput(code="output('x' * (1024 * 1024 * 1024))").model_dump(),
         )
 
@@ -245,7 +254,7 @@ async def test_scoped_codemode_uses_only_explicit_hidden_capabilities(
     )
 
     result = await scoped.execute(
-        harness,
+        _ctx(harness),
         {"code": "result = upper(value='hello')\noutput(result['value'])"},
     )
 
@@ -253,7 +262,7 @@ async def test_scoped_codemode_uses_only_explicit_hidden_capabilities(
     assert upper.name not in harness._tools
     for unavailable in ("lower", "remember"):
         with pytest.raises(RuntimeError, match=f"{unavailable}.*not defined"):
-            await scoped.execute(harness, {"code": f"{unavailable}(value='x')"})
+            await scoped.execute(_ctx(harness), {"code": f"{unavailable}(value='x')"})
 
 
 @pytest.mark.asyncio
@@ -271,7 +280,7 @@ async def test_scoped_codemode_default_projection_uses_model_context() -> None:
     harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[scoped])
 
     result = await scoped.execute(
-        harness,
+        _ctx(harness),
         {"code": "result = lookup(value='hello')\noutput(result)"},
     )
 
@@ -287,7 +296,7 @@ async def test_scoped_codemode_sanitizes_formatted_context_events() -> None:
     scoped = local_codemode(CodeModeCapability(lookup))
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
-    await scoped.execute(harness, {"code": "lookup(value='safe'); output(None)"})
+    await scoped.execute(_ctx(harness), {"code": "lookup(value='safe'); output(None)"})
 
     events = [event async for event in harness.history()]
     completed = next(
@@ -309,7 +318,7 @@ async def test_scoped_codemode_does_not_persist_opaque_string_results() -> None:
     scoped = local_codemode(CodeModeCapability(upper, result_adapter=project))
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
-    await scoped.execute(harness, {"code": "upper(value='safe'); output(None)"})
+    await scoped.execute(_ctx(harness), {"code": "upper(value='safe'); output(None)"})
 
     events = [event async for event in harness.history()]
     completed = next(
@@ -332,7 +341,7 @@ async def test_scoped_codemode_does_not_persist_nested_opaque_strings() -> None:
     scoped = local_codemode(CodeModeCapability(upper, result_adapter=project))
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
-    await scoped.execute(harness, {"code": "upper(value='safe'); output(None)"})
+    await scoped.execute(_ctx(harness), {"code": "upper(value='safe'); output(None)"})
 
     events = [event async for event in harness.history()]
     completed = next(
@@ -355,7 +364,7 @@ async def test_scoped_codemode_does_not_persist_non_finite_json_numbers() -> Non
     scoped = local_codemode(CodeModeCapability(upper, result_adapter=project))
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
-    await scoped.execute(harness, {"code": "upper(value='safe'); output(None)"})
+    await scoped.execute(_ctx(harness), {"code": "upper(value='safe'); output(None)"})
 
     events = [event async for event in harness.history()]
     completed = next(
@@ -383,7 +392,7 @@ async def test_scoped_codemode_raw_projection_must_be_explicit() -> None:
     harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[scoped])
 
     result = await scoped.execute(
-        harness,
+        _ctx(harness),
         {"code": "result = lookup(value='hello')\noutput(result)"},
     )
 
@@ -406,7 +415,7 @@ async def test_scoped_codemode_rejects_unsafe_projected_results(
     harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[scoped])
 
     with pytest.raises(RuntimeError, match="capability 'upper' failed"):
-        await scoped.execute(harness, {"code": "upper(value='hello')"})
+        await scoped.execute(_ctx(harness), {"code": "upper(value='hello')"})
 
 
 @pytest.mark.asyncio
@@ -414,18 +423,18 @@ async def test_scoped_codemode_enforces_source_result_and_output_byte_limits() -
     harness = AgentHarness(model="test", model_client=UnusedModel())
     source_limited = local_codemode(limits=CodeModeLimits(max_source_bytes=1))
     with pytest.raises(ValueError, match="source exceeds maximum size"):
-        await source_limited.execute(harness, {"code": "é"})
+        await source_limited.execute(_ctx(harness), {"code": "é"})
 
     result_limited = local_codemode(
         CodeModeCapability(upper, result_adapter=value_adapter),
         limits=CodeModeLimits(max_result_bytes=4),
     )
     with pytest.raises(RuntimeError, match="capability 'upper' failed"):
-        await result_limited.execute(harness, {"code": "upper(value='hello')"})
+        await result_limited.execute(_ctx(harness), {"code": "upper(value='hello')"})
 
     output_limited = local_codemode(limits=CodeModeLimits(max_output_bytes=4))
     with pytest.raises(RuntimeError, match="output exceeds maximum size"):
-        await output_limited.execute(harness, {"code": "output('hello')"})
+        await output_limited.execute(_ctx(harness), {"code": "output('hello')"})
 
 
 @pytest.mark.asyncio
@@ -558,7 +567,7 @@ async def test_scoped_codemode_records_nested_failure_before_propagating() -> No
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
     with pytest.raises(RuntimeError, match=r"capability 'fail' failed \(ValueError\)"):
-        await scoped.execute(harness, {"code": "fail(value='safe')"})
+        await scoped.execute(_ctx(harness), {"code": "fail(value='safe')"})
 
     events = [event async for event in harness.history()]
     nested = [event for event in events if event.payload.get("nested")]
@@ -591,7 +600,7 @@ async def test_scoped_codemode_cancels_pending_nested_callback_on_timeout() -> N
     )
 
     with pytest.raises(RuntimeError, match="timed out"):
-        await scoped.execute(harness, {"code": "wait(value='x')"})
+        await scoped.execute(_ctx(harness), {"code": "wait(value='x')"})
 
     assert started.is_set()
     assert cancelled.is_set()
@@ -613,7 +622,7 @@ async def test_scoped_codemode_propagates_external_cancellation() -> None:
     scoped = local_codemode(CodeModeCapability(wait))
     harness = AgentHarness(model="test", model_client=UnusedModel())
     execution = asyncio.create_task(
-        scoped.execute(harness, {"code": "wait(value='x')"})
+        scoped.execute(_ctx(harness), {"code": "wait(value='x')"})
     )
     await started.wait()
 
@@ -633,7 +642,7 @@ async def test_scoped_codemode_fails_closed_without_remote_socket(
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
     with pytest.raises(RuntimeError, match="SANDBOX_SOCKET is absent"):
-        await scoped.execute(harness, {"code": "output(None)"})
+        await scoped.execute(_ctx(harness), {"code": "output(None)"})
 
 
 @pytest.mark.asyncio
@@ -646,7 +655,7 @@ async def test_scoped_codemode_fails_closed_without_remote_token(
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
     with pytest.raises(RuntimeError, match="SANDBOX_TOKEN is absent"):
-        await scoped.execute(harness, {"code": "output(None)"})
+        await scoped.execute(_ctx(harness), {"code": "output(None)"})
 
 
 class RecordingRunner:
@@ -686,7 +695,7 @@ async def test_scoped_codemode_uses_injected_runner_without_sandbox(
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
     result = await scoped.execute(
-        harness, {"code": "upper('hello'); output({'done': True})", "question": "Q?"}
+        _ctx(harness), {"code": "upper('hello'); output({'done': True})", "question": "Q?"}
     )
 
     assert result.value == {"done": True}
@@ -707,7 +716,7 @@ async def test_scoped_codemode_output_must_be_called_exactly_once() -> None:
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
     with pytest.raises(ValueError, match="may only be called once"):
-        await scoped.execute(harness, {"code": "output(1); output(2)"})
+        await scoped.execute(_ctx(harness), {"code": "output(1); output(2)"})
 
 
 @pytest.mark.asyncio
@@ -717,7 +726,7 @@ async def test_scoped_codemode_output_requires_a_value() -> None:
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
     with pytest.raises(ValueError, match="output requires a value"):
-        await scoped.execute(harness, {"code": "output()"})
+        await scoped.execute(_ctx(harness), {"code": "output()"})
 
 
 @pytest.mark.asyncio
@@ -727,7 +736,7 @@ async def test_scoped_codemode_requires_output_call() -> None:
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
     with pytest.raises(ValueError, match="must call output\\(value\\) exactly once"):
-        await scoped.execute(harness, {"code": "1 + 1"})
+        await scoped.execute(_ctx(harness), {"code": "1 + 1"})
 
 
 @pytest.mark.asyncio
@@ -741,7 +750,7 @@ async def test_scoped_codemode_enforces_cumulative_result_limit() -> None:
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
     with pytest.raises(RuntimeError, match="capability 'upper' failed"):
-        await scoped.execute(harness, {"code": "upper('hi'); upper('ok')"})
+        await scoped.execute(_ctx(harness), {"code": "upper('hi'); upper('ok')"})
 
     events = [event async for event in harness.history()]
     nested = [event for event in events if event.payload.get("nested")]
@@ -856,11 +865,11 @@ async def test_scoped_codemode_concurrency_saturation() -> None:
         execution_limiter=CodeModeExecutionLimiter(1),
     )
     harness = AgentHarness(model="test", model_client=UnusedModel())
-    first = asyncio.create_task(scoped.execute(harness, {"code": "wait(value='x')"}))
+    first = asyncio.create_task(scoped.execute(_ctx(harness), {"code": "wait(value='x')"}))
     await started.wait()
 
     with pytest.raises(RuntimeError, match="concurrency limit reached"):
-        await scoped.execute(harness, {"code": "output(None)"})
+        await scoped.execute(_ctx(harness), {"code": "output(None)"})
 
     first.cancel()
     await asyncio.gather(first, return_exceptions=True)
@@ -892,7 +901,7 @@ async def test_scoped_codemode_holds_slot_for_non_cooperative_callback(
     scoped = local_codemode(CodeModeCapability(wait), execution_limiter=limiter)
     harness = AgentHarness(model="test", model_client=UnusedModel())
     execution = asyncio.create_task(
-        scoped.execute(harness, {"code": "wait(value='x')"})
+        scoped.execute(_ctx(harness), {"code": "wait(value='x')"})
     )
     await started.wait()
 
@@ -901,10 +910,10 @@ async def test_scoped_codemode_holds_slot_for_non_cooperative_callback(
         await asyncio.wait_for(execution, timeout=0.5)
     await cancellation_seen.wait()
     with pytest.raises(RuntimeError, match="concurrency limit reached"):
-        await scoped.execute(harness, {"code": "output(None)"})
+        await scoped.execute(_ctx(harness), {"code": "output(None)"})
 
     release.set()
     await asyncio.wait_for(callback_done.wait(), timeout=0.5)
     await asyncio.sleep(0)
-    result = await scoped.execute(harness, {"code": "output('released')"})
+    result = await scoped.execute(_ctx(harness), {"code": "output('released')"})
     assert result.value == "released"

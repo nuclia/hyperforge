@@ -27,7 +27,7 @@ from ..execution import (
     set_current_tool_call_id,
 )
 from ..models import HarnessEventType
-from . import HarnessTool, ToolInheritancePolicy, tool
+from . import HarnessTool, ToolCallContext, ToolInheritancePolicy, tool
 
 CODEMODE_TOOL_NAME = "codemode"
 OUTPUT_FUNCTION_NAME = "output"
@@ -183,7 +183,10 @@ _process_execution_limiter = CodeModeExecutionLimiter()
         "call output(value) to return a result."
     ),
 )
-async def codemode(harness: Any, input_value: CodemodeInput) -> CodemodeOutput:
+async def codemode(
+    context: ToolCallContext, input_value: CodemodeInput
+) -> CodemodeOutput:
+    harness = context.harness
     tools = {
         tool.name: tool
         for tool in harness.iter_tools()
@@ -206,7 +209,9 @@ async def codemode(harness: Any, input_value: CodemodeInput) -> CodemodeOutput:
         harness.usage.tool_calls += 1
         harness._check_limit("max_tool_calls", harness.usage.tool_calls)
         arguments = _tool_arguments(tool, task.args, task.keyword_args)
-        output = await tool.execute(harness, arguments)
+        output = await tool.execute(
+            ToolCallContext(harness=harness, name=tool.name), arguments
+        )
         return output.model_dump(mode="json")
 
     runner = (
@@ -293,7 +298,8 @@ def create_codemode_tool(
         capability_map[capability_name] = capability
     scoped_capabilities = tuple(capabilities)
 
-    async def execute(harness: Any, input_value: CodemodeInput) -> CodemodeOutput:
+    async def execute(context: ToolCallContext, input_value: CodemodeInput) -> CodemodeOutput:
+        harness = context.harness
         source_size = len(input_value.code.encode("utf-8"))
         if source_size > limits.max_source_bytes:
             raise ValueError(
@@ -388,7 +394,10 @@ async def _execute_scoped_codemode(
                     f"{nested_calls} > {limits.max_nested_calls}"
                 )
             arguments = _tool_arguments(capability.tool, task.args, task.keyword_args)
-            output = await capability.tool.execute(harness, arguments)
+            output = await capability.tool.execute(
+                ToolCallContext(harness=harness, name=capability.tool.name, id=call_id),
+                arguments,
+            )
             projected = capability.result_adapter(capability.tool, output)
             if inspect.isawaitable(projected):
                 projected = await projected

@@ -9,7 +9,7 @@ from concurrent.futures import Executor, ThreadPoolExecutor
 from concurrent.futures import Future as ConcurrentFuture
 from multiprocessing import Pipe, Process
 from multiprocessing.connection import Connection
-from typing import Any, Callable, Coroutine
+from typing import Any, Awaitable, Callable, Coroutine
 
 import httpx
 import nucliadb_telemetry.metrics
@@ -32,7 +32,6 @@ from .model import (
 from .worker import PythonAgentWorker
 
 logger = logging.getLogger("hyperforge_codemode_sandbox")
-WORKER_CPU_LIMIT = 1
 WORKER_EXIT_TIMEOUT = 1
 CALLBACK_CANCEL_TIMEOUT = 1
 MAX_PACKET_BYTES = MAX_PROTOCOL_BYTES
@@ -55,6 +54,7 @@ class SandboxSettings(BaseSettings):
     sandbox_timeout_slack_seconds: float = Field(
         default=10.0, ge=0, allow_inf_nan=False
     )
+    sandbox_callback_wait_seconds: float = 1.0
 
     @field_validator("sandbox_socket_mode")
     @classmethod
@@ -93,8 +93,16 @@ class SandboxRunner:
         socket: str,
         callback: Callable[[RestrictedPythonTask], Coroutine[Any, Any, WorkerTypes]],
         debug: bool = False,
+        *,
+        token: str | Callable[[], str] | None = None,
     ) -> "SandboxRunner":
-        return cls(pool=None, socket=socket, callback=callback, debug=debug)
+        return cls(
+            pool=None,
+            socket=socket,
+            callback=callback,
+            debug=debug,
+            token=token,
+        )
 
     @classmethod
     def isolated_process(
@@ -111,12 +119,14 @@ class SandboxRunner:
         socket: str | None,
         callback: Callable[[RestrictedPythonTask], Coroutine[Any, Any, WorkerTypes]],
         debug: bool,
+        token: str | Callable[[], str] | None = None,
     ):
         self.pool = pool
         self.socket = socket
         self.callback = callback
         self.debug = debug
         self.isolated = False
+        self.token = token
         self._callback_tasks: set[asyncio.Task[WorkerTypes]] = set()
         self._callback_futures: dict[
             asyncio.Task[WorkerTypes], ConcurrentFuture[WorkerTypes]
@@ -211,14 +221,19 @@ class SandboxRunner:
             await asyncio.gather(controller_task, return_exceptions=True)
 
     async def _run_remotely(self, request: WorkerExecutionRequest):
-        if not settings.sandbox_token:
+        token_source = self.token
+        if token_source is None:
+            token = SandboxSettings().sandbox_token
+        elif isinstance(token_source, str):
+            token = token_source
+        else:
+            token = token_source()
+        if not token:
             raise RuntimeError("SANDBOX_TOKEN is required for remote codemode")
         rx, tx = await asyncio.open_unix_connection(self.socket)
         reader, writer = SandboxReader(rx), SandboxWriter(tx)
         try:
-            await writer.write_message(
-                SandboxMessage.Run(run=request, token=settings.sandbox_token)
-            )
+            await writer.write_message(SandboxMessage.Run(run=request, token=token))
             while True:
                 try:
                     msg = await reader.read_message()
@@ -485,9 +500,15 @@ class SandboxReader:
 
 
 class SandboxSession:
-    def __init__(self, reader: SandboxReader, writer: SandboxWriter):
+    def __init__(
+        self,
+        reader: SandboxReader,
+        writer: SandboxWriter,
+        callback_wait_seconds: float = 1.0,
+    ):
         self.reader = reader
         self.writer = writer
+        self.callback_wait_seconds = callback_wait_seconds
         self.runner = SandboxRunner(
             pool=None, socket=None, callback=self._callback, debug=False
         )
@@ -501,7 +522,7 @@ class SandboxSession:
         request = request.model_copy(update={"max_memory_bytes": memory})
         self.task, self.process = self.runner.run_in_process(request)
         try:
-            await self._start_timeout(WORKER_CPU_LIMIT)
+            await self._start_timeout(self.callback_wait_seconds)
             runtime = settings.sandbox_max_session_runtime_seconds
             if request.max_runtime_seconds is not None:
                 runtime = min(runtime, request.max_runtime_seconds)
@@ -559,7 +580,7 @@ class SandboxSession:
             return None
         if not isinstance(response, SandboxMessage.Response):
             raise RuntimeError("Unexpected sandbox protocol response")
-        await self._start_timeout(WORKER_CPU_LIMIT)
+        await self._start_timeout(self.callback_wait_seconds)
         return response.result
 
     async def _start_timeout(self, timeout: float):
@@ -583,13 +604,16 @@ agents_running = prometheus_client.Gauge(
 execution_observer = nucliadb_telemetry.metrics.Observer("arag_sandbox_execution")
 
 
-async def run_sandbox_server():
-    if settings.sandbox_socket is None:
+async def run_sandbox_server(
+    *, token_verifier: Callable[[str], Awaitable[bool]] | None = None
+):
+    server_settings = SandboxSettings()
+    if server_settings.sandbox_socket is None:
         raise RuntimeError("SANDBOX_SOCKET is required for the sandbox server")
-    sandbox_token = settings.sandbox_token
-    if not sandbox_token:
+    sandbox_token = server_settings.sandbox_token
+    if token_verifier is None and not sandbox_token:
         raise RuntimeError("SANDBOX_TOKEN is required for the sandbox server")
-    if settings.sandbox_verify:
+    if server_settings.sandbox_verify:
         _verify_connectivity()
 
     active_sessions = 0
@@ -610,18 +634,16 @@ async def run_sandbox_server():
                 msg = await reader.read_message()
                 if not isinstance(msg, SandboxMessage.Run):
                     raise ValueError("Expected a sandbox run request")
-                if not hmac.compare_digest(msg.token or "", sandbox_token):
+                token = msg.token or ""
+                valid_token = (
+                    await token_verifier(token)
+                    if token_verifier is not None
+                    else hmac.compare_digest(token, sandbox_token or "")
+                )
+                if not valid_token:
                     raise PermissionError("Invalid sandbox token")
-        except (
-            asyncio.IncompleteReadError,
-            KeyError,
-            PermissionError,
-            RecursionError,
-            TimeoutError,
-            TypeError,
-            ValueError,
-        ):
-            logger.warning("Rejected invalid sandbox connection")
+        except Exception as exc:
+            logger.warning("Rejected invalid sandbox connection: %r", exc)
             writer.close()
             await writer.wait_closed()
             return
@@ -642,7 +664,9 @@ async def run_sandbox_server():
         observation = execution_observer()
         observation.start()
         try:
-            session = SandboxSession(reader, writer)
+            session = SandboxSession(
+                reader, writer, SandboxSettings().sandbox_callback_wait_seconds
+            )
             await session.run(msg.run)
         except Exception as exc:
             observation.set_status("error")
@@ -655,13 +679,13 @@ async def run_sandbox_server():
             writer.close()
             await writer.wait_closed()
 
-    server = await asyncio.start_unix_server(handler, settings.sandbox_socket)
-    if settings.sandbox_socket_group is not None:
-        group: str | int = settings.sandbox_socket_group
-        if settings.sandbox_socket_group.isdecimal():
-            group = int(settings.sandbox_socket_group)
-        shutil.chown(settings.sandbox_socket, group=group)
-    os.chmod(settings.sandbox_socket, int(settings.sandbox_socket_mode, 8))
+    server = await asyncio.start_unix_server(handler, server_settings.sandbox_socket)
+    if server_settings.sandbox_socket_group is not None:
+        group: str | int = server_settings.sandbox_socket_group
+        if server_settings.sandbox_socket_group.isdecimal():
+            group = int(server_settings.sandbox_socket_group)
+        shutil.chown(server_settings.sandbox_socket, group=group)
+    os.chmod(server_settings.sandbox_socket, int(server_settings.sandbox_socket_mode, 8))
     async with server:
         await server.serve_forever()
 

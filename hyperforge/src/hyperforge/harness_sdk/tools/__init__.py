@@ -1,6 +1,7 @@
 from .utils import (
     ContextFactory,
     HarnessTool,
+    ToolCallContext,
     ToolHandler,
     ToolInheritancePolicy,
     tool,
@@ -9,6 +10,7 @@ from .utils import (
 __all__ = [
     "ContextFactory",
     "HarnessTool",
+    "ToolCallContext",
     "ToolHandler",
     "ToolInheritancePolicy",
     "tool",

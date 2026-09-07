@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from ..harness import AgentHarness
 
 type ToolHandler[InputT: BaseModel, OutputT: BaseModel] = Callable[
-    ["AgentHarness", InputT], Awaitable[OutputT]
+    [ToolCallContext, InputT], Awaitable[OutputT]
 ]
 type ContextFactory[OutputT: BaseModel] = Callable[[OutputT], HarnessContextReference]
 
@@ -25,6 +25,19 @@ type ContextFactory[OutputT: BaseModel] = Callable[[OutputT], HarnessContextRefe
 class ToolInheritancePolicy(StrEnum):
     INHERIT = "inherit"
     DO_NOT_INHERIT = "do_not_inherit"
+
+
+@dataclass(frozen=True)
+class ToolCallContext:
+    """Execution context passed to a tool handler.
+
+    Provides the harness along with the identity of the tool call
+    currently being executed.
+    """
+
+    harness: "AgentHarness"
+    name: str
+    id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -45,10 +58,11 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
         parameters = list(inspect.signature(self.handler).parameters.values())
         if len(parameters) != 2:
             raise TypeError(
-                f"Tool handler {self.name!r} must accept harness and input parameters"
+                f"Tool handler {self.name!r} must accept context and input parameters"
             )
         globalns = dict(getattr(self.handler, "__globals__", {}))
         globalns.setdefault("AgentHarness", object)
+        globalns.setdefault("ToolCallContext", ToolCallContext)
         hints = get_type_hints(self.handler, globalns=globalns)
         input_model = hints.get(parameters[1].name)
         output_model = hints.get("return")
@@ -72,12 +86,12 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
         return self._parameters
 
     def __call__(
-        self, harness: AgentHarness, input_value: InputT
+        self, context: ToolCallContext, input_value: InputT
     ) -> Awaitable[OutputT]:
-        return self.handler(harness, input_value)
+        return self.handler(context, input_value)
 
     async def execute(
-        self, harness: AgentHarness, arguments: dict[str, Any]
+        self, context: ToolCallContext, arguments: dict[str, Any]
     ) -> OutputT:
         if error := arguments.get("_tool_error"):
             raise ValueError(str(error))
@@ -92,7 +106,7 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
             value = self.input_model.model_validate(arguments)
         except ValidationError as exc:
             raise ValueError(f"Invalid {self.name} arguments: {exc}") from exc
-        result = await self.handler(harness, value)
+        result = await self.handler(context, value)
         return self.output_model.model_validate(result)
 
     def context(self, output: OutputT) -> HarnessContextReference:
@@ -135,6 +149,7 @@ def _is_model_type(value: Any) -> bool:
 __all__ = [
     "ContextFactory",
     "HarnessTool",
+    "ToolCallContext",
     "ToolHandler",
     "ToolInheritancePolicy",
     "tool",
