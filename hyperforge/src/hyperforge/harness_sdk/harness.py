@@ -14,6 +14,11 @@ from pydantic import BaseModel
 from .agents import published_agent_to_tools
 from .clients import ModelClient, ReasoningEffort
 from .context import format_context
+from .execution import (
+    current_tool_call_id,
+    reset_current_tool_call_id,
+    set_current_tool_call_id,
+)
 from .models import (
     HarnessConversation,
     HarnessEvent,
@@ -23,7 +28,7 @@ from .models import (
     HarnessToolCall,
 )
 from .storage import HarnessStorageProtocol, InMemoryHarnessStorage
-from .tools import HarnessTool
+from .tools import HarnessTool, ToolCallContext, ToolInheritancePolicy
 from .tools.core import DictOutput, SendMessageInput, SpawnAgentInput, create_core_tools
 from .usage import HarnessUsage, UsageLimitExceeded, UsageLimits
 
@@ -594,6 +599,7 @@ class AgentHarness:
             turn_id=self._turn_id,
             agent_id=self.agent_id,
             parent_agent_id=self.parent_agent_id,
+            parent_call_id=current_tool_call_id(),
             category=self.category,
             tags=self.tags,
             metadata=self._persisted_metadata(),
@@ -955,7 +961,8 @@ class AgentHarness:
     async def _execute_tool_call(self, call: HarnessToolCall) -> HarnessMessage:
         assert call.id is not None
         await self.emit(
-            HarnessEventType.TOOL_REQUESTED, {"call": call.model_dump(mode="json")}
+            HarnessEventType.TOOL_REQUESTED,
+            {"call": call.model_dump(mode="json")},
         )
         tool = self._tools.get(call.name)
         try:
@@ -965,7 +972,12 @@ class AgentHarness:
             elif tool.lazy_load and tool.name not in self._active_lazy_tools:
                 raise ValueError(f"Tool is not active: {call.name}")
             else:
-                output = await tool.execute(self, call.arguments)
+                context = ToolCallContext(harness=self, name=call.name, id=call.id)
+                token = set_current_tool_call_id(call.id)
+                try:
+                    output = await tool.execute(context, call.arguments)
+                finally:
+                    reset_current_tool_call_id(token)
                 result = output.model_dump(mode="json")
                 reference = tool.context(output)
                 content = format_context(reference)
@@ -1034,7 +1046,11 @@ class AgentHarness:
             model=self._config.model,
             model_client=self._config.model_client,
             reasoning_effort=self._config.reasoning_effort,
-            tools=self._config.tools,
+            tools=(
+                tool
+                for tool in self._config.tools
+                if tool.inheritance == ToolInheritancePolicy.INHERIT
+            ),
             system_prompt=self._config.system_prompt,
             title=self._config.title,
             conversation_id=self.conversation_id,

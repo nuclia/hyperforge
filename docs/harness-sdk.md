@@ -190,6 +190,193 @@ handlers always receive a validated model instance; they never receive `None`.
 Tools can attach typed context to their result by setting `context_type` and, if
 needed, registering a schema and formatter with `register_context()`.
 
+Tools are inherited by spawned sub-agents by default. Set
+`inheritance=ToolInheritancePolicy.DO_NOT_INHERIT` on `@tool` or `HarnessTool`
+when a tool must remain on the current agent. Scoped Code Mode tools use this
+policy by default.
+
+## Scoped Code Mode
+
+Use `create_codemode_tool()` when generated Python should orchestrate a small,
+explicit capability set without exposing those capabilities as top-level model
+tools. The capability list must be an immutable tuple. Scoped Code Mode never
+calls `harness.iter_tools()` and never includes core or external tools unless the
+caller explicitly passes them.
+
+```python
+from pydantic import BaseModel, Field
+
+from hyperforge.harness_sdk import (
+    AgentHarness,
+    CodeModeCapability,
+    CodeModeExecutionLimiter,
+    CodeModeLimits,
+    HarnessTool,
+    create_codemode_tool,
+    tool,
+)
+
+
+class SearchInput(BaseModel):
+    query: str = Field(description="Read-only catalog search query")
+
+
+class SearchOutput(BaseModel):
+    matches: list[dict[str, str]]
+    internal_cursor: str | None = None
+
+
+@tool(description="Search the approved catalog without modifying it.")
+async def search_catalog(
+    harness: AgentHarness,
+    input_value: SearchInput,
+) -> SearchOutput:
+    return SearchOutput(
+        matches=[{"id": "item-1", "title": input_value.query}],
+        internal_cursor="do-not-expose",
+    )
+
+
+def project_search_result(
+    capability: HarnessTool,
+    output: BaseModel,
+) -> dict[str, object]:
+    del capability
+    validated = SearchOutput.model_validate(output)
+    return {"matches": validated.matches}
+
+
+code_mode = create_codemode_tool(
+    capabilities=(
+        CodeModeCapability(
+            search_catalog,
+            result_adapter=project_search_result,
+        ),
+    ),
+    limits=CodeModeLimits(
+        max_source_bytes=64 * 1024,
+        max_result_bytes=256 * 1024,
+        max_cumulative_result_bytes=1024 * 1024,
+        max_output_bytes=256 * 1024,
+        max_nested_calls=10,
+    ),
+    execution_limiter=CodeModeExecutionLimiter(max_concurrent_executions=4),
+    remote_required=True,
+)
+
+agent = AgentHarness(
+    model="your-model",
+    model_client=model_client,
+    tools=[code_mode],
+)
+```
+
+Only `code_mode` is registered with the harness in this example.
+`search_catalog` is callable from generated code but is not advertised as a
+top-level model tool. The Code Mode tool description includes each capability's
+description and argument schema so the model can write valid calls. Nested
+arguments still pass through `HarnessTool.execute()`, including JSON Schema,
+Pydantic input, and output validation.
+
+Every `CodeModeCapability` has a result adapter. The safe default returns the
+tool's formatted model-facing context as a string. Prefer an application adapter,
+as above, when generated code needs selected structured fields. Projected values
+must contain only JSON worker values; the SDK rejects non-serializable values,
+non-finite numbers, and the reserved `__model__` transport key. Use
+`raw_codemode_result_adapter` only after explicitly deciding that the complete
+JSON-mode Pydantic output is safe for generated code. A raw adapter does not
+bypass serialization or result-size validation.
+
+Capability names must be public, non-keyword Python identifiers and must not
+conflict with worker names such as `codemode`, `output`, `save`, `question`,
+`agent_id`, `dataclass`, `Chunk`, `Context`, `List`, `Any`, or `Dict`.
+
+`CodeModeLimits` applies source, per-call projected-result, cumulative
+projected-result, final-output, and nested-call limits to each invocation.
+Values are measured as UTF-8 JSON bytes where applicable, and the cumulative
+cap must be at least the per-call cap. `CodeModeExecutionLimiter` provides
+fail-fast admission control. The default instance is process-wide; pass one
+shared application-owned instance to limit a particular run or group of tools.
+Existing runtime and memory limits remain configured through `UsageLimits`:
+
+```python
+from hyperforge.harness_sdk import UsageLimits
+
+usage_limits = UsageLimits(
+    max_tool_calls=20,
+    max_codemode_runtime_seconds=30,
+    max_codemode_memory_bytes=512 * 1024 * 1024,
+)
+```
+
+The normal `max_tool_calls` count includes the outer Code Mode call and every
+nested capability call exactly once. `max_nested_calls` independently bounds one
+generated program. Generated code must call `output(value)` with exactly one
+value, exactly once; a missing, empty, or repeated `output` call fails the
+invocation. The optional `question` input is exposed to generated code as the
+worker's `question` variable.
+
+Pass `runner=` to inject a custom `CodeModeRunner` for deterministic tests; the
+default runner uses the remote sandbox, or the isolated local process when
+`remote_required=False`. An injected runner bypasses the socket and token
+fail-closed checks and owns its callback lifecycle.
+
+Each nested call emits `TOOL_REQUESTED`, followed by `TOOL_COMPLETED` or
+`TOOL_FAILED`, with a stable call ID. Event payloads have `codemode=true`,
+`nested=true`, and the outer call's `parent_call_id`; `HarnessEvent` also stores
+`parent_call_id` as a first-class field. Arguments and projected results are
+sanitized, failure payloads contain only the exception type, and normal event
+fields preserve conversation, turn, agent, and parent-agent context. Scalar
+actor, tenant, and user identifiers from `execution_context` are copied into the
+nested payload.
+
+The existing exported `codemode` tool remains available for compatibility. It
+discovers registered tools and returns raw JSON-mode outputs. New applications
+that require capability isolation should use `create_codemode_tool()`.
+
+### Code Mode Security
+
+RestrictedPython reduces the available Python language surface. It is not a
+security boundary. Production generated-code execution requires a separately
+isolated OS process or container with a dedicated non-root identity, no network,
+a read-only or minimal filesystem, dropped capabilities, no privilege
+escalation, seccomp or an equivalent syscall policy, and CPU, memory, PID,
+file-descriptor, and wall-clock limits. Keep the API process outside that
+boundary.
+
+Scoped Code Mode defaults to `remote_required=True`. It fails closed when
+`SANDBOX_SOCKET` is absent and never silently falls back to local execution.
+Remote clients and the sandbox service both require a non-empty
+`SANDBOX_TOKEN`; the Unix socket ACL is an additional control, not a replacement
+for token authentication. `remote_required=False` enables the isolated local
+process and is intended only for deterministic tests and explicitly trusted
+development environments.
+
+Sandbox deployment settings use secure defaults:
+
+- `SANDBOX_MAX_CONCURRENT_SESSIONS=4` bounds authenticated worker sessions and
+  concurrent authentication handshakes.
+- `SANDBOX_MAX_SESSION_RUNTIME_SECONDS=60` and
+  `SANDBOX_MAX_SESSION_MEMORY_BYTES=536870912` impose server-owned ceilings even
+  when a client omits limits. The remote client also bounds each connection by
+  the requested runtime (or the session ceiling when no runtime is requested)
+  plus `SANDBOX_TIMEOUT_SLACK_SECONDS=10`, so a hung sandbox cannot stall a
+  caller indefinitely.
+- `SANDBOX_SOCKET_MODE=0600` restricts the socket to its owner.
+- `SANDBOX_SOCKET_GROUP` optionally changes group ownership. Use an explicitly
+  provisioned shared group with `SANDBOX_SOCKET_MODE=0660` when the API and
+  sandbox run as different non-root users.
+- `SANDBOX_METRICS_ENABLED=false` avoids creating an IP listener. If enabled,
+  `SANDBOX_METRICS_HOST` defaults to `127.0.0.1` and
+  `SANDBOX_METRICS_PORT` defaults to `8091`.
+- Local process IPC and remote length-prefixed JSON messages are bounded;
+  oversized run requests, callbacks, responses, and frames are rejected.
+
+Place the socket in a dedicated directory writable only by the sandbox identity
+and, when configured, the shared group. Provision the directory and group before
+startup; do not make the socket or parent directory world-writable. Rotate
+`SANDBOX_TOKEN` as a secret and restart both peers together during rotation.
+
 ## Usage Limits
 
 All limits are disabled by default. Configure only the limits needed by the
@@ -301,8 +488,10 @@ publication never waits for the consumer. If the consumer falls behind by
 `event_queue_size` events, additional `TEXT_DELTA` and `REASONING_DELTA` events
 are dropped; persisted lifecycle events remain lossless. Events from child agents
 may interleave, but `turn_id`, `agent_id`, and `parent_agent_id` identify their
-origin. Use `async with agent` when a caller may stop consuming early so the
-active turn and descendants are cleaned up.
+origin. Events emitted inside a tool call also carry its `parent_call_id`;
+parallel calls use task-local call context and do not overwrite one another. Use
+`async with agent` when a caller may stop consuming early so the active turn and
+descendants are cleaned up.
 
 At most four agents run concurrently in a conversation by default, including
 the root agent. Configure `max_concurrent_agents` to change this limit. When the
@@ -376,10 +565,11 @@ implementation is responsible for enforcing tenant and user isolation.
 
 The model can call `spawn_agent` with a self-contained prompt, then call
 `wait_agent` with the returned internal ID. It can use `send_message` to steer a
-running child. Children inherit the model client, model, external tools,
-execution context, storage, and usage limits. They start with isolated history
-unless `include_history=true` is requested. Included history contains the current
-system and user messages but never an incomplete spawn tool exchange.
+running child. Children inherit the model client, model, external tools whose
+inheritance policy is `INHERIT`, execution context, storage, and usage limits.
+They start with isolated history unless `include_history=true` is requested.
+Included history contains the current system and user messages but never an
+incomplete spawn tool exchange.
 
 Delegation is limited to depth one by default. Set `max_spawn_depth` on the
 root harness to change the limit; an agent at the limit does not advertise the

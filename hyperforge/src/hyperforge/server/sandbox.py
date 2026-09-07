@@ -22,20 +22,21 @@ def set_sentry(zone: str, environment: str, sentry_url: str):
     sentry_sdk.set_tag("zone", zone)
 
 
-async def run_metrics_server(port: int):
+async def run_metrics_server(host: str, port: int):
     import uvicorn
 
-    config = uvicorn.Config(
-        application_metrics, host="0.0.0.0", port=port, log_level="info"
-    )
+    config = uvicorn.Config(application_metrics, host=host, port=port, log_level="info")
     server = uvicorn.Server(config)
     await server.serve()
 
 
-async def run_servers(metrics_port: int) -> None:
+async def run_servers(
+    *, metrics_enabled: bool, metrics_host: str, metrics_port: int
+) -> None:
     async with asyncio.TaskGroup() as tasks:
-        tasks.create_task(run_metrics_server(metrics_port))
         tasks.create_task(sandbox.run_sandbox_server())
+        if metrics_enabled:
+            tasks.create_task(run_metrics_server(metrics_host, metrics_port))
 
 
 def run():  # pragma: no cover
@@ -57,6 +58,12 @@ def run():  # pragma: no cover
 
     if sandbox_settings.sandbox_socket is None:
         raise RuntimeError("SANDBOX_SOCKET is required for the sandbox server")
-    if sandbox_settings.sandbox_token is None:
+    if not sandbox_settings.sandbox_token:
         raise RuntimeError("SANDBOX_TOKEN is required for the sandbox server")
-    asyncio.run(run_servers(sandbox_settings.sandbox_metrics_port))
+    asyncio.run(
+        run_servers(
+            metrics_enabled=sandbox_settings.sandbox_metrics_enabled,
+            metrics_host=sandbox_settings.sandbox_metrics_host,
+            metrics_port=sandbox_settings.sandbox_metrics_port,
+        )
+    )
