@@ -753,7 +753,13 @@ async def test_a2a_client_agent_answers_nested_remote_feedback(
         responses = iter(["EMEA", "Germany"])
 
         async def answer_feedback(feedback):
-            requested_feedback.append((feedback.feedback_id, feedback.question))
+            requested_feedback.append(
+                (
+                    feedback.feedback_id,
+                    feedback.data["a2a_feedback_id"],
+                    feedback.question,
+                )
+            )
             return UserToAgentInteraction(
                 request_id=feedback.request_id, response=next(responses)
             )
@@ -767,10 +773,15 @@ async def test_a2a_client_agent_answers_nested_remote_feedback(
     finally:
         await server.stop(grace=1)
 
-    assert requested_feedback == [
+    assert [feedback[1:] for feedback in requested_feedback] == [
         ("feedback-1", "Which region should I use?"),
         ("feedback-2", "Which country should I use?"),
     ]
+    assert len({feedback[0] for feedback in requested_feedback}) == 2
+    assert all(
+        feedback[0] not in {"feedback-1", "feedback-2"}
+        for feedback in requested_feedback
+    )
     assert captured == [("request-1", "EMEA"), ("request-2", "Germany")]
     assert context.summary == "Using Germany in EMEA"
     assert [chunk.text for chunk in context.chunks] == ["Using Germany in EMEA"]
