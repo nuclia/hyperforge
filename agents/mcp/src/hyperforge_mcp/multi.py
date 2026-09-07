@@ -296,7 +296,11 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
             global_input_tokens += input_tokens
             global_output_tokens += output_tokens
             self.main_agent.tools.append(
-                types.Tool(name=agent.config.id, description=response, inputSchema={})
+                types.Tool(
+                    name=agent.config.id,
+                    description=response,
+                    inputSchema={"type": "object", "properties": {}},
+                )
             )
 
             response, input_tokens, output_tokens = await self.summarize_prompts(
