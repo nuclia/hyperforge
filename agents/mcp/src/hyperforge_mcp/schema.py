@@ -1,6 +1,16 @@
 from copy import deepcopy
 from typing import Any
 
+JSON_SCHEMA_TYPES = {
+    "array",
+    "boolean",
+    "integer",
+    "null",
+    "number",
+    "object",
+    "string",
+}
+
 
 class IncompatibleToolSchema(ValueError):
     def __init__(self, path: tuple[str, ...], reason: str) -> None:
@@ -21,11 +31,16 @@ def normalize_tool_schema(schema: dict[str, Any]) -> dict[str, Any]:
     """Return an LLM-compatible copy of an MCP tool input schema."""
     if not isinstance(schema, dict):
         raise IncompatibleToolSchema((), "schema must be an object")
+    if not schema:
+        return {"type": "object", "properties": {}}
 
     root = deepcopy(schema)
     normalized = _normalize_schema(root, root, (), ())
-    normalized.pop("$defs", None)
-    normalized.pop("definitions", None)
+    dangling_reference = _find_reference(normalized)
+    if dangling_reference is not None:
+        raise IncompatibleToolSchema(
+            dangling_reference, "reference in unsupported schema container"
+        )
     return normalized
 
 
@@ -49,22 +64,32 @@ def _normalize_schema(
             raise IncompatibleToolSchema(path + ("$ref",), "cyclic local reference")
         target = _resolve_reference(root, reference, path + ("$ref",))
         resolved = _normalize_schema(target, root, path, resolving + (reference,))
-        resolved.update(current)
-        current = resolved
+        if current:
+            siblings = _normalize_schema(current, root, path, resolving + (reference,))
+            current = {"allOf": [resolved, siblings]}
+        else:
+            current = resolved
 
-    properties = current.get("properties")
-    if properties is not None:
-        if not isinstance(properties, dict):
-            raise IncompatibleToolSchema(path + ("properties",), "must be an object")
-        current["properties"] = {
-            name: _normalize_schema(child, root, path + ("properties", name), resolving)
-            for name, child in properties.items()
-        }
+    for keyword in ("properties", "patternProperties", "dependentSchemas"):
+        _normalize_schema_map(current, keyword, root, path, resolving)
 
-    if "items" in current:
-        current["items"] = _normalize_schema(
-            current["items"], root, path + ("items",), resolving
-        )
+    for keyword in (
+        "items",
+        "contains",
+        "not",
+        "propertyNames",
+        "if",
+        "then",
+        "else",
+        "unevaluatedItems",
+    ):
+        _normalize_schema_value(current, keyword, root, path, resolving)
+
+    for keyword in ("additionalProperties", "unevaluatedProperties"):
+        if keyword in current and not isinstance(current[keyword], bool):
+            _normalize_schema_value(current, keyword, root, path, resolving)
+
+    _normalize_schema_list(current, "prefixItems", root, path, resolving)
 
     for keyword in ("allOf", "anyOf", "oneOf"):
         alternatives = current.get(keyword)
@@ -79,6 +104,9 @@ def _normalize_schema(
             for index, alternative in enumerate(alternatives)
         ]
 
+    if "type" in current:
+        _validate_type(current["type"], path + ("type",))
+
     if "type" not in current and not any(
         keyword in current for keyword in ("allOf", "anyOf", "oneOf")
     ):
@@ -89,7 +117,92 @@ def _normalize_schema(
             )
         current["type"] = inferred_type
 
+    current.pop("$defs", None)
+    current.pop("definitions", None)
     return current
+
+
+def _validate_type(value: Any, path: tuple[str, ...]) -> None:
+    if isinstance(value, str):
+        valid = value in JSON_SCHEMA_TYPES
+    elif isinstance(value, list):
+        valid = (
+            bool(value)
+            and all(
+                isinstance(item, str) and item in JSON_SCHEMA_TYPES for item in value
+            )
+            and len(value) == len(set(value))
+        )
+    else:
+        valid = False
+
+    if not valid:
+        raise IncompatibleToolSchema(path, "invalid JSON Schema type")
+
+
+def _normalize_schema_value(
+    schema: dict[str, Any],
+    keyword: str,
+    root: dict[str, Any],
+    path: tuple[str, ...],
+    resolving: tuple[str, ...],
+) -> None:
+    if keyword in schema:
+        schema[keyword] = _normalize_schema(
+            schema[keyword], root, path + (keyword,), resolving
+        )
+
+
+def _normalize_schema_map(
+    schema: dict[str, Any],
+    keyword: str,
+    root: dict[str, Any],
+    path: tuple[str, ...],
+    resolving: tuple[str, ...],
+) -> None:
+    values = schema.get(keyword)
+    if values is None:
+        return
+    if not isinstance(values, dict):
+        raise IncompatibleToolSchema(path + (keyword,), "must be an object")
+    schema[keyword] = {
+        name: _normalize_schema(value, root, path + (keyword, name), resolving)
+        for name, value in values.items()
+    }
+
+
+def _normalize_schema_list(
+    schema: dict[str, Any],
+    keyword: str,
+    root: dict[str, Any],
+    path: tuple[str, ...],
+    resolving: tuple[str, ...],
+) -> None:
+    values = schema.get(keyword)
+    if values is None:
+        return
+    if not isinstance(values, list):
+        raise IncompatibleToolSchema(path + (keyword,), "must be an array")
+    schema[keyword] = [
+        _normalize_schema(value, root, path + (keyword, str(index)), resolving)
+        for index, value in enumerate(values)
+    ]
+
+
+def _find_reference(value: Any, path: tuple[str, ...] = ()) -> tuple[str, ...] | None:
+    if isinstance(value, dict):
+        if "$ref" in value:
+            return path + ("$ref",)
+        for key, child in value.items():
+            found = _find_reference(child, path + (key,))
+            if found is not None:
+                return found
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            found = _find_reference(child, path + (str(index),))
+            if found is not None:
+                return found
+    return None
 
 
 def _resolve_reference(

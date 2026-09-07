@@ -8,6 +8,40 @@ from hyperforge_mcp.config import MCPAgentConfig
 from hyperforge_mcp.schema import IncompatibleToolSchema, normalize_tool_schema
 
 
+def test_normalize_empty_root_schema_as_no_argument_object():
+    assert normalize_tool_schema({}) == {"type": "object", "properties": {}}
+
+
+def test_normalize_tool_schema_rejects_empty_nested_property():
+    with pytest.raises(IncompatibleToolSchema) as exc_info:
+        normalize_tool_schema({"type": "object", "properties": {"value": {}}})
+
+    assert exc_info.value.json_path == "/properties/value"
+
+
+@pytest.mark.parametrize(
+    "declared_type",
+    [42, "unknown", [], ["string", "unknown"], ["string", "string"]],
+)
+def test_normalize_tool_schema_rejects_invalid_declared_type(declared_type):
+    with pytest.raises(IncompatibleToolSchema) as exc_info:
+        normalize_tool_schema(
+            {
+                "type": "object",
+                "properties": {"value": {"type": declared_type}},
+            }
+        )
+
+    assert exc_info.value.json_path == "/properties/value/type"
+    assert exc_info.value.reason == "invalid JSON Schema type"
+
+
+def test_normalize_tool_schema_preserves_type_union():
+    schema = {"type": "object", "properties": {"value": {"type": ["string", "null"]}}}
+
+    assert normalize_tool_schema(schema) == schema
+
+
 def test_normalize_tool_schema_preserves_nested_constraints_and_resolves_refs():
     schema = {
         "type": "object",
@@ -50,6 +84,83 @@ def test_normalize_tool_schema_preserves_nested_constraints_and_resolves_refs():
         "minItems": 1,
         "maxItems": 10,
     }
+
+
+def test_normalize_ref_with_siblings_preserves_conjunction():
+    normalized = normalize_tool_schema(
+        {
+            "type": "object",
+            "$defs": {
+                "Target": {
+                    "type": "object",
+                    "properties": {"from_target": {"type": "string"}},
+                    "required": ["from_target"],
+                }
+            },
+            "properties": {
+                "value": {
+                    "$ref": "#/$defs/Target",
+                    "type": "object",
+                    "properties": {"from_sibling": {"type": "integer"}},
+                    "required": ["from_sibling"],
+                }
+            },
+        }
+    )
+
+    assert normalized["properties"]["value"] == {
+        "allOf": [
+            {
+                "type": "object",
+                "properties": {"from_target": {"type": "string"}},
+                "required": ["from_target"],
+            },
+            {
+                "type": "object",
+                "properties": {"from_sibling": {"type": "integer"}},
+                "required": ["from_sibling"],
+            },
+        ]
+    }
+
+
+def test_normalize_refs_in_schema_containers():
+    normalized = normalize_tool_schema(
+        {
+            "type": "object",
+            "$defs": {"Value": {"type": "string", "minLength": 1}},
+            "additionalProperties": {"$ref": "#/$defs/Value"},
+            "patternProperties": {
+                "^x-": {"$ref": "#/$defs/Value"},
+            },
+            "dependentSchemas": {
+                "kind": {
+                    "type": "object",
+                    "properties": {"value": {"$ref": "#/$defs/Value"}},
+                }
+            },
+        }
+    )
+
+    value_schema = {"type": "string", "minLength": 1}
+    assert normalized["additionalProperties"] == value_schema
+    assert normalized["patternProperties"]["^x-"] == value_schema
+    assert normalized["dependentSchemas"]["kind"]["properties"]["value"] == value_schema
+    assert "$defs" not in normalized
+
+
+def test_rejects_reference_in_unsupported_schema_container():
+    with pytest.raises(IncompatibleToolSchema) as exc_info:
+        normalize_tool_schema(
+            {
+                "type": "object",
+                "$defs": {"Value": {"type": "string"}},
+                "customSchema": {"$ref": "#/$defs/Value"},
+            }
+        )
+
+    assert exc_info.value.json_path == "/customSchema/$ref"
+    assert exc_info.value.reason == "reference in unsupported schema container"
 
 
 @pytest.mark.parametrize(
