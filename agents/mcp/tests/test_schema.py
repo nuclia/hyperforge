@@ -1,5 +1,6 @@
 import logging
 from types import SimpleNamespace
+from unittest.mock import AsyncMock
 
 import pytest
 from mcp import types
@@ -174,7 +175,16 @@ def test_normalize_ref_with_annotation_siblings():
 
 @pytest.mark.parametrize(
     "keyword",
-    ["allOf", "oneOf", "patternProperties", "dependentSchemas", "contains", "const"],
+    [
+        "allOf",
+        "oneOf",
+        "patternProperties",
+        "dependentSchemas",
+        "contains",
+        "const",
+        "exclusiveMinimum",
+        "exclusiveMaximum",
+    ],
 )
 def test_unsupported_provider_keyword_is_rejected(keyword):
     with pytest.raises(IncompatibleToolSchema) as exc_info:
@@ -284,6 +294,7 @@ def test_incompatible_tool_is_isolated_with_diagnostics(caplog):
     assert "server='mcphttp-01'" in caplog.text
     assert "tool='getFieldValuesFiltered'" in caplog.text
     assert "path='/properties/filters/items/properties/value'" in caplog.text
+    assert "reason='schema must declare or imply a supported type'" in caplog.text
 
 
 async def test_choose_tool_only_sends_compatible_tools_to_nua():
@@ -292,19 +303,30 @@ async def test_choose_tool_only_sends_compatible_tools_to_nua():
             {"id": "mcp-test", "module": "mcp", "source": "mcphttp-01"}
         )
     )
-    agent.tools = [
-        types.Tool(
-            name="invalid",
-            inputSchema={"type": "object", "properties": {"value": {}}},
-        ),
-        types.Tool(
-            name="valid",
-            inputSchema={
-                "type": "object",
-                "properties": {"query": {"type": "string"}},
-            },
-        ),
-    ]
+    agent.session = SimpleNamespace(
+        list_tools=AsyncMock(
+            return_value=SimpleNamespace(
+                tools=[
+                    types.Tool(
+                        name="invalid",
+                        inputSchema={
+                            "type": "object",
+                            "properties": {"value": {}},
+                        },
+                    ),
+                    types.Tool(
+                        name="valid",
+                        inputSchema={
+                            "type": "object",
+                            "properties": {"query": {"type": "string"}},
+                        },
+                    ),
+                ],
+                nextCursor=None,
+            )
+        )
+    )
+    await agent.preload_tools()
     captured_items = []
 
     async def execute_raw(item, tracking=None):

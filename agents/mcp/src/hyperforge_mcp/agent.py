@@ -371,7 +371,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                 description=mtl.description or "",
                 parameters=mtl.inputSchema,
             )
-            for mtl in self._compatible_tools(self.tools)
+            for mtl in self.tools
         ]
         tools.extend(extra_tools)
         logger.debug(f"Available tools: {tools}")
@@ -1187,14 +1187,13 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         # Context: There are many tools available for a user. However, the number of tools can be large, and it is not always practical to present all of them at once. We need to create a summary of them that accurately reflects the capabilities they provide.
         # The user presents you with the tools available to them, and you must create a summary of the tools that is accurate and comprehensive. The summary should include the capabilities of the tools and when they should be used.
 
-        self.tools.extend(tools.tools)
+        self.tools.extend(self._compatible_tools(tools.tools))
         while tools.nextCursor:
             params: types.PaginatedRequestParams = types.PaginatedRequestParams(
                 cursor=tools.nextCursor
             )
             tools = await self.session.list_tools(params=params)
-            self.tools.extend(tools.tools)
-        self.tools = self._compatible_tools(self.tools)
+            self.tools.extend(self._compatible_tools(tools.tools))
 
     async def preload_prompts(self):
         if self.session is None:

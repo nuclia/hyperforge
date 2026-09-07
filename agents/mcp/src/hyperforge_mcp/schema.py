@@ -17,15 +17,15 @@ IGNORED_ANNOTATION_KEYWORDS = {
     "readOnly",
     "writeOnly",
 }
-SCHEMA_MAP_KEYWORDS = {"properties"}
-SCHEMA_VALUE_KEYWORDS = {"additionalProperties", "items"}
-SCHEMA_LIST_KEYWORDS = {"anyOf"}
-SUPPORTED_KEYWORDS = (
+NUA_SCHEMA_MAP_KEYWORDS = {"properties"}
+NUA_SCHEMA_VALUE_KEYWORDS = {"additionalProperties", "items"}
+NUA_SCHEMA_LIST_KEYWORDS = {"anyOf"}
+NUA_COMMON_KEYWORDS = (
     ANNOTATION_KEYWORDS
     | IGNORED_ANNOTATION_KEYWORDS
-    | SCHEMA_MAP_KEYWORDS
-    | SCHEMA_VALUE_KEYWORDS
-    | SCHEMA_LIST_KEYWORDS
+    | NUA_SCHEMA_MAP_KEYWORDS
+    | NUA_SCHEMA_VALUE_KEYWORDS
+    | NUA_SCHEMA_LIST_KEYWORDS
     | {
         "$defs",
         "$id",
@@ -33,8 +33,6 @@ SUPPORTED_KEYWORDS = (
         "$schema",
         "definitions",
         "enum",
-        "exclusiveMaximum",
-        "exclusiveMinimum",
         "format",
         "maxItems",
         "maxLength",
@@ -95,7 +93,7 @@ def _normalize_schema(
     for keyword in IGNORED_ANNOTATION_KEYWORDS:
         current.pop(keyword, None)
     unsupported = next(
-        (keyword for keyword in current if keyword not in SUPPORTED_KEYWORDS), None
+        (keyword for keyword in current if keyword not in NUA_COMMON_KEYWORDS), None
     )
     if unsupported is not None:
         raise IncompatibleToolSchema(
@@ -127,7 +125,7 @@ def _normalize_schema(
         current = resolved
         current.update(annotations)
 
-    for keyword in SCHEMA_MAP_KEYWORDS:
+    for keyword in NUA_SCHEMA_MAP_KEYWORDS:
         _normalize_schema_map(current, keyword, root, path, resolving)
 
     _normalize_schema_value(current, "items", root, path, resolving)
@@ -136,7 +134,7 @@ def _normalize_schema(
     ):
         _normalize_schema_value(current, "additionalProperties", root, path, resolving)
 
-    for keyword in SCHEMA_LIST_KEYWORDS:
+    for keyword in NUA_SCHEMA_LIST_KEYWORDS:
         alternatives = current.get(keyword)
         if alternatives is None:
             continue
@@ -228,7 +226,7 @@ def _validate_keyword_values(schema: dict[str, Any], path: tuple[str, ...]) -> N
                 path + (keyword,), "must be a non-negative integer"
             )
 
-    for keyword in ("minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum"):
+    for keyword in ("minimum", "maximum"):
         if keyword in schema and (
             not isinstance(schema[keyword], (int, float))
             or isinstance(schema[keyword], bool)
