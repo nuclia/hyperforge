@@ -80,7 +80,7 @@ def _normalize_schema(
             if keyword in ANNOTATION_KEYWORDS
         }
         if current:
-            siblings = _normalize_schema(current, root, path, resolving + (reference,))
+            siblings = _normalize_schema(current, root, path, resolving)
             current = {"allOf": [resolved, siblings]}
         else:
             current = resolved

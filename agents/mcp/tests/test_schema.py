@@ -174,6 +174,28 @@ def test_normalize_ref_with_annotations_and_validation_siblings():
     }
 
 
+def test_repeated_reference_in_sibling_is_not_cyclic():
+    normalized = normalize_tool_schema(
+        {
+            "type": "object",
+            "$defs": {"Value": {"type": "string"}},
+            "properties": {
+                "value": {
+                    "$ref": "#/$defs/Value",
+                    "allOf": [{"$ref": "#/$defs/Value"}],
+                }
+            },
+        }
+    )
+
+    assert normalized["properties"]["value"] == {
+        "allOf": [
+            {"type": "string"},
+            {"allOf": [{"type": "string"}]},
+        ]
+    }
+
+
 def test_normalize_refs_in_schema_containers():
     normalized = normalize_tool_schema(
         {
