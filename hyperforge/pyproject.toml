@@ -24,7 +24,7 @@ dependencies = [
     "nucliadb-telemetry[otel]>=6.15.0",
     "hyperforge-restricted",
     "pydantic_settings",
-    "mcp>=1.26.0",
+    "mcp>=1.29.1,<2",
     "prometheus_client",
     "mrflagly>=0.2.11",
     "aiodns",
