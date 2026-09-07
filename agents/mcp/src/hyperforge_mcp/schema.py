@@ -42,13 +42,13 @@ def _normalize_schema(
     reference = current.pop("$ref", None)
     if reference is not None:
         if not isinstance(reference, str) or not reference.startswith("#/"):
-            raise IncompatibleToolSchema(path + ("$ref",), "only local references are supported")
+            raise IncompatibleToolSchema(
+                path + ("$ref",), "only local references are supported"
+            )
         if reference in resolving:
             raise IncompatibleToolSchema(path + ("$ref",), "cyclic local reference")
         target = _resolve_reference(root, reference, path + ("$ref",))
-        resolved = _normalize_schema(
-            target, root, path, resolving + (reference,)
-        )
+        resolved = _normalize_schema(target, root, path, resolving + (reference,))
         resolved.update(current)
         current = resolved
 
@@ -57,9 +57,7 @@ def _normalize_schema(
         if not isinstance(properties, dict):
             raise IncompatibleToolSchema(path + ("properties",), "must be an object")
         current["properties"] = {
-            name: _normalize_schema(
-                child, root, path + ("properties", name), resolving
-            )
+            name: _normalize_schema(child, root, path + ("properties", name), resolving)
             for name, child in properties.items()
         }
 
@@ -101,7 +99,9 @@ def _resolve_reference(
     for encoded_part in reference[2:].split("/"):
         part = encoded_part.replace("~1", "/").replace("~0", "~")
         if not isinstance(target, dict) or part not in target:
-            raise IncompatibleToolSchema(path, f"unresolved local reference {reference!r}")
+            raise IncompatibleToolSchema(
+                path, f"unresolved local reference {reference!r}"
+            )
         target = target[part]
     if not isinstance(target, dict):
         raise IncompatibleToolSchema(path, "local reference must resolve to an object")
