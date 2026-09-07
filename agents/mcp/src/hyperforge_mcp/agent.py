@@ -147,7 +147,6 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         if self.session is None:
             raise Exception("MCP session not initialized")
         t0 = time()
-        description = "Choose a tool for the task"
         messages = []
         images: List[Any] = []
         audios = []
@@ -205,15 +204,21 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                             "type": "string",
                             "description": "id of the prompt to use",
                         },
+                        "reason": {
+                            "type": "string",
+                            "description": "reason for selecting the prompt",
+                        },
                     },
                 },
                 tracking=memory.get_tracking_info(),
             )
+
             prompt_id: str = resp["prompt_id"]
+            reason: str = resp["reason"]
             await memory.add_step(
                 step_module=self.config.module,
                 step_title=self.step_title("Prompt selection"),
-                step_reason="",
+                step_reason=reason,
                 step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
                 step_value="mcp prompt selected: " + prompt_id
                 if prompt_id
@@ -257,7 +262,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                     step_title=self.step_title("Prompt arguments"),
                     step_reason="",
                     step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
-                    step_value="mcp_no_feedback_arguments",
+                    step_value=json.dumps(resp),
                     timeit=time() - t0,
                     input_nuclia_tokens=input_tokens,
                     output_nuclia_tokens=output_tokens,
@@ -274,13 +279,8 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
 
             logger.debug("No user feedback received, continuing without it")
 
-        description = (
-            final_prompt.description
-            if final_prompt and final_prompt.description
-            else "No description available"
-        )
         if final_prompt:
-            description += " Any partial answer or summary should  use the information in the prompt."
+            # Append the selected prompt to the context after processing all message contents so summarize can have access to it
             selected_prompt = Prompt(
                 prompt="",
                 description=final_prompt.description,
@@ -344,24 +344,35 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                                 b64encoded=message.content.resource.blob,
                             )
                         )
+            # Append the selected prompt to the context after processing all message contents so summarize can have access to it
             context.prompts.append(selected_prompt)
 
-        await memory.add_step(
-            step_module=self.config.module,
-            step_title=self.step_title("Prompt completion"),
-            step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
-            step_value=description,
-            timeit=time() - t0,
-        )
+            await memory.add_step(
+                step_module=self.config.module,
+                step_title=self.step_title("Prompt selected"),
+                step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
+                step_value=final_prompt.description,
+                timeit=time() - t0,
+            )
+        else:
+            await memory.add_step(
+                step_module=self.config.module,
+                step_title=self.step_title("No prompt selected"),
+                step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
+                step_value="",
+                timeit=time() - t0,
+            )
         return messages, images
 
     async def choose_tool(
         self,
         manager: Manager,
+        memory: QuestionMemory,
         images: List[Image],
         messages: List[Message],
         extra_tools: List[Tool] = [],
         tracking: TrackingInfo | None = None,
+        system: Optional[str] = None,
     ) -> Tuple[GenerativeFullResponse, float, float]:
         # Convert MCP tools into a format the LLM can understand and use
         tools = [
@@ -388,11 +399,34 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                 prompt="Choose the best tool or tools for the task, select task_complete if no more tools are needed according to the user request and previous interactions"
             ),
             format_prompt=False,
-            system=SIMPLE_TOOL_CHOICE_PROMPT,
+            system=system or SIMPLE_TOOL_CHOICE_PROMPT,
             chat_history=messages,
         )
-        resp, input_tokens, output_tokens = await manager.execute_raw(
-            item, tracking=tracking
+        try:
+            resp, input_tokens, output_tokens = await manager.execute_raw(
+                item, tracking=tracking
+            )
+        except Exception as e:
+            logger.error(f"Error choosing tool: {e}")
+            await memory.add_step(
+                step_module=self.config.module,
+                step_title=self.step_title("Error on tool choose:"),
+                step_reason="Error on Parsing the tools at LLM side",
+                step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
+                error=str(e),
+                timeit=0,
+            )
+            raise
+
+        await memory.add_step(
+            step_module=self.config.module,
+            step_title=self.step_title("Chosen tool:"),
+            step_reason="Chosen tool at LLM side",
+            step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
+            step_value=f"*{', '.join(resp.tools.keys() if resp.tools else [])}* {resp.reasoning}",
+            input_nuclia_tokens=input_tokens,
+            output_nuclia_tokens=output_tokens,
+            timeit=0,
         )
 
         logger.debug(f"Tool and parameters to use: {resp}")
@@ -424,6 +458,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         messages: List[Message],
         images: List[Image],
         session: Optional[ClientSession] = None,
+        mutation_tools: list[str] = [],
     ) -> None:
         active_session = session or self.session
         if active_session is None:
@@ -483,6 +518,9 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             progress_callback=progress_callback_memory,
         )
         logger.debug(f"Tool {tool_name} results: {tool_result}")
+
+        if tool_name in mutation_tools:
+            logger.debug(f"Tool {tool_name} is a mutation tool")
 
         if tool_result.isError:
             # Extract error text from content blocks; fall back to meta if none present
@@ -694,16 +732,11 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
 
         messages.append(Message(author=Author.NUCLIA, text="\n".join(trace_lines)))
 
-        step_value = (
-            f"Used tool: {tool_name} with arguments: {tool_arguments}"
-            if tool_arguments
-            else "No tool used"
-        )
         await memory.add_step(
             step_module=self.config.module,
             step_title=self.step_title("Tool result"),
             step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
-            step_value=step_value,
+            step_value=f"Used tool: {tool_name} ",
             timeit=time() - t0,
         )
 
@@ -939,7 +972,13 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         )
 
     async def mcp_interaction(
-        self, memory: QuestionMemory, manager: Manager, question: str, context: Context
+        self,
+        memory: QuestionMemory,
+        manager: Manager,
+        question: str,
+        context: Context,
+        system: Optional[str] = None,
+        mutation_tools: list[str] = [],
     ) -> Tuple[float, float]:
         """
         Interact with the MCP server to get the context for the question.
@@ -953,17 +992,24 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         )
         resp, input_tokens, output_tokens = await self.choose_tool(
             manager,
+            memory,
             images,
             messages,
             tracking=memory.get_tracking_info(),
         )
-
         total_input_tokens += input_tokens
         total_output_tokens += output_tokens
         tool_calls = list(iterate_tools_resp(resp))
+
         for tool_name, tool_arguments in tool_calls:
             await self.process_tool(
-                memory, tool_name, tool_arguments, context, messages, images
+                memory,
+                tool_name,
+                tool_arguments,
+                context,
+                messages,
+                images,
+                mutation_tools=mutation_tools,
             )
 
         if self.config.work_chain is False or not tool_calls:
@@ -976,6 +1022,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             count += 1
             resp, input_tokens, output_tokens = await self.choose_tool(
                 manager,
+                memory,
                 images,
                 messages,
                 EXIT_LOOP_TOOLS,
@@ -993,7 +1040,13 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                     finished = True
                     break
                 await self.process_tool(
-                    memory, tool_name, tool_arguments, context, messages, images
+                    memory,
+                    tool_name,
+                    tool_arguments,
+                    context,
+                    messages,
+                    images,
+                    mutation_tools=mutation_tools,
                 )
 
         return total_input_tokens, total_output_tokens

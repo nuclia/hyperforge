@@ -267,7 +267,6 @@ class Manager:
             return await self.execute_raw_streaming(
                 item, memory, module=module, agent_path=agent_path
             )
-
         try:
             resp = await self.nua.generate(
                 body=item,
