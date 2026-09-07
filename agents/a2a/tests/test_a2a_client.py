@@ -472,11 +472,13 @@ def test_relayed_feedback_uses_local_request_id():
     )
 
     assert feedback.request_id == "local-session"
-    assert feedback.feedback_id == "feedback-1"
+    assert feedback.feedback_id != remote.feedback_id
+    assert len(feedback.feedback_id) == 32
     assert feedback.timeout_ms == 600_000
     assert feedback.data == {
         "a2a_task_id": "task-1",
         "a2a_context_id": "context-1",
+        "a2a_feedback_id": "feedback-1",
         "a2a_request_id": "remote-request",
     }
 

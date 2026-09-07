@@ -33,7 +33,6 @@ def build_local_feedback(
 ) -> Feedback:
     return Feedback(
         request_id=local_request_id,
-        feedback_id=remote_feedback.feedback_id,
         question=remote_feedback.question,
         module=module,
         agent_id=agent_id,
@@ -41,6 +40,7 @@ def build_local_feedback(
         data={
             "a2a_task_id": remote_feedback.task_id,
             "a2a_context_id": remote_feedback.context_id,
+            "a2a_feedback_id": remote_feedback.feedback_id,
             "a2a_request_id": remote_feedback.request_id,
         },
         response_schema=remote_feedback.response_schema,
