@@ -129,6 +129,44 @@ def test_normalize_tool_schema_preserves_nested_constraints_and_resolves_refs():
     }
 
 
+def test_normalize_local_reference_through_array_and_encoded_fragment():
+    normalized = normalize_tool_schema(
+        {
+            "type": "object",
+            "$defs": {
+                "Choices": {
+                    "anyOf": [
+                        {"type": "string", "description": "Selected value"},
+                    ]
+                }
+            },
+            "properties": {
+                "choice": {"$ref": "#%2F%24defs%2FChoices%2FanyOf%2F0"},
+            },
+        }
+    )
+
+    assert normalized["properties"]["choice"] == {
+        "type": "string",
+        "description": "Selected value",
+    }
+
+
+@pytest.mark.parametrize("reference", ["#/$defs/a~2b", "#/$defs/a%2"])
+def test_normalize_rejects_invalid_local_reference(reference):
+    with pytest.raises(IncompatibleToolSchema) as exc_info:
+        normalize_tool_schema(
+            {
+                "type": "object",
+                "$defs": {"a~2b": {"type": "string"}},
+                "properties": {"value": {"$ref": reference}},
+            }
+        )
+
+    assert exc_info.value.json_path == "/properties/value/$ref"
+    assert exc_info.value.reason == f"invalid local reference {reference!r}"
+
+
 def test_normalize_ref_with_validation_siblings_is_rejected():
     with pytest.raises(IncompatibleToolSchema) as exc_info:
         normalize_tool_schema(
@@ -184,6 +222,7 @@ def test_normalize_ref_with_annotation_siblings():
         "const",
         "exclusiveMinimum",
         "exclusiveMaximum",
+        "$id",
     ],
 )
 def test_unsupported_provider_keyword_is_rejected(keyword):
@@ -297,6 +336,35 @@ def test_incompatible_tool_is_isolated_with_diagnostics(caplog):
     assert "reason='schema must declare or imply a supported type'" in caplog.text
 
 
+def test_deeply_nested_tool_is_isolated():
+    agent = MCPAgent(
+        MCPAgentConfig.model_validate(
+            {"id": "mcp-test", "module": "mcp", "source": "mcphttp-01"}
+        )
+    )
+    nested_schema = {"type": "string"}
+    for _ in range(1200):
+        nested_schema = {"type": "array", "items": nested_schema}
+
+    compatible = agent._compatible_tools(
+        [
+            types.Tool(
+                name="too-deep",
+                inputSchema={
+                    "type": "object",
+                    "properties": {"value": nested_schema},
+                },
+            ),
+            types.Tool(
+                name="valid",
+                inputSchema={"type": "object", "properties": {}},
+            ),
+        ]
+    )
+
+    assert [tool.name for tool in compatible] == ["valid"]
+
+
 async def test_choose_tool_only_sends_compatible_tools_to_nua():
     agent = MCPAgent(
         MCPAgentConfig.model_validate(
@@ -338,3 +406,51 @@ async def test_choose_tool_only_sends_compatible_tools_to_nua():
     )
 
     assert [tool.name for tool in captured_items[0].tools] == ["valid"]
+
+
+async def test_preload_tools_isolates_incompatible_tools_across_pages():
+    agent = MCPAgent(
+        MCPAgentConfig.model_validate(
+            {"id": "mcp-test", "module": "mcp", "source": "mcphttp-01"}
+        )
+    )
+    agent.session = SimpleNamespace(
+        list_tools=AsyncMock(
+            side_effect=[
+                SimpleNamespace(
+                    tools=[
+                        types.Tool(
+                            name="invalid-first-page",
+                            inputSchema={"type": "object", "properties": {"value": {}}},
+                        ),
+                        types.Tool(
+                            name="valid-first-page",
+                            inputSchema={"type": "object", "properties": {}},
+                        ),
+                    ],
+                    nextCursor="page-2",
+                ),
+                SimpleNamespace(
+                    tools=[
+                        types.Tool(
+                            name="invalid-second-page",
+                            inputSchema={"type": "object", "oneOf": []},
+                        ),
+                        types.Tool(
+                            name="valid-second-page",
+                            inputSchema={"type": "object", "properties": {}},
+                        ),
+                    ],
+                    nextCursor=None,
+                ),
+            ]
+        )
+    )
+
+    await agent.preload_tools()
+
+    assert [tool.name for tool in agent.tools] == [
+        "valid-first-page",
+        "valid-second-page",
+    ]
+    assert agent.session.list_tools.await_count == 2

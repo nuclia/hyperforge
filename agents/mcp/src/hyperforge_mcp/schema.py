@@ -1,5 +1,7 @@
+import re
 from copy import deepcopy
 from typing import Any
+from urllib.parse import unquote
 
 JSON_SCHEMA_TYPES = frozenset(
     {"array", "boolean", "integer", "number", "object", "string"}
@@ -28,7 +30,6 @@ NUA_COMMON_KEYWORDS = (
     | NUA_SCHEMA_LIST_KEYWORDS
     | {
         "$defs",
-        "$id",
         "$ref",
         "$schema",
         "definitions",
@@ -71,8 +72,11 @@ def normalize_tool_schema(schema: dict[str, Any]) -> dict[str, Any]:
     if not schema:
         return {"type": "object", "properties": {}}
 
-    root = deepcopy(schema)
-    normalized = _normalize_schema(root, root, (), ())
+    try:
+        root = deepcopy(schema)
+        normalized = _normalize_schema(root, root, (), ())
+    except RecursionError:
+        raise IncompatibleToolSchema((), "schema nesting is too deep") from None
     if normalized.get("type") != "object":
         raise IncompatibleToolSchema(
             ("type",), "tool input schema must have type 'object'"
@@ -102,14 +106,29 @@ def _normalize_schema(
 
     reference = current.pop("$ref", None)
     if reference is not None:
-        if not isinstance(reference, str) or not reference.startswith("#/"):
+        if not isinstance(reference, str) or not reference.startswith("#"):
             raise IncompatibleToolSchema(
                 path + ("$ref",), "only local references are supported"
             )
-        if reference in resolving:
+        fragment = reference[1:]
+        if re.search(r"%(?![0-9A-Fa-f]{2})", fragment):
+            raise IncompatibleToolSchema(
+                path + ("$ref",), f"invalid local reference {reference!r}"
+            )
+        try:
+            pointer = unquote(fragment, errors="strict")
+        except UnicodeDecodeError:
+            raise IncompatibleToolSchema(
+                path + ("$ref",), f"invalid local reference {reference!r}"
+            ) from None
+        if not pointer.startswith("/"):
+            raise IncompatibleToolSchema(
+                path + ("$ref",), "only local references are supported"
+            )
+        if pointer in resolving:
             raise IncompatibleToolSchema(path + ("$ref",), "cyclic local reference")
-        target = _resolve_reference(root, reference, path + ("$ref",))
-        resolved = _normalize_schema(target, root, path, resolving + (reference,))
+        target = _resolve_reference(root, reference, pointer, path + ("$ref",))
+        resolved = _normalize_schema(target, root, path, resolving + (pointer,))
         annotations = {
             keyword: current.pop(keyword)
             for keyword in tuple(current)
@@ -205,7 +224,7 @@ def _validate_keyword_values(schema: dict[str, Any], path: tuple[str, ...]) -> N
             path + ("enum",), "must be a non-empty array of strings"
         )
 
-    for keyword in ("title", "description", "format", "pattern", "$id", "$schema"):
+    for keyword in ("title", "description", "format", "pattern", "$schema"):
         if keyword in schema and not isinstance(schema[keyword], str):
             raise IncompatibleToolSchema(path + (keyword,), "must be a string")
 
@@ -266,16 +285,36 @@ def _normalize_schema_map(
 
 
 def _resolve_reference(
-    root: dict[str, Any], reference: str, path: tuple[str, ...]
+    root: dict[str, Any],
+    reference: str,
+    pointer: str,
+    path: tuple[str, ...],
 ) -> dict[str, Any]:
     target: Any = root
-    for encoded_part in reference[2:].split("/"):
+    for encoded_part in pointer[1:].split("/"):
+        if re.search(r"~(?![01])", encoded_part):
+            raise IncompatibleToolSchema(path, f"invalid local reference {reference!r}")
         part = encoded_part.replace("~1", "/").replace("~0", "~")
-        if not isinstance(target, dict) or part not in target:
+        if isinstance(target, dict) and part in target:
+            target = target[part]
+        elif isinstance(target, list) and (
+            part == "0" or (part.isdigit() and not part.startswith("0"))
+        ):
+            try:
+                index = int(part)
+            except ValueError:
+                raise IncompatibleToolSchema(
+                    path, f"unresolved local reference {reference!r}"
+                ) from None
+            if index >= len(target):
+                raise IncompatibleToolSchema(
+                    path, f"unresolved local reference {reference!r}"
+                )
+            target = target[index]
+        else:
             raise IncompatibleToolSchema(
                 path, f"unresolved local reference {reference!r}"
             )
-        target = target[part]
     if not isinstance(target, dict):
         raise IncompatibleToolSchema(path, "local reference must resolve to an object")
     return target
