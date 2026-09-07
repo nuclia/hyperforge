@@ -1,4 +1,5 @@
 import logging
+from types import SimpleNamespace
 
 import pytest
 from mcp import types
@@ -10,6 +11,21 @@ from hyperforge_mcp.schema import IncompatibleToolSchema, normalize_tool_schema
 
 def test_normalize_empty_root_schema_as_no_argument_object():
     assert normalize_tool_schema({}) == {"type": "object", "properties": {}}
+
+
+@pytest.mark.parametrize(
+    "schema",
+    [
+        {"type": "string"},
+        {"$defs": {"Value": {"type": "string"}}, "$ref": "#/$defs/Value"},
+    ],
+)
+def test_normalize_tool_schema_rejects_non_object_root(schema):
+    with pytest.raises(IncompatibleToolSchema) as exc_info:
+        normalize_tool_schema(schema)
+
+    assert exc_info.value.json_path == "/type"
+    assert exc_info.value.reason == "tool input schema must have type 'object'"
 
 
 def test_normalize_tool_schema_rejects_empty_nested_property():
@@ -33,11 +49,37 @@ def test_normalize_tool_schema_rejects_invalid_declared_type(declared_type):
         )
 
     assert exc_info.value.json_path == "/properties/value/type"
-    assert exc_info.value.reason == "invalid JSON Schema type"
+    assert exc_info.value.reason == "type is not supported by all NUA providers"
 
 
 def test_normalize_tool_schema_preserves_type_union():
     schema = {"type": "object", "properties": {"value": {"type": ["string", "null"]}}}
+
+    assert normalize_tool_schema(schema) == schema
+
+
+@pytest.mark.parametrize("enum", [[1, 2], ["auto", None], []])
+def test_normalize_tool_schema_rejects_non_string_enum(enum):
+    with pytest.raises(IncompatibleToolSchema) as exc_info:
+        normalize_tool_schema(
+            {"type": "object", "properties": {"mode": {"enum": enum}}}
+        )
+
+    assert exc_info.value.json_path == "/properties/mode/enum"
+
+
+def test_literal_refs_and_ref_property_name_are_not_schema_references():
+    schema = {
+        "type": "object",
+        "properties": {
+            "$ref": {"type": "string"},
+            "metadata": {
+                "type": "object",
+                "default": {"$ref": "literal-default"},
+                "example": {"$ref": "literal-example"},
+            },
+        },
+    }
 
     assert normalize_tool_schema(schema) == schema
 
@@ -86,42 +128,23 @@ def test_normalize_tool_schema_preserves_nested_constraints_and_resolves_refs():
     }
 
 
-def test_normalize_ref_with_siblings_preserves_conjunction():
-    normalized = normalize_tool_schema(
-        {
-            "type": "object",
-            "$defs": {
-                "Target": {
-                    "type": "object",
-                    "properties": {"from_target": {"type": "string"}},
-                    "required": ["from_target"],
-                }
-            },
-            "properties": {
-                "value": {
-                    "$ref": "#/$defs/Target",
-                    "type": "object",
-                    "properties": {"from_sibling": {"type": "integer"}},
-                    "required": ["from_sibling"],
-                }
-            },
-        }
-    )
+def test_normalize_ref_with_validation_siblings_is_rejected():
+    with pytest.raises(IncompatibleToolSchema) as exc_info:
+        normalize_tool_schema(
+            {
+                "type": "object",
+                "$defs": {"Value": {"type": "string"}},
+                "properties": {
+                    "value": {
+                        "$ref": "#/$defs/Value",
+                        "type": "string",
+                        "maxLength": 10,
+                    }
+                },
+            }
+        )
 
-    assert normalized["properties"]["value"] == {
-        "allOf": [
-            {
-                "type": "object",
-                "properties": {"from_target": {"type": "string"}},
-                "required": ["from_target"],
-            },
-            {
-                "type": "object",
-                "properties": {"from_sibling": {"type": "integer"}},
-                "required": ["from_sibling"],
-            },
-        ]
-    }
+    assert exc_info.value.json_path == "/properties/value"
 
 
 def test_normalize_ref_with_annotation_siblings():
@@ -149,75 +172,29 @@ def test_normalize_ref_with_annotation_siblings():
     }
 
 
-def test_normalize_ref_with_annotations_and_validation_siblings():
-    normalized = normalize_tool_schema(
-        {
-            "type": "object",
-            "$defs": {"Value": {"type": "string", "minLength": 1}},
-            "properties": {
-                "value": {
-                    "$ref": "#/$defs/Value",
-                    "description": "A constrained value",
-                    "type": "string",
-                    "maxLength": 10,
-                }
-            },
-        }
-    )
+@pytest.mark.parametrize(
+    "keyword",
+    ["allOf", "oneOf", "patternProperties", "dependentSchemas", "contains", "const"],
+)
+def test_unsupported_provider_keyword_is_rejected(keyword):
+    with pytest.raises(IncompatibleToolSchema) as exc_info:
+        normalize_tool_schema({"type": "object", keyword: {}})
 
-    assert normalized["properties"]["value"] == {
-        "allOf": [
-            {"type": "string", "minLength": 1},
-            {"type": "string", "maxLength": 10},
-        ],
-        "description": "A constrained value",
-    }
+    assert exc_info.value.json_path == f"/{keyword}"
+    assert exc_info.value.reason == "keyword is not supported by all NUA providers"
 
 
-def test_repeated_reference_in_sibling_is_not_cyclic():
-    normalized = normalize_tool_schema(
-        {
-            "type": "object",
-            "$defs": {"Value": {"type": "string"}},
-            "properties": {
-                "value": {
-                    "$ref": "#/$defs/Value",
-                    "allOf": [{"$ref": "#/$defs/Value"}],
-                }
-            },
-        }
-    )
-
-    assert normalized["properties"]["value"] == {
-        "allOf": [
-            {"type": "string"},
-            {"allOf": [{"type": "string"}]},
-        ]
-    }
-
-
-def test_normalize_refs_in_schema_containers():
+def test_normalize_refs_in_supported_schema_containers():
     normalized = normalize_tool_schema(
         {
             "type": "object",
             "$defs": {"Value": {"type": "string", "minLength": 1}},
             "additionalProperties": {"$ref": "#/$defs/Value"},
-            "patternProperties": {
-                "^x-": {"$ref": "#/$defs/Value"},
-            },
-            "dependentSchemas": {
-                "kind": {
-                    "type": "object",
-                    "properties": {"value": {"$ref": "#/$defs/Value"}},
-                }
-            },
         }
     )
 
     value_schema = {"type": "string", "minLength": 1}
     assert normalized["additionalProperties"] == value_schema
-    assert normalized["patternProperties"]["^x-"] == value_schema
-    assert normalized["dependentSchemas"]["kind"]["properties"]["value"] == value_schema
     assert "$defs" not in normalized
 
 
@@ -231,8 +208,8 @@ def test_rejects_reference_in_unsupported_schema_container():
             }
         )
 
-    assert exc_info.value.json_path == "/customSchema/$ref"
-    assert exc_info.value.reason == "reference in unsupported schema container"
+    assert exc_info.value.json_path == "/customSchema"
+    assert exc_info.value.reason == "keyword is not supported by all NUA providers"
 
 
 @pytest.mark.parametrize(
@@ -307,3 +284,35 @@ def test_incompatible_tool_is_isolated_with_diagnostics(caplog):
     assert "server='mcphttp-01'" in caplog.text
     assert "tool='getFieldValuesFiltered'" in caplog.text
     assert "path='/properties/filters/items/properties/value'" in caplog.text
+
+
+async def test_choose_tool_only_sends_compatible_tools_to_nua():
+    agent = MCPAgent(
+        MCPAgentConfig.model_validate(
+            {"id": "mcp-test", "module": "mcp", "source": "mcphttp-01"}
+        )
+    )
+    agent.tools = [
+        types.Tool(
+            name="invalid",
+            inputSchema={"type": "object", "properties": {"value": {}}},
+        ),
+        types.Tool(
+            name="valid",
+            inputSchema={
+                "type": "object",
+                "properties": {"query": {"type": "string"}},
+            },
+        ),
+    ]
+    captured_items = []
+
+    async def execute_raw(item, tracking=None):
+        captured_items.append(item)
+        return SimpleNamespace(tools=None), 0.0, 0.0
+
+    await agent.choose_tool(
+        manager=SimpleNamespace(execute_raw=execute_raw), images=[], messages=[]
+    )
+
+    assert [tool.name for tool in captured_items[0].tools] == ["valid"]
