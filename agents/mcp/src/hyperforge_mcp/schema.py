@@ -3,6 +3,9 @@ from copy import deepcopy
 from typing import Any
 from urllib.parse import unquote
 
+INVALID_PERCENT_ESCAPE = re.compile(r"%(?![0-9A-Fa-f]{2})")
+INVALID_JSON_POINTER_ESCAPE = re.compile(r"~(?![01])")
+
 JSON_SCHEMA_TYPES = frozenset(
     {"array", "boolean", "integer", "number", "object", "string"}
 )
@@ -111,7 +114,7 @@ def _normalize_schema(
                 path + ("$ref",), "only local references are supported"
             )
         fragment = reference[1:]
-        if re.search(r"%(?![0-9A-Fa-f]{2})", fragment):
+        if INVALID_PERCENT_ESCAPE.search(fragment):
             raise IncompatibleToolSchema(
                 path + ("$ref",), f"invalid local reference {reference!r}"
             )
@@ -292,7 +295,7 @@ def _resolve_reference(
 ) -> dict[str, Any]:
     target: Any = root
     for encoded_part in pointer[1:].split("/"):
-        if re.search(r"~(?![01])", encoded_part):
+        if INVALID_JSON_POINTER_ESCAPE.search(encoded_part):
             raise IncompatibleToolSchema(path, f"invalid local reference {reference!r}")
         part = encoded_part.replace("~1", "/").replace("~0", "~")
         if isinstance(target, dict) and part in target:
