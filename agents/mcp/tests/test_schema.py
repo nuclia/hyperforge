@@ -124,6 +124,56 @@ def test_normalize_ref_with_siblings_preserves_conjunction():
     }
 
 
+def test_normalize_ref_with_annotation_siblings():
+    normalized = normalize_tool_schema(
+        {
+            "type": "object",
+            "$defs": {"Value": {"type": "string", "minLength": 1}},
+            "properties": {
+                "value": {
+                    "$ref": "#/$defs/Value",
+                    "title": "Value",
+                    "description": "The value to use",
+                    "default": "example",
+                }
+            },
+        }
+    )
+
+    assert normalized["properties"]["value"] == {
+        "type": "string",
+        "minLength": 1,
+        "title": "Value",
+        "description": "The value to use",
+        "default": "example",
+    }
+
+
+def test_normalize_ref_with_annotations_and_validation_siblings():
+    normalized = normalize_tool_schema(
+        {
+            "type": "object",
+            "$defs": {"Value": {"type": "string", "minLength": 1}},
+            "properties": {
+                "value": {
+                    "$ref": "#/$defs/Value",
+                    "description": "A constrained value",
+                    "type": "string",
+                    "maxLength": 10,
+                }
+            },
+        }
+    )
+
+    assert normalized["properties"]["value"] == {
+        "allOf": [
+            {"type": "string", "minLength": 1},
+            {"type": "string", "maxLength": 10},
+        ],
+        "description": "A constrained value",
+    }
+
+
 def test_normalize_refs_in_schema_containers():
     normalized = normalize_tool_schema(
         {

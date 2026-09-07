@@ -10,6 +10,16 @@ JSON_SCHEMA_TYPES = {
     "object",
     "string",
 }
+ANNOTATION_KEYWORDS = {
+    "$comment",
+    "default",
+    "deprecated",
+    "description",
+    "examples",
+    "readOnly",
+    "title",
+    "writeOnly",
+}
 
 
 class IncompatibleToolSchema(ValueError):
@@ -64,11 +74,17 @@ def _normalize_schema(
             raise IncompatibleToolSchema(path + ("$ref",), "cyclic local reference")
         target = _resolve_reference(root, reference, path + ("$ref",))
         resolved = _normalize_schema(target, root, path, resolving + (reference,))
+        annotations = {
+            keyword: current.pop(keyword)
+            for keyword in tuple(current)
+            if keyword in ANNOTATION_KEYWORDS
+        }
         if current:
             siblings = _normalize_schema(current, root, path, resolving + (reference,))
             current = {"allOf": [resolved, siblings]}
         else:
             current = resolved
+        current.update(annotations)
 
     for keyword in ("properties", "patternProperties", "dependentSchemas"):
         _normalize_schema_map(current, keyword, root, path, resolving)
