@@ -44,6 +44,7 @@ from pydantic import FileUrl
 
 from hyperforge_mcp.config import MCPAgentConfig, Transport
 from hyperforge_mcp.http import MCPHTTPDriver
+from hyperforge_mcp.schema import IncompatibleToolSchema, normalize_tool_schema
 from hyperforge_mcp.stdio import MCPStdioDriver
 from hyperforge_mcp.tools import (
     MCP_ROUTER_PROMPT_TEMPLATE,
@@ -370,7 +371,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                 description=mtl.description or "",
                 parameters=mtl.inputSchema,
             )
-            for mtl in self.tools
+            for mtl in self._compatible_tools(self.tools)
         ]
         tools.extend(extra_tools)
         logger.debug(f"Available tools: {tools}")
@@ -397,6 +398,23 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
 
         logger.debug(f"Tool and parameters to use: {resp}")
         return resp, input_tokens, output_tokens
+
+    def _compatible_tools(self, tools: List[types.Tool]) -> List[types.Tool]:
+        compatible = []
+        for tool in tools:
+            try:
+                schema = normalize_tool_schema(tool.inputSchema)
+            except IncompatibleToolSchema as error:
+                logger.warning(
+                    "Ignoring incompatible MCP tool: server=%r tool=%r path=%r reason=%r",
+                    self.config.source,
+                    tool.name,
+                    error.json_path,
+                    error.reason,
+                )
+                continue
+            compatible.append(tool.model_copy(update={"inputSchema": schema}))
+        return compatible
 
     async def progress_callback(
         self,
@@ -1176,6 +1194,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             )
             tools = await self.session.list_tools(params=params)
             self.tools.extend(tools.tools)
+        self.tools = self._compatible_tools(self.tools)
 
     async def preload_prompts(self):
         if self.session is None:
