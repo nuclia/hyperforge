@@ -13,7 +13,7 @@ interactions:
       x-goog-api-key:
       - DUMMY
     method: POST
-    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent
   response:
     body:
       string: "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\":
@@ -233,7 +233,7 @@ interactions:
         \   ],\n    \"toolUsePromptTokenCount\": 85,\n    \"toolUsePromptTokensDetails\":
         [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 85\n
         \     }\n    ],\n    \"thoughtsTokenCount\": 246,\n    \"serviceTier\": \"standard\"\n
-        \ },\n  \"modelVersion\": \"gemini-2.5-flash\",\n  \"responseId\": \"Qq4datpRrrCewQ_dz9j4Bw\"\n}\n"
+        \ },\n  \"modelVersion\": \"gemini-3.6-flash\",\n  \"responseId\": \"Qq4datpRrrCewQ_dz9j4Bw\"\n}\n"
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000

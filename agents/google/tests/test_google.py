@@ -95,7 +95,7 @@ async def test_google():
     event = usage[0]
     assert event.operation == ExternalUsageOperation.INTERNET_SEARCH
     assert event.provider == "google"
-    assert event.model == "gemini-2.5-flash"
+    assert event.model == "gemini-3.6-flash"
     assert event.input_tokens > 0
     assert event.output_tokens > 0
     assert event.requests == 1
