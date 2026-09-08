@@ -436,7 +436,7 @@ class PythonAgent(Agent[PythonAgentConfig], ContextAgent):
                                 local_vars=local_vars,
                                 global_vars=copy_of_global_vars,
                                 function_names=self.function_names,
-                            )
+                            ),
                         )
                     )
                 )

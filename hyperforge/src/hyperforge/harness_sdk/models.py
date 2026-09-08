@@ -84,6 +84,7 @@ class HarnessEvent(BaseModel):
     turn_id: str | None = None
     agent_id: str | None = None
     parent_agent_id: str | None = None
+    parent_call_id: str | None = None
     category: str = "assistant"
     tags: list[str] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)

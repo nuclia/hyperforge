@@ -31,7 +31,13 @@ from hyperforge.definition import FunctionDefinition
 from hyperforge.memory import Chunk
 from hyperforge.memory.memory import Context
 
-from .model import RestrictedPythonTask, WorkerError
+from .model import (
+    MAX_PROTOCOL_BYTES,
+    RestrictedPythonTask,
+    WorkerError,
+    decode_protocol_value,
+    encode_protocol_value,
+)
 
 BLOCKED_EXCEPTIONS = {
     "BaseException",
@@ -162,7 +168,7 @@ class PythonAgentWorker:
                 global_vars["pdb"] = __import__("pdb")
             exec(byte_code, global_vars, local_vars)
         except BaseException as exc:
-            self.pipe.send(
+            self._send(
                 RestrictedPythonTask(
                     function="_error",
                     agent="_controller",
@@ -171,7 +177,7 @@ class PythonAgentWorker:
                 )
             )
         finally:
-            self.pipe.send(
+            self._send(
                 RestrictedPythonTask(
                     function="_close",
                     agent="_controller",
@@ -188,7 +194,7 @@ class PythonAgentWorker:
         question: str = "",
         final_answer: Optional[str] = None,
     ):
-        self.pipe.send(
+        self._send(
             RestrictedPythonTask(
                 function="save",
                 agent="_controller",
@@ -224,7 +230,7 @@ class PythonAgentWorker:
                 )
             agent_id = agents[0]
 
-        self.pipe.send(
+        self._send(
             RestrictedPythonTask(
                 function=function_name,
                 agent=agent_id,
@@ -234,8 +240,13 @@ class PythonAgentWorker:
         )
         return self._receive()
 
+    def _send(self, task: RestrictedPythonTask) -> None:
+        self.pipe.send_bytes(encode_protocol_value(task, "Local sandbox request"))
+
     def _receive(self) -> Any:
-        result = self.pipe.recv()
+        result = decode_protocol_value(
+            self.pipe.recv_bytes(MAX_PROTOCOL_BYTES), "Local sandbox response"
+        )
         if isinstance(result, WorkerError):
             raise RuntimeError(result.error)
         return result
