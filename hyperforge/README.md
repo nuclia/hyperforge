@@ -54,7 +54,8 @@ uv run hyperforge-api
 | `hyperforge-api` | Main HTTP API server |
 | `hyperforge-server` | Background server process |
 | `hyperforge-sandbox` | Sandbox execution environment |
-| `hyperforge-standalone` | All-in-one single-process mode |
+| `hyperforge-standalone` | All-in-one HTTP, MCP, and optional A2A gRPC mode |
+| `hyperforge-a2a-grpc` | Database-backed SaaS A2A gRPC server |
 | `hyperforge-downloads-cronjob` | Downloads cleanup cron job |
 | `hyperforge-workflows-cleanup-cronjob` | Stale workflow cleanup cron job |
 | `hyperforge-extract-openapi` | Extract OpenAPI schema to file |
@@ -81,6 +82,31 @@ All settings are provided through environment variables consumed by Pydantic `Ba
 | `LOAD_MODULES` | Comma-separated list of agent package modules to load at startup |
 | `NUCLIA_ZONE` | Nuclia zone (default `arag`) |
 | `NUCLIA_PUBLIC_URL` | Public Nuclia URL template (default `https://{zone}.nuclia.com`) |
+
+### Standalone A2A
+
+Standalone can expose its configured static agent over A2A from the same
+`hyperforge-standalone` process. It requires a Redis/Valkey broker because A2A
+task state and cross-instance feedback are durable Redis stores; the default
+in-memory broker remains suitable only for HTTP/MCP local development.
+
+```bash
+BROKER_REDIS_DSN=redis://valkey:6379 \
+A2A_ENABLED=true \
+A2A_ACCOUNT=local \
+A2A_AGENT_ID=venue \
+A2A_GRPC_HOST=0.0.0.0 \
+A2A_GRPC_PORT=8034 \
+A2A_PUBLIC_URL=venue.example.test:8034 \
+uv run hyperforge-standalone
+```
+
+Use distinct `BROKER_REDIS_ACTIVATE_SUBJECT` and `A2A_TASK_STORE_PREFIX` values
+for independent Standalone installations sharing one Valkey cluster. TLS and
+mTLS use the `A2A_TLS_*` variables supported by the SaaS A2A server. If the
+owner process restarts while a task awaits feedback, the client must resend the
+request; Redis keeps protocol task visibility but does not serialize live
+workflow continuations.
 
 ## Loading Agent Packages
 

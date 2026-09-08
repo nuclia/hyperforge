@@ -30,7 +30,9 @@ from hyperforge.harness_sdk.harness import (
 )
 from hyperforge.harness_sdk.tools.core import (
     AgentIdInput,
+    SearchToolsInput,
     SpawnAgentInput,
+    search_tools,
     spawn_agent,
     wait_agent,
 )
@@ -1251,6 +1253,43 @@ async def test_lazy_tool_can_be_searched_activated_and_used() -> None:
     )
 
     assert await run_harness(harness, "Uppercase hi") == "HI"
+
+
+@pytest.mark.asyncio
+async def test_search_tools_matches_natural_language_query() -> None:
+    async def execute(_harness: AgentHarness, value: ToolInput) -> ToolOutput:
+        return ToolOutput(value=value.value)
+
+    harness = AgentHarness(
+        model="test-model",
+        model_client=Model(),
+        tools=[
+            HarnessTool(
+                "create_dataset",
+                execute,
+                description="Create a dataset.",
+                lazy_load=True,
+            ),
+            HarnessTool(
+                "list_datasets",
+                execute,
+                description="List datasets.",
+                lazy_load=True,
+            ),
+        ],
+    )
+
+    result = await search_tools(
+        harness,
+        SearchToolsInput(
+            query="create a dataset, upload data, import files, or manage datasets"
+        ),
+    )
+
+    assert [item["name"] for item in result.items] == [
+        "create_dataset",
+        "list_datasets",
+    ]
 
 
 @pytest.mark.asyncio

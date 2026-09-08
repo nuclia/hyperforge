@@ -138,6 +138,7 @@ class HTTPApplication(FastAPI):
             activate_subject=self.settings.activate_subject,
             keepalive_ms=int(self.settings.pubsub_keepalive_seconds * 1000),
             cluster_mode=self.settings.valkey_cluster_mode,
+            stream_ttl_seconds=self.settings.pubsub_stream_ttl_seconds,
         )
 
         self.sses: LRU[Tuple[str, str], StreamableHTTPServerTransport] = LRU(size=100)
