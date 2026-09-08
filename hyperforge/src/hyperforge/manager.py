@@ -115,6 +115,7 @@ class Manager:
         cls,
         drivers: List[DriverConfig],
         nua: AsyncNuaClient,
+        allow_private_network_endpoints: bool = False,
         send_rao_origin: bool = True,
     ):
         manager = cls(send_rao_origin=send_rao_origin)
@@ -124,7 +125,11 @@ class Manager:
             driver_class = get_driver_klass(
                 driver.provider
             )  # Check if driver provider is valid
-            manager.drivers[driver.identifier] = await driver_class.init(driver)
+            initialized_driver = await driver_class.init(driver)
+            initialized_driver.allow_private_network_endpoints = (
+                allow_private_network_endpoints
+            )
+            manager.drivers[driver.identifier] = initialized_driver
 
         return manager
 
