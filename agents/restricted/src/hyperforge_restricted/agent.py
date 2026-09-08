@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import functools
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 from copy import deepcopy
 from dataclasses import dataclass, field
 from time import time
@@ -10,6 +10,13 @@ from typing import Any, Dict, List, Optional, cast
 
 from hyperforge import logger
 from hyperforge.agent import Agent
+from hyperforge.codemode import (
+    RestrictedPythonTask,
+    SandboxRunner,
+    WorkerExecutionRequest,
+    WorkerTypes,
+)
+from hyperforge.codemode import settings as sandbox_settings
 from hyperforge.configure import agent
 from hyperforge.context.agent import ContextAgent, build_context_agent
 from hyperforge.db.agents import SERVICE_NAME
@@ -35,14 +42,6 @@ from hyperforge_restricted.decision import (
     EXTRACT_AGENT_TEMPLATE,
     TRANSFORM_REPHRASE,
 )
-from hyperforge_restricted.model import (
-    RestrictedPythonTask,
-    WorkerExecutionRequest,
-    WorkerTypes,
-)
-
-from .sandbox import SandboxRunner
-from .sandbox import settings as sandbox_settings
 
 
 def tracer():
@@ -79,6 +78,23 @@ class Output:
     missing: List[str] = field(default_factory=list)
     contexts: List[Context] = field(default_factory=list)
     final_answer: Optional[str] = None
+
+
+CONTROLLER_FUNCTIONS = {
+    "add_step",
+    "choose",
+    "context_match_question",
+    "extract",
+    "rephrase",
+    "remi_validation",
+    "save",
+    "save_context",
+    "set_context",
+    "summary",
+    "transform",
+    "user_validation",
+    "validate",
+}
 
 
 if sandbox_settings.sandbox_socket is None:
@@ -330,19 +346,11 @@ class PythonAgent(Agent[PythonAgentConfig], ContextAgent):
                 sandbox_settings.sandbox_socket,
                 functools.partial(self.handle_queue_item, manager, memory),
             )
-        elif self.config.debug:
-            # Debug mode, run in the same process (another thread)
-            return SandboxRunner.with_pool(
-                ThreadPoolExecutor(1),
-                functools.partial(self.handle_queue_item, manager, memory),
-                debug=True,
-            )
-        else:
-            # Process pool mode, run in a separate process for isolation
-            return SandboxRunner.with_pool(
-                SANDBOX_POOL,
-                functools.partial(self.handle_queue_item, manager, memory),
-            )
+        # Process pool mode, run in a separate process for isolation
+        return SandboxRunner.with_pool(
+            SANDBOX_POOL,
+            functools.partial(self.handle_queue_item, manager, memory),
+        )
 
     async def _preload_child_agents(
         self, manager: Manager, memory: QuestionMemory
@@ -419,11 +427,6 @@ class PythonAgent(Agent[PythonAgentConfig], ContextAgent):
                 local_vars["needs_rephrase"] = (
                     True if depth == 0 and self.config.needs_rephrase else False
                 )
-                if self.config.debug:
-                    logger.debug(
-                        f"Executing restricted code, loop {depth}, question: {question}"
-                    )
-
                 tasks.append(
                     asyncio.create_task(
                         self._runner(memory, manager).run(
@@ -506,6 +509,20 @@ class PythonAgent(Agent[PythonAgentConfig], ContextAgent):
         self, manager: Manager, memory: QuestionMemory, item: RestrictedPythonTask
     ) -> WorkerTypes:
         contexts: List[Context] = []
+
+        if not (
+            item.agent == "_controller" and item.function == "save"
+        ) and item.function not in self.function_names.get(item.agent, {}):
+            raise ValueError(
+                f"Function {item.function!r} is not authorized for agent {item.agent!r}"
+            )
+        if item.function in CONTROLLER_FUNCTIONS and item.agent not in {
+            "_controller",
+            "self",
+        }:
+            raise ValueError(
+                f"Function {item.function!r} is reserved for the restricted agent"
+            )
 
         with tracer().start_as_current_span(f"RestrictedAgent.{item.function}"):
             try:

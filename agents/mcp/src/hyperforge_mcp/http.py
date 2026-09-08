@@ -1,11 +1,13 @@
 import asyncio
 import base64
 import hashlib
+import os
 import secrets
 import ssl
 import tempfile
 from collections.abc import Awaitable, Callable
 from functools import cache, partial
+from pathlib import Path
 from typing import Any, Optional
 from urllib.parse import parse_qs, urlencode, urlparse
 from uuid import uuid4
@@ -478,10 +480,18 @@ def create_mcp_http_client(
         if certificate is not None:
             if len(certificate) > 32_000:
                 raise ValueError("Certificate is too large")
-            with tempfile.NamedTemporaryFile(mode="w+", delete=False) as cert_file:
-                cert_file.write(certificate)
-
-            ssl_context.load_cert_chain(certfile=cert_file.name)
+            cert_path: str | None = None
+            try:
+                with tempfile.NamedTemporaryFile(
+                    mode="w", delete=False, encoding="utf-8"
+                ) as cert_file:
+                    cert_path = cert_file.name
+                    cert_file.write(certificate)
+                os.chmod(cert_path, 0o600)
+                ssl_context.load_cert_chain(certfile=cert_path)
+            finally:
+                if cert_path is not None:
+                    Path(cert_path).unlink(missing_ok=True)
 
         safe_transport = SafeTransport(verify=ssl_context)
     else:

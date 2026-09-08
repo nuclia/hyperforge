@@ -170,6 +170,7 @@ class SessionManager:
                 external_nua_api_key=self.settings.external_nua_api_key,
                 account=message.account,
                 kbid=None if self.settings.standalone else message.agent_id,
+                allow_private_network_endpoints=self.settings.allow_private_network_endpoints,
             )
 
             if message.session not in self.memory:

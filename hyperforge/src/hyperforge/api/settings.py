@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     oauth_subject: str = "arag.{account}.{agent_id}.{workflow_id}.{session}.{question}.oauth.{oauth_uuid}"
     activate_subject: str = "arag.activate"
     pubsub_keepalive_seconds: float = 20
+    pubsub_stream_ttl_seconds: int = 300
 
     load_modules: list[str] = []
 
@@ -38,3 +39,5 @@ class Settings(BaseSettings):
     hydra_scopes_supported: list[str] = ["offline_access", "openid"]
     mcp_force_https_metadata: bool = True
     auth_success_logo_url: Optional[str] = None
+    mcp_max_request_bytes: int = 1024 * 1024
+    mcp_max_response_bytes: int = 4 * 1024 * 1024

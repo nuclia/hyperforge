@@ -7,8 +7,7 @@ from hyperforge.configure import agent
 from hyperforge.context.agent import ContextAgent
 from hyperforge.manager import Manager
 from hyperforge.memory import Chunk, Context, QuestionMemory
-from hyperforge.utils import check_dns
-from hyperforge.utils.http import safe_http_client
+from hyperforge.utils.http import read_limited_response, safe_http_client
 
 from hyperforge_http.config import HTTPStaticAgentConfig
 
@@ -33,24 +32,22 @@ class HTTPStaticAgent(ContextAgent, Agent[HTTPStaticAgentConfig]):
         t0 = time()
         error = None
 
-        url = await check_dns(self.config.url)
-
         async with safe_http_client() as client:
             if self.config.method == "GET":
-                response = await client.get(
-                    url,
+                request = client.build_request(
+                    "GET",
+                    self.config.url,
                     headers=self.config.headers,
-                    timeout=self.config.timeout,
                     params={self.config.question_query_param: question}
                     if self.config.question_query_param
                     else None,
                 )
 
             elif self.config.method == "POST":
-                response = await client.post(
-                    url,
+                request = client.build_request(
+                    "POST",
+                    self.config.url,
                     headers=self.config.headers,
-                    timeout=self.config.timeout,
                     params={self.config.question_query_param: question}
                     if self.config.question_query_param
                     else None,
@@ -61,11 +58,19 @@ class HTTPStaticAgent(ContextAgent, Agent[HTTPStaticAgentConfig]):
             else:
                 raise ValueError(f"Unsupported HTTP method: {self.config.method}")
 
+            response = await client.send(request, stream=True)
+            try:
+                response_content = await read_limited_response(
+                    response, self.config.max_response_bytes
+                )
+            finally:
+                await response.aclose()
+
         if response.status_code != 200:
             error = f"HTTP request failed with status code {response.status_code}"
             context_text = ""
         else:
-            context_text = response.content.decode("utf-8")
+            context_text = response_content.decode("utf-8", errors="replace")
 
         context = Context(
             agent_id=self.config.id if self.config.id else "http",
@@ -88,7 +93,7 @@ class HTTPStaticAgent(ContextAgent, Agent[HTTPStaticAgentConfig]):
             step_module=self.config.module,
             step_title=self.step_title("HTTP request"),
             step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
-            step_value=f" HTTP {self.config.method} to {url}",
+            step_value=f" HTTP {self.config.method} to {self.config.url}",
             timeit=time() - t0,
             input_nuclia_tokens=0,
             output_nuclia_tokens=0,

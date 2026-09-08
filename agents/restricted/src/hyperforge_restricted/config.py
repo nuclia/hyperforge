@@ -40,16 +40,6 @@ class PythonAgentConfig(ContextAgentConfig):
         },
     )
 
-    debug: bool = Field(
-        False,
-        title="Debug mode",
-        description="Enable debug mode to get more information about the execution",
-        json_schema_extra={
-            "show_in_node": False,
-            "widget": WidgetType.NOT_SHOWN,
-        },
-    )
-
     decision_model: LLMField = Field(
         default=LLMConfig(model_id=llm_defaults.reasoning),
         title="Generative model",

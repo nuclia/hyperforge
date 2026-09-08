@@ -7,8 +7,7 @@ from hyperforge.configure import agent
 from hyperforge.manager import Manager
 from hyperforge.memory import QuestionMemory
 from hyperforge.trace import trace_agent
-from hyperforge.utils import check_dns
-from hyperforge.utils.http import safe_http_client
+from hyperforge.utils.http import read_limited_response, safe_http_client
 
 from hyperforge_external.config import ExternalCallAgentConfig
 
@@ -61,9 +60,8 @@ class ExternalCallAgent(Agent[ExternalCallAgentConfig]):
         output_nuclia_tokens: float = 0.0
 
         evaluation = None
-        async with safe_http_client() as client:
-            url = await check_dns(self.config.url)
-
+        response_content = b""
+        async with safe_http_client(timeout=self.config.timeout) as client:
             if self.config.call_schema:
                 logger.debug(
                     f"Calling external API with schema: {self.config.call_schema}, description: {self.config.description}"
@@ -83,9 +81,9 @@ class ExternalCallAgent(Agent[ExternalCallAgentConfig]):
                 output_nuclia_tokens += output_tokens
                 input_nuclia_tokens += input_tokens
                 logger.debug(f"Json to do the call: {evaluation}")
-                resp = await client.request(
+                request = client.build_request(
                     method=self.config.method.value,
-                    url=url,
+                    url=self.config.url,
                     json=evaluation,
                     headers=self.config.headers,
                 )
@@ -93,9 +91,9 @@ class ExternalCallAgent(Agent[ExternalCallAgentConfig]):
                 logger.debug(
                     f"Calling external API with generated context: {memory.contexts}"
                 )
-                resp = await client.request(
+                request = client.build_request(
                     method=self.config.method.value,
-                    url=url,
+                    url=self.config.url,
                     json=memory.contexts,
                     headers=self.config.headers,
                 )
@@ -109,26 +107,38 @@ class ExternalCallAgent(Agent[ExternalCallAgentConfig]):
                     evaluation = {}
                 evaluation["answer"] = memory.final_answer
                 evaluation["question"] = memory.original_question
-                resp = await client.request(
+                request = client.build_request(
                     method=self.config.method.value,
                     url=self.config.url,
                     json=evaluation,
                     headers=self.config.headers,
                 )
+            resp = await client.send(request, stream=True)
+            try:
+                response_content = await read_limited_response(
+                    resp, self.config.max_response_bytes
+                )
+            finally:
+                await resp.aclose()
         error_resp = None
         if resp is None:
             error_resp = "No response from external API"
         elif resp.status_code != 200:
-            error_resp = f"Error calling external API: {resp.status_code} - {resp.content.decode()}"
+            error_resp = f"Error calling external API: {resp.status_code}"
         if error_resp:
             logger.error(error_resp)
             raise Exception(error_resp)
-        logger.info(f"Response from external API: {resp.content.decode()}")
+        response_text = response_content.decode("utf-8", errors="replace")
+        logger.info(
+            "External API returned status %s and %s bytes",
+            resp.status_code,
+            len(response_content),
+        )
         await memory.add_step(
             step_module="external",
             step_title=self.step_title(self.config.method.value),
             step_value=self.config.url,
-            step_reason=resp.content.decode(),
+            step_reason=response_text,
             timeit=time() - t0,
             step_agent_path=f"/postprocess/{self.config.id if self.config.id else 'default'}",
             input_nuclia_tokens=input_nuclia_tokens,

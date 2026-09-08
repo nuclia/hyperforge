@@ -30,12 +30,21 @@ from mcp.client.streamable_http import GetSessionIdCallback
 from mcp.shared.context import RequestContext
 from mcp.shared.message import SessionMessage
 from mcp.shared.session import RequestResponder
-from nuclia.lib.nua_responses import Author, ChatModel, Image, Message, Tool, UserPrompt
+from nuclia.lib.nua_responses import (
+    Author,
+    ChatModel,
+    Image,
+    Message,
+    Tool,
+    ToolChoiceAuto,
+    UserPrompt,
+)
 from nuclia_models.predict.generative_responses import GenerativeFullResponse
 from pydantic import FileUrl
 
 from hyperforge_mcp.config import MCPAgentConfig, Transport
 from hyperforge_mcp.http import MCPHTTPDriver
+from hyperforge_mcp.schema import IncompatibleToolSchema, normalize_tool_schema
 from hyperforge_mcp.stdio import MCPStdioDriver
 from hyperforge_mcp.tools import (
     MCP_ROUTER_PROMPT_TEMPLATE,
@@ -176,8 +185,15 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
 
         if final_prompt is None:
             # We will use LLM to choose the prompt
-            prompt_feedback_str = PROMPT_CHOOSE_TEMPLATE.render(prompts=self.prompts)
-            resp, input_tokens, output_tokens = await manager.execute_json(
+            prompt_feedback_str = PROMPT_CHOOSE_TEMPLATE.render(
+                prompts=self.prompts, task_description=question
+            )
+            (
+                resp,
+                input_tokens,
+                output_tokens,
+                reasoning,
+            ) = await manager.execute_json_reasoning(
                 model=self.config.tool_choice_model,
                 prompt=prompt_feedback_str,
                 user_id="mcp_no_feedback",
@@ -368,6 +384,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             generative_model=self.config.tool_choice_model.model_id,
             reasoning=build_reasoning(self.config.tool_choice_model),
             tools=tools,
+            tool_choice=ToolChoiceAuto(),
             user_prompt=UserPrompt(
                 prompt="Choose the best tool or tools for the task, select task_complete if no more tools are needed according to the user request and previous interactions"
             ),
@@ -381,6 +398,23 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
 
         logger.debug(f"Tool and parameters to use: {resp}")
         return resp, input_tokens, output_tokens
+
+    def _compatible_tools(self, tools: List[types.Tool]) -> List[types.Tool]:
+        compatible = []
+        for tool in tools:
+            try:
+                schema = normalize_tool_schema(tool.inputSchema)
+            except IncompatibleToolSchema as error:
+                logger.warning(
+                    "Ignoring incompatible MCP tool: server=%r tool=%r path=%r reason=%r",
+                    self.config.source,
+                    tool.name,
+                    error.json_path,
+                    error.reason,
+                )
+                continue
+            compatible.append(tool.model_copy(update={"inputSchema": schema}))
+        return compatible
 
     async def progress_callback(
         self,
@@ -894,6 +928,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                 name=tool.name,
                 description=tool.description or tool.name,
                 parameters=_tool_parameters(tool.inputSchema),
+                input_schema=tool.inputSchema,
             )
             setattr(self, tool.name, self._make_tool_caller(tool.name))
 
@@ -943,14 +978,15 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
 
         total_input_tokens += input_tokens
         total_output_tokens += output_tokens
-        for tool_name, tool_arguments in iterate_tools_resp(resp):
+        tool_calls = list(iterate_tools_resp(resp))
+        for tool_name, tool_arguments in tool_calls:
             await self.process_tool(
                 memory, tool_name, tool_arguments, context, messages, images
             )
 
-        if self.config.work_chain is False:
+        if self.config.work_chain is False or not tool_calls:
             logger.debug("Exiting loop on tool")
-            return input_tokens, output_tokens
+            return total_input_tokens, total_output_tokens
 
         count = 0
         finished = False
@@ -965,7 +1001,11 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             )
             total_input_tokens += input_tokens
             total_output_tokens += output_tokens
-            for tool_name, tool_arguments in iterate_tools_resp(resp):
+            tool_calls = list(iterate_tools_resp(resp))
+            if not tool_calls:
+                logger.debug("Exiting loop because no tool was selected")
+                break
+            for tool_name, tool_arguments in tool_calls:
                 if tool_name == "task_complete":
                     logger.debug("Exiting loop on task_complete tool")
                     finished = True
@@ -1147,13 +1187,13 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         # Context: There are many tools available for a user. However, the number of tools can be large, and it is not always practical to present all of them at once. We need to create a summary of them that accurately reflects the capabilities they provide.
         # The user presents you with the tools available to them, and you must create a summary of the tools that is accurate and comprehensive. The summary should include the capabilities of the tools and when they should be used.
 
-        self.tools.extend(tools.tools)
+        self.tools.extend(self._compatible_tools(tools.tools))
         while tools.nextCursor:
             params: types.PaginatedRequestParams = types.PaginatedRequestParams(
                 cursor=tools.nextCursor
             )
             tools = await self.session.list_tools(params=params)
-            self.tools.extend(tools.tools)
+            self.tools.extend(self._compatible_tools(tools.tools))
 
     async def preload_prompts(self):
         if self.session is None:

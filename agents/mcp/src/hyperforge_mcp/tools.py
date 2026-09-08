@@ -7,6 +7,8 @@ Choose proper prompt to solve the task. If none of the prompts is suitable, do n
 <prompt name="{{prompt.name}}">{{prompt.description}}</prompt>
 {% endfor -%}
 
+Task: {{task_description}}
+
 """
 
 PROMPT_CHOOSE_TEMPLATE = PROMPT_ENVIRONMENT.from_string(PROMPT_CHOOSE)
@@ -15,19 +17,10 @@ TOOLS_CHOOSE = """
 Choose proper toolset to solve the task. If none of the toolsets is suitable, do not choose any. Make sure to choose only one toolset.
 
 {% for tool in tools %}
-<tool name="{{tool.name}}">{{tool.description}}</prompt>
+<tool name="{{tool.name}}">{{tool.description}}</tool>
 {% endfor -%}
 
-"""
-
-PROMPT_CHOOSE_TEMPLATE = PROMPT_ENVIRONMENT.from_string(PROMPT_CHOOSE)
-
-PROMPT_CHOOSE = """
-Choose proper prompt to solve the task. If none of the prompts is suitable, do not choose any. Make sure to choose only one prompt.
-
-{% for prompt in prompts %}
-<prompt name="{{prompt.name}}">{{prompt.description}}</prompt>
-{% endfor -%}
+Task: {{task_description}}
 
 """
 
