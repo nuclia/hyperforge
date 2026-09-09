@@ -2,15 +2,12 @@ from __future__ import annotations
 
 import uuid
 from re import findall
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from pydantic import BaseModel
 
 from ..models import HarnessEventType, HarnessMemory, HarnessMessage
-from . import HarnessTool, tool
-
-if TYPE_CHECKING:
-    from ..harness import AgentHarness
+from . import HarnessTool, ToolCallContext, tool
 
 
 class RememberInput(BaseModel):
@@ -78,8 +75,9 @@ def _search_terms(value: str) -> set[str]:
 
 @tool(description="Search for additional tools that can be activated.")
 async def search_tools(
-    harness: AgentHarness, input_value: SearchToolsInput
+    context: ToolCallContext, input_value: SearchToolsInput
 ) -> ListOutput:
+    harness = context.harness
     terms = _search_terms(input_value.query)
     candidates: list[tuple[int, HarnessTool[Any, Any]]] = []
     for candidate in harness._external_tools:
@@ -104,8 +102,9 @@ async def search_tools(
 
 @tool(description="Activate additional tools by their exact names.")
 async def activate_tools(
-    harness: AgentHarness, input_value: ActivateToolsInput
+    context: ToolCallContext, input_value: ActivateToolsInput
 ) -> DictOutput:
+    harness = context.harness
     names = list(dict.fromkeys(input_value.names))
     unknown = [
         name
@@ -119,7 +118,8 @@ async def activate_tools(
 
 
 @tool()
-async def remember(harness: AgentHarness, input_value: RememberInput) -> DictOutput:
+async def remember(context: ToolCallContext, input_value: RememberInput) -> DictOutput:
+    harness = context.harness
     memory = HarnessMemory(
         id=uuid.uuid4().hex,
         text=input_value.text,
@@ -135,7 +135,8 @@ async def remember(harness: AgentHarness, input_value: RememberInput) -> DictOut
 
 
 @tool()
-async def recall(harness: AgentHarness, input_value: RecallInput) -> ListOutput:
+async def recall(context: ToolCallContext, input_value: RecallInput) -> ListOutput:
+    harness = context.harness
     memories = await harness.storage.recall(
         scope=input_value.scope,
         query=input_value.query,
@@ -144,7 +145,8 @@ async def recall(harness: AgentHarness, input_value: RecallInput) -> ListOutput:
 
 
 @tool()
-async def forget(harness: AgentHarness, input_value: ForgetInput) -> DictOutput:
+async def forget(context: ToolCallContext, input_value: ForgetInput) -> DictOutput:
+    harness = context.harness
     await harness.storage.forget(input_value.id)
     await harness.emit(HarnessEventType.MEMORY_FORGOTTEN, {"id": input_value.id})
     return DictOutput(value={"id": input_value.id})
@@ -152,25 +154,26 @@ async def forget(harness: AgentHarness, input_value: ForgetInput) -> DictOutput:
 
 @tool()
 async def spawn_agent(
-    harness: AgentHarness, input_value: SpawnAgentInput
+    context: ToolCallContext, input_value: SpawnAgentInput
 ) -> DictOutput:
-    return await harness._child_agents.spawn(input_value)
+    return await context.harness._child_agents.spawn(input_value)
 
 
 @tool()
 async def send_message(
-    harness: AgentHarness, input_value: SendMessageInput
+    context: ToolCallContext, input_value: SendMessageInput
 ) -> DictOutput:
-    return await harness._child_agents.send_message(input_value)
+    return await context.harness._child_agents.send_message(input_value)
 
 
 @tool()
-async def wait_agent(harness: AgentHarness, input_value: AgentIdInput) -> DictOutput:
-    return await harness._child_agents.wait(input_value.agent_id)
+async def wait_agent(context: ToolCallContext, input_value: AgentIdInput) -> DictOutput:
+    return await context.harness._child_agents.wait(input_value.agent_id)
 
 
 @tool()
-async def compact(harness: AgentHarness, input_value: CompactInput) -> DictOutput:
+async def compact(context: ToolCallContext, input_value: CompactInput) -> DictOutput:
+    harness = context.harness
     harness.messages = [
         HarnessMessage(role="system", content=harness.system_prompt),
         HarnessMessage(
@@ -185,8 +188,8 @@ async def compact(harness: AgentHarness, input_value: CompactInput) -> DictOutpu
 
 
 @tool()
-async def feedback(harness: AgentHarness, input_value: FeedbackInput) -> DictOutput:
-    response = await harness.request_feedback(
+async def feedback(context: ToolCallContext, input_value: FeedbackInput) -> DictOutput:
+    response = await context.harness.request_feedback(
         question=input_value.question,
         response_schema={
             "type": "object",
