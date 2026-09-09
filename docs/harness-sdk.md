@@ -334,6 +334,12 @@ The existing exported `codemode` tool remains available for compatibility. It
 discovers registered tools and returns raw JSON-mode outputs. New applications
 that require capability isolation should use `create_codemode_tool()`.
 
+All Code Mode worker transports, including local pool and isolated-process
+execution, now move values over the bounded JSON worker protocol instead of
+pickle. Values crossing the worker boundary must be JSON worker values;
+previously picklable types such as `bytes`, sets, and dataclasses are rejected
+before transport. Convert binary data to base64 strings in tool results.
+
 ### Code Mode Security
 
 RestrictedPython reduces the available Python language surface. It is not a
