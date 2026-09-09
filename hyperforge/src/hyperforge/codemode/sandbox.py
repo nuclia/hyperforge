@@ -230,24 +230,31 @@ class SandboxRunner:
             token = token_source()
         rx, tx = await asyncio.open_unix_connection(self.socket)
         reader, writer = SandboxReader(rx), SandboxWriter(tx)
+        incoming: asyncio.Task[SandboxMessage.AnyMessage] | None = None
         try:
             await writer.write_message(SandboxMessage.Run(run=request, token=token))
             while True:
+                if incoming is None:
+                    incoming = asyncio.create_task(reader.read_message())
                 try:
-                    msg = await reader.read_message()
+                    msg = await incoming
                 except asyncio.IncompleteReadError as exc:
                     raise RuntimeError(
                         "Sandbox connection closed unexpectedly"
                     ) from exc
+                incoming = None
                 if isinstance(msg, SandboxMessage.Done):
                     break
                 if isinstance(msg, SandboxMessage.Error):
                     raise RuntimeError(f"Python agent error: {msg.error}")
                 if not isinstance(msg, SandboxMessage.Request):
                     raise RuntimeError("Unexpected sandbox protocol message")
-                await self._run_remote_callback(reader, writer, msg.task)
+                incoming = await self._run_remote_callback(reader, writer, msg.task)
         finally:
             await self._cancel_callbacks()
+            if incoming is not None:
+                incoming.cancel()
+                await asyncio.gather(incoming, return_exceptions=True)
             writer.close()
             await writer.wait_closed()
 
@@ -256,7 +263,7 @@ class SandboxRunner:
         reader: "SandboxReader",
         writer: "SandboxWriter",
         task: RestrictedPythonTask,
-    ) -> None:
+    ) -> asyncio.Task[SandboxMessage.AnyMessage]:
         callback_task = asyncio.create_task(self.callback(task))
         self._callback_tasks.add(callback_task)
         incoming = asyncio.create_task(reader.read_message())
@@ -276,23 +283,27 @@ class SandboxRunner:
             except Exception as exc:
                 response = WorkerError(error=str(exc))
             await writer.write_message(SandboxMessage.Response(result=response))
+        except BaseException:
+            if incoming.done():
+                _consume_task_result(incoming)
+            else:
+                incoming.cancel()
+                await asyncio.gather(incoming, return_exceptions=True)
+            raise
         finally:
-            for candidate in (callback_task, incoming):
-                if not candidate.done():
-                    candidate.cancel()
-            done, still_pending = await asyncio.wait(
-                {callback_task, incoming}, timeout=CALLBACK_CANCEL_TIMEOUT
+            if not callback_task.done():
+                callback_task.cancel()
+            callback_done, still_pending = await asyncio.wait(
+                {callback_task}, timeout=CALLBACK_CANCEL_TIMEOUT
             )
-            for completed in done:
+            for completed in callback_done:
                 await asyncio.gather(completed, return_exceptions=True)
             if still_pending:
                 logger.warning("Sandbox callback ignored cancellation")
             self._callback_tasks.discard(callback_task)
             for remaining in still_pending:
-                if remaining is callback_task:
-                    self._track_orphaned_callback(callback_task)
-                else:
-                    remaining.add_done_callback(_consume_task_result)
+                self._track_orphaned_callback(remaining)
+        return incoming
 
     def run_in_process(self, request: WorkerExecutionRequest):
         pipe_worker, pipe_restricted = Pipe()

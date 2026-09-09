@@ -221,6 +221,94 @@ async def test_remote_callback_cancellation_is_bounded(
 
 
 @pytest.mark.asyncio
+async def test_remote_callback_keeps_frame_arriving_during_response_write() -> None:
+    write_started = asyncio.Event()
+    frame_read = asyncio.Event()
+
+    class Reader:
+        async def read_message(self):
+            await write_started.wait()
+            frame_read.set()
+            return SandboxMessage.Done()
+
+    class Writer:
+        async def write_message(self, _message):
+            write_started.set()
+            await frame_read.wait()
+
+    async def callback(_task: RestrictedPythonTask):
+        return None
+
+    runner = SandboxRunner.isolated_process(callback)
+    incoming = await runner._run_remote_callback(
+        Reader(),  # type: ignore[arg-type]
+        Writer(),  # type: ignore[arg-type]
+        RestrictedPythonTask(
+            function="capability", agent="test", args=(), keyword_args={}
+        ),
+    )
+
+    message = await asyncio.wait_for(incoming, timeout=0.2)
+
+    assert isinstance(message, SandboxMessage.Done)
+
+
+@pytest.mark.asyncio
+async def test_remote_run_consumes_frame_arriving_during_response_write(
+    monkeypatch: pytest.MonkeyPatch, socket_path: str
+) -> None:
+    done_frame_read = asyncio.Event()
+    original_read = SandboxReader.read_message
+    original_write = SandboxWriter.write_message
+
+    async def tracked_read(self):
+        message = await original_read(self)
+        if isinstance(message, SandboxMessage.Done):
+            done_frame_read.set()
+        return message
+
+    async def stalled_write(self, message):
+        await original_write(self, message)
+        if isinstance(message, SandboxMessage.Response):
+            await done_frame_read.wait()
+
+    monkeypatch.setattr(SandboxReader, "read_message", tracked_read)
+    monkeypatch.setattr(SandboxWriter, "write_message", stalled_write)
+
+    async def handler(rx: asyncio.StreamReader, tx: asyncio.StreamWriter) -> None:
+        reader, writer = SandboxReader(rx), SandboxWriter(tx)
+        run_message = await reader.read_message()
+        assert isinstance(run_message, SandboxMessage.Run)
+        await writer.write_message(
+            SandboxMessage.Request(
+                task=RestrictedPythonTask(
+                    function="capability", agent="test", args=(), keyword_args={}
+                )
+            )
+        )
+        response = await reader.read_message()
+        assert isinstance(response, SandboxMessage.Response)
+        await writer.write_message(SandboxMessage.Done())
+        writer.close()
+        await writer.wait_closed()
+
+    server = await asyncio.start_unix_server(handler, socket_path)
+
+    async def callback(_task: RestrictedPythonTask):
+        return None
+
+    runner = SandboxRunner.remote(socket_path, callback, token="server-secret")
+    request = WorkerExecutionRequest(
+        code="", local_vars={}, global_vars={}, function_names={}
+    )
+    try:
+        await asyncio.wait_for(runner.run(request), timeout=2)
+    finally:
+        server.close()
+        await server.wait_closed()
+
+
+@pytest.mark.asyncio
 async def test_remote_runners_share_client_session_limit(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
