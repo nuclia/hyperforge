@@ -1568,18 +1568,18 @@ async def test_tool_failure_log_includes_actionable_detail(mocker) -> None:
         model="test-model", model_client=Model(), tools=[HarnessTool("validate", fail)]
     )
     call = HarnessToolCall(id="call-42", name="validate", arguments={"value": "x"})
-    warning = mocker.patch("hyperforge.harness_sdk.harness.logger.warning")
+    info = mocker.patch("hyperforge.harness_sdk.harness.logger.info")
 
     await harness._execute_tool_call(call)
 
-    assert warning.call_count == 1
-    assert warning.call_args.args[:4] == (
+    assert info.call_count == 1
+    assert info.call_args.args[:4] == (
         "Agent tool execution failed: tool=%s call_id=%s error_type=%s error=%s",
         "validate",
         "call-42",
         "ValueError",
     )
-    assert str(warning.call_args.args[4]) == "identity field is invalid"
+    assert str(info.call_args.args[4]) == "identity field is invalid"
 
 
 def test_tool_requires_pydantic_handler_annotations() -> None:

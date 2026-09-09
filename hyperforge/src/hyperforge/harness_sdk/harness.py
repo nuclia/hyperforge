@@ -983,7 +983,7 @@ class AgentHarness:
                 context=reference,
             )
         except Exception as exc:
-            logger.warning(
+            logger.info(
                 "Agent tool execution failed: tool=%s call_id=%s error_type=%s error=%s",
                 call.name,
                 call.id,
