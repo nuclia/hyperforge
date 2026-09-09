@@ -139,7 +139,7 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
         if agent_obj is None:
             raise Exception(f"No tool found with id {tool_id}")
         return await agent_obj.choose_tool(
-            manager=manager, messages=messages, images=images
+            manager=manager, messages=messages, images=images, memory=memory
         )
 
     async def get_multi_tool_selection_prompt(
@@ -254,7 +254,11 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
         while count > self.config.max_turns is False and finished is False:
             count += 1
             resp, input_tokens, output_tokens = await self.main_agent.choose_tool(
-                manager, images, messages, EXIT_LOOP_TOOLS
+                manager=manager,
+                images=images,
+                messages=messages,
+                memory=memory,
+                extra_tools=EXIT_LOOP_TOOLS,
             )
             total_input_tokens += input_tokens
             total_output_tokens += output_tokens
