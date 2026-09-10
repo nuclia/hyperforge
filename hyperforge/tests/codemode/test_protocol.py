@@ -159,7 +159,9 @@ async def test_sandbox_server_accepts_missing_token_without_verifier(
 
 
 @pytest.mark.asyncio
-async def test_remote_runner_allows_missing_token(monkeypatch, socket_path: str) -> None:
+async def test_remote_runner_allows_missing_token(
+    monkeypatch, socket_path: str
+) -> None:
     monkeypatch.setenv("SANDBOX_VERIFY", "false")
     monkeypatch.delenv("SANDBOX_TOKEN", raising=False)
     monkeypatch.setenv("SANDBOX_CALLBACK_WAIT_SECONDS", "15")
