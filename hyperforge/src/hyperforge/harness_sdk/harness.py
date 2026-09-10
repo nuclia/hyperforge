@@ -14,11 +14,6 @@ from pydantic import BaseModel
 from .agents import published_agent_to_tools
 from .clients import ModelClient, ReasoningEffort
 from .context import format_context
-from .execution import (
-    current_tool_call_id,
-    reset_current_tool_call_id,
-    set_current_tool_call_id,
-)
 from .models import (
     HarnessConversation,
     HarnessEvent,
@@ -592,6 +587,7 @@ class AgentHarness:
         payload: dict[str, Any],
         *,
         persist: bool = True,
+        parent_call_id: str | None = None,
     ) -> HarnessEvent:
         event = HarnessEvent(
             id=uuid.uuid4().hex,
@@ -599,7 +595,7 @@ class AgentHarness:
             turn_id=self._turn_id,
             agent_id=self.agent_id,
             parent_agent_id=self.parent_agent_id,
-            parent_call_id=current_tool_call_id(),
+            parent_call_id=parent_call_id,
             category=self.category,
             tags=self.tags,
             metadata=self._persisted_metadata(),
@@ -973,11 +969,7 @@ class AgentHarness:
                 raise ValueError(f"Tool is not active: {call.name}")
             else:
                 context = ToolCallContext(harness=self, name=call.name, id=call.id)
-                token = set_current_tool_call_id(call.id)
-                try:
-                    output = await tool.execute(context, call.arguments)
-                finally:
-                    reset_current_tool_call_id(token)
+                output = await tool.execute(context, call.arguments)
                 result = output.model_dump(mode="json")
                 reference = tool.context(output)
                 content = format_context(reference)

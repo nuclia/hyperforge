@@ -25,7 +25,6 @@ from hyperforge.harness_sdk import (
     create_codemode_tool,
     tool,
 )
-from hyperforge.harness_sdk.execution import current_tool_call_id
 from hyperforge.harness_sdk.harness import (
     EMPTY_RESPONSE_RETRY_PROMPT,
     AgentResult,
@@ -115,20 +114,19 @@ def test_scoped_codemode_is_not_inherited_by_default() -> None:
 
 
 @pytest.mark.asyncio
-async def test_current_tool_call_id_is_isolated_between_parallel_calls() -> None:
+async def test_parallel_tool_calls_receive_their_own_call_context() -> None:
     ready = asyncio.Event()
     seen: dict[str, str | None] = {}
     count = 0
 
-    async def execute(harness: AgentHarness, value: ToolInput) -> ToolOutput:
-        del harness
+    async def execute(context: ToolCallContext, value: ToolInput) -> ToolOutput:
         nonlocal count
         count += 1
         if count == 2:
             ready.set()
         await ready.wait()
         await asyncio.sleep(0)
-        seen[value.value] = current_tool_call_id()
+        seen[value.value] = context.id
         return ToolOutput(value=value.value)
 
     first = HarnessTool("first", execute)
@@ -145,7 +143,6 @@ async def test_current_tool_call_id_is_isolated_between_parallel_calls() -> None
     )
 
     assert seen == {"a": "first-call", "b": "second-call"}
-    assert current_tool_call_id() is None
 
 
 def test_turn_loop_clears_pending_tool_result_after_non_empty_response() -> None:

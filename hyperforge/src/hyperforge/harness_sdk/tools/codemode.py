@@ -21,11 +21,6 @@ from hyperforge.codemode.sandbox import settings
 from hyperforge.definition import FunctionDefinition
 
 from ..context import format_context
-from ..execution import (
-    current_tool_call_id,
-    reset_current_tool_call_id,
-    set_current_tool_call_id,
-)
 from ..models import HarnessEventType
 from . import HarnessTool, ToolCallContext, ToolInheritancePolicy, tool
 
@@ -210,7 +205,7 @@ async def codemode(
         harness._check_limit("max_tool_calls", harness.usage.tool_calls)
         arguments = _tool_arguments(tool, task.args, task.keyword_args)
         output = await tool.execute(
-            ToolCallContext(harness=harness, name=tool.name), arguments
+            ToolCallContext(harness=harness, name=tool.name, id=context.id), arguments
         )
         return output.model_dump(mode="json")
 
@@ -328,6 +323,7 @@ def create_codemode_tool(
             socket,
             execution_limiter,
             runner,
+            parent_call_id=context.id,
         )
 
     execute.__name__ = name
@@ -348,13 +344,14 @@ async def _execute_scoped_codemode(
     socket: str | None,
     execution_limiter: CodeModeExecutionLimiter,
     runner: CodeModeRunner | None = None,
+    *,
+    parent_call_id: str | None = None,
 ) -> CodemodeOutput:
     capability_map = {capability.tool.name: capability for capability in capabilities}
     result = CodemodeOutput()
     output_state = _OutputState()
     nested_calls = 0
     cumulative_result_bytes = 0
-    parent_call_id = current_tool_call_id()
 
     async def dispatch(task: RestrictedPythonTask) -> Any:
         nonlocal nested_calls, cumulative_result_bytes
@@ -384,8 +381,8 @@ async def _execute_scoped_codemode(
                 },
                 **marker,
             },
+            parent_call_id=parent_call_id,
         )
-        token = set_current_tool_call_id(call_id)
         started = time.perf_counter()
         try:
             harness.usage.tool_calls += 1
@@ -417,7 +414,6 @@ async def _execute_scoped_codemode(
                 )
             sanitized_result = _sanitize_event_value(normalized)
         except BaseException as exc:
-            reset_current_tool_call_id(token)
             await harness.emit(
                 HarnessEventType.TOOL_FAILED,
                 {
@@ -427,6 +423,7 @@ async def _execute_scoped_codemode(
                     "duration_ms": round((time.perf_counter() - started) * 1000, 3),
                     **marker,
                 },
+                parent_call_id=parent_call_id,
             )
             if isinstance(exc, asyncio.CancelledError):
                 raise
@@ -435,7 +432,6 @@ async def _execute_scoped_codemode(
                 f"({type(exc).__name__})"
             ) from None
         else:
-            reset_current_tool_call_id(token)
             await harness.emit(
                 HarnessEventType.TOOL_COMPLETED,
                 {
@@ -446,6 +442,7 @@ async def _execute_scoped_codemode(
                     "result_bytes": result_bytes,
                     **marker,
                 },
+                parent_call_id=parent_call_id,
             )
             return normalized
 

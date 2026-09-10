@@ -496,7 +496,8 @@ publication never waits for the consumer. If the consumer falls behind by
 are dropped; persisted lifecycle events remain lossless. Events from child agents
 may interleave, but `turn_id`, `agent_id`, and `parent_agent_id` identify their
 origin. Events emitted inside a tool call also carry its `parent_call_id`;
-parallel calls use task-local call context and do not overwrite one another. Use
+each call receives its own `ToolCallContext` (use `context.emit()` to attribute
+events to the current call). Use
 `async with agent` when a caller may stop consuming early so the active turn and
 descendants are cleaned up.
 

@@ -10,7 +10,12 @@ from jsonschema import validate as validate_json_schema
 from pydantic import BaseModel, ValidationError
 
 from ..context import make_context
-from ..models import HarnessContextReference, HarnessContextType
+from ..models import (
+    HarnessContextReference,
+    HarnessContextType,
+    HarnessEvent,
+    HarnessEventType,
+)
 from ..schema import flatten_json_schema
 
 if TYPE_CHECKING:
@@ -38,6 +43,21 @@ class ToolCallContext:
     harness: "AgentHarness"
     name: str
     id: str | None = None
+
+    async def emit(
+        self,
+        event_type: HarnessEventType,
+        payload: dict[str, Any],
+        *,
+        persist: bool = True,
+    ) -> "HarnessEvent":
+        """Emit an event attributed to this tool call."""
+        return await self.harness.emit(
+            event_type,
+            payload,
+            persist=persist,
+            parent_call_id=self.id,
+        )
 
 
 @dataclass(frozen=True)
