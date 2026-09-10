@@ -154,8 +154,6 @@ class SandboxRunner:
             token = token_source
         else:
             token = token_source()
-        if token is None:
-            raise RuntimeError("SANDBOX_TOKEN is required for remote codemode")
         rx, tx = await asyncio.open_unix_connection(self.socket)
         reader, writer = SandboxReader(rx), SandboxWriter(tx)
         try:
@@ -409,8 +407,6 @@ async def run_sandbox_server(
     server_settings = SandboxSettings()
     assert server_settings.sandbox_socket is not None
     sandbox_token = server_settings.sandbox_token
-    if token_verifier is None and sandbox_token is None:
-        raise RuntimeError("SANDBOX_TOKEN is required for the sandbox server")
     if server_settings.sandbox_verify:
         _verify_connectivity()
 
@@ -425,7 +421,11 @@ async def run_sandbox_server(
                 valid_token = (
                     await token_verifier(token)
                     if token_verifier is not None
-                    else hmac.compare_digest(token, sandbox_token or "")
+                    else (
+                        True
+                        if sandbox_token is None
+                        else hmac.compare_digest(token, sandbox_token)
+                    )
                 )
                 if not valid_token:
                     raise PermissionError("Invalid sandbox token")

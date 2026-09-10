@@ -57,6 +57,4 @@ def run():  # pragma: no cover
 
     if sandbox_settings.sandbox_socket is None:
         raise RuntimeError("SANDBOX_SOCKET is required for the sandbox server")
-    if sandbox_settings.sandbox_token is None:
-        raise RuntimeError("SANDBOX_TOKEN is required for the sandbox server")
     asyncio.run(run_servers(sandbox_settings.sandbox_metrics_port))

@@ -36,6 +36,24 @@ async def sandbox_conn(monkeypatch):
 
 
 @pytest.fixture
+async def tokenless_sandbox_conn(monkeypatch):
+    with tempfile.TemporaryDirectory() as path:
+        socket = f"{path}/sandbox.sock"
+        monkeypatch.setenv("SANDBOX_SOCKET", socket)
+        monkeypatch.setenv("SANDBOX_VERIFY", "false")
+        monkeypatch.delenv("SANDBOX_TOKEN", raising=False)
+        task = asyncio.create_task(sandbox.run_sandbox_server())
+        await asyncio.sleep(0.1)
+        rx, tx = await asyncio.open_unix_connection(socket)
+        yield (sandbox.SandboxReader(rx), sandbox.SandboxWriter(tx))
+
+        tx.close()
+        await tx.wait_closed()
+        task.cancel()
+        await asyncio.gather(task, return_exceptions=True)
+
+
+@pytest.fixture
 async def long_timeout(monkeypatch):
     monkeypatch.setenv("SANDBOX_CALLBACK_WAIT_SECONDS", "15")
     yield
@@ -48,6 +66,17 @@ async def test_sandbox_no_code(sandbox_conn, long_timeout):
 
     (rx, tx) = sandbox_conn
     await tx.write_message(SandboxMessage.Run(request, token="test-token"))
+    message = await rx.read_message()
+    assert isinstance(message, SandboxMessage.Done)
+
+
+async def test_sandbox_token_is_optional(tokenless_sandbox_conn, long_timeout):
+    request = WorkerExecutionRequest(
+        code="", question="Q?", local_vars={}, global_vars={}, function_names={}
+    )
+
+    (rx, tx) = tokenless_sandbox_conn
+    await tx.write_message(SandboxMessage.Run(request))
     message = await rx.read_message()
     assert isinstance(message, SandboxMessage.Done)
 

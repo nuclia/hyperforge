@@ -144,28 +144,38 @@ async def test_sandbox_server_uses_token_verifier_hook(
 
 
 @pytest.mark.asyncio
-async def test_sandbox_server_requires_token_without_verifier(
+async def test_sandbox_server_accepts_missing_token_without_verifier(
     monkeypatch, socket_path: str
 ) -> None:
     monkeypatch.setenv("SANDBOX_VERIFY", "false")
     monkeypatch.delenv("SANDBOX_TOKEN", raising=False)
-    monkeypatch.setenv("SANDBOX_SOCKET", socket_path)
-
-    with pytest.raises(RuntimeError, match="SANDBOX_TOKEN is required"):
-        await run_sandbox_server()
+    monkeypatch.setenv("SANDBOX_CALLBACK_WAIT_SECONDS", "15")
+    server_task = await _serve(monkeypatch, socket_path)
+    try:
+        await _run_client(socket_path, "value = 1", token=None)
+    finally:
+        server_task.cancel()
+        await asyncio.gather(server_task, return_exceptions=True)
 
 
 @pytest.mark.asyncio
-async def test_remote_runner_requires_token(monkeypatch, socket_path: str) -> None:
+async def test_remote_runner_allows_missing_token(
+    monkeypatch, socket_path: str
+) -> None:
+    monkeypatch.setenv("SANDBOX_VERIFY", "false")
     monkeypatch.delenv("SANDBOX_TOKEN", raising=False)
+    monkeypatch.setenv("SANDBOX_CALLBACK_WAIT_SECONDS", "15")
 
     async def callback(task):
         return None
 
+    server_task = await _serve(monkeypatch, socket_path)
     runner = SandboxRunner.remote(socket_path, callback)
-
-    with pytest.raises(RuntimeError, match="SANDBOX_TOKEN is required"):
+    try:
         await runner.run(_empty_request())
+    finally:
+        server_task.cancel()
+        await asyncio.gather(server_task, return_exceptions=True)
 
 
 @pytest.mark.asyncio
