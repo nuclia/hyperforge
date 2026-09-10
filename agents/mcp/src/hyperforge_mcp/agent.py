@@ -215,7 +215,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             )
 
             prompt_id: str = resp["prompt_id"]
-            reason: str = resp["reason"]
+            reason: str = resp.get("reason", "")
             await memory.add_step(
                 step_module=self.config.module,
                 step_title=self.step_title("Prompt selection"),
@@ -1014,6 +1014,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             images,
             messages,
             tracking=memory.get_tracking_info(),
+            system=system,
         )
         total_input_tokens += input_tokens
         total_output_tokens += output_tokens
@@ -1043,7 +1044,8 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                 memory,
                 images,
                 messages,
-                EXIT_LOOP_TOOLS,
+                extra_tools=EXIT_LOOP_TOOLS,
+                system=system,
                 tracking=memory.get_tracking_info(),
             )
             total_input_tokens += input_tokens
