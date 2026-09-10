@@ -97,3 +97,6 @@ hyperforge-standalone = "hyperforge.standalone:run.run"
 
 [tool.ruff]
 extend = "../ruff.toml"
+
+[tool.ruff.lint.isort]
+known-third-party = ["alembic"]

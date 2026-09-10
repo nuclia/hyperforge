@@ -1,10 +1,10 @@
 import os
 from logging.config import fileConfig
 
+from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 import hyperforge.db.agents  # noqa
-from alembic import context
 from hyperforge.database import metadata
 from hyperforge.db.settings import DataManagerSettings
 
