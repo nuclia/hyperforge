@@ -396,13 +396,42 @@ async def test_choose_tool_only_sends_compatible_tools_to_nua():
     )
     await agent.preload_tools()
     captured_items = []
+    add_step_items = []
 
     async def execute_raw(item, tracking=None):
         captured_items.append(item)
-        return SimpleNamespace(tools=None), 0.0, 0.0
+        return SimpleNamespace(tools=None, reasoning=""), 0.0, 0.0
+
+    async def add_step(
+        step_module: str = "",
+        step_title: str = "",
+        step_reason: str = "",
+        step_value: str = "",
+        step_agent_path: str = "",
+        input_nuclia_tokens: int = 0,
+        output_nuclia_tokens: int = 0,
+        error: str = "",
+        timeit: float = 0.0,
+    ):
+        add_step_items.append(
+            (
+                step_module,
+                step_title,
+                step_reason,
+                step_value,
+                step_agent_path,
+                input_nuclia_tokens,
+                output_nuclia_tokens,
+                error,
+                timeit,
+            )
+        )
 
     await agent.choose_tool(
-        manager=SimpleNamespace(execute_raw=execute_raw), images=[], messages=[]
+        manager=SimpleNamespace(execute_raw=execute_raw),
+        images=[],
+        messages=[],
+        memory=SimpleNamespace(add_step=add_step),
     )
 
     assert [tool.name for tool in captured_items[0].tools] == ["valid"]
