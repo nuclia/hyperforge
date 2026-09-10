@@ -222,19 +222,31 @@ async def test_sandbox_rejects_wrong_token(sandbox_conn):
         await rx.read_message()
 
 
-async def test_remote_runner_requires_token(monkeypatch, tmp_path):
-    monkeypatch.setattr(sandbox.settings, "sandbox_token", None)
+async def test_remote_runner_allows_missing_token(monkeypatch):
+    with tempfile.TemporaryDirectory() as path:
+        socket = f"{path}/sandbox.sock"
+        monkeypatch.setenv("SANDBOX_SOCKET", socket)
+        monkeypatch.setenv("SANDBOX_VERIFY", "false")
+        monkeypatch.setenv("SANDBOX_CALLBACK_WAIT_SECONDS", "15")
+        monkeypatch.delenv("SANDBOX_TOKEN", raising=False)
+        task = asyncio.create_task(sandbox.run_sandbox_server())
+        for _ in range(100):
+            if os.path.exists(socket):
+                break
+            await asyncio.sleep(0.01)
 
-    async def callback(_task):
-        return None
+        async def callback(_task):
+            return None
 
-    runner = sandbox.SandboxRunner.remote(str(tmp_path / "unused.sock"), callback)
-    request = WorkerExecutionRequest(
-        code="", question="Q?", local_vars={}, global_vars={}, function_names={}
-    )
-
-    with pytest.raises(RuntimeError, match="SANDBOX_TOKEN is required"):
-        await runner.run(request)
+        runner = sandbox.SandboxRunner.remote(socket, callback)
+        request = WorkerExecutionRequest(
+            code="", question="Q?", local_vars={}, global_vars={}, function_names={}
+        )
+        try:
+            await runner.run(request)
+        finally:
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
 
 
 async def test_sandbox_rejects_concurrent_session(

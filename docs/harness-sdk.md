@@ -351,10 +351,11 @@ file-descriptor, and wall-clock limits. Keep the API process outside that
 boundary.
 
 Scoped Code Mode defaults to `remote_required=True`. It fails closed when
-`SANDBOX_SOCKET` is absent and never silently falls back to local execution.
-Remote clients and the sandbox service both require a non-empty
-`SANDBOX_TOKEN`; the Unix socket ACL is an additional control, not a replacement
-for token authentication. `remote_required=False` enables the isolated local
+`SANDBOX_SOCKET` or `SANDBOX_TOKEN` is absent and never silently falls back to
+local execution. The generic sandbox service can run without a token for
+deployments that rely solely on Unix socket ACLs, but scoped Code Mode still
+requires one; the socket ACL is an additional control, not a replacement for
+token authentication. `remote_required=False` enables the isolated local
 process and is intended only for deterministic tests and explicitly trusted
 development environments.
 
