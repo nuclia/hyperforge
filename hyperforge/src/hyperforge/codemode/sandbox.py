@@ -43,14 +43,14 @@ class SandboxSettings(BaseSettings):
     sandbox_socket_mode: str = "0600"
     sandbox_socket_group: str | None = None
     sandbox_metrics_port: int = 8091
-    sandbox_metrics_host: str = "127.0.0.1"
-    sandbox_metrics_enabled: bool = False
+    sandbox_metrics_host: str = "0.0.0.0"
+    sandbox_metrics_enabled: bool = True
     sandbox_token: str | None = None
-    sandbox_max_concurrent_sessions: int = Field(default=4, gt=0)
-    sandbox_max_session_runtime_seconds: float = Field(
-        default=60, gt=0, allow_inf_nan=False
+    sandbox_max_concurrent_sessions: int | None = Field(default=None, gt=0)
+    sandbox_max_session_runtime_seconds: float | None = Field(
+        default=None, gt=0, allow_inf_nan=False
     )
-    sandbox_max_session_memory_bytes: int = Field(default=512 * 1024 * 1024, gt=0)
+    sandbox_max_session_memory_bytes: int | None = Field(default=None, gt=0)
     sandbox_timeout_slack_seconds: float = Field(
         default=10.0, ge=0, allow_inf_nan=False
     )
@@ -154,9 +154,12 @@ class SandboxRunner:
                 runtime = message.run.max_runtime_seconds
                 if runtime is None:
                     runtime = settings.sandbox_max_session_runtime_seconds
-                async with asyncio.timeout(
+                timeout = (
                     runtime + settings.sandbox_timeout_slack_seconds
-                ):
+                    if runtime is not None
+                    else None
+                )
+                async with asyncio.timeout(timeout):
                     return await self._run_with_remote_admission(message.run)
             except TimeoutError as exc:
                 raise RuntimeError("Codemode execution timed out") from exc
@@ -174,8 +177,10 @@ class SandboxRunner:
     async def _run_in_pool(self, request: WorkerExecutionRequest):
         loop = asyncio.get_running_loop()
         pipe_worker, pipe_restricted = Pipe()
-        worker = PythonAgentWorker(pipe_worker, debug=self.debug)
-        controller_task = asyncio.create_task(self.background_task(pipe_restricted))
+        worker = PythonAgentWorker(pipe_worker, debug=self.debug, json_protocol=False)
+        controller_task = asyncio.create_task(
+            self.background_task(pipe_restricted, json_protocol=False)
+        )
         try:
             await loop.run_in_executor(
                 self.pool,
@@ -324,7 +329,9 @@ class SandboxRunner:
         pipe_worker.close()
         return controller_task, process
 
-    async def background_task(self, pipe: Connection) -> bool:
+    async def background_task(
+        self, pipe: Connection, *, json_protocol: bool = True
+    ) -> bool:
         loop = asyncio.get_running_loop()
         context = contextvars.copy_context()
         try:
@@ -334,6 +341,7 @@ class SandboxRunner:
                 pipe,
                 loop,
                 context,
+                json_protocol,
             )
         finally:
             pipe.close()
@@ -383,14 +391,18 @@ class SandboxRunner:
         pipe: Connection,
         loop: asyncio.AbstractEventLoop,
         context: contextvars.Context,
+        json_protocol: bool = True,
     ) -> bool:
         try:
             while True:
-                item = decode_protocol_value(
-                    pipe.recv_bytes(MAX_PACKET_BYTES),
-                    "Local sandbox request",
-                    max_bytes=MAX_PACKET_BYTES,
-                )
+                if json_protocol:
+                    item = decode_protocol_value(
+                        pipe.recv_bytes(MAX_PACKET_BYTES),
+                        "Local sandbox request",
+                        max_bytes=MAX_PACKET_BYTES,
+                    )
+                else:
+                    item = pipe.recv()
                 if not isinstance(item, RestrictedPythonTask):
                     raise ValueError("Invalid local sandbox request")
                 if item.function == "_error":
@@ -421,19 +433,22 @@ class SandboxRunner:
                     result = future.result()
                 except Exception as exc:
                     result = WorkerError(error=str(exc))
-                try:
-                    encoded = encode_protocol_value(
-                        result,
-                        "Local sandbox response",
-                        max_bytes=MAX_PACKET_BYTES,
-                    )
-                except ValueError as exc:
-                    encoded = encode_protocol_value(
-                        WorkerError(error=str(exc)),
-                        "Local sandbox response error",
-                        max_bytes=MAX_PACKET_BYTES,
-                    )
-                pipe.send_bytes(encoded)
+                if json_protocol:
+                    try:
+                        encoded = encode_protocol_value(
+                            result,
+                            "Local sandbox response",
+                            max_bytes=MAX_PACKET_BYTES,
+                        )
+                    except ValueError as exc:
+                        encoded = encode_protocol_value(
+                            WorkerError(error=str(exc)),
+                            "Local sandbox response error",
+                            max_bytes=MAX_PACKET_BYTES,
+                        )
+                    pipe.send_bytes(encoded)
+                else:
+                    pipe.send(result)
         except EOFError:
             return False
 
@@ -526,14 +541,18 @@ class SandboxSession:
 
     async def run(self, request: WorkerExecutionRequest):
         memory = settings.sandbox_max_session_memory_bytes
-        if request.max_memory_bytes is not None:
+        if memory is None:
+            memory = request.max_memory_bytes
+        elif request.max_memory_bytes is not None:
             memory = min(memory, request.max_memory_bytes)
         request = request.model_copy(update={"max_memory_bytes": memory})
         self.task, self.process = self.runner.run_in_process(request)
         try:
             await self._start_timeout(self.callback_wait_seconds)
             runtime = settings.sandbox_max_session_runtime_seconds
-            if request.max_runtime_seconds is not None:
+            if runtime is None:
+                runtime = request.max_runtime_seconds
+            elif request.max_runtime_seconds is not None:
                 runtime = min(runtime, request.max_runtime_seconds)
             async with asyncio.timeout(runtime):
                 clean_exit = await self.task
@@ -625,17 +644,19 @@ async def run_sandbox_server(
 
     active_sessions = 0
     admission_lock = asyncio.Lock()
-    handshake_limit = asyncio.Semaphore(settings.sandbox_max_concurrent_sessions)
+    max_sessions = settings.sandbox_max_concurrent_sessions
+    handshake_limit = asyncio.Semaphore(max_sessions) if max_sessions is not None else None
 
     async def handler(rx: asyncio.StreamReader, tx: asyncio.StreamWriter):
         nonlocal active_sessions
         reader = SandboxReader(rx)
         writer = SandboxWriter(tx)
-        if handshake_limit.locked():
+        if handshake_limit is not None and handshake_limit.locked():
             writer.close()
             await writer.wait_closed()
             return
-        await handshake_limit.acquire()
+        if handshake_limit is not None:
+            await handshake_limit.acquire()
         try:
             async with asyncio.timeout(1):
                 msg = await reader.read_message()
@@ -659,10 +680,12 @@ async def run_sandbox_server(
             await writer.wait_closed()
             return
         finally:
-            handshake_limit.release()
+            if handshake_limit is not None:
+                handshake_limit.release()
 
         async with admission_lock:
-            if active_sessions >= settings.sandbox_max_concurrent_sessions:
+            active_limit = settings.sandbox_max_concurrent_sessions
+            if active_limit is not None and active_sessions >= active_limit:
                 await writer.write_message(
                     SandboxMessage.Error(error="Sandbox concurrency limit reached")
                 )
@@ -712,6 +735,8 @@ def _consume_task_result(task: asyncio.Future[Any]) -> None:
 
 async def _acquire_remote_session() -> None:
     global _remote_active_sessions
+    if settings.sandbox_max_concurrent_sessions is None:
+        return
     while True:
         with _remote_admission_lock:
             if _remote_active_sessions < settings.sandbox_max_concurrent_sessions:
@@ -722,6 +747,8 @@ async def _acquire_remote_session() -> None:
 
 def _release_remote_session() -> None:
     global _remote_active_sessions
+    if settings.sandbox_max_concurrent_sessions is None:
+        return
     with _remote_admission_lock:
         if _remote_active_sessions <= 0:
             raise RuntimeError("Remote sandbox admission counter underflow")

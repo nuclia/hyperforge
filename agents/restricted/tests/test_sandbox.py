@@ -1,6 +1,7 @@
 import asyncio
 import os
 import tempfile
+from concurrent.futures import ProcessPoolExecutor
 
 import pytest
 from hyperforge.codemode import sandbox
@@ -249,6 +250,34 @@ async def test_remote_runner_allows_missing_token(monkeypatch):
             await asyncio.gather(task, return_exceptions=True)
 
 
+async def test_local_runner_preserves_legacy_python_values():
+    received = []
+
+    async def callback(task):
+        received.append(task.keyword_args["value"])
+        return task.keyword_args["value"]
+
+    with ProcessPoolExecutor(max_workers=1) as pool:
+        runner = sandbox.SandboxRunner.with_pool(pool, callback)
+        await runner.run(
+            WorkerExecutionRequest(
+                code="passthrough(value=value)",
+                question="Q?",
+                local_vars={"value": b"legacy-pickle-value"},
+                global_vars={},
+                function_names={
+                    "self": {
+                        "passthrough": FunctionDefinition(
+                            name="passthrough", description="", parameters={}
+                        )
+                    }
+                },
+            )
+        )
+
+    assert received == [b"legacy-pickle-value"]
+
+
 async def test_sandbox_rejects_concurrent_session(
     sandbox_conn, long_timeout, monkeypatch
 ):
@@ -286,14 +315,15 @@ async def test_sandbox_rejects_concurrent_session(
     assert isinstance(await first_rx.read_message(), SandboxMessage.Done)
 
 
-def test_sandbox_settings_default_to_private_optional_metrics() -> None:
+def test_sandbox_settings_preserve_legacy_metrics_defaults() -> None:
     configured = sandbox.SandboxSettings()
 
-    assert configured.sandbox_metrics_enabled is False
-    assert configured.sandbox_metrics_host == "127.0.0.1"
+    assert configured.sandbox_metrics_enabled is True
+    assert configured.sandbox_metrics_host == "0.0.0.0"
     assert configured.sandbox_socket_mode == "0600"
-    assert configured.sandbox_max_session_runtime_seconds == 60
-    assert configured.sandbox_max_session_memory_bytes == 512 * 1024 * 1024
+    assert configured.sandbox_max_concurrent_sessions is None
+    assert configured.sandbox_max_session_runtime_seconds is None
+    assert configured.sandbox_max_session_memory_bytes is None
 
 
 def test_sandbox_settings_accept_shared_group_socket_mode() -> None:

@@ -112,10 +112,13 @@ def guarded_inplace(operator: str, left: Any, right: Any) -> Any:
 class PythonAgentWorker:
     context: Optional[Context] = None
 
-    def __init__(self, pipe: Connection, debug: bool = False):
+    def __init__(
+        self, pipe: Connection, debug: bool = False, json_protocol: bool = True
+    ):
         self.pipe = pipe
         self.functions_agent_id: Dict[str, List[str]] = {}
         self.debug = debug
+        self.json_protocol = json_protocol
 
     def _process_question_context_sync(
         self,
@@ -241,12 +244,18 @@ class PythonAgentWorker:
         return self._receive()
 
     def _send(self, task: RestrictedPythonTask) -> None:
-        self.pipe.send_bytes(encode_protocol_value(task, "Local sandbox request"))
+        if self.json_protocol:
+            self.pipe.send_bytes(encode_protocol_value(task, "Local sandbox request"))
+        else:
+            self.pipe.send(task)
 
     def _receive(self) -> Any:
-        result = decode_protocol_value(
-            self.pipe.recv_bytes(MAX_PROTOCOL_BYTES), "Local sandbox response"
-        )
+        if self.json_protocol:
+            result = decode_protocol_value(
+                self.pipe.recv_bytes(MAX_PROTOCOL_BYTES), "Local sandbox response"
+            )
+        else:
+            result = self.pipe.recv()
         if isinstance(result, WorkerError):
             raise RuntimeError(result.error)
         return result

@@ -334,11 +334,12 @@ The existing exported `codemode` tool remains available for compatibility. It
 discovers registered tools and returns raw JSON-mode outputs. New applications
 that require capability isolation should use `create_codemode_tool()`.
 
-All Code Mode worker transports, including local pool and isolated-process
-execution, now move values over the bounded JSON worker protocol instead of
-pickle. Values crossing the worker boundary must be JSON worker values;
-previously picklable types such as `bytes`, sets, and dataclasses are rejected
-before transport. Convert binary data to base64 strings in tool results.
+Remote and isolated-process Code Mode execution move values over the bounded
+JSON worker protocol. Values crossing those worker boundaries must be JSON
+worker values; types such as `bytes`, sets, and dataclasses are rejected before
+transport. Convert binary data to base64 strings in tool results. The legacy
+local pool used by the restricted agent retains its existing pickle transport
+for backward compatibility.
 
 ### Code Mode Security
 
@@ -361,21 +362,22 @@ development environments.
 
 Sandbox deployment settings use secure defaults:
 
-- `SANDBOX_MAX_CONCURRENT_SESSIONS=4` bounds authenticated worker sessions and
-  concurrent authentication handshakes.
-- `SANDBOX_MAX_SESSION_RUNTIME_SECONDS=60` and
-  `SANDBOX_MAX_SESSION_MEMORY_BYTES=536870912` impose server-owned ceilings even
-  when a client omits limits. The remote client also bounds each connection by
-  the requested runtime (or the session ceiling when no runtime is requested)
-  plus `SANDBOX_TIMEOUT_SLACK_SECONDS=10`, so a hung sandbox cannot stall a
-  caller indefinitely.
+- `SANDBOX_MAX_CONCURRENT_SESSIONS` bounds authenticated worker sessions and
+  concurrent authentication handshakes when configured.
+- `SANDBOX_MAX_SESSION_RUNTIME_SECONDS` and
+  `SANDBOX_MAX_SESSION_MEMORY_BYTES` impose server-owned ceilings when
+  configured. Existing compatibility deployments leave these unset. Scoped
+  Code Mode supplies per-request runtime and memory limits. The remote client
+  bounds connections that have a requested or server runtime plus
+  `SANDBOX_TIMEOUT_SLACK_SECONDS=10`.
 - `SANDBOX_SOCKET_MODE=0600` restricts the socket to its owner.
 - `SANDBOX_SOCKET_GROUP` optionally changes group ownership. Use an explicitly
   provisioned shared group with `SANDBOX_SOCKET_MODE=0660` when the API and
   sandbox run as different non-root users.
-- `SANDBOX_METRICS_ENABLED=false` avoids creating an IP listener. If enabled,
-  `SANDBOX_METRICS_HOST` defaults to `127.0.0.1` and
-  `SANDBOX_METRICS_PORT` defaults to `8091`.
+- `SANDBOX_METRICS_ENABLED=true`, `SANDBOX_METRICS_HOST=0.0.0.0`, and
+  `SANDBOX_METRICS_PORT=8091` preserve the existing metrics endpoint. Set
+  `SANDBOX_METRICS_ENABLED=false` to avoid creating an IP listener, or bind the
+  endpoint to `127.0.0.1` when it does not need to be remotely scraped.
 - Local process IPC and remote length-prefixed JSON messages are bounded;
   oversized run requests, callbacks, responses, and frames are rejected.
 
