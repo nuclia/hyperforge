@@ -26,6 +26,46 @@ be reused for multiple turns in the same conversation.
 
 ## Creating an Agent
 
+For a standard OpenAI-compatible Chat Completions API, pass the API's `/v1`
+base URL to `OpenAIModelClient`. An API key is optional for local servers such as
+LM Studio:
+
+```python
+import asyncio
+
+from hyperforge.harness_sdk import AgentHarness, HarnessEventType, OpenAIModelClient
+
+
+async def main() -> None:
+    model_client = OpenAIModelClient(
+        base_url="http://localhost:1234/v1",
+        # api_key="your-api-key",  # Required by most hosted providers.
+    )
+    agent = AgentHarness(
+        model="google/gemma-4-26b-a4b",
+        model_client=model_client,
+        system_prompt="You are a concise assistant.",
+    )
+
+    try:
+        async for event in agent.run("Explain what an agent harness does."):
+            if event.type == HarnessEventType.TEXT_DELTA:
+                print(event.payload["text"], end="", flush=True)
+    finally:
+        await model_client.aclose()
+
+
+asyncio.run(main())
+```
+
+The endpoint must implement streaming `POST /chat/completions` responses using
+OpenAI's server-sent event format. The client also translates harness tools and
+tool results to OpenAI function-calling messages. Optional generation settings
+such as `temperature`, `max_tokens`, and `tool_choice` can be passed to
+`OpenAIModelClient`.
+
+### Nuclia
+
 Hyperforge includes `NucliaModelClient`, which connects the harness to Nuclia's
 chat-completions endpoint through Hyperforge's existing asynchronous NUA client:
 

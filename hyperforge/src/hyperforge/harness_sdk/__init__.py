@@ -17,6 +17,9 @@ from .clients import (
     NucliaChatCompletionsClient,
     NucliaChatCompletionsError,
     NucliaModelClient,
+    OpenAIChatCompletionsClient,
+    OpenAIChatCompletionsError,
+    OpenAIModelClient,
     ReasoningEffort,
 )
 from .context import context_schema, format_context, make_context, register_context
@@ -75,6 +78,9 @@ __all__ = [
     "LLMCallError",
     "ModelClient",
     "ModelDelta",
+    "OpenAIChatCompletionsClient",
+    "OpenAIChatCompletionsError",
+    "OpenAIModelClient",
     "NucliaModelClient",
     "NucliaChatCompletionsClient",
     "NucliaChatCompletionsError",
