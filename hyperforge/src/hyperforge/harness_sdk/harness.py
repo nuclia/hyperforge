@@ -23,7 +23,7 @@ from .models import (
     HarnessToolCall,
 )
 from .storage import HarnessStorageProtocol, InMemoryHarnessStorage
-from .tools import HarnessTool, ToolCallContext
+from .tools import HarnessTool, ToolCallContext, ToolInheritancePolicy
 from .tools.core import DictOutput, SendMessageInput, SpawnAgentInput, create_core_tools
 from .usage import HarnessUsage, UsageLimitExceeded, UsageLimits
 
@@ -587,6 +587,7 @@ class AgentHarness:
         payload: dict[str, Any],
         *,
         persist: bool = True,
+        parent_call_id: str | None = None,
     ) -> HarnessEvent:
         event = HarnessEvent(
             id=uuid.uuid4().hex,
@@ -594,6 +595,7 @@ class AgentHarness:
             turn_id=self._turn_id,
             agent_id=self.agent_id,
             parent_agent_id=self.parent_agent_id,
+            parent_call_id=parent_call_id,
             category=self.category,
             tags=self.tags,
             metadata=self._persisted_metadata(),
@@ -1036,7 +1038,11 @@ class AgentHarness:
             model=self._config.model,
             model_client=self._config.model_client,
             reasoning_effort=self._config.reasoning_effort,
-            tools=self._config.tools,
+            tools=(
+                tool
+                for tool in self._config.tools
+                if tool.inheritance == ToolInheritancePolicy.INHERIT
+            ),
             system_prompt=self._config.system_prompt,
             title=self._config.title,
             conversation_id=self.conversation_id,

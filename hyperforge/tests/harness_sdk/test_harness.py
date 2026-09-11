@@ -22,6 +22,7 @@ from hyperforge.harness_sdk import (
     UsageLimitExceeded,
     UsageLimits,
     codemode,
+    create_codemode_tool,
     tool,
 )
 from hyperforge.harness_sdk.harness import (
@@ -92,6 +93,56 @@ def test_codemode_can_be_registered_explicitly() -> None:
     )
 
     assert "codemode" in {tool.name for tool in harness.iter_tools()}
+
+
+def test_scoped_codemode_is_not_inherited_by_default() -> None:
+    async def execute(_harness: AgentHarness, value: ToolInput) -> ToolOutput:
+        return ToolOutput(value=value.value)
+
+    ordinary = HarnessTool("ordinary", execute)
+    scoped = create_codemode_tool(capabilities=())
+    harness = AgentHarness(
+        model="test-model",
+        model_client=Model(),
+        tools=[ordinary, scoped],
+    )
+
+    child = harness._create_child("child", include_history=False)
+
+    assert "ordinary" in child._tools
+    assert "codemode" not in child._tools
+
+
+@pytest.mark.asyncio
+async def test_parallel_tool_calls_receive_their_own_call_context() -> None:
+    ready = asyncio.Event()
+    seen: dict[str, str | None] = {}
+    count = 0
+
+    async def execute(context: ToolCallContext, value: ToolInput) -> ToolOutput:
+        nonlocal count
+        count += 1
+        if count == 2:
+            ready.set()
+        await ready.wait()
+        await asyncio.sleep(0)
+        seen[value.value] = context.id
+        return ToolOutput(value=value.value)
+
+    first = HarnessTool("first", execute)
+    second = HarnessTool("second", execute)
+    harness = AgentHarness(
+        model="test-model", model_client=Model(), tools=[first, second]
+    )
+
+    await harness._execute_tool_calls(
+        [
+            HarnessToolCall(id="first-call", name="first", arguments={"value": "a"}),
+            HarnessToolCall(id="second-call", name="second", arguments={"value": "b"}),
+        ]
+    )
+
+    assert seen == {"a": "first-call", "b": "second-call"}
 
 
 def test_turn_loop_clears_pending_tool_result_after_non_empty_response() -> None:

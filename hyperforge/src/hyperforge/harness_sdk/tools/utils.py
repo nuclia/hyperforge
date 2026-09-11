@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 from dataclasses import dataclass, field
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any, Awaitable, Callable, cast, get_type_hints
 
 from jsonschema import ValidationError as JsonSchemaValidationError
@@ -9,7 +10,12 @@ from jsonschema import validate as validate_json_schema
 from pydantic import BaseModel, ValidationError
 
 from ..context import make_context
-from ..models import HarnessContextReference, HarnessContextType
+from ..models import (
+    HarnessContextReference,
+    HarnessContextType,
+    HarnessEvent,
+    HarnessEventType,
+)
 from ..schema import flatten_json_schema
 
 if TYPE_CHECKING:
@@ -19,6 +25,11 @@ type ToolHandler[InputT: BaseModel, OutputT: BaseModel] = Callable[
     [ToolCallContext, InputT], Awaitable[OutputT]
 ]
 type ContextFactory[OutputT: BaseModel] = Callable[[OutputT], HarnessContextReference]
+
+
+class ToolInheritancePolicy(StrEnum):
+    INHERIT = "inherit"
+    DO_NOT_INHERIT = "do_not_inherit"
 
 
 @dataclass(frozen=True)
@@ -33,6 +44,21 @@ class ToolCallContext:
     name: str
     id: str | None = None
 
+    async def emit(
+        self,
+        event_type: HarnessEventType,
+        payload: dict[str, Any],
+        *,
+        persist: bool = True,
+    ) -> "HarnessEvent":
+        """Emit an event attributed to this tool call."""
+        return await self.harness.emit(
+            event_type,
+            payload,
+            persist=persist,
+            parent_call_id=self.id,
+        )
+
 
 @dataclass(frozen=True)
 class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
@@ -43,6 +69,7 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
     parameters_schema: dict[str, Any] | None = None
     context_factory: ContextFactory[OutputT] | None = None
     lazy_load: bool = False
+    inheritance: ToolInheritancePolicy = ToolInheritancePolicy.INHERIT
     input_model: type[InputT] = field(init=False)
     output_model: type[OutputT] = field(init=False)
     _parameters: dict[str, Any] = field(init=False, repr=False)
@@ -116,6 +143,7 @@ def tool(
     parameters_schema: dict[str, Any] | None = None,
     context_factory: ContextFactory[Any] | None = None,
     lazy_load: bool = False,
+    inheritance: ToolInheritancePolicy = ToolInheritancePolicy.INHERIT,
 ) -> Callable[[ToolHandler[Any, Any]], HarnessTool[Any, Any]]:
     """Create a harness tool from an annotated async handler."""
 
@@ -128,6 +156,7 @@ def tool(
             parameters_schema=parameters_schema,
             context_factory=context_factory,
             lazy_load=lazy_load,
+            inheritance=inheritance,
         )
 
     return decorate
@@ -137,4 +166,11 @@ def _is_model_type(value: Any) -> bool:
     return isinstance(value, type) and issubclass(value, BaseModel)
 
 
-__all__ = ["ContextFactory", "HarnessTool", "ToolCallContext", "ToolHandler", "tool"]
+__all__ = [
+    "ContextFactory",
+    "HarnessTool",
+    "ToolCallContext",
+    "ToolHandler",
+    "ToolInheritancePolicy",
+    "tool",
+]

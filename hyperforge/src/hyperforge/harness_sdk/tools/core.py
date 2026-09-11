@@ -127,7 +127,7 @@ async def remember(context: ToolCallContext, input_value: RememberInput) -> Dict
         metadata=harness._persisted_metadata(),
     )
     await harness.storage.remember(memory)
-    await harness.emit(
+    await context.emit(
         HarnessEventType.MEMORY_REMEMBERED,
         {"memory": memory.model_dump(mode="json")},
     )
@@ -148,7 +148,7 @@ async def recall(context: ToolCallContext, input_value: RecallInput) -> ListOutp
 async def forget(context: ToolCallContext, input_value: ForgetInput) -> DictOutput:
     harness = context.harness
     await harness.storage.forget(input_value.id)
-    await harness.emit(HarnessEventType.MEMORY_FORGOTTEN, {"id": input_value.id})
+    await context.emit(HarnessEventType.MEMORY_FORGOTTEN, {"id": input_value.id})
     return DictOutput(value={"id": input_value.id})
 
 
@@ -180,7 +180,7 @@ async def compact(context: ToolCallContext, input_value: CompactInput) -> DictOu
             role="user", content=f"Conversation summary:\n{input_value.summary}"
         ),
     ]
-    await harness.emit(
+    await context.emit(
         HarnessEventType.COMPACTED,
         {"messages": [message.model_dump(mode="json") for message in harness.messages]},
     )
