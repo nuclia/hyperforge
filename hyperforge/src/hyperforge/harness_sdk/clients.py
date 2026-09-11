@@ -6,7 +6,7 @@ import logging
 import random
 from collections.abc import AsyncIterator, Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Literal, Protocol
+from typing import Any, Literal, Protocol, cast
 
 import httpx
 from pydantic import BaseModel, Field
@@ -378,7 +378,7 @@ class NucliaModelClient:
 
     @property
     def nua(self) -> AsyncNuaClient:
-        return self.client.nua
+        return cast(NucliaChatCompletionsClient, self.client).nua
 
     async def aclose(self) -> None:
         await self.client.aclose()
