@@ -565,7 +565,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                     step_value=error_overflow.trace_value(),
                     timeit=time() - t0,
                 )
-            logger.error(f"Tool {tool_name} encountered an error: {error_message}")
+            logger.warning(f"Tool {tool_name} encountered an error: {error_message}")
             context.chunks.append(
                 Chunk(
                     chunk_id=f"mcp_{self.config.id}_{tool_name}_error_{_short_uid()}",
@@ -832,7 +832,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                         session=session,
                     )
             except Exception as e:
-                logger.error(
+                logger.warning(
                     f"MCPAgent {self.agent_id!r}: error calling tool {tool_name!r}: {e}"
                 )
             return context
