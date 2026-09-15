@@ -94,7 +94,9 @@ class ExternalCallAgent(Agent[ExternalCallAgentConfig]):
                 request = client.build_request(
                     method=self.config.method.value,
                     url=self.config.url,
-                    json=[context.model_dump(mode="json") for context in memory.contexts],
+                    json=[
+                        context.model_dump(mode="json") for context in memory.contexts
+                    ],
                     headers=self.config.headers,
                 )
             else:
