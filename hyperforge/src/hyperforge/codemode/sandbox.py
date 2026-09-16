@@ -1,11 +1,13 @@
 import asyncio
 import contextvars
 import hmac
-import json
 import logging
 import os
+import shutil
+import threading
 from concurrent.futures import Executor, ThreadPoolExecutor
 from concurrent.futures import Future as ConcurrentFuture
+from dataclasses import dataclass
 from multiprocessing import Pipe, Process
 from multiprocessing.connection import Connection
 from typing import Any, Awaitable, Callable, Coroutine
@@ -13,31 +15,75 @@ from typing import Any, Awaitable, Callable, Coroutine
 import httpx
 import nucliadb_telemetry.metrics
 import prometheus_client
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
 
 from .model import (
+    MAX_PROTOCOL_BYTES,
     RestrictedPythonTask,
     SandboxMessage,
     WorkerError,
     WorkerExecutionRequest,
     WorkerTypes,
+    decode_json_value,
+    decode_protocol_value,
+    encode_protocol_value,
+    encode_sandbox_message,
 )
 from .worker import PythonAgentWorker
 
 logger = logging.getLogger("hyperforge_codemode_sandbox")
 WORKER_EXIT_TIMEOUT = 1
-MAX_PACKET_BYTES = 16 * 1024 * 1024
+CALLBACK_CANCEL_TIMEOUT = 1
+MAX_PACKET_BYTES = MAX_PROTOCOL_BYTES
 
 
 class SandboxSettings(BaseSettings):
     sandbox_verify: bool = True
     sandbox_socket: str | None = None
+    sandbox_socket_mode: str = "0600"
+    sandbox_socket_group: str | None = None
     sandbox_metrics_port: int = 8091
+    sandbox_metrics_host: str = "0.0.0.0"
+    sandbox_metrics_enabled: bool = True
     sandbox_token: str | None = None
+    sandbox_max_concurrent_sessions: int | None = Field(default=None, gt=0)
+    sandbox_max_session_runtime_seconds: float | None = Field(
+        default=None, gt=0, allow_inf_nan=False
+    )
+    sandbox_max_session_memory_bytes: int | None = Field(default=None, gt=0)
+    sandbox_timeout_slack_seconds: float = Field(
+        default=10.0, ge=0, allow_inf_nan=False
+    )
     sandbox_callback_wait_seconds: float = 1.0
+
+    @field_validator("sandbox_socket_mode")
+    @classmethod
+    def validate_socket_mode(cls, value: str) -> str:
+        try:
+            mode = int(value, 8)
+        except ValueError as exc:
+            raise ValueError("SANDBOX_SOCKET_MODE must be an octal mode") from exc
+        if mode < 0 or mode > 0o777:
+            raise ValueError("SANDBOX_SOCKET_MODE must be between 0000 and 0777")
+        return value
 
 
 settings = SandboxSettings()
+_remote_admission_lock = threading.Lock()
+
+
+@dataclass
+class _RemoteAdmissionCounter:
+    active_sessions: int = 0
+
+
+@dataclass(frozen=True)
+class _RemoteSessionTicket:
+    counter: _RemoteAdmissionCounter | None
+
+
+_remote_admission_counter = _RemoteAdmissionCounter()
 
 
 class InsecureSandbox(Exception):
@@ -94,32 +140,78 @@ class SandboxRunner:
         self.debug = debug
         self.isolated = False
         self.token = token
+        self._callback_lock = threading.Lock()
+        self._callbacks_closed = True
+        self._run_active = False
+        self._pending_callback_futures: set[ConcurrentFuture[WorkerTypes]] = set()
+        self._callback_tasks: set[asyncio.Task[WorkerTypes]] = set()
+        self._callback_futures: dict[
+            asyncio.Task[WorkerTypes], ConcurrentFuture[WorkerTypes]
+        ] = {}
+        self._orphaned_callback_tasks: set[asyncio.Task[WorkerTypes]] = set()
 
     async def run(self, request: WorkerExecutionRequest):
-        if self.pool is not None:
-            return await self._run_in_pool(request)
-        if self.socket is not None:
+        self._begin_callback_run()
+        try:
+            if self.pool is not None:
+                return await self._run_in_pool(request)
+            request = _canonicalize_run_request(request)
+            if self.socket is not None:
+                runtime = request.max_runtime_seconds
+                if runtime is None:
+                    runtime = settings.sandbox_max_session_runtime_seconds
+                timeout = (
+                    runtime + settings.sandbox_timeout_slack_seconds
+                    if runtime is not None
+                    else None
+                )
+                try:
+                    async with asyncio.timeout(timeout):
+                        return await self._run_with_remote_admission(request)
+                except TimeoutError as exc:
+                    raise RuntimeError("Codemode execution timed out") from exc
+            if self.isolated:
+                return await self._run_isolated(request)
+            raise ValueError(
+                "SandboxRunner must be initialized with a pool or a socket"
+            )
+        finally:
+            try:
+                await self._cancel_callbacks()
+            finally:
+                self._finish_callback_run()
+
+    async def _run_with_remote_admission(self, request: WorkerExecutionRequest):
+        ticket = await _acquire_remote_session(settings.sandbox_max_concurrent_sessions)
+        try:
             return await self._run_remotely(request)
-        if self.isolated:
-            return await self._run_isolated(request)
-        raise ValueError("SandboxRunner must be initialized with a pool or a socket")
+        finally:
+            _release_remote_session(ticket)
 
     async def _run_in_pool(self, request: WorkerExecutionRequest):
         loop = asyncio.get_running_loop()
         pipe_worker, pipe_restricted = Pipe()
-        worker = PythonAgentWorker(pipe_worker, debug=self.debug)
-        controller_task = asyncio.create_task(self.background_task(pipe_restricted))
-        await loop.run_in_executor(
-            self.pool,
-            worker._process_question_context_sync,
-            request.code,
-            request.question,
-            request.local_vars,
-            request.global_vars,
-            request.function_names,
-            request.max_memory_bytes,
+        worker = PythonAgentWorker(pipe_worker, debug=self.debug, json_protocol=False)
+        controller_task = asyncio.create_task(
+            self.background_task(pipe_restricted, json_protocol=False)
         )
-        await controller_task
+        try:
+            await loop.run_in_executor(
+                self.pool,
+                worker._process_question_context_sync,
+                request.code,
+                request.question,
+                request.local_vars,
+                request.global_vars,
+                request.function_names,
+                request.max_memory_bytes,
+                request.redact_errors,
+            )
+            await controller_task
+        finally:
+            if not controller_task.done():
+                controller_task.cancel()
+            await asyncio.gather(controller_task, return_exceptions=True)
 
     async def _run_isolated(self, request: WorkerExecutionRequest):
         controller_task, process = self.run_in_process(request)
@@ -156,33 +248,87 @@ class SandboxRunner:
             token = token_source()
         rx, tx = await asyncio.open_unix_connection(self.socket)
         reader, writer = SandboxReader(rx), SandboxWriter(tx)
+        incoming: asyncio.Task[SandboxMessage.AnyMessage] | None = None
         try:
             await writer.write_message(SandboxMessage.Run(run=request, token=token))
             while True:
+                if incoming is None:
+                    incoming = asyncio.create_task(reader.read_message())
                 try:
-                    msg = await reader.read_message()
+                    msg = await incoming
                 except asyncio.IncompleteReadError as exc:
                     raise RuntimeError(
                         "Sandbox connection closed unexpectedly"
                     ) from exc
+                incoming = None
                 if isinstance(msg, SandboxMessage.Done):
                     break
                 if isinstance(msg, SandboxMessage.Error):
                     raise RuntimeError(f"Python agent error: {msg.error}")
-                assert isinstance(msg, SandboxMessage.Request)
-                try:
-                    response = await self.callback(msg.task)
-                except Exception as exc:
-                    response = WorkerError(error=str(exc))
-                await writer.write_message(SandboxMessage.Response(result=response))
+                if not isinstance(msg, SandboxMessage.Request):
+                    raise RuntimeError("Unexpected sandbox protocol message")
+                incoming = await self._run_remote_callback(reader, writer, msg.task)
         finally:
+            if incoming is not None:
+                incoming.cancel()
+                await asyncio.gather(incoming, return_exceptions=True)
             writer.close()
             await writer.wait_closed()
+
+    async def _run_remote_callback(
+        self,
+        reader: "SandboxReader",
+        writer: "SandboxWriter",
+        task: RestrictedPythonTask,
+    ) -> asyncio.Task[SandboxMessage.AnyMessage]:
+        with self._callback_lock:
+            if self._callbacks_closed:
+                raise RuntimeError("Sandbox callback lifecycle is closed")
+            callback_task = asyncio.create_task(self.callback(task))
+            self._callback_tasks.add(callback_task)
+        incoming = asyncio.create_task(reader.read_message())
+        try:
+            done, _ = await asyncio.wait(
+                {callback_task, incoming}, return_when=asyncio.FIRST_COMPLETED
+            )
+            if incoming in done:
+                message = incoming.result()
+                if isinstance(message, SandboxMessage.Error):
+                    raise RuntimeError(f"Python agent error: {message.error}")
+                raise RuntimeError(
+                    "Unexpected sandbox protocol message during callback"
+                )
+            try:
+                response = callback_task.result()
+            except Exception as exc:
+                response = WorkerError(error=str(exc))
+            await writer.write_message(SandboxMessage.Response(result=response))
+        except BaseException:
+            if incoming.done():
+                _consume_task_result(incoming)
+            else:
+                incoming.cancel()
+                await asyncio.gather(incoming, return_exceptions=True)
+            raise
+        finally:
+            if not callback_task.done():
+                callback_task.cancel()
+            callback_done, still_pending = await asyncio.wait(
+                {callback_task}, timeout=CALLBACK_CANCEL_TIMEOUT
+            )
+            for completed in callback_done:
+                await asyncio.gather(completed, return_exceptions=True)
+            if still_pending:
+                logger.warning("Sandbox callback ignored cancellation")
+            with self._callback_lock:
+                self._callback_tasks.discard(callback_task)
+            for remaining in still_pending:
+                self._track_orphaned_callback(remaining)
+        return incoming
 
     def run_in_process(self, request: WorkerExecutionRequest):
         pipe_worker, pipe_restricted = Pipe()
         worker = PythonAgentWorker(pipe_worker, debug=self.debug)
-        controller_task = asyncio.create_task(self.background_task(pipe_restricted))
         process = Process(
             target=worker._process_question_context_sync,
             args=(
@@ -192,13 +338,22 @@ class SandboxRunner:
                 request.global_vars,
                 request.function_names,
                 request.max_memory_bytes,
+                request.redact_errors,
             ),
         )
-        process.start()
+        try:
+            process.start()
+        except BaseException:
+            pipe_worker.close()
+            pipe_restricted.close()
+            raise
         pipe_worker.close()
+        controller_task = asyncio.create_task(self.background_task(pipe_restricted))
         return controller_task, process
 
-    async def background_task(self, pipe: Connection) -> bool:
+    async def background_task(
+        self, pipe: Connection, *, json_protocol: bool = True
+    ) -> bool:
         loop = asyncio.get_running_loop()
         context = contextvars.copy_context()
         try:
@@ -208,42 +363,202 @@ class SandboxRunner:
                 pipe,
                 loop,
                 context,
+                json_protocol,
             )
         finally:
             pipe.close()
+
+    def _begin_callback_run(self) -> None:
+        with self._callback_lock:
+            if self._run_active:
+                raise RuntimeError("SandboxRunner does not support concurrent runs")
+            unsettled = any(
+                not future.done() for future in self._pending_callback_futures
+            ) or any(
+                not task.done()
+                for task in self._callback_tasks | self._orphaned_callback_tasks
+            )
+            if unsettled:
+                raise RuntimeError(
+                    "SandboxRunner cannot be reused until callbacks have completed"
+                )
+            self._pending_callback_futures.clear()
+            self._callback_tasks.clear()
+            self._callback_futures.clear()
+            self._orphaned_callback_tasks.clear()
+            self._callbacks_closed = False
+            self._run_active = True
+
+    def _finish_callback_run(self) -> None:
+        with self._callback_lock:
+            self._callbacks_closed = True
+            self._run_active = False
+
+    def _register_callback_intent(self, future: ConcurrentFuture[WorkerTypes]) -> bool:
+        with self._callback_lock:
+            if self._callbacks_closed:
+                future.set_exception(
+                    RuntimeError("Sandbox callback lifecycle is closed")
+                )
+                return False
+            self._pending_callback_futures.add(future)
+            return True
+
+    def _schedule_callback(
+        self,
+        future: ConcurrentFuture[WorkerTypes],
+        item: RestrictedPythonTask,
+        loop: asyncio.AbstractEventLoop,
+        context: contextvars.Context,
+    ) -> None:
+        with self._callback_lock:
+            if future not in self._pending_callback_futures:
+                return
+            self._pending_callback_futures.remove(future)
+            if self._callbacks_closed:
+                if not future.done():
+                    future.set_exception(
+                        RuntimeError("Sandbox callback lifecycle is closed")
+                    )
+                return
+            task = loop.create_task(self.callback(item), context=context.copy())
+            self._callback_tasks.add(task)
+            self._callback_futures[task] = future
+
+        def copy_result(completed: asyncio.Task[WorkerTypes]) -> None:
+            with self._callback_lock:
+                self._callback_tasks.discard(completed)
+                controller_future = self._callback_futures.pop(completed, None)
+            if controller_future is None or controller_future.done():
+                return
+            try:
+                controller_future.set_result(completed.result())
+            except BaseException as exc:
+                controller_future.set_exception(exc)
+
+        task.add_done_callback(copy_result)
+
+    async def _cancel_callbacks(self) -> None:
+        with self._callback_lock:
+            self._callbacks_closed = True
+            intents = list(self._pending_callback_futures)
+            self._pending_callback_futures.clear()
+            tasks = list(self._callback_tasks)
+            task_futures = [
+                future
+                for task in tasks
+                if (future := self._callback_futures.pop(task, None)) is not None
+            ]
+        cancellation = RuntimeError("Sandbox callback cancelled")
+        for future in [*intents, *task_futures]:
+            if not future.done():
+                future.set_exception(cancellation)
+        for task in tasks:
+            task.cancel()
+        if tasks:
+            done, pending = await asyncio.wait(tasks, timeout=CALLBACK_CANCEL_TIMEOUT)
+            for completed in done:
+                await asyncio.gather(completed, return_exceptions=True)
+            if pending:
+                logger.warning("Sandbox callbacks ignored cancellation")
+            with self._callback_lock:
+                self._callback_tasks.difference_update(tasks)
+            for task in pending:
+                self._track_orphaned_callback(task)
+
+    def _track_orphaned_callback(self, task: asyncio.Task[WorkerTypes]) -> None:
+        with self._callback_lock:
+            self._orphaned_callback_tasks.add(task)
+
+        def completed(done: asyncio.Task[WorkerTypes]) -> None:
+            with self._callback_lock:
+                self._orphaned_callback_tasks.discard(done)
+            _consume_task_result(done)
+
+        task.add_done_callback(completed)
+
+    def run_when_callbacks_complete(self, callback: Callable[[], None]) -> bool:
+        with self._callback_lock:
+            pending: set[Any] = {
+                future for future in self._pending_callback_futures if not future.done()
+            }
+            pending.update(
+                task
+                for task in self._callback_tasks | self._orphaned_callback_tasks
+                if not task.done()
+            )
+        if not pending:
+            return False
+
+        completion_lock = threading.Lock()
+        remaining = len(pending)
+        registration_complete = False
+
+        def completed(_done: Any) -> None:
+            nonlocal remaining
+            with completion_lock:
+                remaining -= 1
+                release = registration_complete and remaining == 0
+            if release:
+                callback()
+
+        for future in pending:
+            future.add_done_callback(completed)
+        with completion_lock:
+            registration_complete = True
+            release = remaining == 0
+        if release:
+            callback()
+        return True
 
     def read_write_queue(
         self,
         pipe: Connection,
         loop: asyncio.AbstractEventLoop,
         context: contextvars.Context,
+        json_protocol: bool = True,
     ) -> bool:
         try:
             while True:
-                item = pipe.recv()
+                if json_protocol:
+                    item = decode_protocol_value(
+                        pipe.recv_bytes(MAX_PACKET_BYTES),
+                        "Local sandbox request",
+                        max_bytes=MAX_PACKET_BYTES,
+                    )
+                else:
+                    item = pipe.recv()
+                if not isinstance(item, RestrictedPythonTask):
+                    raise ValueError("Invalid local sandbox request")
                 if item.function == "_error":
                     raise RuntimeError(item.args[0])
                 if item.function == "_close":
                     return True
                 future: ConcurrentFuture[WorkerTypes] = ConcurrentFuture()
-
-                def schedule_callback() -> None:
-                    task = loop.create_task(self.callback(item), context=context.copy())
-
-                    def copy_result(completed: asyncio.Task[WorkerTypes]) -> None:
-                        try:
-                            future.set_result(completed.result())
-                        except Exception as exc:
-                            future.set_exception(exc)
-
-                    task.add_done_callback(copy_result)
-
-                loop.call_soon_threadsafe(schedule_callback)
+                if self._register_callback_intent(future):
+                    loop.call_soon_threadsafe(
+                        self._schedule_callback, future, item, loop, context
+                    )
                 try:
                     result = future.result()
                 except Exception as exc:
                     result = WorkerError(error=str(exc))
-                pipe.send(result)
+                if json_protocol:
+                    try:
+                        encoded = encode_protocol_value(
+                            result,
+                            "Local sandbox response",
+                            max_bytes=MAX_PACKET_BYTES,
+                        )
+                    except ValueError as exc:
+                        encoded = encode_protocol_value(
+                            WorkerError(error=str(exc)),
+                            "Local sandbox response error",
+                            max_bytes=MAX_PACKET_BYTES,
+                        )
+                    pipe.send_bytes(encoded)
+                else:
+                    pipe.send(result)
         except EOFError:
             return False
 
@@ -255,6 +570,25 @@ def _url_reachable(url: str) -> bool:
             return True
         except httpx.ConnectError:
             return False
+
+
+def _canonicalize_run_request(
+    request: WorkerExecutionRequest,
+) -> WorkerExecutionRequest:
+    encoded_request = encode_sandbox_message(
+        SandboxMessage.Run(run=request),
+        "Sandbox run request",
+        max_bytes=MAX_PACKET_BYTES,
+    )
+    encoded_value = decode_json_value(
+        encoded_request, "Sandbox run request", max_bytes=MAX_PACKET_BYTES
+    )
+    if not isinstance(encoded_value, dict):
+        raise ValueError("Invalid sandbox run request")
+    message = SandboxMessage.parse(encoded_value)
+    if not isinstance(message, SandboxMessage.Run):
+        raise ValueError("Invalid sandbox run request")
+    return message.run
 
 
 def _verify_connectivity():
@@ -269,16 +603,16 @@ class SandboxWriter:
     def __init__(self, writer: asyncio.StreamWriter):
         self.writer = writer
 
-    async def _write_packet(self, msg: dict[str, Any]):
-        msg_bytes = json.dumps(msg).encode("utf-8")
-        if len(msg_bytes) > MAX_PACKET_BYTES:
-            raise ValueError("Sandbox message exceeds maximum size")
+    async def _write_packet(self, msg: SandboxMessage.AnyMessage):
+        msg_bytes = encode_sandbox_message(
+            msg, "Sandbox message", max_bytes=MAX_PACKET_BYTES
+        )
         self.writer.write(len(msg_bytes).to_bytes(4, "little"))
         self.writer.write(msg_bytes)
         await self.writer.drain()
 
     async def write_message(self, message: SandboxMessage.AnyMessage):
-        await self._write_packet(SandboxMessage.serialize(message))
+        await self._write_packet(message)
 
     def close(self):
         self.writer.close()
@@ -297,10 +631,25 @@ class SandboxReader:
         if msg_len > MAX_PACKET_BYTES:
             raise ValueError("Sandbox message exceeds maximum size")
         msg_bytes = await self.reader.readexactly(msg_len)
-        return json.loads(msg_bytes.decode("utf-8"))
+        value = decode_json_value(
+            msg_bytes, "Sandbox message", max_bytes=MAX_PACKET_BYTES
+        )
+        if not isinstance(value, dict):
+            raise ValueError("Sandbox message must be a JSON object")
+        return value
 
     async def read_message(self) -> SandboxMessage.AnyMessage:
-        return SandboxMessage.parse(await self._read_packet())
+        value = await self._read_packet()
+        try:
+            return SandboxMessage.parse(value)
+        except (
+            AttributeError,
+            KeyError,
+            RecursionError,
+            TypeError,
+            ValueError,
+        ) as exc:
+            raise ValueError("Invalid sandbox message") from exc
 
 
 class SandboxSession:
@@ -309,32 +658,47 @@ class SandboxSession:
         reader: SandboxReader,
         writer: SandboxWriter,
         callback_wait_seconds: float = 1.0,
+        *,
+        settings_snapshot: SandboxSettings | None = None,
     ):
         self.reader = reader
         self.writer = writer
         self.callback_wait_seconds = callback_wait_seconds
+        self.settings = settings_snapshot or settings.model_copy(deep=True)
         self.runner = SandboxRunner(
             pool=None, socket=None, callback=self._callback, debug=False
         )
+        self.task: asyncio.Task[bool] | None = None
+        self.process: Process | None = None
         self.waiting_for_agent: asyncio.Task[None] | None = None
         self.timed_out = False
 
     async def run(self, request: WorkerExecutionRequest):
-        self.task, self.process = self.runner.run_in_process(request)
+        self.runner._begin_callback_run()
         try:
+            memory = self.settings.sandbox_max_session_memory_bytes
+            if memory is None:
+                memory = request.max_memory_bytes
+            elif request.max_memory_bytes is not None:
+                memory = min(memory, request.max_memory_bytes)
+            request = request.model_copy(update={"max_memory_bytes": memory})
+            task, process = self.runner.run_in_process(request)
+            self.task, self.process = task, process
             await self._start_timeout(self.callback_wait_seconds)
-            if request.max_runtime_seconds is None:
-                clean_exit = await self.task
-            else:
-                async with asyncio.timeout(request.max_runtime_seconds):
-                    clean_exit = await self.task
+            runtime = self.settings.sandbox_max_session_runtime_seconds
+            if runtime is None:
+                runtime = request.max_runtime_seconds
+            elif request.max_runtime_seconds is not None:
+                runtime = min(runtime, request.max_runtime_seconds)
+            async with asyncio.timeout(runtime):
+                clean_exit = await task
             await self._stop_timeout()
             if self.timed_out:
                 raise RuntimeError("Python agent timeout")
             if not clean_exit:
                 raise RuntimeError("Codemode worker exited unexpectedly")
-            await asyncio.to_thread(self.process.join, WORKER_EXIT_TIMEOUT)
-            if self.process.exitcode != 0:
+            await asyncio.to_thread(process.join, WORKER_EXIT_TIMEOUT)
+            if process.exitcode != 0:
                 raise RuntimeError(
                     "Codemode worker exceeded its memory limit or exited unexpectedly"
                 )
@@ -344,26 +708,40 @@ class SandboxSession:
         except Exception as exc:
             await self._fail(exc)
         finally:
-            await self._stop_timeout()
-            if self.process.is_alive():
-                self.process.kill()
-            await asyncio.to_thread(self.process.join)
-            if not self.task.done():
-                self.task.cancel()
-            await asyncio.gather(self.task, return_exceptions=True)
+            try:
+                await self._stop_timeout()
+                await self._stop_worker()
+            finally:
+                try:
+                    await self.runner._cancel_callbacks()
+                finally:
+                    self.runner._finish_callback_run()
 
     async def _fail(self, exc: Exception):
         logger.error("Error in sandbox session: %s", exc)
-        if self.process.is_alive():
-            self.process.kill()
-        await asyncio.to_thread(self.process.join)
-        if not self.task.done():
-            self.task.cancel()
-        await asyncio.gather(self.task, return_exceptions=True)
+        await self._stop_worker()
         try:
             await self.writer.write_message(SandboxMessage.Error(error=str(exc)))
         except Exception:
             pass
+
+    async def _stop_worker(self) -> None:
+        process = self.process
+        if process is not None:
+            try:
+                if process.is_alive():
+                    process.kill()
+                await asyncio.to_thread(process.join)
+            except Exception:
+                logger.exception("Failed to clean up sandbox process")
+        task = self.task
+        if task is not None:
+            try:
+                if not task.done():
+                    task.cancel()
+                await asyncio.gather(task, return_exceptions=True)
+            except Exception:
+                logger.exception("Failed to clean up sandbox controller task")
 
     async def _callback(self, item: RestrictedPythonTask) -> WorkerTypes:
         await self._stop_timeout()
@@ -372,11 +750,14 @@ class SandboxSession:
             response = await self.reader.read_message()
         except asyncio.IncompleteReadError:
             logger.warning("Got disconnected from agent")
-            self.process.kill()
-            self.process.join()
-            self.task.cancel()
+            if self.process is not None:
+                self.process.kill()
+                self.process.join()
+            if self.task is not None:
+                self.task.cancel()
             return None
-        assert isinstance(response, SandboxMessage.Response)
+        if not isinstance(response, SandboxMessage.Response):
+            raise RuntimeError("Unexpected sandbox protocol response")
         await self._start_timeout(self.callback_wait_seconds)
         return response.result
 
@@ -391,7 +772,7 @@ class SandboxSession:
     async def _timeout(self, timeout: float):
         await asyncio.sleep(timeout)
         self.timed_out = True
-        if self.process.is_alive():
+        if self.process is not None and self.process.is_alive():
             self.process.kill()
 
 
@@ -405,18 +786,34 @@ async def run_sandbox_server(
     *, token_verifier: Callable[[str], Awaitable[bool]] | None = None
 ):
     server_settings = SandboxSettings()
-    assert server_settings.sandbox_socket is not None
+    if server_settings.sandbox_socket is None:
+        raise RuntimeError("SANDBOX_SOCKET is required for the sandbox server")
     sandbox_token = server_settings.sandbox_token
     if server_settings.sandbox_verify:
         _verify_connectivity()
 
+    active_sessions = 0
+    admission_lock = asyncio.Lock()
+    max_sessions = server_settings.sandbox_max_concurrent_sessions
+    handshake_limit = (
+        asyncio.Semaphore(max_sessions) if max_sessions is not None else None
+    )
+
     async def handler(rx: asyncio.StreamReader, tx: asyncio.StreamWriter):
+        nonlocal active_sessions
         reader = SandboxReader(rx)
         writer = SandboxWriter(tx)
+        if handshake_limit is not None and handshake_limit.locked():
+            writer.close()
+            await writer.wait_closed()
+            return
+        if handshake_limit is not None:
+            await handshake_limit.acquire()
         try:
             async with asyncio.timeout(1):
                 msg = await reader.read_message()
-                assert isinstance(msg, SandboxMessage.Run)
+                if not isinstance(msg, SandboxMessage.Run):
+                    raise ValueError("Expected a sandbox run request")
                 token = msg.token or ""
                 valid_token = (
                     await token_verifier(token)
@@ -434,25 +831,79 @@ async def run_sandbox_server(
             writer.close()
             await writer.wait_closed()
             return
+        finally:
+            if handshake_limit is not None:
+                handshake_limit.release()
+
+        async with admission_lock:
+            if max_sessions is not None and active_sessions >= max_sessions:
+                await writer.write_message(
+                    SandboxMessage.Error(error="Sandbox concurrency limit reached")
+                )
+                writer.close()
+                await writer.wait_closed()
+                return
+            active_sessions += 1
 
         agents_running.inc()
         observation = execution_observer()
         observation.start()
         try:
             session = SandboxSession(
-                reader, writer, SandboxSettings().sandbox_callback_wait_seconds
+                reader,
+                writer,
+                server_settings.sandbox_callback_wait_seconds,
+                settings_snapshot=server_settings,
             )
             await session.run(msg.run)
         except Exception as exc:
             observation.set_status("error")
             await writer.write_message(SandboxMessage.Error(error=str(exc)))
         finally:
+            async with admission_lock:
+                active_sessions -= 1
             agents_running.dec()
             observation.end()
             writer.close()
             await writer.wait_closed()
 
     server = await asyncio.start_unix_server(handler, server_settings.sandbox_socket)
-    os.chmod(server_settings.sandbox_socket, 0o600)
+    if server_settings.sandbox_socket_group is not None:
+        group: str | int = server_settings.sandbox_socket_group
+        if server_settings.sandbox_socket_group.isdecimal():
+            group = int(server_settings.sandbox_socket_group)
+        shutil.chown(server_settings.sandbox_socket, group=group)
+    os.chmod(
+        server_settings.sandbox_socket, int(server_settings.sandbox_socket_mode, 8)
+    )
     async with server:
         await server.serve_forever()
+
+
+def _consume_task_result(task: asyncio.Future[Any]) -> None:
+    try:
+        task.exception()
+    except asyncio.CancelledError:
+        pass
+
+
+async def _acquire_remote_session(
+    max_concurrent_sessions: int | None,
+) -> _RemoteSessionTicket:
+    if max_concurrent_sessions is None:
+        return _RemoteSessionTicket(counter=None)
+    while True:
+        with _remote_admission_lock:
+            if _remote_admission_counter.active_sessions < max_concurrent_sessions:
+                _remote_admission_counter.active_sessions += 1
+                return _RemoteSessionTicket(counter=_remote_admission_counter)
+        await asyncio.sleep(0.01)
+
+
+def _release_remote_session(ticket: _RemoteSessionTicket) -> None:
+    if ticket.counter is None:
+        return
+    with _remote_admission_lock:
+        if ticket.counter.active_sessions <= 0:
+            raise RuntimeError("Remote sandbox admission counter underflow")
+        ticket.counter.active_sessions -= 1
