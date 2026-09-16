@@ -190,6 +190,69 @@ handlers always receive a validated model instance; they never receive `None`.
 Tools can attach typed context to their result by setting `context_type` and, if
 needed, registering a schema and formatter with `register_context()`.
 
+Tools are inherited by spawned sub-agents by default. Set
+`inheritance=ToolInheritancePolicy.DO_NOT_INHERIT` when a tool must remain on
+the current agent.
+
+## Scoped Code Mode
+
+`create_codemode_tool()` exposes generated Python as one model tool while making
+only an explicit, immutable tuple of capabilities callable from that Python.
+The factory never discovers tools from the harness, so capabilities can remain
+hidden from the model's top-level tool list.
+
+```python
+from hyperforge.harness_sdk import (
+    AgentHarness,
+    CodeModeCapability,
+    create_codemode_tool,
+)
+
+code_mode = create_codemode_tool(
+    capabilities=(CodeModeCapability(weather),),
+)
+agent = AgentHarness(
+    model="your-model",
+    model_client=model_client,
+    tools=[code_mode],
+)
+```
+
+The generated tool description includes each capability's description and
+argument JSON Schema. Capability calls use normal `HarnessTool` input and output
+validation and count toward ordinary harness tool-call usage. The optional
+`question` Code Mode input is available to generated code as `question`.
+
+By default, capability results are projected through the tool's formatted
+model-facing context. Supply a custom `result_adapter` for another safe
+projection, or opt into the complete JSON-mode Pydantic output with
+`raw_codemode_result_adapter`. Every adapter result is normalized through a
+strict JSON round trip before generated code receives it, so tuples become
+lists and non-JSON or non-finite values are rejected consistently across
+runners. Adapters must not return Pydantic models, including models nested in
+containers, or dictionaries containing the reserved `__model__` key.
+Values passed to scoped `output(...)` use the same normalization and rejection
+rules. Generated code must call `output(value)` exactly once; a missing or
+repeated call fails the invocation.
+
+Capability names must be unique ASCII public Python identifiers, cannot use
+reserved worker names, and cannot expose an `agent_id` input field. Scoped Code
+Mode tools default to `ToolInheritancePolicy.DO_NOT_INHERIT`. If the outer Code
+Mode tool is explicitly configured with `INHERIT`, all of its capabilities must
+also be inheritable; the factory rejects combinations that would bypass a
+capability's `DO_NOT_INHERIT` policy.
+
+For tests, `runner=` accepts a `CodeModeRunner`; its `run()` method receives the
+worker request and capability dispatch callback. Without an injected runner,
+the factory uses the existing `SandboxRunner.remote` when `SANDBOX_SOCKET` is
+configured and the existing isolated process otherwise. Runtime and memory
+behavior continues to use the existing sandbox implementation and
+`UsageLimits`; this foundation adds no separate sandbox limits.
+
+The existing exported `codemode` tool remains available for compatibility and
+continues to discover registered harness tools. Prefer the scoped factory when
+the generated program should have an explicit capability boundary.
+
 ## Usage Limits
 
 All limits are disabled by default. Configure only the limits needed by the
