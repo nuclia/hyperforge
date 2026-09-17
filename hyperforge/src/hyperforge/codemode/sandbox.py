@@ -29,6 +29,7 @@ from .model import (
     decode_protocol_value,
     encode_protocol_value,
     encode_sandbox_message,
+    serialize_legacy_callback_result,
 )
 from .worker import PythonAgentWorker
 
@@ -108,6 +109,7 @@ class SandboxRunner:
         debug: bool = False,
         *,
         token: str | Callable[[], str] | None = None,
+        legacy_callback_results: bool = False,
     ) -> "SandboxRunner":
         return cls(
             pool=None,
@@ -115,6 +117,7 @@ class SandboxRunner:
             callback=callback,
             debug=debug,
             token=token,
+            legacy_callback_results=legacy_callback_results,
         )
 
     @classmethod
@@ -133,6 +136,7 @@ class SandboxRunner:
         callback: Callable[[RestrictedPythonTask], Coroutine[Any, Any, WorkerTypes]],
         debug: bool,
         token: str | Callable[[], str] | None = None,
+        legacy_callback_results: bool = False,
     ):
         self.pool = pool
         self.socket = socket
@@ -140,6 +144,7 @@ class SandboxRunner:
         self.debug = debug
         self.isolated = False
         self.token = token
+        self.legacy_callback_results = legacy_callback_results
         self._callback_lock = threading.Lock()
         self._callbacks_closed = True
         self._run_active = False
@@ -302,6 +307,8 @@ class SandboxRunner:
                 response = callback_task.result()
             except Exception as exc:
                 response = WorkerError(error=str(exc))
+            if self.legacy_callback_results:
+                response = serialize_legacy_callback_result(response)
             await writer.write_message(SandboxMessage.Response(result=response))
         except BaseException:
             if incoming.done():

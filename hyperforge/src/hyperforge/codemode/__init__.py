@@ -11,6 +11,7 @@ from .model import (
     encode_protocol_value,
     encode_sandbox_message,
     serialize,
+    serialize_legacy_callback_result,
     validate_protocol_value,
 )
 from .sandbox import (
@@ -46,6 +47,7 @@ __all__ = [
     "encode_protocol_value",
     "run_sandbox_server",
     "serialize",
+    "serialize_legacy_callback_result",
     "settings",
     "validate_protocol_value",
 ]

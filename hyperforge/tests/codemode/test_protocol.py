@@ -10,6 +10,7 @@ from pathlib import Path
 
 import pytest
 from nuclia_models.predict.remi import RemiResponse
+from pydantic import BaseModel
 
 from hyperforge.codemode import sandbox
 from hyperforge.codemode import worker as worker_module
@@ -18,9 +19,12 @@ from hyperforge.codemode.model import (
     SandboxMessage,
     WorkerError,
     WorkerExecutionRequest,
+    decode_json_value,
     decode_protocol_value,
     deserialize,
     encode_protocol_value,
+    encode_sandbox_message,
+    serialize_legacy_callback_result,
 )
 from hyperforge.codemode.sandbox import (
     MAX_PACKET_BYTES,
@@ -417,6 +421,145 @@ async def test_remote_callback_keeps_frame_arriving_during_response_write() -> N
     message = await asyncio.wait_for(incoming, timeout=0.2)
 
     assert isinstance(message, SandboxMessage.Done)
+    await runner._cancel_callbacks()
+    runner._finish_callback_run()
+
+
+@pytest.mark.asyncio
+async def test_remote_runner_legacy_callback_results_round_trip() -> None:
+    class ApplicationResult(BaseModel):
+        value: int
+
+    write_finished = asyncio.Event()
+
+    class Reader:
+        async def read_message(self):
+            await write_finished.wait()
+            return SandboxMessage.Done()
+
+    encoded_messages: list[bytes] = []
+
+    class Writer:
+        async def write_message(self, message):
+            encoded_messages.append(encode_sandbox_message(message, "Sandbox message"))
+            write_finished.set()
+
+    async def callback(_task: RestrictedPythonTask):
+        return ApplicationResult(value=7)
+
+    runner = SandboxRunner.remote(
+        "unused-socket", callback, legacy_callback_results=True
+    )
+    runner._begin_callback_run()
+    incoming = await runner._run_remote_callback(
+        Reader(),  # type: ignore[arg-type]
+        Writer(),  # type: ignore[arg-type]
+        RestrictedPythonTask(
+            function="capability", agent="test", args=(), keyword_args={}
+        ),
+    )
+    message = await asyncio.wait_for(incoming, timeout=0.2)
+    assert isinstance(message, SandboxMessage.Done)
+    await runner._cancel_callbacks()
+    runner._finish_callback_run()
+
+    message = SandboxMessage.parse(
+        decode_json_value(encoded_messages[0], "Sandbox message")
+    )
+    assert isinstance(message, SandboxMessage.Response)
+    assert message.result == {"__model__": "ApplicationResult", "value": 7}
+
+
+def test_remote_runner_legacy_callback_results_cover_subclasses() -> None:
+    class CustomContext(Context):
+        extra: str = "detail"
+
+    context = CustomContext(
+        original_question_uuid=None,
+        actual_question_uuid=None,
+        question="question",
+        chunks=[],
+        source="source",
+        agent="agent",
+    )
+
+    serialized = serialize_legacy_callback_result([context])
+
+    assert serialized == [{**context.model_dump(), "__model__": "CustomContext"}]
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        Context(
+            original_question_uuid=None,
+            actual_question_uuid=None,
+            question="question",
+            chunks=[],
+            source="source",
+            agent="agent",
+        ),
+        RemiResponse(time=0.25),
+        WorkerError(error="failed"),
+    ],
+)
+def test_remote_runner_legacy_callback_results_preserve_protocol_models(
+    value: BaseModel,
+) -> None:
+    serialized = serialize_legacy_callback_result(value)
+    encoded = encode_sandbox_message(
+        SandboxMessage.Response(result=serialized), "Sandbox message"
+    )
+    message = SandboxMessage.parse(decode_json_value(encoded, "Sandbox message"))
+
+    assert serialized is value
+    assert isinstance(message, SandboxMessage.Response)
+    assert type(message.result) is type(value)
+    assert message.result == value
+
+
+def test_legacy_callback_worker_error_still_raises_in_worker() -> None:
+    class Pipe:
+        def recv_bytes(self, _max_bytes: int) -> bytes:
+            result = serialize_legacy_callback_result(WorkerError(error="denied"))
+            return encode_protocol_value(result, "Local sandbox response")
+
+    worker = PythonAgentWorker(Pipe())  # type: ignore[arg-type]
+
+    with pytest.raises(RuntimeError, match="denied"):
+        worker._receive()
+
+
+@pytest.mark.asyncio
+async def test_remote_runner_strict_callback_results_reject_arbitrary_models() -> None:
+    class ApplicationResult(BaseModel):
+        value: int
+
+    write_finished = asyncio.Event()
+
+    class Reader:
+        async def read_message(self):
+            await write_finished.wait()
+            return SandboxMessage.Done()
+
+    class Writer:
+        async def write_message(self, message):
+            encode_sandbox_message(message, "Sandbox message")
+            write_finished.set()
+
+    async def callback(_task: RestrictedPythonTask):
+        return ApplicationResult(value=7)
+
+    runner = SandboxRunner.remote("unused-socket", callback)
+    runner._begin_callback_run()
+    with pytest.raises(ValueError, match="not serializable"):
+        await runner._run_remote_callback(
+            Reader(),  # type: ignore[arg-type]
+            Writer(),  # type: ignore[arg-type]
+            RestrictedPythonTask(
+                function="capability", agent="test", args=(), keyword_args={}
+            ),
+        )
     await runner._cancel_callbacks()
     runner._finish_callback_run()
 

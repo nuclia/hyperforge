@@ -171,6 +171,41 @@ def serialize(message: Any) -> Any:
     return message
 
 
+def serialize_legacy_callback_result(value: Any) -> Any:
+    """Serialize restricted-agent callback results with the pre-hardening behavior.
+
+    Arbitrary Pydantic models are converted to their plain dictionary
+    representation with an ``__model__`` marker so callback results keep
+    crossing the remote sandbox boundary. Protocol models retain their native
+    wire representation, while unknown markers deserialize back to plain
+    dictionaries on the worker side.
+    """
+    if isinstance(value, RestrictedPythonTask):
+        return {
+            "__model__": "RestrictedPythonTask",
+            "function": value.function,
+            "agent": value.agent,
+            "args": serialize_legacy_callback_result(value.args),
+            "keyword_args": serialize_legacy_callback_result(value.keyword_args),
+        }
+    if isinstance(value, BaseModel):
+        if type(value) in _MARKED_PROTOCOL_MODELS:
+            return value
+        converted = {
+            key: serialize_legacy_callback_result(item)
+            for key, item in value.model_dump().items()
+        }
+        converted["__model__"] = type(value).__name__
+        return converted
+    if isinstance(value, (list, tuple)):
+        return [serialize_legacy_callback_result(item) for item in value]
+    if isinstance(value, dict):
+        return {
+            key: serialize_legacy_callback_result(item) for key, item in value.items()
+        }
+    return value
+
+
 def validate_protocol_value(
     value: Any, label: str, *, max_bytes: int = MAX_PROTOCOL_BYTES
 ) -> None:

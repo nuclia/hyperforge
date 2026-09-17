@@ -1,4 +1,5 @@
 import asyncio
+import functools
 import os
 import tempfile
 from concurrent.futures import ProcessPoolExecutor
@@ -12,6 +13,7 @@ from hyperforge.codemode.model import (
     WorkerExecutionRequest,
 )
 from hyperforge.definition import FunctionDefinition
+from pydantic import BaseModel
 
 from hyperforge_restricted.agent import PythonAgent
 from hyperforge_restricted.config import PythonAgentConfig
@@ -236,6 +238,15 @@ def test_restricted_agent_config_cannot_enable_debug_mode():
     assert "debug" not in config.model_dump()
 
 
+def test_restricted_agent_remote_runner_uses_legacy_callback_results(monkeypatch):
+    agent = PythonAgent.__new__(PythonAgent)
+    monkeypatch.setattr(sandbox.settings, "sandbox_socket", "/tmp/sandbox.sock")
+
+    runner = agent._runner(None, None)
+
+    assert runner.legacy_callback_results is True
+
+
 async def test_restricted_agent_rejects_undeclared_callback():
     agent = PythonAgent.__new__(PythonAgent)
     agent.function_names = {"child": {}}
@@ -248,6 +259,51 @@ async def test_restricted_agent_rejects_undeclared_callback():
 
     with pytest.raises(ValueError, match="not authorized"):
         await agent.handle_queue_item(None, None, task)
+
+
+async def test_remote_restricted_agent_preserves_arbitrary_model_callback_results(
+    monkeypatch, long_timeout
+):
+    class ApplicationResult(BaseModel):
+        value: int
+
+    received = []
+
+    class Child:
+        async def lookup(self, **_kwargs):
+            return ApplicationResult(value=7)
+
+        async def show(self, result, **_kwargs):
+            received.append(result)
+            return None
+
+    agent = PythonAgent.__new__(PythonAgent)
+    agent.function_names = {
+        "child": {
+            function: FunctionDefinition(name=function, description="", parameters={})
+            for function in ("lookup", "show")
+        }
+    }
+    agent.agents = {"child": Child()}
+    agent.flow_id = None
+
+    async with configured_sandbox(monkeypatch) as socket:
+        runner = sandbox.SandboxRunner.remote(
+            socket,
+            functools.partial(agent.handle_queue_item, None, None),
+            legacy_callback_results=True,
+        )
+        await runner.run(
+            WorkerExecutionRequest(
+                code="show(result=lookup())",
+                question="Q?",
+                local_vars={},
+                global_vars={},
+                function_names=agent.function_names,
+            )
+        )
+
+    assert received == [{"__model__": "ApplicationResult", "value": 7}]
 
 
 async def test_sandbox_rejects_wrong_token(sandbox_conn):
