@@ -12,3 +12,11 @@ class MaxRetries(Exception):
 
 class ModelRetry(Exception):
     pass
+
+
+class OpenAIChatCompletionsError(Exception):
+    pass
+
+
+class NotSupportedbyLLMException(Exception):
+    pass
