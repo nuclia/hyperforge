@@ -1,3 +1,4 @@
+import json
 from collections.abc import AsyncIterator
 
 import httpx
@@ -11,6 +12,7 @@ from hyperforge.harness_sdk import (
     NucliaChatCompletionsClient,
     NucliaChatCompletionsError,
     NucliaModelClient,
+    OpenAIModelClient,
 )
 
 
@@ -274,3 +276,49 @@ def test_harness_client_rejects_unmatched_tool_history() -> None:
 
     with pytest.raises(ValueError, match="missing outputs.*call-1"):
         NucliaModelClient._validate_tool_history(messages)
+
+
+@pytest.mark.asyncio
+async def test_openai_model_client_calls_standard_streaming_endpoint() -> None:
+    async def handle(request: httpx.Request) -> httpx.Response:
+        assert request.url == "http://localhost:1234/v1/chat/completions"
+        assert request.headers["authorization"] == "Bearer test-key"
+        payload = json.loads(request.content)
+        assert payload == {
+            "messages": [{"role": "user", "content": "hi"}],
+            "model": "local-model",
+            "stream": True,
+            "tools": [],
+            "user": "system",
+            "stream_options": {"include_usage": True},
+        }
+        return httpx.Response(
+            200,
+            headers={"content-type": "text/event-stream"},
+            text=(
+                'data: {"id":"chunk","model":"local-model","choices":'
+                '[{"index":0,"delta":{"content":"hello"}}]}\n\n'
+                "data: [DONE]\n\n"
+            ),
+        )
+
+    http_client = httpx.AsyncClient(transport=httpx.MockTransport(handle))
+    client = OpenAIModelClient(
+        base_url="http://localhost:1234/v1",
+        api_key="test-key",
+        http_client=http_client,
+    )
+
+    deltas = [
+        delta
+        async for delta in client.stream(
+            model="local-model",
+            reasoning_effort=None,
+            messages=[HarnessMessage(role="user", content="hi")],
+            tools=[],
+            execution_context={},
+        )
+    ]
+
+    assert [delta.text for delta in deltas] == ["hello"]
+    await http_client.aclose()

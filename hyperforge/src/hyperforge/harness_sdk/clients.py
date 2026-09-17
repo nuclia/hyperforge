@@ -6,7 +6,7 @@ import logging
 import random
 from collections.abc import AsyncIterator, Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Literal, Protocol
+from typing import Any, Literal, Protocol, cast
 
 import httpx
 from pydantic import BaseModel, Field
@@ -37,7 +37,7 @@ class ChatCompletionRequest(BaseModel):
     model: str | None = None
     stream: bool = True
     temperature: float | None = None
-    max_tokens: int = 50_000
+    max_tokens: int | None = None
     top_p: float | None = None
     frequency_penalty: float | None = None
     presence_penalty: float | None = None
@@ -98,12 +98,24 @@ class ChatCompletionChunk(BaseModel):
     service_tier: str | None = None
 
 
+class ChatCompletionsClient(Protocol):
+    def stream(
+        self, request: ChatCompletionRequest
+    ) -> AsyncIterator[ChatCompletionChunk]: ...
+
+    async def aclose(self) -> None: ...
+
+
 class NucliaChatCompletionsError(RuntimeError):
     def __init__(
         self, message: str, *, provider_data: dict[str, Any] | None = None
     ) -> None:
         super().__init__(message)
         self.provider_data = provider_data or {}
+
+
+class OpenAIChatCompletionsError(RuntimeError):
+    """Error returned by an OpenAI-compatible chat completions endpoint."""
 
 
 def _request_error_detail(
@@ -229,6 +241,63 @@ class NucliaChatCompletionsClient:
             await asyncio.sleep(delay)
 
 
+class OpenAIChatCompletionsClient:
+    """Streaming transport for a standard OpenAI chat completions endpoint."""
+
+    def __init__(
+        self,
+        *,
+        base_url: str,
+        api_key: str | None = None,
+        timeout: float = 5 * 60,
+        headers: Mapping[str, str] | None = None,
+        http_client: httpx.AsyncClient | None = None,
+    ) -> None:
+        default_headers = {"accept": "text/event-stream"}
+        if api_key:
+            default_headers["authorization"] = f"Bearer {api_key}"
+        default_headers.update(headers or {})
+        self.url = f"{base_url.rstrip('/')}/chat/completions"
+        self.headers = default_headers
+        self.timeout = timeout
+        self._owns_client = http_client is None
+        self.http_client = http_client or httpx.AsyncClient()
+
+    async def aclose(self) -> None:
+        if self._owns_client:
+            await self.http_client.aclose()
+
+    async def stream(
+        self, request: ChatCompletionRequest
+    ) -> AsyncIterator[ChatCompletionChunk]:
+        payload = request.model_dump(exclude_none=True)
+        try:
+            async with self.http_client.stream(
+                "POST",
+                self.url,
+                json=payload,
+                headers=self.headers,
+                timeout=self.timeout,
+            ) as response:
+                if response.is_error:
+                    await response.aread()
+                response.raise_for_status()
+                async for line in response.aiter_lines():
+                    line = line.strip()
+                    if not line or line.startswith(":") or line.startswith("event:"):
+                        continue
+                    if line == "data: [DONE]":
+                        return
+                    if line.startswith("data:"):
+                        line = line[5:].lstrip()
+                    yield ChatCompletionChunk.model_validate_json(line)
+        except (httpx.RequestError, httpx.HTTPStatusError) as exc:
+            detail, _ = _request_error_detail(exc)
+            raise OpenAIChatCompletionsError(
+                f"OpenAI chat completions request failed: {detail}"
+            ) from exc
+
+
 @dataclass
 class ModelDelta:
     text: str = ""
@@ -257,10 +326,10 @@ class NucliaModelClient:
 
     def __init__(
         self,
-        client: NucliaChatCompletionsClient,
+        client: ChatCompletionsClient,
         *,
-        reasoning_effort: ReasoningEffort = "medium",
-        max_tokens: int = 50_000,
+        reasoning_effort: ReasoningEffort | None = "medium",
+        max_tokens: int | None = 50_000,
         temperature: float | None = None,
         top_p: float | None = None,
         frequency_penalty: float | None = None,
@@ -309,7 +378,7 @@ class NucliaModelClient:
 
     @property
     def nua(self) -> AsyncNuaClient:
-        return self.client.nua
+        return cast(NucliaChatCompletionsClient, self.client).nua
 
     async def aclose(self) -> None:
         await self.client.aclose()
@@ -349,7 +418,7 @@ class NucliaModelClient:
                 }
                 for tool in tools
             ],
-            tool_choice=self.tool_choice,
+            tool_choice=self.tool_choice if tools else None,
         )
         pending_calls: dict[int, dict[str, str]] = {}
         emitted_calls: set[int] = set()
@@ -477,3 +546,30 @@ class NucliaModelClient:
             raise ValueError(
                 f"Incomplete tool history at end of messages; missing outputs for {sorted(pending)}"
             )
+
+
+class OpenAIModelClient(NucliaModelClient):
+    """Harness adapter for any OpenAI-compatible chat completions endpoint."""
+
+    def __init__(
+        self,
+        *,
+        base_url: str,
+        api_key: str | None = None,
+        timeout: float = 5 * 60,
+        headers: Mapping[str, str] | None = None,
+        http_client: httpx.AsyncClient | None = None,
+        **options: Any,
+    ) -> None:
+        options.setdefault("reasoning_effort", None)
+        options.setdefault("max_tokens", None)
+        super().__init__(
+            OpenAIChatCompletionsClient(
+                base_url=base_url,
+                api_key=api_key,
+                timeout=timeout,
+                headers=headers,
+                http_client=http_client,
+            ),
+            **options,
+        )
