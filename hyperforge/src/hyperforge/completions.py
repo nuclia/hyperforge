@@ -8,24 +8,6 @@ from typing import Annotated, Any, Dict, List, Literal, Optional, Sequence, Tupl
 
 import httpx
 from nuclia.lib.nua_responses import ChatModel, CitationsType, Tool
-from openai.types.responses import (
-    ResponseFunctionToolCallParam,
-    ResponseInputParam,
-)
-from openai.types.responses.easy_input_message_param import EasyInputMessageParam
-from openai.types.responses.function_tool_param import FunctionToolParam
-from openai.types.responses.response_create_params import (
-    ToolChoice,
-    ToolChoiceFunctionParam,
-)
-from openai.types.responses.response_input_image_param import (
-    ResponseInputImageParam,
-)
-from openai.types.responses.response_input_param import FunctionCallOutput
-from openai.types.responses.tool_param import (
-    ImageGeneration,
-    ToolParam,
-)
 from pydantic import BaseModel, Field
 
 from hyperforge import logger
@@ -103,6 +85,9 @@ Example format:
 
 
 type ReasoningEffort = Literal["minimal", "low", "medium", "high"]
+type ToolChoice = Literal["auto", "none", "required"] | dict[str, Any]
+type ResponseInputParam = list[dict[str, Any]]
+type ToolParam = dict[str, Any]
 
 
 class NormalizedTool(BaseModel):
@@ -234,12 +219,6 @@ class Message(BaseModel):
     type: Literal["message"] = "message"
     author: Author
     text: str
-
-
-class MessageToolCall(BaseModel):
-    id: str
-    type: Literal["function"] = "function"
-    function: MessageToolFunction
 
 
 RichMessage = Annotated[
@@ -377,34 +356,34 @@ def rich_messages_to_openai_responses(
                 message.content if message.content is not None else message.text
             )
             if text:
-                converted.append(EasyInputMessageParam(content=text, role="assistant"))
+                converted.append({"content": text, "role": "assistant"})
             for tool_call in message.tool_calls:
                 converted.append(
-                    ResponseFunctionToolCallParam(
-                        type="function_call",
-                        call_id=tool_call.id,
-                        name=tool_call.function.name,
-                        arguments=json.dumps(
+                    {
+                        "type": "function_call",
+                        "call_id": tool_call.id,
+                        "name": tool_call.function.name,
+                        "arguments": json.dumps(
                             openai_tool_arguments(tool_call.function.arguments)
                         ),
-                    )
+                    }
                 )
         elif message.type == "tool":
             converted.append(
-                FunctionCallOutput(
-                    type="function_call_output",
-                    call_id=message.tool_call_id,
-                    output=openai_content_to_text(
+                {
+                    "type": "function_call_output",
+                    "call_id": message.tool_call_id,
+                    "output": openai_content_to_text(
                         message.content if message.content is not None else message.text
                     ),
-                )
+                }
             )
         else:
             converted.append(
-                EasyInputMessageParam(
-                    content=openai_content_to_text(message.text),
-                    role="user" if message.author == Author.USER else "assistant",
-                )
+                {
+                    "content": openai_content_to_text(message.text),
+                    "role": "user" if message.author == Author.USER else "assistant",
+                }
             )
     return converted
 
@@ -553,10 +532,10 @@ def normalize_openai_compatible_tool_choice(
     if isinstance(tool_choice, ToolChoiceRequired):
         return "required"
     if isinstance(tool_choice, ToolChoiceForced):
-        return ToolChoiceFunctionParam(
-            name=normalize_tool_name(tool_choice.name),
-            type="function",
-        )
+        return {
+            "name": normalize_tool_name(tool_choice.name),
+            "type": "function",
+        }
     return "auto"
 
 
@@ -581,13 +560,13 @@ def transform_chat_to_openai_messages(
 
     normalized_tools = normalize_tools(item.tools)
     openai_tools: list[ToolParam] = [
-        FunctionToolParam(
-            name=tool.name,
-            parameters=tool.parameters,
-            type="function",
-            description=tool.description,
-            strict=True,
-        )
+        {
+            "name": tool.name,
+            "parameters": tool.parameters,
+            "type": "function",
+            "description": tool.description,
+            "strict": True,
+        }
         for tool in normalized_tools
     ]
 
@@ -606,24 +585,25 @@ def transform_chat_to_openai_messages(
     schema = None
     if schema is not None:
         openai_tools.append(
-            FunctionToolParam(
-                name=schema["name"],
-                parameters=schema["parameters"],
-                description=schema["description"],
-                type="function",
-                strict=True,
-            )
+            {
+                "name": schema["name"],
+                "parameters": schema["parameters"],
+                "description": schema["description"],
+                "type": "function",
+                "strict": True,
+            }
         )
-        tool_choice = ToolChoiceFunctionParam(
-            name=schema.get("name", uuid.uuid4().hex), type="function"
-        )
+        tool_choice = {
+            "name": schema.get("name", uuid.uuid4().hex),
+            "type": "function",
+        }
 
     messages: ResponseInputParam = []
     messages.append(
-        EasyInputMessageParam(
-            content=system,
-            role="system",
-        )
+        {
+            "content": system,
+            "role": "system",
+        }
     )
 
     messages.extend(rich_messages_to_openai_responses(item.chat_history))
@@ -636,16 +616,16 @@ def transform_chat_to_openai_messages(
 
     for image in image_list:
         messages.append(
-            EasyInputMessageParam(
-                content=[
-                    ResponseInputImageParam(
-                        image_url=f"data:{image.content_type};base64,{image.b64encoded}",
-                        detail="auto",
-                        type="input_image",
-                    )
+            {
+                "content": [
+                    {
+                        "image_url": f"data:{image.content_type};base64,{image.b64encoded}",
+                        "detail": "auto",
+                        "type": "input_image",
+                    }
                 ],
-                role="user",
-            )
+                "role": "user",
+            }
         )
 
     if should_append_query_message(item, context, image_list):
@@ -653,20 +633,20 @@ def transform_chat_to_openai_messages(
             user, item.format_prompt, question=item.question, context=context
         )
         messages.append(
-            EasyInputMessageParam(
-                content=query,
-                role="user",
-            )
+            {
+                "content": query,
+                "role": "user",
+            }
         )
 
     if item.image_generation is True:
         openai_tools.append(
-            ImageGeneration(
-                type="image_generation",
-                background="auto",
-                size="auto",
-                output_format="png",
-            )
+            {
+                "type": "image_generation",
+                "background": "auto",
+                "size": "auto",
+                "output_format": "png",
+            }
         )
 
     return messages, openai_tools, tool_choice, schema
