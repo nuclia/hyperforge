@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock
 
 import anyio
 import pytest
+from fastapi import HTTPException
 from mcp.server.fastmcp.exceptions import ResourceError
 from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from mcp.types import ElicitResult
@@ -261,8 +262,10 @@ async def test_mcp_production_uses_current_request_headers(monkeypatch):
 @pytest.mark.asyncio
 async def test_mcp_server_limit_evicts_and_awaits_oldest_manager():
     oldest_task = asyncio.create_task(asyncio.Event().wait())
-    oldest = SimpleNamespace(task=oldest_task, close=oldest_task.cancel)
-    newest = SimpleNamespace(task=None, close=AsyncMock())
+    oldest = SimpleNamespace(
+        task=oldest_task, close=oldest_task.cancel, active_requests=0
+    )
+    newest = SimpleNamespace(task=None, close=AsyncMock(), active_requests=0)
     app = SimpleNamespace(mcp_servers={"oldest": oldest, "newest": newest})
 
     await mcp_interaction._evict_mcp_servers(app, max_servers=2)
@@ -270,6 +273,32 @@ async def test_mcp_server_limit_evicts_and_awaits_oldest_manager():
     assert oldest_task.done()
     assert app.mcp_servers == {"newest": newest}
     newest.close.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_mcp_server_limit_does_not_evict_active_manager():
+    active = SimpleNamespace(task=None, close=AsyncMock(), active_requests=1)
+    idle = SimpleNamespace(task=None, close=AsyncMock(), active_requests=0)
+    app = SimpleNamespace(mcp_servers={"active": active, "idle": idle})
+
+    await mcp_interaction._evict_mcp_servers(app, max_servers=2)
+
+    assert app.mcp_servers == {"active": active}
+    active.close.assert_not_called()
+    idle.close.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_mcp_server_limit_rejects_when_all_managers_are_active():
+    active = SimpleNamespace(task=None, close=AsyncMock(), active_requests=1)
+    app = SimpleNamespace(mcp_servers={"active": active})
+
+    with pytest.raises(HTTPException, match="active sessions") as error:
+        await mcp_interaction._evict_mcp_servers(app, max_servers=1)
+
+    assert error.value.status_code == 503
+    assert app.mcp_servers == {"active": active}
+    active.close.assert_not_called()
 
 
 def test_mcp_manager_accepts_only_one_request_without_session_id():

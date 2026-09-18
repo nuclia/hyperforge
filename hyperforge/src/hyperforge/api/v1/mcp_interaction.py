@@ -294,6 +294,7 @@ class _ManagedMCPServer:
         self.started = asyncio.Event()
         self.task: asyncio.Task[None] | None = None
         self.session_created = False
+        self.active_requests = 0
 
     async def run(self) -> None:
         async with self.manager.run():
@@ -307,6 +308,12 @@ class _ManagedMCPServer:
     def close(self) -> None:
         if self.task is not None:
             self.task.cancel()
+
+    def reserve_request(self) -> None:
+        self.active_requests += 1
+
+    def release_request(self) -> None:
+        self.active_requests -= 1
 
     def accept_request(self, request: Request) -> bool:
         if request.headers.get(MCP_SESSION_ID_HEADER):
@@ -332,7 +339,19 @@ class _ManagedMCPServer:
 
 async def _evict_mcp_servers(app: "HTTPApplication", max_servers: int) -> None:
     while len(app.mcp_servers) >= max_servers:
-        oldest_key = next(iter(app.mcp_servers))
+        oldest_key = next(
+            (
+                key
+                for key, server in app.mcp_servers.items()
+                if server.active_requests == 0
+            ),
+            None,
+        )
+        if oldest_key is None:
+            raise HTTPException(
+                status_code=503,
+                detail="MCP server capacity is occupied by active sessions",
+            )
         managed_server = app.mcp_servers.pop(oldest_key)
         managed_server.close()
         if managed_server.task is not None:
@@ -354,17 +373,23 @@ class _MCPTransportResponse(Response):
     def __init__(
         self,
         request: Request,
-        manager: StreamableHTTPSessionManager,
+        managed_server: _ManagedMCPServer,
         body: bytes,
         max_response_bytes: int,
     ):
         super().__init__()
         self.request = request
-        self.manager = manager
+        self.managed_server = managed_server
         self.body = body
         self.max_response_bytes = max_response_bytes
 
     async def __call__(self, scope, receive, send) -> None:
+        try:
+            await self._handle_request(scope, receive, send)
+        finally:
+            self.managed_server.release_request()
+
+    async def _handle_request(self, scope, receive, send) -> None:
         body_sent = False
 
         async def patched_receive():
@@ -379,7 +404,9 @@ class _MCPTransportResponse(Response):
             return await receive()
 
         if self.request.method == "GET":
-            await self.manager.handle_request(scope, patched_receive, send)
+            await self.managed_server.manager.handle_request(
+                scope, patched_receive, send
+            )
             return
 
         response_status = 200
@@ -407,7 +434,9 @@ class _MCPTransportResponse(Response):
                 elif not response_too_large:
                     body_chunks.append(chunk)
 
-        await self.manager.handle_request(scope, patched_receive, intercepting_send)
+        await self.managed_server.manager.handle_request(
+            scope, patched_receive, intercepting_send
+        )
         if response_too_large:
             response = Response(content="MCP response is too large", status_code=502)
         else:
@@ -550,6 +579,12 @@ async def interaction_mcp_handler(
         if managed_server is not None and managed_server.is_reinitialization(
             request, bytes(body_bytes)
         ):
+            if managed_server.active_requests:
+                app.mcp_servers[key] = managed_server
+                raise HTTPException(
+                    status_code=409,
+                    detail="MCP session is still active for this path",
+                )
             managed_server.close()
             if managed_server.task is not None:
                 await asyncio.gather(managed_server.task, return_exceptions=True)
@@ -557,6 +592,7 @@ async def interaction_mcp_handler(
         if managed_server is not None:
             app.mcp_servers[key] = managed_server
         if managed_server is None:
+            await _evict_mcp_servers(app, runtime_settings.mcp_max_servers)
             agent_manager: AgentManager = request.app.agent_manager
             workflows, agent_config, prompts = await asyncio.gather(
                 agent_manager.workflows_list(account=x_stf_account, agent_id=agent_id),
@@ -595,17 +631,17 @@ async def interaction_mcp_handler(
             )
             managed_server = _ManagedMCPServer(manager)
             await managed_server.start()
-            await _evict_mcp_servers(app, runtime_settings.mcp_max_servers)
             app.mcp_servers[key] = managed_server
         if not managed_server.accept_request(request):
             raise HTTPException(
                 status_code=409,
                 detail="MCP session already initialized for this path",
             )
+            managed_server.reserve_request()
 
     return _MCPTransportResponse(
         request,
-        managed_server.manager,
+        managed_server,
         bytes(body_bytes),
         max_response_bytes,
     )
