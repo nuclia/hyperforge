@@ -1,5 +1,6 @@
 from typing import Optional
 
+from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
@@ -41,3 +42,4 @@ class Settings(BaseSettings):
     auth_success_logo_url: Optional[str] = None
     mcp_max_request_bytes: int = 1024 * 1024
     mcp_max_response_bytes: int = 4 * 1024 * 1024
+    mcp_max_servers: int = Field(default=100, ge=1)

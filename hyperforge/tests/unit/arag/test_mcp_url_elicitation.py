@@ -1,11 +1,14 @@
 import asyncio
+import json
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
+import anyio
 import pytest
 from mcp.server.fastmcp.exceptions import ResourceError
 from mcp.types import ElicitResult
 from starlette.datastructures import Headers
+from starlette.requests import Request
 
 from hyperforge.api.v1 import mcp_interaction
 from hyperforge.interaction import (
@@ -45,7 +48,7 @@ def setup_call(monkeypatch, events):
         get_sync_oauth_credentials=AsyncMock(return_value=None),
         upsert_sync_oauth_credentials=AsyncMock(),
     )
-    app = SimpleNamespace(agent_manager=agent_manager)
+    app = SimpleNamespace(agent_manager=agent_manager, settings=SimpleNamespace())
     session = SimpleNamespace(
         elicit_url=AsyncMock(return_value=ElicitResult(action="accept")),
         elicit_form=AsyncMock(),
@@ -144,6 +147,121 @@ async def test_mcp_returns_stored_credentials_without_elicitation(monkeypatch):
     )
 
     session.elicit_url.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_mcp_discards_partial_stored_credentials(monkeypatch):
+    events = [
+        AragAnswer(
+            operation=AnswerOperation.AGENT_REQUEST,
+            feedback=feedback(
+                get_credentials={
+                    "stored": Provider.SHAREFILE_OAUTH,
+                    "missing": Provider.SHAREFILE_OAUTH,
+                }
+            ),
+        )
+    ]
+    app, server, workflow, headers, _, agent_manager = setup_call(monkeypatch, events)
+    agent_manager.get_sync_oauth_credentials.side_effect = [
+        {"external-connection": "secret"},
+        None,
+    ]
+    websocket = SimpleNamespace(queue=asyncio.Queue())
+    monkeypatch.setattr(
+        mcp_interaction, "WebsocketReceiver", lambda websocket: websocket_receiver
+    )
+    websocket_receiver = websocket
+
+    await mcp_interaction.call_tool(
+        app,
+        server,
+        "account",
+        "agent",
+        "session",
+        [workflow],
+        headers,
+        "ask",
+        {},
+    )
+
+    response = await websocket.queue.get()
+    assert json.loads(response.response) == {"existing_credentials": {}}
+
+
+@pytest.mark.asyncio
+async def test_mcp_production_uses_current_request_headers(monkeypatch):
+    app, server, workflow, headers, _, _ = setup_call(monkeypatch, [])
+    api_settings_type = type("ApiSettings", (), {})
+    monkeypatch.setattr(mcp_interaction, "ApiSettings", api_settings_type)
+    app.settings = api_settings_type()
+    server.request_context.request = Request(
+        {
+            "type": "http",
+            "headers": [
+                (b"authorization", b"Bearer refreshed"),
+                (b"x-stf-user", b"user"),
+                (b"x-stf-account", b"account"),
+                (b"x-stf-account-type", b"basic"),
+            ],
+        }
+    )
+    captured_headers = None
+
+    async def stream_response(*args, **kwargs):
+        nonlocal captured_headers
+        captured_headers = kwargs["interaction"].headers
+        if False:
+            yield
+
+    monkeypatch.setattr(mcp_interaction, "stream_response", stream_response)
+
+    await mcp_interaction.call_tool(
+        app,
+        server,
+        "account",
+        "agent",
+        "session",
+        [workflow],
+        headers,
+        "ask",
+        {},
+    )
+
+    assert captured_headers["authorization"] == "Bearer refreshed"
+
+
+@pytest.mark.asyncio
+async def test_mcp_server_limit_evicts_and_awaits_oldest_manager():
+    oldest_task = asyncio.create_task(asyncio.Event().wait())
+    oldest = SimpleNamespace(task=oldest_task, close=oldest_task.cancel)
+    newest = SimpleNamespace(task=None, close=AsyncMock())
+    app = SimpleNamespace(mcp_servers={"oldest": oldest, "newest": newest})
+
+    await mcp_interaction._evict_mcp_servers(app, max_servers=2)
+
+    assert oldest_task.done()
+    assert app.mcp_servers == {"newest": newest}
+    newest.close.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_mcp_delete_waits_for_concurrent_server_creation():
+    key = ("account", "user", "type", "agent", "session")
+    server_task = asyncio.create_task(asyncio.Event().wait())
+    managed_server = SimpleNamespace(task=server_task, close=server_task.cancel)
+    app = SimpleNamespace(mcp_servers={}, mcp_server_lock=anyio.Lock())
+
+    async with app.mcp_server_lock:
+        delete_task = asyncio.create_task(mcp_interaction._remove_mcp_server(app, key))
+        await asyncio.sleep(0)
+        assert not delete_task.done()
+        app.mcp_servers[key] = managed_server
+
+    await delete_task
+
+    assert key not in app.mcp_servers
+    assert server_task.done()
 
 
 @pytest.mark.asyncio

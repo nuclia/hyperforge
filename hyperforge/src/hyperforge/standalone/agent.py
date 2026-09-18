@@ -12,8 +12,9 @@ import datetime
 import json
 from typing import Any, List
 
+from cryptography.fernet import Fernet, InvalidToken
+
 from hyperforge.db import exceptions
-from hyperforge.db.encryption import decrypt_data, encrypt_data
 from hyperforge.models import MemoryConfig, Rules
 from hyperforge.prompts import PromptConfig
 from hyperforge.retrieval.config import RetrievalAgentConfig
@@ -28,6 +29,7 @@ class StaticAgentManager:
 
     def __init__(self, config: dict[str, StandAloneAgentConfig]) -> None:
         self._config = config
+        self._oauth_fernet = Fernet(Fernet.generate_key())
         self._oauth_credentials: dict[tuple[str, str, str, str, str], str] = {}
 
     # ------------------------------------------------------------------
@@ -64,8 +66,10 @@ class StaticAgentManager:
         if encrypted_credentials is None:
             return None
         try:
-            credentials = json.loads(decrypt_data(encrypted_credentials))
-        except (ValueError, json.JSONDecodeError) as exc:
+            credentials = json.loads(
+                self._oauth_fernet.decrypt(encrypted_credentials.encode()).decode()
+            )
+        except (InvalidToken, json.JSONDecodeError) as exc:
             raise ValueError("Invalid stored OAuth credentials") from exc
         if not isinstance(credentials, dict) or not all(
             isinstance(name, str) and isinstance(value, str)
@@ -86,7 +90,9 @@ class StaticAgentManager:
     ) -> None:
         key = (account, user_id, agent_id, provider, sync_config_id)
         payload = json.dumps(credentials, sort_keys=True, separators=(",", ":"))
-        self._oauth_credentials[key] = encrypt_data(payload)
+        self._oauth_credentials[key] = self._oauth_fernet.encrypt(
+            payload.encode()
+        ).decode()
 
     async def ensure_workflow_active(
         self, account: str, agent_id: str, workflow_id: str

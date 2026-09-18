@@ -92,7 +92,13 @@ async def call_tool(
             raise ResourceError(f"Missing required parameter: {parameter}")
 
     question = f"Calling tool: {workflow.description or workflow.name} with arguments: {arguments}"
-    interaction_headers = _prepare_interaction_headers(app, agent_id, headers)
+    request_headers = headers
+    if isinstance(app.settings, ApiSettings):
+        current_request = mcp_server.request_context.request
+        if not isinstance(current_request, Request):
+            raise ResourceError("Current MCP HTTP request is unavailable")
+        request_headers = current_request.headers
+    interaction_headers = _prepare_interaction_headers(app, agent_id, request_headers)
     user_id = interaction_headers.get("x-stf-user")
     if not user_id:
         raise ResourceError("Authenticated user identity is required")
@@ -149,6 +155,9 @@ async def call_tool(
                     )
                     if credentials is not None:
                         existing_credentials[sync_config_id] = credentials
+
+                if len(existing_credentials) != len(requested_credentials):
+                    existing_credentials.clear()
 
                 websocket.queue.put_nowait(
                     UserToAgentInteraction(
@@ -293,6 +302,26 @@ class _ManagedMCPServer:
     def close(self) -> None:
         if self.task is not None:
             self.task.cancel()
+
+
+async def _evict_mcp_servers(app: "HTTPApplication", max_servers: int) -> None:
+    while len(app.mcp_servers) >= max_servers:
+        oldest_key = next(iter(app.mcp_servers))
+        managed_server = app.mcp_servers.pop(oldest_key)
+        managed_server.close()
+        if managed_server.task is not None:
+            await asyncio.gather(managed_server.task, return_exceptions=True)
+
+
+async def _remove_mcp_server(
+    app: "HTTPApplication", key: tuple[str, str, str, str, str]
+) -> None:
+    async with app.mcp_server_lock:
+        managed_server = app.mcp_servers.pop(key, None)
+    if managed_server is not None:
+        managed_server.close()
+        if managed_server.task is not None:
+            await asyncio.gather(managed_server.task, return_exceptions=True)
 
 
 class _MCPTransportResponse(Response):
@@ -455,9 +484,7 @@ async def mcp_handler_delete(
 ):
     app: HTTPApplication = request.app
     key = (x_stf_account, x_stf_user, x_stf_account_type, agent_id, session)
-    managed_server = app.mcp_servers.pop(key, None)
-    if managed_server is not None:
-        managed_server.close()
+    await _remove_mcp_server(app, key)
 
 
 @router.get("/api/v1/agent/{agent_id}/session/{session}/mcp", tags=["MCP"])
@@ -493,7 +520,9 @@ async def interaction_mcp_handler(
 
     key = (x_stf_account, x_stf_user, x_stf_account_type, agent_id, session)
     async with app.mcp_server_lock:
-        managed_server = app.mcp_servers.get(key)
+        managed_server = app.mcp_servers.pop(key, None)
+        if managed_server is not None:
+            app.mcp_servers[key] = managed_server
         if managed_server is None:
             agent_manager: AgentManager = request.app.agent_manager
             workflows, agent_config, prompts = await asyncio.gather(
@@ -533,6 +562,7 @@ async def interaction_mcp_handler(
             )
             managed_server = _ManagedMCPServer(manager)
             await managed_server.start()
+            await _evict_mcp_servers(app, runtime_settings.mcp_max_servers)
             app.mcp_servers[key] = managed_server
 
     return _MCPTransportResponse(

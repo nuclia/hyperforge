@@ -2,9 +2,7 @@ from hyperforge.standalone.agent import StaticAgentManager
 
 
 async def test_standalone_oauth_credentials_are_encrypted_and_scoped(monkeypatch):
-    monkeypatch.setenv(
-        "ENCRYPTION_SECRET_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA="
-    )
+    monkeypatch.delenv("ENCRYPTION_SECRET_KEY", raising=False)
     manager = StaticAgentManager({})
 
     await manager.upsert_sync_oauth_credentials(
