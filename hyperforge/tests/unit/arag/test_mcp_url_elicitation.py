@@ -245,6 +245,24 @@ async def test_mcp_server_limit_evicts_and_awaits_oldest_manager():
     newest.close.assert_not_called()
 
 
+def test_mcp_manager_accepts_only_one_request_without_session_id():
+    managed_server = mcp_interaction._ManagedMCPServer(SimpleNamespace())
+    initial_request = Request({"type": "http", "method": "POST", "headers": []})
+    established_request = Request(
+        {
+            "type": "http",
+            "method": "POST",
+            "headers": [(b"mcp-session-id", b"session-id")],
+        }
+    )
+    sessionless_get = Request({"type": "http", "method": "GET", "headers": []})
+
+    assert managed_server.accept_request(initial_request) is True
+    assert managed_server.accept_request(initial_request) is False
+    assert managed_server.accept_request(sessionless_get) is False
+    assert managed_server.accept_request(established_request) is True
+
+
 @pytest.mark.asyncio
 async def test_mcp_delete_waits_for_concurrent_server_creation():
     key = ("account", "user", "type", "agent", "session")

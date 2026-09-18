@@ -10,6 +10,7 @@ from mcp.server.fastmcp.exceptions import ResourceError
 from mcp.server.lowlevel.helper_types import ReadResourceContents
 from mcp.server.lowlevel.server import Server as MCPServer
 from mcp.server.lowlevel.server import lifespan as default_lifespan
+from mcp.server.streamable_http import MCP_SESSION_ID_HEADER
 from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from mcp.types import (
     EmbeddedResource,
@@ -289,6 +290,7 @@ class _ManagedMCPServer:
         self.manager = manager
         self.started = asyncio.Event()
         self.task: asyncio.Task[None] | None = None
+        self.session_created = False
 
     async def run(self) -> None:
         async with self.manager.run():
@@ -302,6 +304,14 @@ class _ManagedMCPServer:
     def close(self) -> None:
         if self.task is not None:
             self.task.cancel()
+
+    def accept_request(self, request: Request) -> bool:
+        if request.headers.get(MCP_SESSION_ID_HEADER):
+            return True
+        if self.session_created:
+            return False
+        self.session_created = True
+        return True
 
 
 async def _evict_mcp_servers(app: "HTTPApplication", max_servers: int) -> None:
@@ -564,6 +574,11 @@ async def interaction_mcp_handler(
             await managed_server.start()
             await _evict_mcp_servers(app, runtime_settings.mcp_max_servers)
             app.mcp_servers[key] = managed_server
+        if not managed_server.accept_request(request):
+            raise HTTPException(
+                status_code=409,
+                detail="MCP session already initialized for this path",
+            )
 
     return _MCPTransportResponse(
         request,
