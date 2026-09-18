@@ -191,6 +191,7 @@ class StandaloneSettings(BaseSettings):
     in_memory_cache_size: int = 3000
     mcp_max_request_bytes: int = Field(default=1024 * 1024, ge=1)
     mcp_max_response_bytes: int = Field(default=4 * 1024 * 1024, ge=1)
+    mcp_max_servers: int = Field(default=100, ge=1)
 
     cors_allow_origin: list[str] = Field(
         default_factory=list,

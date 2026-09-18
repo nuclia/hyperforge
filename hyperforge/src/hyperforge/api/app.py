@@ -1,13 +1,10 @@
+import asyncio
 from contextlib import asynccontextmanager
-from typing import Any, Optional, Tuple
+from typing import Any, Optional
 
+import anyio
 import prometheus_client
 from fastapi import APIRouter, FastAPI
-from lru import LRU
-from mcp.server.lowlevel.server import Server as MCPServer
-from mcp.server.streamable_http import (
-    StreamableHTTPServerTransport,
-)
 from nucliadb_sdk.v2.sdk import NucliaDBAsync
 from nucliadb_telemetry.logs import setup_logging
 from nucliadb_telemetry.settings import LogLevel, LogSettings
@@ -141,8 +138,8 @@ class HTTPApplication(FastAPI):
             stream_ttl_seconds=self.settings.pubsub_stream_ttl_seconds,
         )
 
-        self.sses: LRU[Tuple[str, str], StreamableHTTPServerTransport] = LRU(size=100)
-        self.mcp_servers: LRU[str, MCPServer] = LRU(size=100)
+        self.mcp_servers: dict[tuple[str, str, str, str, str], Any] = {}
+        self.mcp_server_lock = anyio.Lock()
 
         self.agent_manager = await AgentManager.from_settings(
             settings=self.data_manager_settings
@@ -157,6 +154,13 @@ class HTTPApplication(FastAPI):
                 logger.error(f"Module {load_module} could not be loaded")
 
     async def shutdown(self) -> None:
+        for managed_server in self.mcp_servers.values():
+            managed_server.close()
+        await asyncio.gather(
+            *(managed_server.task for managed_server in self.mcp_servers.values()),
+            return_exceptions=True,
+        )
+        self.mcp_servers.clear()
         await self.agent_manager.finalize()
         await self.broker.finalize()
         await clean_telemetry(SERVICE_NAME)

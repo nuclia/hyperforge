@@ -9,7 +9,10 @@ agent configuration.
 """
 
 import datetime
+import json
 from typing import Any, List
+
+from cryptography.fernet import Fernet, InvalidToken
 
 from hyperforge.db import exceptions
 from hyperforge.models import MemoryConfig, Rules
@@ -26,6 +29,8 @@ class StaticAgentManager:
 
     def __init__(self, config: dict[str, StandAloneAgentConfig]) -> None:
         self._config = config
+        self._oauth_fernet = Fernet(Fernet.generate_key())
+        self._oauth_credentials: dict[tuple[str, str, str, str, str], str] = {}
 
     # ------------------------------------------------------------------
     # Lifecycle (no-ops — nothing to connect/disconnect)
@@ -46,6 +51,48 @@ class StaticAgentManager:
         if not agent_config:
             raise exceptions.NotFoundError(f"Agent '{agent_id}' not found")
         return agent_config
+
+    async def get_sync_oauth_credentials(
+        self,
+        *,
+        account: str,
+        user_id: str,
+        agent_id: str,
+        provider: str,
+        sync_config_id: str,
+    ) -> dict[str, str] | None:
+        key = (account, user_id, agent_id, provider, sync_config_id)
+        encrypted_credentials = self._oauth_credentials.get(key)
+        if encrypted_credentials is None:
+            return None
+        try:
+            credentials = json.loads(
+                self._oauth_fernet.decrypt(encrypted_credentials.encode()).decode()
+            )
+        except (InvalidToken, json.JSONDecodeError) as exc:
+            raise ValueError("Invalid stored OAuth credentials") from exc
+        if not isinstance(credentials, dict) or not all(
+            isinstance(name, str) and isinstance(value, str)
+            for name, value in credentials.items()
+        ):
+            raise ValueError("Invalid stored OAuth credentials")
+        return credentials
+
+    async def upsert_sync_oauth_credentials(
+        self,
+        *,
+        account: str,
+        user_id: str,
+        agent_id: str,
+        provider: str,
+        sync_config_id: str,
+        credentials: dict[str, str],
+    ) -> None:
+        key = (account, user_id, agent_id, provider, sync_config_id)
+        payload = json.dumps(credentials, sort_keys=True, separators=(",", ":"))
+        self._oauth_credentials[key] = self._oauth_fernet.encrypt(
+            payload.encode()
+        ).decode()
 
     async def ensure_workflow_active(
         self, account: str, agent_id: str, workflow_id: str

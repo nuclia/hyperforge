@@ -1,5 +1,6 @@
 import asyncio
-from collections.abc import MutableMapping
+import json
+import uuid
 from functools import partial
 from typing import TYPE_CHECKING, Any, Iterable, Sequence
 
@@ -9,11 +10,8 @@ from mcp.server.fastmcp.exceptions import ResourceError
 from mcp.server.lowlevel.helper_types import ReadResourceContents
 from mcp.server.lowlevel.server import Server as MCPServer
 from mcp.server.lowlevel.server import lifespan as default_lifespan
-from mcp.server.streamable_http import (
-    MCP_SESSION_ID_HEADER,
-    StreamableHTTPServerTransport,
-)
-from mcp.server.transport_security import TransportSecuritySettings
+from mcp.server.streamable_http import MCP_SESSION_ID_HEADER
+from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from mcp.types import (
     EmbeddedResource,
     GetPromptResult,
@@ -36,7 +34,7 @@ from hyperforge.api.models import InteractionRequest
 from hyperforge.api.settings import Settings as ApiSettings
 from hyperforge.api.v1.interaction import WebsocketReceiver, stream_response
 from hyperforge.db.agents import AgentManager
-from hyperforge.interaction import AnswerOperation
+from hyperforge.interaction import AnswerOperation, Provider
 from hyperforge.prompts import PromptConfig
 from hyperforge.pubsub import UserToAgentInteraction
 from hyperforge.standalone.oauth import force_https_metadata, get_enabled_mcp_auth
@@ -44,14 +42,14 @@ from hyperforge.workflows import WorkflowData
 
 if TYPE_CHECKING:
     from hyperforge.api.app import HTTPApplication
-from anyio.abc import TaskStatus
-
 from hyperforge.api import logger
 from hyperforge.api.models import (
     AgentRole,
 )
 from hyperforge.api.v1.mcp_content import convert_arag_answer_to_content
 from hyperforge.api.v1.router import router
+
+SUPPORTED_OAUTH_CREDENTIAL_PROVIDERS = frozenset({Provider.SHAREFILE_OAUTH})
 
 
 async def list_tools(workflows: list[WorkflowData]) -> list[Tool]:
@@ -95,7 +93,16 @@ async def call_tool(
             raise ResourceError(f"Missing required parameter: {parameter}")
 
     question = f"Calling tool: {workflow.description or workflow.name} with arguments: {arguments}"
-    interaction_headers = _prepare_interaction_headers(app, agent_id, headers)
+    request_headers = headers
+    if isinstance(app.settings, ApiSettings):
+        current_request = mcp_server.request_context.request
+        if not isinstance(current_request, Request):
+            raise ResourceError("Current MCP HTTP request is unavailable")
+        request_headers = current_request.headers
+    interaction_headers = _prepare_interaction_headers(app, agent_id, request_headers)
+    user_id = interaction_headers.get("x-stf-user")
+    if not user_id:
+        raise ResourceError("Authenticated user identity is required")
 
     interaction = InteractionRequest(
         question=question, headers=interaction_headers, arguments=arguments
@@ -104,6 +111,7 @@ async def call_tool(
     websocket = WebsocketReceiver(websocket=None)
 
     messages = []
+    requested_credentials: dict[str, Provider] = {}
     async for msg in stream_response(
         app,
         websocket,
@@ -114,26 +122,104 @@ async def call_tool(
         workflow_id=workflow.id,
     ):
         if msg.operation == AnswerOperation.AGENT_REQUEST and msg.oauth:
-            pass
-        elif msg.operation == AnswerOperation.AGENT_REQUEST and msg.feedback:
-            # DO NOTHING FOR NOW
-            result = await mcp_session.elicit_form(
-                message=msg.feedback.question,
-                requestedSchema=msg.feedback.response_schema,
-                related_request_id=msg.feedback.request_id,
+            result = await mcp_session.elicit_url(
+                message="Authenticate with ShareFile to access the requested content.",
+                url=msg.oauth.oauth_url,
+                elicitation_id=uuid.uuid4().hex,
             )
-            websocket.queue.put_nowait(
-                UserToAgentInteraction(
-                    request_id=msg.feedback.request_id,
-                    response=result.content,  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
+            if result.action != "accept":
+                raise ResourceError(
+                    f"ShareFile authentication was {result.action} by the user"
                 )
-            )
+        elif msg.operation == AnswerOperation.AGENT_REQUEST and msg.feedback:
+            feedback = msg.feedback
+            if feedback.get_credentials is not None:
+                requested_credentials = feedback.get_credentials
+                unsupported = {
+                    provider
+                    for provider in requested_credentials.values()
+                    if provider not in SUPPORTED_OAUTH_CREDENTIAL_PROVIDERS
+                }
+                if unsupported:
+                    raise ResourceError(
+                        "MCP credential storage does not support the requested provider"
+                    )
+
+                existing_credentials: dict[str, dict[str, str]] = {}
+                for sync_config_id, provider in requested_credentials.items():
+                    credentials = await app.agent_manager.get_sync_oauth_credentials(
+                        account=x_stf_account,
+                        user_id=user_id,
+                        agent_id=agent_id,
+                        provider=provider.value,
+                        sync_config_id=sync_config_id,
+                    )
+                    if credentials is not None:
+                        existing_credentials[sync_config_id] = credentials
+
+                if len(existing_credentials) != len(requested_credentials):
+                    existing_credentials.clear()
+
+                websocket.queue.put_nowait(
+                    UserToAgentInteraction(
+                        request_id=feedback.request_id,
+                        response=json.dumps(
+                            {"existing_credentials": existing_credentials}
+                        ),
+                    )
+                )
+            elif feedback.credentials is not None:
+                unexpected = set(feedback.credentials) - set(requested_credentials)
+                if unexpected:
+                    raise ResourceError(
+                        "Received credentials for an unexpected Sync configuration"
+                    )
+
+                for sync_config_id, credentials in feedback.credentials.items():
+                    if not isinstance(credentials, dict) or not all(
+                        isinstance(key, str) and isinstance(value, str)
+                        for key, value in credentials.items()
+                    ):
+                        raise ResourceError("Received invalid Sync OAuth credentials")
+                    provider = requested_credentials[sync_config_id]
+                    await app.agent_manager.upsert_sync_oauth_credentials(
+                        account=x_stf_account,
+                        user_id=user_id,
+                        agent_id=agent_id,
+                        provider=provider.value,
+                        sync_config_id=sync_config_id,
+                        credentials=credentials,
+                    )
+
+                websocket.queue.put_nowait(
+                    UserToAgentInteraction(
+                        request_id=feedback.request_id,
+                        response=json.dumps(
+                            {"existing_credentials": feedback.credentials}
+                        ),
+                    )
+                )
+            else:
+                result = await mcp_session.elicit_form(
+                    message=feedback.question,
+                    requestedSchema=feedback.response_schema,
+                    related_request_id=feedback.request_id,
+                )
+                websocket.queue.put_nowait(
+                    UserToAgentInteraction(
+                        request_id=feedback.request_id,
+                        response=result.content,  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
+                    )
+                )
         elif msg.operation == AnswerOperation.ANSWER:
             result_contents = convert_arag_answer_to_content(msg)
             for content in result_contents:
                 if isinstance(content, TextContent):
                     logger.debug(f"Tool output text: {content.text}")
                 messages.append(content)
+        elif msg.operation == AnswerOperation.ERROR:
+            detail = msg.exception.detail if msg.exception else "Agent execution failed"
+            raise ResourceError(detail)
 
     return messages
 
@@ -200,6 +286,166 @@ def _get_first_enabled_mcp_auth_config(app: "HTTPApplication"):
             if auth_config is not None:
                 return auth_config
     return None
+
+
+class _ManagedMCPServer:
+    def __init__(self, manager: StreamableHTTPSessionManager):
+        self.manager = manager
+        self.started = asyncio.Event()
+        self.task: asyncio.Task[None] | None = None
+        self.session_created = False
+        self.active_requests = 0
+
+    async def run(self) -> None:
+        async with self.manager.run():
+            self.started.set()
+            await anyio.sleep_forever()
+
+    async def start(self) -> None:
+        self.task = asyncio.create_task(self.run())
+        await self.started.wait()
+
+    def close(self) -> None:
+        if self.task is not None:
+            self.task.cancel()
+
+    def reserve_request(self) -> None:
+        self.active_requests += 1
+
+    def release_request(self) -> None:
+        self.active_requests -= 1
+
+    def accept_request(self, request: Request) -> bool:
+        if request.headers.get(MCP_SESSION_ID_HEADER):
+            return True
+        if self.session_created:
+            return False
+        self.session_created = True
+        return True
+
+    def is_reinitialization(self, request: Request, body: bytes) -> bool:
+        if (
+            not self.session_created
+            or request.method != "POST"
+            or request.headers.get(MCP_SESSION_ID_HEADER)
+        ):
+            return False
+        try:
+            message = json.loads(body)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return False
+        return isinstance(message, dict) and message.get("method") == "initialize"
+
+
+async def _evict_mcp_servers(app: "HTTPApplication", max_servers: int) -> None:
+    while len(app.mcp_servers) >= max_servers:
+        oldest_key = next(
+            (
+                key
+                for key, server in app.mcp_servers.items()
+                if server.active_requests == 0
+            ),
+            None,
+        )
+        if oldest_key is None:
+            raise HTTPException(
+                status_code=503,
+                detail="MCP server capacity is occupied by active sessions",
+            )
+        managed_server = app.mcp_servers.pop(oldest_key)
+        managed_server.close()
+        if managed_server.task is not None:
+            await asyncio.gather(managed_server.task, return_exceptions=True)
+
+
+async def _remove_mcp_server(
+    app: "HTTPApplication", key: tuple[str, str, str, str, str]
+) -> None:
+    async with app.mcp_server_lock:
+        managed_server = app.mcp_servers.pop(key, None)
+    if managed_server is not None:
+        managed_server.close()
+        if managed_server.task is not None:
+            await asyncio.gather(managed_server.task, return_exceptions=True)
+
+
+class _MCPTransportResponse(Response):
+    def __init__(
+        self,
+        request: Request,
+        managed_server: _ManagedMCPServer,
+        body: bytes,
+        max_response_bytes: int,
+    ):
+        super().__init__()
+        self.request = request
+        self.managed_server = managed_server
+        self.body = body
+        self.max_response_bytes = max_response_bytes
+
+    async def __call__(self, scope, receive, send) -> None:
+        try:
+            await self._handle_request(scope, receive, send)
+        finally:
+            self.managed_server.release_request()
+
+    async def _handle_request(self, scope, receive, send) -> None:
+        body_sent = False
+
+        async def patched_receive():
+            nonlocal body_sent
+            if not body_sent:
+                body_sent = True
+                return {
+                    "type": "http.request",
+                    "body": self.body,
+                    "more_body": False,
+                }
+            return await receive()
+
+        if self.request.method == "GET":
+            await self.managed_server.manager.handle_request(
+                scope, patched_receive, send
+            )
+            return
+
+        response_status = 200
+        response_headers: dict[str, str] = {}
+        body_chunks: list[bytes] = []
+        response_bytes = 0
+        response_too_large = False
+
+        async def intercepting_send(message) -> None:
+            nonlocal response_status, response_bytes, response_too_large
+            if message["type"] == "http.response.start":
+                response_status = message["status"]
+                response_headers.update(
+                    {
+                        key.decode(): value.decode()
+                        for key, value in message.get("headers", [])
+                    }
+                )
+            elif message["type"] == "http.response.body":
+                chunk = message.get("body", b"")
+                response_bytes += len(chunk)
+                if response_bytes > self.max_response_bytes:
+                    response_too_large = True
+                    body_chunks.clear()
+                elif not response_too_large:
+                    body_chunks.append(chunk)
+
+        await self.managed_server.manager.handle_request(
+            scope, patched_receive, intercepting_send
+        )
+        if response_too_large:
+            response = Response(content="MCP response is too large", status_code=502)
+        else:
+            response = Response(
+                content=b"".join(body_chunks),
+                status_code=response_status,
+                headers=response_headers,
+            )
+        await response(scope, receive, send)
 
 
 @router.get("/.well-known/oauth-protected-resource")
@@ -292,10 +538,8 @@ async def mcp_handler_delete(
     x_stf_account_type: str = Header(..., include_in_schema=False),
 ):
     app: HTTPApplication = request.app
-    if (agent_id, session) in app.sses:
-        await app.sses[(agent_id, session)].terminate()
-    if (agent_id, session) in app.sses:
-        del app.sses[(agent_id, session)]
+    key = (x_stf_account, x_stf_user, x_stf_account_type, agent_id, session)
+    await _remove_mcp_server(app, key)
 
 
 @router.get("/api/v1/agent/{agent_id}/session/{session}/mcp", tags=["MCP"])
@@ -329,136 +573,75 @@ async def interaction_mcp_handler(
             raise HTTPException(status_code=413, detail="MCP request is too large")
         body_bytes.extend(chunk)
 
-    agent_manager: AgentManager = request.app.agent_manager
-    request._headers._list.append((MCP_SESSION_ID_HEADER.encode(), session.encode()))
-
-    # No session ID needed in stateless mode
-    security_settings: TransportSecuritySettings | None = None
-    http_transport = StreamableHTTPServerTransport(
-        mcp_session_id=session,  # No session tracking in stateless mode
-        is_json_response_enabled=True,
-        event_store=None,  # No event store in stateless mode
-        security_settings=security_settings,
-    )
-
-    workflows, agent_config, prompts = await asyncio.gather(
-        agent_manager.workflows_list(account=x_stf_account, agent_id=agent_id),
-        agent_manager.get_agent_config_basic(account=x_stf_account, agent_id=agent_id),
-        agent_manager.get_prompts(account=x_stf_account, agent_id=agent_id),
-    )
-
-    mcp_server = MCPServer(
-        name=agent_id,
-        version="1.0.0",
-        instructions=agent_config.instructions,
-        lifespan=default_lifespan,
-    )
-
-    list_tools_partial = partial(list_tools, workflows)
-    mcp_server.list_tools()(list_tools_partial)
-
-    call_tool_partial = partial(
-        call_tool,
-        app,
-        mcp_server,
-        x_stf_account,
-        agent_id,
-        session,
-        workflows,
-        request.headers,
-    )
-    mcp_server.call_tool()(call_tool_partial)
-
-    list_prompts_partial = partial(list_prompts, prompts=prompts)
-    mcp_server.list_prompts()(list_prompts_partial)
-
-    get_prompt_partial = partial(get_prompt, prompts)
-    mcp_server.get_prompt()(get_prompt_partial)
-
-    # Start server in a new task
-    async def run_stateless_server(
-        *, task_status: TaskStatus[None] = anyio.TASK_STATUS_IGNORED
-    ):
-        async with http_transport.connect() as streams:
-            read_stream, write_stream = streams
-            task_status.started()
-            try:
-                await mcp_server.run(
-                    read_stream,
-                    write_stream,
-                    mcp_server.create_initialization_options(),
-                    stateless=True,
+    key = (x_stf_account, x_stf_user, x_stf_account_type, agent_id, session)
+    async with app.mcp_server_lock:
+        managed_server = app.mcp_servers.pop(key, None)
+        if managed_server is not None and managed_server.is_reinitialization(
+            request, bytes(body_bytes)
+        ):
+            if managed_server.active_requests:
+                app.mcp_servers[key] = managed_server
+                raise HTTPException(
+                    status_code=409,
+                    detail="MCP session is still active for this path",
                 )
-            except Exception:
-                logger.exception("Stateless session crashed")
-
-    # Intercept ASGI send messages so FastAPI doesn't attempt to send a
-    # second response after the transport has already sent one (which would
-    # cause: RuntimeError: Unexpected ASGI message 'http.response.start'
-    # sent, after response already completed).
-    response_status = 200
-    response_headers: dict[str, str] = {}
-    body_chunks: list[bytes] = []
-    response_bytes = 0
-    response_too_large = False
-
-    async def intercepting_send(message: MutableMapping[str, Any]) -> None:
-        nonlocal response_status, response_bytes, response_too_large
-        if message["type"] == "http.response.start":
-            response_status = message["status"]
-            response_headers.update(
-                {k.decode(): v.decode() for k, v in message.get("headers", [])}
+            managed_server.close()
+            if managed_server.task is not None:
+                await asyncio.gather(managed_server.task, return_exceptions=True)
+            managed_server = None
+        if managed_server is not None:
+            app.mcp_servers[key] = managed_server
+        if managed_server is None:
+            await _evict_mcp_servers(app, runtime_settings.mcp_max_servers)
+            agent_manager: AgentManager = request.app.agent_manager
+            workflows, agent_config, prompts = await asyncio.gather(
+                agent_manager.workflows_list(account=x_stf_account, agent_id=agent_id),
+                agent_manager.get_agent_config_basic(
+                    account=x_stf_account, agent_id=agent_id
+                ),
+                agent_manager.get_prompts(account=x_stf_account, agent_id=agent_id),
             )
-        elif message["type"] == "http.response.body":
-            chunk = message.get("body", b"")
-            if not chunk or response_too_large:
-                return
-            response_bytes += len(chunk)
-            if response_bytes > max_response_bytes:
-                response_too_large = True
-                body_chunks.clear()
-                return
-            body_chunks.append(chunk)
+            mcp_server = MCPServer(
+                name=agent_id,
+                version="1.0.0",
+                instructions=agent_config.instructions,
+                lifespan=default_lifespan,
+            )
+            mcp_server.list_tools()(partial(list_tools, workflows))
+            mcp_server.call_tool()(
+                partial(
+                    call_tool,
+                    app,
+                    mcp_server,
+                    x_stf_account,
+                    agent_id,
+                    session,
+                    workflows,
+                    request.headers,
+                )
+            )
+            mcp_server.list_prompts()(partial(list_prompts, prompts=prompts))
+            mcp_server.get_prompt()(partial(get_prompt, prompts))
+            manager = StreamableHTTPSessionManager(
+                app=mcp_server,
+                json_response=True,
+                stateless=False,
+                security_settings=None,
+                max_request_body_size=max_request_bytes,
+            )
+            managed_server = _ManagedMCPServer(manager)
+            await managed_server.start()
+            app.mcp_servers[key] = managed_server
+        if not managed_server.accept_request(request):
+            raise HTTPException(
+                status_code=409,
+                detail="MCP session already initialized for this path",
+            )
+            managed_server.reserve_request()
 
-    # Pre-read the body before passing to the MCP transport.
-    # Fix for FastAPI/Starlette 1.x
-    # which consumes the ASGI receive callable internally before the route handler runs.
-    # TODO: consider rewriting this handler to use the official StreamableHTTPSessionManager
-    # This does not happen in arag due to older versions of FastAPI/Starlette.
-
-    body_sent = False
-
-    async def patched_receive():
-        nonlocal body_sent
-        if not body_sent:
-            body_sent = True
-            return {
-                "type": "http.request",
-                "body": bytes(body_bytes),
-                "more_body": False,
-            }
-        while True:
-            msg = await request._receive()
-            if msg["type"] == "http.disconnect":
-                return msg
-
-    async with anyio.create_task_group() as tg:
-        # Start the server task
-        await tg.start(run_stateless_server)
-
-        # Handle the HTTP request via the patched receive
-        await http_transport.handle_request(
-            request.scope, patched_receive, intercepting_send
-        )
-
-        # Terminate the transport after the request is handled
-        await http_transport.terminate()
-
-    if response_too_large:
-        return Response(content="MCP response is too large", status_code=502)
-
-    return Response(
-        content=b"".join(body_chunks),
-        status_code=response_status,
-        headers=response_headers,
+    return _MCPTransportResponse(
+        request,
+        managed_server,
+        bytes(body_bytes),
+        max_response_bytes,
     )
