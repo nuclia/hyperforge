@@ -6,19 +6,18 @@ process, connected via a LocalBroker.  No Redis, no gRPC, no PostgreSQL, no
 NucliaDB required.
 """
 
+import asyncio
 import base64
 import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, Tuple
+from typing import Any
 
+import anyio
 import prometheus_client
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from lru import LRU
-from mcp.server.lowlevel.server import Server as MCPServer
-from mcp.server.streamable_http import StreamableHTTPServerTransport
 from nucliadb_telemetry.logs import setup_logging
 from nucliadb_telemetry.settings import LogLevel, LogSettings
 from prometheus_client import CONTENT_TYPE_LATEST
@@ -355,9 +354,8 @@ class StandaloneApplication(FastAPI):
                 stream_ttl_seconds=s.pubsub_stream_ttl_seconds,
             )
 
-        # LRU caches for MCP server instances (mirrors HTTPApplication).
-        self.sses: LRU[Tuple[str, str], StreamableHTTPServerTransport] = LRU(size=100)
-        self.mcp_servers: LRU[str, MCPServer] = LRU(size=100)
+        self.mcp_servers: dict[tuple[str, str, str, str, str], Any] = {}
+        self.mcp_server_lock = anyio.Lock()
 
         # Agent manager backed by the JSON config — no PostgreSQL.
         agent_manager_class = resolve_dotted_name(s.agent_manager_class)
@@ -420,6 +418,13 @@ class StandaloneApplication(FastAPI):
             raise
 
     async def _shutdown(self) -> None:
+        for managed_server in self.mcp_servers.values():
+            managed_server.close()
+        await asyncio.gather(
+            *(managed_server.task for managed_server in self.mcp_servers.values()),
+            return_exceptions=True,
+        )
+        self.mcp_servers.clear()
         if self.a2a_server is not None:
             await self.a2a_server.stop(grace=5)
         await self.session_manager.finalize()

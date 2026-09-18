@@ -9,9 +9,11 @@ agent configuration.
 """
 
 import datetime
+import json
 from typing import Any, List
 
 from hyperforge.db import exceptions
+from hyperforge.db.encryption import decrypt_data, encrypt_data
 from hyperforge.models import MemoryConfig, Rules
 from hyperforge.prompts import PromptConfig
 from hyperforge.retrieval.config import RetrievalAgentConfig
@@ -26,6 +28,7 @@ class StaticAgentManager:
 
     def __init__(self, config: dict[str, StandAloneAgentConfig]) -> None:
         self._config = config
+        self._oauth_credentials: dict[tuple[str, str, str, str, str], str] = {}
 
     # ------------------------------------------------------------------
     # Lifecycle (no-ops — nothing to connect/disconnect)
@@ -46,6 +49,44 @@ class StaticAgentManager:
         if not agent_config:
             raise exceptions.NotFoundError(f"Agent '{agent_id}' not found")
         return agent_config
+
+    async def get_sync_oauth_credentials(
+        self,
+        *,
+        account: str,
+        user_id: str,
+        agent_id: str,
+        provider: str,
+        sync_config_id: str,
+    ) -> dict[str, str] | None:
+        key = (account, user_id, agent_id, provider, sync_config_id)
+        encrypted_credentials = self._oauth_credentials.get(key)
+        if encrypted_credentials is None:
+            return None
+        try:
+            credentials = json.loads(decrypt_data(encrypted_credentials))
+        except (ValueError, json.JSONDecodeError) as exc:
+            raise ValueError("Invalid stored OAuth credentials") from exc
+        if not isinstance(credentials, dict) or not all(
+            isinstance(name, str) and isinstance(value, str)
+            for name, value in credentials.items()
+        ):
+            raise ValueError("Invalid stored OAuth credentials")
+        return credentials
+
+    async def upsert_sync_oauth_credentials(
+        self,
+        *,
+        account: str,
+        user_id: str,
+        agent_id: str,
+        provider: str,
+        sync_config_id: str,
+        credentials: dict[str, str],
+    ) -> None:
+        key = (account, user_id, agent_id, provider, sync_config_id)
+        payload = json.dumps(credentials, sort_keys=True, separators=(",", ":"))
+        self._oauth_credentials[key] = encrypt_data(payload)
 
     async def ensure_workflow_active(
         self, account: str, agent_id: str, workflow_id: str

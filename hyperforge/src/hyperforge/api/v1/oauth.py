@@ -11,6 +11,7 @@ from starlette.responses import HTMLResponse
 from hyperforge.api.settings import Settings
 from hyperforge.api.v1.router import router
 from hyperforge.api.v1.utils import tracer
+from hyperforge.standalone.const import STANDALONE_ACCOUNT
 
 logger = logging.getLogger(__name__)
 
@@ -137,9 +138,11 @@ async def oauth_callback(
     Callback from oauth flow on RAO that requires to send creds to websocket
     """
     settings: Settings = request.app.settings
+    # Standalone interactions always use this fixed broker account namespace.
+    callback_account_id = STANDALONE_ACCOUNT if settings.standalone else account_id
     subject = _build_oauth_subject(
         settings,
-        account_id,
+        callback_account_id,
         agent_id,
         workflow_id,
         session,
