@@ -139,7 +139,11 @@ async def oauth_callback(
     """
     settings: Settings = request.app.settings
     # Standalone interactions always use this fixed broker account namespace.
-    callback_account_id = STANDALONE_ACCOUNT if settings.standalone else account_id
+    callback_account_id = (
+        STANDALONE_ACCOUNT
+        if hasattr(request.app, "_standalone_settings")
+        else account_id
+    )
     subject = _build_oauth_subject(
         settings,
         callback_account_id,

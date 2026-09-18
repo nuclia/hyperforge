@@ -382,11 +382,14 @@ async def test_standalone_mcp_unknown_tool_returns_protocol_error(
 ):
     mcp_url = f"http://{standalone_http}/api/v1/agent/{AGENT_ID}/session/unknown/mcp"
 
-    async with streamable_http_client(mcp_url) as (
-        read_stream,
-        write_stream,
-        _,
-    ), ClientSession(read_stream, write_stream) as session:
+    async with (
+        streamable_http_client(mcp_url) as (
+            read_stream,
+            write_stream,
+            _,
+        ),
+        ClientSession(read_stream, write_stream) as session,
+    ):
         await session.initialize()
         result = await session.call_tool("missing", {})
 
@@ -423,11 +426,14 @@ async def test_standalone_mcp_sessions_are_independent(standalone_http: str):
             f"http://{standalone_http}/api/v1/agent/{AGENT_ID}"
             f"/session/{session_name}/mcp"
         )
-        async with streamable_http_client(mcp_url) as (
-            read_stream,
-            write_stream,
-            _,
-        ), ClientSession(read_stream, write_stream) as session:
+        async with (
+            streamable_http_client(mcp_url) as (
+                read_stream,
+                write_stream,
+                _,
+            ),
+            ClientSession(read_stream, write_stream) as session,
+        ):
             await session.initialize()
             result = await session.list_tools()
         return [tool.name for tool in result.tools]
@@ -470,9 +476,7 @@ async def test_standalone_mcp_url_elicitation(
                 elicitation_callback=handle_elicitation,
             ) as session:
                 await session.initialize()
-                result = await session.call_tool(
-                    "ask", {"question": "Authenticate"}
-                )
+                result = await session.call_tool("ask", {"question": "Authenticate"})
 
     assert result.isError is False
     assert len(elicitation_requests) == 1
