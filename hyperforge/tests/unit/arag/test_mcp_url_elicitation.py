@@ -1,11 +1,13 @@
 import asyncio
 import json
 from types import SimpleNamespace
+from typing import cast
 from unittest.mock import AsyncMock
 
 import anyio
 import pytest
 from mcp.server.fastmcp.exceptions import ResourceError
+from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from mcp.types import ElicitResult
 from starlette.datastructures import Headers
 from starlette.requests import Request
@@ -14,6 +16,7 @@ from hyperforge.api.v1 import mcp_interaction
 from hyperforge.interaction import (
     AnswerOperation,
     AragAnswer,
+    ARAGException,
     Feedback,
     OAuthAuthenticateURL,
     OAuthFeedbackReturnSchema,
@@ -65,6 +68,30 @@ def setup_call(monkeypatch, events):
         }
     )
     return app, server, workflow, headers, session, agent_manager
+
+
+@pytest.mark.asyncio
+async def test_mcp_propagates_agent_error(monkeypatch):
+    events = [
+        AragAnswer(
+            operation=AnswerOperation.ERROR,
+            exception=ARAGException(detail="Unable to start agent"),
+        )
+    ]
+    app, server, workflow, headers, _, _ = setup_call(monkeypatch, events)
+
+    with pytest.raises(ResourceError, match="Unable to start agent"):
+        await mcp_interaction.call_tool(
+            app,
+            server,
+            "account",
+            "agent",
+            "session",
+            [workflow],
+            headers,
+            "ask",
+            {},
+        )
 
 
 @pytest.mark.asyncio
@@ -246,7 +273,8 @@ async def test_mcp_server_limit_evicts_and_awaits_oldest_manager():
 
 
 def test_mcp_manager_accepts_only_one_request_without_session_id():
-    managed_server = mcp_interaction._ManagedMCPServer(SimpleNamespace())
+    manager = cast(StreamableHTTPSessionManager, SimpleNamespace())
+    managed_server = mcp_interaction._ManagedMCPServer(manager)
     initial_request = Request({"type": "http", "method": "POST", "headers": []})
     established_request = Request(
         {
@@ -261,6 +289,35 @@ def test_mcp_manager_accepts_only_one_request_without_session_id():
     assert managed_server.accept_request(initial_request) is False
     assert managed_server.accept_request(sessionless_get) is False
     assert managed_server.accept_request(established_request) is True
+
+
+def test_mcp_manager_identifies_sessionless_reinitialization():
+    manager = cast(StreamableHTTPSessionManager, SimpleNamespace())
+    managed_server = mcp_interaction._ManagedMCPServer(manager)
+    initial_request = Request({"type": "http", "method": "POST", "headers": []})
+    initialize_body = b'{"jsonrpc":"2.0","method":"initialize","id":1}'
+    established_request = Request(
+        {
+            "type": "http",
+            "method": "POST",
+            "headers": [(b"mcp-session-id", b"session-id")],
+        }
+    )
+
+    assert managed_server.is_reinitialization(initial_request, initialize_body) is False
+    assert managed_server.accept_request(initial_request) is True
+    assert managed_server.is_reinitialization(initial_request, initialize_body) is True
+    assert managed_server.is_reinitialization(initial_request, b"not json") is False
+    assert (
+        managed_server.is_reinitialization(
+            initial_request, b'{"jsonrpc":"2.0","method":"tools/list","id":2}'
+        )
+        is False
+    )
+    assert (
+        managed_server.is_reinitialization(established_request, initialize_body)
+        is False
+    )
 
 
 @pytest.mark.asyncio

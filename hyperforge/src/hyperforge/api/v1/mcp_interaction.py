@@ -217,6 +217,9 @@ async def call_tool(
                 if isinstance(content, TextContent):
                     logger.debug(f"Tool output text: {content.text}")
                 messages.append(content)
+        elif msg.operation == AnswerOperation.ERROR:
+            detail = msg.exception.detail if msg.exception else "Agent execution failed"
+            raise ResourceError(detail)
 
     return messages
 
@@ -312,6 +315,19 @@ class _ManagedMCPServer:
             return False
         self.session_created = True
         return True
+
+    def is_reinitialization(self, request: Request, body: bytes) -> bool:
+        if (
+            not self.session_created
+            or request.method != "POST"
+            or request.headers.get(MCP_SESSION_ID_HEADER)
+        ):
+            return False
+        try:
+            message = json.loads(body)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return False
+        return isinstance(message, dict) and message.get("method") == "initialize"
 
 
 async def _evict_mcp_servers(app: "HTTPApplication", max_servers: int) -> None:
@@ -531,6 +547,13 @@ async def interaction_mcp_handler(
     key = (x_stf_account, x_stf_user, x_stf_account_type, agent_id, session)
     async with app.mcp_server_lock:
         managed_server = app.mcp_servers.pop(key, None)
+        if managed_server is not None and managed_server.is_reinitialization(
+            request, bytes(body_bytes)
+        ):
+            managed_server.close()
+            if managed_server.task is not None:
+                await asyncio.gather(managed_server.task, return_exceptions=True)
+            managed_server = None
         if managed_server is not None:
             app.mcp_servers[key] = managed_server
         if managed_server is None:
