@@ -55,6 +55,7 @@ def test_standalone_a2a_settings_reuse_shared_validation():
 @pytest.mark.asyncio
 async def test_standalone_shutdown_delegates_resource_cleanup_to_session_manager():
     app = StandaloneApplication.__new__(StandaloneApplication)
+    app.mcp_servers = {}
     app.a2a_server = AsyncMock()
     app.session_manager = AsyncMock()
 
