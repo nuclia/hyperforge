@@ -280,7 +280,10 @@ the same limits. Exceeding a limit raises `UsageLimitExceeded` and records a
 failed turn event.
 
 After a run, inspect `agent.usage` for `turns`, `tool_calls`, `input_tokens`, and
-`output_tokens`.
+`output_tokens`. The Nuclia adapter uses the provider's raw model token counts when
+available and falls back to the legacy prompt/completion counts for older responses.
+`nuclia_input_tokens` and `nuclia_output_tokens` contain the separate Nuclia
+accounting units used to measure cost when the API reports them.
 
 ## Conversations and Storage
 
