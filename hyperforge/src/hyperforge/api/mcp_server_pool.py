@@ -158,6 +158,7 @@ class MCPServerPool:
                     status_code=409,
                     detail="MCP session initialization is already in progress",
                 )
+            self._reserve_capacity()
             self._creating[key] = current_task
 
         candidate = None
@@ -267,24 +268,31 @@ class MCPServerPool:
 
     def _evict_for_capacity(self) -> None:
         while len(self._servers) >= self._max_servers:
-            now = time.monotonic()
-            candidates = [
-                (key, server)
-                for key, server in self._servers.items()
-                if server.active_requests == 0
-                and (
-                    not server.session_created
-                    or now - server.last_used >= self._idle_ttl_seconds
-                )
-            ]
-            if not candidates:
-                raise HTTPException(
-                    status_code=503,
-                    detail="MCP server capacity is occupied by established sessions",
-                )
-            key, server = min(candidates, key=lambda item: item[1].last_used)
-            self._servers.pop(key)
-            server.close()
-            if server.task is not None:
-                self._retired_tasks.add(server.task)
-                server.task.add_done_callback(self._retired_tasks.discard)
+            self._evict_one()
+
+    def _reserve_capacity(self) -> None:
+        while len(self._servers) + len(self._creating) >= self._max_servers:
+            self._evict_one()
+
+    def _evict_one(self) -> None:
+        now = time.monotonic()
+        candidates = [
+            (key, server)
+            for key, server in self._servers.items()
+            if server.active_requests == 0
+            and (
+                not server.session_created
+                or now - server.last_used >= self._idle_ttl_seconds
+            )
+        ]
+        if not candidates:
+            raise HTTPException(
+                status_code=503,
+                detail="MCP server capacity is occupied by established sessions",
+            )
+        key, server = min(candidates, key=lambda item: item[1].last_used)
+        self._servers.pop(key)
+        server.close()
+        if server.task is not None:
+            self._retired_tasks.add(server.task)
+            server.task.add_done_callback(self._retired_tasks.discard)

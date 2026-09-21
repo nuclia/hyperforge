@@ -1,6 +1,7 @@
 import asyncio
 import time
 from typing import cast
+from unittest.mock import AsyncMock
 
 import pytest
 from fastapi import HTTPException
@@ -127,6 +128,32 @@ async def test_pool_creates_different_keys_concurrently():
 
     first_lease.release()
     second_lease.release()
+    await pool.shutdown()
+
+
+@pytest.mark.asyncio
+async def test_pool_counts_pending_creations_toward_capacity():
+    pool = MCPServerPool(1, 1800, 30)
+    creation_started = asyncio.Event()
+    release_creation = asyncio.Event()
+    second_factory = AsyncMock()
+
+    async def slow_factory():
+        creation_started.set()
+        await release_creation.wait()
+        return FakeManagedServer()
+
+    first = asyncio.create_task(pool.acquire(KEY, request(), b"", slow_factory))
+    await creation_started.wait()
+
+    with pytest.raises(HTTPException) as error:
+        await pool.acquire(OTHER_KEY, request(), b"", second_factory)
+
+    assert error.value.status_code == 503
+    second_factory.assert_not_awaited()
+    release_creation.set()
+    lease = await first
+    lease.release()
     await pool.shutdown()
 
 
