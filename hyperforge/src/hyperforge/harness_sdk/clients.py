@@ -83,8 +83,28 @@ class ChatCompletionUsage(BaseModel):
     prompt_tokens: float = 0
     completion_tokens: float = 0
     total_tokens: float = 0
+    nuclia_input_tokens: float | None = None
+    nuclia_output_tokens: float | None = None
+    model_input_tokens: float | None = None
+    model_output_tokens: float | None = None
     prompt_tokens_details: dict[str, Any] | None = None
     completion_tokens_details: dict[str, Any] | None = None
+
+    @property
+    def input_tokens(self) -> float:
+        return (
+            self.model_input_tokens
+            if self.model_input_tokens is not None
+            else self.prompt_tokens
+        )
+
+    @property
+    def output_tokens(self) -> float:
+        return (
+            self.model_output_tokens
+            if self.model_output_tokens is not None
+            else self.completion_tokens
+        )
 
 
 class ChatCompletionChunk(BaseModel):
@@ -236,6 +256,10 @@ class ModelDelta:
     tool_calls: list[HarnessToolCall] = field(default_factory=list)
     input_tokens: float = 0
     output_tokens: float = 0
+    nuclia_input_tokens: float = 0
+    nuclia_output_tokens: float = 0
+    model_input_tokens: float = 0
+    model_output_tokens: float = 0
     trace_id: str | None = None
     model: str | None = None
 
@@ -380,8 +404,20 @@ class NucliaModelClient:
         async for chunk in self.client.stream(request):
             if not chunk.choices:
                 yield ModelDelta(
-                    input_tokens=chunk.usage.prompt_tokens if chunk.usage else 0,
-                    output_tokens=chunk.usage.completion_tokens if chunk.usage else 0,
+                    input_tokens=chunk.usage.input_tokens if chunk.usage else 0,
+                    output_tokens=chunk.usage.output_tokens if chunk.usage else 0,
+                    nuclia_input_tokens=(chunk.usage.nuclia_input_tokens or 0)
+                    if chunk.usage
+                    else 0,
+                    nuclia_output_tokens=(chunk.usage.nuclia_output_tokens or 0)
+                    if chunk.usage
+                    else 0,
+                    model_input_tokens=(chunk.usage.model_input_tokens or 0)
+                    if chunk.usage
+                    else 0,
+                    model_output_tokens=(chunk.usage.model_output_tokens or 0)
+                    if chunk.usage
+                    else 0,
                     trace_id=chunk.id,
                     model=chunk.model,
                 )
@@ -404,8 +440,20 @@ class NucliaModelClient:
                     tool_calls=completed_calls()
                     if choice.finish_reason == "tool_calls"
                     else [],
-                    input_tokens=chunk.usage.prompt_tokens if chunk.usage else 0,
-                    output_tokens=chunk.usage.completion_tokens if chunk.usage else 0,
+                    input_tokens=chunk.usage.input_tokens if chunk.usage else 0,
+                    output_tokens=chunk.usage.output_tokens if chunk.usage else 0,
+                    nuclia_input_tokens=(chunk.usage.nuclia_input_tokens or 0)
+                    if chunk.usage
+                    else 0,
+                    nuclia_output_tokens=(chunk.usage.nuclia_output_tokens or 0)
+                    if chunk.usage
+                    else 0,
+                    model_input_tokens=(chunk.usage.model_input_tokens or 0)
+                    if chunk.usage
+                    else 0,
+                    model_output_tokens=(chunk.usage.model_output_tokens or 0)
+                    if chunk.usage
+                    else 0,
                     trace_id=chunk.id,
                     model=chunk.model,
                 )
