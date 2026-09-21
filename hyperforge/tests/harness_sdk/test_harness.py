@@ -254,8 +254,12 @@ async def test_agent_loop_streams_direct_answer_and_records_usage() -> None:
             yield ModelDelta(text="Hello")
             yield ModelDelta(
                 text=" world",
-                input_tokens=5,
-                output_tokens=2,
+                input_tokens=4,
+                output_tokens=1,
+                nuclia_input_tokens=0.005,
+                nuclia_output_tokens=0.002,
+                model_input_tokens=4,
+                model_output_tokens=1,
                 model="resolved-model",
             )
 
@@ -276,8 +280,19 @@ async def test_agent_loop_streams_direct_answer_and_records_usage() -> None:
     assert events[-1].type == HarnessEventType.TURN_COMPLETED
     assert harness.usage.turns == 1
     assert harness.usage.tool_calls == 0
-    assert harness.usage.input_tokens == 5
-    assert harness.usage.output_tokens == 2
+    assert harness.usage.input_tokens == 4
+    assert harness.usage.output_tokens == 1
+    assert harness.usage.nuclia_input_tokens == 0.005
+    assert harness.usage.nuclia_output_tokens == 0.002
+    assert harness.usage.model_input_tokens == 4
+    assert harness.usage.model_output_tokens == 1
+    completed = next(
+        event for event in events if event.type == HarnessEventType.LLM_COMPLETED
+    )
+    assert completed.payload["model_input_tokens"] == 4
+    assert completed.payload["model_output_tokens"] == 1
+    assert completed.payload["nuclia_input_tokens"] == 0.005
+    assert completed.payload["nuclia_output_tokens"] == 0.002
 
 
 @pytest.mark.asyncio
