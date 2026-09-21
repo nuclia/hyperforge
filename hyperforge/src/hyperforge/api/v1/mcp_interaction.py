@@ -172,10 +172,9 @@ async def call_tool(
                     )
                 )
             elif feedback.credentials is not None:
-                unexpected = set(feedback.credentials) - set(requested_credentials)
-                if unexpected:
+                if set(feedback.credentials) != set(requested_credentials):
                     raise ResourceError(
-                        "Received credentials for an unexpected Sync configuration"
+                        "Received credentials that do not match the requested Sync configurations"
                     )
 
                 for sync_config_id, credentials in feedback.credentials.items():

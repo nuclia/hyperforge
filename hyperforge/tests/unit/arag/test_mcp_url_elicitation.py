@@ -215,6 +215,41 @@ async def test_mcp_discards_partial_stored_credentials(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_mcp_rejects_partial_received_credentials(monkeypatch):
+    events = [
+        AragAnswer(
+            operation=AnswerOperation.AGENT_REQUEST,
+            feedback=feedback(
+                get_credentials={
+                    "first": Provider.SHAREFILE_OAUTH,
+                    "second": Provider.SHAREFILE_OAUTH,
+                }
+            ),
+        ),
+        AragAnswer(
+            operation=AnswerOperation.AGENT_REQUEST,
+            feedback=feedback(credentials={"first": {"external-connection": "secret"}}),
+        ),
+    ]
+    app, server, workflow, headers, _, agent_manager = setup_call(monkeypatch, events)
+
+    with pytest.raises(ResourceError, match="do not match"):
+        await mcp_interaction.call_tool(
+            app,
+            server,
+            "account",
+            "agent",
+            "session",
+            [workflow],
+            headers,
+            "ask",
+            {},
+        )
+
+    agent_manager.upsert_sync_oauth_credentials.assert_not_awaited()
+
+
+@pytest.mark.asyncio
 async def test_mcp_production_uses_current_request_headers(monkeypatch):
     app, server, workflow, headers, _, _ = setup_call(monkeypatch, [])
     api_settings_type = type("ApiSettings", (), {})
