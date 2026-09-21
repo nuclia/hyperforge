@@ -62,9 +62,11 @@ class HTTPApplication(FastAPI):
     ):
         @asynccontextmanager
         async def lifespan(app: "HTTPApplication"):
-            await app.startup()
-            yield
-            await app.shutdown()
+            try:
+                await app.startup()
+                yield
+            finally:
+                await app.shutdown()
 
         super().__init__(*args, lifespan=lifespan, **kwargs)
         self.settings = settings
@@ -156,8 +158,11 @@ class HTTPApplication(FastAPI):
                 logger.error(f"Module {load_module} could not be loaded")
 
     async def shutdown(self) -> None:
-        await self.mcp_server_pool.shutdown()
-        await self.agent_manager.finalize()
-        await self.broker.finalize()
+        if hasattr(self, "mcp_server_pool"):
+            await self.mcp_server_pool.shutdown()
+        if hasattr(self, "agent_manager"):
+            await self.agent_manager.finalize()
+        if hasattr(self, "broker"):
+            await self.broker.finalize()
         await clean_telemetry(SERVICE_NAME)
         GLOBAL_REGISTRY.clear()

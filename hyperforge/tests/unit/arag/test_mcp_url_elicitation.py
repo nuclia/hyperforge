@@ -47,7 +47,7 @@ def setup_call(monkeypatch, events):
     )
     agent_manager = SimpleNamespace(
         get_sync_oauth_credentials=AsyncMock(return_value=None),
-        upsert_sync_oauth_credentials=AsyncMock(),
+        upsert_sync_oauth_credentials_batch=AsyncMock(),
     )
     app = SimpleNamespace(agent_manager=agent_manager, settings=SimpleNamespace())
     session = SimpleNamespace(
@@ -132,13 +132,16 @@ async def test_mcp_elicits_url_and_persists_sharefile_credentials(monkeypatch):
     assert session.elicit_url.await_args.kwargs["url"] == (
         "https://sharefile.example/authorize"
     )
-    agent_manager.upsert_sync_oauth_credentials.assert_awaited_once_with(
+    agent_manager.upsert_sync_oauth_credentials_batch.assert_awaited_once_with(
         account="account",
         user_id="user",
         agent_id="agent",
-        provider="sharefile_oauth",
-        sync_config_id="sync-config",
-        credentials={"external-connection": "secret"},
+        credentials_by_config={
+            "sync-config": (
+                "sharefile_oauth",
+                {"external-connection": "secret"},
+            )
+        },
     )
 
 
@@ -246,7 +249,47 @@ async def test_mcp_rejects_partial_received_credentials(monkeypatch):
             {},
         )
 
-    agent_manager.upsert_sync_oauth_credentials.assert_not_awaited()
+    agent_manager.upsert_sync_oauth_credentials_batch.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_mcp_validates_all_received_credentials_before_persisting(monkeypatch):
+    events = [
+        AragAnswer(
+            operation=AnswerOperation.AGENT_REQUEST,
+            feedback=feedback(
+                get_credentials={
+                    "first": Provider.SHAREFILE_OAUTH,
+                    "second": Provider.SHAREFILE_OAUTH,
+                }
+            ),
+        ),
+        AragAnswer(
+            operation=AnswerOperation.AGENT_REQUEST,
+            feedback=feedback(
+                credentials={
+                    "first": {"external-connection": "secret"},
+                    "second": {"external-connection": 42},
+                }
+            ),
+        ),
+    ]
+    app, server, workflow, headers, _, agent_manager = setup_call(monkeypatch, events)
+
+    with pytest.raises(ResourceError, match="invalid Sync OAuth credentials"):
+        await mcp_interaction.call_tool(
+            app,
+            server,
+            "account",
+            "agent",
+            "session",
+            [workflow],
+            headers,
+            "ask",
+            {},
+        )
+
+    agent_manager.upsert_sync_oauth_credentials_batch.assert_not_awaited()
 
 
 @pytest.mark.asyncio
@@ -377,4 +420,4 @@ async def test_mcp_stops_when_url_elicitation_is_rejected(monkeypatch, action):
             {},
         )
 
-    agent_manager.upsert_sync_oauth_credentials.assert_not_awaited()
+    agent_manager.upsert_sync_oauth_credentials_batch.assert_not_awaited()

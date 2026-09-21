@@ -177,6 +177,7 @@ async def call_tool(
                         "Received credentials that do not match the requested Sync configurations"
                     )
 
+                credentials_by_config: dict[str, tuple[str, dict[str, str]]] = {}
                 for sync_config_id, credentials in feedback.credentials.items():
                     if not isinstance(credentials, dict) or not all(
                         isinstance(key, str) and isinstance(value, str)
@@ -184,14 +185,17 @@ async def call_tool(
                     ):
                         raise ResourceError("Received invalid Sync OAuth credentials")
                     provider = requested_credentials[sync_config_id]
-                    await app.agent_manager.upsert_sync_oauth_credentials(
-                        account=x_stf_account,
-                        user_id=user_id,
-                        agent_id=agent_id,
-                        provider=provider.value,
-                        sync_config_id=sync_config_id,
-                        credentials=credentials,
+                    credentials_by_config[sync_config_id] = (
+                        provider.value,
+                        credentials,
                     )
+
+                await app.agent_manager.upsert_sync_oauth_credentials_batch(
+                    account=x_stf_account,
+                    user_id=user_id,
+                    agent_id=agent_id,
+                    credentials_by_config=credentials_by_config,
+                )
 
                 websocket.queue.put_nowait(
                     UserToAgentInteraction(

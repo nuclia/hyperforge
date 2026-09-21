@@ -259,8 +259,10 @@ class StandaloneApplication(FastAPI):
         @asynccontextmanager
         async def lifespan(app: "StandaloneApplication"):
             await app._startup()
-            yield
-            await app._shutdown()
+            try:
+                yield
+            finally:
+                await app._shutdown()
 
         super().__init__(
             title="arag standalone",
@@ -413,7 +415,7 @@ class StandaloneApplication(FastAPI):
                     s.a2a_grpc_host,
                     s.a2a_grpc_port,
                 )
-        except Exception:
+        except BaseException:
             if self.a2a_server is not None:
                 await self.a2a_server.stop(grace=0)
             await self.session_manager.finalize()

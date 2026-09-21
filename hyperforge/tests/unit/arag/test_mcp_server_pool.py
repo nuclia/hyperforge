@@ -293,6 +293,41 @@ async def test_pool_remove_cancels_pending_creation():
 
 
 @pytest.mark.asyncio
+async def test_pool_remove_keeps_capacity_reserved_during_creation_cleanup():
+    pool = MCPServerPool(1, 1800, 30)
+    creation_started = asyncio.Event()
+    cleanup_started = asyncio.Event()
+    release_cleanup = asyncio.Event()
+
+    async def slow_cleanup_factory():
+        creation_started.set()
+        try:
+            await asyncio.Event().wait()
+        except asyncio.CancelledError:
+            cleanup_started.set()
+            await release_cleanup.wait()
+            raise
+
+    acquire_task = asyncio.create_task(
+        pool.acquire(KEY, request(), b"", slow_cleanup_factory)
+    )
+    await creation_started.wait()
+    remove_task = asyncio.create_task(pool.remove(KEY))
+    await cleanup_started.wait()
+
+    with pytest.raises(HTTPException) as error:
+        await pool.acquire(
+            OTHER_KEY, request(), b"", lambda: factory(FakeManagedServer())
+        )
+
+    assert error.value.status_code == 503
+    release_cleanup.set()
+    await remove_task
+    assert acquire_task.cancelled()
+    await pool.shutdown()
+
+
+@pytest.mark.asyncio
 async def test_concurrent_shutdown_calls_wait_for_same_cleanup():
     pool = MCPServerPool(1, 1800, 30)
     cleanup_started = asyncio.Event()

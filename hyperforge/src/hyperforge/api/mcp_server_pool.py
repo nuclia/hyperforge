@@ -188,7 +188,7 @@ class MCPServerPool:
     async def remove(self, key: MCPServerKey) -> None:
         async with self._lock:
             server = self._servers.pop(key, None)
-            creating_task = self._creating.pop(key, None)
+            creating_task = self._creating.get(key)
         if creating_task is not None:
             creating_task.cancel()
         if server is not None:

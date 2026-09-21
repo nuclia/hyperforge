@@ -457,6 +457,28 @@ class AgentManager:
         )
         await self.database.execute(statement)
 
+    async def upsert_sync_oauth_credentials_batch(
+        self,
+        *,
+        account: str,
+        user_id: str,
+        agent_id: str,
+        credentials_by_config: dict[str, tuple[str, dict[str, str]]],
+    ) -> None:
+        async with self.database.transaction():
+            for sync_config_id, (
+                provider,
+                credentials,
+            ) in credentials_by_config.items():
+                await self.upsert_sync_oauth_credentials(
+                    account=account,
+                    user_id=user_id,
+                    agent_id=agent_id,
+                    provider=provider,
+                    sync_config_id=sync_config_id,
+                    credentials=credentials,
+                )
+
     async def patch_driver(
         self,
         account: str,

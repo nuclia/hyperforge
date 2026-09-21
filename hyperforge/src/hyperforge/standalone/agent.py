@@ -94,6 +94,23 @@ class StaticAgentManager:
             payload.encode()
         ).decode()
 
+    async def upsert_sync_oauth_credentials_batch(
+        self,
+        *,
+        account: str,
+        user_id: str,
+        agent_id: str,
+        credentials_by_config: dict[str, tuple[str, dict[str, str]]],
+    ) -> None:
+        encrypted_credentials = {}
+        for sync_config_id, (provider, credentials) in credentials_by_config.items():
+            key = (account, user_id, agent_id, provider, sync_config_id)
+            payload = json.dumps(credentials, sort_keys=True, separators=(",", ":"))
+            encrypted_credentials[key] = self._oauth_fernet.encrypt(
+                payload.encode()
+            ).decode()
+        self._oauth_credentials.update(encrypted_credentials)
+
     async def ensure_workflow_active(
         self, account: str, agent_id: str, workflow_id: str
     ) -> None:
