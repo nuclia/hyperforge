@@ -1,8 +1,6 @@
-import asyncio
 from contextlib import asynccontextmanager
 from typing import Any, Optional
 
-import anyio
 import prometheus_client
 from fastapi import APIRouter, FastAPI
 from nucliadb_sdk.v2.sdk import NucliaDBAsync
@@ -16,6 +14,7 @@ from starlette.responses import PlainTextResponse
 from hyperforge.api import SERVICE_NAME, logger, v1
 from hyperforge.api.authentication import RaoAuthenticationBackend
 from hyperforge.api.logging import set_sentry
+from hyperforge.api.mcp_server_pool import MCPServerPool
 from hyperforge.api.settings import Settings
 from hyperforge.broker import Broker
 from hyperforge.broker.redis import RedisBroker
@@ -138,8 +137,11 @@ class HTTPApplication(FastAPI):
             stream_ttl_seconds=self.settings.pubsub_stream_ttl_seconds,
         )
 
-        self.mcp_servers: dict[tuple[str, str, str, str, str], Any] = {}
-        self.mcp_server_lock = anyio.Lock()
+        self.mcp_server_pool = MCPServerPool(
+            max_servers=self.settings.mcp_max_servers,
+            idle_ttl_seconds=self.settings.mcp_session_idle_ttl_seconds,
+            startup_timeout_seconds=self.settings.mcp_startup_timeout_seconds,
+        )
 
         self.agent_manager = await AgentManager.from_settings(
             settings=self.data_manager_settings
@@ -154,13 +156,7 @@ class HTTPApplication(FastAPI):
                 logger.error(f"Module {load_module} could not be loaded")
 
     async def shutdown(self) -> None:
-        for managed_server in self.mcp_servers.values():
-            managed_server.close()
-        await asyncio.gather(
-            *(managed_server.task for managed_server in self.mcp_servers.values()),
-            return_exceptions=True,
-        )
-        self.mcp_servers.clear()
+        await self.mcp_server_pool.shutdown()
         await self.agent_manager.finalize()
         await self.broker.finalize()
         await clean_telemetry(SERVICE_NAME)

@@ -6,14 +6,12 @@ process, connected via a LocalBroker.  No Redis, no gRPC, no PostgreSQL, no
 NucliaDB required.
 """
 
-import asyncio
 import base64
 import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
-import anyio
 import prometheus_client
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -35,6 +33,7 @@ from starlette.responses import PlainTextResponse
 from hyperforge.a2a.server import build_grpc_server_from_runtime
 from hyperforge.api import v1
 from hyperforge.api.authentication import User
+from hyperforge.api.mcp_server_pool import MCPServerPool
 from hyperforge.api.models import AgentRole, StashRoles
 from hyperforge.api.v1 import oauth as v1_oauth
 from hyperforge.broker import Broker
@@ -354,8 +353,11 @@ class StandaloneApplication(FastAPI):
                 stream_ttl_seconds=s.pubsub_stream_ttl_seconds,
             )
 
-        self.mcp_servers: dict[tuple[str, str, str, str, str], Any] = {}
-        self.mcp_server_lock = anyio.Lock()
+        self.mcp_server_pool = MCPServerPool(
+            max_servers=s.mcp_max_servers,
+            idle_ttl_seconds=s.mcp_session_idle_ttl_seconds,
+            startup_timeout_seconds=s.mcp_startup_timeout_seconds,
+        )
 
         # Agent manager backed by the JSON config — no PostgreSQL.
         agent_manager_class = resolve_dotted_name(s.agent_manager_class)
@@ -418,13 +420,7 @@ class StandaloneApplication(FastAPI):
             raise
 
     async def _shutdown(self) -> None:
-        for managed_server in self.mcp_servers.values():
-            managed_server.close()
-        await asyncio.gather(
-            *(managed_server.task for managed_server in self.mcp_servers.values()),
-            return_exceptions=True,
-        )
-        self.mcp_servers.clear()
+        await self.mcp_server_pool.shutdown()
         if self.a2a_server is not None:
             await self.a2a_server.stop(grace=5)
         await self.session_manager.finalize()

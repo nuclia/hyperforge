@@ -4,13 +4,11 @@ import uuid
 from functools import partial
 from typing import TYPE_CHECKING, Any, Iterable, Sequence
 
-import anyio
 from fastapi import Header, HTTPException
 from mcp.server.fastmcp.exceptions import ResourceError
 from mcp.server.lowlevel.helper_types import ReadResourceContents
 from mcp.server.lowlevel.server import Server as MCPServer
 from mcp.server.lowlevel.server import lifespan as default_lifespan
-from mcp.server.streamable_http import MCP_SESSION_ID_HEADER
 from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from mcp.types import (
     EmbeddedResource,
@@ -30,6 +28,11 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from hyperforge.api.authentication import requires_one
+from hyperforge.api.mcp_server_pool import (
+    ManagedMCPServer,
+    MCPRequestLease,
+    MCPServerKey,
+)
 from hyperforge.api.models import InteractionRequest
 from hyperforge.api.settings import Settings as ApiSettings
 from hyperforge.api.v1.interaction import WebsocketReceiver, stream_response
@@ -288,98 +291,65 @@ def _get_first_enabled_mcp_auth_config(app: "HTTPApplication"):
     return None
 
 
-class _ManagedMCPServer:
-    def __init__(self, manager: StreamableHTTPSessionManager):
-        self.manager = manager
-        self.started = asyncio.Event()
-        self.task: asyncio.Task[None] | None = None
-        self.session_created = False
-        self.active_requests = 0
-
-    async def run(self) -> None:
-        async with self.manager.run():
-            self.started.set()
-            await anyio.sleep_forever()
-
-    async def start(self) -> None:
-        self.task = asyncio.create_task(self.run())
-        await self.started.wait()
-
-    def close(self) -> None:
-        if self.task is not None:
-            self.task.cancel()
-
-    def reserve_request(self) -> None:
-        self.active_requests += 1
-
-    def release_request(self) -> None:
-        self.active_requests -= 1
-
-    def accept_request(self, request: Request) -> bool:
-        if request.headers.get(MCP_SESSION_ID_HEADER):
-            return True
-        if self.session_created:
-            return False
-        self.session_created = True
-        return True
-
-    def is_reinitialization(self, request: Request, body: bytes) -> bool:
-        if (
-            not self.session_created
-            or request.method != "POST"
-            or request.headers.get(MCP_SESSION_ID_HEADER)
-        ):
-            return False
-        try:
-            message = json.loads(body)
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            return False
-        return isinstance(message, dict) and message.get("method") == "initialize"
-
-
-async def _evict_mcp_servers(app: "HTTPApplication", max_servers: int) -> None:
-    while len(app.mcp_servers) >= max_servers:
-        oldest_key = next(
-            (
-                key
-                for key, server in app.mcp_servers.items()
-                if server.active_requests == 0
-            ),
-            None,
+async def _create_mcp_server(
+    app: "HTTPApplication",
+    request: Request,
+    agent_id: str,
+    session: str,
+    account: str,
+    max_request_bytes: int,
+) -> ManagedMCPServer:
+    agent_manager: AgentManager = request.app.agent_manager
+    workflows, agent_config, prompts = await asyncio.gather(
+        agent_manager.workflows_list(account=account, agent_id=agent_id),
+        agent_manager.get_agent_config_basic(account=account, agent_id=agent_id),
+        agent_manager.get_prompts(account=account, agent_id=agent_id),
+    )
+    mcp_server = MCPServer(
+        name=agent_id,
+        version="1.0.0",
+        instructions=agent_config.instructions,
+        lifespan=default_lifespan,
+    )
+    mcp_server.list_tools()(partial(list_tools, workflows))
+    mcp_server.call_tool()(
+        partial(
+            call_tool,
+            app,
+            mcp_server,
+            account,
+            agent_id,
+            session,
+            workflows,
+            request.headers,
         )
-        if oldest_key is None:
-            raise HTTPException(
-                status_code=503,
-                detail="MCP server capacity is occupied by active sessions",
-            )
-        managed_server = app.mcp_servers.pop(oldest_key)
-        managed_server.close()
-        if managed_server.task is not None:
-            await asyncio.gather(managed_server.task, return_exceptions=True)
-
-
-async def _remove_mcp_server(
-    app: "HTTPApplication", key: tuple[str, str, str, str, str]
-) -> None:
-    async with app.mcp_server_lock:
-        managed_server = app.mcp_servers.pop(key, None)
-    if managed_server is not None:
-        managed_server.close()
-        if managed_server.task is not None:
-            await asyncio.gather(managed_server.task, return_exceptions=True)
+    )
+    mcp_server.list_prompts()(partial(list_prompts, prompts=prompts))
+    mcp_server.get_prompt()(partial(get_prompt, prompts))
+    manager = StreamableHTTPSessionManager(
+        app=mcp_server,
+        json_response=True,
+        stateless=False,
+        security_settings=None,
+        max_request_body_size=max_request_bytes,
+    )
+    managed_server = ManagedMCPServer(manager)
+    await managed_server.start()
+    return managed_server
 
 
 class _MCPTransportResponse(Response):
     def __init__(
         self,
         request: Request,
-        managed_server: _ManagedMCPServer,
+        lease: MCPRequestLease,
         body: bytes,
         max_response_bytes: int,
     ):
         super().__init__()
         self.request = request
-        self.managed_server = managed_server
+        self.lease = lease
+        self.managed_server = lease.server
         self.body = body
         self.max_response_bytes = max_response_bytes
 
@@ -387,7 +357,7 @@ class _MCPTransportResponse(Response):
         try:
             await self._handle_request(scope, receive, send)
         finally:
-            self.managed_server.release_request()
+            self.lease.release()
 
     async def _handle_request(self, scope, receive, send) -> None:
         body_sent = False
@@ -539,7 +509,7 @@ async def mcp_handler_delete(
 ):
     app: HTTPApplication = request.app
     key = (x_stf_account, x_stf_user, x_stf_account_type, agent_id, session)
-    await _remove_mcp_server(app, key)
+    await app.mcp_server_pool.remove(key)
 
 
 @router.get("/api/v1/agent/{agent_id}/session/{session}/mcp", tags=["MCP"])
@@ -573,75 +543,25 @@ async def interaction_mcp_handler(
             raise HTTPException(status_code=413, detail="MCP request is too large")
         body_bytes.extend(chunk)
 
-    key = (x_stf_account, x_stf_user, x_stf_account_type, agent_id, session)
-    async with app.mcp_server_lock:
-        managed_server = app.mcp_servers.pop(key, None)
-        if managed_server is not None and managed_server.is_reinitialization(
-            request, bytes(body_bytes)
-        ):
-            if managed_server.active_requests:
-                app.mcp_servers[key] = managed_server
-                raise HTTPException(
-                    status_code=409,
-                    detail="MCP session is still active for this path",
-                )
-            managed_server.close()
-            if managed_server.task is not None:
-                await asyncio.gather(managed_server.task, return_exceptions=True)
-            managed_server = None
-        if managed_server is not None:
-            app.mcp_servers[key] = managed_server
-        if managed_server is None:
-            await _evict_mcp_servers(app, runtime_settings.mcp_max_servers)
-            agent_manager: AgentManager = request.app.agent_manager
-            workflows, agent_config, prompts = await asyncio.gather(
-                agent_manager.workflows_list(account=x_stf_account, agent_id=agent_id),
-                agent_manager.get_agent_config_basic(
-                    account=x_stf_account, agent_id=agent_id
-                ),
-                agent_manager.get_prompts(account=x_stf_account, agent_id=agent_id),
-            )
-            mcp_server = MCPServer(
-                name=agent_id,
-                version="1.0.0",
-                instructions=agent_config.instructions,
-                lifespan=default_lifespan,
-            )
-            mcp_server.list_tools()(partial(list_tools, workflows))
-            mcp_server.call_tool()(
-                partial(
-                    call_tool,
-                    app,
-                    mcp_server,
-                    x_stf_account,
-                    agent_id,
-                    session,
-                    workflows,
-                    request.headers,
-                )
-            )
-            mcp_server.list_prompts()(partial(list_prompts, prompts=prompts))
-            mcp_server.get_prompt()(partial(get_prompt, prompts))
-            manager = StreamableHTTPSessionManager(
-                app=mcp_server,
-                json_response=True,
-                stateless=False,
-                security_settings=None,
-                max_request_body_size=max_request_bytes,
-            )
-            managed_server = _ManagedMCPServer(manager)
-            await managed_server.start()
-            app.mcp_servers[key] = managed_server
-        if not managed_server.accept_request(request):
-            raise HTTPException(
-                status_code=409,
-                detail="MCP session already initialized for this path",
-            )
-        managed_server.reserve_request()
-
-    return _MCPTransportResponse(
-        request,
-        managed_server,
-        bytes(body_bytes),
-        max_response_bytes,
+    key: MCPServerKey = (
+        x_stf_account,
+        x_stf_user,
+        x_stf_account_type,
+        agent_id,
+        session,
     )
+
+    async def create_server() -> ManagedMCPServer:
+        return await _create_mcp_server(
+            app,
+            request,
+            agent_id,
+            session,
+            x_stf_account,
+            max_request_bytes,
+        )
+
+    lease = await app.mcp_server_pool.acquire(
+        key, request, bytes(body_bytes), create_server
+    )
+    return _MCPTransportResponse(request, lease, bytes(body_bytes), max_response_bytes)
