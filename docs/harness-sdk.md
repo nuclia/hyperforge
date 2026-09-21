@@ -318,7 +318,9 @@ The normal `max_tool_calls` count includes the outer Code Mode call and every
 nested capability call exactly once. `max_nested_calls` independently bounds one
 generated program. Generated code must call `output(value)` with exactly one
 value, exactly once; a missing, empty, or repeated `output` call fails the
-invocation. Authorization, nested/global call limits, projected-result limits,
+invocation. `print()` is unavailable and must not be used to return a result.
+Assign the final value to a variable and finish with `output(result)`.
+Authorization, nested/global call limits, projected-result limits,
 and invalid or repeated `output` attempts remain terminal even if generated code
 catches the immediate callback error. An output attempt rejected by worker
 transport serialization also remains terminal. The optional `question` input is

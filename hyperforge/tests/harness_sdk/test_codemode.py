@@ -855,8 +855,17 @@ def test_scoped_codemode_description_includes_capability_schema() -> None:
 
     assert "Uppercase a value" in scoped.description
     assert '"required":["value"]' in scoped.description
+    assert "Do not use print(); it is unavailable." in scoped.description
+    assert "finish with output(result)" in scoped.description
     assert "Custom orchestration instructions." in custom.description
     assert '"required":["value"]' in custom.description
+    assert "Do not use print(); it is unavailable." in custom.description
+
+
+def test_compatibility_codemode_description_explains_output_contract() -> None:
+    assert "output(value) exactly once" in codemode.description
+    assert "Do not use print(); it is unavailable." in codemode.description
+    assert "finish with output(result)" in codemode.description
 
 
 @pytest.mark.asyncio

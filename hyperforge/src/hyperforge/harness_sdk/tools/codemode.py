@@ -29,6 +29,11 @@ from . import HarnessTool, ToolCallContext, ToolInheritancePolicy, tool
 
 CODEMODE_TOOL_NAME = "codemode"
 OUTPUT_FUNCTION_NAME = "output"
+CODEMODE_USAGE_GUIDANCE = (
+    "Return the final result by calling output(value) exactly once. "
+    "Do not use print(); it is unavailable. "
+    "For example, assign the result to a variable and finish with output(result)."
+)
 DEFAULT_MAX_SOURCE_BYTES = 64 * 1024
 DEFAULT_MAX_RESULT_BYTES = 1024 * 1024
 DEFAULT_MAX_CUMULATIVE_RESULT_BYTES = 4 * 1024 * 1024
@@ -191,7 +196,7 @@ _process_execution_limiter = CodeModeExecutionLimiter()
     name=CODEMODE_TOOL_NAME,
     description=(
         "Execute restricted Python code. Registered tools are available as functions; "
-        "call output(value) to return a result."
+        f"{CODEMODE_USAGE_GUIDANCE}"
     ),
 )
 async def codemode(
@@ -858,10 +863,8 @@ def _nested_event_context(harness: Any) -> dict[str, Any]:
 def _scoped_description(
     capabilities: tuple[CodeModeCapability[Any], ...], description: str | None = None
 ) -> str:
-    introduction = description or (
-        "Execute restricted Python code using only the scoped capabilities below; "
-        "call output(value) exactly once to return a result."
-    )
+    introduction = description or "Execute restricted Python code using only the scoped capabilities below."
+    introduction = f"{introduction} {CODEMODE_USAGE_GUIDANCE}"
     if not capabilities:
         return introduction
     definitions = []
