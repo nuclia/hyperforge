@@ -132,9 +132,7 @@ async def activate_tools(
         "returned by activate_tools."
     )
 )
-async def call_tool(
-    context: ToolCallContext, input_value: CallToolInput
-) -> DictOutput:
+async def call_tool(context: ToolCallContext, input_value: CallToolInput) -> DictOutput:
     output = await context.harness.call_tool(
         input_value.tool_name,
         input_value.arguments,
