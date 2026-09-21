@@ -637,7 +637,7 @@ async def interaction_mcp_handler(
                 status_code=409,
                 detail="MCP session already initialized for this path",
             )
-            managed_server.reserve_request()
+        managed_server.reserve_request()
 
     return _MCPTransportResponse(
         request,

@@ -320,6 +320,17 @@ def test_mcp_manager_accepts_only_one_request_without_session_id():
     assert managed_server.accept_request(established_request) is True
 
 
+def test_mcp_manager_tracks_active_requests():
+    manager = cast(StreamableHTTPSessionManager, SimpleNamespace())
+    managed_server = mcp_interaction._ManagedMCPServer(manager)
+
+    managed_server.reserve_request()
+    assert managed_server.active_requests == 1
+
+    managed_server.release_request()
+    assert managed_server.active_requests == 0
+
+
 def test_mcp_manager_identifies_sessionless_reinitialization():
     manager = cast(StreamableHTTPSessionManager, SimpleNamespace())
     managed_server = mcp_interaction._ManagedMCPServer(manager)
