@@ -392,9 +392,7 @@ class AgentHarness:
         self.conversation = conversation
         self.messages = []
         self._active_lazy_tools.clear()
-        lazy_tool_names = {
-            tool.name for tool in self._external_tools if tool.lazy_load
-        }
+        lazy_tool_names = {tool.name for tool in self._external_tools if tool.lazy_load}
         pending_tool_outputs: dict[str, HarnessMessage] = {}
         async for event in self.storage.iter_events(self.conversation_id):
             self._last_event_id = event.id
@@ -435,8 +433,7 @@ class AgentHarness:
                     self._active_lazy_tools.update(
                         name
                         for name in names
-                        if isinstance(name, str)
-                        and name in lazy_tool_names
+                        if isinstance(name, str) and name in lazy_tool_names
                     )
         if pending_tool_outputs:
             logger.warning(

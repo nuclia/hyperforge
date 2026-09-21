@@ -1522,9 +1522,7 @@ async def test_lazy_tool_activation_is_persisted_and_restored() -> None:
     assert resumed._active_lazy_tools == {"upper"}
     output = await call_tool.execute(
         ToolCallContext(harness=resumed, name="call_tool", id="call-1"),
-        CallToolInput(
-            tool_name="upper", arguments={"value": "hi"}
-        ).model_dump(),
+        CallToolInput(tool_name="upper", arguments={"value": "hi"}).model_dump(),
     )
     assert output.value == {"value": "HI"}
 
@@ -1552,9 +1550,7 @@ async def test_call_tool_rejects_inactive_and_non_lazy_tools() -> None:
     with pytest.raises(ValueError, match="Unknown lazy tool: regular"):
         await call_tool.execute(
             context,
-            CallToolInput(
-                tool_name="regular", arguments={"value": "x"}
-            ).model_dump(),
+            CallToolInput(tool_name="regular", arguments={"value": "x"}).model_dump(),
         )
 
 
