@@ -102,6 +102,7 @@ async def test_codemode_calls_registered_tools_and_returns_output() -> None:
             "compact",
             "search_tools",
             "activate_tools",
+            "call_tool",
         ],
     )
 
