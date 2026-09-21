@@ -20,3 +20,11 @@ class OpenAIChatCompletionsError(Exception):
 
 class NotSupportedbyLLMException(Exception):
     pass
+
+
+class CouldNotParse(Exception):
+    pass
+
+
+class ParseJsonSchemaException(Exception):
+    pass

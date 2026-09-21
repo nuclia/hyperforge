@@ -391,11 +391,13 @@ class AsyncLocalOpenAIClient:
                     }
                 )
         chat_tool_choice: Any = tool_choice
-        if isinstance(tool_choice, dict) and tool_choice.get("type") == "function":
-            chat_tool_choice = {
-                "type": "function",
-                "function": {"name": tool_choice["name"]},
-            }
+        if isinstance(tool_choice, dict):
+            chat_tool_choice = "required"
+        # if isinstance(tool_choice, dict) and tool_choice.get("type") == "function":
+        #     chat_tool_choice = {
+        #         "type": "function",
+        #         "function": {"name": tool_choice["name"]},
+        #     }
         response_format = None
         if body.json_schema is not None:
             response_format = {

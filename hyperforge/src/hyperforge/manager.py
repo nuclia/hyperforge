@@ -503,8 +503,14 @@ class Manager:
             convert_errors(e)
             raise
 
-        if resp.object is None:
+        if resp.object is None and resp.tools is None:
             raise Exception("No object")
+        else:
+            object_to_return = (
+                resp.object
+                if resp.object is not None
+                else list(resp.tools.values())[0][0].function.arguments
+            )
 
         if resp.consumption is None or resp.consumption.normalized_tokens is None:
             input_tokens = 0.0
@@ -514,7 +520,7 @@ class Manager:
             output_tokens = resp.consumption.normalized_tokens.output
 
         return (
-            resp.object,
+            object_to_return,
             input_tokens,
             output_tokens,
         )

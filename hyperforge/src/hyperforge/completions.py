@@ -7,6 +7,8 @@ from functools import lru_cache
 from typing import Annotated, Any, Dict, List, Literal, Optional, Sequence, Tuple, Union
 
 import httpx
+from hyperforge.json_schema import convert_json_schema
+import jsonschema
 from nuclia.lib.nua_responses import ChatModel, CitationsType, Tool
 from pydantic import BaseModel, Field
 
@@ -549,6 +551,27 @@ def should_append_query_message(
     return has_query_payload
 
 
+def normalize_json_schema(
+    schema: dict[str, Any],
+    *,
+    additional_properties: Literal[
+        "default_to_false", "unsupported", "noop"
+    ] = "default_to_false",
+    required: Literal["set_if_no_default", "force", "noop"] = "set_if_no_default",
+) -> NormalizedSchema:
+    jsonschema.Draft202012Validator.check_schema(schema)
+    converted_schema = convert_json_schema(
+        schema,
+        additional_properties=additional_properties,
+        required=required,
+    )
+    return NormalizedSchema(
+        name=converted_schema["name"],
+        description=converted_schema["description"],
+        parameters=converted_schema["parameters"],
+    )
+
+
 def transform_chat_to_openai_messages(
     item: ChatModel,
 ) -> Tuple[
@@ -583,20 +606,22 @@ def transform_chat_to_openai_messages(
     # We don't raise errors for system prompt support because system prompt can be defined KB-wise and that would block the user from using the model
 
     schema = None
-    if schema is not None:
-        openai_tools.append(
-            {
-                "name": schema["name"],
-                "parameters": schema["parameters"],
-                "description": schema["description"],
+    if item.json_schema:
+        schema = normalize_json_schema(item.json_schema, required="force").model_dump()
+        if schema is not None:
+            openai_tools.append(
+                {
+                    "name": schema["name"],
+                    "parameters": schema["parameters"],
+                    "description": schema["description"],
+                    "type": "function",
+                    "strict": True,
+                }
+            )
+            tool_choice = {
+                "name": schema.get("name", uuid.uuid4().hex),
                 "type": "function",
-                "strict": True,
             }
-        )
-        tool_choice = {
-            "name": schema.get("name", uuid.uuid4().hex),
-            "type": "function",
-        }
 
     messages: ResponseInputParam = []
     messages.append(
