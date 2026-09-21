@@ -113,6 +113,7 @@ class MCPServerPool:
         self._retired_tasks: set[asyncio.Task[Any]] = set()
         self._lock = anyio.Lock()
         self._shutting_down = False
+        self._reaper_task: asyncio.Task[None] | None = None
         self._shutdown_task: asyncio.Task[None] | None = None
 
     async def acquire(
@@ -129,6 +130,8 @@ class MCPServerPool:
         stale_server = None
         async with self._lock:
             self._ensure_running()
+            if self._reaper_task is None:
+                self._reaper_task = asyncio.create_task(self._reap_idle_servers())
             server = self._servers.get(key)
             if (
                 server is not None
@@ -201,12 +204,17 @@ class MCPServerPool:
                 creating_tasks = list(self._creating.values())
                 self._creating.clear()
                 retired_tasks = list(self._retired_tasks)
+                reaper_task = self._reaper_task
                 for server in servers:
                     server.close()
                 for task in creating_tasks:
                     task.cancel()
+                if reaper_task is not None:
+                    reaper_task.cancel()
                 self._shutdown_task = asyncio.create_task(
-                    self._finish_shutdown(servers, creating_tasks, retired_tasks)
+                    self._finish_shutdown(
+                        servers, creating_tasks, retired_tasks, reaper_task
+                    )
                 )
             shutdown_task = self._shutdown_task
         await asyncio.shield(shutdown_task)
@@ -216,21 +224,39 @@ class MCPServerPool:
         servers: list[ManagedMCPServer],
         creating_tasks: list[asyncio.Task[Any]],
         retired_tasks: list[asyncio.Task[Any]],
+        reaper_task: asyncio.Task[None] | None,
     ) -> None:
         await asyncio.gather(
             *(server.task for server in servers if server.task is not None),
             *creating_tasks,
             *retired_tasks,
+            *(task for task in (reaper_task,) if task is not None),
             return_exceptions=True,
         )
+
+    async def _reap_idle_servers(self) -> None:
+        while True:
+            await asyncio.sleep(self._idle_ttl_seconds)
+            now = time.monotonic()
+            async with self._lock:
+                expired = [
+                    (key, server)
+                    for key, server in self._servers.items()
+                    if server.active_requests == 0
+                    and now - server.last_used >= self._idle_ttl_seconds
+                ]
+                for key, server in expired:
+                    self._servers.pop(key)
+                    server.close()
+            await asyncio.gather(
+                *(server.stop() for _, server in expired), return_exceptions=True
+            )
 
     def _ensure_running(self) -> None:
         if self._shutting_down:
             raise HTTPException(status_code=503, detail="MCP service is shutting down")
 
-    def _lease(
-        self, server: ManagedMCPServer, request: Request
-    ) -> MCPRequestLease:
+    def _lease(self, server: ManagedMCPServer, request: Request) -> MCPRequestLease:
         if not server.accept_request(request):
             raise HTTPException(
                 status_code=409,

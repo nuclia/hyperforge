@@ -175,6 +175,26 @@ async def test_pool_replaces_expired_session_on_same_key():
 
 
 @pytest.mark.asyncio
+async def test_pool_reaps_idle_server_without_another_acquire():
+    pool = MCPServerPool(2, 0.01, 30)
+    server = FakeManagedServer()
+    stopped = asyncio.Event()
+
+    async def stop():
+        server.stopped = True
+        stopped.set()
+
+    server.stop = stop
+    lease = await pool.acquire(KEY, request(), b"", lambda: factory(server))
+    lease.release()
+
+    await asyncio.wait_for(stopped.wait(), timeout=1)
+
+    assert KEY not in pool._servers
+    await pool.shutdown()
+
+
+@pytest.mark.asyncio
 async def test_pool_cleans_candidate_when_cancelled_waiting_for_lock():
     pool = MCPServerPool(1, 1800, 30)
     candidate = FakeManagedServer()
@@ -211,7 +231,9 @@ async def test_pool_shutdown_cancels_pending_creation():
         creation_started.set()
         await asyncio.Event().wait()
 
-    acquire_task = asyncio.create_task(pool.acquire(KEY, request(), b"", blocked_factory))
+    acquire_task = asyncio.create_task(
+        pool.acquire(KEY, request(), b"", blocked_factory)
+    )
     await creation_started.wait()
     await pool.shutdown()
 
@@ -230,7 +252,9 @@ async def test_pool_remove_cancels_pending_creation():
         creation_started.set()
         await asyncio.Event().wait()
 
-    acquire_task = asyncio.create_task(pool.acquire(KEY, request(), b"", blocked_factory))
+    acquire_task = asyncio.create_task(
+        pool.acquire(KEY, request(), b"", blocked_factory)
+    )
     await creation_started.wait()
     await pool.remove(KEY)
 

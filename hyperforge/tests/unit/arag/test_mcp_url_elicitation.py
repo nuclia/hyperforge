@@ -1,18 +1,15 @@
 import asyncio
 import json
 from types import SimpleNamespace
-from typing import cast
 from unittest.mock import AsyncMock
 
-import anyio
 import pytest
-from fastapi import HTTPException
 from mcp.server.fastmcp.exceptions import ResourceError
-from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from mcp.types import ElicitResult
 from starlette.datastructures import Headers
 from starlette.requests import Request
 
+from hyperforge.api.mcp_server_pool import MCPRequestLease
 from hyperforge.api.v1 import mcp_interaction
 from hyperforge.interaction import (
     AnswerOperation,
@@ -260,123 +257,33 @@ async def test_mcp_production_uses_current_request_headers(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_mcp_server_limit_evicts_and_awaits_oldest_manager():
-    oldest_task = asyncio.create_task(asyncio.Event().wait())
-    oldest = SimpleNamespace(
-        task=oldest_task, close=oldest_task.cancel, active_requests=0
-    )
-    newest = SimpleNamespace(task=None, close=AsyncMock(), active_requests=0)
-    app = SimpleNamespace(mcp_servers={"oldest": oldest, "newest": newest})
-
-    await mcp_interaction._evict_mcp_servers(app, max_servers=2)
-
-    assert oldest_task.done()
-    assert app.mcp_servers == {"newest": newest}
-    newest.close.assert_not_called()
-
-
-@pytest.mark.asyncio
-async def test_mcp_server_limit_does_not_evict_active_manager():
-    active = SimpleNamespace(task=None, close=AsyncMock(), active_requests=1)
-    idle = SimpleNamespace(task=None, close=AsyncMock(), active_requests=0)
-    app = SimpleNamespace(mcp_servers={"active": active, "idle": idle})
-
-    await mcp_interaction._evict_mcp_servers(app, max_servers=2)
-
-    assert app.mcp_servers == {"active": active}
-    active.close.assert_not_called()
-    idle.close.assert_called_once()
-
-
-@pytest.mark.asyncio
-async def test_mcp_server_limit_rejects_when_all_managers_are_active():
-    active = SimpleNamespace(task=None, close=AsyncMock(), active_requests=1)
-    app = SimpleNamespace(mcp_servers={"active": active})
-
-    with pytest.raises(HTTPException, match="active sessions") as error:
-        await mcp_interaction._evict_mcp_servers(app, max_servers=1)
-
-    assert error.value.status_code == 503
-    assert app.mcp_servers == {"active": active}
-    active.close.assert_not_called()
-
-
-def test_mcp_manager_accepts_only_one_request_without_session_id():
-    manager = cast(StreamableHTTPSessionManager, SimpleNamespace())
-    managed_server = mcp_interaction._ManagedMCPServer(manager)
-    initial_request = Request({"type": "http", "method": "POST", "headers": []})
-    established_request = Request(
-        {
-            "type": "http",
-            "method": "POST",
-            "headers": [(b"mcp-session-id", b"session-id")],
-        }
-    )
-    sessionless_get = Request({"type": "http", "method": "GET", "headers": []})
-
-    assert managed_server.accept_request(initial_request) is True
-    assert managed_server.accept_request(initial_request) is False
-    assert managed_server.accept_request(sessionless_get) is False
-    assert managed_server.accept_request(established_request) is True
-
-
-def test_mcp_manager_tracks_active_requests():
-    manager = cast(StreamableHTTPSessionManager, SimpleNamespace())
-    managed_server = mcp_interaction._ManagedMCPServer(manager)
-
-    managed_server.reserve_request()
-    assert managed_server.active_requests == 1
-
-    managed_server.release_request()
-    assert managed_server.active_requests == 0
-
-
-def test_mcp_manager_identifies_sessionless_reinitialization():
-    manager = cast(StreamableHTTPSessionManager, SimpleNamespace())
-    managed_server = mcp_interaction._ManagedMCPServer(manager)
-    initial_request = Request({"type": "http", "method": "POST", "headers": []})
-    initialize_body = b'{"jsonrpc":"2.0","method":"initialize","id":1}'
-    established_request = Request(
-        {
-            "type": "http",
-            "method": "POST",
-            "headers": [(b"mcp-session-id", b"session-id")],
-        }
+async def test_mcp_transport_releases_lease_when_handling_fails():
+    managed_server = SimpleNamespace(
+        manager=SimpleNamespace(
+            handle_request=AsyncMock(side_effect=RuntimeError("transport failed"))
+        ),
+        active_requests=1,
     )
 
-    assert managed_server.is_reinitialization(initial_request, initialize_body) is False
-    assert managed_server.accept_request(initial_request) is True
-    assert managed_server.is_reinitialization(initial_request, initialize_body) is True
-    assert managed_server.is_reinitialization(initial_request, b"not json") is False
-    assert (
-        managed_server.is_reinitialization(
-            initial_request, b'{"jsonrpc":"2.0","method":"tools/list","id":2}'
+    def release_request():
+        managed_server.active_requests -= 1
+
+    managed_server.release_request = release_request
+    response = mcp_interaction._MCPTransportResponse(
+        Request({"type": "http", "method": "POST", "headers": []}),
+        MCPRequestLease(managed_server),
+        b"",
+        1024,
+    )
+
+    with pytest.raises(RuntimeError, match="transport failed"):
+        await response(
+            {"type": "http", "method": "POST"},
+            AsyncMock(),
+            AsyncMock(),
         )
-        is False
-    )
-    assert (
-        managed_server.is_reinitialization(established_request, initialize_body)
-        is False
-    )
 
-
-@pytest.mark.asyncio
-async def test_mcp_delete_waits_for_concurrent_server_creation():
-    key = ("account", "user", "type", "agent", "session")
-    server_task = asyncio.create_task(asyncio.Event().wait())
-    managed_server = SimpleNamespace(task=server_task, close=server_task.cancel)
-    app = SimpleNamespace(mcp_servers={}, mcp_server_lock=anyio.Lock())
-
-    async with app.mcp_server_lock:
-        delete_task = asyncio.create_task(mcp_interaction._remove_mcp_server(app, key))
-        await asyncio.sleep(0)
-        assert not delete_task.done()
-        app.mcp_servers[key] = managed_server
-
-    await delete_task
-
-    assert key not in app.mcp_servers
-    assert server_task.done()
+    assert managed_server.active_requests == 0
 
 
 @pytest.mark.asyncio
