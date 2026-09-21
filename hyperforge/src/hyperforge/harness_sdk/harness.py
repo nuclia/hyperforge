@@ -49,6 +49,10 @@ class AgentResult:
     tool_calls: list[HarnessToolCall] = field(default_factory=list)
     input_tokens: float = 0
     output_tokens: float = 0
+    nuclia_input_tokens: float = 0
+    nuclia_output_tokens: float = 0
+    model_input_tokens: float = 0
+    model_output_tokens: float = 0
 
 
 @dataclass(frozen=True)
@@ -658,6 +662,18 @@ class AgentHarness:
                 result.tool_calls.extend(delta.tool_calls)
                 result.input_tokens = max(result.input_tokens, delta.input_tokens)
                 result.output_tokens = max(result.output_tokens, delta.output_tokens)
+                result.nuclia_input_tokens = max(
+                    result.nuclia_input_tokens, delta.nuclia_input_tokens
+                )
+                result.nuclia_output_tokens = max(
+                    result.nuclia_output_tokens, delta.nuclia_output_tokens
+                )
+                result.model_input_tokens = max(
+                    result.model_input_tokens, delta.model_input_tokens
+                )
+                result.model_output_tokens = max(
+                    result.model_output_tokens, delta.model_output_tokens
+                )
                 trace_id = delta.trace_id or trace_id
                 resolved_model = delta.model or resolved_model
                 if delta.text:
@@ -672,6 +688,10 @@ class AgentHarness:
                     )
             self.usage.input_tokens += result.input_tokens
             self.usage.output_tokens += result.output_tokens
+            self.usage.nuclia_input_tokens += result.nuclia_input_tokens
+            self.usage.nuclia_output_tokens += result.nuclia_output_tokens
+            self.usage.model_input_tokens += result.model_input_tokens
+            self.usage.model_output_tokens += result.model_output_tokens
             usage_recorded = True
             self._check_limit("max_input_tokens", self.usage.input_tokens)
             self._check_limit("max_output_tokens", self.usage.output_tokens)
@@ -692,6 +712,10 @@ class AgentHarness:
             if not usage_recorded:
                 self.usage.input_tokens += result.input_tokens
                 self.usage.output_tokens += result.output_tokens
+                self.usage.nuclia_input_tokens += result.nuclia_input_tokens
+                self.usage.nuclia_output_tokens += result.nuclia_output_tokens
+                self.usage.model_input_tokens += result.model_input_tokens
+                self.usage.model_output_tokens += result.model_output_tokens
             await self._emit_llm_result(
                 HarnessEventType.LLM_FAILED,
                 call_id,
@@ -732,6 +756,10 @@ class AgentHarness:
             "call_id": call_id,
             "input_tokens": result.input_tokens,
             "output_tokens": result.output_tokens,
+            "nuclia_input_tokens": result.nuclia_input_tokens,
+            "nuclia_output_tokens": result.nuclia_output_tokens,
+            "model_input_tokens": result.model_input_tokens,
+            "model_output_tokens": result.model_output_tokens,
             "history_head_event_id": history_head_event_id,
             "trace_id": trace_id,
             "model": resolved_model or self.model,
