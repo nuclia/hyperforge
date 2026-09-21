@@ -3,11 +3,18 @@ from __future__ import annotations
 import inspect
 from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import TYPE_CHECKING, Any, Awaitable, Callable, cast, get_type_hints
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Awaitable,
+    Callable,
+    cast,
+    get_type_hints,
+)
 
 from jsonschema import ValidationError as JsonSchemaValidationError
 from jsonschema import validate as validate_json_schema
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, TypeAdapter, ValidationError
 
 from ..context import make_context
 from ..models import HarnessContextReference, HarnessContextType
@@ -16,10 +23,10 @@ from ..schema import flatten_json_schema
 if TYPE_CHECKING:
     from ..harness import AgentHarness
 
-type ToolHandler[InputT: BaseModel, OutputT: BaseModel] = Callable[
+type ToolHandler[InputT: BaseModel, OutputT] = Callable[
     [ToolCallContext, InputT], Awaitable[OutputT]
 ]
-type ContextFactory[OutputT: BaseModel] = Callable[[OutputT], HarnessContextReference]
+type ContextFactory[OutputT] = Callable[[OutputT], HarnessContextReference]
 
 
 class ToolInheritancePolicy(StrEnum):
@@ -41,7 +48,7 @@ class ToolCallContext:
 
 
 @dataclass(frozen=True)
-class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
+class HarnessTool[InputT: BaseModel, OutputT]:
     name: str
     handler: ToolHandler[InputT, OutputT]
     description: str = ""
@@ -51,7 +58,8 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
     lazy_load: bool = False
     inheritance: ToolInheritancePolicy = ToolInheritancePolicy.INHERIT
     input_model: type[InputT] = field(init=False)
-    output_model: type[OutputT] = field(init=False)
+    output_model: Any = field(init=False)
+    _output_adapter: TypeAdapter[OutputT] = field(init=False, repr=False)
     _parameters: dict[str, Any] = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -70,14 +78,16 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
             raise TypeError(
                 f"Tool handler {self.name!r} input must be annotated with a Pydantic model"
             )
-        if not _is_model_type(output_model):
+        if not _is_output_type(output_model):
             raise TypeError(
-                f"Tool handler {self.name!r} return must be annotated with a Pydantic model"
+                f"Tool handler {self.name!r} return must be annotated with a Pydantic "
+                "model, list, or dict"
             )
         input_model = cast(type[InputT], input_model)
         output_model = cast(type[OutputT], output_model)
         object.__setattr__(self, "input_model", input_model)
         object.__setattr__(self, "output_model", output_model)
+        object.__setattr__(self, "_output_adapter", TypeAdapter(output_model))
         schema = self.parameters_schema or input_model.model_json_schema()
         object.__setattr__(self, "_parameters", flatten_json_schema(schema))
 
@@ -107,12 +117,15 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
         except ValidationError as exc:
             raise ValueError(f"Invalid {self.name} arguments: {exc}") from exc
         result = await self.handler(context, value)
-        return self.output_model.model_validate(result)
+        return self._output_adapter.validate_python(result)
+
+    def dump_output(self, output: OutputT) -> Any:
+        return self._output_adapter.dump_python(output, mode="json")
 
     def context(self, output: OutputT) -> HarnessContextReference:
         if self.context_factory is not None:
             return self.context_factory(output)
-        return make_context(self.context_type, output)
+        return make_context(self.context_type, self.dump_output(output))
 
 
 def tool(
@@ -144,6 +157,16 @@ def tool(
 
 def _is_model_type(value: Any) -> bool:
     return isinstance(value, type) and issubclass(value, BaseModel)
+
+
+def _is_output_type(value: Any) -> bool:
+    if value is None:
+        return False
+    try:
+        TypeAdapter(value)
+    except TypeError:
+        return False
+    return True
 
 
 __all__ = [

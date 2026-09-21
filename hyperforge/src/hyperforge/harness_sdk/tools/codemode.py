@@ -44,7 +44,7 @@ RESERVED_CAPABILITY_NAMES = frozenset(
         "save",
     }
 )
-type CodeModeResultAdapter[OutputT: BaseModel] = Callable[
+type CodeModeResultAdapter[OutputT] = Callable[
     [HarnessTool[Any, OutputT], OutputT], Any | Awaitable[Any]
 ]
 type CodeModeDispatch = Callable[[RestrictedPythonTask], Awaitable[Any]]
@@ -59,18 +59,18 @@ class CodemodeOutput(BaseModel):
     value: Any = None
 
 
-def context_codemode_result_adapter[OutputT: BaseModel](
+def context_codemode_result_adapter[OutputT](
     capability: HarnessTool[Any, OutputT], output: OutputT
 ) -> Any:
     """Project a result to the same formatted context shown to the model."""
     return format_context(capability.context(output))
 
 
-def raw_codemode_result_adapter[OutputT: BaseModel](
-    _capability: HarnessTool[Any, OutputT], output: OutputT
+def raw_codemode_result_adapter[OutputT](
+    capability: HarnessTool[Any, OutputT], output: OutputT
 ) -> Any:
     """Explicitly expose the capability's complete JSON-mode output."""
-    return output.model_dump(mode="json")
+    return capability.dump_output(output)
 
 
 class CodeModeRunner(Protocol):
@@ -80,7 +80,7 @@ class CodeModeRunner(Protocol):
 
 
 @dataclass(frozen=True)
-class CodeModeCapability[OutputT: BaseModel]:
+class CodeModeCapability[OutputT]:
     tool: HarnessTool[Any, OutputT]
     result_adapter: CodeModeResultAdapter[OutputT] = context_codemode_result_adapter
 
@@ -121,7 +121,7 @@ async def codemode(
         output = await tool.execute(
             ToolCallContext(harness=harness, name=tool.name), arguments
         )
-        return output.model_dump(mode="json")
+        return tool.dump_output(output)
 
     runner = (
         SandboxRunner.remote(settings.sandbox_socket, dispatch)

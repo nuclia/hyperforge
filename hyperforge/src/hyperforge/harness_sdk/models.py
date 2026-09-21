@@ -57,7 +57,7 @@ class HarnessToolCall(BaseModel):
 
 class HarnessContextReference(BaseModel):
     type: HarnessContextType
-    content: dict[str, Any]
+    content: Any
 
 
 class HarnessMessage(BaseModel):

@@ -123,8 +123,10 @@ harness records the largest reported values and aggregates them across the run.
 
 ## Defining Tools
 
-A tool uses Pydantic models for its arguments and return value. Field
-descriptions are included in the JSON Schema sent to the model.
+A tool uses a Pydantic model for its arguments. Return values may use Pydantic
+models or other annotated types, including typed lists and dictionaries. Field
+descriptions from the input model are included in the JSON Schema sent to the
+model.
 
 ```python
 from pydantic import BaseModel, Field
@@ -155,17 +157,37 @@ agent = AgentHarness(
 )
 ```
 
-The `@tool` decorator creates a `HarnessTool` and infers its input and output
-models from the handler annotations. The decorated tool remains callable, so
+The `@tool` decorator creates a `HarnessTool` and infers its input model and
+output type from the handler annotations. The decorated tool remains callable, so
 application code can use `await weather(harness, WeatherInput(city="Boston"))`
 as it would call the original function. Direct `HarnessTool(...)` construction
 is available when a decorator is not appropriate.
 Nested JSON Schema references are flattened before schemas are sent to the model;
 the emitted schema does not contain `$ref`, `$defs`, or `definitions`.
 The harness validates model-provided arguments before calling the handler and
-validates the result against its annotated return model. Missing or non-Pydantic
-input and return annotations fail when the tool is constructed. Tool failures are
-returned to the model as failed tool results so it can recover or answer differently.
+validates the result against its annotated return type. Missing or non-Pydantic
+input annotations and missing return annotations fail when the tool is constructed.
+Tool failures are returned to the model as failed tool results so it can recover or
+answer differently.
+
+For example, tools can return containers directly without wrapper models:
+
+```python
+@tool(description="List temperatures by city.")
+async def temperatures(
+    harness: AgentHarness,
+    input_value: WeatherInput,
+) -> dict[str, float]:
+    return {input_value.city: 72.0}
+
+
+@tool(description="List matching cities.")
+async def matching_cities(
+    harness: AgentHarness,
+    input_value: WeatherInput,
+) -> list[str]:
+    return [input_value.city]
+```
 Multiple tool calls from one model response run concurrently; their result
 messages retain the model's original call order.
 

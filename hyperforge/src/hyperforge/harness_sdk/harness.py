@@ -9,8 +9,6 @@ from collections.abc import AsyncIterator, Iterable, Mapping
 from dataclasses import dataclass, field
 from typing import Any, Literal, NamedTuple
 
-from pydantic import BaseModel
-
 from .agents import published_agent_to_tools
 from .clients import ModelClient, ReasoningEffort
 from .context import format_context
@@ -24,7 +22,18 @@ from .models import (
 )
 from .storage import HarnessStorageProtocol, InMemoryHarnessStorage
 from .tools import HarnessTool, ToolCallContext, ToolInheritancePolicy
-from .tools.core import DictOutput, SendMessageInput, SpawnAgentInput, create_core_tools
+from .tools.core import (
+    AgentCancelledOutput,
+    AgentCompletedOutput,
+    AgentConcurrencyLimitOutput,
+    AgentFailedOutput,
+    AgentResultOutput,
+    AgentSpawnedOutput,
+    SendMessageInput,
+    SendMessageOutput,
+    SpawnAgentInput,
+    create_core_tools,
+)
 from .usage import HarnessUsage, UsageLimitExceeded, UsageLimits
 
 logger = logging.getLogger(__name__)
@@ -130,7 +139,7 @@ class ChildAgentManager:
     ) -> None:
         self.owner = owner
         self.children: dict[str, ChildAgent] = {}
-        self.results: dict[str, DictOutput] = {}
+        self.results: dict[str, AgentResultOutput] = {}
         self.active_agent_ids = (
             active_agent_ids if active_agent_ids is not None else set()
         )
@@ -151,7 +160,9 @@ class ChildAgentManager:
             self.results.setdefault(child_id, self._result(child_id, child.task))
         self.children.clear()
 
-    async def spawn(self, input_value: SpawnAgentInput) -> DictOutput:
+    async def spawn(
+        self, input_value: SpawnAgentInput
+    ) -> AgentSpawnedOutput | AgentConcurrencyLimitOutput:
         owner = self.owner
         if owner.spawn_depth >= owner.max_spawn_depth:
             raise ValueError(f"Maximum spawn depth reached: {owner.max_spawn_depth}")
@@ -191,16 +202,16 @@ class ChildAgentManager:
                 "max_spawn_depth": owner.max_spawn_depth,
             },
         )
-        return DictOutput(value={"agent_id": child_id})
+        return AgentSpawnedOutput(agent_id=child_id)
 
-    async def send_message(self, input_value: SendMessageInput) -> DictOutput:
+    async def send_message(self, input_value: SendMessageInput) -> SendMessageOutput:
         child = self.children.get(input_value.agent_id)
         if child is None:
             raise ValueError("Agent not found")
         message_id = await child.harness.steer(input_value.message, sender="agent")
-        return DictOutput(value={"message_id": message_id})
+        return SendMessageOutput(message_id=message_id)
 
-    async def wait(self, agent_id: str) -> DictOutput:
+    async def wait(self, agent_id: str) -> AgentResultOutput:
         completed = self.results.get(agent_id)
         if completed is not None:
             return completed
@@ -221,7 +232,7 @@ class ChildAgentManager:
         self.children.pop(agent_id, None)
         return result
 
-    def _concurrency_limit_result(self) -> DictOutput:
+    def _concurrency_limit_result(self) -> AgentConcurrencyLimitOutput:
         waitable_agent_ids = [
             agent_id
             for agent_id, child in self.children.items()
@@ -237,14 +248,11 @@ class ChildAgentManager:
                 "The conversation is at its concurrent agent limit, and this agent has no child "
                 "it can wait for. Finish the current work so the parent can wait before spawning more."
             )
-        return DictOutput(
-            value={
-                "status": "concurrency_limit_reached",
-                "max_concurrent_agents": self.owner.max_concurrent_agents,
-                "active_agents": len(self.active_agent_ids) + 1,
-                "waitable_agent_ids": waitable_agent_ids,
-                "message": message,
-            }
+        return AgentConcurrencyLimitOutput(
+            max_concurrent_agents=self.owner.max_concurrent_agents,
+            active_agents=len(self.active_agent_ids) + 1,
+            waitable_agent_ids=waitable_agent_ids,
+            message=message,
         )
 
     @staticmethod
@@ -259,21 +267,16 @@ class ChildAgentManager:
         await asyncio.sleep(0)
 
     @staticmethod
-    def _result(agent_id: str, task: asyncio.Task[str]) -> DictOutput:
+    def _result(agent_id: str, task: asyncio.Task[str]) -> AgentResultOutput:
         if task.cancelled():
-            value: dict[str, Any] = {"agent_id": agent_id, "status": "cancelled"}
+            return AgentCancelledOutput(agent_id=agent_id)
         elif (error := task.exception()) is not None:
-            value = {"agent_id": agent_id, "status": "failed", "error": str(error)}
+            return AgentFailedOutput(agent_id=agent_id, error=str(error))
         else:
             result = task.result()
             if result == "interrupted":
-                return DictOutput(value={"agent_id": agent_id, "status": "cancelled"})
-            value = {
-                "agent_id": agent_id,
-                "status": "completed",
-                "result": result,
-            }
-        return DictOutput(value=value)
+                return AgentCancelledOutput(agent_id=agent_id)
+            return AgentCompletedOutput(agent_id=agent_id, result=result)
 
 
 class AgentHarness:
@@ -373,7 +376,7 @@ class AgentHarness:
         return self._child_agents.children
 
     @property
-    def child_results(self) -> dict[str, DictOutput]:
+    def child_results(self) -> dict[str, AgentResultOutput]:
         return self._child_agents.results
 
     async def load(self, *, create: bool = True) -> None:
@@ -504,7 +507,7 @@ class AgentHarness:
 
     async def call_tool(
         self, name: str, arguments: dict[str, Any], *, call_id: str | None = None
-    ) -> BaseModel:
+    ) -> Any:
         """Execute an active external lazy tool by name."""
         tool = next(
             (
@@ -1044,7 +1047,6 @@ class AgentHarness:
         )
         tool = self._tools.get(call.name)
         try:
-            output: BaseModel | None = None
             if tool is None:
                 raise ValueError(f"Unknown tool: {call.name}")
             elif tool.lazy_load and tool.name not in self._active_lazy_tools:
@@ -1052,7 +1054,7 @@ class AgentHarness:
             else:
                 context = ToolCallContext(harness=self, name=call.name, id=call.id)
                 output = await tool.execute(context, call.arguments)
-                result = output.model_dump(mode="json")
+                result = tool.dump_output(output)
                 reference = tool.context(output)
                 content = format_context(reference)
             await self.emit(

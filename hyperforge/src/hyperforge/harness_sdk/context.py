@@ -62,15 +62,11 @@ def _format_retrieval_context(context: RetrievalContext) -> str:
     return json.dumps(content, sort_keys=True, default=str, separators=(",", ":"))
 
 
-def make_context(
-    context_type: HarnessContextType, output: BaseModel
-) -> HarnessContextReference:
+def make_context(context_type: HarnessContextType, output: Any) -> HarnessContextReference:
     definition = _DEFINITIONS.get(context_type)
     if definition is None:
-        return HarnessContextReference(
-            type=context_type, content=output.model_dump(mode="json")
-        )
-    value = definition.schema.model_validate(output.model_dump(mode="json"))
+        return HarnessContextReference(type=context_type, content=output)
+    value = definition.schema.model_validate(output)
     return HarnessContextReference(
         type=context_type, content=value.model_dump(mode="json")
     )

@@ -673,7 +673,7 @@ async def test_agent_loop_spawns_and_waits_for_sub_agent() -> None:
                     for message in reversed(messages)
                     if message.tool_name == "spawn_agent"
                 )
-                child_id = spawn_message.context.content["value"]["agent_id"]
+                child_id = spawn_message.context.content["agent_id"]
                 yield ModelDelta(
                     tool_calls=[
                         HarnessToolCall(
@@ -775,14 +775,14 @@ async def test_spawn_agent_returns_wait_result_at_conversation_limit() -> None:
         ToolCallContext(harness=harness, name="spawn_agent"),
         SpawnAgentInput(prompt="first", include_history=False),
     )
-    first_id = first.value["agent_id"]
+    first_id = first.agent_id
 
     blocked = await spawn_agent(
         ToolCallContext(harness=harness, name="spawn_agent"),
         SpawnAgentInput(prompt="second", include_history=False),
     )
 
-    assert blocked.value == {
+    assert blocked.model_dump(exclude_none=True) == {
         "status": "concurrency_limit_reached",
         "max_concurrent_agents": 2,
         "active_agents": 2,
@@ -802,7 +802,7 @@ async def test_spawn_agent_returns_wait_result_at_conversation_limit() -> None:
         ToolCallContext(harness=harness, name="spawn_agent"),
         SpawnAgentInput(prompt="second", include_history=False),
     )
-    assert "agent_id" in next_spawn.value
+    assert next_spawn.agent_id
     await harness._stop_children()
 
 
@@ -824,17 +824,17 @@ async def test_concurrent_agent_limit_is_shared_with_descendants() -> None:
         ToolCallContext(harness=harness, name="spawn_agent"),
         SpawnAgentInput(prompt="child", include_history=False),
     )
-    child, _ = harness.children[spawned.value["agent_id"]]
+    child, _ = harness.children[spawned.agent_id]
 
     blocked = await spawn_agent(
         ToolCallContext(harness=child, name="spawn_agent"),
         SpawnAgentInput(prompt="grandchild", include_history=False),
     )
 
-    assert blocked.value["status"] == "concurrency_limit_reached"
-    assert blocked.value["active_agents"] == 2
-    assert blocked.value["waitable_agent_ids"] == []
-    assert "Finish the current work" in blocked.value["message"]
+    assert blocked.status == "concurrency_limit_reached"
+    assert blocked.active_agents == 2
+    assert blocked.waitable_agent_ids == []
+    assert "Finish the current work" in blocked.message
     release.set()
     await harness._stop_children()
 
@@ -897,7 +897,7 @@ async def test_wait_agent_returns_stable_failure_result() -> None:
         ToolCallContext(harness=harness, name="spawn_agent"),
         SpawnAgentInput(prompt="fail", include_history=False),
     )
-    child_id = spawned.value["agent_id"]
+    child_id = spawned.agent_id
     input_value = AgentIdInput(agent_id=child_id)
 
     first = await wait_agent(
@@ -908,7 +908,7 @@ async def test_wait_agent_returns_stable_failure_result() -> None:
     )
 
     assert first == second
-    assert first.value == {
+    assert first.model_dump(exclude_none=True) == {
         "agent_id": child_id,
         "status": "failed",
         "error": "child failed",
@@ -933,7 +933,7 @@ async def test_wait_agent_returns_when_child_fails_before_terminal_event() -> No
         ToolCallContext(harness=harness, name="spawn_agent"),
         SpawnAgentInput(prompt="fail", include_history=False),
     )
-    child_id = spawned.value["agent_id"]
+    child_id = spawned.agent_id
 
     result = await asyncio.wait_for(
         wait_agent(
@@ -943,7 +943,7 @@ async def test_wait_agent_returns_when_child_fails_before_terminal_event() -> No
         timeout=1,
     )
 
-    assert result.value == {
+    assert result.model_dump(exclude_none=True) == {
         "agent_id": child_id,
         "status": "failed",
         "error": "storage failed",
@@ -1193,7 +1193,7 @@ async def test_spawn_depth_defaults_to_one() -> None:
             ToolCallContext(harness=current, name="spawn_agent"),
             SpawnAgentInput(prompt=f"depth {expected_depth}"),
         )
-        child, _ = current.children[spawned.value["agent_id"]]
+        child, _ = current.children[spawned.agent_id]
         assert child.spawn_depth == expected_depth
         current = child
     assert "spawn_agent" not in current._tools
@@ -1247,7 +1247,7 @@ async def test_interrupt_cancels_sub_agents() -> None:
     assert child_cancelled.is_set()
     assert harness.children == {}
     assert all(
-        result.value["status"] == "cancelled"
+        result.status == "cancelled"
         for result in harness.child_results.values()
     )
 
@@ -1289,7 +1289,7 @@ async def test_unwaited_child_is_stopped_when_parent_completes() -> None:
     assert child_cancelled.is_set()
     assert harness.children == {}
     assert all(
-        result.value["status"] == "cancelled"
+        result.status == "cancelled"
         for result in harness.child_results.values()
     )
 
@@ -1496,8 +1496,8 @@ async def test_lazy_tool_activation_is_persisted_and_restored() -> None:
         ActivateToolsInput(names=["upper"]).model_dump(),
     )
 
-    definition = activation.value["activated"][0]
-    assert definition == {
+    definition = activation.activated[0]
+    assert definition.model_dump() == {
         "name": "upper",
         "description": "Convert text to uppercase.",
         "parameters": lazy.parameters,
@@ -1524,7 +1524,7 @@ async def test_lazy_tool_activation_is_persisted_and_restored() -> None:
         ToolCallContext(harness=resumed, name="call_tool", id="call-1"),
         CallToolInput(tool_name="upper", arguments={"value": "hi"}).model_dump(),
     )
-    assert output.value == {"value": "HI"}
+    assert output == {"value": "HI"}
 
 
 @pytest.mark.asyncio
@@ -1585,7 +1585,7 @@ async def test_search_tools_matches_natural_language_query() -> None:
         ),
     )
 
-    assert [item["name"] for item in result.items] == [
+    assert [item.name for item in result] == [
         "create_dataset",
         "list_datasets",
     ]
@@ -1615,6 +1615,34 @@ def test_tool_schema_preserves_descriptions() -> None:
     assert tool.input_model is DescribedInput
     assert tool.output_model is ToolOutput
     assert tool.parameters["properties"]["value"]["description"] == "Value to transform"
+
+
+@pytest.mark.asyncio
+async def test_tools_support_typed_dict_and_list_outputs() -> None:
+    async def mapping(
+        _context: ToolCallContext, _value: ToolInput
+    ) -> dict[str, int]:
+        return {"count": "2"}  # type: ignore[dict-item]
+
+    async def sequence(
+        _context: ToolCallContext, _value: ToolInput
+    ) -> list[int]:
+        return ["1", 2]  # type: ignore[list-item]
+
+    harness = AgentHarness(model="test-model", model_client=Model())
+    context = ToolCallContext(harness=harness, name="container")
+    mapping_tool = HarnessTool("mapping", mapping)
+    sequence_tool = HarnessTool("sequence", sequence)
+
+    mapping_output = await mapping_tool.execute(context, {"value": "unused"})
+    sequence_output = await sequence_tool.execute(context, {"value": "unused"})
+
+    assert mapping_output == {"count": 2}
+    assert mapping_tool.dump_output(mapping_output) == {"count": 2}
+    assert mapping_tool.context(mapping_output).content == {"count": 2}
+    assert sequence_output == [1, 2]
+    assert sequence_tool.dump_output(sequence_output) == [1, 2]
+    assert sequence_tool.context(sequence_output).content == [1, 2]
 
 
 def test_tool_schema_flattens_nested_references() -> None:

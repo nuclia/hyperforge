@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from re import findall
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel
 
@@ -59,12 +59,70 @@ class CallToolInput(BaseModel):
     arguments: dict[str, Any]
 
 
-class DictOutput(BaseModel):
-    value: dict[str, Any]
+class ToolSearchResult(BaseModel):
+    name: str
+    description: str
+    active: bool
 
 
-class ListOutput(BaseModel):
-    items: list[dict[str, Any]]
+class ActivatedTool(BaseModel):
+    name: str
+    description: str
+    parameters: dict[str, Any]
+
+
+class ActivateToolsOutput(BaseModel):
+    activated: list[ActivatedTool]
+
+
+class IdOutput(BaseModel):
+    id: str
+
+
+class AgentSpawnedOutput(BaseModel):
+    agent_id: str
+
+
+class AgentConcurrencyLimitOutput(BaseModel):
+    status: Literal["concurrency_limit_reached"] = "concurrency_limit_reached"
+    max_concurrent_agents: int
+    active_agents: int
+    waitable_agent_ids: list[str]
+    message: str
+
+
+class SendMessageOutput(BaseModel):
+    message_id: str
+
+
+class AgentCancelledOutput(BaseModel):
+    agent_id: str
+    status: Literal["cancelled"] = "cancelled"
+
+
+class AgentCompletedOutput(BaseModel):
+    agent_id: str
+    status: Literal["completed"] = "completed"
+    result: str
+
+
+class AgentFailedOutput(BaseModel):
+    agent_id: str
+    status: Literal["failed"] = "failed"
+    error: str
+
+
+type AgentResultOutput = (
+    AgentCancelledOutput | AgentCompletedOutput | AgentFailedOutput
+)
+
+
+class CompactOutput(BaseModel):
+    status: Literal["compacted"] = "compacted"
+
+
+class FeedbackOutput(BaseModel):
+    response: str | None
 
 
 _SEARCH_STOP_WORDS = {"a", "an", "and", "for", "or", "the", "to"}
@@ -81,7 +139,7 @@ def _search_terms(value: str) -> set[str]:
 @tool(description="Search for additional tools that can be activated.")
 async def search_tools(
     context: ToolCallContext, input_value: SearchToolsInput
-) -> ListOutput:
+) -> list[ToolSearchResult]:
     harness = context.harness
     terms = _search_terms(input_value.query)
     candidates: list[tuple[int, HarnessTool[Any, Any]]] = []
@@ -95,34 +153,30 @@ async def search_tools(
         candidates.append((score, candidate))
     candidates.sort(key=lambda item: (-item[0], item[1].name))
     limit = max(1, min(input_value.limit, 50))
-    return ListOutput(
-        items=[
-            {
-                "name": candidate.name,
-                "description": candidate.description,
-                "active": harness.is_tool_active(candidate.name),
-            }
-            for _, candidate in candidates[:limit]
-        ]
-    )
+    return [
+        ToolSearchResult(
+            name=candidate.name,
+            description=candidate.description,
+            active=harness.is_tool_active(candidate.name),
+        )
+        for _, candidate in candidates[:limit]
+    ]
 
 
 @tool(description="Activate additional tools by their exact names.")
 async def activate_tools(
     context: ToolCallContext, input_value: ActivateToolsInput
-) -> DictOutput:
+) -> ActivateToolsOutput:
     tools = await context.harness.activate_tools(input_value.names)
-    return DictOutput(
-        value={
-            "activated": [
-                {
-                    "name": tool.name,
-                    "description": tool.description,
-                    "parameters": tool.parameters,
-                }
-                for tool in tools
-            ]
-        }
+    return ActivateToolsOutput(
+        activated=[
+            ActivatedTool(
+                name=tool.name,
+                description=tool.description,
+                parameters=tool.parameters,
+            )
+            for tool in tools
+        ]
     )
 
 
@@ -132,17 +186,22 @@ async def activate_tools(
         "returned by activate_tools."
     )
 )
-async def call_tool(context: ToolCallContext, input_value: CallToolInput) -> DictOutput:
+async def call_tool(context: ToolCallContext, input_value: CallToolInput) -> Any:
     output = await context.harness.call_tool(
         input_value.tool_name,
         input_value.arguments,
         call_id=context.id,
     )
-    return DictOutput(value=output.model_dump(mode="json"))
+    tool = next(
+        tool
+        for tool in context.harness.iter_lazy_tools()
+        if tool.name == input_value.tool_name
+    )
+    return tool.dump_output(output)
 
 
 @tool()
-async def remember(context: ToolCallContext, input_value: RememberInput) -> DictOutput:
+async def remember(context: ToolCallContext, input_value: RememberInput) -> IdOutput:
     harness = context.harness
     memory = HarnessMemory(
         id=uuid.uuid4().hex,
@@ -155,48 +214,52 @@ async def remember(context: ToolCallContext, input_value: RememberInput) -> Dict
         HarnessEventType.MEMORY_REMEMBERED,
         {"memory": memory.model_dump(mode="json")},
     )
-    return DictOutput(value={"id": memory.id})
+    return IdOutput(id=memory.id)
 
 
 @tool()
-async def recall(context: ToolCallContext, input_value: RecallInput) -> ListOutput:
+async def recall(
+    context: ToolCallContext, input_value: RecallInput
+) -> list[HarnessMemory]:
     harness = context.harness
     memories = await harness.storage.recall(
         scope=input_value.scope,
         query=input_value.query,
     )
-    return ListOutput(items=[memory.model_dump(mode="json") for memory in memories])
+    return memories
 
 
 @tool()
-async def forget(context: ToolCallContext, input_value: ForgetInput) -> DictOutput:
+async def forget(context: ToolCallContext, input_value: ForgetInput) -> IdOutput:
     harness = context.harness
     await harness.storage.forget(input_value.id)
     await harness.emit(HarnessEventType.MEMORY_FORGOTTEN, {"id": input_value.id})
-    return DictOutput(value={"id": input_value.id})
+    return IdOutput(id=input_value.id)
 
 
 @tool()
 async def spawn_agent(
     context: ToolCallContext, input_value: SpawnAgentInput
-) -> DictOutput:
+) -> AgentSpawnedOutput | AgentConcurrencyLimitOutput:
     return await context.harness._child_agents.spawn(input_value)
 
 
 @tool()
 async def send_message(
     context: ToolCallContext, input_value: SendMessageInput
-) -> DictOutput:
+) -> SendMessageOutput:
     return await context.harness._child_agents.send_message(input_value)
 
 
 @tool()
-async def wait_agent(context: ToolCallContext, input_value: AgentIdInput) -> DictOutput:
+async def wait_agent(
+    context: ToolCallContext, input_value: AgentIdInput
+) -> AgentResultOutput:
     return await context.harness._child_agents.wait(input_value.agent_id)
 
 
 @tool()
-async def compact(context: ToolCallContext, input_value: CompactInput) -> DictOutput:
+async def compact(context: ToolCallContext, input_value: CompactInput) -> CompactOutput:
     harness = context.harness
     harness.messages = [
         HarnessMessage(role="system", content=harness.system_prompt),
@@ -208,11 +271,13 @@ async def compact(context: ToolCallContext, input_value: CompactInput) -> DictOu
         HarnessEventType.COMPACTED,
         {"messages": [message.model_dump(mode="json") for message in harness.messages]},
     )
-    return DictOutput(value={"status": "compacted"})
+    return CompactOutput()
 
 
 @tool()
-async def feedback(context: ToolCallContext, input_value: FeedbackInput) -> DictOutput:
+async def feedback(
+    context: ToolCallContext, input_value: FeedbackInput
+) -> FeedbackOutput:
     response = await context.harness.request_feedback(
         question=input_value.question,
         response_schema={
@@ -221,7 +286,7 @@ async def feedback(context: ToolCallContext, input_value: FeedbackInput) -> Dict
         },
         timeout_ms=5 * 60 * 1000,
     )
-    return DictOutput(value={"response": response})
+    return FeedbackOutput(response=response)
 
 
 def create_core_tools(*, feedback_enabled: bool) -> dict[str, HarnessTool[Any, Any]]:
@@ -247,18 +312,29 @@ def create_core_tools(*, feedback_enabled: bool) -> dict[str, HarnessTool[Any, A
 
 __all__ = [
     "ActivateToolsInput",
+    "ActivateToolsOutput",
+    "ActivatedTool",
+    "AgentCancelledOutput",
+    "AgentCompletedOutput",
+    "AgentConcurrencyLimitOutput",
+    "AgentFailedOutput",
     "AgentIdInput",
+    "AgentResultOutput",
+    "AgentSpawnedOutput",
     "CallToolInput",
     "CompactInput",
-    "DictOutput",
+    "CompactOutput",
     "FeedbackInput",
+    "FeedbackOutput",
     "ForgetInput",
-    "ListOutput",
+    "IdOutput",
     "RecallInput",
     "RememberInput",
     "SearchToolsInput",
     "SendMessageInput",
+    "SendMessageOutput",
     "SpawnAgentInput",
+    "ToolSearchResult",
     "activate_tools",
     "call_tool",
     "compact",
