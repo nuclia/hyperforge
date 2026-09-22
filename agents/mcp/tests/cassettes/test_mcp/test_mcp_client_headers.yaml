@@ -44,7 +44,7 @@ interactions:
       "citation_threshold": null, "generative_model": "chatgpt-4.1", "max_tokens":
       8192, "query_context_images": {}, "prefer_markdown": null, "json_schema": {"type":
       "object", "title": "PromptSelection", "description": "Select the most appropriate
-      prompt for the task", "properties": {"prompt_id": {"type": "string", "description":
+      prompt for the task", "properties": {"name": {"type": "string", "description":
       "id of the prompt to use"}, "reason": {"type": "string", "description": "reason
       for selecting the prompt"}}}, "format_prompt": false, "rerank_context": false,
       "tools": [], "tool_choice": {"type": "required"}, "reasoning": false, "seed":
@@ -80,7 +80,7 @@ interactions:
     uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"object","object":{"prompt_id":"math_basic_arithmetic","reason":"The
+      string: '{"chunk":{"type":"object","object":{"name":"math_basic_arithmetic","reason":"The
         task is a basic arithmetic question (2 + 2), so the ''math_basic_arithmetic''
         prompt is the most suitable."}}}
 
