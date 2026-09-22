@@ -7,12 +7,12 @@ from functools import lru_cache
 from typing import Annotated, Any, Dict, List, Literal, Optional, Sequence, Tuple, Union
 
 import httpx
-from hyperforge.json_schema import convert_json_schema
 import jsonschema
 from nuclia.lib.nua_responses import ChatModel, CitationsType, Tool
 from pydantic import BaseModel, Field
 
 from hyperforge import logger
+from hyperforge.json_schema import convert_json_schema
 
 NormalizedReasoningEffort = Literal[
     "none", "minimal", "low", "medium", "high", "xhigh", "max"
