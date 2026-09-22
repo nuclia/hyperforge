@@ -364,6 +364,7 @@ class AgentHarness:
         self._interrupted = asyncio.Event()
         self._model_started = asyncio.Event()
         self._run_lock = asyncio.Lock()
+        self._lazy_tools_lock = asyncio.Lock()
         self._active_task: asyncio.Task[Any] | None = None
         self._turn_id: str | None = None
         self._last_event_id: str | None = None
@@ -397,6 +398,8 @@ class AgentHarness:
             await self.storage.create_conversation(conversation)
         self.conversation = conversation
         self.messages = []
+        self._active_lazy_tools.clear()
+        lazy_tool_names = {tool.name for tool in self._external_tools if tool.lazy_load}
         pending_tool_outputs: dict[str, HarnessMessage] = {}
         async for event in self.storage.iter_events(self.conversation_id):
             self._last_event_id = event.id
@@ -431,6 +434,14 @@ class AgentHarness:
                     for item in event.payload["messages"]
                 ]
                 pending_tool_outputs.clear()
+            elif event.type == HarnessEventType.TOOLS_ACTIVATED:
+                names = event.payload.get("names", [])
+                if isinstance(names, list):
+                    self._active_lazy_tools.update(
+                        name
+                        for name in names
+                        if isinstance(name, str) and name in lazy_tool_names
+                    )
         if pending_tool_outputs:
             logger.warning(
                 "Ignoring orphaned tool outputs while loading conversation: conversation=%s call_ids=%s",
@@ -471,6 +482,54 @@ class AgentHarness:
             or not tool.lazy_load
             or tool.name in self._active_lazy_tools
         )
+
+    def iter_lazy_tools(self) -> Iterable[HarnessTool]:
+        """Iterate over registered external lazy tools."""
+        return (tool for tool in self._external_tools if tool.lazy_load)
+
+    def is_tool_active(self, name: str) -> bool:
+        return name in self._active_lazy_tools
+
+    async def activate_tools(self, names: Iterable[str]) -> list[HarnessTool]:
+        """Activate registered lazy tools and persist newly activated names."""
+        requested_names = list(dict.fromkeys(names))
+        lazy_tools = {tool.name: tool for tool in self.iter_lazy_tools()}
+        unknown = [name for name in requested_names if name not in lazy_tools]
+        if unknown:
+            raise ValueError(f"Unknown lazy tools: {', '.join(unknown)}")
+        async with self._lazy_tools_lock:
+            newly_activated = [
+                name for name in requested_names if name not in self._active_lazy_tools
+            ]
+            if newly_activated:
+                await self.emit(
+                    HarnessEventType.TOOLS_ACTIVATED,
+                    {"names": newly_activated},
+                )
+                self._active_lazy_tools.update(newly_activated)
+        return [lazy_tools[name] for name in requested_names]
+
+    async def call_tool(
+        self, name: str, arguments: dict[str, Any], *, call_id: str | None = None
+    ) -> BaseModel:
+        """Execute an active external lazy tool by name."""
+        tool = next(
+            (
+                candidate
+                for candidate in self.iter_lazy_tools()
+                if candidate.name == name
+            ),
+            None,
+        )
+        if tool is None:
+            raise ValueError(f"Unknown lazy tool: {name}")
+        async with self._lazy_tools_lock:
+            if name not in self._active_lazy_tools:
+                raise ValueError(f"Tool is not active: {name}")
+        output = await tool.execute(
+            ToolCallContext(harness=self, name=name, id=call_id), arguments
+        )
+        return output
 
     async def save_messages(self) -> None:
         await self._flush_pending_messages()
@@ -626,7 +685,7 @@ class AgentHarness:
     async def llm(self, tools: Iterable[HarnessTool] | None = None) -> AgentResult:
         await self._flush_pending_messages()
         if tools is None:
-            selected = list(self.iter_tools())
+            selected = [tool for tool in self.iter_tools() if not tool.lazy_load]
         else:
             selected = []
             seen: set[str] = set()
@@ -635,10 +694,7 @@ class AgentHarness:
                 if (
                     registered is not None
                     and registered.name not in seen
-                    and (
-                        not registered.lazy_load
-                        or registered.name in self._active_lazy_tools
-                    )
+                    and not registered.lazy_load
                 ):
                     selected.append(registered)
                     seen.add(registered.name)
@@ -1101,6 +1157,11 @@ class AgentHarness:
         child._usage_started_at = self._usage_started_at
         child._owns_usage = False
         child.conversation = self.conversation
+        child._active_lazy_tools = {
+            name
+            for name in self._active_lazy_tools
+            if name in {tool.name for tool in child._external_tools if tool.lazy_load}
+        }
         if include_history:
             child.messages = list(self.messages)
         return child

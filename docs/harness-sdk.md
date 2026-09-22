@@ -171,9 +171,11 @@ messages retain the model's original call order.
 
 Tools marked `lazy_load=True` are registered for execution but omitted from the
 model's initial tool list. The always-available `search_tools` and
-`activate_tools` tools let the model discover matching lazy tools and expose
-their schemas on subsequent model calls. Lazy activation remains active for the
-life of the harness instance.
+`activate_tools` tools let the model discover matching lazy tools. Activation
+returns each tool's full input schema, after which the model invokes it through
+`call_tool(tool_name, arguments)`. Lazy schemas never change the provider-visible
+tool list, preserving its prompt-cache prefix. Activation is persisted with the
+conversation and restored when the harness resumes.
 
 ```python
 @tool(description="Get the current weather for a city.", lazy_load=True)

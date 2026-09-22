@@ -190,7 +190,7 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
                 schema={
                     "type": "object",
                     "properties": {
-                        "prompt_id": {
+                        "name": {
                             "type": "string",
                             "description": "id of the prompt to use",
                         },
@@ -198,7 +198,7 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
                 },
                 tracking=memory.get_tracking_info(),
             )
-            prompt_id: str = resp["prompt_id"]
+            prompt_id: str = resp["name"]
 
             await memory.add_step(
                 step_module=self.config.module,

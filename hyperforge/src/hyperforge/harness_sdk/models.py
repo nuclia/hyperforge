@@ -22,6 +22,7 @@ class HarnessEventType(StrEnum):
     TOOL_REQUESTED = "tool.requested"
     TOOL_COMPLETED = "tool.completed"
     TOOL_FAILED = "tool.failed"
+    TOOLS_ACTIVATED = "tools.activated"
     INBOX_ADDED = "inbox.added"
     INBOX_CONSUMED = "inbox.consumed"
     FEEDBACK_REQUESTED = "feedback.requested"

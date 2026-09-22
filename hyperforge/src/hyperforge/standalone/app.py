@@ -10,15 +10,12 @@ import base64
 import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, Tuple
+from typing import Any
 
 import prometheus_client
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from lru import LRU
-from mcp.server.lowlevel.server import Server as MCPServer
-from mcp.server.streamable_http import StreamableHTTPServerTransport
 from nucliadb_telemetry.logs import setup_logging
 from nucliadb_telemetry.settings import LogLevel, LogSettings
 from prometheus_client import CONTENT_TYPE_LATEST
@@ -36,6 +33,7 @@ from starlette.responses import PlainTextResponse
 from hyperforge.a2a.server import build_grpc_server_from_runtime
 from hyperforge.api import v1
 from hyperforge.api.authentication import User
+from hyperforge.api.mcp_server_pool import MCPServerPool
 from hyperforge.api.models import AgentRole, StashRoles
 from hyperforge.api.v1 import oauth as v1_oauth
 from hyperforge.broker import Broker
@@ -261,8 +259,10 @@ class StandaloneApplication(FastAPI):
         @asynccontextmanager
         async def lifespan(app: "StandaloneApplication"):
             await app._startup()
-            yield
-            await app._shutdown()
+            try:
+                yield
+            finally:
+                await app._shutdown()
 
         super().__init__(
             title="arag standalone",
@@ -355,9 +355,11 @@ class StandaloneApplication(FastAPI):
                 stream_ttl_seconds=s.pubsub_stream_ttl_seconds,
             )
 
-        # LRU caches for MCP server instances (mirrors HTTPApplication).
-        self.sses: LRU[Tuple[str, str], StreamableHTTPServerTransport] = LRU(size=100)
-        self.mcp_servers: LRU[str, MCPServer] = LRU(size=100)
+        self.mcp_server_pool = MCPServerPool(
+            max_servers=s.mcp_max_servers,
+            idle_ttl_seconds=s.mcp_session_idle_ttl_seconds,
+            startup_timeout_seconds=s.mcp_startup_timeout_seconds,
+        )
 
         # Agent manager backed by the JSON config — no PostgreSQL.
         agent_manager_class = resolve_dotted_name(s.agent_manager_class)
@@ -413,13 +415,14 @@ class StandaloneApplication(FastAPI):
                     s.a2a_grpc_host,
                     s.a2a_grpc_port,
                 )
-        except Exception:
+        except BaseException:
             if self.a2a_server is not None:
                 await self.a2a_server.stop(grace=0)
             await self.session_manager.finalize()
             raise
 
     async def _shutdown(self) -> None:
+        await self.mcp_server_pool.shutdown()
         if self.a2a_server is not None:
             await self.a2a_server.stop(grace=5)
         await self.session_manager.finalize()
