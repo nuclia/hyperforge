@@ -867,7 +867,10 @@ def _nested_event_context(harness: Any) -> dict[str, Any]:
 def _scoped_description(
     capabilities: tuple[CodeModeCapability[Any], ...], description: str | None = None
 ) -> str:
-    introduction = description or "Execute restricted Python code using only the scoped capabilities below."
+    introduction = (
+        description
+        or "Execute restricted Python code using only the scoped capabilities below."
+    )
     introduction = f"{introduction} {CODEMODE_USAGE_GUIDANCE}"
     if not capabilities:
         return introduction
