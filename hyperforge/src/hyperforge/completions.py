@@ -8,7 +8,16 @@ from typing import Annotated, Any, Dict, List, Literal, Optional, Sequence, Tupl
 
 import httpx
 import jsonschema
-from nuclia.lib.nua_responses import ChatModel, CitationsType, Tool
+from nuclia.lib.nua_responses import (
+    ChatModel,
+    CitationsType,
+    Tool,
+    ToolChoiceAuto,
+    ToolChoiceForced,
+    ToolChoiceNone,
+    ToolChoiceRequired,
+)
+from nucliadb_models.search import Image
 from pydantic import BaseModel, Field
 
 from hyperforge import logger
@@ -246,28 +255,6 @@ class Message(BaseModel):
 RichMessage = Annotated[
     Union[AssistantMessage, ToolMessage, Message], Field(discriminator="type")
 ]
-
-
-class Image(BaseModel):
-    content_type: str
-    b64encoded: str
-
-
-class ToolChoiceAuto(BaseModel):
-    type: Literal["auto"] = "auto"
-
-
-class ToolChoiceNone(BaseModel):
-    type: Literal["none"] = "none"
-
-
-class ToolChoiceRequired(BaseModel):
-    type: Literal["required"] = "required"
-
-
-class ToolChoiceForced(BaseModel):
-    type: Literal["forced"] = "forced"
-    name: str
 
 
 class NucliaChatCompletionsError(RuntimeError):

@@ -419,7 +419,7 @@ class AsyncLocalOpenAIClient:
             tools=chat_tools,
             tool_choice=chat_tool_choice,
             max_tokens=body.max_tokens or 50_000,
-            reasoning_effort=reasoning_effort,
+            reasoning_effort=reasoning_effort,  # type: ignore
         )
 
     async def _generative_stream(
@@ -458,15 +458,15 @@ class AsyncLocalOpenAIClient:
             )
         if tool_calls:
             tools: dict[str, list[dict[str, Any]]] = {}
-            for call in tool_calls.values():
-                name = call["name"]
+            for accumulated_call in tool_calls.values():
+                name = accumulated_call["name"]
                 try:
-                    arguments = json.loads(call["arguments"] or "{}")
+                    arguments = json.loads(accumulated_call["arguments"] or "{}")
                 except json.JSONDecodeError:
                     arguments = {}
                 tools.setdefault(name, []).append(
                     {
-                        "id": call["id"],
+                        "id": accumulated_call["id"],
                         "function": {"name": name, "arguments": arguments},
                     }
                 )

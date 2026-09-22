@@ -509,7 +509,7 @@ class Manager:
             object_to_return = (
                 resp.object
                 if resp.object is not None
-                else list(resp.tools.values())[0][0].function.arguments
+                else list(resp.tools.values())[0][0].function.arguments  # type: ignore
             )
 
         if resp.consumption is None or resp.consumption.normalized_tokens is None:

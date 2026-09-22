@@ -10,6 +10,9 @@ from nuclia.lib.nua_responses import (
     MessageToolFunction,
     Reasoning,
     Tool,
+    ToolChoiceAuto,
+    ToolChoiceForced,
+    ToolChoiceRequired,
     ToolMessage,
     UserPrompt,
 )
@@ -97,9 +100,20 @@ async def test_local_openai_generate_uses_chat_completions() -> None:
 
 
 @pytest.mark.asyncio
-async def test_local_openai_generate_stream_translates_tool_deltas() -> None:
+@pytest.mark.parametrize(
+    ("tool_choice", "expected_tool_choice"),
+    [
+        (ToolChoiceAuto(), "auto"),
+        (ToolChoiceRequired(), "required"),
+        (ToolChoiceForced(name="lookup"), "required"),
+    ],
+)
+async def test_local_openai_generate_stream_translates_tool_deltas(
+    tool_choice, expected_tool_choice
+) -> None:
     async def handler(request: httpx.Request) -> httpx.Response:
         payload = json.loads(request.content)
+        assert payload["tool_choice"] == expected_tool_choice
         assert payload["tools"] == [
             {
                 "type": "function",
@@ -165,6 +179,7 @@ async def test_local_openai_generate_stream_translates_tool_deltas() -> None:
         ChatModel(
             question="use a tool",
             generative_model="request-model",
+            tool_choice=tool_choice,
             tools=[
                 Tool(
                     name="lookup",
