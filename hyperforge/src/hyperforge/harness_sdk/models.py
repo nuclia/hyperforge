@@ -33,6 +33,8 @@ class HarnessEventType(StrEnum):
     LLM_STARTED = "llm.started"
     LLM_COMPLETED = "llm.completed"
     LLM_FAILED = "llm.failed"
+    PROCEDURAL_GUIDANCE = "procedural.guidance"
+    PROCEDURAL_STEP = "procedural.step"
     WORKFLOW_MESSAGE = "workflow.message"
     TURN_COMPLETED = "turn.completed"
     TURN_INTERRUPTED = "turn.interrupted"

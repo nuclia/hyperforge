@@ -10,6 +10,7 @@ from hyperforge.harness import HarnessAgent, HarnessAgentConfig
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import BaseSessionMemory
 from hyperforge.models import MemoryConfig, Rules
+from hyperforge.procedural import ProceduralGraph, ProceduralGuidanceConfig
 
 
 class PublishedConfig(AgentConfig):
@@ -36,9 +37,32 @@ class PublishedAgent(Agent[PublishedConfig]):
 class FakeNua:
     def __init__(self) -> None:
         self.calls = 0
+        self.guidance_calls = 0
 
     async def chat_completions_stream(self, payload, **kwargs) -> AsyncIterator[dict]:
+        if not payload["tools"]:
+            self.guidance_calls += 1
+            yield {
+                "choices": [
+                    {
+                        "index": 0,
+                        "delta": {
+                            "content": "Use evidence and answer only the requested question."
+                        },
+                    }
+                ]
+            }
+            return
         self.calls += 1
+        if self.guidance_calls:
+            assert (
+                sum(
+                    "Procedural Graph Guidance" in message["content"]
+                    for message in payload["messages"]
+                    if isinstance(message.get("content"), str)
+                )
+                == 1
+            )
         assert any(
             message["role"] == "system" and "- Be concise" in message["content"]
             for message in payload["messages"]
@@ -81,7 +105,10 @@ class FakeNua:
 
 
 @pytest.mark.asyncio
-async def test_harness_agent_runs_configured_legacy_agent_as_tool(monkeypatch) -> None:
+@pytest.mark.parametrize("guided", [False, True])
+async def test_harness_agent_runs_configured_legacy_agent_as_tool(
+    monkeypatch, guided
+) -> None:
     monkeypatch.setitem(
         GLOBAL_REGISTRY.agents,
         "published",
@@ -99,6 +126,11 @@ async def test_harness_agent_runs_configured_legacy_agent_as_tool(monkeypatch) -
         {
             "model": "test-model",
             "agents": [{"id": "source", "module": "published"}],
+            "procedural_guidance": ProceduralGuidanceConfig(
+                graph=ProceduralGraph.skeleton(), failure_policy="raise"
+            ).model_dump(mode="json")
+            if guided
+            else None,
         }
     )
     agent = await HarnessAgent.from_config_class(config)
@@ -117,3 +149,4 @@ async def test_harness_agent_runs_configured_legacy_agent_as_tool(monkeypatch) -
 
     assert memory.final_answer == "Final answer"
     assert nua.calls == 2
+    assert nua.guidance_calls == (2 if guided else 0)

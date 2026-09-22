@@ -11,6 +11,12 @@ from typing import Any, Literal, NamedTuple
 
 from pydantic import BaseModel
 
+from hyperforge.procedural.guidance import (
+    ProceduralGuidance,
+    ProceduralGuidanceConfig,
+    ProcedureStep,
+)
+
 from .agents import published_agent_to_tools
 from .clients import ModelClient, ReasoningEffort
 from .context import format_context
@@ -297,6 +303,8 @@ class AgentHarness:
         spawn_depth: int = 0,
         parent_agent_id: str | None = None,
         event_queue_size: int = DEFAULT_EVENT_QUEUE_SIZE,
+        procedural_guidance: ProceduralGuidanceConfig | None = None,
+        guidance_client: ModelClient | None = None,
     ) -> None:
         if event_queue_size <= 0:
             raise ValueError("event_queue_size must be positive")
@@ -367,6 +375,21 @@ class AgentHarness:
         if len(self._tools) != len(self._external_tools):
             raise ValueError("Tool names must be unique")
         self._install_core_tools(self._config.feedback_enabled)
+        self._procedural = (
+            ProceduralGuidance(procedural_guidance) if procedural_guidance else None
+        )
+        self._guidance_client = guidance_client or model_client
+        self._failed_procedural_calls: set[str] = set()
+        if self._procedural:
+            self._procedural.config.graph.check_tools(self._tools)
+
+    @property
+    def procedural_guidance(self) -> ProceduralGuidanceConfig | None:
+        return self._procedural.config if self._procedural else None
+
+    @property
+    def procedural_trajectory(self) -> tuple[ProcedureStep, ...]:
+        return tuple(self._procedural.steps) if self._procedural else ()
 
     @property
     def children(self) -> dict[str, ChildAgent]:
@@ -378,6 +401,15 @@ class AgentHarness:
 
     async def load(self, *, create: bool = True) -> None:
         conversation = await self.storage.get_conversation(self.conversation_id)
+        if (
+            conversation is not None
+            and self._procedural
+            and conversation.metadata.get("procedural_graph_version")
+            != self._procedural.version
+        ):
+            raise ValueError(
+                "Cannot resume with a different procedural graph; start a new conversation"
+            )
         if conversation is None:
             if not create:
                 raise ValueError("Conversation not found")
@@ -393,11 +425,20 @@ class AgentHarness:
         self.messages = []
         self._active_lazy_tools.clear()
         lazy_tool_names = {tool.name for tool in self._external_tools if tool.lazy_load}
+        if self._procedural:
+            self._procedural.steps.clear()
         pending_tool_outputs: dict[str, HarnessMessage] = {}
         async for event in self.storage.iter_events(self.conversation_id):
             self._last_event_id = event.id
             if event.parent_agent_id is not None:
                 continue
+            if event.type == HarnessEventType.PROCEDURAL_STEP and self._procedural:
+                step = ProcedureStep.model_validate(event.payload)
+                if step.graph_version != self._procedural.version:
+                    raise ValueError(
+                        "Persisted procedural step uses a different graph version"
+                    )
+                self._procedural.steps.append(step)
             if event.type in {
                 HarnessEventType.MESSAGE_ADDED,
                 HarnessEventType.MESSAGES_ADDED,
@@ -449,7 +490,10 @@ class AgentHarness:
 
     def _persisted_metadata(self) -> dict[str, Any]:
         metadata = self.execution_context.get("conversation_metadata", {})
-        return dict(metadata) if isinstance(metadata, Mapping) else {}
+        result = dict(metadata) if isinstance(metadata, Mapping) else {}
+        if self._procedural:
+            result["procedural_graph_version"] = self._procedural.version
+        return result
 
     def add_messages(self, messages: Iterable[HarnessMessage | dict[str, Any]]) -> None:
         self._pending_messages.extend(
@@ -689,13 +733,19 @@ class AgentHarness:
         self._check_limit("max_turns", self.usage.turns)
         result = AgentResult(text="")
         call_id = uuid.uuid4().hex
+        request_messages = self.messages
+        if self._procedural:
+            self._procedural.decision_id = call_id
+            request_messages = await self._procedural.messages(
+                self, self._guidance_client
+            )
         history_head_event_id = self._last_event_id
         await self.emit(
             HarnessEventType.LLM_STARTED,
             {
                 "call_id": call_id,
                 "history_head_event_id": history_head_event_id,
-                "message_count": len(self.messages),
+                "message_count": len(request_messages),
                 "model": self.model,
                 "reasoning_effort": self.reasoning_effort,
                 "tools": [tool.name for tool in selected],
@@ -709,7 +759,7 @@ class AgentHarness:
             async for delta in self.model_client.stream(
                 model=self.model,
                 reasoning_effort=self.reasoning_effort,
-                messages=self.messages,
+                messages=request_messages,
                 tools=selected,
                 execution_context=self.execution_context,
             ):
@@ -894,6 +944,8 @@ class AgentHarness:
             await self.load()
         self._start_usage()
         self._turn_id = uuid.uuid4().hex
+        if self._procedural:
+            self._procedural.query = prompt
         await self.emit(HarnessEventType.TURN_STARTED, {"prompt": prompt})
         latest_system = next(
             (
@@ -910,6 +962,7 @@ class AgentHarness:
         await self._flush_pending_messages()
         await self._append_message(HarnessMessage(role="user", content=prompt))
         loop_state = TurnLoopState()
+        multi_action_retries = 0
         try:
             if self._interrupted.is_set():
                 await self.emit(HarnessEventType.TURN_INTERRUPTED, {})
@@ -917,6 +970,24 @@ class AgentHarness:
             while not self._interrupted.is_set():
                 await self._consume_inbox()
                 result = await self._with_time_limit(self.llm())
+                if (
+                    self._procedural
+                    and self._procedural.config.single_action
+                    and len(result.tool_calls) > 1
+                ):
+                    multi_action_retries += 1
+                    if multi_action_retries > MAX_EMPTY_RETRIES:
+                        raise ValueError(
+                            "Solver repeatedly requested multiple actions in single_action mode"
+                        )
+                    await self._append_message(
+                        HarnessMessage(
+                            role="user",
+                            content="No calls were executed. Request exactly one tool action per decision, or answer when done.",
+                        )
+                    )
+                    continue
+                multi_action_retries = 0
                 if result.tool_calls:
                     await self._with_time_limit(
                         self._execute_tool_calls(result.tool_calls, result.text)
@@ -1029,6 +1100,14 @@ class AgentHarness:
         messages = await asyncio.gather(
             *(self._execute_tool_call(call) for call in calls)
         )
+        if self._procedural:
+            # gather preserves requested order, independently of completion order.
+            for call, message in zip(calls, messages, strict=True):
+                step = self._procedural.record(
+                    call, message, failed=call.id in self._failed_procedural_calls
+                )
+                self._failed_procedural_calls.discard(call.id or "")
+                await self.emit(HarnessEventType.PROCEDURAL_STEP, step.model_dump())
         await self._append_messages(
             [
                 HarnessMessage(role="assistant", content=text, tool_calls=calls),
@@ -1084,6 +1163,8 @@ class AgentHarness:
                 },
             )
             result = {"error": str(exc)}
+            if self._procedural:
+                self._failed_procedural_calls.add(call.id)
             await self.emit(
                 HarnessEventType.TOOL_FAILED,
                 {"call_id": call.id, "tool": call.name, "result": result},
