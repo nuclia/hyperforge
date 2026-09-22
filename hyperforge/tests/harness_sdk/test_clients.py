@@ -133,7 +133,14 @@ async def test_harness_client_keeps_usage_only_chunk() -> None:
                     "id": "usage",
                     "model": "model",
                     "choices": [],
-                    "usage": {"prompt_tokens": 11, "completion_tokens": 5},
+                    "usage": {
+                        "prompt_tokens": 11,
+                        "completion_tokens": 5,
+                        "nuclia_input_tokens": 0.011,
+                        "nuclia_output_tokens": 0.005,
+                        "model_input_tokens": 9,
+                        "model_output_tokens": 4,
+                    },
                 }
             )
 
@@ -147,7 +154,72 @@ async def test_harness_client_keeps_usage_only_chunk() -> None:
             execution_context={},
         )
     ]
-    assert (deltas[0].input_tokens, deltas[0].output_tokens) == (11, 5)
+    assert (deltas[0].input_tokens, deltas[0].output_tokens) == (9, 4)
+    assert (deltas[0].nuclia_input_tokens, deltas[0].nuclia_output_tokens) == (
+        0.011,
+        0.005,
+    )
+    assert (deltas[0].model_input_tokens, deltas[0].model_output_tokens) == (9, 4)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("usage", "expected_tokens", "expected_model_tokens"),
+    [
+        ({"prompt_tokens": 11, "completion_tokens": 5}, (11, 5), (0, 0)),
+        (
+            {
+                "prompt_tokens": 11,
+                "completion_tokens": 5,
+                "model_input_tokens": None,
+                "model_output_tokens": None,
+            },
+            (11, 5),
+            (0, 0),
+        ),
+        (
+            {
+                "prompt_tokens": 11,
+                "completion_tokens": 5,
+                "model_input_tokens": 9,
+                "model_output_tokens": None,
+            },
+            (9, 5),
+            (9, 0),
+        ),
+    ],
+)
+async def test_harness_client_falls_back_to_legacy_usage(
+    usage, expected_tokens, expected_model_tokens
+) -> None:
+    class UsageClient:
+        async def stream(self, request):
+            yield ChatCompletionChunk.model_validate(
+                {
+                    "id": "usage",
+                    "model": "model",
+                    "choices": [],
+                    "usage": usage,
+                }
+            )
+
+    deltas = [
+        delta
+        async for delta in NucliaModelClient(UsageClient()).stream(
+            model="model",
+            reasoning_effort=None,
+            messages=[HarnessMessage(role="user", content="hi")],
+            tools=[],
+            execution_context={},
+        )
+    ]
+
+    assert (deltas[0].input_tokens, deltas[0].output_tokens) == expected_tokens
+    assert (
+        deltas[0].model_input_tokens,
+        deltas[0].model_output_tokens,
+    ) == expected_model_tokens
+    assert (deltas[0].nuclia_input_tokens, deltas[0].nuclia_output_tokens) == (0, 0)
 
 
 class FakeCompletionsClient:

@@ -1,6 +1,7 @@
 import json
 import socket
 from base64 import b64encode
+from datetime import timedelta
 from pathlib import Path
 from typing import Any, Optional
 from unittest.mock import patch
@@ -8,11 +9,12 @@ from unittest.mock import patch
 import httpx
 import pytest
 import uvicorn
+from anyio import fail_after
 from httpx import AsyncClient
 from httpx._transports.asgi import ASGITransport
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
-from mcp.types import TextContent
+from mcp.types import ElicitResult, TextContent
 from pydantic import SecretStr
 from websockets.asyncio.client import connect
 
@@ -26,6 +28,7 @@ from hyperforge.engine import State
 from hyperforge.interaction import (
     AnswerOperation,
     AragAnswer,
+    OAuthAuthenticateURL,
 )
 from hyperforge.manager import Manager
 from hyperforge.memory import QuestionMemory
@@ -372,3 +375,109 @@ async def test_standalone_mcp_call_tool(standalone_http: str):
         c.text for c in contents if isinstance(c, TextContent) and c.text
     )
     assert "42" in full_text
+
+
+async def test_standalone_mcp_unknown_tool_returns_protocol_error(
+    standalone_http: str,
+):
+    mcp_url = f"http://{standalone_http}/api/v1/agent/{AGENT_ID}/session/unknown/mcp"
+
+    async with (
+        streamable_http_client(mcp_url) as (
+            read_stream,
+            write_stream,
+            _,
+        ),
+        ClientSession(read_stream, write_stream) as session,
+    ):
+        await session.initialize()
+        result = await session.call_tool("missing", {})
+
+    assert result.isError is True
+
+
+async def test_standalone_mcp_rejects_oversized_request(
+    standalone_client: AsyncClient,
+):
+    mcp_url = f"/api/v1/agent/{AGENT_ID}/session/oversized/mcp"
+    response = await standalone_client.post(
+        mcp_url,
+        content=b"x" * (STANDALONE_SETTINGS.mcp_max_request_bytes + 1),
+    )
+
+    assert response.status_code == 413
+
+
+async def test_standalone_mcp_delete_is_idempotent(
+    standalone_client: AsyncClient,
+):
+    mcp_url = f"/api/v1/agent/{AGENT_ID}/session/delete/mcp"
+
+    first = await standalone_client.delete(mcp_url)
+    second = await standalone_client.delete(mcp_url)
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+
+
+async def test_standalone_mcp_sessions_are_independent(standalone_http: str):
+    async def list_tool_names(session_name: str) -> list[str]:
+        mcp_url = (
+            f"http://{standalone_http}/api/v1/agent/{AGENT_ID}"
+            f"/session/{session_name}/mcp"
+        )
+        async with (
+            streamable_http_client(mcp_url) as (
+                read_stream,
+                write_stream,
+                _,
+            ),
+            ClientSession(read_stream, write_stream) as session,
+        ):
+            await session.initialize()
+            result = await session.list_tools()
+        return [tool.name for tool in result.tools]
+
+    first_tools = await list_tool_names("first")
+    second_tools = await list_tool_names("second")
+
+    assert first_tools == second_tools
+    assert "ask" in first_tools
+
+
+async def test_standalone_mcp_url_elicitation(
+    standalone_http: str, monkeypatch: pytest.MonkeyPatch
+):
+    from hyperforge.api.v1 import mcp_interaction
+
+    async def oauth_response(*args, **kwargs):
+        yield AragAnswer(
+            operation=AnswerOperation.AGENT_REQUEST,
+            oauth=OAuthAuthenticateURL(oauth_url="https://example.com/authorize"),
+        )
+        yield AragAnswer(operation=AnswerOperation.DONE)
+
+    monkeypatch.setattr(mcp_interaction, "stream_response", oauth_response)
+    elicitation_requests = []
+
+    async def handle_elicitation(context, params):
+        elicitation_requests.append(params)
+        return ElicitResult(action="accept")
+
+    mcp_url = (
+        f"http://{standalone_http}/api/v1/agent/{AGENT_ID}/session/elicitation/mcp"
+    )
+    with fail_after(3):
+        async with streamable_http_client(mcp_url) as (read_stream, write_stream, _):
+            async with ClientSession(
+                read_stream,
+                write_stream,
+                read_timeout_seconds=timedelta(seconds=2),
+                elicitation_callback=handle_elicitation,
+            ) as session:
+                await session.initialize()
+                result = await session.call_tool("ask", {"question": "Authenticate"})
+
+    assert result.isError is False
+    assert len(elicitation_requests) == 1
+    assert elicitation_requests[0].mode == "url"

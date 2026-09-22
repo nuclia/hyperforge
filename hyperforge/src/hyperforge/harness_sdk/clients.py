@@ -151,6 +151,10 @@ class ModelDelta:
     tool_calls: list[HarnessToolCall] = field(default_factory=list)
     input_tokens: float = 0
     output_tokens: float = 0
+    nuclia_input_tokens: float = 0
+    nuclia_output_tokens: float = 0
+    model_input_tokens: float = 0
+    model_output_tokens: float = 0
     trace_id: str | None = None
     model: str | None = None
 
@@ -295,8 +299,20 @@ class NucliaModelClient:
         async for chunk in self.client.stream(request):
             if not chunk.choices:
                 yield ModelDelta(
-                    input_tokens=chunk.usage.prompt_tokens if chunk.usage else 0,
-                    output_tokens=chunk.usage.completion_tokens if chunk.usage else 0,
+                    input_tokens=chunk.usage.input_tokens if chunk.usage else 0,
+                    output_tokens=chunk.usage.output_tokens if chunk.usage else 0,
+                    nuclia_input_tokens=(chunk.usage.nuclia_input_tokens or 0)
+                    if chunk.usage
+                    else 0,
+                    nuclia_output_tokens=(chunk.usage.nuclia_output_tokens or 0)
+                    if chunk.usage
+                    else 0,
+                    model_input_tokens=(chunk.usage.model_input_tokens or 0)
+                    if chunk.usage
+                    else 0,
+                    model_output_tokens=(chunk.usage.model_output_tokens or 0)
+                    if chunk.usage
+                    else 0,
                     trace_id=chunk.id,
                     model=chunk.model,
                 )
@@ -319,8 +335,20 @@ class NucliaModelClient:
                     tool_calls=completed_calls()
                     if choice.finish_reason == "tool_calls"
                     else [],
-                    input_tokens=chunk.usage.prompt_tokens if chunk.usage else 0,
-                    output_tokens=chunk.usage.completion_tokens if chunk.usage else 0,
+                    input_tokens=chunk.usage.input_tokens if chunk.usage else 0,
+                    output_tokens=chunk.usage.output_tokens if chunk.usage else 0,
+                    nuclia_input_tokens=(chunk.usage.nuclia_input_tokens or 0)
+                    if chunk.usage
+                    else 0,
+                    nuclia_output_tokens=(chunk.usage.nuclia_output_tokens or 0)
+                    if chunk.usage
+                    else 0,
+                    model_input_tokens=(chunk.usage.model_input_tokens or 0)
+                    if chunk.usage
+                    else 0,
+                    model_output_tokens=(chunk.usage.model_output_tokens or 0)
+                    if chunk.usage
+                    else 0,
                     trace_id=chunk.id,
                     model=chunk.model,
                 )
