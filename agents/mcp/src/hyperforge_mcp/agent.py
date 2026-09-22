@@ -191,8 +191,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                 resp,
                 input_tokens,
                 output_tokens,
-                reasoning,
-            ) = await manager.execute_json_reasoning(
+            ) = await manager.execute_json(
                 model=self.config.tool_choice_model,
                 prompt=prompt_feedback_str,
                 user_id="mcp_no_feedback",
@@ -201,7 +200,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                     "title": "PromptSelection",
                     "description": "Select the most appropriate prompt for the task",
                     "properties": {
-                        "prompt_id": {
+                        "name": {
                             "type": "string",
                             "description": "id of the prompt to use",
                         },
@@ -214,7 +213,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                 tracking=memory.get_tracking_info(),
             )
 
-            prompt_id: str = resp["prompt_id"]
+            prompt_id: str = resp["name"]
             reason: str = resp.get("reason", "")
             await memory.add_step(
                 step_module=self.config.module,

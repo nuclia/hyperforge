@@ -6,11 +6,34 @@ import logging
 import random
 from collections.abc import AsyncIterator, Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Literal, Protocol
+from typing import Any, Protocol
 
 import httpx
-from pydantic import BaseModel, Field
 
+from hyperforge.completions import (
+    ChatCompletionChoice as ChatCompletionChoice,
+)
+from hyperforge.completions import (
+    ChatCompletionChunk,
+    ChatCompletionRequest,
+    ChatCompletionResponseFormat,
+    NucliaChatCompletionsError,
+    ReasoningEffort,
+    ToolChoice,
+    request_error_detail,
+)
+from hyperforge.completions import (
+    ChatCompletionDelta as ChatCompletionDelta,
+)
+from hyperforge.completions import (
+    ChatCompletionToolCallDelta as ChatCompletionToolCallDelta,
+)
+from hyperforge.completions import (
+    ChatCompletionToolCallFunctionDelta as ChatCompletionToolCallFunctionDelta,
+)
+from hyperforge.completions import (
+    ChatCompletionUsage as ChatCompletionUsage,
+)
 from hyperforge.llm import AsyncNuaClient, NUAConnection
 
 from .models import HarnessMessage, HarnessToolCall
@@ -20,134 +43,6 @@ logger = logging.getLogger(__name__)
 
 PUBLIC_CHAT_COMPLETIONS_PATH = "/api/v1/predict/compat/chat/completions"
 INTERNAL_CHAT_COMPLETIONS_PATH = "/api/internal/predict/compat/chat/completions"
-
-type ReasoningEffort = Literal["minimal", "low", "medium", "high"]
-type ToolChoice = Literal["auto", "none", "required"] | dict[str, Any]
-
-
-class ChatCompletionResponseFormat(BaseModel):
-    type: str
-    json_schema: dict[str, Any] | None = None
-
-
-class ChatCompletionRequest(BaseModel):
-    """Provider-neutral request for an OpenAI-compatible chat endpoint."""
-
-    messages: list[dict[str, Any]] = Field(min_length=1)
-    model: str | None = None
-    stream: bool = True
-    temperature: float | None = None
-    max_tokens: int = 50_000
-    top_p: float | None = None
-    frequency_penalty: float | None = None
-    presence_penalty: float | None = None
-    stop: str | list[str] | None = None
-    response_format: ChatCompletionResponseFormat | None = None
-    json_schema: dict[str, Any] | None = None
-    tools: list[dict[str, Any]] = Field(default_factory=list)
-    tool_choice: ToolChoice | None = None
-    reasoning_effort: ReasoningEffort | None = None
-    user: str | None = None
-    stream_options: dict[str, bool] = Field(
-        default_factory=lambda: {"include_usage": True}
-    )
-
-
-class ChatCompletionToolCallFunctionDelta(BaseModel):
-    name: str | None = None
-    arguments: str | None = None
-
-
-class ChatCompletionToolCallDelta(BaseModel):
-    index: int
-    id: str | None = None
-    type: Literal["function"] | None = None
-    function: ChatCompletionToolCallFunctionDelta | None = None
-
-
-class ChatCompletionDelta(BaseModel):
-    role: str | None = None
-    content: str | None = None
-    reasoning_content: str | None = None
-    refusal: str | None = None
-    tool_calls: list[ChatCompletionToolCallDelta] = Field(default_factory=list)
-
-
-class ChatCompletionChoice(BaseModel):
-    index: int = 0
-    delta: ChatCompletionDelta = Field(default_factory=ChatCompletionDelta)
-    finish_reason: str | None = None
-
-
-class ChatCompletionUsage(BaseModel):
-    prompt_tokens: float = 0
-    completion_tokens: float = 0
-    total_tokens: float = 0
-    nuclia_input_tokens: float | None = None
-    nuclia_output_tokens: float | None = None
-    model_input_tokens: float | None = None
-    model_output_tokens: float | None = None
-    prompt_tokens_details: dict[str, Any] | None = None
-    completion_tokens_details: dict[str, Any] | None = None
-
-    @property
-    def input_tokens(self) -> float:
-        return (
-            self.model_input_tokens
-            if self.model_input_tokens is not None
-            else self.prompt_tokens
-        )
-
-    @property
-    def output_tokens(self) -> float:
-        return (
-            self.model_output_tokens
-            if self.model_output_tokens is not None
-            else self.completion_tokens
-        )
-
-
-class ChatCompletionChunk(BaseModel):
-    id: str | None = None
-    choices: list[ChatCompletionChoice] = Field(default_factory=list)
-    created: int | None = None
-    model: str | None = None
-    object: str = "chat.completion.chunk"
-    usage: ChatCompletionUsage | None = None
-    system_fingerprint: str | None = None
-    service_tier: str | None = None
-
-
-class NucliaChatCompletionsError(RuntimeError):
-    def __init__(
-        self, message: str, *, provider_data: dict[str, Any] | None = None
-    ) -> None:
-        super().__init__(message)
-        self.provider_data = provider_data or {}
-
-
-def _request_error_detail(
-    exc: httpx.RequestError | httpx.HTTPStatusError,
-) -> tuple[str, dict[str, Any]]:
-    response = exc.response if isinstance(exc, httpx.HTTPStatusError) else None
-    status = response.status_code if response is not None else None
-    response_body = response.text.strip()[:2000] if response is not None else ""
-    request = exc.request
-    url = str(request.url) if request is not None else "unknown URL"
-    detail = str(exc).strip() or repr(exc)
-    parts = [f"{type(exc).__name__} for {url}"]
-    if status is not None:
-        parts.append(f"status={status}")
-    if response_body:
-        parts.append(f"response={response_body}")
-    parts.append(f"error={detail}")
-    return "; ".join(parts), {
-        "http_status": status,
-        "url": url,
-        "response_body": response_body or None,
-        "error_type": type(exc).__name__,
-        "error": detail,
-    }
 
 
 class NucliaChatCompletionsClient:
@@ -216,7 +111,7 @@ class NucliaChatCompletionsClient:
                     yield chunk
                 return
             except (httpx.RequestError, httpx.HTTPStatusError) as exc:
-                detail, provider_data = _request_error_detail(exc)
+                detail, provider_data = request_error_detail(exc)
                 error = NucliaChatCompletionsError(
                     f"Nuclia chat completions request failed: {detail}",
                     provider_data=provider_data,
