@@ -193,8 +193,28 @@ class ChatCompletionUsage(BaseModel):
     prompt_tokens: float = 0
     completion_tokens: float = 0
     total_tokens: float = 0
+    nuclia_input_tokens: float | None = None
+    nuclia_output_tokens: float | None = None
+    model_input_tokens: float | None = None
+    model_output_tokens: float | None = None
     prompt_tokens_details: dict[str, Any] | None = None
     completion_tokens_details: dict[str, Any] | None = None
+
+    @property
+    def input_tokens(self) -> float:
+        return (
+            self.model_input_tokens
+            if self.model_input_tokens is not None
+            else self.prompt_tokens
+        )
+
+    @property
+    def output_tokens(self) -> float:
+        return (
+            self.model_output_tokens
+            if self.model_output_tokens is not None
+            else self.completion_tokens
+        )
 
 
 class ToolMessage(BaseModel):
