@@ -32,6 +32,10 @@ OUTPUT_FUNCTION_NAME = "output"
 CODEMODE_USAGE_GUIDANCE = (
     "Return the final result by calling output(value) exactly once. "
     "Do not use print(); it is unavailable. "
+    "Available common built-ins are abs, bool, bytes, chr, complex, divmod, float, "
+    "hash, hex, id, int, isinstance, issubclass, len, oct, ord, pow, range, repr, "
+    "round, slice, sorted, str, sum, tuple, and zip; helpers such as all, any, min, "
+    "and max are unavailable. "
     "For example, assign the result to a variable and finish with output(result)."
 )
 DEFAULT_MAX_SOURCE_BYTES = 64 * 1024

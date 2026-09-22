@@ -322,6 +322,11 @@ generated program. Generated code must call `output(value)` with exactly one
 value, exactly once; a missing, empty, or repeated `output` call fails the
 invocation. `print()` is unavailable and must not be used to return a result.
 Assign the final value to a variable and finish with `output(result)`.
+Generated code can use the provided capability functions and these common
+built-ins: `abs`, `bool`, `bytes`, `chr`, `complex`, `divmod`, `float`, `hash`,
+`hex`, `id`, `int`, `isinstance`, `issubclass`, `len`, `oct`, `ord`, `pow`,
+`range`, `repr`, `round`, `slice`, `sorted`, `str`, `sum`, `tuple`, and `zip`.
+Other helpers, including `all`, `any`, `min`, and `max`, are unavailable.
 Authorization, nested/global call limits, projected-result limits,
 and invalid or repeated `output` attempts remain terminal even if generated code
 catches the immediate callback error. An output attempt rejected by worker
