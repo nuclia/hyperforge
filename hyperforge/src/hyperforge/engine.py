@@ -7,7 +7,12 @@ from nuclia.lib.nua import AsyncNuaClient
 from hyperforge.configure import GLOBAL_REGISTRY, load_all_configurations
 from hyperforge.harness import HarnessAgent, HarnessAgentConfig
 from hyperforge.interaction import AragAnswer
-from hyperforge.llm import NoopNuaClient, NuaBaseModel, NUAConnection
+from hyperforge.llm import (
+    AsyncLocalOpenAIClient,
+    NoopNuaClient,
+    NuaBaseModel,
+    NUAConnection,
+)
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import BaseSessionMemory, QuestionMemory, SessionMemory
 from hyperforge.models import HistoryQuestionAnswer
@@ -160,6 +165,7 @@ async def get_state(
     account: Optional[str] = None,
     kbid: Optional[str] = None,
     local_openai_model_klass: Optional[type[NuaBaseModel]] = None,
+    allow_private_network_endpoints: bool = False,
 ) -> State:
     nua: AsyncNuaClient
     if internal_nua:
@@ -170,14 +176,24 @@ async def get_state(
             ),
         )
 
-    elif local_openai is not None and local_openai_model_klass is not None:
-        nua = await local_openai_model_klass.model_validate(
-            {
-                "key": external_nua_api_key,
-                "local_openai": local_openai,
-                "local_openai_model": local_openai_model,
-            }
-        ).connect()
+    elif local_openai is not None:
+        if local_openai_model_klass is not None:
+            nua = await local_openai_model_klass.model_validate(
+                {
+                    "key": external_nua_api_key,
+                    "local_openai": local_openai,
+                    "local_openai_model": local_openai_model,
+                }
+            ).connect()
+        else:
+            nua = cast(
+                AsyncNuaClient,
+                AsyncLocalOpenAIClient(
+                    base_url=local_openai,
+                    api_key=external_nua_api_key,
+                    model=local_openai_model,
+                ),
+            )
 
     elif external_nua_api_key is not None:
         nua = await NUAConnection.model_validate(
@@ -194,7 +210,11 @@ async def get_state(
         )
         nua = NoopNuaClient()
 
-    manager = await Manager.from_config(drivers=config.drivers, nua=nua)
+    manager = await Manager.from_config(
+        drivers=config.drivers,
+        nua=nua,
+        allow_private_network_endpoints=allow_private_network_endpoints,
+    )
     if isinstance(config, HarnessAgentConfig):
         agent = await HarnessAgent.from_config_class(config)
     else:

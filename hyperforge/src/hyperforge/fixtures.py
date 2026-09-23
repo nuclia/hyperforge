@@ -365,6 +365,7 @@ async def arag_server(
         activate_subject=settings.activate_subject,
         keepalive_ms=int(settings.pubsub_keepalive_seconds * 1000),
         cluster_mode=settings.valkey_cluster_mode,
+        stream_ttl_seconds=settings.pubsub_stream_ttl_seconds,
     )
     session = SessionManager(
         settings=settings,

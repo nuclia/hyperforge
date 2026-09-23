@@ -2,6 +2,7 @@ import ipaddress
 import socket
 from collections.abc import AsyncIterator, Iterable
 from typing import Any
+from urllib.parse import urlsplit
 
 import anyio
 import httpcore
@@ -13,13 +14,18 @@ class PrivateUrlError(Exception):
     pass
 
 
+async def ensure_public_endpoint(endpoint: str) -> None:
+    parsed = urlsplit(endpoint if "://" in endpoint else f"//{endpoint}")
+    if parsed.hostname is None:
+        raise PrivateUrlError("A valid endpoint hostname is required")
+    await _resolve_public_addresses(parsed.hostname, parsed.port or 443)
+
+
 class ResponseTooLargeError(Exception):
     pass
 
 
 def validate_public_http_url(url: str, *, https_only: bool = False) -> str:
-    from urllib.parse import urlsplit
-
     parsed = urlsplit(url)
     allowed_schemes = {"https"} if https_only else {"http", "https"}
     if parsed.scheme.lower() not in allowed_schemes or parsed.hostname is None:
@@ -94,8 +100,20 @@ class SafeTransport(AsyncHTTPTransport):
         super().__init__(*args, **kwargs)
         self._pool._network_backend = SafeNetworkBackend()  # type: ignore
 
+    @staticmethod
+    async def is_private_address(hostname: str) -> bool:
+        try:
+            await ensure_public_endpoint(hostname)
+        except PrivateUrlError:
+            return True
+        return False
+
     async def handle_async_request(self, request: Request) -> Response:
         validate_public_http_url(str(request.url))
+        url = request.url
+        hostname = url.host if url.host is not None else url.path
+        if await self.is_private_address(hostname):
+            raise PrivateUrlError("Cannot access private network resources")
         return await super().handle_async_request(request)
 
 

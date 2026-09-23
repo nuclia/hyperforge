@@ -1,13 +1,8 @@
 from contextlib import asynccontextmanager
-from typing import Any, Optional, Tuple
+from typing import Any, Optional
 
 import prometheus_client
 from fastapi import APIRouter, FastAPI
-from lru import LRU
-from mcp.server.lowlevel.server import Server as MCPServer
-from mcp.server.streamable_http import (
-    StreamableHTTPServerTransport,
-)
 from nucliadb_sdk.v2.sdk import NucliaDBAsync
 from nucliadb_telemetry.logs import setup_logging
 from nucliadb_telemetry.settings import LogLevel, LogSettings
@@ -19,6 +14,7 @@ from starlette.responses import PlainTextResponse
 from hyperforge.api import SERVICE_NAME, logger, v1
 from hyperforge.api.authentication import RaoAuthenticationBackend
 from hyperforge.api.logging import set_sentry
+from hyperforge.api.mcp_server_pool import MCPServerPool
 from hyperforge.api.settings import Settings
 from hyperforge.broker import Broker
 from hyperforge.broker.redis import RedisBroker
@@ -66,9 +62,11 @@ class HTTPApplication(FastAPI):
     ):
         @asynccontextmanager
         async def lifespan(app: "HTTPApplication"):
-            await app.startup()
-            yield
-            await app.shutdown()
+            try:
+                await app.startup()
+                yield
+            finally:
+                await app.shutdown()
 
         super().__init__(*args, lifespan=lifespan, **kwargs)
         self.settings = settings
@@ -138,10 +136,14 @@ class HTTPApplication(FastAPI):
             activate_subject=self.settings.activate_subject,
             keepalive_ms=int(self.settings.pubsub_keepalive_seconds * 1000),
             cluster_mode=self.settings.valkey_cluster_mode,
+            stream_ttl_seconds=self.settings.pubsub_stream_ttl_seconds,
         )
 
-        self.sses: LRU[Tuple[str, str], StreamableHTTPServerTransport] = LRU(size=100)
-        self.mcp_servers: LRU[str, MCPServer] = LRU(size=100)
+        self.mcp_server_pool = MCPServerPool(
+            max_servers=self.settings.mcp_max_servers,
+            idle_ttl_seconds=self.settings.mcp_session_idle_ttl_seconds,
+            startup_timeout_seconds=self.settings.mcp_startup_timeout_seconds,
+        )
 
         self.agent_manager = await AgentManager.from_settings(
             settings=self.data_manager_settings
@@ -156,7 +158,11 @@ class HTTPApplication(FastAPI):
                 logger.error(f"Module {load_module} could not be loaded")
 
     async def shutdown(self) -> None:
-        await self.agent_manager.finalize()
-        await self.broker.finalize()
+        if hasattr(self, "mcp_server_pool"):
+            await self.mcp_server_pool.shutdown()
+        if hasattr(self, "agent_manager"):
+            await self.agent_manager.finalize()
+        if hasattr(self, "broker"):
+            await self.broker.finalize()
         await clean_telemetry(SERVICE_NAME)
         GLOBAL_REGISTRY.clear()

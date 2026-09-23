@@ -1,10 +1,16 @@
+import json
 import os
-from unittest.mock import AsyncMock
+from types import SimpleNamespace
+from unittest.mock import AsyncMock, MagicMock
 
 import httpx
 import pytest
 from hyperforge.engine import main as arag_main
 from hyperforge.minimal_fixtures import cassette_nua_key
+from hyperforge.models import Context
+
+from hyperforge_external.agent import ExternalCallAgent
+from hyperforge_external.config import ExternalCallAgentConfig
 
 NUA_KEY = os.environ.get(
     "NUA_KEY",
@@ -66,7 +72,7 @@ async def test_external(mocker):
     mock_client.__aexit__ = AsyncMock(return_value=None)
 
     mocker.patch(
-        "hyperforge.utils.http.safe_http_client",
+        "hyperforge_external.agent.safe_http_client",
         return_value=mock_client,
     )
 
@@ -89,3 +95,48 @@ async def test_external(mocker):
         or "Peugeot" in question_memory.steps[-2].reason
     )
     assert mock_client.send.called
+
+
+@pytest.mark.asyncio
+async def test_external_with_context_payload(mocker):
+    config = ExternalCallAgentConfig(
+        context=True,
+        url="https://example.com/aaa",
+    )
+    external_agent = ExternalCallAgent(config)
+    memory = SimpleNamespace(
+        original_question="Question",
+        final_answer="Answer",
+        contexts=[
+            Context(
+                original_question_uuid=None,
+                actual_question_uuid=None,
+                question="Question",
+                source="static",
+                agent="static",
+            )
+        ],
+        contexts_minimal=lambda: "Context",
+        add_step=AsyncMock(),
+    )
+
+    mock_response = httpx.Response(
+        200,
+        content=b"oki doki",
+        request=httpx.Request("POST", config.url),
+    )
+    mock_client = MagicMock()
+    mock_client.build_request.side_effect = httpx.Request
+    mock_client.send = AsyncMock(return_value=mock_response)
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=None)
+    mocker.patch(
+        "hyperforge_external.agent.safe_http_client",
+        return_value=mock_client,
+    )
+
+    await external_agent(memory, manager=None)
+
+    request = mock_client.send.call_args.args[0]
+    assert request.headers["content-type"] == "application/json"
+    assert json.loads(request.content)[0]["source"] == "static"

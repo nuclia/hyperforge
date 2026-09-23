@@ -10,15 +10,12 @@ import base64
 import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, Tuple
+from typing import Any
 
 import prometheus_client
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from lru import LRU
-from mcp.server.lowlevel.server import Server as MCPServer
-from mcp.server.streamable_http import StreamableHTTPServerTransport
 from nucliadb_telemetry.logs import setup_logging
 from nucliadb_telemetry.settings import LogLevel, LogSettings
 from prometheus_client import CONTENT_TYPE_LATEST
@@ -33,8 +30,10 @@ from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import HTTPConnection
 from starlette.responses import PlainTextResponse
 
+from hyperforge.a2a.server import build_grpc_server_from_runtime
 from hyperforge.api import v1
 from hyperforge.api.authentication import User
+from hyperforge.api.mcp_server_pool import MCPServerPool
 from hyperforge.api.models import AgentRole, StashRoles
 from hyperforge.api.v1 import oauth as v1_oauth
 from hyperforge.broker import Broker
@@ -44,6 +43,7 @@ from hyperforge.configure import resolve_dotted_name
 from hyperforge.server.cache import InMemoryCache, ValkeyCache
 from hyperforge.server.session import SessionManager
 from hyperforge.server.settings import Settings as ServerSettings
+from hyperforge.standalone import logger
 from hyperforge.standalone.oauth import (
     JWKSCache,
     force_https_metadata,
@@ -259,8 +259,10 @@ class StandaloneApplication(FastAPI):
         @asynccontextmanager
         async def lifespan(app: "StandaloneApplication"):
             await app._startup()
-            yield
-            await app._shutdown()
+            try:
+                yield
+            finally:
+                await app._shutdown()
 
         super().__init__(
             title="arag standalone",
@@ -350,11 +352,14 @@ class StandaloneApplication(FastAPI):
                 s.broker_redis_activate_subject,
                 int(s.pubsub_keepalive_seconds * 1000),
                 cluster_mode=s.broker_redis_cluster_mode,
+                stream_ttl_seconds=s.pubsub_stream_ttl_seconds,
             )
 
-        # LRU caches for MCP server instances (mirrors HTTPApplication).
-        self.sses: LRU[Tuple[str, str], StreamableHTTPServerTransport] = LRU(size=100)
-        self.mcp_servers: LRU[str, MCPServer] = LRU(size=100)
+        self.mcp_server_pool = MCPServerPool(
+            max_servers=s.mcp_max_servers,
+            idle_ttl_seconds=s.mcp_session_idle_ttl_seconds,
+            startup_timeout_seconds=s.mcp_startup_timeout_seconds,
+        )
 
         # Agent manager backed by the JSON config — no PostgreSQL.
         agent_manager_class = resolve_dotted_name(s.agent_manager_class)
@@ -367,6 +372,7 @@ class StandaloneApplication(FastAPI):
             valkey_url="redis://localhost",
             question_timeout_seconds=s.question_timeout_seconds,
             pubsub_keepalive_seconds=s.pubsub_keepalive_seconds,
+            pubsub_stream_ttl_seconds=s.pubsub_stream_ttl_seconds,
             internal_nua=s.internal_nua,
             internal_nua_api=s.internal_nua_api,
             external_nua_api_key=s.external_nua_api_key,
@@ -375,6 +381,7 @@ class StandaloneApplication(FastAPI):
             internal_nucliadb_url=None,
             auth_success_logo_url=s.auth_success_logo_url,
             standalone=True,
+            allow_private_network_endpoints=s.allow_private_network_endpoints,
         )
 
         # use redis as cache backend if provided
@@ -393,7 +400,29 @@ class StandaloneApplication(FastAPI):
             agent_manager=self.agent_manager,
             cache=cache,
         )
-        await self.session_manager.initialize()
+        self.a2a_server = None
+        try:
+            await self.session_manager.initialize()
+            if s.a2a_enabled:
+                if not isinstance(self.broker, RedisBroker):
+                    raise ValueError("A2A_ENABLED requires BROKER_REDIS_DSN")
+                self.a2a_server = await build_grpc_server_from_runtime(
+                    s.a2a_settings(), self.agent_manager, self.broker
+                )
+                await self.a2a_server.start()
+                logger.info(
+                    "Standalone A2A gRPC server listening on %s:%s",
+                    s.a2a_grpc_host,
+                    s.a2a_grpc_port,
+                )
+        except BaseException:
+            if self.a2a_server is not None:
+                await self.a2a_server.stop(grace=0)
+            await self.session_manager.finalize()
+            raise
 
     async def _shutdown(self) -> None:
+        await self.mcp_server_pool.shutdown()
+        if self.a2a_server is not None:
+            await self.a2a_server.stop(grace=5)
         await self.session_manager.finalize()

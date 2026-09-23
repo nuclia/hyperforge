@@ -1,5 +1,6 @@
 from typing import Optional
 
+from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
@@ -30,6 +31,7 @@ class Settings(BaseSettings):
     oauth_subject: str = "arag.{account}.{agent_id}.{workflow_id}.{session}.{question}.oauth.{oauth_uuid}"
     activate_subject: str = "arag.activate"
     pubsub_keepalive_seconds: float = 20
+    pubsub_stream_ttl_seconds: int = 300
 
     load_modules: list[str] = []
 
@@ -38,5 +40,8 @@ class Settings(BaseSettings):
     hydra_scopes_supported: list[str] = ["offline_access", "openid"]
     mcp_force_https_metadata: bool = True
     auth_success_logo_url: Optional[str] = None
-    mcp_max_request_bytes: int = 1024 * 1024
-    mcp_max_response_bytes: int = 4 * 1024 * 1024
+    mcp_max_request_bytes: int = Field(default=1024 * 1024, ge=1)
+    mcp_max_response_bytes: int = Field(default=4 * 1024 * 1024, ge=1)
+    mcp_max_servers: int = Field(default=100, ge=1)
+    mcp_session_idle_ttl_seconds: int = Field(default=1800, ge=1)
+    mcp_startup_timeout_seconds: int = Field(default=30, ge=1)

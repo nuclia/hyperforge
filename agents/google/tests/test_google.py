@@ -1,3 +1,4 @@
+import json
 import os
 from uuid import uuid4
 
@@ -17,6 +18,18 @@ NUA_KEY = os.environ.get(
     "NUA_KEY",
 ) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 
+VERTEX_CREDENTIALS = json.dumps(
+    {
+        "type": "authorized_user",
+        "client_id": "DUMMY",
+        "client_secret": "DUMMY",
+        "refresh_token": "DUMMY",
+        "quota_project_id": "dummy-project",
+        "token": "DUMMY",
+        "expiry": "2999-01-01T00:00:00Z",
+    }
+)
+
 pytestmark = [
     pytest.mark.vcr(
         ignore_localhost=True,
@@ -32,8 +45,8 @@ DRIVERS = [
         "identifier": "google-01",
         "name": "google",
         "config": {
-            "vertexai": False,
-            "api_key": os.environ.get("GOOGLE_API_KEY", "DUMMY_API_KEY"),
+            "vertexai": True,
+            "credentials": VERTEX_CREDENTIALS,
         },
     },
 ]
@@ -81,7 +94,8 @@ async def _run_question(
     return memory.get_agent_contexts(flow_id=flow_id, agent_id=agent.agent_id), memory
 
 
-async def test_google():
+async def test_google(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "dummy-project")
     contexts, memory = await _run_question(
         DRIVERS,
         "What is Nuclia?",
@@ -95,7 +109,7 @@ async def test_google():
     event = usage[0]
     assert event.operation == ExternalUsageOperation.INTERNET_SEARCH
     assert event.provider == "google"
-    assert event.model == "gemini-2.5-flash"
+    assert event.model == "gemini-3.6-flash"
     assert event.input_tokens > 0
     assert event.output_tokens > 0
     assert event.requests == 1

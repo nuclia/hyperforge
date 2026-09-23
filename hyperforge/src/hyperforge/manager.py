@@ -115,6 +115,7 @@ class Manager:
         cls,
         drivers: List[DriverConfig],
         nua: AsyncNuaClient,
+        allow_private_network_endpoints: bool = False,
         send_rao_origin: bool = True,
     ):
         manager = cls(send_rao_origin=send_rao_origin)
@@ -124,7 +125,11 @@ class Manager:
             driver_class = get_driver_klass(
                 driver.provider
             )  # Check if driver provider is valid
-            manager.drivers[driver.identifier] = await driver_class.init(driver)
+            initialized_driver = await driver_class.init(driver)
+            initialized_driver.allow_private_network_endpoints = (
+                allow_private_network_endpoints
+            )
+            manager.drivers[driver.identifier] = initialized_driver
 
         return manager
 
@@ -262,7 +267,6 @@ class Manager:
             return await self.execute_raw_streaming(
                 item, memory, module=module, agent_path=agent_path
             )
-
         try:
             resp = await self.nua.generate(
                 body=item,
@@ -499,8 +503,14 @@ class Manager:
             convert_errors(e)
             raise
 
-        if resp.object is None:
+        if resp.object is None and resp.tools is None:
             raise Exception("No object")
+        else:
+            object_to_return = (
+                resp.object
+                if resp.object is not None
+                else list(resp.tools.values())[0][0].function.arguments  # type: ignore
+            )
 
         if resp.consumption is None or resp.consumption.normalized_tokens is None:
             input_tokens = 0.0
@@ -510,7 +520,7 @@ class Manager:
             output_tokens = resp.consumption.normalized_tokens.output
 
         return (
-            resp.object,
+            object_to_return,
             input_tokens,
             output_tokens,
         )

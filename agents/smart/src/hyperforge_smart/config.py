@@ -121,6 +121,14 @@ class SmartAgentConfig(ContextAgentConfig):
         title="Max iterations",
         description="Maximum number of planning and execution iterations before stopping",
     )
+    parallel_tool_calls: bool = Field(
+        default=True,
+        title="Parallel tool calls",
+        description=(
+            "Execute tool calls selected in the same turn concurrently. Disable for "
+            "interactive or stateful tools that must complete in order."
+        ),
+    )
     extra_prompt: Optional[str] = Field(
         None,
         title="Extra prompt",
