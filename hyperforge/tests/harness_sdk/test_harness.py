@@ -340,6 +340,20 @@ async def test_iter_events_discards_events_from_unconsumed_previous_turn() -> No
 
 
 @pytest.mark.asyncio
+async def test_emit_distinguishes_explicit_no_turn_from_current_turn() -> None:
+    harness = AgentHarness(model="test-model", model_client=Model())
+    harness._turn_id = "current-turn"
+
+    current = await harness.emit(HarnessEventType.TURN_STARTED, {}, persist=False)
+    no_turn = await harness.emit(
+        HarnessEventType.TURN_STARTED, {}, persist=False, turn_id=None
+    )
+
+    assert current.turn_id == "current-turn"
+    assert no_turn.turn_id is None
+
+
+@pytest.mark.asyncio
 async def test_unconsumed_turn_does_not_buffer_live_events() -> None:
     harness = AgentHarness(model="test-model", model_client=Model())
 

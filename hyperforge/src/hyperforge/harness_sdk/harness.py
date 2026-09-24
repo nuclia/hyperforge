@@ -42,6 +42,13 @@ EMPTY_RESPONSE_RETRY_PROMPT = (
 MAX_EMPTY_RETRIES = 2
 
 
+class _CurrentTurn:
+    pass
+
+
+_CURRENT_TURN = _CurrentTurn()
+
+
 @dataclass
 class AgentResult:
     text: str
@@ -650,13 +657,19 @@ class AgentHarness:
         payload: dict[str, Any],
         *,
         persist: bool = True,
+        parent_call_id: str | None = None,
+        turn_id: str | None | _CurrentTurn = _CURRENT_TURN,
     ) -> HarnessEvent:
+        resolved_turn_id = (
+            self._turn_id if isinstance(turn_id, _CurrentTurn) else turn_id
+        )
         event = HarnessEvent(
             id=uuid.uuid4().hex,
             conversation_id=self.conversation_id,
-            turn_id=self._turn_id,
+            turn_id=resolved_turn_id,
             agent_id=self.agent_id,
             parent_agent_id=self.parent_agent_id,
+            parent_call_id=parent_call_id,
             category=self.category,
             tags=self.tags,
             metadata=self._persisted_metadata(),
