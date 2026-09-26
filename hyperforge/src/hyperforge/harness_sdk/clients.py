@@ -313,7 +313,7 @@ class NucliaModelClient:
             user=str(execution_context.get("user_id", "system")),
             model=model,
             reasoning_effort=reasoning_effort or self.reasoning_effort,
-            **({"max_tokens": self.max_tokens} if self.max_tokens is not None else {}),
+            max_tokens=self.max_tokens,
             temperature=self.temperature,
             top_p=self.top_p,
             frequency_penalty=self.frequency_penalty,
