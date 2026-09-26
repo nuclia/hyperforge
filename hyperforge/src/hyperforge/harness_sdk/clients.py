@@ -22,7 +22,6 @@ from hyperforge.completions import (
     ToolChoice,
     request_error_detail,
 )
-from hyperforge.exceptions import OpenAIChatCompletionsError
 from hyperforge.completions import (
     ChatCompletionDelta as ChatCompletionDelta,
 )
@@ -35,6 +34,7 @@ from hyperforge.completions import (
 from hyperforge.completions import (
     ChatCompletionUsage as ChatCompletionUsage,
 )
+from hyperforge.exceptions import OpenAIChatCompletionsError
 from hyperforge.llm import AsyncNuaClient, NUAConnection
 
 from .models import HarnessMessage, HarnessToolCall
