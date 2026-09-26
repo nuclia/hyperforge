@@ -22,6 +22,7 @@ from hyperforge.completions import (
     ToolChoice,
     request_error_detail,
 )
+from hyperforge.exceptions import OpenAIChatCompletionsError
 from hyperforge.completions import (
     ChatCompletionDelta as ChatCompletionDelta,
 )
@@ -194,10 +195,18 @@ class OpenAIChatCompletionsClient:
                         line = line[5:].lstrip()
                     yield ChatCompletionChunk.model_validate_json(line)
         except (httpx.RequestError, httpx.HTTPStatusError) as exc:
-            detail, _ = _request_error_detail(exc)
+            detail, _ = request_error_detail(exc)
             raise OpenAIChatCompletionsError(
                 f"OpenAI chat completions request failed: {detail}"
             ) from exc
+
+
+class ChatCompletionsClient(Protocol):
+    async def aclose(self) -> None: ...
+
+    def stream(
+        self, request: ChatCompletionRequest
+    ) -> AsyncIterator[ChatCompletionChunk]: ...
 
 
 @dataclass
