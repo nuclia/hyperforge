@@ -10,9 +10,7 @@ from typing import Any, Protocol, cast
 
 import httpx
 
-from hyperforge.completions import (
-    ChatCompletionChoice as ChatCompletionChoice,
-)
+from hyperforge.completions import ChatCompletionChoice as ChatCompletionChoice
 from hyperforge.completions import (
     ChatCompletionChunk,
     ChatCompletionRequest,
