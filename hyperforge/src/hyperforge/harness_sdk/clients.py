@@ -43,6 +43,7 @@ logger = logging.getLogger(__name__)
 PUBLIC_CHAT_COMPLETIONS_PATH = "/api/v1/predict/compat/chat/completions"
 INTERNAL_CHAT_COMPLETIONS_PATH = "/api/internal/predict/compat/chat/completions"
 
+
 class NucliaChatCompletionsClient:
     """Chat-completions transport backed by Hyperforge's shared NUA client."""
 
