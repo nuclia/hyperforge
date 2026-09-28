@@ -415,13 +415,17 @@ class SyncAskAgent(BasicAskAgent):
         self,
         catalog_filter: Optional[CatalogFilterExpression] = None,
     ):
+        if any(
+            not self.sources[source].config.connection_ids
+            for source in self.config.sources
+        ):
+            return catalog_filter
+
         connection_ids = [
             connection_id
             for source in self.config.sources
-            for connection_id in self.sources[source].sync_configs.keys()
+            for connection_id in self.sources[source].config.connection_ids
         ]
-        if not connection_ids:
-            return catalog_filter
 
         if catalog_filter is None:
             catalog_filter = CatalogFilterExpression(

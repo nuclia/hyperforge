@@ -176,11 +176,27 @@ async def test_sync_driver_does_not_expand_configured_allowlist():
     client.get.assert_not_awaited()
 
 
-async def test_hybrid_catalog_filter_is_preserved():
+async def test_hybrid_catalog_filter_is_preserved_after_connection_resolution():
     agent = SyncAskAgent(SyncAskAgentConfig(sources=["source"]))
     agent.sources = {
-        "source": SimpleNamespace(sync_configs={})  # type: ignore[dict-item]
+        "source": SimpleNamespace(
+            config=SimpleNamespace(connection_ids=[]),
+            sync_configs={SYNC_CONFIG_ID: [EXTERNAL_CONNECTION_ID]},
+        )  # type: ignore[dict-item]
     }
+    catalog_filter = MagicMock()
+
+    assert agent.enrich_catalog_filter(catalog_filter) is catalog_filter
+
+
+async def test_mixed_sources_preserve_hybrid_catalog_filter():
+    agent = SyncAskAgent(SyncAskAgentConfig(sources=["hybrid", "restricted"]))
+    agent.sources = {
+        "hybrid": SimpleNamespace(config=SimpleNamespace(connection_ids=[])),
+        "restricted": SimpleNamespace(
+            config=SimpleNamespace(connection_ids=[SYNC_CONFIG_ID])
+        ),
+    }  # type: ignore[dict-item]
     catalog_filter = MagicMock()
 
     assert agent.enrich_catalog_filter(catalog_filter) is catalog_filter
