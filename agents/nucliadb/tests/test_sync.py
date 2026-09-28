@@ -206,7 +206,9 @@ async def test_mixed_sources_preserve_hybrid_catalog_filter():
 async def test_search_by_title_initializes_sources_before_enriching_filter():
     agent = SyncAskAgent(SyncAskAgentConfig(sources=["source"]))
     driver = SimpleNamespace(config=SimpleNamespace(connection_ids=[]))
-    manager = SimpleNamespace(drivers=SimpleNamespace(get=MagicMock(return_value=driver)))
+    manager = SimpleNamespace(
+        drivers=SimpleNamespace(get=MagicMock(return_value=driver))
+    )
 
     with patch.object(
         BasicAskAgent,
@@ -245,7 +247,9 @@ async def test_configured_source_ignores_resources_outside_allowlist():
         config=SimpleNamespace(kbid="kb"),
         driver=SimpleNamespace(get_resource_by_id=AsyncMock(side_effect=resources)),
     )
-    manager = SimpleNamespace(drivers=SimpleNamespace(get=MagicMock(return_value=driver)))
+    manager = SimpleNamespace(
+        drivers=SimpleNamespace(get=MagicMock(return_value=driver))
+    )
 
     with patch("hyperforge_nucliadb.sync.agent.get_ndb_driver", return_value=ndb):
         result = await agent._post_filter_configured_resources(
@@ -278,7 +282,9 @@ async def test_hybrid_dynamic_connection_is_authorized():
         config=SimpleNamespace(kbid="kb"),
         driver=SimpleNamespace(get_resource_by_id=AsyncMock(return_value=resource)),
     )
-    manager = SimpleNamespace(drivers=SimpleNamespace(get=MagicMock(return_value=driver)))
+    manager = SimpleNamespace(
+        drivers=SimpleNamespace(get=MagicMock(return_value=driver))
+    )
     memory = MagicMock()
     memory.get_session_id.return_value = "session"
     memory.send_feedback = AsyncMock(
