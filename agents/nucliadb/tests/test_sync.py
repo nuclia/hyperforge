@@ -1,7 +1,8 @@
 import json
 import os
+from types import SimpleNamespace
 from typing import Any, cast
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
@@ -12,6 +13,12 @@ from hyperforge.interaction import AragAnswer, Feedback, OAuthAuthenticateURL
 from hyperforge.memory.memory import EphemeralSessionMemory
 from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.pubsub import UserToAgentInteraction
+from pydantic import ValidationError
+
+from hyperforge_nucliadb.sync.agent import SyncAskAgent
+from hyperforge_nucliadb.sync.config import SyncAskAgentConfig
+from hyperforge_nucliadb.sync.config_driver import SyncConnection
+from hyperforge_nucliadb.sync.driver import SyncDriver
 
 NUA_KEY = os.environ.get(
     "NUA_KEY",
@@ -75,6 +82,193 @@ CONFIG = {
 
 SYNC_CONFIG_ID = "019cade7-c177-77c5-99c2-c8771f85cf91"
 EXTERNAL_CONNECTION_ID = "019cade7-64ee-7389-bec6-888c8ff8d604"
+
+
+async def test_sync_connection_defaults_to_hybrid_mode():
+    config = {
+        "url": "https://example.com",
+        "manager": "https://example.com",
+        "kbid": "kb",
+        "key": "key",
+        "description": "test",
+        "filters": [],
+    }
+
+    assert SyncConnection(**config).connection_ids == []
+    with pytest.raises(ValidationError):
+        SyncConnection(**config, connection_ids=[" "])
+
+
+async def test_sync_driver_lazily_resolves_and_caches_connection():
+    config = SyncConnection(
+        url="https://example.com",
+        manager="https://example.com",
+        kbid="00000000-0000-0000-0000-000000000010",
+        key="key",
+        description="test",
+        filters=[],
+    )
+    client = AsyncMock(spec=AsyncClient)
+    client.get.side_effect = [
+        _mock_sync_response(
+            "GET",
+            f"https://example.com/sync_config/{SYNC_CONFIG_ID}",
+            {"external_connection": {"id": EXTERNAL_CONNECTION_ID}},
+        ),
+        _mock_sync_response(
+            "GET",
+            f"https://example.com/external_connection/{EXTERNAL_CONNECTION_ID}",
+            {
+                "id": EXTERNAL_CONNECTION_ID,
+                "kb_id": "00000000-0000-0000-0000-000000000010",
+                "created_by": "00000000-0000-0000-0000-000000000001",
+                "created_at": "2024-01-01T00:00:00Z",
+                "updated_at": "2024-01-01T00:00:00Z",
+                "provider": "sharefile_oauth",
+            },
+        ),
+    ]
+    driver = SyncDriver.model_construct(
+        provider="sync",
+        name="sync",
+        config=config,
+        async_driver=client,
+        information={},
+        sync_configs={},
+        driver=MagicMock(),
+        manager=MagicMock(),
+        _synonyms=None,
+    )
+
+    first = await driver.resolve_sync_config(SYNC_CONFIG_ID)
+    second = await driver.resolve_sync_config(SYNC_CONFIG_ID)
+
+    assert first is second
+    assert first.provider.value == "sharefile_oauth"
+    assert client.get.await_count == 2
+
+
+async def test_sync_driver_does_not_expand_configured_allowlist():
+    config = SyncConnection(
+        url="https://example.com",
+        manager="https://example.com",
+        kbid="00000000-0000-0000-0000-000000000010",
+        key="key",
+        description="test",
+        filters=[],
+        connection_ids=[SYNC_CONFIG_ID],
+    )
+    client = AsyncMock(spec=AsyncClient)
+    driver = SyncDriver.model_construct(
+        provider="sync",
+        name="sync",
+        config=config,
+        async_driver=client,
+        information={},
+        sync_configs={},
+        driver=MagicMock(),
+        manager=MagicMock(),
+        _synonyms=None,
+    )
+
+    with pytest.raises(ValueError, match="not configured"):
+        await driver.resolve_sync_config(EXTERNAL_CONNECTION_ID)
+    client.get.assert_not_awaited()
+
+
+async def test_hybrid_catalog_filter_is_preserved():
+    agent = SyncAskAgent(SyncAskAgentConfig(sources=["source"]))
+    agent.sources = {
+        "source": SimpleNamespace(sync_configs={})  # type: ignore[dict-item]
+    }
+    catalog_filter = MagicMock()
+
+    assert agent.enrich_catalog_filter(catalog_filter) is catalog_filter
+
+
+async def test_hybrid_resources_without_connections_skip_authorization():
+    agent = SyncAskAgent(SyncAskAgentConfig(sources=["source"]))
+    driver = SimpleNamespace(config=SimpleNamespace(connection_ids=[]))
+    agent.sources = {"source": driver}  # type: ignore[assignment]
+    resource = SimpleNamespace(id="public-resource", origin=None)
+    ndb = SimpleNamespace(
+        config=SimpleNamespace(kbid="kb"),
+        driver=SimpleNamespace(get_resource_by_id=AsyncMock(return_value=resource)),
+    )
+    configured_filter = AsyncMock()
+    agent._post_filter_configured_resources = configured_filter
+
+    with patch("hyperforge_nucliadb.sync.agent.get_ndb_driver", return_value=ndb):
+        result = await agent._post_filter_hybrid_resources(
+            memory=MagicMock(),
+            manager=MagicMock(),
+            kb_source_id="source",
+            resource_ids=["public-resource"],
+        )
+
+    assert result == {"source": {"__hybrid__": ["public-resource"]}}
+    configured_filter.assert_not_awaited()
+
+
+async def test_hybrid_resources_authorize_only_valid_sync_origins():
+    agent = SyncAskAgent(SyncAskAgentConfig(sources=["source"]))
+    driver = SimpleNamespace(
+        config=SimpleNamespace(connection_ids=[]),
+        resolve_sync_config=AsyncMock(),
+    )
+    agent.sources = {"source": driver}  # type: ignore[assignment]
+    resources = [
+        SimpleNamespace(id="public-resource", origin=None),
+        SimpleNamespace(
+            id="connected-resource",
+            origin=SimpleNamespace(
+                source_id=f"sync_config_{SYNC_CONFIG_ID}",
+                sync_metadata=SimpleNamespace(),
+            ),
+        ),
+        SimpleNamespace(
+            id="missing-metadata",
+            origin=SimpleNamespace(
+                source_id=f"sync_config_{SYNC_CONFIG_ID}", sync_metadata=None
+            ),
+        ),
+        SimpleNamespace(
+            id="invalid-connection",
+            origin=SimpleNamespace(
+                source_id="sync_config_not-a-uuid",
+                sync_metadata=SimpleNamespace(),
+            ),
+        ),
+    ]
+    ndb = SimpleNamespace(
+        config=SimpleNamespace(kbid="kb"),
+        driver=SimpleNamespace(get_resource_by_id=AsyncMock(side_effect=resources)),
+    )
+
+    async def resolve_sync_config(sync_config_id: str):
+        if sync_config_id == "not-a-uuid":
+            raise ValueError("invalid sync config")
+        return SimpleNamespace()
+
+    driver.resolve_sync_config.side_effect = resolve_sync_config
+    agent._post_filter_configured_resources = AsyncMock(
+        return_value={"source": {SYNC_CONFIG_ID: ["connected-resource"]}}
+    )
+
+    with patch("hyperforge_nucliadb.sync.agent.get_ndb_driver", return_value=ndb):
+        result = await agent._post_filter_hybrid_resources(
+            memory=MagicMock(),
+            manager=MagicMock(),
+            kb_source_id="source",
+            resource_ids=[resource.id for resource in resources],
+        )
+
+    assert result == {
+        "source": {
+            "__hybrid__": ["public-resource", "connected-resource"],
+        }
+    }
+    agent._post_filter_configured_resources.assert_awaited_once()
 
 
 def _mock_sync_response(
