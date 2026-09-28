@@ -158,9 +158,7 @@ class SyncAskAgent(BasicAskAgent):
                 public_resource_ids.append(resource_obj.id)
                 continue
 
-            if not origin.source_id or not origin.source_id.startswith(
-                "sync_config_"
-            ):
+            if not origin.source_id or not origin.source_id.startswith("sync_config_"):
                 if origin.sync_metadata is None:
                     public_resource_ids.append(resource_obj.id)
                 else:
