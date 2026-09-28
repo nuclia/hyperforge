@@ -15,6 +15,7 @@ from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.pubsub import UserToAgentInteraction
 from pydantic import ValidationError
 
+from hyperforge_nucliadb.basic_ask_agent import BasicAskAgent
 from hyperforge_nucliadb.sync.agent import SyncAskAgent
 from hyperforge_nucliadb.sync.config import SyncAskAgentConfig
 from hyperforge_nucliadb.sync.config_driver import SyncConnection
@@ -202,6 +203,108 @@ async def test_mixed_sources_preserve_hybrid_catalog_filter():
     assert agent.enrich_catalog_filter(catalog_filter) is catalog_filter
 
 
+async def test_search_by_title_initializes_sources_before_enriching_filter():
+    agent = SyncAskAgent(SyncAskAgentConfig(sources=["source"]))
+    driver = SimpleNamespace(config=SimpleNamespace(connection_ids=[]))
+    manager = SimpleNamespace(drivers=SimpleNamespace(get=MagicMock(return_value=driver)))
+
+    with patch.object(
+        BasicAskAgent,
+        "search_by_title",
+        new=AsyncMock(return_value={"source": []}),
+    ):
+        result = await agent.search_by_title(
+            memory=MagicMock(),
+            manager=manager,  # type: ignore[arg-type]
+            title="title",
+        )
+
+    assert result == {"source": []}
+    assert agent.sources == {"source": driver}
+
+
+async def test_configured_source_ignores_resources_outside_allowlist():
+    agent = SyncAskAgent(SyncAskAgentConfig(sources=["source"]))
+    driver = SimpleNamespace(
+        config=SimpleNamespace(connection_ids=[SYNC_CONFIG_ID]),
+        sync_configs={SYNC_CONFIG_ID: [EXTERNAL_CONNECTION_ID]},
+        information={},
+    )
+    agent.sources = {"source": driver}  # type: ignore[assignment]
+    resources = [
+        SimpleNamespace(id="public-resource", origin=None),
+        SimpleNamespace(
+            id="other-connection-resource",
+            origin=SimpleNamespace(
+                source_id="sync_config_00000000-0000-0000-0000-000000000001",
+                sync_metadata=SimpleNamespace(),
+            ),
+        ),
+    ]
+    ndb = SimpleNamespace(
+        config=SimpleNamespace(kbid="kb"),
+        driver=SimpleNamespace(get_resource_by_id=AsyncMock(side_effect=resources)),
+    )
+    manager = SimpleNamespace(drivers=SimpleNamespace(get=MagicMock(return_value=driver)))
+
+    with patch("hyperforge_nucliadb.sync.agent.get_ndb_driver", return_value=ndb):
+        result = await agent._post_filter_configured_resources(
+            memory=MagicMock(),
+            manager=manager,  # type: ignore[arg-type]
+            resources={"source": [resource.id for resource in resources]},
+        )
+
+    assert result == {}
+
+
+async def test_hybrid_dynamic_connection_is_authorized():
+    agent = SyncAskAgent(SyncAskAgentConfig(sources=["source"]))
+    driver = SimpleNamespace(
+        config=SimpleNamespace(connection_ids=[]),
+        sync_configs={SYNC_CONFIG_ID: [EXTERNAL_CONNECTION_ID]},
+        information={
+            EXTERNAL_CONNECTION_ID: SimpleNamespace(provider="sharefile_oauth")
+        },
+        validate_resources=AsyncMock(return_value=["connected-resource"]),
+    )
+    resource = SimpleNamespace(
+        id="connected-resource",
+        origin=SimpleNamespace(
+            source_id=f"sync_config_{SYNC_CONFIG_ID}",
+            sync_metadata=SimpleNamespace(model_dump=MagicMock(return_value={})),
+        ),
+    )
+    ndb = SimpleNamespace(
+        config=SimpleNamespace(kbid="kb"),
+        driver=SimpleNamespace(get_resource_by_id=AsyncMock(return_value=resource)),
+    )
+    manager = SimpleNamespace(drivers=SimpleNamespace(get=MagicMock(return_value=driver)))
+    memory = MagicMock()
+    memory.get_session_id.return_value = "session"
+    memory.send_feedback = AsyncMock(
+        return_value=UserToAgentInteraction(
+            request_id="session",
+            response=json.dumps(
+                {
+                    "existing_credentials": {
+                        SYNC_CONFIG_ID: {EXTERNAL_CONNECTION_ID: "credential"}
+                    }
+                }
+            ),
+        )
+    )
+
+    with patch("hyperforge_nucliadb.sync.agent.get_ndb_driver", return_value=ndb):
+        result = await agent._post_filter_configured_resources(
+            memory=memory,
+            manager=manager,  # type: ignore[arg-type]
+            resources={"source": [resource.id]},
+            allowed_connection_ids={SYNC_CONFIG_ID},
+        )
+
+    assert result == {"source": {SYNC_CONFIG_ID: ["connected-resource"]}}
+
+
 async def test_hybrid_resources_without_connections_skip_authorization():
     agent = SyncAskAgent(SyncAskAgentConfig(sources=["source"]))
     driver = SimpleNamespace(config=SimpleNamespace(connection_ids=[]))
@@ -285,6 +388,37 @@ async def test_hybrid_resources_authorize_only_valid_sync_origins():
         }
     }
     agent._post_filter_configured_resources.assert_awaited_once()
+
+
+async def test_hybrid_resource_with_sync_metadata_and_invalid_source_is_excluded():
+    agent = SyncAskAgent(SyncAskAgentConfig(sources=["source"]))
+    driver = SimpleNamespace(
+        config=SimpleNamespace(connection_ids=[]),
+        resolve_sync_config=AsyncMock(),
+    )
+    agent.sources = {"source": driver}  # type: ignore[assignment]
+    resource = SimpleNamespace(
+        id="invalid-sync-resource",
+        origin=SimpleNamespace(
+            source_id=None,
+            sync_metadata=SimpleNamespace(),
+        ),
+    )
+    ndb = SimpleNamespace(
+        config=SimpleNamespace(kbid="kb"),
+        driver=SimpleNamespace(get_resource_by_id=AsyncMock(return_value=resource)),
+    )
+
+    with patch("hyperforge_nucliadb.sync.agent.get_ndb_driver", return_value=ndb):
+        result = await agent._post_filter_hybrid_resources(
+            memory=MagicMock(),
+            manager=MagicMock(),
+            kb_source_id="source",
+            resource_ids=[resource.id],
+        )
+
+    assert result == {"source": {"__hybrid__": []}}
+    driver.resolve_sync_config.assert_not_awaited()
 
 
 def _mock_sync_response(
