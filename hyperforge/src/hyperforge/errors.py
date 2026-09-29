@@ -60,7 +60,9 @@ def _exception_priority(exc: BaseException) -> int:
 def exception_detail(exc: BaseException) -> str:
     """Return useful, bounded details from an exception or exception group."""
     leaves = list(_leaf_exceptions(exc))
-    actionable = [item for item in leaves if not isinstance(item, asyncio.CancelledError)]
+    actionable = [
+        item for item in leaves if not isinstance(item, asyncio.CancelledError)
+    ]
     if actionable:
         leaves = actionable
 
@@ -71,5 +73,7 @@ def exception_detail(exc: BaseException) -> str:
 
     visible_details = details[:3]
     if len(details) > len(visible_details):
-        visible_details.append(f"and {len(details) - len(visible_details)} more error(s)")
+        visible_details.append(
+            f"and {len(details) - len(visible_details)} more error(s)"
+        )
     return "Multiple errors: " + "; ".join(visible_details)
