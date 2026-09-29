@@ -19,6 +19,7 @@ from hyperforge.broker import Broker
 from hyperforge.configure import load_all_configurations, scan
 from hyperforge.db.agents import AgentManager
 from hyperforge.engine import State, get_state
+from hyperforge.errors import actionable_exception_group, exception_detail
 from hyperforge.interaction import (
     AnswerOperation,
     AragAnswer,
@@ -375,10 +376,16 @@ class SessionManager:
             async with asyncio.timeout(self.settings.question_timeout_seconds):
                 await state.agent(question_memory, state.manager)
 
+        except BaseExceptionGroup as exc:
+            error_group = actionable_exception_group(exc)
+            logger.exception("Answering exception")
+            errors.capture_exception(error_group)
+            error = ARAGException(detail=exception_detail(error_group))
+            observation.set_status("error")
         except Exception as e:
             logger.exception("Answering exception")
             errors.capture_exception(e)
-            error = ARAGException(detail=str(e))
+            error = ARAGException(detail=exception_detail(e))
             observation.set_status("error")
         finally:
             if state.manager is not None:
@@ -387,10 +394,9 @@ class SessionManager:
                 except Exception as e:
                     logger.exception("Error closing Manager")
                     errors.capture_exception(e)
-
-        observation.end()
-        answer_running.dec()
-        keepalive.cancel()
+            observation.end()
+            answer_running.dec()
+            keepalive.cancel()
 
         await self.callback(
             topic,
