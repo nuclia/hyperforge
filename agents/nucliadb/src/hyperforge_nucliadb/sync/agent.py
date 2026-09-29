@@ -3,6 +3,7 @@ import itertools
 from typing import Dict, List, Optional, cast
 from uuid import uuid4
 
+from hyperforge import logger
 from hyperforge.configure import agent
 from hyperforge.interaction import (
     Feedback,
@@ -110,12 +111,158 @@ class SyncAskAgent(BasicAskAgent):
         manager: Manager,
         resources: Dict[str, List[str]],
     ) -> Dict[str, Dict[str, List[str]]]:
+        connections = self.get_connections(manager)
+        filtered_resources: Dict[str, Dict[str, List[str]]] = {}
+        for kb_source_id, resource_ids in resources.items():
+            if connections[kb_source_id].config.connection_ids:
+                source_resources = await self._post_filter_configured_resources(
+                    memory=memory,
+                    manager=manager,
+                    resources={kb_source_id: resource_ids},
+                )
+            else:
+                source_resources = await self._post_filter_hybrid_resources(
+                    memory=memory,
+                    manager=manager,
+                    kb_source_id=kb_source_id,
+                    resource_ids=resource_ids,
+                )
+            filtered_resources.update(source_resources)
+        return filtered_resources
+
+    async def _post_filter_hybrid_resources(
+        self,
+        memory: QuestionMemory,
+        manager: Manager,
+        kb_source_id: str,
+        resource_ids: List[str],
+    ) -> Dict[str, Dict[str, List[str]]]:
+        driver = self.sources[kb_source_id]
+        ndb = get_ndb_driver(manager, kb_source_id)
+        resource_objs: List[NucliaDBResource] = await asyncio.gather(
+            *[
+                ndb.driver.get_resource_by_id(
+                    kbid=ndb.config.kbid,
+                    rid=resource_id,
+                    query_params={"show": [ResourceProperties.ORIGIN.value]},
+                )
+                for resource_id in resource_ids
+            ]
+        )
+
+        public_resource_ids: List[str] = []
+        connected_resources: Dict[str, List[str]] = {}
+        for resource_obj in resource_objs:
+            origin = resource_obj.origin
+            if origin is None:
+                public_resource_ids.append(resource_obj.id)
+                continue
+
+            if not origin.source_id or not origin.source_id.startswith("sync_config_"):
+                if origin.sync_metadata is None:
+                    public_resource_ids.append(resource_obj.id)
+                else:
+                    logger.warning(
+                        "Excluding resource with inconsistent Sync origin metadata",
+                        extra={"resource_id": resource_obj.id},
+                    )
+                continue
+
+            source_id = origin.source_id
+            sync_config_id = source_id.removeprefix("sync_config_")
+            if not sync_config_id or origin.sync_metadata is None:
+                logger.warning(
+                    "Excluding synced resource with incomplete origin metadata",
+                    extra={"resource_id": resource_obj.id, "source_id": source_id},
+                )
+                continue
+            connected_resources.setdefault(sync_config_id, []).append(resource_obj.id)
+
+        resolved_resource_ids: List[str] = []
+        resolved_connection_ids: set[str] = set()
+        for sync_config_id, connection_resource_ids in connected_resources.items():
+            try:
+                await driver.resolve_sync_config(sync_config_id)
+            except Exception as exc:
+                logger.warning(
+                    "Excluding resources for an unavailable sync configuration",
+                    extra={
+                        "sync_config_id": sync_config_id,
+                        "resource_count": len(connection_resource_ids),
+                        "exception_type": type(exc).__name__,
+                    },
+                )
+                continue
+            resolved_resource_ids.extend(connection_resource_ids)
+            resolved_connection_ids.add(sync_config_id)
+
+        public_resource_id_set = set(public_resource_ids)
+        if not resolved_resource_ids:
+            return {
+                kb_source_id: {
+                    "__hybrid__": [
+                        resource_id
+                        for resource_id in resource_ids
+                        if resource_id in public_resource_id_set
+                    ]
+                }
+            }
+
+        try:
+            connected_filtered_resources = await self._post_filter_configured_resources(
+                memory=memory,
+                manager=manager,
+                resources={kb_source_id: resolved_resource_ids},
+                allowed_connection_ids=resolved_connection_ids,
+            )
+        except Exception as exc:
+            logger.warning(
+                "Excluding synced resources after authorization failed",
+                extra={
+                    "source_id": kb_source_id,
+                    "exception_type": type(exc).__name__,
+                },
+            )
+            connected_filtered_resources = {}
+
+        authorized_resource_ids = {
+            resource_id
+            for connection_resource_ids in connected_filtered_resources.get(
+                kb_source_id, {}
+            ).values()
+            for resource_id in connection_resource_ids
+        }
+        return {
+            kb_source_id: {
+                "__hybrid__": [
+                    resource_id
+                    for resource_id in resource_ids
+                    if resource_id in public_resource_id_set
+                    or resource_id in authorized_resource_ids
+                ]
+            }
+        }
+
+    async def _post_filter_configured_resources(
+        self,
+        memory: QuestionMemory,
+        manager: Manager,
+        resources: Dict[str, List[str]],
+        allowed_connection_ids: Optional[set[str]] = None,
+    ) -> Dict[str, Dict[str, List[str]]]:
         """We have a list of ARAG resources per KB source. Now we need to filter them by connection"""
         filtered_resources: Dict[str, Dict[str, List[str]]] = {}
-        connections_by_resource: Dict[str, List[str]] = {}
-        sync_metadata_by_resource: Dict[str, SyncMetadata] = {}
         connections = self.get_connections(manager)
         for kb_source_id, resource_ids in resources.items():
+            driver = self.sources[kb_source_id]
+            configured_connection_ids = (
+                allowed_connection_ids
+                if allowed_connection_ids is not None
+                else set(driver.config.connection_ids)
+            )
+            connections_by_resource: Dict[str, List[str]] = {}
+            sync_metadata_by_resource: Dict[str, SyncMetadata] = {}
+
             # Get resource source connection for each resource
             ndb = get_ndb_driver(manager, kb_source_id)
             get_resource_ids_tasks = []
@@ -131,24 +278,28 @@ class SyncAskAgent(BasicAskAgent):
                 *get_resource_ids_tasks
             )
             for resource_obj in resource_objs:
+                origin = resource_obj.origin
                 if (
-                    resource_obj.origin is not None
-                    and resource_obj.origin.source_id is not None
+                    origin is None
+                    or not origin.source_id
+                    or not origin.source_id.startswith("sync_config_")
+                    or origin.sync_metadata is None
                 ):
-                    source_id = resource_obj.origin.source_id.replace(
-                        "sync_config_", ""
-                    )
-                    connections_by_resource.setdefault(source_id, []).append(
-                        resource_obj.id
-                    )
-                    if resource_obj.origin.sync_metadata is not None:
-                        sync_metadata_by_resource[resource_obj.id] = (
-                            resource_obj.origin.sync_metadata
-                        )
+                    continue
+
+                source_id = origin.source_id.removeprefix("sync_config_")
+                if source_id not in configured_connection_ids:
+                    continue
+
+                connections_by_resource.setdefault(source_id, []).append(
+                    resource_obj.id
+                )
+                sync_metadata_by_resource[resource_obj.id] = origin.sync_metadata
 
             # Get providers needed for the resources allocated
             needed_providers_ids = list(connections_by_resource.keys())
-            driver = self.sources[kb_source_id]
+            if not needed_providers_ids:
+                continue
 
             creds_providers = {}
             for sync_config_id in needed_providers_ids:
@@ -258,13 +409,19 @@ class SyncAskAgent(BasicAskAgent):
                     raise Exception("Connection not found")
 
                 credential = connection_credentials[inner_connection_id]
+                connection_resource_ids = connections_by_resource[connection_id]
+                connection_sync_metadata = {
+                    resource_id: sync_metadata_by_resource[resource_id]
+                    for resource_id in connection_resource_ids
+                    if resource_id in sync_metadata_by_resource
+                }
                 filtered_resource_ids = await self.validate_resources_by_connection(
                     connection=source,
                     credentials=credential,
-                    resource_ids=resource_ids,
+                    resource_ids=connection_resource_ids,
                     connection_id=inner_connection_id,
                     sync_config_id=connection_id,
-                    sync_metadata_by_resource=sync_metadata_by_resource,
+                    sync_metadata_by_resource=connection_sync_metadata,
                 )
 
                 filtered_resources.setdefault(kb_source_id, {})[connection_id] = (
@@ -279,13 +436,24 @@ class SyncAskAgent(BasicAskAgent):
         self,
         catalog_filter: Optional[CatalogFilterExpression] = None,
     ):
+        if any(
+            not self.sources[source].config.connection_ids
+            for source in self.config.sources
+        ):
+            return catalog_filter
+
+        connection_ids = [
+            connection_id
+            for source in self.config.sources
+            for connection_id in self.sources[source].config.connection_ids
+        ]
+
         if catalog_filter is None:
             catalog_filter = CatalogFilterExpression(
                 resource=Or(
                     operands=[
                         OriginSource(id=f"sync_config_{connection_id}")
-                        for source in self.config.sources
-                        for connection_id in self.sources[source].sync_configs.keys()
+                        for connection_id in connection_ids
                     ]
                 )
             )
@@ -296,10 +464,7 @@ class SyncAskAgent(BasicAskAgent):
                     Or(
                         operands=[
                             OriginSource(id=f"sync_config_{connection_id}")
-                            for source in self.config.sources
-                            for connection_id in self.sources[
-                                source
-                            ].sync_configs.keys()
+                            for connection_id in connection_ids
                         ]
                     ),
                 ]
@@ -316,6 +481,7 @@ class SyncAskAgent(BasicAskAgent):
         catalog_filter: Optional[CatalogFilterExpression] = None,
         **kwargs,
     ) -> Dict[str, List[str]]:
+        self.get_connections(manager)
         catalog_filter = self.enrich_catalog_filter(catalog_filter)
         resources = await super().search_by_title(
             memory=memory,
