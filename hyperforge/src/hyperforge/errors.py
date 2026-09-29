@@ -2,20 +2,32 @@ import asyncio
 import re
 from collections.abc import Iterator
 
-_BEARER_TOKEN = re.compile(r"(?i)\b(Bearer)\s+[^\s,;]+")
+_AUTH_CREDENTIAL = re.compile(r"(?i)\b(Bearer|Basic)\s+[^\s,;]+")
+_AUTHORIZATION_VALUE = re.compile(
+    r"(?i)\b(authorization)(\s*[:=]\s*)"
+    r"(?:\"[^\"]*\"|'[^']*'|(?:(?:Basic|Bearer)\s+)?[^\s,;]+)"
+)
 _COOKIE_VALUE = re.compile(r"(?i)\b(set-cookie|cookie)(\s*:\s*)[^\r\n]+")
-_SECRET_VALUE = re.compile(
-    r"(?i)\b(api[_-]?key|access[_-]?token|authorization|client[_-]?secret|"
+_SECRET_KEYS = (
+    r"api[_-]?key|access[_-]?token|auth[_-]?token|client[_-]?secret|"
     r"credential|password|private[_-]?key|refresh[_-]?token|secret|session[_-]?id|"
-    r"token)\b(\s*[\"']?\s*[:=]\s*[\"']?)([^\"',\s;&}]+)"
+    r"oauth[_-]?token|token"
+)
+_QUOTED_SECRET_VALUE = re.compile(
+    rf"(?i)\b({_SECRET_KEYS})\b(\s*[\"']?\s*[:=]\s*)([\"'])[^\"']*\3"
+)
+_SECRET_VALUE = re.compile(
+    rf"(?i)\b({_SECRET_KEYS})\b(\s*[\"']?\s*[:=]\s*)([^\"',\s;&}}]+)"
 )
 _URL_CREDENTIALS = re.compile(r"(?i)(https?://)[^\s/:@]+:[^\s/@]+@")
 
 
 def _redact_secrets(detail: str) -> str:
     detail = _URL_CREDENTIALS.sub(r"\1[REDACTED]:[REDACTED]@", detail)
-    detail = _BEARER_TOKEN.sub(r"\1 [REDACTED]", detail)
+    detail = _AUTHORIZATION_VALUE.sub(r"\1\2[REDACTED]", detail)
+    detail = _AUTH_CREDENTIAL.sub(r"\1 [REDACTED]", detail)
     detail = _COOKIE_VALUE.sub(r"\1\2[REDACTED]", detail)
+    detail = _QUOTED_SECRET_VALUE.sub(r"\1\2\3[REDACTED]\3", detail)
     return _SECRET_VALUE.sub(r"\1\2[REDACTED]", detail)
 
 
@@ -26,6 +38,20 @@ def _leaf_exceptions(exc: BaseException) -> Iterator[BaseException]:
         return
 
     yield exc
+
+
+def actionable_exception_group(exc: BaseExceptionGroup) -> BaseExceptionGroup:
+    """Return regular exceptions while allowing only cancellation to be discarded."""
+    actionable, remainder = exc.split(Exception)
+    if actionable is None or (
+        remainder is not None
+        and any(
+            not isinstance(item, asyncio.CancelledError)
+            for item in _leaf_exceptions(remainder)
+        )
+    ):
+        raise exc
+    return actionable
 
 
 def _http_status(exc: BaseException) -> int | None:

@@ -1,9 +1,11 @@
+import asyncio
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from hyperforge import engine
+from hyperforge.interaction import AnswerOperation
 from hyperforge.pubsub import StartInteraction
 from hyperforge.server.session import SessionManager
 
@@ -137,6 +139,79 @@ async def test_answer_logs_original_exception_group():
     capture.assert_called_once_with(original_error)
     answer = manager.callback.await_args_list[-1].args[1]
     assert answer.exception.detail == "provider failed"
+
+
+@pytest.mark.asyncio
+async def test_answer_handles_mixed_cancellation_exception_group():
+    manager = SessionManager(
+        settings=SimpleNamespace(question_timeout_seconds=10),
+        broker=SimpleNamespace(keepalive_seconds=10),
+        agent_manager=None,
+        cache=None,
+    )
+    manager.callback = AsyncMock()
+    manager.send_message = AsyncMock()
+    state = SimpleNamespace(
+        manager=SimpleNamespace(aclose=AsyncMock()),
+        agent=AsyncMock(
+            side_effect=BaseExceptionGroup(
+                "task group",
+                [asyncio.CancelledError(), RuntimeError("provider failed")],
+            )
+        ),
+    )
+    question_memory = SimpleNamespace(
+        set_callback_fn=MagicMock(),
+        set_feedback_fn=MagicMock(),
+        set_oauth_fn=MagicMock(),
+        set_oauth_callback_fn=MagicMock(),
+        session=SimpleNamespace(id="session"),
+        final_answer=None,
+        final_answer_citations=None,
+        final_answer_urls=None,
+        data_visualizations=None,
+        save=AsyncMock(),
+    )
+
+    await manager.answer(
+        "account", "agent", "workflow", "topic", state, question_memory
+    )
+
+    answer = manager.callback.await_args_list[-1].args[1]
+    assert answer.operation == AnswerOperation.ERROR
+    assert answer.exception.detail == "provider failed"
+
+
+@pytest.mark.asyncio
+async def test_answer_propagates_cancellation_only_exception_group():
+    manager = SessionManager(
+        settings=SimpleNamespace(question_timeout_seconds=10),
+        broker=SimpleNamespace(keepalive_seconds=10),
+        agent_manager=None,
+        cache=None,
+    )
+    manager.callback = AsyncMock()
+    state_manager = SimpleNamespace(aclose=AsyncMock())
+    cancellation = BaseExceptionGroup("task group", [asyncio.CancelledError()])
+    state = SimpleNamespace(
+        manager=state_manager,
+        agent=AsyncMock(side_effect=cancellation),
+    )
+    question_memory = SimpleNamespace(
+        set_callback_fn=MagicMock(),
+        set_feedback_fn=MagicMock(),
+        set_oauth_fn=MagicMock(),
+        set_oauth_callback_fn=MagicMock(),
+        session=SimpleNamespace(id="session"),
+    )
+
+    with pytest.raises(BaseExceptionGroup) as raised:
+        await manager.answer(
+            "account", "agent", "workflow", "topic", state, question_memory
+        )
+
+    assert raised.value is cancellation
+    state_manager.aclose.assert_awaited_once_with()
 
 
 @pytest.mark.asyncio

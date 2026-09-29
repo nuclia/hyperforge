@@ -75,6 +75,22 @@ def test_exception_detail_redacts_secrets():
             "Set-Cookie: session=abc; HttpOnly; Secure",
             "Set-Cookie: [REDACTED]",
         ),
+        (
+            'password="hunter 2"',
+            'password="[REDACTED]"',
+        ),
+        (
+            "oauth_token=oauth-value auth_token=auth-value",
+            "oauth_token=[REDACTED] auth_token=[REDACTED]",
+        ),
+        (
+            "Authorization: Basic dXNlcjpwYXNzd29yZA==",
+            "Authorization: [REDACTED]",
+        ),
+        (
+            'Authorization: "Basic dXNlcjpwYXNzd29yZA=="',
+            "Authorization: [REDACTED]",
+        ),
     ],
 )
 def test_exception_detail_redacts_common_structured_secrets(detail, expected):
