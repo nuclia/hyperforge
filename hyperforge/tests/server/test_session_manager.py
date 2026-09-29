@@ -98,6 +98,48 @@ async def test_answer_closes_manager():
 
 
 @pytest.mark.asyncio
+async def test_answer_logs_original_exception_group():
+    manager = SessionManager(
+        settings=SimpleNamespace(question_timeout_seconds=10),
+        broker=SimpleNamespace(keepalive_seconds=10),
+        agent_manager=None,
+        cache=None,
+    )
+    manager.callback = AsyncMock()
+    manager.send_message = AsyncMock()
+    original_error = ExceptionGroup("task group", [RuntimeError("provider failed")])
+    state = SimpleNamespace(
+        manager=SimpleNamespace(aclose=AsyncMock()),
+        agent=AsyncMock(side_effect=original_error),
+    )
+    question_memory = SimpleNamespace(
+        set_callback_fn=MagicMock(),
+        set_feedback_fn=MagicMock(),
+        set_oauth_fn=MagicMock(),
+        set_oauth_callback_fn=MagicMock(),
+        session=SimpleNamespace(id="session"),
+        final_answer=None,
+        final_answer_citations=None,
+        final_answer_urls=None,
+        data_visualizations=None,
+        save=AsyncMock(),
+    )
+
+    with (
+        patch("hyperforge.server.session.logger.exception") as log_exception,
+        patch("hyperforge.server.session.errors.capture_exception") as capture,
+    ):
+        await manager.answer(
+            "account", "agent", "workflow", "topic", state, question_memory
+        )
+
+    log_exception.assert_called_once_with("Answering exception")
+    capture.assert_called_once_with(original_error)
+    answer = manager.callback.await_args_list[-1].args[1]
+    assert answer.exception.detail == "provider failed"
+
+
+@pytest.mark.asyncio
 async def test_engine_main_closes_manager(monkeypatch):
     state_manager = SimpleNamespace(aclose=AsyncMock())
     state = SimpleNamespace(manager=state_manager, agent=AsyncMock())

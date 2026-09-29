@@ -19,6 +19,7 @@ from hyperforge.broker import Broker
 from hyperforge.configure import load_all_configurations, scan
 from hyperforge.db.agents import AgentManager
 from hyperforge.engine import State, get_state
+from hyperforge.errors import exception_detail
 from hyperforge.interaction import (
     AnswerOperation,
     AragAnswer,
@@ -378,7 +379,7 @@ class SessionManager:
         except Exception as e:
             logger.exception("Answering exception")
             errors.capture_exception(e)
-            error = ARAGException(detail=str(e))
+            error = ARAGException(detail=exception_detail(e))
             observation.set_status("error")
         finally:
             if state.manager is not None:
