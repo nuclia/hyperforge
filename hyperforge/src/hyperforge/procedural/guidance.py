@@ -65,12 +65,17 @@ class ProceduralGuidance:
     async def messages(
         self, harness: AgentHarness, client: ModelClient
     ) -> list[HarnessMessage]:
+        # SDK package exports import this module; defer runtime imports to avoid a cycle.
         from hyperforge.harness_sdk.models import HarnessEventType, HarnessMessage
         from hyperforge.harness_sdk.usage import UsageLimitExceeded
 
         config = self.config
         procedure = self.steps[-1].procedure_name if self.steps else "Start"
         context = config.graph.neighborhood(procedure, config.hops)
+        context["nodes"].sort(key=lambda node: node["id"])
+        context["edges"].sort(
+            key=lambda edge: (edge["source"], edge["target"], edge["relation"])
+        )
         query = self.query or next(
             (
                 message.content
@@ -79,25 +84,23 @@ class ProceduralGuidance:
             ),
             "",
         )
-        prompt = json.dumps(
-            {
-                "query": query,
-                "latest_observation": next(
-                    (
-                        message.content
-                        for message in reversed(harness.messages)
-                        if message.role == "user"
-                    ),
-                    query,
+        # Stable sections precede changing context to preserve reusable prompt prefixes.
+        sections = {
+            "available_tools": sorted(tool.name for tool in harness.iter_tools()),
+            "query": query,
+            "graph_context": context,
+            "recent_trajectory": [
+                step.model_dump() for step in self.steps[-config.window :]
+            ],
+            "latest_observation": next(
+                (
+                    message.content
+                    for message in reversed(harness.messages)
+                    if message.role == "user"
                 ),
-                "graph_context": context,
-                "recent_trajectory": [
-                    step.model_dump() for step in self.steps[-config.window :]
-                ],
-                "available_tools": [tool.name for tool in harness.iter_tools()],
-            },
-            ensure_ascii=True,
-        )
+                query,
+            ),
+        }
         messages = [
             HarnessMessage(
                 role="system",
@@ -111,8 +114,19 @@ class ProceduralGuidance:
                     "do not execute tools or answer the task."
                 ),
             ),
-            HarnessMessage(role="user", content=prompt),
         ]
+        messages.extend(
+            HarnessMessage(
+                role="user",
+                content=json.dumps(
+                    {name: value},
+                    ensure_ascii=True,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ),
+            )
+            for name, value in sections.items()
+        )
         started = time.monotonic()
         text = ""
         usage = {

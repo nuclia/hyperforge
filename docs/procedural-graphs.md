@@ -8,19 +8,23 @@ chooses tools and answers through the normal `AgentHarness` loop.
 ## Start Small
 
 Use an existing `ModelClient` and a minimal graph first. This asynchronous example
-needs a configured client and a model ID supported by that client:
+needs a configured client and caller-supplied, supported model IDs: `model` for
+the solver and `guidance_model` for a separate, smaller advisor model:
 
 ```python
 from hyperforge.harness_sdk import AgentHarness, HarnessEventType
 from hyperforge.procedural import ProceduralGraph, ProceduralGuidanceConfig
 
 
-async def answer(model_client, model: str, question: str) -> str:
+async def answer(
+    model_client, model: str, guidance_model: str, question: str,
+) -> str:
     agent = AgentHarness(
         model=model,
         model_client=model_client,
         procedural_guidance=ProceduralGuidanceConfig(
             graph=ProceduralGraph.skeleton(),
+            model=guidance_model,
         ),
     )
     async with agent:
@@ -38,7 +42,8 @@ Client initialization and shutdown remain application responsibilities.
 `ProceduralGraph`, its nodes and edges, and `ProceduralGuidanceConfig` are frozen
 Pydantic models with unknown fields forbidden. The harness revalidates a snapshot
 at construction. Inspect it through `agent.procedural_guidance`; create a new
-harness to change configuration, and a new conversation to change the graph.
+harness to change configuration. To use a different graph, start a new
+conversation; an existing conversation can still continue unguided.
 
 ## Optional Expert Graph
 
@@ -99,18 +104,26 @@ provide advice; they are not executed steps.
 
 ## Runtime Behavior
 
-Before every solver decision, a separate guidance request receives the current
-query, latest user-message observation, graph neighborhood, recent tool steps,
-and currently visible tool names. It receives no executable tools. By default it
-uses the solver's client and model; set `guidance_client=` on `AgentHarness` and/or
-`model=` on `ProceduralGuidanceConfig` to override these independently.
+Before every solver decision, including retries, an extra sequential advisor
+request receives separate messages in this order: fixed system instructions,
+sorted currently visible tool names, current query, canonical local graph,
+recent trajectory, and latest user-message observation. It receives no executable
+tools. By default it uses the solver's client and model; set `guidance_client=` on
+`AgentHarness` and/or `model=` on `ProceduralGuidanceConfig` to override these
+independently. The examples explicitly select a smaller advisor model, but the
+generic SDK fallback remains the solver's model when `model=` is omitted.
+
+The advisor's stable prompt prefix can benefit from independent,
+provider-dependent prompt caching; cache hits are not guaranteed. This does not
+rely on conversation caching or cache sharing with the solver. Custom model
+adapters must preserve multiple system messages and message order.
 
 - Defaults are `hops=2` and `window=3`. Localization starts at
   `Start`, then uses the most recent recorded tool action's exact binding. A
   localization miss supplies the full graph, not a fuzzy match or an empty graph.
-- Guidance is a temporary system message for that solver request, not factual
-  evidence. It is not appended to conversation messages or streamed as answer
-  text; its text is recorded in procedural events.
+- Guidance is appended as a temporary system message for that solver request,
+  not factual evidence. It is not appended to conversation history or streamed
+  as answer text; its text is recorded in procedural events.
 - The graph fingerprint is pinned for the harness lifetime; the trajectory
   accumulates across successive `run()` turns and the query updates each turn.
   Loading an existing conversation restores its root procedural steps when the
@@ -124,15 +137,17 @@ uses the solver's client and model; set `guidance_client=` on `AgentHarness` and
   order, not completion order; the next anchor is the **last requested action in
   the executed batch**, including a failed tool result. All steps in that batch
   share a decision ID.
-- With `single_action=True`, a response requesting multiple calls executes
-  **none** of them. The solver is reprompted, with at most two consecutive retries
-  before a third multi-call response raises. It does not silently choose one call.
+- With procedural runtime active and `single_action=True`, a response requesting
+  multiple calls executes **none** of them. The solver is reprompted, with at most
+  two consecutive retries before a third multi-call response raises. It does not
+  silently choose one call.
 
 The default `timeout_seconds=30` and `failure_policy="unguided"` let ordinary
 runs continue without advice after guidance timeouts or errors. Failed refreshes
 do not reuse old advice. Empty guidance, tool requests from the advisor, and
 oversized guidance are errors too. Set `failure_policy="raise"` to fail instead;
-usage-limit violations still propagate under either policy.
+usage-limit violations still propagate under either policy. `failure_policy`
+applies only to guidance request failures, not conversation graph mismatches.
 
 `max_guidance_chars=8000` bounds advisor output; `max_observation_chars=8000`
 truncates each recorded argument string and observation. `max_graph_chars=100000`
@@ -150,10 +165,15 @@ the same graph, storage, and `conversation_id`, then call
 child events, so the next decision uses the restored action anchor and recent
 steps. Supply the graph explicitly; it is not reconstructed from event history.
 
-With guidance enabled, an existing conversation whose version is missing or
-differs from the supplied graph raises: **start a new conversation**. Persisted
-steps with a different graph version also raise. This supports conversation
-continuation, not resuming an in-flight tool call or an offline evolution run.
+If an existing conversation's graph metadata is missing or differs from the
+supplied graph, or any persisted root procedural step has a mismatched graph
+version, loading disables procedural runtime for that harness instance and
+completes normal conversation replay. It preserves stored metadata and events,
+clears `procedural_trajectory`, and disables both guidance and `single_action`,
+regardless of `failure_policy`. Matching conversations resume unchanged.
+**Start a new conversation to use the new graph**, not to continue the existing
+conversation unguided. This supports conversation continuation, not resuming an
+in-flight tool call or an offline evolution run.
 
 ### Events and Cost
 
@@ -169,7 +189,8 @@ Guidance tokens, including reported partial usage on failed requests, are added
 to total `agent.usage` alongside solver usage. Reported model-token and Nuclia
 accounting fields are included too. Guidance events provide the separate advisor
 breakdown; `usage.turns` counts solver decisions, not an additional turn per
-advisor call. Account for advisor latency and cost when comparing runs. This
+advisor call. Each solver decision or retry waits for the extra sequential
+advisor request; account for its latency and cost when comparing runs. This
 implementation does not establish live benchmark gains or complete reproduction
 of a research result.
 
@@ -177,7 +198,8 @@ of a research result.
 
 For the harness-based engine workflow, use top-level `procedural_guidance` with
 an inline graph, not a graph filename or a context-stage agent. The `agents` key
-selects `HarnessAgentConfig`, even when the list is empty:
+selects `HarnessAgentConfig`, even when the list is empty. Replace the model
+placeholders with supported IDs, choosing a separate smaller model for guidance:
 
 ```python
 from hyperforge.procedural import ProceduralGraph, ProceduralGuidanceConfig
@@ -190,7 +212,7 @@ config = {
     "rules": {"rules": ["Be concise"]},
     "memory": {},
     "procedural_guidance": ProceduralGuidanceConfig(
-        graph=graph, hops=2, window=3,
+        graph=graph, model="your-smaller-model", hops=2, window=3,
     ).model_dump(mode="json"),
 }
 ```
@@ -216,6 +238,8 @@ not a standalone benchmark. It requires existing model clients, a configured
 Here the task is source-ID selection: each task's `expected` is a nonempty list
 of correct source IDs. Replace this scorer with your task's actual evaluator,
 not a constant success score. Clients, corpus setup, and cleanup are caller-owned.
+Supply supported model IDs, choosing `guidance_model` as a separate smaller model
+served by `guidance_client`.
 
 ```python
 import json
@@ -227,7 +251,8 @@ from hyperforge.procedural.evolution import EvaluationTask, evolve
 
 
 async def evolve_sources(
-    *, model_client, guidance_client, manager, model: str, refiner_model: str,
+    *, model_client, guidance_client, manager,
+    model: str, guidance_model: str, refiner_model: str,
     search_tool, train_tasks, validation_tasks, test_tasks, output,
 ):
     if search_tool.name != "search" or search_tool.lazy_load:
@@ -251,7 +276,8 @@ async def evolve_sources(
             ),
             usage_limits=UsageLimits(max_turns=12, max_tool_calls=10, max_time=120),
             procedural_guidance=ProceduralGuidanceConfig(
-                graph=graph, single_action=True, failure_policy="raise",
+                graph=graph, model=guidance_model,
+                single_action=True, failure_policy="raise",
             ),
         )
 
@@ -284,7 +310,9 @@ async def evolve_sources(
         ),
         available_tools=tools,
         provenance={
-            "model": {"solver": model, "guidance": model, "refiner": refiner_model},
+            "model": {
+                "solver": model, "guidance": guidance_model, "refiner": refiner_model,
+            },
             "evaluator": "source-id-set-exact-match-v1",
             "tools": tools,
         },

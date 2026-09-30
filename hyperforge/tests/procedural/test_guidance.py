@@ -1,5 +1,7 @@
 import asyncio
 import json
+import subprocess
+import sys
 from collections.abc import AsyncIterator
 
 import pytest
@@ -10,6 +12,7 @@ from hyperforge.harness_sdk import (
     AgentHarness,
     HarnessEvent,
     HarnessEventType,
+    HarnessMessage,
     HarnessTool,
     HarnessToolCall,
     InMemoryHarnessStorage,
@@ -55,8 +58,15 @@ class GuidanceModel:
         assert not kwargs.get("tools"), "Guidance must not receive executable tools"
         self.calls.append(kwargs)
         user_messages = [m for m in kwargs["messages"] if m.role == "user"]
-        assert len(user_messages) == 1
-        prompt = json.loads(user_messages[0].content)
+        sections = [json.loads(message.content) for message in user_messages]
+        assert [list(section) for section in sections] == [
+            ["available_tools"],
+            ["query"],
+            ["graph_context"],
+            ["recent_trajectory"],
+            ["latest_observation"],
+        ]
+        prompt = {key: value for section in sections for key, value in section.items()}
         assert isinstance(prompt["query"], str)
         assert isinstance(prompt["graph_context"], dict)
         assert isinstance(prompt["recent_trajectory"], list)
@@ -137,9 +147,98 @@ def guidance_messages(messages):
     ]
 
 
+def graph_context(graph, procedure, hops=2):
+    context = graph.neighborhood(procedure, hops)
+    context["nodes"].sort(key=lambda node: node["id"])
+    context["edges"].sort(
+        key=lambda edge: (edge["source"], edge["target"], edge["relation"])
+    )
+    return context
+
+
 async def run(harness, query="Find evidence"):
     async with asyncio.timeout(5):
         return [event async for event in harness.run(query)]
+
+
+@pytest.mark.parametrize(
+    "modules",
+    [
+        ("hyperforge.procedural", "hyperforge.harness_sdk"),
+        ("hyperforge.harness_sdk", "hyperforge.procedural"),
+    ],
+)
+def test_public_import_orders(modules):
+    subprocess.run(
+        [sys.executable, "-c", "; ".join(f"import {module}" for module in modules)],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+
+
+@pytest.mark.asyncio
+async def test_guidance_preserves_stable_prefix_and_solver_history(graph, tools):
+    guidance = GuidanceModel()
+    harness = AgentHarness(
+        model="solver",
+        model_client=ScriptedModel(),
+        tools=tools,
+        procedural_guidance=ProceduralGuidanceConfig(graph=graph),
+        guidance_client=guidance,
+    )
+    await harness.load()
+    harness.messages.append(HarnessMessage(role="user", content="original query"))
+    runtime = harness._procedural
+    runtime.query = "original query"
+    for observation in ("original query", "updated observation"):
+        harness.messages[-1] = HarnessMessage(role="user", content=observation)
+        history = [message.model_copy(deep=True) for message in harness.messages]
+        request = await runtime.messages(harness, guidance)
+        assert request[:-1] == history == harness.messages
+        assert len(guidance_messages(request)) == 1
+    first, second = [request["messages"] for request in guidance.calls]
+    assert first[:-1] == second[:-1]
+    assert first[-1] != second[-1]
+
+    runtime.record(
+        call(), HarnessMessage(role="tool", content="first result"), failed=False
+    )
+    await runtime.messages(harness, guidance)
+    runtime.record(
+        call(call_id="call-2"),
+        HarnessMessage(role="tool", content="second result"),
+        failed=False,
+    )
+    await runtime.messages(harness, guidance)
+    third, fourth = [request["messages"] for request in guidance.calls[2:]]
+    assert second[:3] == third[:3] == fourth[:3]
+    assert second[3] != third[3]  # The active graph neighborhood changes.
+    assert third[:4] == fourth[:4]
+    assert third[4] != fourth[4]  # Only the trajectory changes for repeated actions.
+    assert guidance_messages(harness.messages) == []
+
+
+@pytest.mark.asyncio
+async def test_guidance_canonicalizes_equivalent_graphs_and_tool_order(graph, tools):
+    reordered = ProceduralGraph(
+        nodes=tuple(reversed(graph.nodes)), edges=tuple(reversed(graph.edges))
+    )
+    assert reordered.fingerprint == graph.fingerprint
+    requests = []
+    for candidate, catalog in ((graph, tools), (reordered, list(reversed(tools)))):
+        guidance = GuidanceModel()
+        harness = AgentHarness(
+            model="solver",
+            model_client=ScriptedModel(ModelDelta(text="answer")),
+            tools=catalog,
+            procedural_guidance=ProceduralGuidanceConfig(graph=candidate),
+            guidance_client=guidance,
+        )
+        await run(harness)
+        requests.append(guidance.calls[0]["messages"])
+    assert requests[0] == requests[1]
 
 
 def test_config_defaults_frozen_and_serialization(graph):
@@ -223,12 +322,12 @@ async def test_start_exact_localization_and_temporary_guidance(graph, tools, hop
     assert len(guidance.calls) == len(solver.calls) == 2
     assert all(request["model"] == "solver" for request in guidance.calls)
     assert guidance.prompts[0]["query"] == "Find evidence"
-    assert guidance.prompts[0]["graph_context"] == graph.neighborhood(
-        "Start", hops=hops
+    assert guidance.prompts[0]["graph_context"] == graph_context(
+        graph, "Start", hops=hops
     )
     assert guidance.prompts[0]["recent_trajectory"] == []
-    assert guidance.prompts[1]["graph_context"] == graph.neighborhood(
-        "search", hops=hops
+    assert guidance.prompts[1]["graph_context"] == graph_context(
+        graph, "search", hops=hops
     )
     for index, request in enumerate(solver.calls, 1):
         messages = guidance_messages(request["messages"])
@@ -298,7 +397,7 @@ async def test_localization_miss_uses_full_graph(graph, tools, name):
     )
     await run(harness)
 
-    assert guidance.prompts[1]["graph_context"] == graph.neighborhood(name)
+    assert guidance.prompts[1]["graph_context"] == graph_context(graph, name)
     assert guidance.prompts[1]["graph_context"]["active_node"] is None
     assert guidance.prompts[1]["graph_context"]["scope"] == "full"
     step = harness.procedural_trajectory[0]
@@ -384,7 +483,7 @@ async def test_parallel_steps_and_anchor_follow_model_order_not_completion(graph
         "first",
         "second",
     ]
-    assert guidance.prompts[1]["graph_context"] == graph.neighborhood("inspect")
+    assert guidance.prompts[1]["graph_context"] == graph_context(graph, "inspect")
 
 
 @pytest.mark.asyncio
@@ -813,12 +912,12 @@ async def test_latest_query_and_trajectory_survive_turns_with_pinned_graph(
     events = await run(harness, "latest query")
 
     assert guidance.prompts[-1]["query"] == "latest query"
-    assert guidance.prompts[-1]["graph_context"] == graph.neighborhood("search")
+    assert guidance.prompts[-1]["graph_context"] == graph_context(graph, "search")
     assert guidance.prompts[-1]["recent_trajectory"][0]["call_id"] == "call-1"
     assert harness.procedural_trajectory == original_steps
     assert other.procedural_trajectory == ()
     assert other_guidance.prompts[0]["recent_trajectory"] == []
-    assert other_guidance.prompts[0]["graph_context"] == revised.neighborhood("Start")
+    assert other_guidance.prompts[0]["graph_context"] == graph_context(revised, "Start")
     assert {
         e.payload["graph_version"]
         for e in events
@@ -890,7 +989,7 @@ async def test_resume_restores_root_trajectory_and_anchor_without_duplicates(
     await run(resumed, "resumed query")
     assert len(guidance.prompts) == 1
     assert guidance.prompts[0]["query"] == "resumed query"
-    assert guidance.prompts[0]["graph_context"] == graph.neighborhood("search")
+    assert guidance.prompts[0]["graph_context"] == graph_context(graph, "search")
     assert guidance.prompts[0]["recent_trajectory"] == [
         original_steps[0].model_dump(mode="json")
     ]
@@ -902,8 +1001,10 @@ async def test_resume_restores_root_trajectory_and_anchor_without_duplicates(
 @pytest.mark.parametrize(
     "existing_guidance", [False, True], ids=["legacy", "different-graph"]
 )
-async def test_resume_rejects_missing_or_different_graph_metadata_before_loading(
-    graph, tools, existing_guidance, mocker
+@pytest.mark.parametrize("explicit_load", [False, True])
+@pytest.mark.parametrize("policy", ["unguided", "raise"])
+async def test_resume_disables_guidance_for_missing_or_different_graph_metadata(
+    graph, tools, existing_guidance, explicit_load, policy, caplog
 ):
     storage = InMemoryHarnessStorage()
     original = AgentHarness(
@@ -923,7 +1024,10 @@ async def test_resume_rejects_missing_or_different_graph_metadata_before_loading
     else:
         assert conversation.metadata["procedural_graph_version"] != graph.fingerprint
 
-    solver = ScriptedModel(ModelDelta(text="must not run"))
+    solver = ScriptedModel(
+        ModelDelta(tool_calls=[call("search", "first"), call("inspect", "second")]),
+        ModelDelta(text="resumed answer"),
+    )
     guidance = GuidanceModel()
     resumed = AgentHarness(
         model="solver",
@@ -931,26 +1035,48 @@ async def test_resume_rejects_missing_or_different_graph_metadata_before_loading
         tools=tools,
         storage=storage,
         conversation_id=original.conversation_id,
-        procedural_guidance=ProceduralGuidanceConfig(graph=graph),
+        procedural_guidance=ProceduralGuidanceConfig(
+            graph=graph, single_action=True, failure_policy=policy
+        ),
         guidance_client=guidance,
     )
-    read_events = mocker.spy(storage, "iter_events")
-    with pytest.raises(ValueError, match="procedural graph"):
-        await resumed.load(create=False)
-    with pytest.raises(ValueError, match="procedural graph"):
-        await run(resumed)
-    read_events.assert_not_called()
-    assert solver.calls == guidance.calls == []
-    assert resumed.messages == []
+    resumed._failed_procedural_calls.add("stale-call")
+    if explicit_load:
+        for _ in range(2):
+            await resumed.load(create=False)
+            assert resumed.messages == original.messages
+            assert resumed.procedural_guidance is None
+        assert solver.calls == guidance.calls == []
+    events = await run(resumed, "resumed query")
+    assert events[-1].payload["text"] == "resumed answer"
+    assert solver.calls[0]["messages"][: len(original.messages)] == original.messages
+    assert resumed.usage.tool_calls == 2
+    assert guidance.calls == []
+    assert resumed.procedural_guidance is None
     assert resumed.procedural_trajectory == ()
-    assert resumed.conversation is None
-    assert await storage.get_conversation(original.conversation_id) == conversation
+    assert resumed._failed_procedural_calls == set()
+    assert all(not guidance_messages(request["messages"]) for request in solver.calls)
+    assert not any(
+        event.type
+        in {HarnessEventType.PROCEDURAL_GUIDANCE, HarnessEventType.PROCEDURAL_STEP}
+        for event in events
+    )
+    assert "Disabling procedural guidance" in caplog.text
+    messages = list(resumed.messages)
+    await resumed.load(create=False)
+    assert resumed.messages == messages
+    assert resumed.procedural_guidance is None
+    stored = await storage.get_conversation(original.conversation_id)
+    assert stored.metadata == conversation.metadata
 
 
 @pytest.mark.asyncio
-async def test_resume_rejects_root_step_from_different_graph(graph, tools):
+@pytest.mark.parametrize("policy", ["unguided", "raise"])
+async def test_resume_disables_guidance_for_root_step_from_different_graph(
+    graph, tools, policy, caplog
+):
     storage = InMemoryHarnessStorage()
-    config = ProceduralGuidanceConfig(graph=graph)
+    config = ProceduralGuidanceConfig(graph=graph, failure_policy=policy)
     original = AgentHarness(
         model="solver",
         model_client=ScriptedModel(
@@ -975,7 +1101,18 @@ async def test_resume_rejects_root_step_from_different_graph(graph, tools):
             },
         )
     )
-    solver = ScriptedModel(ModelDelta(text="must not run"))
+    later_message = {"role": "user", "content": "History after incompatible step"}
+    await storage.append_event(
+        HarnessEvent(
+            id="later-message",
+            conversation_id=original.conversation_id,
+            agent_id=original.agent_id,
+            type=HarnessEventType.MESSAGE_ADDED,
+            payload={"message": later_message},
+        )
+    )
+    conversation = await storage.get_conversation(original.conversation_id)
+    solver = ScriptedModel(ModelDelta(text="resumed answer"))
     guidance = GuidanceModel()
     resumed = AgentHarness(
         model="solver",
@@ -986,13 +1123,27 @@ async def test_resume_rejects_root_step_from_different_graph(graph, tools):
         procedural_guidance=config,
         guidance_client=guidance,
     )
-    with pytest.raises(ValueError, match="different graph version"):
+    resumed._failed_procedural_calls.add("stale-call")
+    for _ in range(2):
         await resumed.load(create=False)
+        assert resumed.messages[:-1] == original.messages
+        assert resumed.messages[-1].content == later_message["content"]
+        assert resumed.procedural_guidance is None
+        assert resumed.procedural_trajectory == ()
     assert solver.calls == guidance.calls == []
-    assert all(
-        step.graph_version == graph.fingerprint
-        for step in resumed.procedural_trajectory
+    assert resumed._failed_procedural_calls == set()
+    assert "mismatched-root-step" in caplog.text
+    events = await run(resumed, "resumed query")
+    assert events[-1].payload["text"] == "resumed answer"
+    assert guidance.calls == []
+    assert not guidance_messages(solver.calls[0]["messages"])
+    assert not any(
+        event.type
+        in {HarnessEventType.PROCEDURAL_GUIDANCE, HarnessEventType.PROCEDURAL_STEP}
+        for event in events
     )
+    stored = await storage.get_conversation(original.conversation_id)
+    assert stored.metadata == conversation.metadata
 
 
 @pytest.mark.asyncio

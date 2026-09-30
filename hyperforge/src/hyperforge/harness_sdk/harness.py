@@ -407,9 +407,14 @@ class AgentHarness:
             and conversation.metadata.get("procedural_graph_version")
             != self._procedural.version
         ):
-            raise ValueError(
-                "Cannot resume with a different procedural graph; start a new conversation"
+            logger.warning(
+                "Disabling procedural guidance: conversation=%s expected_graph=%s stored_graph=%s",
+                self.conversation_id,
+                self._procedural.version,
+                conversation.metadata.get("procedural_graph_version"),
             )
+            self._procedural = None
+            self._failed_procedural_calls.clear()
         if conversation is None:
             if not create:
                 raise ValueError("Conversation not found")
@@ -435,10 +440,17 @@ class AgentHarness:
             if event.type == HarnessEventType.PROCEDURAL_STEP and self._procedural:
                 step = ProcedureStep.model_validate(event.payload)
                 if step.graph_version != self._procedural.version:
-                    raise ValueError(
-                        "Persisted procedural step uses a different graph version"
+                    logger.warning(
+                        "Disabling procedural guidance: conversation=%s event=%s expected_graph=%s stored_graph=%s",
+                        self.conversation_id,
+                        event.id,
+                        self._procedural.version,
+                        step.graph_version,
                     )
-                self._procedural.steps.append(step)
+                    self._procedural = None
+                    self._failed_procedural_calls.clear()
+                else:
+                    self._procedural.steps.append(step)
             if event.type in {
                 HarnessEventType.MESSAGE_ADDED,
                 HarnessEventType.MESSAGES_ADDED,
