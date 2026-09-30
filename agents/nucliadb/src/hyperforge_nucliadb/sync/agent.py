@@ -398,6 +398,8 @@ class SyncAskAgent(BasicAskAgent):
                 connection_id,
                 connection_credentials,
             ) in existing_credentials.items():
+                if connection_id not in connections_by_resource:
+                    continue
                 source = connections[kb_source_id]
                 if (
                     connection_id not in source.sync_configs
