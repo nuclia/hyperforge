@@ -215,6 +215,20 @@ class SessionManager:
             task.add_done_callback(self._remove_task)
             self.tasks.append(task)
 
+        except BaseExceptionGroup as exc:
+            error_group = actionable_exception_group(exc)
+            logger.exception("Activation exception")
+            errors.capture_exception(error_group)
+            observation.set_status("error")
+            if topic:
+                await self.callback(
+                    topic,
+                    AragAnswer(
+                        exception=ARAGException(detail=exception_detail(error_group)),
+                        operation=AnswerOperation.ERROR,
+                    ),
+                )
+                await self.send_message(topic, AgentDone())
         except Exception as e:
             logger.exception("Activation exception")
             errors.capture_exception(e)
@@ -223,7 +237,7 @@ class SessionManager:
                 await self.callback(
                     topic,
                     AragAnswer(
-                        exception=ARAGException(detail="Unable to start agent"),
+                        exception=ARAGException(detail=exception_detail(e)),
                         operation=AnswerOperation.ERROR,
                     ),
                 )

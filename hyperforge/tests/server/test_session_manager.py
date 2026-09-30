@@ -64,6 +64,38 @@ async def test_ephemeral_session_is_not_cached():
 
 
 @pytest.mark.asyncio
+async def test_activate_reports_sanitized_failure():
+    manager = SessionManager(
+        settings=SimpleNamespace(
+            answers_subject="arag.{account}.{agent_id}.{workflow_id}.{session}.{question}.answer",
+            internal_nucliadb_url="",
+        ),
+        broker=None,  # type: ignore[arg-type]
+        agent_manager=SimpleNamespace(
+            get_agent_config=AsyncMock(
+                side_effect=RuntimeError("password=hunter2 invalid configuration")
+            )
+        ),
+        cache=None,  # type: ignore[arg-type]
+    )
+    manager.callback = AsyncMock()
+    manager.send_message = AsyncMock()
+    message = StartInteraction(
+        account="account",
+        agent_id="agent",
+        session="session",
+        question_id="question-id",
+        question="question",
+    )
+
+    await manager.activate(message)
+
+    answer = manager.callback.await_args.args[1]
+    assert answer.operation == AnswerOperation.ERROR
+    assert answer.exception.detail == "password=[REDACTED] invalid configuration"
+
+
+@pytest.mark.asyncio
 async def test_answer_closes_manager():
     manager = SessionManager(
         settings=SimpleNamespace(question_timeout_seconds=10),
