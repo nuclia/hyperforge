@@ -311,6 +311,60 @@ async def test_hybrid_dynamic_connection_is_authorized():
     assert result == {"source": {SYNC_CONFIG_ID: ["connected-resource"]}}
 
 
+async def test_hybrid_dynamic_connection_ignores_unrequested_credentials():
+    agent = SyncAskAgent(SyncAskAgentConfig(sources=["source"]))
+    driver = SimpleNamespace(
+        config=SimpleNamespace(connection_ids=[]),
+        sync_configs={SYNC_CONFIG_ID: [EXTERNAL_CONNECTION_ID]},
+        information={
+            EXTERNAL_CONNECTION_ID: SimpleNamespace(provider="sharefile_oauth")
+        },
+        validate_resources=AsyncMock(return_value=["connected-resource"]),
+    )
+    resource = SimpleNamespace(
+        id="connected-resource",
+        origin=SimpleNamespace(
+            source_id=f"sync_config_{SYNC_CONFIG_ID}",
+            sync_metadata=SimpleNamespace(model_dump=MagicMock(return_value={})),
+        ),
+    )
+    ndb = SimpleNamespace(
+        config=SimpleNamespace(kbid="kb"),
+        driver=SimpleNamespace(get_resource_by_id=AsyncMock(return_value=resource)),
+    )
+    manager = SimpleNamespace(
+        drivers=SimpleNamespace(get=MagicMock(return_value=driver))
+    )
+    memory = MagicMock()
+    memory.get_session_id.return_value = "session"
+    memory.send_feedback = AsyncMock(
+        return_value=UserToAgentInteraction(
+            request_id="session",
+            response=json.dumps(
+                {
+                    "existing_credentials": {
+                        SYNC_CONFIG_ID: {EXTERNAL_CONNECTION_ID: "credential"},
+                        "00000000-0000-0000-0000-000000000002": {
+                            "unrequested-connection": "credential"
+                        },
+                    }
+                }
+            ),
+        )
+    )
+
+    with patch("hyperforge_nucliadb.sync.agent.get_ndb_driver", return_value=ndb):
+        result = await agent._post_filter_configured_resources(
+            memory=memory,
+            manager=manager,  # type: ignore[arg-type]
+            resources={"source": [resource.id]},
+            allowed_connection_ids={SYNC_CONFIG_ID},
+        )
+
+    assert result == {"source": {SYNC_CONFIG_ID: ["connected-resource"]}}
+    driver.validate_resources.assert_awaited_once()
+
+
 async def test_hybrid_resources_without_connections_skip_authorization():
     agent = SyncAskAgent(SyncAskAgentConfig(sources=["source"]))
     driver = SimpleNamespace(config=SimpleNamespace(connection_ids=[]))
