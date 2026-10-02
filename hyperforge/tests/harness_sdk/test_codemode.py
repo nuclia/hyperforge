@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 
 from hyperforge.codemode import RestrictedPythonTask, WorkerExecutionRequest
 from hyperforge.codemode import sandbox as sandbox_module
+from hyperforge.codemode.worker import guarded_module_attribute
 from hyperforge.harness_sdk import (
     AgentHarness,
     CodeModeDispatch,
@@ -596,14 +597,59 @@ async def test_codemode_provides_statistics_itertools_and_decimal_without_import
 
 
 @pytest.mark.asyncio
+async def test_codemode_traverses_approved_class_instance_and_property_attributes() -> (
+    None
+):
+    scoped = local_codemode()
+    harness = AgentHarness(model="test", model_client=UnusedModel())
+    result = await scoped.execute(
+        _ctx(harness),
+        {
+            "code": (
+                "amount = decimal.Decimal.from_float(0.5).quantize(decimal.Decimal('0.01'))\n"
+                "match = re.search('(x+)', 'xxx')\n"
+                "pattern = re.compile('x')\n"
+                "distribution = statistics.NormalDist(mu=2, sigma=1)\n"
+                "output([str(amount), decimal.getcontext().prec > 0, match.group(1), "
+                "match.re.pattern, re.Pattern.findall(pattern, 'xx'), "
+                "distribution.mean, distribution.cdf(2)])"
+            )
+        },
+    )
+    assert result.value == ["0.50", True, "xxx", "(x+)", ["x", "x"], 2, 0.5]
+
+
+@pytest.mark.parametrize(
+    "module_name", ["unapproved", "decimal.internal", "decimal_helpers"]
+)
+def test_attribute_guard_checks_actual_type_module_not_instance_metadata(
+    module_name: str,
+) -> None:
+    class Unapproved:
+        public = "blocked"
+
+    Unapproved.__module__ = module_name
+    instance = Unapproved()
+    instance.__module__ = "decimal"
+    with pytest.raises(AttributeError, match="Object attributes are unavailable"):
+        guarded_module_attribute(instance, "public")
+    with pytest.raises(AttributeError, match="Object attributes are unavailable"):
+        guarded_module_attribute(Unapproved, "public")
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "code",
     [
         "import os\noutput(os.getcwd())",
         "output(math.__dict__)",
         "output(re.enum.global_enum)",
-        "output(re.search('x', 'x').group())",
+        "output(re.search('x', 'x').__class__)",
+        "output(re.Pattern.__module__)",
+        "output(decimal.Decimal('0.1').__class__)",
         "output('x'.upper())",
+        "output('x'.format())",
+        "output('x'.format_map({}))",
     ],
 )
 async def test_codemode_module_support_does_not_allow_object_traversal(

@@ -34,7 +34,7 @@ CODEMODE_USAGE_GUIDANCE = (
     "Execute restricted Python code. Each currently active tool is available as a "
     "function with the same name and arguments. Tool results are JSON data (dicts/lists). "
     "Supported: assignments, loops, conditionals, indexing, and builtins including len, "
-    "range, sum, and sorted. Imports and arbitrary object attributes are unavailable. "
+    "range, sum, and sorted. Imports and attributes on unapproved objects are unavailable. "
     "Return the final result by calling output(value) exactly once; do not use print()."
 )
 DEFAULT_MAX_SOURCE_BYTES = 64 * 1024
@@ -808,6 +808,7 @@ def _codemode_description(signatures: list[str], description: str | None = None)
         "\n\nAvailable Python modules (public attributes only):\n"
         + "\n".join(f"- {name}" for name in ALLOWED_GLOBAL_MODULES)
     )
+    introduction += "\nPublic attributes are also available on classes and instances defined by these modules."
     if signatures:
         introduction += "\n\nAvailable utility functions:\n" + "\n".join(signatures)
     return introduction + "\n\nExample:\n```python\nx = 1\nx = x * 2\noutput(x)\n```"
