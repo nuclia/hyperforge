@@ -526,7 +526,7 @@ async def test_codemode_rejects_core_tool_callbacks() -> None:
 
 
 @pytest.mark.asyncio
-async def test_model_receives_compact_active_tool_input_and_output_signatures() -> None:
+async def test_model_receives_compact_active_tool_output_signatures() -> None:
     class CatalogInput(BaseModel):
         query: str
         limit: int = 10
@@ -566,7 +566,7 @@ async def test_model_receives_compact_active_tool_input_and_output_signatures() 
     await harness.llm()
     description = model.descriptions[-1]
     assert (
-        '- def list_data_catalog(query: str, limit: int = ...) -> TypedDict[{"name": str, "data": dict[str, Any]}]'
+        '- def list_data_catalog(...) -> TypedDict[{"name": str, "data": dict[str, Any]}]'
         in description
     )
     assert "A long catalog description" not in description
@@ -577,8 +577,7 @@ async def test_model_receives_compact_active_tool_input_and_output_signatures() 
     await harness.activate_tools([lazy.name])
     await harness.llm()
     assert (
-        '- def lazy_upper(value: str) -> TypedDict[{"value": str}]'
-        in model.descriptions[-1]
+        '- def lazy_upper(...) -> TypedDict[{"value": str}]' in model.descriptions[-1]
     )
     assert "- def lazy_upper(" not in model.descriptions[0]
     assert "- def list_data_catalog(" not in scoped.description
@@ -631,7 +630,7 @@ async def test_codemode_signatures_describe_serialized_nested_and_root_outputs(
     await harness.llm()
     name_key = "public_name" if by_alias else "name"
     assert (
-        f'- def records() -> list[TypedDict[{{"{name_key}": str, "score": str}}]]'
+        f'- def records(...) -> list[TypedDict[{{"{name_key}": str, "score": str}}]]'
         in model.description
     )
     result = await scoped.execute(_ctx(harness), {"code": "output(records())"})

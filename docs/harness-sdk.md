@@ -203,17 +203,17 @@ inactive lazy tools and core agent tools (such as memory, tool discovery, and
 agent spawning) are excluded. Use core agent tools directly, outside Code Mode.
 Code Mode instances are also excluded to prevent recursive execution.
 
-The Code Mode description includes compact input and return-type signatures for
-the available application tools, so generated code knows which result keys it can
-use. For example:
+The Code Mode description includes tool names and compact return types, so
+generated code knows which result keys it can use. Arguments are omitted because
+they are already described by the tools themselves. For example:
 
 ```text
-- def list_data_catalog(query: str) -> TypedDict[{"name": str, "data": dict[str, Any]}]
+- def list_data_catalog(...) -> TypedDict[{"name": str, "data": dict[str, Any]}]
 ```
 
 `TypedDict` describes a JSON object's keys; it is not a class to instantiate in
 generated code. Signatures reflect JSON results, and `...` indicates omitted
-defaults or abbreviated details. Newly activated lazy tools appear in the
+arguments or abbreviated details. Newly activated lazy tools appear in the
 description on the next model call. Tool descriptions and full JSON schemas are
 not repeated inside the Code Mode description. Python builtins such as `len`,
 `range`, and `sum` remain available.

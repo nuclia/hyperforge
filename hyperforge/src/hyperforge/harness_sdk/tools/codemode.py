@@ -25,7 +25,7 @@ from hyperforge.codemode.sandbox import MAX_PACKET_BYTES, settings
 from hyperforge.definition import FunctionDefinition
 
 from ..models import HarnessEventType
-from ..schema import compact_json_type, compact_model_output_type
+from ..schema import compact_model_output_type
 from ..usage import UsageLimitExceeded
 from . import HarnessTool, ToolCallContext
 
@@ -301,13 +301,7 @@ def _codemode_tools(harness: Any) -> Iterable[HarnessTool[Any, Any]]:
 
 
 def _tool_signature(active_tool: HarnessTool[Any, Any]) -> str:
-    parameters = active_tool.parameters
-    required = set(parameters.get("required", []))
-    arguments = ", ".join(
-        f"{name}: {compact_json_type(value)}" + ("" if name in required else " = ...")
-        for name, value in parameters.get("properties", {}).items()
-    )
-    return f"- def {active_tool.name}({arguments}) -> {compact_model_output_type(active_tool.output_model)}"
+    return f"- def {active_tool.name}(...) -> {compact_model_output_type(active_tool.output_model)}"
 
 
 def _validate_function_name(name: str) -> None:
