@@ -23,7 +23,7 @@ from .models import (
     HarnessToolCall,
 )
 from .storage import HarnessStorageProtocol, InMemoryHarnessStorage
-from .tools import HarnessTool, ToolCallContext, ToolInheritancePolicy
+from .tools import HarnessTool, ToolCallContext
 from .tools.core import DictOutput, SendMessageInput, SpawnAgentInput, create_core_tools
 from .usage import HarnessUsage, UsageLimitExceeded, UsageLimits
 
@@ -1133,11 +1133,7 @@ class AgentHarness:
             model=self._config.model,
             model_client=self._config.model_client,
             reasoning_effort=self._config.reasoning_effort,
-            tools=(
-                tool
-                for tool in self._config.tools
-                if tool.inheritance == ToolInheritancePolicy.INHERIT
-            ),
+            tools=self._config.tools,
             system_prompt=self._config.system_prompt,
             title=self._config.title,
             conversation_id=self.conversation_id,

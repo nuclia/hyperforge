@@ -3,7 +3,6 @@ from .utils import (
     HarnessTool,
     ToolCallContext,
     ToolHandler,
-    ToolInheritancePolicy,
     tool,
 )
 
@@ -12,6 +11,5 @@ __all__ = [
     "HarnessTool",
     "ToolCallContext",
     "ToolHandler",
-    "ToolInheritancePolicy",
     "tool",
 ]
