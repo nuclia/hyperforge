@@ -20,6 +20,9 @@ make lint
 uv run pytest
 ```
 
+Run these commands from the repository root. The integration tests require a
+running Docker daemon for PostgreSQL, Valkey, and NucliaDB fixtures.
+
 If your change only affects one package, running the relevant package tests is
 acceptable.
 

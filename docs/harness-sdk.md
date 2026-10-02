@@ -24,6 +24,10 @@ An `AgentHarness` run:
 Calls to `run()` on one harness are serialized. A harness instance can therefore
 be reused for multiple turns in the same conversation.
 
+For opt-in graph-based advice before each model decision and offline graph
+evolution, see [Procedural Graphs](procedural-graphs.md). Guidance does not require
+a context agent or change tool permissions.
+
 ## Creating an Agent
 
 Hyperforge includes `NucliaModelClient`, which connects the harness to Nuclia's
@@ -75,6 +79,9 @@ class ApplicationModelClient:
         # Translate messages and tools to the provider's API here.
         yield ModelDelta(text="Hello", input_tokens=10, output_tokens=1)
 ```
+
+Custom adapters must preserve multiple system messages and message order,
+including request-only procedural guidance appended to solver messages.
 
 ## Using Legacy Agents
 
@@ -504,6 +511,16 @@ async for _ in resumed.run("What should I do next?"):
 agents. Production applications should implement `HarnessStorageProtocol` with
 durable conversation, event, and memory storage. `create_agent()` is a convenience
 function that constructs and loads an agent in one call.
+
+With procedural guidance enabled, reload restores root procedural steps only
+with the same pinned graph version. Missing or different conversation graph
+metadata, or a mismatched root procedural step, disables procedural runtime
+(including `single_action`) for that harness instance and completes normal
+conversation replay. Stored metadata and events are preserved; the procedural
+trajectory is cleared. This is independent of `failure_policy`, which applies
+only to guidance request failures. Matching conversations resume unchanged.
+Start a new conversation to use a new graph, not to continue the existing one
+unguided; see [Conversation Reload](procedural-graphs.md#conversation-reload).
 
 Conversation metadata can be supplied under `conversation_metadata` in the
 execution context:

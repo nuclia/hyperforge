@@ -304,6 +304,9 @@ async def test_harness_client_assembles_openai_tool_deltas() -> None:
 def test_harness_client_preserves_structured_tool_history() -> None:
     messages = NucliaModelClient._messages(
         [
+            HarnessMessage(role="system", content="base instructions"),
+            HarnessMessage(role="user", content='{"available_tools":["lookup"]}'),
+            HarnessMessage(role="user", content='{"query":"find evidence"}'),
             HarnessMessage(
                 role="assistant",
                 content="",
@@ -316,15 +319,22 @@ def test_harness_client_preserves_structured_tool_history() -> None:
             HarnessMessage(
                 role="tool", content="result", tool_call_id="call-1", tool_name="lookup"
             ),
+            HarnessMessage(role="system", content="request-local guidance"),
         ]
     )
 
-    assert messages[0]["tool_calls"][0]["function"]["name"] == "lookup"
-    assert messages[1] == {
+    assert messages[:3] == [
+        {"role": "system", "content": "base instructions"},
+        {"role": "user", "content": '{"available_tools":["lookup"]}'},
+        {"role": "user", "content": '{"query":"find evidence"}'},
+    ]
+    assert messages[3]["tool_calls"][0]["function"]["name"] == "lookup"
+    assert messages[4] == {
         "role": "tool",
         "content": "result",
         "tool_call_id": "call-1",
     }
+    assert messages[5] == {"role": "system", "content": "request-local guidance"}
     NucliaModelClient._validate_tool_history(messages)
 
 
