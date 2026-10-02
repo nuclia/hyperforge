@@ -89,6 +89,7 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
     context_factory: ContextFactory[OutputT] | None = None
     lazy_load: bool = False
     cache_policy: ToolCachePolicy = ToolCachePolicy.NONE
+    description_factory: Callable[[AgentHarness], str] | None = None
     input_model: type[InputT] = field(init=False)
     output_model: type[OutputT] = field(init=False)
     _parameters: dict[str, Any] = field(init=False, repr=False)
@@ -169,6 +170,7 @@ def tool(
     context_factory: ContextFactory[Any] | None = None,
     lazy_load: bool = False,
     cache_policy: ToolCachePolicy = ToolCachePolicy.NONE,
+    description_factory: Callable[[AgentHarness], str] | None = None,
 ) -> Callable[[ToolHandler[Any, Any]], HarnessTool[Any, Any]]:
     """Create a harness tool from an annotated async handler."""
 
@@ -182,6 +184,7 @@ def tool(
             context_factory=context_factory,
             lazy_load=lazy_load,
             cache_policy=cache_policy,
+            description_factory=description_factory,
         )
 
     return decorate

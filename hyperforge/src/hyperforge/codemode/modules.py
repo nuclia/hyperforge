@@ -13,3 +13,7 @@ ALLOWED_GLOBAL_MODULES: dict[str, ModuleType] = {
     "itertools": itertools,
     "decimal": decimal,
 }
+
+# Allow useful JSON/container operations without exposing the builtins module.
+SAFE_BUILTIN_TYPES = frozenset({list, dict, str, tuple})
+WRITABLE_CONTAINER_TYPES = frozenset({list, dict})
