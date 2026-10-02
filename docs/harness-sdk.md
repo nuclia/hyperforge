@@ -192,70 +192,58 @@ handlers always receive a validated model instance; they never receive `None`.
 Tools can attach typed context to their result by setting `context_type` and, if
 needed, registering a schema and formatter with `register_context()`.
 
-Tools are inherited by spawned sub-agents by default. Set
-`inheritance=ToolInheritancePolicy.DO_NOT_INHERIT` on `@tool` or `HarnessTool`
-when a tool must remain on the current agent. Scoped Code Mode tools use this
-policy by default.
+Tools, including Code Mode, are inherited by spawned sub-agents. Code Mode
+resolves tools against the harness executing it, not a captured parent tool list.
 
-## Scoped Code Mode
+## Code Mode
 
-Use `create_codemode_tool()` when generated Python should orchestrate a small,
-explicit capability set without exposing those capabilities as top-level model
-tools. The capability list must be an immutable tuple. Scoped Code Mode never
-calls `harness.iter_tools()` and never includes core or external tools unless the
-caller explicitly passes them.
+Use `create_codemode_tool()` to orchestrate the agent's currently active external
+tools with restricted Python. Application tools are available automatically;
+inactive lazy tools and core agent tools (such as memory, tool discovery, and
+agent spawning) are excluded. Use core agent tools directly, outside Code Mode.
+Code Mode instances are also excluded to prevent recursive execution.
+
+The Code Mode description includes tool names and compact return types, so
+generated code knows which result keys it can use. Arguments are omitted because
+they are already described by the tools themselves. For example:
+
+```text
+- def list_data_catalog(...) -> TypedDict[{"name": str, "data": dict[str, Any]}]
+```
+
+`TypedDict` describes a JSON object's keys; it is not a class to instantiate in
+generated code. Signatures reflect JSON results, and `...` indicates omitted
+arguments or abbreviated details. Newly activated lazy tools appear in the
+description on the next model call. Tool descriptions and full JSON schemas are
+not repeated inside the Code Mode description. Python builtins such as `len`,
+`range`, and `sum` remain available.
+
+Optional `capabilities` are additional trusted Python utility functions, not
+`HarnessTool` objects. Both synchronous and asynchronous functions are supported;
+generated code calls either as an ordinary function, without `await`. Any iterable
+is accepted and captured when the Code Mode tool is created. Utilities are not
+registered as top-level agent tools. Their Python signatures, rather than JSON
+schemas or repeated tool descriptions, are included in the Code Mode description.
 
 ```python
-from pydantic import BaseModel, Field
-
 from hyperforge.harness_sdk import (
     AgentHarness,
-    CodeModeCapability,
     CodeModeExecutionLimiter,
     CodeModeLimits,
-    HarnessTool,
-    ToolCallContext,
     create_codemode_tool,
-    tool,
 )
 
 
-class SearchInput(BaseModel):
-    query: str = Field(description="Read-only catalog search query")
+def double_string(input_string: str) -> str:
+    return input_string * 2
 
 
-class SearchOutput(BaseModel):
-    matches: list[dict[str, str]]
-    internal_cursor: str | None = None
-
-
-@tool(description="Search the approved catalog without modifying it.")
-async def search_catalog(
-    context: ToolCallContext,
-    input_value: SearchInput,
-) -> SearchOutput:
-    return SearchOutput(
-        matches=[{"id": "item-1", "title": input_value.query}],
-        internal_cursor="do-not-expose",
-    )
-
-
-def project_search_result(
-    capability: HarnessTool,
-    output: BaseModel,
-) -> dict[str, object]:
-    del capability
-    validated = SearchOutput.model_validate(output)
-    return {"matches": validated.matches}
+def times_two(input: int) -> int:
+    return input * 2
 
 
 code_mode = create_codemode_tool(
-    capabilities=(
-        CodeModeCapability(
-            search_catalog,
-            result_adapter=project_search_result,
-        ),
-    ),
+    capabilities=[double_string, times_two],
     limits=CodeModeLimits(
         max_source_bytes=64 * 1024,
         max_result_bytes=256 * 1024,
@@ -270,30 +258,31 @@ code_mode = create_codemode_tool(
 agent = AgentHarness(
     model="your-model",
     model_client=model_client,
-    tools=[code_mode],
+    tools=[*application_tools, code_mode],
 )
 ```
 
-Only `code_mode` is registered with the harness in this example.
-`search_catalog` is callable from generated code but is not advertised as a
-top-level model tool. The Code Mode tool description includes each capability's
-description and argument schema so the model can write valid calls. Nested
-arguments still pass through `HarnessTool.execute()`, including JSON Schema,
-Pydantic input, and output validation.
+No capabilities are required: `create_codemode_tool()` makes active external
+tools usable. Tool calls pass through `HarnessTool.execute()`, preserving
+JSON Schema and Pydantic input/output validation. Results are the tool's complete
+JSON-mode output, not its formatted context. **Do not put private fields in tool
+outputs** just because a context formatter hides them. Remove such fields in the
+tool itself if generated code must not see them.
 
-Every `CodeModeCapability` has a result adapter. The safe default returns the
-tool's formatted model-facing context as a string. Prefer an application adapter,
-as above, when generated code needs selected structured fields. Projected values
-must contain only JSON worker values; the SDK rejects non-serializable values,
-non-finite numbers, Pydantic models at any nesting depth, and the reserved
-`__model__` transport key. Use
-`raw_codemode_result_adapter` only after explicitly deciding that the complete
-JSON-mode Pydantic output is safe for generated code. A raw adapter does not
-bypass serialization or result-size validation.
+Utility calls use normal Python argument binding, including defaults, positional-
+only, and keyword-only arguments. Type annotations document utilities; they are
+not runtime validators. Utilities run on the host and must be trusted, bounded
+application functions; the sandbox does not restrict their implementation.
+Utility results must contain only JSON worker values. Non-serializable values,
+non-finite numbers, nested Pydantic models, and the reserved `__model__` key are
+rejected. Tool and utility results share the same serialization and size limits.
 
 Capability names must be unique ASCII public, non-keyword Python identifiers and must not
 conflict with worker names such as `codemode`, `output`, `save`, `question`,
-`agent_id`, `dataclass`, `Chunk`, `Context`, `List`, `Any`, or `Dict`.
+`agent_id`, `dataclass`, `Chunk`, `Context`, `List`, `Any`, `Dict`, `re`, or `math`.
+Utility names must not collide with active tool names; collisions fail rather
+than silently shadowing a tool. Function arguments named `agent_id` pass through
+unchanged.
 
 `CodeModeLimits` applies source, per-call projected-result, cumulative
 projected-result, final-output, and nested-call limits to each invocation.
@@ -327,6 +316,40 @@ built-ins: `abs`, `bool`, `bytes`, `chr`, `complex`, `divmod`, `float`, `hash`,
 `hex`, `id`, `int`, `isinstance`, `issubclass`, `len`, `oct`, `ord`, `pow`,
 `range`, `repr`, `round`, `slice`, `sorted`, `str`, `sum`, `tuple`, and `zip`.
 Other helpers, including `all`, `any`, `min`, and `max`, are unavailable.
+`math`, `re`, `statistics`, `itertools`, and `decimal` are available without
+imports. You can use their public functions, constants, and classes, as well as
+public methods and properties on objects defined by these modules:
+
+```python
+amount = decimal.Decimal('0.1').quantize(decimal.Decimal('0.01'))
+match = re.search('(x+)', 'xxx')
+output({'amount': str(amount), 'matched': match.group(1)})
+```
+
+Imports, private attributes, and attributes on unapproved objects are unavailable.
+Submodules are not automatically supported. Comprehensions and
+generator expressions are supported.
+Public methods on `list`, `dict`, `str`, and `tuple` are available, including
+`list.append()`, `dict.get()`, `dict.items()`, `dict.update()`, and `str.upper()`.
+You can also construct these types and assign or delete list/dictionary items:
+
+```python
+result = query_data(sql='SELECT status, COUNT(*) AS count FROM resources.workorder GROUP BY status')
+counts = []
+for row in result['data'].get('rows', []):
+    counts.append(row['count'])
+summary = {}
+summary['total'] = sum(counts)
+output(summary)
+```
+
+Attribute assignment on modules, classes, and other objects is unavailable.
+`str.format()` and `str.format_map()` remain unavailable; use string
+concatenation or f-strings instead. Core agent tools remain excluded from Code Mode.
+
+Convert `decimal.Decimal` results to strings (to preserve precision) or floats
+before returning them through `output()`, which accepts JSON values rather than
+Decimal objects.
 Authorization, nested/global call limits, projected-result limits,
 and invalid or repeated `output` attempts remain terminal even if generated code
 catches the immediate callback error. An output attempt rejected by worker
@@ -367,9 +390,14 @@ contract and persists its raw `code` and `question` arguments. Applications must
 not embed secrets in either field. The nested events described above are the
 sanitized audit surface for capability calls and results.
 
-The existing exported `codemode` tool remains available for compatibility. It
-discovers registered tools and returns raw JSON-mode outputs. New applications
-that require capability isolation should use `create_codemode_tool()`.
+The exported `codemode` convenience tool uses the same implementation and has
+no additional utilities. It retains automatic remote/local selection for
+compatibility: remote when a socket is configured, otherwise isolated local
+execution (equivalent to `remote_required=None`).
+Use the factory's default `remote_required=True` for production fail-closed
+remote execution. `CodeModeCapability`, result adapters, and
+`ToolInheritancePolicy` have been removed; register tools on the agent and pass
+plain Python functions as additional capabilities instead.
 
 Remote and isolated-process Code Mode execution move values over the bounded
 JSON worker protocol. Values crossing those worker boundaries must be JSON

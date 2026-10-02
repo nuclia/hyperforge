@@ -6,7 +6,7 @@ import logging
 import time
 import uuid
 from collections.abc import AsyncIterator, Iterable, Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Literal, NamedTuple
 
 from pydantic import BaseModel
@@ -23,7 +23,7 @@ from .models import (
     HarnessToolCall,
 )
 from .storage import HarnessStorageProtocol, InMemoryHarnessStorage
-from .tools import HarnessTool, ToolCallContext, ToolInheritancePolicy
+from .tools import HarnessTool, ToolCallContext
 from .tools.core import DictOutput, SendMessageInput, SpawnAgentInput, create_core_tools
 from .usage import HarnessUsage, UsageLimitExceeded, UsageLimits
 
@@ -473,11 +473,13 @@ class AgentHarness:
         """Expose a legacy agent's published functions as harness tools."""
         return published_agent_to_tools(agent, namespace=namespace, manager=manager)
 
-    def iter_tools(self, *, include_inactive: bool = False) -> Iterable[HarnessTool]:
+    def iter_tools(
+        self, *, include_inactive: bool = False, include_core: bool = True
+    ) -> Iterable[HarnessTool]:
         """Iterate over registered tools available to this harness."""
         return (
             tool
-            for tool in self._tools.values()
+            for tool in (self._tools.values() if include_core else self._external_tools)
             if include_inactive
             or not tool.lazy_load
             or tool.name in self._active_lazy_tools
@@ -698,6 +700,16 @@ class AgentHarness:
                 ):
                     selected.append(registered)
                     seen.add(registered.name)
+        selected = [
+            replace(
+                tool,
+                description=tool.description_factory(self),
+                description_factory=None,
+            )
+            if tool.description_factory is not None
+            else tool
+            for tool in selected
+        ]
         self.usage.turns += 1
         self._check_limit("max_turns", self.usage.turns)
         result = AgentResult(text="")
@@ -1133,11 +1145,7 @@ class AgentHarness:
             model=self._config.model,
             model_client=self._config.model_client,
             reasoning_effort=self._config.reasoning_effort,
-            tools=(
-                tool
-                for tool in self._config.tools
-                if tool.inheritance == ToolInheritancePolicy.INHERIT
-            ),
+            tools=self._config.tools,
             system_prompt=self._config.system_prompt,
             title=self._config.title,
             conversation_id=self.conversation_id,
