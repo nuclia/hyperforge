@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 import pytest
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel, field_serializer
 
 from hyperforge.codemode import RestrictedPythonTask, WorkerExecutionRequest
 from hyperforge.codemode import sandbox as sandbox_module
@@ -33,6 +33,7 @@ from hyperforge.harness_sdk import (
     create_codemode_tool,
     tool,
 )
+from hyperforge.harness_sdk.schema import compact_model_output_type
 from hyperforge.harness_sdk.tools import codemode as codemode_module
 
 
@@ -496,9 +497,7 @@ async def test_codemode_resolves_lazy_tools_for_each_invocation() -> None:
 
 
 @pytest.mark.asyncio
-async def test_codemode_excludes_other_codemode_instances_and_includes_core_tools() -> (
-    None
-):
+async def test_codemode_excludes_other_codemode_instances_and_core_tools() -> None:
     runner = RecordingRunner([worker_task("output", None)])
     scoped = create_codemode_tool(runner=runner)
     other = create_codemode_tool(name="execute_python", runner=runner)
@@ -507,10 +506,151 @@ async def test_codemode_excludes_other_codemode_instances_and_includes_core_tool
     )
     await scoped.execute(_ctx(harness), {"code": "output(None)"})
     names = set(runner.requests[0].function_names["harness"])
-    assert "remember" in names
-    assert "activate_tools" in names
-    assert "codemode" not in names
-    assert "execute_python" not in names
+    assert names == {"output"}
+
+
+@pytest.mark.asyncio
+async def test_codemode_rejects_core_tool_callbacks() -> None:
+    runner = CatchingRunner(
+        [worker_task("remember", text="blocked"), worker_task("output", None)]
+    )
+    scoped = create_codemode_tool(runner=runner)
+    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[scoped])
+    assert "remember" in {tool.name for tool in harness.iter_tools()}
+    with pytest.raises(ValueError, match="Unknown Code Mode capability: remember"):
+        await scoped.execute(
+            _ctx(harness), {"code": "remember(text='blocked'); output(None)"}
+        )
+    assert harness.usage.tool_calls == 0
+    assert runner.errors == ["Unknown Code Mode capability: remember"] * 2
+
+
+@pytest.mark.asyncio
+async def test_model_receives_compact_active_tool_input_and_output_signatures() -> None:
+    class CatalogInput(BaseModel):
+        query: str
+        limit: int = 10
+
+    class CatalogOutput(BaseModel):
+        name: str
+        data: dict[str, Any]
+
+    @tool(
+        description="A long catalog description that should not be repeated in Code Mode"
+    )
+    async def list_data_catalog(
+        _context: ToolCallContext, input_value: CatalogInput
+    ) -> CatalogOutput:
+        return CatalogOutput(name=input_value.query, data={"count": input_value.limit})
+
+    class CapturingModel(UnusedModel):
+        def __init__(self) -> None:
+            self.descriptions: list[str] = []
+
+        async def stream(self, **kwargs: Any) -> AsyncIterator[ModelDelta]:
+            self.descriptions.append(
+                next(
+                    item.description
+                    for item in kwargs["tools"]
+                    if item.name == "codemode"
+                )
+            )
+            yield ModelDelta(text="done")
+
+    model = CapturingModel()
+    scoped = local_codemode()
+    lazy = HarnessTool("lazy_upper", upper.handler, lazy_load=True)
+    harness = AgentHarness(
+        model="test", model_client=model, tools=[scoped, list_data_catalog, lazy]
+    )
+    await harness.llm()
+    description = model.descriptions[-1]
+    assert (
+        '- def list_data_catalog(query: str, limit: int = ...) -> TypedDict[{"name": str, "data": dict[str, Any]}]'
+        in description
+    )
+    assert "A long catalog description" not in description
+    assert '"properties"' not in description
+    assert "- def remember(" not in description
+    assert "- def lazy_upper(" not in description
+
+    await harness.activate_tools([lazy.name])
+    await harness.llm()
+    assert (
+        '- def lazy_upper(value: str) -> TypedDict[{"value": str}]'
+        in model.descriptions[-1]
+    )
+    assert "- def lazy_upper(" not in model.descriptions[0]
+    assert "- def list_data_catalog(" not in scoped.description
+
+    result = await scoped.execute(
+        _ctx(harness),
+        {
+            "code": "result = list_data_catalog(query='sales')\noutput(result['data']['count'])"
+        },
+    )
+    assert result.value == 10
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("by_alias", [False, True])
+async def test_codemode_signatures_describe_serialized_nested_and_root_outputs(
+    by_alias: bool,
+) -> None:
+    class Empty(BaseModel):
+        pass
+
+    class Record(BaseModel):
+        model_config = {"serialize_by_alias": by_alias}
+        name: str = Field(serialization_alias="public_name")
+        score: int | None = None
+
+        @field_serializer("score")
+        def serialize_score(self, value: int | None) -> str:
+            return str(value)
+
+    class Records(RootModel[list[Record]]):
+        pass
+
+    @tool()
+    async def records(_context: ToolCallContext, _input: Empty) -> Records:
+        return Records([Record(name="sales", score=2)])
+
+    class CapturingModel(UnusedModel):
+        description = ""
+
+        async def stream(self, **kwargs: Any) -> AsyncIterator[ModelDelta]:
+            self.description = next(
+                item.description for item in kwargs["tools"] if item.name == "codemode"
+            )
+            yield ModelDelta(text="done")
+
+    model = CapturingModel()
+    scoped = local_codemode()
+    harness = AgentHarness(model="test", model_client=model, tools=[scoped, records])
+    await harness.llm()
+    name_key = "public_name" if by_alias else "name"
+    assert (
+        f'- def records() -> list[TypedDict[{{"{name_key}": str, "score": str}}]]'
+        in model.description
+    )
+    result = await scoped.execute(_ctx(harness), {"code": "output(records())"})
+    assert result.value == [{name_key: "sales", "score": "2"}]
+
+
+def test_compact_return_types_handle_unions_and_recursive_models() -> None:
+    class Node(BaseModel):
+        name: str
+        child: "Node | None" = None
+        values: list[int | bool]
+        metrics: dict[str, float]
+
+    rendered = compact_model_output_type(Node)
+    assert '"child": Any | None' in rendered
+    assert '"values": list[int | bool]' in rendered
+    assert '"metrics": dict[str, float]' in rendered
+    assert "$ref" not in rendered
+    assert len(rendered) < 300
 
 
 @pytest.mark.asyncio
@@ -597,6 +737,60 @@ async def test_codemode_provides_statistics_itertools_and_decimal_without_import
 
 
 @pytest.mark.asyncio
+async def test_codemode_supports_container_methods_and_item_writes_on_tool_results() -> (
+    None
+):
+    class Empty(BaseModel):
+        pass
+
+    class Rows(BaseModel):
+        rows: list[dict[str, Any]]
+
+    @tool()
+    async def get_counts(_context: ToolCallContext, _input: Empty) -> Rows:
+        return Rows(
+            rows=[{"status": "completed", "count": 10}, {"status": "open", "count": 4}]
+        )
+
+    scoped = local_codemode()
+    harness = AgentHarness(
+        model="test", model_client=UnusedModel(), tools=[scoped, get_counts]
+    )
+    result = await scoped.execute(
+        _ctx(harness),
+        {
+            "code": (
+                "result = get_counts()\n"
+                "counts = list()\n"
+                "by_status = dict()\n"
+                "for row in result.get('rows', []):\n"
+                "    counts.append(row.get('count', 0))\n"
+                "    by_status[row['status'].upper()] = counts[-1]\n"
+                "summary = {'temporary': True}\n"
+                "summary.update({'total': sum(counts)})\n"
+                "summary['mean'] = statistics.mean(counts)\n"
+                "summary.setdefault('truncated', False)\n"
+                "del summary['temporary']\n"
+                "copied = counts.copy()\n"
+                "copied[0] = 99\n"
+                "copied[1:2] = [77, 55]\n"
+                "copied.pop()\n"
+                "names = tuple(by_status.keys())\n"
+                "pairs = [[name, value] for name, value in by_status.items()]\n"
+                "output({'counts': counts, 'summary': summary, 'copied': copied, 'names': names, 'pairs': pairs})"
+            )
+        },
+    )
+    assert result.value == {
+        "counts": [10, 4],
+        "summary": {"total": 14, "mean": 7, "truncated": False},
+        "copied": [99, 77],
+        "names": ["COMPLETED", "OPEN"],
+        "pairs": [["COMPLETED", 10], ["OPEN", 4]],
+    }
+
+
+@pytest.mark.asyncio
 async def test_codemode_traverses_approved_class_instance_and_property_attributes() -> (
     None
 ):
@@ -647,9 +841,14 @@ def test_attribute_guard_checks_actual_type_module_not_instance_metadata(
         "output(re.search('x', 'x').__class__)",
         "output(re.Pattern.__module__)",
         "output(decimal.Decimal('0.1').__class__)",
-        "output('x'.upper())",
         "output('x'.format())",
         "output('x'.format_map({}))",
+        "output(str.format('{0.__class__}', 'x'))",
+        "output((1).bit_length())",
+        "output(open('unapproved-file'))",
+        "math.pi = 0\noutput(math.pi)",
+        "decimal.getcontext().prec = 2\noutput(decimal.getcontext().prec)",
+        "str.custom = 'blocked'\noutput(str.custom)",
     ],
 )
 async def test_codemode_module_support_does_not_allow_object_traversal(

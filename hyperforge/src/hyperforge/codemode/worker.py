@@ -39,7 +39,11 @@ from .model import (
     decode_protocol_value,
     encode_protocol_value,
 )
-from .modules import ALLOWED_GLOBAL_MODULES
+from .modules import (
+    ALLOWED_GLOBAL_MODULES,
+    SAFE_BUILTIN_TYPES,
+    WRITABLE_CONTAINER_TYPES,
+)
 
 BLOCKED_EXCEPTIONS = {
     "BaseException",
@@ -51,17 +55,24 @@ REDACTED_EXECUTION_ERROR = "Generated code execution failed"
 
 
 def guarded_module_attribute(obj: Any, name: str) -> Any:
-    """Allow safe public attributes on approved modules and their types."""
+    """Allow safe public attributes on approved modules and container types."""
     if name.startswith("_"):
         raise AttributeError("Object attributes are unavailable")
     if not any(obj is module for module in ALLOWED_GLOBAL_MODULES.values()):
         obj_type = obj if isinstance(obj, type) else type(obj)
-        approved_modules = {
-            module.__name__ for module in ALLOWED_GLOBAL_MODULES.values()
-        }
-        if obj_type.__module__ not in approved_modules:
+        if (
+            obj_type not in SAFE_BUILTIN_TYPES
+            and obj_type.__module__ not in ALLOWED_GLOBAL_MODULES
+        ):
             raise AttributeError("Object attributes are unavailable")
     return safer_getattr_raise(obj, name)
+
+
+def guarded_container_write(obj: Any) -> Any:
+    """Allow item assignment/deletion on plain lists and dictionaries only."""
+    if type(obj) not in WRITABLE_CONTAINER_TYPES:
+        raise TypeError("Only list and dict items may be modified")
+    return obj
 
 
 def _set_memory_limit(max_memory_bytes: int | None) -> None:
@@ -177,9 +188,11 @@ class PythonAgentWorker:
                             if name not in BLOCKED_EXCEPTIONS
                         },
                         "sum": sum,
+                        **{value.__name__: value for value in SAFE_BUILTIN_TYPES},
                     },
                     "_getitem_": lambda obj, index: obj[index],
                     "_getattr_": guarded_module_attribute,
+                    "_write_": guarded_container_write,
                     "_getiter_": iter,
                     "_inplacevar_": guarded_inplace,
                     "dataclass": dataclass,

@@ -25,16 +25,20 @@ from hyperforge.codemode.sandbox import MAX_PACKET_BYTES, settings
 from hyperforge.definition import FunctionDefinition
 
 from ..models import HarnessEventType
+from ..schema import compact_json_type, compact_model_output_type
 from ..usage import UsageLimitExceeded
 from . import HarnessTool, ToolCallContext
 
 CODEMODE_TOOL_NAME = "codemode"
 OUTPUT_FUNCTION_NAME = "output"
 CODEMODE_USAGE_GUIDANCE = (
-    "Execute restricted Python code. Each currently active tool is available as a "
-    "function with the same name and arguments. Tool results are JSON data (dicts/lists). "
-    "Supported: assignments, loops, conditionals, indexing, and builtins including len, "
+    "Execute restricted Python code. Active external tools listed below are available as "
+    "functions with the same names and arguments. Core agent tools are unavailable. "
+    "Tool results are JSON data (dicts/lists); TypedDict describes their keys. "
+    "Supported: assignments, loops, conditionals, indexing, comprehensions, and builtins including len, "
     "range, sum, and sorted. Imports and attributes on unapproved objects are unavailable. "
+    "Public list, dict, str, and tuple methods and list/dict item assignment are supported. "
+    "Private attributes and str.format/format_map are unavailable. "
     "Return the final result by calling output(value) exactly once; do not use print()."
 )
 DEFAULT_MAX_SOURCE_BYTES = 64 * 1024
@@ -245,10 +249,7 @@ def create_codemode_tool(
                     "Remote Code Mode execution is required but SANDBOX_TOKEN is absent"
                 )
         functions = dict(capability_map)
-        for active_tool in harness.iter_tools():
-            # Exclude every Code Mode instance, including custom-named instances.
-            if getattr(active_tool.handler, "_codemode", False):
-                continue
+        for active_tool in _codemode_tools(harness):
             _validate_function_name(active_tool.name)
             if active_tool.name in functions:
                 raise ValueError(
@@ -273,11 +274,40 @@ def create_codemode_tool(
     execute.__name__ = name
     setattr(execute, "_codemode", True)
     tool_description = _codemode_description(signatures, description)
+
+    def describe(harness: Any) -> str:
+        return _codemode_description(
+            signatures,
+            description,
+            tools=[
+                _tool_signature(active_tool) for active_tool in _codemode_tools(harness)
+            ],
+        )
+
     return HarnessTool(
         name=name,
         handler=execute,
         description=tool_description,
+        description_factory=describe,
     )
+
+
+def _codemode_tools(harness: Any) -> Iterable[HarnessTool[Any, Any]]:
+    return (
+        active_tool
+        for active_tool in harness.iter_tools(include_core=False)
+        if not getattr(active_tool.handler, "_codemode", False)
+    )
+
+
+def _tool_signature(active_tool: HarnessTool[Any, Any]) -> str:
+    parameters = active_tool.parameters
+    required = set(parameters.get("required", []))
+    arguments = ", ".join(
+        f"{name}: {compact_json_type(value)}" + ("" if name in required else " = ...")
+        for name, value in parameters.get("properties", {}).items()
+    )
+    return f"- def {active_tool.name}({arguments}) -> {compact_model_output_type(active_tool.output_model)}"
 
 
 def _validate_function_name(name: str) -> None:
@@ -800,7 +830,12 @@ def _nested_event_context(harness: Any) -> dict[str, Any]:
     return {"execution_context": context} if context else {}
 
 
-def _codemode_description(signatures: list[str], description: str | None = None) -> str:
+def _codemode_description(
+    signatures: list[str],
+    description: str | None = None,
+    *,
+    tools: list[str] | None = None,
+) -> str:
     introduction = CODEMODE_USAGE_GUIDANCE
     if description:
         introduction = f"{description}\n\n{introduction}"
@@ -809,6 +844,8 @@ def _codemode_description(signatures: list[str], description: str | None = None)
         + "\n".join(f"- {name}" for name in ALLOWED_GLOBAL_MODULES)
     )
     introduction += "\nPublic attributes are also available on classes and instances defined by these modules."
+    if tools:
+        introduction += "\n\nAvailable tool functions:\n" + "\n".join(tools)
     if signatures:
         introduction += "\n\nAvailable utility functions:\n" + "\n".join(signatures)
     return introduction + "\n\nExample:\n```python\nx = 1\nx = x * 2\noutput(x)\n```"

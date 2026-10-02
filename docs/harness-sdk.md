@@ -197,10 +197,26 @@ resolves tools against the harness executing it, not a captured parent tool list
 
 ## Code Mode
 
-Use `create_codemode_tool()` to orchestrate the agent's currently active tools
-with restricted Python. Core tools and active external tools are available
-automatically; inactive lazy tools are excluded. The tool set is resolved on
-each invocation. Code Mode instances are excluded to prevent recursive execution.
+Use `create_codemode_tool()` to orchestrate the agent's currently active external
+tools with restricted Python. Application tools are available automatically;
+inactive lazy tools and core agent tools (such as memory, tool discovery, and
+agent spawning) are excluded. Use core agent tools directly, outside Code Mode.
+Code Mode instances are also excluded to prevent recursive execution.
+
+The Code Mode description includes compact input and return-type signatures for
+the available application tools, so generated code knows which result keys it can
+use. For example:
+
+```text
+- def list_data_catalog(query: str) -> TypedDict[{"name": str, "data": dict[str, Any]}]
+```
+
+`TypedDict` describes a JSON object's keys; it is not a class to instantiate in
+generated code. Signatures reflect JSON results, and `...` indicates omitted
+defaults or abbreviated details. Newly activated lazy tools appear in the
+description on the next model call. Tool descriptions and full JSON schemas are
+not repeated inside the Code Mode description. Python builtins such as `len`,
+`range`, and `sum` remain available.
 
 Optional `capabilities` are additional trusted Python utility functions, not
 `HarnessTool` objects. Both synchronous and asynchronous functions are supported;
@@ -246,8 +262,8 @@ agent = AgentHarness(
 )
 ```
 
-No capabilities are required: `create_codemode_tool()` makes all active agent
-tools usable. Active tool calls pass through `HarnessTool.execute()`, preserving
+No capabilities are required: `create_codemode_tool()` makes active external
+tools usable. Tool calls pass through `HarnessTool.execute()`, preserving
 JSON Schema and Pydantic input/output validation. Results are the tool's complete
 JSON-mode output, not its formatted context. **Do not put private fields in tool
 outputs** just because a context formatter hides them. Remove such fields in the
@@ -310,9 +326,26 @@ match = re.search('(x+)', 'xxx')
 output({'amount': str(amount), 'matched': match.group(1)})
 ```
 
-Imports, private attributes, and attributes on objects from unsupported modules
-are unavailable. Submodules are not automatically supported. Comprehensions and
+Imports, private attributes, and attributes on unapproved objects are unavailable.
+Submodules are not automatically supported. Comprehensions and
 generator expressions are supported.
+Public methods on `list`, `dict`, `str`, and `tuple` are available, including
+`list.append()`, `dict.get()`, `dict.items()`, `dict.update()`, and `str.upper()`.
+You can also construct these types and assign or delete list/dictionary items:
+
+```python
+result = query_data(sql='SELECT status, COUNT(*) AS count FROM resources.workorder GROUP BY status')
+counts = []
+for row in result['data'].get('rows', []):
+    counts.append(row['count'])
+summary = {}
+summary['total'] = sum(counts)
+output(summary)
+```
+
+Attribute assignment on modules, classes, and other objects is unavailable.
+`str.format()` and `str.format_map()` remain unavailable; use string
+concatenation or f-strings instead. Core agent tools remain excluded from Code Mode.
 
 Convert `decimal.Decimal` results to strings (to preserve precision) or floats
 before returning them through `output()`, which accepts JSON values rather than
