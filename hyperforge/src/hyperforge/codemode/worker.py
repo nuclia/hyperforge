@@ -25,6 +25,7 @@ from RestrictedPython.Guards import (
     guarded_iter_unpack_sequence,
     guarded_unpack_sequence,
     safe_builtins,
+    safer_getattr_raise,
 )
 
 from hyperforge.definition import FunctionDefinition
@@ -50,12 +51,17 @@ REDACTED_EXECUTION_ERROR = "Generated code execution failed"
 
 
 def guarded_module_attribute(obj: Any, name: str) -> Any:
-    """Allow public attributes of registered modules, not arbitrary objects."""
-    if not any(
-        obj is module for module in ALLOWED_GLOBAL_MODULES.values()
-    ) or name.startswith("_"):
+    """Allow safe public attributes on approved modules and their types."""
+    if name.startswith("_"):
         raise AttributeError("Object attributes are unavailable")
-    return getattr(obj, name)
+    if not any(obj is module for module in ALLOWED_GLOBAL_MODULES.values()):
+        obj_type = obj if isinstance(obj, type) else type(obj)
+        approved_modules = {
+            module.__name__ for module in ALLOWED_GLOBAL_MODULES.values()
+        }
+        if obj_type.__module__ not in approved_modules:
+            raise AttributeError("Object attributes are unavailable")
+    return safer_getattr_raise(obj, name)
 
 
 def _set_memory_limit(max_memory_bytes: int | None) -> None:

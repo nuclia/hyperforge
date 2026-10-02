@@ -301,17 +301,22 @@ built-ins: `abs`, `bool`, `bytes`, `chr`, `complex`, `divmod`, `float`, `hash`,
 `range`, `repr`, `round`, `slice`, `sorted`, `str`, `sum`, `tuple`, and `zip`.
 Other helpers, including `all`, `any`, `min`, and `max`, are unavailable.
 `math`, `re`, `statistics`, `itertools`, and `decimal` are available without
-imports. Public module attributes are accessible, including functions, constants,
-and classes (for example,
-`math.sqrt(4)`, `re.findall(pattern, text)`, or `re.Pattern`). Arbitrary object
-attributes, private module attributes, and attributes of unapproved modules are
-not. `ALLOWED_GLOBAL_MODULES` in `hyperforge/codemode/modules.py` is the shared
-registry for worker globals, attribute access, reserved names, and the tool's
-module list. Comprehensions and generator expressions remain supported by
-the existing restricted Python interpreter.
+imports. You can use their public functions, constants, and classes, as well as
+public methods and properties on objects defined by these modules:
+
+```python
+amount = decimal.Decimal('0.1').quantize(decimal.Decimal('0.01'))
+match = re.search('(x+)', 'xxx')
+output({'amount': str(amount), 'matched': match.group(1)})
+```
+
+Imports, private attributes, and attributes on objects from unsupported modules
+are unavailable. Submodules are not automatically supported. Comprehensions and
+generator expressions are supported.
+
 Convert `decimal.Decimal` results to strings (to preserve precision) or floats
-before returning them through `output()`, since the worker protocol carries JSON
-values rather than Decimal objects.
+before returning them through `output()`, which accepts JSON values rather than
+Decimal objects.
 Authorization, nested/global call limits, projected-result limits,
 and invalid or repeated `output` attempts remain terminal even if generated code
 catches the immediate callback error. An output attempt rejected by worker
