@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import inspect
 from dataclasses import dataclass, field
-from enum import StrEnum
 from typing import TYPE_CHECKING, Any, Awaitable, Callable, cast, get_type_hints
 
 from jsonschema import ValidationError as JsonSchemaValidationError
@@ -33,11 +32,6 @@ class _CurrentTurn:
 
 
 _CURRENT_TURN = _CurrentTurn()
-
-
-class ToolInheritancePolicy(StrEnum):
-    INHERIT = "inherit"
-    DO_NOT_INHERIT = "do_not_inherit"
 
 
 @dataclass(frozen=True)
@@ -94,7 +88,6 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
     parameters_schema: dict[str, Any] | None = None
     context_factory: ContextFactory[OutputT] | None = None
     lazy_load: bool = False
-    inheritance: ToolInheritancePolicy = ToolInheritancePolicy.INHERIT
     cache_policy: ToolCachePolicy = ToolCachePolicy.NONE
     input_model: type[InputT] = field(init=False)
     output_model: type[OutputT] = field(init=False)
@@ -175,7 +168,6 @@ def tool(
     parameters_schema: dict[str, Any] | None = None,
     context_factory: ContextFactory[Any] | None = None,
     lazy_load: bool = False,
-    inheritance: ToolInheritancePolicy = ToolInheritancePolicy.INHERIT,
     cache_policy: ToolCachePolicy = ToolCachePolicy.NONE,
 ) -> Callable[[ToolHandler[Any, Any]], HarnessTool[Any, Any]]:
     """Create a harness tool from an annotated async handler."""
@@ -189,7 +181,6 @@ def tool(
             parameters_schema=parameters_schema,
             context_factory=context_factory,
             lazy_load=lazy_load,
-            inheritance=inheritance,
             cache_policy=cache_policy,
         )
 
@@ -205,6 +196,5 @@ __all__ = [
     "HarnessTool",
     "ToolCallContext",
     "ToolHandler",
-    "ToolInheritancePolicy",
     "tool",
 ]

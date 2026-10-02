@@ -38,6 +38,7 @@ from .model import (
     decode_protocol_value,
     encode_protocol_value,
 )
+from .modules import ALLOWED_GLOBAL_MODULES
 
 BLOCKED_EXCEPTIONS = {
     "BaseException",
@@ -46,6 +47,15 @@ BLOCKED_EXCEPTIONS = {
     "SystemExit",
 }
 REDACTED_EXECUTION_ERROR = "Generated code execution failed"
+
+
+def guarded_module_attribute(obj: Any, name: str) -> Any:
+    """Allow public attributes of registered modules, not arbitrary objects."""
+    if not any(
+        obj is module for module in ALLOWED_GLOBAL_MODULES.values()
+    ) or name.startswith("_"):
+        raise AttributeError("Object attributes are unavailable")
+    return getattr(obj, name)
 
 
 def _set_memory_limit(max_memory_bytes: int | None) -> None:
@@ -118,6 +128,7 @@ class PythonAgentWorker:
     ):
         self.pipe = pipe
         self.functions_agent_id: Dict[str, List[str]] = {}
+        self._harness_functions = False
         self.debug = debug
         self.json_protocol = json_protocol
         self._redact_errors = False
@@ -135,6 +146,7 @@ class PythonAgentWorker:
         redact_errors: bool = False,
     ):
         self._redact_errors = redact_errors
+        self._harness_functions = redact_errors and set(function_names) == {"harness"}
         self._output_attempted = False
         self._output_send_failed = False
         try:
@@ -161,6 +173,7 @@ class PythonAgentWorker:
                         "sum": sum,
                     },
                     "_getitem_": lambda obj, index: obj[index],
+                    "_getattr_": guarded_module_attribute,
                     "_getiter_": iter,
                     "_inplacevar_": guarded_inplace,
                     "dataclass": dataclass,
@@ -173,6 +186,7 @@ class PythonAgentWorker:
                     "_unpack_sequence_": guarded_unpack_sequence,
                     "save": self.save,
                     "question": question,
+                    **ALLOWED_GLOBAL_MODULES,
                 }
             )
             if self.debug:
@@ -240,7 +254,11 @@ class PythonAgentWorker:
     def valid_functions_call(
         self, function_name: str, *args: Any, **kwargs: Any
     ) -> Any:
-        agent_id = kwargs.pop("agent_id", None)
+        # Harness function arguments must pass through unchanged. Legacy published
+        # agent calls still use agent_id to select the callback destination.
+        agent_id = (
+            "harness" if self._harness_functions else kwargs.pop("agent_id", None)
+        )
         if agent_id is not None:
             if agent_id not in self.functions_agent_id.get(function_name, []):
                 raise ValueError(
