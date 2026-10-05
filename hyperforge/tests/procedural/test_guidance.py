@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import subprocess
 import sys
 from collections.abc import AsyncIterator
@@ -1006,6 +1007,7 @@ async def test_resume_restores_root_trajectory_and_anchor_without_duplicates(
 async def test_resume_disables_guidance_for_missing_or_different_graph_metadata(
     graph, tools, existing_guidance, explicit_load, policy, caplog
 ):
+    caplog.set_level(logging.WARNING, logger="hyperforge.harness_sdk.harness")
     storage = InMemoryHarnessStorage()
     original = AgentHarness(
         model="solver",
@@ -1075,6 +1077,7 @@ async def test_resume_disables_guidance_for_missing_or_different_graph_metadata(
 async def test_resume_disables_guidance_for_root_step_from_different_graph(
     graph, tools, policy, caplog
 ):
+    caplog.set_level(logging.WARNING, logger="hyperforge.harness_sdk.harness")
     storage = InMemoryHarnessStorage()
     config = ProceduralGuidanceConfig(graph=graph, failure_policy=policy)
     original = AgentHarness(
