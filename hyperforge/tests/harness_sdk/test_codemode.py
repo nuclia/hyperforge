@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 import logging
 import sys
 import tempfile
@@ -6,16 +7,16 @@ import tracemalloc
 from collections.abc import AsyncIterator
 from contextvars import ContextVar
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import pytest
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel, field_serializer
 
 from hyperforge.codemode import RestrictedPythonTask, WorkerExecutionRequest
 from hyperforge.codemode import sandbox as sandbox_module
+from hyperforge.codemode.worker import guarded_module_attribute
 from hyperforge.harness_sdk import (
     AgentHarness,
-    CodeModeCapability,
     CodeModeDispatch,
     CodeModeExecutionLimiter,
     CodemodeInput,
@@ -27,13 +28,12 @@ from hyperforge.harness_sdk import (
     HarnessToolCall,
     ModelDelta,
     ToolCallContext,
-    ToolInheritancePolicy,
     UsageLimits,
     codemode,
     create_codemode_tool,
-    raw_codemode_result_adapter,
     tool,
 )
+from hyperforge.harness_sdk.schema import compact_model_output_type
 from hyperforge.harness_sdk.tools import codemode as codemode_module
 
 
@@ -118,7 +118,7 @@ def worker_task(function: str, *args: Any, **kwargs: Any) -> RestrictedPythonTas
 
 
 def local_codemode(
-    *capabilities: CodeModeCapability[Any],
+    *capabilities: Callable[..., Any],
     limits: CodeModeLimits | None = None,
     execution_limiter: CodeModeExecutionLimiter | None = None,
 ) -> HarnessTool[Any, Any]:
@@ -136,10 +136,34 @@ def local_codemode(
     )
 
 
-def value_adapter(
-    _tool: HarnessTool[Any, UpperOutput], output: UpperOutput
-) -> dict[str, str]:
-    return {"value": UpperOutput.model_validate(output).value}
+def utility_from_tool(
+    wrapped: HarnessTool, result_adapter: Callable[..., Any]
+) -> Callable[..., Any]:
+    """Reuse result-policy fixtures as plain utilities (no harness context needed)."""
+
+    async def utility(*args: Any, **kwargs: Any) -> Any:
+        arguments = codemode_module._scoped_tool_arguments(wrapped, args, kwargs)
+        value = wrapped.input_model.model_validate(arguments)
+        context = ToolCallContext(
+            harness=AgentHarness(model="test", model_client=UnusedModel()),
+            name=wrapped.name,
+        )
+        output = await wrapped.handler(context, value)
+        return result_adapter(wrapped, output)
+
+    utility.__name__ = wrapped.name
+    setattr(
+        utility,
+        "__signature__",
+        inspect.Signature(
+            [
+                inspect.Parameter(name, inspect.Parameter.POSITIONAL_OR_KEYWORD)
+                for name in wrapped.parameters.get("properties", {})
+            ]
+            + [inspect.Parameter("extra", inspect.Parameter.VAR_KEYWORD)]
+        ),
+    )
+    return utility
 
 
 @pytest.mark.asyncio
@@ -181,7 +205,7 @@ async def test_codemode_counts_nested_tool_calls() -> None:
         usage_limits=UsageLimits(max_tool_calls=1),
     )
 
-    with pytest.raises(RuntimeError, match="max_tool_calls"):
+    with pytest.raises(RuntimeError, match="Generated code execution failed"):
         await codemode.execute(
             ToolCallContext(harness=harness, name=codemode.name),
             CodemodeInput(code="upper(value='one')\nupper(value='two')").model_dump(),
@@ -196,7 +220,7 @@ async def test_codemode_propagates_tool_validation_errors() -> None:
         tools=[upper],
     )
 
-    with pytest.raises(RuntimeError, match="Invalid upper arguments"):
+    with pytest.raises(RuntimeError, match="Generated code execution failed"):
         await codemode.execute(
             ToolCallContext(harness=harness, name=codemode.name),
             CodemodeInput(code="upper(missing='value')").model_dump(),
@@ -254,7 +278,9 @@ async def test_codemode_preserves_context_when_calling_tools() -> None:
         request_context.reset(token)
 
     assert result.value == "available"
-    assert call_ids == [None]
+    assert len(call_ids) == 1
+    assert call_ids[0] is not None
+    assert call_ids[0] != "outer-call"
 
 
 @pytest.mark.asyncio
@@ -276,7 +302,7 @@ async def test_codemode_enforces_runtime_limit() -> None:
 async def test_codemode_blocks_process_control_exceptions() -> None:
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
-    with pytest.raises(RuntimeError, match="SystemExit.*not defined"):
+    with pytest.raises(RuntimeError, match="Generated code execution failed"):
         await codemode.execute(
             ToolCallContext(harness=harness, name=codemode.name),
             CodemodeInput(code="raise SystemExit(1)").model_dump(),
@@ -300,9 +326,7 @@ async def test_codemode_enforces_memory_limit() -> None:
 
 
 @pytest.mark.asyncio
-async def test_scoped_codemode_uses_only_explicit_hidden_capabilities(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
+async def test_codemode_includes_active_tools_and_additional_utilities() -> None:
     seen_call_ids: list[str | None] = []
 
     @tool(name="hidden_upper")
@@ -316,27 +340,36 @@ async def test_scoped_codemode_uses_only_explicit_hidden_capabilities(
     async def lower(_: ToolCallContext, input_value: UpperInput) -> UpperOutput:
         return UpperOutput(value=input_value.value.lower())
 
+    def double_string(input_string: str) -> str:
+        return input_string * 2
+
     runner = RecordingRunner(
-        [worker_task("hidden_upper", "hello"), worker_task("output", "done")]
+        [
+            worker_task("hidden_upper", "hello"),
+            worker_task("double_string", "hello"),
+            worker_task("output", "done"),
+        ]
     )
     scoped = create_codemode_tool(
-        capabilities=(
-            CodeModeCapability(
-                hidden_upper,
-                result_adapter=raw_codemode_result_adapter,
-            ),
-        ),
+        capabilities=[double_string],
         runner=runner,
     )
     harness = AgentHarness(
         model="test",
         model_client=UnusedModel(),
-        tools=[scoped, lower],
-    )
-    monkeypatch.setattr(
-        harness,
-        "iter_tools",
-        lambda *args, **kwargs: pytest.fail("scoped Code Mode discovered tools"),
+        tools=[scoped, lower, hidden_upper],
+        disabled_core_tools=[
+            "remember",
+            "recall",
+            "forget",
+            "spawn_agent",
+            "send_message",
+            "wait_agent",
+            "compact",
+            "search_tools",
+            "activate_tools",
+            "call_tool",
+        ],
     )
 
     result = await scoped.execute(
@@ -348,15 +381,17 @@ async def test_scoped_codemode_uses_only_explicit_hidden_capabilities(
     assert len(seen_call_ids) == 1
     assert seen_call_ids[0] is not None
     assert seen_call_ids[0] != "outer-call"
-    assert hidden_upper.name not in harness._tools
     assert set(runner.requests[0].function_names["harness"]) == {
         "hidden_upper",
+        "lower",
+        "double_string",
         "output",
     }
     assert runner.requests[0].code == "hidden_upper('hello'); output('done')"
     assert runner.requests[0].question == "Why?"
     assert runner.requests[0].redact_errors is True
     assert runner.results[0] == ("hidden_upper", {"value": "HELLO"})
+    assert runner.results[1] == ("double_string", "hellohello")
 
 
 @pytest.mark.asyncio
@@ -373,18 +408,12 @@ async def test_remote_required_false_forces_isolated_process_with_ambient_remote
         return UpperOutput(value=input_value.value.lower())
 
     scoped = create_codemode_tool(
-        capabilities=(
-            CodeModeCapability(
-                upper,
-                result_adapter=raw_codemode_result_adapter,
-            ),
-        ),
         remote_required=False,
     )
     harness = AgentHarness(
         model="test",
         model_client=UnusedModel(),
-        tools=[scoped, lower],
+        tools=[scoped, lower, upper],
     )
 
     result = await scoped.execute(
@@ -395,48 +424,21 @@ async def test_remote_required_false_forces_isolated_process_with_ambient_remote
     )
 
     assert result.value == "HELLO"
-    assert upper.name not in harness._tools
-    with pytest.raises(RuntimeError, match="Generated code execution failed"):
-        await scoped.execute(
-            ToolCallContext(harness=harness, name=scoped.name),
-            {"code": "lower(value='HELLO')"},
-        )
+    result = await scoped.execute(
+        _ctx(harness), {"code": "output(lower(value='HELLO'))"}
+    )
+    assert result.value == {"value": "hello"}
 
 
 @pytest.mark.asyncio
-async def test_scoped_codemode_default_projection_uses_formatted_context() -> None:
+async def test_codemode_active_tool_results_are_raw_json() -> None:
     runner = RecordingRunner(
         [worker_task("lookup", value="hello"), worker_task("output", None)]
     )
     scoped = create_codemode_tool(
-        capabilities=(CodeModeCapability(lookup),),
         runner=runner,
     )
-    harness = AgentHarness(model="test", model_client=UnusedModel())
-
-    await scoped.execute(
-        ToolCallContext(harness=harness, name=scoped.name),
-        {"code": "lookup(value='hello'); output('done')"},
-    )
-
-    assert runner.results == [("lookup", '{"value":"HELLO"}'), ("output", None)]
-
-
-@pytest.mark.asyncio
-async def test_scoped_codemode_raw_projection_must_be_explicit() -> None:
-    runner = RecordingRunner(
-        [worker_task("lookup", value="hello"), worker_task("output", None)]
-    )
-    scoped = create_codemode_tool(
-        capabilities=(
-            CodeModeCapability(
-                lookup,
-                result_adapter=raw_codemode_result_adapter,
-            ),
-        ),
-        runner=runner,
-    )
-    harness = AgentHarness(model="test", model_client=UnusedModel())
+    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[lookup])
 
     await scoped.execute(
         ToolCallContext(harness=harness, name=scoped.name),
@@ -450,6 +452,414 @@ async def test_scoped_codemode_raw_projection_must_be_explicit() -> None:
 
 
 @pytest.mark.asyncio
+async def test_codemode_orchestrates_tools_sync_and_async_utilities() -> None:
+    def double_string(input_string: str, /, *, suffix: str = "!") -> str:
+        return input_string * 2 + suffix
+
+    async def times_two(input: int = 2) -> int:
+        await asyncio.sleep(0)
+        return input * 2
+
+    utilities = [double_string, times_two]
+    scoped = create_codemode_tool(capabilities=utilities, remote_required=False)
+    utilities.clear()  # The factory captures the iterable, not the mutable list.
+    harness = AgentHarness(
+        model="test", model_client=UnusedModel(), tools=[scoped, upper]
+    )
+    result = await scoped.execute(
+        _ctx(harness),
+        {
+            "code": "text = double_string('hi')\ntext = upper(value=text)\noutput([text['value'], times_two(), times_two(input=3)])"
+        },
+    )
+    assert result.value == ["HIHI!", 4, 6]
+    assert harness.usage.tool_calls == 4
+
+
+@pytest.mark.asyncio
+async def test_codemode_resolves_lazy_tools_for_each_invocation() -> None:
+    lazy = HarnessTool("lazy_upper", upper.handler, lazy_load=True)
+    scoped = local_codemode()
+    harness = AgentHarness(
+        model="test", model_client=UnusedModel(), tools=[scoped, lazy]
+    )
+
+    with pytest.raises(RuntimeError, match="Generated code execution failed"):
+        await scoped.execute(
+            _ctx(harness), {"code": "output(lazy_upper(value='hello'))"}
+        )
+
+    await harness.activate_tools([lazy.name])
+    result = await scoped.execute(
+        _ctx(harness), {"code": "output(lazy_upper(value='hello'))"}
+    )
+    assert result.value == {"value": "HELLO"}
+
+
+@pytest.mark.asyncio
+async def test_codemode_excludes_other_codemode_instances_and_core_tools() -> None:
+    runner = RecordingRunner([worker_task("output", None)])
+    scoped = create_codemode_tool(runner=runner)
+    other = create_codemode_tool(name="execute_python", runner=runner)
+    harness = AgentHarness(
+        model="test", model_client=UnusedModel(), tools=[scoped, other]
+    )
+    await scoped.execute(_ctx(harness), {"code": "output(None)"})
+    names = set(runner.requests[0].function_names["harness"])
+    assert names == {"output"}
+
+
+@pytest.mark.asyncio
+async def test_codemode_rejects_core_tool_callbacks() -> None:
+    runner = CatchingRunner(
+        [worker_task("remember", text="blocked"), worker_task("output", None)]
+    )
+    scoped = create_codemode_tool(runner=runner)
+    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[scoped])
+    assert "remember" in {tool.name for tool in harness.iter_tools()}
+    with pytest.raises(ValueError, match="Unknown Code Mode capability: remember"):
+        await scoped.execute(
+            _ctx(harness), {"code": "remember(text='blocked'); output(None)"}
+        )
+    assert harness.usage.tool_calls == 0
+    assert runner.errors == ["Unknown Code Mode capability: remember"] * 2
+
+
+@pytest.mark.asyncio
+async def test_model_receives_compact_active_tool_output_signatures() -> None:
+    class CatalogInput(BaseModel):
+        query: str
+        limit: int = 10
+
+    class CatalogOutput(BaseModel):
+        name: str
+        data: dict[str, Any]
+
+    @tool(
+        description="A long catalog description that should not be repeated in Code Mode"
+    )
+    async def list_data_catalog(
+        _context: ToolCallContext, input_value: CatalogInput
+    ) -> CatalogOutput:
+        return CatalogOutput(name=input_value.query, data={"count": input_value.limit})
+
+    class CapturingModel(UnusedModel):
+        def __init__(self) -> None:
+            self.descriptions: list[str] = []
+
+        async def stream(self, **kwargs: Any) -> AsyncIterator[ModelDelta]:
+            self.descriptions.append(
+                next(
+                    item.description
+                    for item in kwargs["tools"]
+                    if item.name == "codemode"
+                )
+            )
+            yield ModelDelta(text="done")
+
+    model = CapturingModel()
+    scoped = local_codemode()
+    lazy = HarnessTool("lazy_upper", upper.handler, lazy_load=True)
+    harness = AgentHarness(
+        model="test", model_client=model, tools=[scoped, list_data_catalog, lazy]
+    )
+    await harness.llm()
+    description = model.descriptions[-1]
+    assert (
+        '- def list_data_catalog(...) -> TypedDict[{"name": str, "data": dict[str, Any]}]'
+        in description
+    )
+    assert "A long catalog description" not in description
+    assert '"properties"' not in description
+    assert "- def remember(" not in description
+    assert "- def lazy_upper(" not in description
+
+    await harness.activate_tools([lazy.name])
+    await harness.llm()
+    assert (
+        '- def lazy_upper(...) -> TypedDict[{"value": str}]' in model.descriptions[-1]
+    )
+    assert "- def lazy_upper(" not in model.descriptions[0]
+    assert "- def list_data_catalog(" not in scoped.description
+
+    result = await scoped.execute(
+        _ctx(harness),
+        {
+            "code": "result = list_data_catalog(query='sales')\noutput(result['data']['count'])"
+        },
+    )
+    assert result.value == 10
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("by_alias", [False, True])
+async def test_codemode_signatures_describe_serialized_nested_and_root_outputs(
+    by_alias: bool,
+) -> None:
+    class Empty(BaseModel):
+        pass
+
+    class Record(BaseModel):
+        model_config = {"serialize_by_alias": by_alias}
+        name: str = Field(serialization_alias="public_name")
+        score: int | None = None
+
+        @field_serializer("score")
+        def serialize_score(self, value: int | None) -> str:
+            return str(value)
+
+    class Records(RootModel[list[Record]]):
+        pass
+
+    @tool()
+    async def records(_context: ToolCallContext, _input: Empty) -> Records:
+        return Records([Record(name="sales", score=2)])
+
+    class CapturingModel(UnusedModel):
+        description = ""
+
+        async def stream(self, **kwargs: Any) -> AsyncIterator[ModelDelta]:
+            self.description = next(
+                item.description for item in kwargs["tools"] if item.name == "codemode"
+            )
+            yield ModelDelta(text="done")
+
+    model = CapturingModel()
+    scoped = local_codemode()
+    harness = AgentHarness(model="test", model_client=model, tools=[scoped, records])
+    await harness.llm()
+    name_key = "public_name" if by_alias else "name"
+    assert (
+        f'- def records(...) -> list[TypedDict[{{"{name_key}": str, "score": str}}]]'
+        in model.description
+    )
+    result = await scoped.execute(_ctx(harness), {"code": "output(records())"})
+    assert result.value == [{name_key: "sales", "score": "2"}]
+
+
+def test_compact_return_types_handle_unions_and_recursive_models() -> None:
+    class Node(BaseModel):
+        name: str
+        child: "Node | None" = None
+        values: list[int | bool]
+        metrics: dict[str, float]
+
+    rendered = compact_model_output_type(Node)
+    assert '"child": Any | None' in rendered
+    assert '"values": list[int | bool]' in rendered
+    assert '"metrics": dict[str, float]' in rendered
+    assert "$ref" not in rendered
+    assert len(rendered) < 300
+
+
+@pytest.mark.asyncio
+async def test_codemode_utility_collisions_do_not_shadow_tools() -> None:
+    def upper(value: str) -> str:
+        return value
+
+    scoped = local_codemode(upper)
+    conflicting = HarnessTool("upper", lookup.handler)
+    harness = AgentHarness(
+        model="test", model_client=UnusedModel(), tools=[conflicting]
+    )
+    with pytest.raises(ValueError, match="utility conflicts with active tool: upper"):
+        await scoped.execute(_ctx(harness), {"code": "output(upper('hello'))"})
+
+
+@pytest.mark.asyncio
+async def test_inherited_codemode_uses_the_executing_child_harness() -> None:
+    class Empty(BaseModel):
+        pass
+
+    @tool()
+    async def current_agent(context: ToolCallContext, _input: Empty) -> UpperOutput:
+        return UpperOutput(value=context.harness.agent_id)
+
+    scoped = local_codemode()
+    parent = AgentHarness(
+        model="test", model_client=UnusedModel(), tools=[scoped, current_agent]
+    )
+    child = parent._create_child("child-agent", include_history=False)
+    result = await child._tools["codemode"].execute(
+        _ctx(child), {"code": "output(current_agent())"}
+    )
+    assert result.value == {"value": "child-agent"}
+
+
+@pytest.mark.asyncio
+async def test_convenience_codemode_does_not_fall_back_when_remote_is_configured(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(codemode_module.settings, "sandbox_socket", "/configured.sock")
+    monkeypatch.setattr(codemode_module.settings, "sandbox_token", None)
+    harness = AgentHarness(model="test", model_client=UnusedModel())
+    with pytest.raises(RuntimeError, match="SANDBOX_TOKEN is absent"):
+        await codemode.execute(_ctx(harness), {"code": "output(None)"})
+
+
+@pytest.mark.asyncio
+async def test_codemode_provides_re_and_math_without_imports() -> None:
+    scoped = local_codemode()
+    harness = AgentHarness(model="test", model_client=UnusedModel())
+    result = await scoped.execute(
+        _ctx(harness),
+        {
+            "code": (
+                "matches = re.findall('[0-9]+', 'a12b34')\n"
+                "pattern = re.compile('[0-9]+')\n"
+                "output([matches, math.sqrt(16), math.pi > 3, isinstance(pattern, re.Pattern)])"
+            )
+        },
+    )
+    assert result.value == [["12", "34"], 4.0, True, True]
+
+
+@pytest.mark.asyncio
+async def test_codemode_provides_statistics_itertools_and_decimal_without_imports() -> (
+    None
+):
+    scoped = local_codemode()
+    harness = AgentHarness(model="test", model_client=UnusedModel())
+    result = await scoped.execute(
+        _ctx(harness),
+        {
+            "code": (
+                "totals = []\n"
+                "for batch in itertools.batched([1, 2, 3, 4], 2):\n"
+                "    totals += [sum(batch)]\n"
+                "amount = decimal.Decimal('0.1') + decimal.Decimal('0.2')\n"
+                "output([totals, statistics.mean(totals), str(amount)])"
+            )
+        },
+    )
+    assert result.value == [[3, 7], 5, "0.3"]
+
+
+@pytest.mark.asyncio
+async def test_codemode_supports_container_methods_and_item_writes_on_tool_results() -> (
+    None
+):
+    class Empty(BaseModel):
+        pass
+
+    class Rows(BaseModel):
+        rows: list[dict[str, Any]]
+
+    @tool()
+    async def get_counts(_context: ToolCallContext, _input: Empty) -> Rows:
+        return Rows(
+            rows=[{"status": "completed", "count": 10}, {"status": "open", "count": 4}]
+        )
+
+    scoped = local_codemode()
+    harness = AgentHarness(
+        model="test", model_client=UnusedModel(), tools=[scoped, get_counts]
+    )
+    result = await scoped.execute(
+        _ctx(harness),
+        {
+            "code": (
+                "result = get_counts()\n"
+                "counts = list()\n"
+                "by_status = dict()\n"
+                "for row in result.get('rows', []):\n"
+                "    counts.append(row.get('count', 0))\n"
+                "    by_status[row['status'].upper()] = counts[-1]\n"
+                "summary = {'temporary': True}\n"
+                "summary.update({'total': sum(counts)})\n"
+                "summary['mean'] = statistics.mean(counts)\n"
+                "summary.setdefault('truncated', False)\n"
+                "del summary['temporary']\n"
+                "copied = counts.copy()\n"
+                "copied[0] = 99\n"
+                "copied[1:2] = [77, 55]\n"
+                "copied.pop()\n"
+                "names = tuple(by_status.keys())\n"
+                "pairs = [[name, value] for name, value in by_status.items()]\n"
+                "output({'counts': counts, 'summary': summary, 'copied': copied, 'names': names, 'pairs': pairs})"
+            )
+        },
+    )
+    assert result.value == {
+        "counts": [10, 4],
+        "summary": {"total": 14, "mean": 7, "truncated": False},
+        "copied": [99, 77],
+        "names": ["COMPLETED", "OPEN"],
+        "pairs": [["COMPLETED", 10], ["OPEN", 4]],
+    }
+
+
+@pytest.mark.asyncio
+async def test_codemode_traverses_approved_class_instance_and_property_attributes() -> (
+    None
+):
+    scoped = local_codemode()
+    harness = AgentHarness(model="test", model_client=UnusedModel())
+    result = await scoped.execute(
+        _ctx(harness),
+        {
+            "code": (
+                "amount = decimal.Decimal.from_float(0.5).quantize(decimal.Decimal('0.01'))\n"
+                "match = re.search('(x+)', 'xxx')\n"
+                "pattern = re.compile('x')\n"
+                "distribution = statistics.NormalDist(mu=2, sigma=1)\n"
+                "output([str(amount), decimal.getcontext().prec > 0, match.group(1), "
+                "match.re.pattern, re.Pattern.findall(pattern, 'xx'), "
+                "distribution.mean, distribution.cdf(2)])"
+            )
+        },
+    )
+    assert result.value == ["0.50", True, "xxx", "(x+)", ["x", "x"], 2, 0.5]
+
+
+@pytest.mark.parametrize(
+    "module_name", ["unapproved", "decimal.internal", "decimal_helpers"]
+)
+def test_attribute_guard_checks_actual_type_module_not_instance_metadata(
+    module_name: str,
+) -> None:
+    class Unapproved:
+        public = "blocked"
+
+    Unapproved.__module__ = module_name
+    instance = Unapproved()
+    instance.__module__ = "decimal"
+    with pytest.raises(AttributeError, match="Object attributes are unavailable"):
+        guarded_module_attribute(instance, "public")
+    with pytest.raises(AttributeError, match="Object attributes are unavailable"):
+        guarded_module_attribute(Unapproved, "public")
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "code",
+    [
+        "import os\noutput(os.getcwd())",
+        "output(math.__dict__)",
+        "output(re.enum.global_enum)",
+        "output(re.search('x', 'x').__class__)",
+        "output(re.Pattern.__module__)",
+        "output(decimal.Decimal('0.1').__class__)",
+        "output('x'.format())",
+        "output('x'.format_map({}))",
+        "output(str.format('{0.__class__}', 'x'))",
+        "output((1).bit_length())",
+        "output(open('unapproved-file'))",
+        "math.pi = 0\noutput(math.pi)",
+        "decimal.getcontext().prec = 2\noutput(decimal.getcontext().prec)",
+        "str.custom = 'blocked'\noutput(str.custom)",
+    ],
+)
+async def test_codemode_module_support_does_not_allow_object_traversal(
+    code: str,
+) -> None:
+    scoped = local_codemode()
+    harness = AgentHarness(model="test", model_client=UnusedModel())
+    with pytest.raises(RuntimeError, match="Generated code execution failed"):
+        await scoped.execute(_ctx(harness), {"code": code})
+
+
+@pytest.mark.asyncio
 async def test_scoped_codemode_rejects_nested_unprojected_models() -> None:
     def wrap_model(
         _tool: HarnessTool[Any, UpperOutput], output: UpperOutput
@@ -460,7 +870,7 @@ async def test_scoped_codemode_rejects_nested_unprojected_models() -> None:
         [worker_task("upper", value="hello"), worker_task("output", None)]
     )
     scoped = create_codemode_tool(
-        capabilities=(CodeModeCapability(upper, result_adapter=wrap_model),),
+        capabilities=(utility_from_tool(upper, result_adapter=wrap_model),),
         runner=runner,
     )
     harness = AgentHarness(model="test", model_client=UnusedModel())
@@ -498,7 +908,7 @@ async def test_scoped_codemode_normalizes_adapter_results_as_strict_json() -> No
         [worker_task("upper", value="hello"), worker_task("output", None)]
     )
     scoped = create_codemode_tool(
-        capabilities=(CodeModeCapability(upper, result_adapter=project),),
+        capabilities=(utility_from_tool(upper, result_adapter=project),),
         runner=runner,
     )
     harness = AgentHarness(model="test", model_client=UnusedModel())
@@ -523,7 +933,7 @@ async def test_scoped_codemode_rejects_reserved_model_marker() -> None:
 
     runner = RecordingRunner([worker_task("upper", value="hello")])
     scoped = create_codemode_tool(
-        capabilities=(CodeModeCapability(upper, result_adapter=project),),
+        capabilities=(utility_from_tool(upper, result_adapter=project),),
         runner=runner,
     )
     harness = AgentHarness(model="test", model_client=UnusedModel())
@@ -544,7 +954,7 @@ async def test_scoped_codemode_rejects_non_finite_adapter_result() -> None:
 
     runner = RecordingRunner([worker_task("upper", value="hello")])
     scoped = create_codemode_tool(
-        capabilities=(CodeModeCapability(upper, result_adapter=project),),
+        capabilities=(utility_from_tool(upper, result_adapter=project),),
         runner=runner,
     )
     harness = AgentHarness(model="test", model_client=UnusedModel())
@@ -621,10 +1031,9 @@ async def test_scoped_codemode_rejects_reserved_model_marker_in_output() -> None
 async def test_scoped_codemode_uses_normal_tool_validation() -> None:
     invalid_input_runner = RecordingRunner([worker_task("upper", missing="value")])
     input_scoped = create_codemode_tool(
-        capabilities=(CodeModeCapability(upper),),
         runner=invalid_input_runner,
     )
-    harness = AgentHarness(model="test", model_client=UnusedModel())
+    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[upper])
 
     with pytest.raises(RuntimeError, match=r"capability 'upper' failed \(ValueError\)"):
         await input_scoped.execute(
@@ -642,8 +1051,10 @@ async def test_scoped_codemode_uses_normal_tool_validation() -> None:
         [worker_task("invalid_output", value="hello")]
     )
     output_scoped = create_codemode_tool(
-        capabilities=(CodeModeCapability(invalid_output),),
         runner=invalid_output_runner,
+    )
+    harness = AgentHarness(
+        model="test", model_client=UnusedModel(), tools=[invalid_output]
     )
     with pytest.raises(
         RuntimeError, match=r"capability 'invalid_output' failed \(ValidationError\)"
@@ -669,15 +1080,9 @@ async def test_scoped_positional_arguments_follow_advertised_alias_order() -> No
         [worker_task("aliased", "hello"), worker_task("output", None)]
     )
     scoped = create_codemode_tool(
-        capabilities=(
-            CodeModeCapability(
-                aliased,
-                result_adapter=raw_codemode_result_adapter,
-            ),
-        ),
         runner=runner,
     )
-    harness = AgentHarness(model="test", model_client=UnusedModel())
+    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[aliased])
 
     await scoped.execute(
         ToolCallContext(harness=harness, name=scoped.name),
@@ -686,7 +1091,7 @@ async def test_scoped_positional_arguments_follow_advertised_alias_order() -> No
 
     definition = runner.requests[0].function_names["harness"]["aliased"]
     assert list(definition.parameters) == ["public"]
-    assert '"public"' in scoped.description
+    assert '"public"' not in scoped.description
     assert runner.results == [
         ("aliased", {"value": "HELLO"}),
         ("output", None),
@@ -703,13 +1108,12 @@ async def test_scoped_codemode_counts_nested_calls_as_ordinary_usage() -> None:
         ]
     )
     scoped = create_codemode_tool(
-        capabilities=(CodeModeCapability(upper),),
         runner=runner,
     )
     harness = AgentHarness(
         model="test",
         model_client=UnusedModel(),
-        tools=[scoped],
+        tools=[scoped, upper],
         usage_limits=UsageLimits(max_tool_calls=3),
     )
 
@@ -747,10 +1151,9 @@ async def test_scoped_codemode_assigns_unique_nested_call_ids() -> None:
         ]
     )
     scoped = create_codemode_tool(
-        capabilities=(CodeModeCapability(record_id),),
         runner=runner,
     )
-    harness = AgentHarness(model="test", model_client=UnusedModel())
+    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[record_id])
 
     await scoped.execute(
         ToolCallContext(harness=harness, name=scoped.name, id="outer-call"),
@@ -782,10 +1185,13 @@ async def test_scoped_codemode_assigns_unique_nested_call_ids() -> None:
     ],
 )
 def test_scoped_codemode_rejects_reserved_capability_names(name: str) -> None:
-    reserved = HarnessTool(name, upper.handler)
+    def reserved(value: str) -> str:
+        return value
+
+    reserved.__name__ = name
 
     with pytest.raises(ValueError, match="reserved"):
-        create_codemode_tool(capabilities=(CodeModeCapability(reserved),))
+        create_codemode_tool(capabilities=[reserved])
 
 
 @pytest.mark.parametrize(
@@ -801,82 +1207,83 @@ def test_scoped_codemode_rejects_reserved_capability_names(name: str) -> None:
     ],
 )
 def test_scoped_codemode_rejects_invalid_capability_names(name: str) -> None:
-    invalid = HarnessTool(name, upper.handler)
+    def invalid(value: str) -> str:
+        return value
+
+    invalid.__name__ = name
 
     with pytest.raises(ValueError, match="ASCII public Python identifier"):
-        create_codemode_tool(capabilities=(CodeModeCapability(invalid),))
+        create_codemode_tool(capabilities=[invalid])
 
 
 def test_scoped_codemode_rejects_duplicate_capability_names() -> None:
-    duplicate = HarnessTool(upper.name, upper.handler)
+    def duplicate(value: str) -> str:
+        return value
 
     with pytest.raises(ValueError, match="must be unique"):
-        create_codemode_tool(
-            capabilities=(CodeModeCapability(upper), CodeModeCapability(duplicate))
-        )
+        create_codemode_tool(capabilities=[duplicate, duplicate])
 
 
-def test_scoped_codemode_rejects_agent_id_input_field() -> None:
+@pytest.mark.asyncio
+async def test_codemode_preserves_agent_id_function_arguments() -> None:
+    def routed(agent_id: str) -> str:
+        return agent_id
+
     class AgentInput(BaseModel):
         agent_id: str
 
     @tool()
-    async def routed(_context: ToolCallContext, input_value: AgentInput) -> UpperOutput:
-        return UpperOutput(value=input_value.agent_id)
+    async def routed_tool(_context: ToolCallContext, value: AgentInput) -> UpperOutput:
+        return UpperOutput(value=value.agent_id)
 
-    with pytest.raises(ValueError, match="reserved 'agent_id' input field"):
-        create_codemode_tool(capabilities=(CodeModeCapability(routed),))
-
-
-def test_scoped_codemode_requires_immutable_capability_tuple() -> None:
-    with pytest.raises(TypeError, match="immutable tuple"):
-        create_codemode_tool(capabilities=[])  # type: ignore[arg-type]
-
-
-def test_inherited_codemode_rejects_non_inherited_capability() -> None:
-    @tool(inheritance=ToolInheritancePolicy.DO_NOT_INHERIT)
-    async def parent_only(
-        _context: ToolCallContext, input_value: UpperInput
-    ) -> UpperOutput:
-        return UpperOutput(value=input_value.value)
-
-    with pytest.raises(ValueError, match="cannot include.*DO_NOT_INHERIT"):
-        create_codemode_tool(
-            capabilities=(CodeModeCapability(parent_only),),
-            inheritance=ToolInheritancePolicy.INHERIT,
-        )
+    scoped = local_codemode(routed)
+    harness = AgentHarness(
+        model="test", model_client=UnusedModel(), tools=[routed_tool]
+    )
+    result = await scoped.execute(
+        _ctx(harness),
+        {
+            "code": "value = routed(agent_id='child')\noutput(routed_tool(agent_id=value))"
+        },
+    )
+    assert result.value == {"value": "child"}
 
 
-def test_scoped_codemode_description_includes_capability_schema() -> None:
-    scoped = create_codemode_tool(capabilities=(CodeModeCapability(upper),))
+def test_codemode_rejects_tools_as_additional_utilities() -> None:
+    with pytest.raises(TypeError, match="Python functions, not tools"):
+        create_codemode_tool(capabilities=[upper])
+
+
+def test_codemode_description_includes_only_utility_signatures() -> None:
+    def double_string(input_string: str) -> str:
+        return input_string * 2
+
+    def times_two(input: int) -> int:
+        return input * 2
+
+    scoped = create_codemode_tool(capabilities=[double_string, times_two])
     custom = create_codemode_tool(
-        capabilities=(CodeModeCapability(upper),),
+        capabilities=[double_string],
         description="Custom orchestration instructions.",
     )
 
-    assert "Uppercase a value" in scoped.description
-    assert '"required":["value"]' in scoped.description
-    assert "Do not use print(); it is unavailable." in scoped.description
-    assert (
-        "helpers such as all, any, min, and max are unavailable" in scoped.description
-    )
-    assert "finish with output(result)" in scoped.description
+    assert "- double_string(input_string: str) -> str" in scoped.description
+    assert "- times_two(input: int) -> int" in scoped.description
+    assert "JSON Schema" not in scoped.description
+    assert "output(value) exactly once" in scoped.description
+    assert "do not use print()" in scoped.description
+    assert "output(x)" in scoped.description
     assert "Custom orchestration instructions." in custom.description
-    assert '"required":["value"]' in custom.description
-    assert "Do not use print(); it is unavailable." in custom.description
+    assert "- double_string(input_string: str) -> str" in custom.description
 
 
 def test_compatibility_codemode_description_explains_output_contract() -> None:
     assert "output(value) exactly once" in codemode.description
-    assert "Do not use print(); it is unavailable." in codemode.description
-    assert (
-        "helpers such as all, any, min, and max are unavailable" in codemode.description
-    )
-    assert "finish with output(result)" in codemode.description
+    assert "do not use print()" in codemode.description
 
 
 @pytest.mark.asyncio
-async def test_scoped_codemode_default_projection_uses_model_context() -> None:
+async def test_codemode_returns_structured_json_instead_of_formatted_context() -> None:
     @tool(
         context_factory=lambda output: HarnessContextReference(
             type=HarnessContextType.STRUCTURED,
@@ -886,15 +1293,17 @@ async def test_scoped_codemode_default_projection_uses_model_context() -> None:
     async def lookup(_: AgentHarness, input_value: UpperInput) -> SensitiveOutput:
         return SensitiveOutput(value=input_value.value.upper(), secret="internal")
 
-    scoped = local_codemode(CodeModeCapability(lookup))
-    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[scoped])
+    scoped = local_codemode()
+    harness = AgentHarness(
+        model="test", model_client=UnusedModel(), tools=[scoped, lookup]
+    )
 
     result = await scoped.execute(
         _ctx(harness),
         {"code": "result = lookup(value='hello')\noutput(result)"},
     )
 
-    assert result.value == '{"value":"HELLO"}'
+    assert result.value == {"value": "HELLO", "secret": "internal"}
 
 
 @pytest.mark.asyncio
@@ -903,8 +1312,8 @@ async def test_scoped_codemode_sanitizes_formatted_context_events() -> None:
     async def lookup(_: AgentHarness, input_value: UpperInput) -> SensitiveOutput:
         return SensitiveOutput(value=input_value.value, secret="internal-secret")
 
-    scoped = local_codemode(CodeModeCapability(lookup))
-    harness = AgentHarness(model="test", model_client=UnusedModel())
+    scoped = local_codemode()
+    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[lookup])
 
     await scoped.execute(_ctx(harness), {"code": "lookup(value='safe'); output(None)"})
 
@@ -914,8 +1323,8 @@ async def test_scoped_codemode_sanitizes_formatted_context_events() -> None:
         for event in events
         if event.type == HarnessEventType.TOOL_COMPLETED and event.payload.get("nested")
     )
-    assert completed.payload["result"]["type"] == "string"
-    assert completed.payload["result"]["utf8_bytes"] > 0
+    assert completed.payload["result"]["type"] == "object"
+    assert completed.payload["result"]["entries"][1]["value"] == "[REDACTED]"
     assert "internal-secret" not in str(completed.payload)
 
 
@@ -924,7 +1333,7 @@ async def test_scoped_codemode_does_not_persist_opaque_string_results() -> None:
     def project(_tool: HarnessTool, _output: BaseModel) -> str:
         return "authorization: Bearer projected-secret"
 
-    scoped = local_codemode(CodeModeCapability(upper, result_adapter=project))
+    scoped = local_codemode(utility_from_tool(upper, result_adapter=project))
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
     await scoped.execute(_ctx(harness), {"code": "upper(value='safe'); output(None)"})
@@ -947,7 +1356,7 @@ async def test_scoped_codemode_does_not_persist_nested_opaque_strings() -> None:
             "items": ["another-secret"],
         }
 
-    scoped = local_codemode(CodeModeCapability(upper, result_adapter=project))
+    scoped = local_codemode(utility_from_tool(upper, result_adapter=project))
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
     await scoped.execute(_ctx(harness), {"code": "upper(value='safe'); output(None)"})
@@ -982,7 +1391,7 @@ async def test_scoped_codemode_treats_json_looking_strings_as_opaque() -> None:
     def project(_tool: HarnessTool, _output: BaseModel) -> str:
         return '{"score":1e9999}'
 
-    scoped = local_codemode(CodeModeCapability(upper, result_adapter=project))
+    scoped = local_codemode(utility_from_tool(upper, result_adapter=project))
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
     await scoped.execute(_ctx(harness), {"code": "upper(value='safe'); output(None)"})
@@ -1116,7 +1525,7 @@ def test_scoped_source_sizing_stops_after_crossing_limit() -> None:
 async def test_scoped_codemode_rejects_unsafe_projected_results(
     projection: Any,
 ) -> None:
-    scoped = local_codemode(CodeModeCapability(upper, result_adapter=projection))
+    scoped = local_codemode(utility_from_tool(upper, result_adapter=projection))
     harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[scoped])
 
     with pytest.raises(RuntimeError, match="Generated code execution failed"):
@@ -1125,13 +1534,12 @@ async def test_scoped_codemode_rejects_unsafe_projected_results(
 
 @pytest.mark.asyncio
 async def test_scoped_codemode_enforces_source_result_and_output_byte_limits() -> None:
-    harness = AgentHarness(model="test", model_client=UnusedModel())
+    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[upper])
     source_limited = local_codemode(limits=CodeModeLimits(max_source_bytes=1))
     with pytest.raises(ValueError, match="source exceeds maximum size"):
         await source_limited.execute(_ctx(harness), {"code": "é"})
 
     result_limited = local_codemode(
-        CodeModeCapability(upper, result_adapter=value_adapter),
         limits=CodeModeLimits(max_result_bytes=4),
     )
     with pytest.raises(RuntimeError, match="Generated code execution failed"):
@@ -1154,10 +1562,9 @@ async def test_scoped_codemode_result_policy_failure_remains_terminal_when_caugh
         return UpperOutput(value=input_value.value)
 
     scoped = local_codemode(
-        CodeModeCapability(count, result_adapter=value_adapter),
         limits=CodeModeLimits(max_result_bytes=8),
     )
-    harness = AgentHarness(model="test", model_client=UnusedModel())
+    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[count])
     code = """
 try:
     count(value='one')
@@ -1199,7 +1606,7 @@ async def test_scoped_codemode_preflights_isolated_result_transport(
         return UpperOutput(value=input_value.value)
 
     scoped = local_codemode(
-        CodeModeCapability(
+        utility_from_tool(
             transport_result,
             result_adapter=lambda _tool, _output: "x" * 127,
         ),
@@ -1257,7 +1664,7 @@ async def test_scoped_codemode_preflights_remote_result_envelope(
     )
     scoped = create_codemode_tool(
         capabilities=(
-            CodeModeCapability(
+            utility_from_tool(
                 transport_result,
                 result_adapter=lambda _tool, _output: "x" * 110,
             ),
@@ -1286,13 +1693,12 @@ async def test_scoped_codemode_counts_nested_calls_once_and_enforces_local_limit
     None
 ):
     scoped = local_codemode(
-        CodeModeCapability(upper, result_adapter=value_adapter),
         limits=CodeModeLimits(max_nested_calls=1),
     )
     harness = AgentHarness(
         model="test",
         model_client=UnusedModel(),
-        tools=[scoped],
+        tools=[scoped, upper],
         usage_limits=UsageLimits(max_tool_calls=10),
     )
 
@@ -1325,10 +1731,9 @@ async def test_scoped_codemode_nested_limit_remains_terminal_when_caught() -> No
         return UpperOutput(value=input_value.value)
 
     scoped = local_codemode(
-        CodeModeCapability(count, result_adapter=value_adapter),
         limits=CodeModeLimits(max_nested_calls=1),
     )
-    harness = AgentHarness(model="test", model_client=UnusedModel())
+    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[count])
     code = """
 count(value='one')
 try:
@@ -1367,11 +1772,12 @@ async def test_scoped_codemode_global_tool_limit_remains_terminal_when_caught() 
         calls.append(input_value.value)
         return UpperOutput(value=input_value.value)
 
-    scoped = local_codemode(CodeModeCapability(count, result_adapter=value_adapter))
+    scoped = local_codemode()
     harness = AgentHarness(
         model="test",
         model_client=UnusedModel(),
         usage_limits=UsageLimits(max_tool_calls=1),
+        tools=[count],
     )
     code = """
 count(value='one')
@@ -1433,10 +1839,11 @@ async def test_scoped_codemode_event_failures_are_redacted_and_terminal(
         ]
     )
     scoped = create_codemode_tool(
-        capabilities=(CodeModeCapability(event_target, result_adapter=value_adapter),),
         runner=runner,
     )
-    harness = AgentHarness(model="test", model_client=UnusedModel())
+    harness = AgentHarness(
+        model="test", model_client=UnusedModel(), tools=[event_target]
+    )
     original_emit = harness.emit
 
     async def failing_emit(
@@ -1492,10 +1899,11 @@ async def test_scoped_codemode_tool_authored_event_failure_is_terminal(
         ]
     )
     scoped = create_codemode_tool(
-        capabilities=(CodeModeCapability(event_target, result_adapter=value_adapter),),
         runner=runner,
     )
-    harness = AgentHarness(model="test", model_client=UnusedModel())
+    harness = AgentHarness(
+        model="test", model_client=UnusedModel(), tools=[event_target]
+    )
     original_emit = harness.emit
 
     async def failing_emit(
@@ -1539,10 +1947,11 @@ async def test_scoped_codemode_can_recover_from_ordinary_handler_failure() -> No
         ]
     )
     scoped = create_codemode_tool(
-        capabilities=(CodeModeCapability(recoverable, result_adapter=value_adapter),),
         runner=runner,
     )
-    harness = AgentHarness(model="test", model_client=UnusedModel())
+    harness = AgentHarness(
+        model="test", model_client=UnusedModel(), tools=[recoverable]
+    )
 
     result = await scoped.execute(_ctx(harness), {"code": "unused"})
 
@@ -1576,10 +1985,9 @@ async def test_scoped_codemode_unknown_capability_is_terminal() -> None:
         ]
     )
     scoped = create_codemode_tool(
-        capabilities=(CodeModeCapability(allowed, result_adapter=value_adapter),),
         runner=runner,
     )
-    harness = AgentHarness(model="test", model_client=UnusedModel())
+    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[allowed])
 
     with pytest.raises(ValueError, match="Unknown Code Mode capability: unknown"):
         await scoped.execute(_ctx(harness), {"code": "unused"})
@@ -1601,7 +2009,7 @@ async def test_scoped_codemode_emits_sanitized_nested_events_with_parent_id() ->
         value = SensitiveOutput.model_validate(output)
         return {"value": value.value, "token": "projected-secret"}
 
-    scoped = local_codemode(CodeModeCapability(inspect_value, result_adapter=project))
+    scoped = local_codemode(utility_from_tool(inspect_value, result_adapter=project))
     harness = AgentHarness(
         model="test",
         model_client=UnusedModel(),
@@ -1739,8 +2147,10 @@ def test_scoped_codemode_event_context_keeps_booleans_distinct() -> None:
 
 @pytest.mark.asyncio
 async def test_scoped_codemode_emits_projected_completion_event() -> None:
-    scoped = local_codemode(CodeModeCapability(upper, result_adapter=value_adapter))
-    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[scoped])
+    scoped = local_codemode()
+    harness = AgentHarness(
+        model="test", model_client=UnusedModel(), tools=[scoped, upper]
+    )
 
     await harness._execute_tool_calls(
         [
@@ -1789,7 +2199,7 @@ async def test_scoped_codemode_never_persists_raw_event_dictionary_keys() -> Non
             "password": "sensitive-result-value",
         }
 
-    scoped = local_codemode(CodeModeCapability(inspect_mapping, result_adapter=project))
+    scoped = local_codemode(utility_from_tool(inspect_mapping, result_adapter=project))
     harness = AgentHarness(model="test", model_client=UnusedModel())
 
     await scoped.execute(
@@ -1827,8 +2237,8 @@ async def test_scoped_codemode_records_nested_failure_before_propagating() -> No
     async def fail(_: AgentHarness, _input_value: UpperInput) -> UpperOutput:
         raise ValueError("secret failure detail")
 
-    scoped = local_codemode(CodeModeCapability(fail))
-    harness = AgentHarness(model="test", model_client=UnusedModel())
+    scoped = local_codemode()
+    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[fail])
 
     with pytest.raises(RuntimeError, match="Generated code execution failed"):
         await scoped.execute(_ctx(harness), {"code": "fail(value='safe')"})
@@ -1843,7 +2253,7 @@ async def test_scoped_codemode_records_nested_failure_before_propagating() -> No
     assert "secret failure detail" not in str(nested)
 
 
-def _secret_capability(secret: str) -> CodeModeCapability[Any]:
+def _secret_capability(secret: str) -> Callable[..., Any]:
     @tool(name="secret_value")
     async def secret_value(
         _context: ToolCallContext, _input_value: UpperInput
@@ -1853,7 +2263,7 @@ def _secret_capability(secret: str) -> CodeModeCapability[Any]:
     def project(_tool: HarnessTool, _output: BaseModel) -> str:
         return secret
 
-    return CodeModeCapability(secret_value, result_adapter=project)
+    return utility_from_tool(secret_value, result_adapter=project)
 
 
 async def _assert_reraised_secret_is_redacted(
@@ -1945,11 +2355,12 @@ async def test_scoped_codemode_cancels_pending_nested_callback_on_timeout() -> N
         finally:
             cancelled.set()
 
-    scoped = local_codemode(CodeModeCapability(wait))
+    scoped = local_codemode()
     harness = AgentHarness(
         model="test",
         model_client=UnusedModel(),
         usage_limits=UsageLimits(max_codemode_runtime_seconds=2),
+        tools=[wait],
     )
 
     with pytest.raises(RuntimeError, match="timed out"):
@@ -1972,8 +2383,8 @@ async def test_scoped_codemode_propagates_external_cancellation() -> None:
         finally:
             cancelled.set()
 
-    scoped = local_codemode(CodeModeCapability(wait))
-    harness = AgentHarness(model="test", model_client=UnusedModel())
+    scoped = local_codemode()
+    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[wait])
     execution = asyncio.create_task(
         scoped.execute(_ctx(harness), {"code": "wait(value='x')"})
     )
@@ -2066,10 +2477,9 @@ async def test_scoped_codemode_uses_injected_runner_without_sandbox(
         ]
     )
     scoped = create_codemode_tool(
-        capabilities=(CodeModeCapability(upper, result_adapter=value_adapter),),
         runner=runner,
     )
-    harness = AgentHarness(model="test", model_client=UnusedModel())
+    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[upper])
 
     result = await scoped.execute(
         _ctx(harness),
@@ -2080,7 +2490,9 @@ async def test_scoped_codemode_uses_injected_runner_without_sandbox(
     request = runner.requests[0]
     assert request.code == "upper('hello'); output({'done': True})"
     assert request.question == "Q?"
-    assert set(request.function_names["harness"]) == {"upper", "output"}
+    assert "upper" in request.function_names["harness"]
+    assert "output" in request.function_names["harness"]
+    assert "codemode" not in request.function_names["harness"]
     assert ("upper", {"value": "HELLO"}) in runner.results
     assert harness.usage.tool_calls == 1
 
@@ -2191,10 +2603,9 @@ async def test_scoped_codemode_enforces_cumulative_result_limit() -> None:
         return UpperOutput(value=input_value.value)
 
     scoped = local_codemode(
-        CodeModeCapability(count, result_adapter=value_adapter),
         limits=CodeModeLimits(max_result_bytes=20, max_cumulative_result_bytes=20),
     )
-    harness = AgentHarness(model="test", model_client=UnusedModel())
+    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[count])
     code = """
 count(value='hi')
 try:
@@ -2259,10 +2670,9 @@ async def test_scoped_codemode_concurrency_saturation() -> None:
         await asyncio.Future()
 
     scoped = local_codemode(
-        CodeModeCapability(wait),
         execution_limiter=CodeModeExecutionLimiter(1),
     )
-    harness = AgentHarness(model="test", model_client=UnusedModel())
+    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[wait])
     first = asyncio.create_task(
         scoped.execute(_ctx(harness), {"code": "wait(value='x')"})
     )
@@ -2299,8 +2709,8 @@ async def test_scoped_codemode_holds_slot_for_non_cooperative_callback(
 
     monkeypatch.setattr("hyperforge.codemode.sandbox.CALLBACK_CANCEL_TIMEOUT", 0.01)
     limiter = CodeModeExecutionLimiter(1)
-    scoped = local_codemode(CodeModeCapability(wait), execution_limiter=limiter)
-    harness = AgentHarness(model="test", model_client=UnusedModel())
+    scoped = local_codemode(execution_limiter=limiter)
+    harness = AgentHarness(model="test", model_client=UnusedModel(), tools=[wait])
     harness._turn_id = "originating-turn"
     execution = asyncio.create_task(
         scoped.execute(_ctx(harness), {"code": "wait(value='x')"})
