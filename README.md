@@ -31,6 +31,8 @@ Framework guides:
 
 - [Harness SDK](docs/harness-sdk.md): build asynchronous tool-loop agents with
   streaming events, persistence, limits, feedback, memory, and sub-agents.
+- [Procedural Graphs](docs/procedural-graphs.md): add advisory harness guidance
+  and run offline, validation-gated graph evolution.
 
 Agent packages:
 

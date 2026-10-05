@@ -78,6 +78,7 @@ class HarnessAgent:
             },
             feedback_enabled=self.config.feedback_enabled,
             usage_limits=self.config.usage_limits,
+            procedural_guidance=self.config.procedural_guidance,
         )
         history = await memory.get_chat_history()
         harness.add_messages(

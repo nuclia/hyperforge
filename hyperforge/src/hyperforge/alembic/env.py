@@ -15,7 +15,7 @@ config = context.config
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 migrations_dir = os.path.dirname(current_dir)

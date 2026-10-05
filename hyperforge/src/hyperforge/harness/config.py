@@ -7,6 +7,7 @@ from hyperforge.configure import get_agent_config_klass, get_driver_config_klass
 from hyperforge.driver import DriverConfig
 from hyperforge.harness_sdk import SYSTEM_PROMPT, ReasoningEffort, UsageLimits
 from hyperforge.models import MemoryConfig, Rules
+from hyperforge.procedural import ProceduralGuidanceConfig
 
 
 class HarnessAgentConfig(BaseModel):
@@ -18,6 +19,7 @@ class HarnessAgentConfig(BaseModel):
     disabled_core_tools: list[str] = Field(default_factory=list)
     feedback_enabled: bool = False
     usage_limits: UsageLimits = Field(default_factory=UsageLimits)
+    procedural_guidance: ProceduralGuidanceConfig | None = None
     rules: Rules = Field(default_factory=Rules)
     memory: MemoryConfig = Field(default_factory=MemoryConfig)
 
