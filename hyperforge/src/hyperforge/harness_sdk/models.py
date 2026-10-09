@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from enum import StrEnum
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -94,12 +94,19 @@ class HarnessEvent(BaseModel):
     payload: dict[str, Any] = Field(default_factory=dict)
 
 
+MemoryName = Annotated[
+    str, Field(min_length=1, max_length=64, pattern=r"^[a-z0-9][a-z0-9_-]*$")
+]
+
+
 class HarnessMemory(BaseModel):
     id: str
     scope: str
+    name: MemoryName
     text: str
     metadata: dict[str, Any] = Field(default_factory=dict)
     created_datetime: datetime = Field(default_factory=utcnow)
+    updated_datetime: datetime = Field(default_factory=utcnow)
 
 
 class HarnessInboxItem(BaseModel):
