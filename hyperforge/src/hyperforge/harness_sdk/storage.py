@@ -4,6 +4,7 @@ from collections import defaultdict
 from collections.abc import AsyncIterator
 from typing import Protocol
 
+from .memory import memory_namespace, memory_search_terms
 from .models import HarnessConversation, HarnessEvent, HarnessMemory
 
 
@@ -20,7 +21,11 @@ class HarnessStorageProtocol(Protocol):
 
     def iter_events(self, conversation_id: str) -> AsyncIterator[HarnessEvent]: ...
 
-    async def remember(self, memory: HarnessMemory) -> None: ...
+    async def get_memory(self, memory_id: str) -> HarnessMemory | None: ...
+
+    async def remember(self, memory: HarnessMemory) -> None:
+        """Upsert by ID, preserving created_datetime on replacement."""
+        ...
 
     async def recall(
         self,
@@ -28,6 +33,7 @@ class HarnessStorageProtocol(Protocol):
         scope: str,
         query: str,
         limit: int = 20,
+        namespace: str | None = None,
     ) -> list[HarnessMemory]: ...
 
     async def forget(self, memory_id: str) -> None: ...
@@ -73,7 +79,14 @@ class InMemoryHarnessStorage:
             yield event.model_copy(deep=True)
 
     async def remember(self, memory: HarnessMemory) -> None:
-        self.memories[memory.id] = memory.model_copy(deep=True)
+        stored = memory.model_copy(deep=True)
+        if existing := self.memories.get(memory.id):
+            stored.created_datetime = existing.created_datetime
+        self.memories[memory.id] = stored
+
+    async def get_memory(self, memory_id: str) -> HarnessMemory | None:
+        memory = self.memories.get(memory_id)
+        return memory.model_copy(deep=True) if memory is not None else None
 
     async def recall(
         self,
@@ -81,15 +94,32 @@ class InMemoryHarnessStorage:
         scope: str,
         query: str,
         limit: int = 20,
+        namespace: str | None = None,
     ) -> list[HarnessMemory]:
-        needle = query.casefold().strip()
+        terms = memory_search_terms(query)
+        if query.strip() and not terms:
+            return []
         values = [
             memory
             for memory in self.memories.values()
             if memory.scope == scope
-            and (not needle or needle in memory.text.casefold())
+            and (
+                namespace is None
+                or memory_namespace(scope, memory.metadata) == namespace
+            )
+            and (
+                not terms or terms & memory_search_terms(f"{memory.name} {memory.text}")
+            )
         ]
-        return [memory.model_copy(deep=True) for memory in values[-limit:]]
+        values.sort(
+            key=lambda memory: (
+                len(terms & memory_search_terms(f"{memory.name} {memory.text}")),
+                memory.updated_datetime,
+                memory.id,
+            ),
+            reverse=True,
+        )
+        return [memory.model_copy(deep=True) for memory in values[: max(0, limit)]]
 
     async def forget(self, memory_id: str) -> None:
         self.memories.pop(memory_id, None)

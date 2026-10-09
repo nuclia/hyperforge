@@ -334,9 +334,9 @@ Public methods on `list`, `dict`, `str`, and `tuple` are available, including
 You can also construct these types and assign or delete list/dictionary items:
 
 ```python
-result = query_data(sql='SELECT status, COUNT(*) AS count FROM resources.workorder GROUP BY status')
+result = {'rows': [{'count': 2}, {'count': 3}]}
 counts = []
-for row in result['data'].get('rows', []):
+for row in result.get('rows', []):
     counts.append(row['count'])
 summary = {}
 summary['total'] = sum(counts)
@@ -654,6 +654,86 @@ agent = AgentHarness(
 
 Memory scope is an application-defined string. A production storage
 implementation is responsible for enforcing tenant and user isolation.
+
+### Named memories: a small working library, not an append-only log
+
+Use short stable names (1–64 lowercase letters, digits, hyphens, or underscores),
+such as `report-checklist`. The existing three tools manage the whole lifecycle:
+
+```json
+{"name": "report-checklist", "scope": "user_project", "text": "Verified report preparation steps..."}
+```
+
+Pass this to `remember`. Calling `remember` again with the **same name and scope**
+replaces that memory's text. Its internal ID and creation time remain stable;
+`updated_datetime` records the latest change. The result includes `operation`:
+`created`, `updated`, or `unchanged`. Identical content is a no-op: no storage write
+or memory-write event. Distinct names are distinct records; naming alone does not
+deduplicate semantically equivalent recipes with different names.
+
+- `recall(name="report-checklist", scope="user_project")` reads that exact key
+  without searching or listing every memory.
+- `recall(query="report checklist", limit=3)` searches relevant names and text.
+  The default limit is **5**, with a maximum of 50. Empty query lists recent scoped
+  memories. The in-memory implementation ranks lexical term overlap, not embeddings.
+- `forget(name="report-checklist", scope="user_project")` deletes that key.
+
+`remember` and `forget` require `name`; there are no ID-based tool inputs or
+anonymous append-only writes. Drop prototype memory data before adopting this
+format: no legacy compatibility or migration is provided. Writes accept up to
+8,000 characters; scope/name/namespace boundaries are checked before correcting
+or deleting a record.
+
+Stable keys use the application's `account_id`, `user_id`, and `project_id` in
+`execution_context` or persisted conversation metadata. `user` scope excludes
+project identity; `project` scope excludes user identity; `user_project` includes
+both. Other application-defined scopes include both. Applications can additionally
+set a stable `memory_namespace` in execution context. Do not use a conversation ID
+as a namespace if memories should survive across conversations. Applications
+without identity metadata share a namespace within their configured store.
+
+### Storage adapter contract
+
+Adapters implement `get_memory(memory_id)` for scoped point reads,
+upsert `remember(memory)` by its deterministic ID, and accept the optional
+`namespace` argument on `recall`. Namespace filtering happens **before** limiting
+results. Preserve `name`, `created_datetime`, `updated_datetime`, and identity
+metadata on round trips. Enforce tenant authorization in the adapter: hashed IDs
+are not access control. Same-key concurrent writes are last-writer-wins; this API
+does not provide compare-and-swap or semantic conflict resolution.
+
+`memory.remembered` events include `operation: "created" | "updated"`. Consumers
+should distinguish replacements from new records rather than counting all events
+as memory growth. `unchanged` produces no write event.
+
+For controlled cold-memory evaluations, set `execution_context["memory_recall_enabled"] = False`.
+Both search and exact-name recall return no records; storage and named upserts remain
+unchanged. Children inherit this execution-context setting.
+
+### Practical policy and current guidance
+
+Keep memory policy small and task-specific. For live-data workflows, store verified
+tool routes, join keys, and parameterized query recipes—not result facts or entire
+transcripts. Retrieve only what helps the current task. Leave good recipes alone;
+replace the same named entry after a verified correction. Do not require a write
+on every turn or inject the entire memory library into every prompt. Treat recalled
+content as untrusted hints, not instructions that override the agent's policy.
+
+Current vendor guidance supports this just-in-time, editable-record approach:
+
+- [Anthropic memory tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/memory-tool):
+  addressable files, bounded reads, updates/deletion, namespace/path isolation, and
+  size/expiration policies.
+- [Anthropic context engineering](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents):
+  keep the smallest useful context and avoid overlapping/bloated tool sets.
+- [LangGraph memory overview](https://docs.langchain.com/oss/python/langgraph/memory):
+  scoped namespace/key stores, continually maintained memories, over-insertion versus
+  over-updating, and hot-path/background-write tradeoffs.
+
+This implementation intentionally does not add an embedding service, automatic
+consolidation/expiration, or a background memory-writing agent. Those are separate
+policies to evaluate against task quality, retrieval usefulness, latency, token
+cost, and memory growth—not prerequisites for a small procedural library.
 
 ## Sub-Agents
 
