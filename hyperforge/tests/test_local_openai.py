@@ -359,3 +359,31 @@ async def test_get_state_selects_local_openai_for_standard_workflows() -> None:
     assert state.manager.nua.model == "model"
     assert state.manager.nua.headers["authorization"] == "Bearer secret"
     await state.manager.aclose()
+
+
+@pytest.mark.asyncio
+async def test_get_state_passes_extra_headers_to_manager() -> None:
+    state = await get_state(
+        agent_id="agent",
+        config=RetrievalAgentConfig.model_validate(
+            {
+                "drivers": [],
+                "rules": {"rules": []},
+                "memory": {},
+                "workflow": {
+                    "id": "workflow",
+                    "name": "Workflow",
+                    "description": None,
+                    "parameters": None,
+                },
+                "preprocess": [],
+                "context": [],
+                "generation": [],
+                "postprocess": [],
+            }
+        ),
+        extra_headers={"x-allow-access-external-models": "true"},
+    )
+
+    assert state.manager.extra_headers == {"x-allow-access-external-models": "true"}
+    await state.manager.aclose()

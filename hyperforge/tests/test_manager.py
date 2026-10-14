@@ -134,3 +134,67 @@ async def test_manager_uses_default_headers_for_existing_nua_calls() -> None:
         "text", model="model", extra_headers=headers, kbid=None
     )
     assert nua.remi.await_args.kwargs["extra_headers"] == headers
+
+
+@pytest.mark.asyncio
+async def test_manager_sends_manager_level_extra_headers_on_every_call() -> None:
+    manager = Manager(extra_headers={"x-allow-access-external-models": "false"})
+    nua = AsyncMock()
+    manager.nua = nua
+    query = QueryRequest(text="question")
+    tracking = TrackingInfo(rao_id="rao", session="session", message="message")
+
+    await manager.query_predict(query, tracking=tracking)
+    await manager.remi("question", "answer", ["context"])
+
+    nua.query_predict.assert_awaited_once_with(
+        query,
+        kbid=None,
+        extra_headers={
+            "x-show-consumption": "true",
+            "x-origin": "RAO",
+            "x-client-ident": "rao",
+            "x-session": "session",
+            "x-message": "message",
+            "x-allow-access-external-models": "false",
+        },
+    )
+    assert nua.remi.await_args.kwargs["extra_headers"] == {
+        "x-show-consumption": "true",
+        "x-origin": "RAO",
+        "x-allow-access-external-models": "false",
+    }
+
+
+@pytest.mark.asyncio
+async def test_manager_per_call_extra_headers_override_manager_level() -> None:
+    manager = Manager(
+        extra_headers={"x-allow-access-external-models": "false", "x-other": "1"}
+    )
+    nua = AsyncMock()
+    manager.nua = nua
+    query = QueryRequest(text="question")
+
+    await manager.query_predict(
+        query, extra_headers={"x-allow-access-external-models": "true"}
+    )
+
+    nua.query_predict.assert_awaited_once_with(
+        query,
+        kbid=None,
+        extra_headers={
+            "x-show-consumption": "true",
+            "x-origin": "RAO",
+            "x-allow-access-external-models": "true",
+            "x-other": "1",
+        },
+    )
+
+
+@pytest.mark.asyncio
+async def test_manager_from_config_sets_extra_headers() -> None:
+    manager = await Manager.from_config(
+        drivers=[], nua=AsyncMock(), extra_headers={"x-test": "value"}
+    )
+
+    assert manager.extra_headers == {"x-test": "value"}
