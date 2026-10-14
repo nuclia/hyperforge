@@ -82,7 +82,6 @@ async def call_tool(
     agent_id: str,
     session: str,
     workflows: list[WorkflowData],
-    headers: Headers,
     name: str,
     arguments: dict[str, Any],
 ) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
@@ -96,13 +95,12 @@ async def call_tool(
             raise ResourceError(f"Missing required parameter: {parameter}")
 
     question = f"Calling tool: {workflow.description or workflow.name} with arguments: {arguments}"
-    request_headers = headers
-    if isinstance(app.settings, ApiSettings):
-        current_request = mcp_server.request_context.request
-        if not isinstance(current_request, Request):
-            raise ResourceError("Current MCP HTTP request is unavailable")
-        request_headers = current_request.headers
-    interaction_headers = _prepare_interaction_headers(app, agent_id, request_headers)
+    current_request = mcp_server.request_context.request
+    if not isinstance(current_request, Request):
+        raise ResourceError("Current MCP HTTP request is unavailable")
+    interaction_headers = _prepare_interaction_headers(
+        app, agent_id, current_request.headers
+    )
     user_id = interaction_headers.get("x-stf-user")
     if not user_id:
         raise ResourceError("Authenticated user identity is required")
@@ -324,7 +322,6 @@ async def _create_mcp_server(
             agent_id,
             session,
             workflows,
-            request.headers,
         )
     )
     mcp_server.list_prompts()(partial(list_prompts, prompts=prompts))

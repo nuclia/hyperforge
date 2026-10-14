@@ -54,7 +54,6 @@ def setup_call(monkeypatch, events):
         elicit_url=AsyncMock(return_value=ElicitResult(action="accept")),
         elicit_form=AsyncMock(),
     )
-    server = SimpleNamespace(request_context=SimpleNamespace(session=session))
     workflow = SimpleNamespace(
         name="ask", description="Ask", required=[], id="workflow"
     )
@@ -64,6 +63,17 @@ def setup_call(monkeypatch, events):
             "x-stf-account": "account",
             "x-stf-account-type": "basic",
         }
+    )
+    server = SimpleNamespace(
+        request_context=SimpleNamespace(
+            session=session,
+            request=Request(
+                {
+                    "type": "http",
+                    "headers": headers.raw,
+                }
+            ),
+        )
     )
     return app, server, workflow, headers, session, agent_manager
 
@@ -86,7 +96,6 @@ async def test_mcp_propagates_agent_error(monkeypatch):
             "agent",
             "session",
             [workflow],
-            headers,
             "ask",
             {},
         )
@@ -123,7 +132,6 @@ async def test_mcp_elicits_url_and_persists_sharefile_credentials(monkeypatch):
         "agent",
         "session",
         [workflow],
-        headers,
         "ask",
         {},
     )
@@ -169,7 +177,6 @@ async def test_mcp_returns_stored_credentials_without_elicitation(monkeypatch):
         "agent",
         "session",
         [workflow],
-        headers,
         "ask",
         {},
     )
@@ -208,7 +215,6 @@ async def test_mcp_discards_partial_stored_credentials(monkeypatch):
         "agent",
         "session",
         [workflow],
-        headers,
         "ask",
         {},
     )
@@ -244,7 +250,6 @@ async def test_mcp_rejects_partial_received_credentials(monkeypatch):
             "agent",
             "session",
             [workflow],
-            headers,
             "ask",
             {},
         )
@@ -284,7 +289,6 @@ async def test_mcp_validates_all_received_credentials_before_persisting(monkeypa
             "agent",
             "session",
             [workflow],
-            headers,
             "ask",
             {},
         )
@@ -293,11 +297,8 @@ async def test_mcp_validates_all_received_credentials_before_persisting(monkeypa
 
 
 @pytest.mark.asyncio
-async def test_mcp_production_uses_current_request_headers(monkeypatch):
+async def test_mcp_standalone_uses_current_request_headers(monkeypatch):
     app, server, workflow, headers, _, _ = setup_call(monkeypatch, [])
-    api_settings_type = type("ApiSettings", (), {})
-    monkeypatch.setattr(mcp_interaction, "ApiSettings", api_settings_type)
-    app.settings = api_settings_type()
     server.request_context.request = Request(
         {
             "type": "http",
@@ -326,12 +327,54 @@ async def test_mcp_production_uses_current_request_headers(monkeypatch):
         "agent",
         "session",
         [workflow],
-        headers,
         "ask",
         {},
     )
 
     assert captured_headers["authorization"] == "Bearer refreshed"
+
+
+@pytest.mark.asyncio
+async def test_mcp_standalone_forwards_refreshed_token_in_same_session(monkeypatch):
+    app, server, workflow, _, _, _ = setup_call(monkeypatch, [])
+    captured_authorization = []
+
+    async def stream_response(*args, **kwargs):
+        captured_authorization.append(
+            kwargs["interaction"].headers.get("authorization")
+        )
+        if False:
+            yield
+
+    monkeypatch.setattr(mcp_interaction, "stream_response", stream_response)
+
+    for token in ("initial-token", "refreshed-token"):
+        server.request_context.request = Request(
+            {
+                "type": "http",
+                "headers": [
+                    (b"authorization", f"Bearer {token}".encode()),
+                    (b"x-stf-user", b"user"),
+                    (b"x-stf-account", b"account"),
+                    (b"x-stf-account-type", b"basic"),
+                ],
+            }
+        )
+        await mcp_interaction.call_tool(
+            app,
+            server,
+            "account",
+            "agent",
+            "session",
+            [workflow],
+            "ask",
+            {},
+        )
+
+    assert captured_authorization == [
+        "Bearer initial-token",
+        "Bearer refreshed-token",
+    ]
 
 
 @pytest.mark.asyncio
@@ -384,7 +427,6 @@ async def test_mcp_rejects_provider_not_in_allowlist(monkeypatch):
             "agent",
             "session",
             [workflow],
-            headers,
             "ask",
             {},
         )
@@ -415,7 +457,6 @@ async def test_mcp_stops_when_url_elicitation_is_rejected(monkeypatch, action):
             "agent",
             "session",
             [workflow],
-            headers,
             "ask",
             {},
         )
