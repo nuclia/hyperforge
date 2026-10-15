@@ -106,9 +106,16 @@ class Manager:
     drivers: Dict[str, Driver]
     nua: AsyncNuaClient
 
-    def __init__(self, *, send_rao_origin: bool = True) -> None:
+    def __init__(
+        self,
+        *,
+        send_rao_origin: bool = True,
+        extra_headers: dict[str, str] | None = None,
+    ) -> None:
         self.drivers: Dict[str, Driver] = {}
         self.send_rao_origin = send_rao_origin
+        # Headers sent on every learning call made through this manager
+        self.extra_headers: dict[str, str] = dict(extra_headers or {})
 
     @classmethod
     async def from_config(
@@ -117,8 +124,9 @@ class Manager:
         nua: AsyncNuaClient,
         allow_private_network_endpoints: bool = False,
         send_rao_origin: bool = True,
+        extra_headers: dict[str, str] | None = None,
     ):
-        manager = cls(send_rao_origin=send_rao_origin)
+        manager = cls(send_rao_origin=send_rao_origin, extra_headers=extra_headers)
 
         manager.nua = nua
         for driver in drivers:
@@ -243,6 +251,7 @@ class Manager:
             headers["x-client-ident"] = tracking.rao_id
             headers["x-session"] = tracking.session
             headers["x-message"] = tracking.message
+        headers.update(self.extra_headers)
         if extra_headers is not None:
             headers.update(extra_headers)
         return headers

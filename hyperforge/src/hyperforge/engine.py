@@ -166,6 +166,7 @@ async def get_state(
     kbid: Optional[str] = None,
     local_openai_model_klass: Optional[type[NuaBaseModel]] = None,
     allow_private_network_endpoints: bool = False,
+    extra_headers: Optional[dict[str, str]] = None,
 ) -> State:
     nua: AsyncNuaClient
     if internal_nua:
@@ -214,6 +215,7 @@ async def get_state(
         drivers=config.drivers,
         nua=nua,
         allow_private_network_endpoints=allow_private_network_endpoints,
+        extra_headers=extra_headers,
     )
     if isinstance(config, HarnessAgentConfig):
         agent = await HarnessAgent.from_config_class(config)

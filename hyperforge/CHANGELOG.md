@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Added `extra_headers` to `Manager` / `Manager.from_config` / `engine.get_state`
+  to send default headers on every learning (NUA) call made through the manager.
+  Per-call `extra_headers` still take precedence.
 - Added explicit scoped Code Mode capabilities and child-tool inheritance policy.
 - Hardened scoped Code Mode with fail-closed remote execution, bounded JSON
   transport, execution limits, atomic callback cleanup, immutable sandbox
