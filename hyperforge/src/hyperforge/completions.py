@@ -132,7 +132,7 @@ class ChatCompletionRequest(BaseModel):
     model: str | None = None
     stream: bool = True
     temperature: float | None = None
-    max_tokens: int = 50_000
+    max_tokens: int | None = 50_000
     top_p: float | None = None
     frequency_penalty: float | None = None
     presence_penalty: float | None = None
