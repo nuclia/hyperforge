@@ -6,6 +6,7 @@ import math
 import threading
 import time
 import uuid
+from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable, NoReturn, Protocol, cast
 
@@ -19,24 +20,26 @@ from hyperforge.codemode import (
     encode_protocol_value,
     encode_sandbox_message,
 )
+from hyperforge.codemode.modules import ALLOWED_GLOBAL_MODULES
 from hyperforge.codemode.sandbox import MAX_PACKET_BYTES, settings
 from hyperforge.definition import FunctionDefinition
 
-from ..context import format_context
 from ..models import HarnessEventType
+from ..schema import compact_model_output_type
 from ..usage import UsageLimitExceeded
-from . import HarnessTool, ToolCallContext, ToolInheritancePolicy, tool
+from . import HarnessTool, ToolCallContext
 
 CODEMODE_TOOL_NAME = "codemode"
 OUTPUT_FUNCTION_NAME = "output"
 CODEMODE_USAGE_GUIDANCE = (
-    "Return the final result by calling output(value) exactly once. "
-    "Do not use print(); it is unavailable. "
-    "Available common built-ins are abs, bool, bytes, chr, complex, divmod, float, "
-    "hash, hex, id, int, isinstance, issubclass, len, oct, ord, pow, range, repr, "
-    "round, slice, sorted, str, sum, tuple, and zip; helpers such as all, any, min, "
-    "and max are unavailable. "
-    "For example, assign the result to a variable and finish with output(result)."
+    "Execute restricted Python code. Active external tools listed below are available as "
+    "functions with the same names and arguments. Core agent tools are unavailable. "
+    "Tool results are JSON data (dicts/lists); TypedDict describes their keys. "
+    "Supported: assignments, loops, conditionals, indexing, comprehensions, and builtins including len, "
+    "range, sum, and sorted. Imports and attributes on unapproved objects are unavailable. "
+    "Public list, dict, str, and tuple methods and list/dict item assignment are supported. "
+    "Private attributes and str.format/format_map are unavailable. "
+    "Return the final result by calling output(value) exactly once; do not use print()."
 )
 DEFAULT_MAX_SOURCE_BYTES = 64 * 1024
 DEFAULT_MAX_RESULT_BYTES = 1024 * 1024
@@ -65,6 +68,7 @@ RESERVED_CAPABILITY_NAMES = frozenset(
         "print",
         "printed",
         "question",
+        *ALLOWED_GLOBAL_MODULES,
         "save",
     }
 )
@@ -91,9 +95,6 @@ _EVENT_CONTEXT_MAX_TOTAL_BYTES = 4096
 _SOURCE_SIZE_CHUNK_CHARS = 4096
 _CAPABILITY_EVENT_FAILURE = "Code Mode capability failed"
 _POLICY_CHECK_FAILURE = "Code Mode policy check failed"
-type CodeModeResultAdapter[OutputT: BaseModel] = Callable[
-    [HarnessTool[Any, OutputT], OutputT], Any | Awaitable[Any]
-]
 type CodeModeDispatch = Callable[[RestrictedPythonTask], Awaitable[Any]]
 
 
@@ -110,20 +111,6 @@ class CodemodeOutput(BaseModel):
     value: Any = None
 
 
-def context_codemode_result_adapter[OutputT: BaseModel](
-    capability: HarnessTool[Any, OutputT], output: OutputT
-) -> Any:
-    """Project a result to the same formatted context shown to the model."""
-    return format_context(capability.context(output))
-
-
-def raw_codemode_result_adapter[OutputT: BaseModel](
-    _capability: HarnessTool[Any, OutputT], output: OutputT
-) -> Any:
-    """Explicitly expose the capability's complete JSON-mode output."""
-    return output.model_dump(mode="json")
-
-
 class CodeModeRunner(Protocol):
     """Execute a request and route worker callbacks through dispatch.
 
@@ -138,9 +125,10 @@ class CodeModeRunner(Protocol):
 
 
 @dataclass(frozen=True)
-class CodeModeCapability[OutputT: BaseModel]:
-    tool: HarnessTool[Any, OutputT]
-    result_adapter: CodeModeResultAdapter[OutputT] = context_codemode_result_adapter
+class _CodeModeFunction:
+    name: str
+    parameters: dict[str, Any]
+    execute: Callable[[ToolCallContext, RestrictedPythonTask], Awaitable[Any]]
 
 
 @dataclass(frozen=True)
@@ -196,155 +184,61 @@ class CodeModeExecutionLimiter:
 _process_execution_limiter = CodeModeExecutionLimiter()
 
 
-@tool(
-    name=CODEMODE_TOOL_NAME,
-    description=(
-        "Execute restricted Python code. Registered tools are available as functions; "
-        f"{CODEMODE_USAGE_GUIDANCE}"
-    ),
-)
-async def codemode(
-    context: ToolCallContext, input_value: CodemodeInput
-) -> CodemodeOutput:
-    harness = context.harness
-    tools = {
-        tool.name: tool
-        for tool in harness.iter_tools()
-        if tool.name != CODEMODE_TOOL_NAME
-    }
-    result = CodemodeOutput()
-
-    async def dispatch(task: RestrictedPythonTask) -> Any:
-        if task.function == OUTPUT_FUNCTION_NAME:
-            if task.args and task.keyword_args:
-                raise ValueError("output accepts either a positional or keyword value")
-            if len(task.args) > 1:
-                raise ValueError("output accepts one value")
-            result.value = task.args[0] if task.args else task.keyword_args.get("value")
-            return None
-
-        tool = tools.get(task.function)
-        if tool is None:
-            raise ValueError(f"Unknown codemode function: {task.function}")
-        harness.usage.tool_calls += 1
-        harness._check_limit("max_tool_calls", harness.usage.tool_calls)
-        arguments = _tool_arguments(tool, task.args, task.keyword_args)
-        output = await tool.execute(
-            ToolCallContext(harness=harness, name=tool.name), arguments
-        )
-        return output.model_dump(mode="json")
-
-    runner = (
-        SandboxRunner.remote(settings.sandbox_socket, dispatch)
-        if settings.sandbox_socket is not None
-        else SandboxRunner.isolated_process(dispatch)
-    )
-    definitions = {
-        name: FunctionDefinition(
-            name=name,
-            description=tool.description,
-            parameters=tool.parameters.get("properties", {}),
-        )
-        for name, tool in tools.items()
-    }
-    definitions[OUTPUT_FUNCTION_NAME] = FunctionDefinition(
-        name=OUTPUT_FUNCTION_NAME,
-        description="Set the value returned by codemode.",
-        parameters={"value": {}},
-    )
-    await runner.run(
-        WorkerExecutionRequest(
-            code=input_value.code,
-            question=input_value.question,
-            local_vars={},
-            global_vars={},
-            function_names={"harness": definitions},
-            max_runtime_seconds=harness.usage_limits.max_codemode_runtime_seconds,
-            max_memory_bytes=harness.usage_limits.max_codemode_memory_bytes,
-        )
-    )
-    return result
-
-
 def create_codemode_tool(
     *,
-    capabilities: tuple[CodeModeCapability[Any], ...],
+    capabilities: Iterable[Callable[..., Any]] = (),
     limits: CodeModeLimits = CodeModeLimits(),
     execution_limiter: CodeModeExecutionLimiter = _process_execution_limiter,
-    remote_required: bool = True,
+    remote_required: bool | None = True,
     runner: CodeModeRunner | None = None,
-    inheritance: ToolInheritancePolicy = ToolInheritancePolicy.DO_NOT_INHERIT,
     name: str = CODEMODE_TOOL_NAME,
     description: str | None = None,
 ) -> HarnessTool[CodemodeInput, CodemodeOutput]:
-    """Create a Code Mode tool with only the explicitly supplied capabilities.
+    """Create Code Mode with active agent tools and optional Python utilities.
+
+    Capabilities are trusted host-side sync or async functions, not agent tools.
+    Only their signatures are advertised; their results must be JSON worker values.
 
     ``runner`` defaults to the remote sandbox (or the isolated local process
     when ``remote_required=False``); inject a ``CodeModeRunner`` for
-    deterministic tests without any sandbox environment.
+    deterministic tests without any sandbox environment. ``remote_required=None``
+    selects remote execution when a sandbox socket is configured, otherwise local.
     """
-    if not isinstance(capabilities, tuple):
-        raise TypeError("capabilities must be an immutable tuple")
-    capability_map: dict[str, CodeModeCapability[Any]] = {}
+    capability_map: dict[str, _CodeModeFunction] = {}
+    signatures: list[str] = []
     for capability in capabilities:
-        if not isinstance(capability, CodeModeCapability):
-            raise TypeError("capabilities must contain CodeModeCapability values")
-        capability_name = capability.tool.name
-        if (
-            not capability_name.isascii()
-            or not capability_name.isidentifier()
-            or keyword.iskeyword(capability_name)
-            or capability_name.startswith("_")
-        ):
-            raise ValueError(
-                f"Code Mode capability name {capability_name!r} must be an ASCII "
-                "public Python identifier"
-            )
-        if capability_name in RESERVED_CAPABILITY_NAMES:
-            raise ValueError(
-                f"Code Mode capability name {capability_name!r} is reserved"
-            )
+        if not callable(capability) or isinstance(capability, HarnessTool):
+            raise TypeError("capabilities must contain Python functions, not tools")
+        capability_name = getattr(capability, "__name__", "")
+        _validate_function_name(capability_name)
         if capability_name in capability_map:
             raise ValueError(
                 f"Code Mode capability names must be unique: {capability_name}"
             )
-        if (
-            "agent_id" in capability.tool.input_model.model_fields
-            or "agent_id" in capability.tool.parameters.get("properties", {})
-        ):
-            raise ValueError(
-                f"Code Mode capability {capability_name!r} uses the reserved "
-                "'agent_id' input field"
-            )
-        capability_map[capability_name] = capability
-    scoped_capabilities = tuple(capabilities)
-    if inheritance == ToolInheritancePolicy.INHERIT:
-        non_inherited = sorted(
-            capability.tool.name
-            for capability in capabilities
-            if capability.tool.inheritance == ToolInheritancePolicy.DO_NOT_INHERIT
-        )
-        if non_inherited:
-            raise ValueError(
-                "An inherited Code Mode tool cannot include capabilities marked "
-                f"DO_NOT_INHERIT: {', '.join(non_inherited)}"
-            )
+        signature = inspect.signature(capability)
+        capability_map[capability_name] = _utility_function(capability, signature)
+        signatures.append(f"- {capability_name}{signature}")
 
     async def execute(
         context: ToolCallContext, input_value: CodemodeInput
     ) -> CodemodeOutput:
         harness = context.harness
         turn_id = harness.turn_id
+        requires_remote = (
+            remote_required
+            if remote_required is not None
+            else settings.sandbox_socket is not None
+        )
         if _utf8_exceeds_limit(input_value.code, limits.max_source_bytes):
             raise ValueError(
                 "Code Mode source exceeds maximum size: "
                 f"> {limits.max_source_bytes} bytes"
             )
-        socket = settings.sandbox_socket if runner is None and remote_required else None
+        socket = settings.sandbox_socket if runner is None and requires_remote else None
         sandbox_token = (
-            settings.sandbox_token if runner is None and remote_required else None
+            settings.sandbox_token if runner is None and requires_remote else None
         )
-        if runner is None and remote_required:
+        if runner is None and requires_remote:
             if socket is None:
                 raise RuntimeError(
                     "Remote Code Mode execution is required but SANDBOX_SOCKET "
@@ -354,35 +248,108 @@ def create_codemode_tool(
                 raise RuntimeError(
                     "Remote Code Mode execution is required but SANDBOX_TOKEN is absent"
                 )
+        functions = dict(capability_map)
+        for active_tool in _codemode_tools(harness):
+            _validate_function_name(active_tool.name)
+            if active_tool.name in functions:
+                raise ValueError(
+                    f"Code Mode utility conflicts with active tool: {active_tool.name}"
+                )
+            functions[active_tool.name] = _active_tool_function(active_tool)
         execution_limiter.acquire()
         return await _execute_scoped_codemode(
             harness,
             input_value,
-            scoped_capabilities,
+            functions,
             limits,
             socket,
             sandbox_token,
             execution_limiter,
             runner,
-            remote_required,
+            requires_remote,
             parent_call_id=context.id,
             turn_id=turn_id,
         )
 
     execute.__name__ = name
-    tool_description = _scoped_description(scoped_capabilities, description)
+    setattr(execute, "_codemode", True)
+    tool_description = _codemode_description(signatures, description)
+
+    def describe(harness: Any) -> str:
+        return _codemode_description(
+            signatures,
+            description,
+            tools=[
+                _tool_signature(active_tool) for active_tool in _codemode_tools(harness)
+            ],
+        )
+
     return HarnessTool(
         name=name,
         handler=execute,
         description=tool_description,
-        inheritance=inheritance,
+        description_factory=describe,
+    )
+
+
+def _codemode_tools(harness: Any) -> Iterable[HarnessTool[Any, Any]]:
+    return (
+        active_tool
+        for active_tool in harness.iter_tools(include_core=False)
+        if not getattr(active_tool.handler, "_codemode", False)
+    )
+
+
+def _tool_signature(active_tool: HarnessTool[Any, Any]) -> str:
+    return f"- def {active_tool.name}(...) -> {compact_model_output_type(active_tool.output_model)}"
+
+
+def _validate_function_name(name: str) -> None:
+    if (
+        not name.isascii()
+        or not name.isidentifier()
+        or keyword.iskeyword(name)
+        or name.startswith("_")
+    ):
+        raise ValueError(
+            f"Code Mode capability name {name!r} must be an ASCII public Python identifier"
+        )
+    if name in RESERVED_CAPABILITY_NAMES:
+        raise ValueError(f"Code Mode capability name {name!r} is reserved")
+
+
+def _active_tool_function(active_tool: HarnessTool[Any, Any]) -> _CodeModeFunction:
+    async def execute(context: ToolCallContext, task: RestrictedPythonTask) -> Any:
+        arguments = _scoped_tool_arguments(active_tool, task.args, task.keyword_args)
+        output = await active_tool.execute(context, arguments)
+        return output.model_dump(mode="json")
+
+    return _CodeModeFunction(
+        active_tool.name, active_tool.parameters.get("properties", {}), execute
+    )
+
+
+def _utility_function(
+    function: Callable[..., Any], signature: inspect.Signature
+) -> _CodeModeFunction:
+    async def execute(_context: ToolCallContext, task: RestrictedPythonTask) -> Any:
+        bound = signature.bind(*task.args, **task.keyword_args)
+        result = function(*bound.args, **bound.kwargs)
+        if inspect.isawaitable(result):
+            result = await result
+        return result
+
+    return _CodeModeFunction(
+        getattr(function, "__name__"),
+        {name: {} for name in signature.parameters},
+        execute,
     )
 
 
 async def _execute_scoped_codemode(
     harness: Any,
     input_value: CodemodeInput,
-    capabilities: tuple[CodeModeCapability[Any], ...],
+    capability_map: dict[str, _CodeModeFunction],
     limits: CodeModeLimits,
     socket: str | None,
     sandbox_token: str | None,
@@ -393,7 +360,6 @@ async def _execute_scoped_codemode(
     parent_call_id: str | None = None,
     turn_id: str | None = None,
 ) -> CodemodeOutput:
-    capability_map = {capability.tool.name: capability for capability in capabilities}
     result = CodemodeOutput()
     invocation_state = _InvocationState()
     output_state = _OutputState(invocation_state)
@@ -464,44 +430,36 @@ async def _execute_scoped_codemode(
             {
                 "call": {
                     "id": call_id,
-                    "name": capability.tool.name,
-                    "arguments": _sanitize_task_arguments(capability.tool, task),
+                    "name": capability.name,
+                    "arguments": _sanitize_task_arguments(capability, task),
                 },
                 **marker,
             },
         )
         started = time.perf_counter()
         try:
-            arguments = _scoped_tool_arguments(
-                capability.tool, task.args, task.keyword_args
-            )
-            output = await capability.tool.execute(
+            projected = await capability.execute(
                 ToolCallContext(
                     harness=harness,
-                    name=capability.tool.name,
+                    name=capability.name,
                     id=call_id,
                     turn_id=turn_id,
                     _emit_failure=event_failure,
                 ),
-                arguments,
+                task,
             )
             invocation_state.raise_if_failed()
-            projected = capability.result_adapter(capability.tool, output)
-            if inspect.isawaitable(projected):
-                projected = await projected
             try:
                 normalized, result_bytes = _normalize_worker_value(
                     projected,
                     limits.max_result_bytes,
-                    f"Code Mode result from {capability.tool.name}",
+                    f"Code Mode result from {capability.name}",
                 )
             except (TypeError, ValueError) as exc:
                 invocation_state.latch(exc)
                 raise
             try:
-                transport_label = (
-                    f"Code Mode result transport from {capability.tool.name}"
-                )
+                transport_label = f"Code Mode result transport from {capability.name}"
                 if remote_required:
                     encode_sandbox_message(
                         SandboxMessage.Response(result=normalized),
@@ -533,7 +491,7 @@ async def _execute_scoped_codemode(
                 HarnessEventType.TOOL_FAILED,
                 {
                     "call_id": call_id,
-                    "tool": capability.tool.name,
+                    "tool": capability.name,
                     "result": {"error": type(exc).__name__},
                     "duration_ms": round((time.perf_counter() - started) * 1000, 3),
                     **marker,
@@ -544,7 +502,7 @@ async def _execute_scoped_codemode(
             if isinstance(exc, _CapabilityEventFailure):
                 raise RuntimeError(_CAPABILITY_EVENT_FAILURE) from None
             raise RuntimeError(
-                f"Code Mode capability {capability.tool.name!r} failed "
+                f"Code Mode capability {capability.name!r} failed "
                 f"({type(exc).__name__})"
             ) from None
         else:
@@ -552,7 +510,7 @@ async def _execute_scoped_codemode(
                 HarnessEventType.TOOL_COMPLETED,
                 {
                     "call_id": call_id,
-                    "tool": capability.tool.name,
+                    "tool": capability.name,
                     "result": sanitized_result,
                     "duration_ms": round((time.perf_counter() - started) * 1000, 3),
                     "result_bytes": result_bytes,
@@ -571,12 +529,12 @@ async def _execute_scoped_codemode(
                 else SandboxRunner.isolated_process(dispatch)
             )
         definitions = {
-            capability.tool.name: FunctionDefinition(
-                name=capability.tool.name,
-                description=capability.tool.description,
-                parameters=capability.tool.parameters.get("properties", {}),
+            capability.name: FunctionDefinition(
+                name=capability.name,
+                description="",
+                parameters=capability.parameters,
             )
-            for capability in capabilities
+            for capability in capability_map.values()
         }
         definitions[OUTPUT_FUNCTION_NAME] = FunctionDefinition(
             name=OUTPUT_FUNCTION_NAME,
@@ -812,10 +770,12 @@ def _utf8_size(value: str) -> int:
 
 
 def _sanitize_task_arguments(
-    capability: HarnessTool[Any, Any], task: RestrictedPythonTask
+    capability: _CodeModeFunction, task: RestrictedPythonTask
 ) -> Any:
     try:
-        arguments = _scoped_tool_arguments(capability, task.args, task.keyword_args)
+        arguments = _function_arguments(
+            capability.name, capability.parameters, task.args, task.keyword_args
+        )
     except ValueError:
         return {"invalid": True}
     return _sanitize_event_value(arguments)
@@ -864,48 +824,25 @@ def _nested_event_context(harness: Any) -> dict[str, Any]:
     return {"execution_context": context} if context else {}
 
 
-def _scoped_description(
-    capabilities: tuple[CodeModeCapability[Any], ...], description: str | None = None
+def _codemode_description(
+    signatures: list[str],
+    description: str | None = None,
+    *,
+    tools: list[str] | None = None,
 ) -> str:
-    introduction = (
-        description
-        or "Execute restricted Python code using only the scoped capabilities below."
+    introduction = CODEMODE_USAGE_GUIDANCE
+    if description:
+        introduction = f"{description}\n\n{introduction}"
+    introduction += (
+        "\n\nAvailable Python modules (public attributes only):\n"
+        + "\n".join(f"- {name}" for name in ALLOWED_GLOBAL_MODULES)
     )
-    introduction = f"{introduction} {CODEMODE_USAGE_GUIDANCE}"
-    if not capabilities:
-        return introduction
-    definitions = []
-    for capability in capabilities:
-        schema = json.dumps(
-            capability.tool.parameters,
-            ensure_ascii=False,
-            separators=(",", ":"),
-            sort_keys=True,
-        )
-        definitions.append(
-            f"{capability.tool.name}: {capability.tool.description or 'No description.'} "
-            f"Arguments JSON Schema: {schema}"
-        )
-    return f"{introduction}\nCapability functions:\n" + "\n".join(definitions)
-
-
-def _tool_arguments(
-    tool: HarnessTool[Any, Any],
-    args: tuple[Any, ...],
-    keyword_args: dict[str, Any],
-) -> dict[str, Any]:
-    if not args:
-        return keyword_args
-    names = list(tool.input_model.model_fields)
-    if len(args) > len(names):
-        raise ValueError(f"Too many positional arguments for {tool.name}")
-    arguments = dict(zip(names, args, strict=False))
-    duplicates = arguments.keys() & keyword_args.keys()
-    if duplicates:
-        duplicate = next(iter(duplicates))
-        raise ValueError(f"Multiple values for argument {duplicate!r}")
-    arguments.update(keyword_args)
-    return arguments
+    introduction += "\nPublic attributes are also available on classes and instances defined by these modules."
+    if tools:
+        introduction += "\n\nAvailable tool functions:\n" + "\n".join(tools)
+    if signatures:
+        introduction += "\n\nAvailable utility functions:\n" + "\n".join(signatures)
+    return introduction + "\n\nExample:\n```python\nx = 1\nx = x * 2\noutput(x)\n```"
 
 
 def _scoped_tool_arguments(
@@ -913,11 +850,22 @@ def _scoped_tool_arguments(
     args: tuple[Any, ...],
     keyword_args: dict[str, Any],
 ) -> dict[str, Any]:
+    return _function_arguments(
+        tool.name, tool.parameters.get("properties", {}), args, keyword_args
+    )
+
+
+def _function_arguments(
+    name: str,
+    parameters: dict[str, Any],
+    args: tuple[Any, ...],
+    keyword_args: dict[str, Any],
+) -> dict[str, Any]:
     if not args:
         return keyword_args
-    names = list(tool.parameters.get("properties", {}))
+    names = list(parameters)
     if len(args) > len(names):
-        raise ValueError(f"Too many positional arguments for {tool.name}")
+        raise ValueError(f"Too many positional arguments for {name}")
     arguments = dict(zip(names, args, strict=False))
     duplicates = arguments.keys() & keyword_args.keys()
     if duplicates:
@@ -927,18 +875,20 @@ def _scoped_tool_arguments(
     return arguments
 
 
+# The convenience tool shares the factory's dispatch, limits, and output contract.
+# Preserve automatic remote/local selection for the convenience tool; production
+# callers should use the factory's fail-closed remote default.
+codemode = create_codemode_tool(remote_required=None)
+
+
 __all__ = [
-    "CodeModeCapability",
     "CodeModeDispatch",
     "CodeModeExecutionLimiter",
     "CodeModeLimits",
-    "CodeModeResultAdapter",
     "CodeModeRunner",
     "CodemodeInput",
     "CodemodeOutput",
     "RESERVED_CAPABILITY_NAMES",
     "codemode",
-    "context_codemode_result_adapter",
     "create_codemode_tool",
-    "raw_codemode_result_adapter",
 ]
