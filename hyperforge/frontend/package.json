@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@types/uuid": "^9.0.7",
-    "@vitejs/plugin-vue": "6.0.8",
+    "@vitejs/plugin-vue": "6.0.9",
     "esbuild": "0.28.1",
     "postcss": "8.5.23",
     "typescript": "^5.3.3",
