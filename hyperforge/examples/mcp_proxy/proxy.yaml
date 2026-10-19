@@ -1,0 +1,21 @@
+# Paths are relative to the repository root (the proxy is started with
+# `uv run --directory <repo root>`). Install the npm upstreams once with
+# `npm --prefix hyperforge/examples/mcp_proxy/node ci` (see README).
+name: hyperforge-example-proxy
+default_search_limit: 5
+servers:
+  - name: inventory
+    description: Warehouse inventory and product stock levels
+    command: uv
+    args: [run, --no-sync, python, hyperforge/examples/mcp_proxy/inventory_server.py]
+    tags: [warehouse, stock]
+  - name: everything
+    description: MCP reference test server with example tools
+    command: hyperforge/examples/mcp_proxy/node/node_modules/.bin/mcp-server-everything
+    timeout_seconds: 60
+  - name: filesystem
+    description: Read files in the example directory
+    command: hyperforge/examples/mcp_proxy/node/node_modules/.bin/mcp-server-filesystem
+    args: [hyperforge/examples/mcp_proxy]
+    timeout_seconds: 60
+    include_tools: [read_text_file, list_directory, search_files, get_file_info]
