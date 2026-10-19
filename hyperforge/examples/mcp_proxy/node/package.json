@@ -1,0 +1,8 @@
+{
+  "name": "mcp-proxy-example-upstreams",
+  "private": true,
+  "dependencies": {
+    "@modelcontextprotocol/server-everything": "^2026.8.31",
+    "@modelcontextprotocol/server-filesystem": "^2026.8.31"
+  }
+}
