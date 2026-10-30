@@ -770,35 +770,23 @@ class AgentHarness:
         self._check_limit("max_turns", self.usage.turns)
         result = AgentResult(text="")
         call_id = uuid.uuid4().hex
-        request_messages = self.messages
         if self._procedural:
             self._procedural.decision_id = call_id
-            request_messages = await self._procedural.messages(
-                self, self._guidance_client
-            )
-        history_head_event_id = self._last_event_id
-        await self.emit(
-            HarnessEventType.LLM_STARTED,
-            {
-                "call_id": call_id,
-                "history_head_event_id": history_head_event_id,
-                "message_count": len(request_messages),
-                "model": self.model,
-                "reasoning_effort": self.reasoning_effort,
-                "tools": [tool.name for tool in selected],
-            },
-        )
         trace_id: str | None = None
         resolved_model: str | None = None
         usage_recorded = False
         cache_query = None
-        if self._decision_cache is not None and not self._procedural:
+        if self._decision_cache is not None:
+            # Keyed on persisted history plus the procedural configuration, not on
+            # the generated guidance text: guidance is derived from both, and a hit
+            # skips the guidance call as well as the decision.
             cache_query = self._decision_cache.query(
                 model=self.model,
                 reasoning_effort=self.reasoning_effort,
-                messages=request_messages,
+                messages=self.messages,
                 tools=selected,
                 policy=self._tool_cache_policy,
+                procedural=self._procedural_cache_key(),
             )
         if cache_query is not None and self._decision_cache is not None:
             entry = await self._decision_cache.lookup(
@@ -807,6 +795,10 @@ class AgentHarness:
                 policy=self._tool_cache_policy,
             )
             if entry is not None:
+                history_head_event_id = self._last_event_id
+                await self._emit_llm_started(
+                    call_id, history_head_event_id, len(self.messages), selected
+                )
                 result.text = entry.decision.text
                 result.reasoning = entry.decision.reasoning
                 result.tool_calls = entry.decision.tool_calls
@@ -832,6 +824,15 @@ class AgentHarness:
                     decision_cache={"status": "hit", "entry_id": entry.id},
                 )
                 return result
+        request_messages = self.messages
+        if self._procedural:
+            request_messages = await self._procedural.messages(
+                self, self._guidance_client
+            )
+        history_head_event_id = self._last_event_id
+        await self._emit_llm_started(
+            call_id, history_head_event_id, len(request_messages), selected
+        )
         try:
             self._model_started.set()
             async for delta in self.model_client.stream(
@@ -935,6 +936,35 @@ class AgentHarness:
             decision_cache={"status": "miss"} if cache_query is not None else None,
         )
         return result
+
+    async def _emit_llm_started(
+        self,
+        call_id: str,
+        history_head_event_id: str | None,
+        message_count: int,
+        tools: list[HarnessTool],
+    ) -> None:
+        await self.emit(
+            HarnessEventType.LLM_STARTED,
+            {
+                "call_id": call_id,
+                "history_head_event_id": history_head_event_id,
+                "message_count": message_count,
+                "model": self.model,
+                "reasoning_effort": self.reasoning_effort,
+                "tools": [tool.name for tool in tools],
+            },
+        )
+
+    def _procedural_cache_key(self) -> dict[str, Any] | None:
+        if not self._procedural:
+            return None
+        return {
+            "graph": self._procedural.version,
+            "config": self._procedural.config.model_dump(
+                mode="json", exclude={"graph"}
+            ),
+        }
 
     def _tool_cache_policy(self, name: str) -> ToolCachePolicy:
         tool = self._tools.get(name)

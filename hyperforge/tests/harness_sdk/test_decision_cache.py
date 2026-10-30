@@ -15,6 +15,8 @@ from hyperforge.harness_sdk import (
     ToolCachePolicy,
     tool,
 )
+from hyperforge.procedural.graph import ProceduralGraph
+from hyperforge.procedural.guidance import ProceduralGuidanceConfig
 
 
 class NameInput(BaseModel):
@@ -192,3 +194,51 @@ async def test_children_keep_their_own_cache_stack() -> None:
         assert warm.calls["parent"] == cold.calls["parent"] - 2
         # Child: its own describe decision replays; the answer is live.
         assert warm.calls["child"] == 1
+
+
+class GuidanceModel:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    async def stream(self, **kwargs) -> AsyncIterator[ModelDelta]:
+        self.calls += 1
+        yield ModelDelta(text=f"guidance {uuid4().hex}")
+
+
+async def test_procedural_guidance_is_keyed_by_graph() -> None:
+    storage = InMemoryDecisionCacheStorage()
+    schema_version["value"] = "v1"
+    skeleton = ProceduralGraph.skeleton()
+    changed = skeleton.model_copy(
+        update={
+            "edges": tuple(
+                edge.model_copy(update={"guidance": "Describe first."})
+                for edge in skeleton.edges
+            )
+        }
+    )
+
+    async def run_guided(graph: ProceduralGraph) -> tuple[list, int, int]:
+        model, guidance = ScriptedModel(["describe"]), GuidanceModel()
+        harness = AgentHarness(
+            model="m",
+            model_client=model,
+            tools=[describe],
+            procedural_guidance=ProceduralGuidanceConfig(graph=graph),
+            guidance_client=guidance,
+            decision_cache=DecisionCache(storage=storage),
+        )
+        events = [event async for event in harness.run("count orders")]
+        assert harness._decision_cache is not None
+        await harness._decision_cache.flush()
+        statuses = [
+            event.payload.get("decision_cache", {}).get("status")
+            for event in events
+            if event.type == HarnessEventType.LLM_COMPLETED
+        ]
+        return statuses, model.calls, guidance.calls
+
+    assert await run_guided(skeleton) == (["miss", "miss"], 2, 2)
+    # Same graph: the hit skips both guidance and inference despite new guidance text.
+    assert await run_guided(skeleton) == (["hit", "miss"], 1, 1)
+    assert await run_guided(changed) == (["miss", "miss"], 2, 2)
