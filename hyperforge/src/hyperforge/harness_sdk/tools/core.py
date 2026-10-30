@@ -6,6 +6,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from ..cache import ToolCachePolicy
 from ..models import HarnessEventType, HarnessMemory, HarnessMessage
 from . import HarnessTool, ToolCallContext, tool
 
@@ -176,7 +177,7 @@ async def forget(context: ToolCallContext, input_value: ForgetInput) -> DictOutp
     return DictOutput(value={"id": input_value.id})
 
 
-@tool()
+@tool(cache_policy=ToolCachePolicy.SIMILAR)
 async def spawn_agent(
     context: ToolCallContext, input_value: SpawnAgentInput
 ) -> DictOutput:
