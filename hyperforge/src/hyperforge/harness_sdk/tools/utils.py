@@ -9,6 +9,7 @@ from jsonschema import ValidationError as JsonSchemaValidationError
 from jsonschema import validate as validate_json_schema
 from pydantic import BaseModel, ValidationError
 
+from ..cache import ToolCachePolicy
 from ..context import make_context
 from ..models import (
     HarnessContextReference,
@@ -94,6 +95,7 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
     context_factory: ContextFactory[OutputT] | None = None
     lazy_load: bool = False
     inheritance: ToolInheritancePolicy = ToolInheritancePolicy.INHERIT
+    cache_policy: ToolCachePolicy = ToolCachePolicy.NONE
     input_model: type[InputT] = field(init=False)
     output_model: type[OutputT] = field(init=False)
     _parameters: dict[str, Any] = field(init=False, repr=False)
@@ -168,6 +170,7 @@ def tool(
     context_factory: ContextFactory[Any] | None = None,
     lazy_load: bool = False,
     inheritance: ToolInheritancePolicy = ToolInheritancePolicy.INHERIT,
+    cache_policy: ToolCachePolicy = ToolCachePolicy.NONE,
 ) -> Callable[[ToolHandler[Any, Any]], HarnessTool[Any, Any]]:
     """Create a harness tool from an annotated async handler."""
 
@@ -181,6 +184,7 @@ def tool(
             context_factory=context_factory,
             lazy_load=lazy_load,
             inheritance=inheritance,
+            cache_policy=cache_policy,
         )
 
     return decorate

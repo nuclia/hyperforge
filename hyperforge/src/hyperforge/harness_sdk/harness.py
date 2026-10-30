@@ -18,6 +18,12 @@ from hyperforge.procedural.guidance import (
 )
 
 from .agents import published_agent_to_tools
+from .cache import (
+    CachedDecision,
+    DecisionCache,
+    DecisionCacheRuntime,
+    ToolCachePolicy,
+)
 from .clients import ModelClient, ReasoningEffort
 from .context import format_context
 from .models import (
@@ -84,6 +90,7 @@ class HarnessConfig:
     feedback_enabled: bool
     usage_limits: UsageLimits
     event_queue_size: int
+    decision_cache: DecisionCache | None = None
 
 
 @dataclass
@@ -312,6 +319,7 @@ class AgentHarness:
         event_queue_size: int = DEFAULT_EVENT_QUEUE_SIZE,
         procedural_guidance: ProceduralGuidanceConfig | None = None,
         guidance_client: ModelClient | None = None,
+        decision_cache: DecisionCache | None = None,
     ) -> None:
         if event_queue_size <= 0:
             raise ValueError("event_queue_size must be positive")
@@ -339,6 +347,7 @@ class AgentHarness:
             feedback_enabled=feedback_enabled,
             usage_limits=normalized_limits,
             event_queue_size=event_queue_size,
+            decision_cache=decision_cache,
         )
         self.model = self._config.model
         self.reasoning_effort = self._config.reasoning_effort
@@ -387,6 +396,9 @@ class AgentHarness:
         )
         self._guidance_client = guidance_client or model_client
         self._failed_procedural_calls: set[str] = set()
+        self._decision_cache = (
+            DecisionCacheRuntime(decision_cache) if decision_cache else None
+        )
         if self._procedural:
             self._procedural.config.graph.check_tools(self._tools)
 
@@ -779,6 +791,47 @@ class AgentHarness:
         trace_id: str | None = None
         resolved_model: str | None = None
         usage_recorded = False
+        cache_query = None
+        if self._decision_cache is not None and not self._procedural:
+            cache_query = self._decision_cache.query(
+                model=self.model,
+                reasoning_effort=self.reasoning_effort,
+                messages=request_messages,
+                tools=selected,
+                policy=self._tool_cache_policy,
+            )
+        if cache_query is not None and self._decision_cache is not None:
+            entry = await self._decision_cache.lookup(
+                cache_query,
+                tools={tool.name: tool for tool in selected},
+                policy=self._tool_cache_policy,
+            )
+            if entry is not None:
+                result.text = entry.decision.text
+                result.reasoning = entry.decision.reasoning
+                result.tool_calls = entry.decision.tool_calls
+                if result.text:
+                    await self.emit(
+                        HarnessEventType.TEXT_DELTA,
+                        {"text": result.text},
+                        persist=False,
+                    )
+                if result.reasoning:
+                    await self.emit(
+                        HarnessEventType.REASONING_DELTA,
+                        {"text": result.reasoning},
+                        persist=False,
+                    )
+                await self._emit_llm_result(
+                    HarnessEventType.LLM_COMPLETED,
+                    call_id,
+                    history_head_event_id,
+                    result,
+                    None,
+                    None,
+                    decision_cache={"status": "hit", "entry_id": entry.id},
+                )
+                return result
         try:
             self._model_started.set()
             async for delta in self.model_client.stream(
@@ -862,6 +915,16 @@ class AgentHarness:
                 trace_id=trace_id,
                 model=resolved_model or self.model,
             ) from exc
+        if cache_query is not None and self._decision_cache is not None:
+            self._decision_cache.save(
+                cache_query,
+                CachedDecision(
+                    text=result.text,
+                    reasoning=result.reasoning,
+                    tool_calls=result.tool_calls,
+                ),
+                self._tool_cache_policy,
+            )
         await self._emit_llm_result(
             HarnessEventType.LLM_COMPLETED,
             call_id,
@@ -869,8 +932,13 @@ class AgentHarness:
             result,
             trace_id,
             resolved_model,
+            decision_cache={"status": "miss"} if cache_query is not None else None,
         )
         return result
+
+    def _tool_cache_policy(self, name: str) -> ToolCachePolicy:
+        tool = self._tools.get(name)
+        return tool.cache_policy if tool is not None else ToolCachePolicy.NONE
 
     async def _emit_llm_result(
         self,
@@ -882,6 +950,7 @@ class AgentHarness:
         resolved_model: str | None,
         *,
         error: str | None = None,
+        decision_cache: dict[str, Any] | None = None,
     ) -> None:
         payload: dict[str, Any] = {
             "call_id": call_id,
@@ -899,6 +968,8 @@ class AgentHarness:
         }
         if error is not None:
             payload["error"] = error
+        if decision_cache is not None:
+            payload["decision_cache"] = decision_cache
         await self.emit(event_type, payload)
 
     async def __aenter__(self) -> AgentHarness:
@@ -1257,6 +1328,12 @@ class AgentHarness:
         }
         if include_history:
             child.messages = list(self.messages)
+        if self._decision_cache is not None:
+            child._decision_cache = self._decision_cache.child(
+                include_history=include_history,
+                messages=child.messages,
+                policy=self._tool_cache_policy,
+            )
         return child
 
 
