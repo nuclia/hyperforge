@@ -270,6 +270,7 @@ class DecisionCacheRuntime:
         messages: Sequence[HarnessMessage],
         tools: Sequence[Any],
         policy: Callable[[str], ToolCachePolicy],
+        procedural: Mapping[str, Any] | None = None,
     ) -> DecisionCacheQuery | None:
         if self.unavailable or not self.enabled:
             return None
@@ -283,6 +284,7 @@ class DecisionCacheRuntime:
                 "lineage": self.lineage,
                 "model": model,
                 "reasoning_effort": reasoning_effort,
+                "procedural": procedural,
                 "tools": [
                     [tool.name, tool.description, tool.parameters, tool.cache_policy]
                     for tool in tools
