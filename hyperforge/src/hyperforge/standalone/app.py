@@ -321,6 +321,10 @@ class StandaloneApplication(FastAPI):
     def settings(self) -> ServerSettings:
         return self._server_settings
 
+    @property
+    def mcp_settings(self) -> StandaloneSettings:
+        return self._standalone_settings
+
     # ------------------------------------------------------------------
     # Lifecycle
     # ------------------------------------------------------------------

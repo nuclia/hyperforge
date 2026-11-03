@@ -1,8 +1,9 @@
 import asyncio
 import json
 import uuid
+from contextlib import asynccontextmanager
 from functools import partial
-from typing import TYPE_CHECKING, Any, Iterable, Sequence
+from typing import TYPE_CHECKING, Any, AsyncIterator, Iterable, Sequence
 
 from fastapi import Header, HTTPException
 from mcp.server.fastmcp.exceptions import ResourceError
@@ -283,12 +284,10 @@ def _get_mcp_auth_config(app: "HTTPApplication", agent_id: str):
 
 
 def _get_first_enabled_mcp_auth_config(app: "HTTPApplication"):
-    agents_cfg = getattr(app, "_agents_cfg", None)
-    if isinstance(agents_cfg, dict):
-        for agent_id in agents_cfg:
-            auth_config = get_enabled_mcp_auth(agents_cfg, agent_id)
-            if auth_config is not None:
-                return auth_config
+    for agent_id in app._agents_cfg:
+        auth_config = get_enabled_mcp_auth(app._agents_cfg, agent_id)
+        if auth_config is not None:
+            return auth_config
     return None
 
 
@@ -300,6 +299,17 @@ async def _create_mcp_server(
     account: str,
     max_request_bytes: int,
 ) -> ManagedMCPServer:
+    runtime_settings = app.mcp_settings
+
+    @asynccontextmanager
+    async def mcp_lifespan(server: MCPServer) -> AsyncIterator[dict[str, Any]]:
+        managed_server.active_sessions += 1
+        try:
+            async with default_lifespan(server) as context:
+                yield context
+        finally:
+            managed_server.release_session()
+
     agent_manager: AgentManager = request.app.agent_manager
     workflows, agent_config, prompts = await asyncio.gather(
         agent_manager.workflows_list(account=account, agent_id=agent_id),
@@ -310,7 +320,7 @@ async def _create_mcp_server(
         name=agent_id,
         version="1.0.0",
         instructions=agent_config.instructions,
-        lifespan=default_lifespan,
+        lifespan=mcp_lifespan,
     )
     mcp_server.list_tools()(partial(list_tools, workflows))
     mcp_server.call_tool()(
@@ -331,9 +341,12 @@ async def _create_mcp_server(
         json_response=True,
         stateless=False,
         security_settings=None,
+        session_idle_timeout=runtime_settings.mcp_session_idle_ttl_seconds,
         max_request_body_size=max_request_bytes,
     )
-    managed_server = ManagedMCPServer(manager)
+    managed_server = ManagedMCPServer(
+        manager, max_sessions=runtime_settings.mcp_max_sessions_per_server
+    )
     await managed_server.start()
     return managed_server
 
@@ -374,9 +387,7 @@ class _MCPTransportResponse(Response):
             return await receive()
 
         if self.request.method == "GET":
-            await self.managed_server.manager.handle_request(
-                scope, patched_receive, send
-            )
+            await self.managed_server.handle_request(scope, patched_receive, send)
             return
 
         response_status = 200
@@ -404,7 +415,7 @@ class _MCPTransportResponse(Response):
                 elif not response_too_large:
                     body_chunks.append(chunk)
 
-        await self.managed_server.manager.handle_request(
+        await self.managed_server.handle_request(
             scope, patched_receive, intercepting_send
         )
         if response_too_large:
@@ -498,20 +509,6 @@ async def mcp_interaction_protected_resource_metadata(
 
 
 @router.delete("/api/v1/agent/{agent_id}/session/{session}/mcp", tags=["MCP"])
-@requires_one([AgentRole.MEMBER])
-async def mcp_handler_delete(
-    request: Request,
-    agent_id: str,
-    session: str,
-    x_stf_user: str = Header(..., include_in_schema=False),
-    x_stf_account: str = Header(..., include_in_schema=False),
-    x_stf_account_type: str = Header(..., include_in_schema=False),
-):
-    app: HTTPApplication = request.app
-    key = (x_stf_account, x_stf_user, x_stf_account_type, agent_id, session)
-    await app.mcp_server_pool.remove(key)
-
-
 @router.get("/api/v1/agent/{agent_id}/session/{session}/mcp", tags=["MCP"])
 @router.post("/api/v1/agent/{agent_id}/session/{session}/mcp", tags=["MCP"])
 @requires_one([AgentRole.MEMBER])
@@ -524,7 +521,11 @@ async def interaction_mcp_handler(
     x_stf_account_type: str = Header(..., include_in_schema=False),
 ):
     app: HTTPApplication = request.app
-    runtime_settings = getattr(app, "_standalone_settings", app.settings)
+    if request.method in {"GET", "DELETE"} and not request.headers.get(
+        "mcp-session-id"
+    ):
+        raise HTTPException(status_code=400, detail="Missing Mcp-Session-Id")
+    runtime_settings = app.mcp_settings
     max_request_bytes = runtime_settings.mcp_max_request_bytes
     max_response_bytes = runtime_settings.mcp_max_response_bytes
     content_length = request.headers.get("content-length")
