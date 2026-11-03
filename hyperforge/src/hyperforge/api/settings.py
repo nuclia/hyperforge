@@ -43,5 +43,6 @@ class Settings(BaseSettings):
     mcp_max_request_bytes: int = Field(default=1024 * 1024, ge=1)
     mcp_max_response_bytes: int = Field(default=4 * 1024 * 1024, ge=1)
     mcp_max_servers: int = Field(default=100, ge=1)
+    mcp_max_sessions_per_server: int = Field(default=100, ge=1)
     mcp_session_idle_ttl_seconds: int = Field(default=1800, ge=1)
     mcp_startup_timeout_seconds: int = Field(default=30, ge=1)

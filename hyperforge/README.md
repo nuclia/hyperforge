@@ -82,6 +82,30 @@ All settings are provided through environment variables consumed by Pydantic `Ba
 | `LOAD_MODULES` | Comma-separated list of agent package modules to load at startup |
 | `NUCLIA_ZONE` | Nuclia zone (default `arag`) |
 | `NUCLIA_PUBLIC_URL` | Public Nuclia URL template (default `https://{zone}.nuclia.com`) |
+| `MCP_MAX_SERVERS` | Maximum cached MCP managers (default `100`) |
+| `MCP_MAX_SESSIONS_PER_SERVER` | Maximum concurrent connections per MCP manager (default `100`) |
+| `MCP_SESSION_IDLE_TTL_SECONDS` | Idle lifetime of each MCP connection and cached manager (default `1800`) |
+
+### MCP connections
+
+API and standalone applications expose their configured MCP limits through the
+typed `mcp_settings` property, without falling back to session-server settings.
+
+Multiple clients can use the same `/api/v1/agent/{agent_id}/session/{session}/mcp`
+URL, including `session/ephemeral`. Each initialization receives its own
+`Mcp-Session-Id`; subsequent requests and DELETE must include that ID. DELETE
+only terminates the requested connection. Missing IDs on GET or DELETE return 400;
+unknown or expired IDs return 404. Clients should initialize a new connection
+after a 404, not reuse the expired ID.
+
+Managers whose last connection has closed can be evicted immediately when the
+pool is full.
+
+MCP transports remain process-local. Multi-replica deployments must route an
+authenticated user's initialization and subsequent requests to the same API
+replica using a stable, trusted identity header. Hashing only `Mcp-Session-Id`
+does not work because initialization has no session ID. Pod restarts or changes
+to the replica set can still require reinitialization.
 
 ### Standalone A2A
 

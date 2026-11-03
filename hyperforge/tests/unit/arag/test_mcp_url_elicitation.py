@@ -380,9 +380,7 @@ async def test_mcp_standalone_forwards_refreshed_token_in_same_session(monkeypat
 @pytest.mark.asyncio
 async def test_mcp_transport_releases_lease_when_handling_fails():
     managed_server = SimpleNamespace(
-        manager=SimpleNamespace(
-            handle_request=AsyncMock(side_effect=RuntimeError("transport failed"))
-        ),
+        handle_request=AsyncMock(side_effect=RuntimeError("transport failed")),
         active_requests=1,
     )
 
