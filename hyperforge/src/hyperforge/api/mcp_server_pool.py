@@ -1,5 +1,4 @@
 import asyncio
-import json
 import time
 from collections.abc import Awaitable, Callable
 from typing import Any
@@ -9,17 +8,25 @@ from fastapi import HTTPException
 from mcp.server.streamable_http import MCP_SESSION_ID_HEADER
 from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from starlette.requests import Request
+from starlette.responses import Response
+from starlette.types import Message, Receive, Scope, Send
+
+from hyperforge.api import logger
 
 MCPServerKey = tuple[str, str, str, str, str]
 MCPServerFactory = Callable[[], Awaitable["ManagedMCPServer"]]
 
 
 class ManagedMCPServer:
-    def __init__(self, manager: StreamableHTTPSessionManager):
+    def __init__(self, manager: StreamableHTTPSessionManager, max_sessions: int = 100):
         self.manager = manager
         self.started = asyncio.Event()
         self.task: asyncio.Task[None] | None = None
-        self.session_created = False
+        self.active_sessions = 0
+        self.max_sessions = max_sessions
+        self._session_creation_lock = anyio.Lock()
+        self._session_closed = anyio.Event()
+        self.has_been_leased = False
         self.active_requests = 0
         self.last_used = time.monotonic()
 
@@ -56,6 +63,7 @@ class ManagedMCPServer:
             await asyncio.gather(self.task, return_exceptions=True)
 
     def reserve_request(self) -> None:
+        self.has_been_leased = True
         self.active_requests += 1
         self.last_used = time.monotonic()
 
@@ -65,26 +73,42 @@ class ManagedMCPServer:
         self.active_requests -= 1
         self.last_used = time.monotonic()
 
-    def accept_request(self, request: Request) -> bool:
-        if request.headers.get(MCP_SESSION_ID_HEADER):
-            return True
-        if self.session_created:
-            return False
-        self.session_created = True
-        return True
+    def release_session(self) -> None:
+        self.active_sessions -= 1
+        self._session_closed.set()
+        self._session_closed = anyio.Event()
 
-    def is_reinitialization(self, request: Request, body: bytes) -> bool:
-        if (
-            not self.session_created
-            or request.method != "POST"
-            or request.headers.get(MCP_SESSION_ID_HEADER)
-        ):
-            return False
-        try:
-            message = json.loads(body)
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            return False
-        return isinstance(message, dict) and message.get("method") == "initialize"
+    async def handle_request(self, scope: Scope, receive: Receive, send: Send) -> None:
+        request = Request(scope)
+        if request.method == "POST" and not request.headers.get(MCP_SESSION_ID_HEADER):
+            async with self._session_creation_lock:
+                if self.active_sessions >= self.max_sessions:
+                    response = Response(
+                        "MCP session capacity is exhausted", status_code=503
+                    )
+                    await response(scope, receive, send)
+                    return
+                await self.manager.handle_request(scope, receive, send)
+        elif request.method == "DELETE":
+            async with self._session_creation_lock:
+                session_closed = self._session_closed
+                status: int | None = None
+
+                async def observe_send(message: Message) -> None:
+                    nonlocal status
+                    if message["type"] == "http.response.start":
+                        status = message["status"]
+                    await send(message)
+
+                await self.manager.handle_request(scope, receive, observe_send)
+                if status == 200:
+                    await session_closed.wait()
+                    # SDK 1.x retains explicitly terminated transports.
+                    session_id = request.headers["mcp-session-id"]
+                    self.manager._server_instances.pop(session_id, None)
+                    self.manager._session_owners.pop(session_id, None)
+        else:
+            await self.manager.handle_request(scope, receive, send)
 
 
 class MCPRequestLease:
@@ -109,7 +133,7 @@ class MCPServerPool:
         self._idle_ttl_seconds = idle_ttl_seconds
         self._startup_timeout_seconds = startup_timeout_seconds
         self._servers: dict[MCPServerKey, ManagedMCPServer] = {}
-        self._creating: dict[MCPServerKey, asyncio.Task[Any]] = {}
+        self._creating: dict[MCPServerKey, asyncio.Task[ManagedMCPServer]] = {}
         self._retired_tasks: set[asyncio.Task[Any]] = set()
         self._lock = anyio.Lock()
         self._shutting_down = False
@@ -123,10 +147,6 @@ class MCPServerPool:
         body: bytes,
         factory: MCPServerFactory,
     ) -> MCPRequestLease:
-        current_task = asyncio.current_task()
-        if current_task is None:
-            raise RuntimeError("MCP request task is unavailable")
-
         stale_server = None
         async with self._lock:
             self._ensure_running()
@@ -139,28 +159,38 @@ class MCPServerPool:
                 and time.monotonic() - server.last_used >= self._idle_ttl_seconds
             ):
                 stale_server = self._servers.pop(key)
-                stale_server.close()
+                self._retire_server(stale_server)
                 server = None
-            if server is not None and server.is_reinitialization(request, body):
-                if server.active_requests:
-                    raise HTTPException(
-                        status_code=409,
-                        detail="MCP session is still active for this path",
-                    )
-                stale_server = self._servers.pop(key)
-                stale_server.close()
-                server = None
-
             if server is not None:
-                return self._lease(server, request)
-            if key in self._creating:
-                raise HTTPException(
-                    status_code=409,
-                    detail="MCP session initialization is already in progress",
+                return self._lease(server)
+            if request.headers.get(MCP_SESSION_ID_HEADER):
+                raise HTTPException(status_code=404, detail="MCP session not found")
+            if request.method != "POST":
+                raise HTTPException(status_code=400, detail="Missing Mcp-Session-Id")
+            creating_task = self._creating.get(key)
+            if creating_task is None:
+                self._reserve_capacity()
+                creating_task = asyncio.create_task(
+                    self._create_server(key, factory, stale_server)
                 )
-            self._reserve_capacity()
-            self._creating[key] = current_task
+                self._creating[key] = creating_task
+                creating_task.add_done_callback(self._log_creation_failure)
 
+        created = await asyncio.shield(creating_task)
+        async with self._lock:
+            self._ensure_running()
+            if self._servers.get(key) is not created:
+                raise HTTPException(
+                    status_code=503, detail="MCP server initialization was interrupted"
+                )
+            return self._lease(created)
+
+    async def _create_server(
+        self,
+        key: MCPServerKey,
+        factory: MCPServerFactory,
+        stale_server: ManagedMCPServer | None,
+    ) -> ManagedMCPServer:
         candidate = None
         registered = False
         try:
@@ -172,18 +202,25 @@ class MCPServerPool:
             async with self._lock:
                 self._ensure_running()
                 self._evict_for_capacity()
-                lease = self._lease(candidate, request)
                 self._servers[key] = candidate
                 self._creating.pop(key, None)
                 registered = True
-                return lease
+                return candidate
         except BaseException:
             if candidate is not None and not registered:
                 await candidate.stop()
             async with self._lock:
-                if self._creating.get(key) is current_task:
+                if self._creating.get(key) is asyncio.current_task():
                     self._creating.pop(key, None)
             raise
+
+    @staticmethod
+    def _log_creation_failure(task: asyncio.Task[ManagedMCPServer]) -> None:
+        if not task.cancelled() and (error := task.exception()) is not None:
+            logger.error(
+                "MCP server initialization failed",
+                exc_info=(type(error), error, error.__traceback__),
+            )
 
     async def remove(self, key: MCPServerKey) -> None:
         async with self._lock:
@@ -257,12 +294,7 @@ class MCPServerPool:
         if self._shutting_down:
             raise HTTPException(status_code=503, detail="MCP service is shutting down")
 
-    def _lease(self, server: ManagedMCPServer, request: Request) -> MCPRequestLease:
-        if not server.accept_request(request):
-            raise HTTPException(
-                status_code=409,
-                detail="MCP session already initialized for this path",
-            )
+    def _lease(self, server: ManagedMCPServer) -> MCPRequestLease:
         server.reserve_request()
         return MCPRequestLease(server)
 
@@ -281,7 +313,7 @@ class MCPServerPool:
             for key, server in self._servers.items()
             if server.active_requests == 0
             and (
-                not server.session_created
+                (server.has_been_leased and server.active_sessions == 0)
                 or now - server.last_used >= self._idle_ttl_seconds
             )
         ]
@@ -292,6 +324,10 @@ class MCPServerPool:
             )
         key, server = min(candidates, key=lambda item: item[1].last_used)
         self._servers.pop(key)
+
+        self._retire_server(server)
+
+    def _retire_server(self, server: ManagedMCPServer) -> None:
         server.close()
         if server.task is not None:
             self._retired_tasks.add(server.task)

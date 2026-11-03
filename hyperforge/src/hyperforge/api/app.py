@@ -83,6 +83,10 @@ class HTTPApplication(FastAPI):
             for extra_middleware in self.extra_middlewares:
                 self.add_middleware(extra_middleware)
 
+    @property
+    def mcp_settings(self) -> Settings:
+        return self.settings
+
     async def startup(self) -> None:
         GLOBAL_REGISTRY.clear()
         await setup_telemetry(SERVICE_NAME)
