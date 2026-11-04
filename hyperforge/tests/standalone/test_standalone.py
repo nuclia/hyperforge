@@ -328,10 +328,13 @@ async def test_standalone_mcp_list_tools(standalone_http: str):
     mcp_url = f"http://{standalone_http}/api/v1/agent/{AGENT_ID}/session/ephemeral/mcp"
 
     http_client = httpx.AsyncClient(timeout=30)
-    async with streamable_http_client(mcp_url, http_client=http_client) as (
-        read_stream,
-        write_stream,
-        _,
+    async with (
+        asyncio.timeout(20),
+        streamable_http_client(mcp_url, http_client=http_client) as (
+            read_stream,
+            write_stream,
+            _,
+        ),
     ):
         assert read_stream is not None and write_stream is not None, (
             "Expected both read and write streams from streamable_http_client"
@@ -354,10 +357,13 @@ async def test_standalone_mcp_call_tool(standalone_http: str):
     mcp_url = f"http://{standalone_http}/api/v1/agent/{AGENT_ID}/session/ephemeral/mcp"
 
     http_client = httpx.AsyncClient(timeout=30)
-    async with streamable_http_client(mcp_url, http_client=http_client) as (
-        read_stream,
-        write_stream,
-        _,
+    async with (
+        asyncio.timeout(20),
+        streamable_http_client(mcp_url, http_client=http_client) as (
+            read_stream,
+            write_stream,
+            _,
+        ),
     ):
         assert read_stream is not None and write_stream is not None, (
             "Expected both read and write streams from streamable_http_client"
@@ -506,9 +512,22 @@ async def test_mcp_session_capacity_is_reclaimed_after_delete(
     url = f"/api/v1/agent/{AGENT_ID}/session/ephemeral/mcp"
     first = await initialize_mcp(standalone_client, url)
     second = await initialize_mcp(standalone_client, url)
-    full = await standalone_client.post(url)
+    full = await standalone_client.post(
+        url,
+        headers={"Accept": "application/json, text/event-stream"},
+        json={
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "protocolVersion": "2025-03-26",
+                "capabilities": {},
+                "clientInfo": {"name": "test", "version": "1"},
+            },
+        },
+    )
     assert full.status_code == 503
-    assert full.text == "MCP session capacity is exhausted"
+    assert full.json()["detail"] == "MCP session capacity is exhausted"
     assert (await mcp_tools(standalone_client, url, second)).status_code == 200
     deleted = await standalone_client.delete(url, headers=mcp_headers(first))
     assert deleted.status_code == 200
@@ -534,7 +553,7 @@ async def test_mcp_idle_sessions_expire_independently(
     assert (await mcp_tools(standalone_client, url, first)).status_code == 404
     assert (await mcp_tools(standalone_client, url, second)).status_code == 200
     managed = next(iter(standalone_app.mcp_server_pool._servers.values()))
-    assert managed.active_sessions == 1
+    assert await managed.manager.session_count() == 1
 
 
 async def test_mcp_pool_reclaims_capacity_after_last_connection_closes(
@@ -565,9 +584,8 @@ async def test_mcp_connection_churn_does_not_retain_deleted_transports(
         assert (
             await standalone_client.delete(url, headers=mcp_headers(session_id))
         ).status_code == 200
-        assert managed.active_sessions == 1
-        assert set(managed.manager._server_instances) == {survivor}
-        assert session_id not in managed.manager._session_owners
+        assert await managed.manager.session_count() == 1
+        assert not managed.manager._tasks
     assert (await mcp_tools(standalone_client, url, survivor)).status_code == 200
 
 
@@ -575,13 +593,13 @@ async def test_mcp_get_requires_session_id_without_allocating_a_transport(
     standalone_client: AsyncClient, standalone_app: StandaloneApplication
 ):
     url = f"/api/v1/agent/{AGENT_ID}/session/ephemeral/mcp"
-    session_id = await initialize_mcp(standalone_client, url)
+    await initialize_mcp(standalone_client, url)
     response = await standalone_client.get(url, headers={"Accept": "text/event-stream"})
     assert response.status_code == 400
     assert response.json()["detail"] == "Missing Mcp-Session-Id"
     managed = next(iter(standalone_app.mcp_server_pool._servers.values()))
-    assert managed.active_sessions == 1
-    assert set(managed.manager._server_instances) == {session_id}
+    assert await managed.manager.session_count() == 1
+    assert not managed.manager._tasks
 
 
 async def test_mcp_sdk_clients_can_share_url_and_close_independently(
@@ -595,8 +613,6 @@ async def test_mcp_sdk_clients_can_share_url_and_close_independently(
         ):
             await first.initialize()
             managed = next(iter(standalone_app.mcp_server_pool._servers.values()))
-            while managed.active_requests == 0:
-                await asyncio.sleep(0.01)
             async with (
                 streamable_http_client(url) as (second_read, second_write, second_id),
                 ClientSession(second_read, second_write) as second,
@@ -610,7 +626,7 @@ async def test_mcp_sdk_clients_can_share_url_and_close_independently(
                     assert not result.isError
             tools = await first.list_tools()
             assert "ask" in [tool.name for tool in tools.tools]
-            assert managed.active_sessions == 1
+            assert await managed.manager.session_count() == 1
 
 
 async def test_standalone_mcp_sessions_are_independent(standalone_http: str):

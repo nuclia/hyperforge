@@ -389,10 +389,8 @@ async def test_mcp_transport_releases_lease_when_handling_fails():
 
     managed_server.release_request = release_request
     response = mcp_interaction._MCPTransportResponse(
-        Request({"type": "http", "method": "POST", "headers": []}),
         MCPRequestLease(managed_server),
         b"",
-        1024,
     )
 
     with pytest.raises(RuntimeError, match="transport failed"):

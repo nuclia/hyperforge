@@ -53,20 +53,14 @@ def test_standalone_a2a_settings_reuse_shared_validation():
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("with_redis", [False, True])
-async def test_standalone_shutdown_delegates_resource_cleanup_to_session_manager(
-    with_redis,
-):
+async def test_standalone_shutdown_delegates_resource_cleanup_to_session_manager():
     app = StandaloneApplication.__new__(StandaloneApplication)
-    app.mcp_session_router = AsyncMock() if with_redis else None
     app.mcp_server_pool = AsyncMock()
     app.a2a_server = AsyncMock()
     app.session_manager = AsyncMock()
 
     await app._shutdown()
 
-    if with_redis:
-        app.mcp_session_router.shutdown.assert_awaited_once()
     app.mcp_server_pool.shutdown.assert_awaited_once()
     app.a2a_server.stop.assert_awaited_once_with(grace=5)
     app.session_manager.finalize.assert_awaited_once()

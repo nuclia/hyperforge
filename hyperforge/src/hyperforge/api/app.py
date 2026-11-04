@@ -1,5 +1,4 @@
 from contextlib import asynccontextmanager
-from functools import partial
 from typing import Any, Optional
 
 import prometheus_client
@@ -15,8 +14,8 @@ from starlette.responses import PlainTextResponse
 from hyperforge.api import SERVICE_NAME, logger, v1
 from hyperforge.api.authentication import RaoAuthenticationBackend
 from hyperforge.api.logging import set_sentry
-from hyperforge.api.mcp_redis import RedisMCPSessionRouter
 from hyperforge.api.mcp_server_pool import MCPServerPool
+from hyperforge.api.mcp_sessions import MCPSessionStore
 from hyperforge.api.settings import Settings
 from hyperforge.broker import Broker
 from hyperforge.broker.redis import RedisBroker
@@ -47,6 +46,7 @@ async def health_alive():
 
 
 class HTTPApplication(FastAPI):
+    mcp_sessions: MCPSessionStore
     agent_manager: AgentManager
     arag_search: NucliaDBAsync
     arag_writer: NucliaDBAsync
@@ -74,7 +74,6 @@ class HTTPApplication(FastAPI):
         self.settings = settings
         self.data_manager_settings = data_manager_settings
         self._agents_cfg = {}
-        self.mcp_session_router: RedisMCPSessionRouter | None = None
         self.include_router(v1.router)
         self.include_router(router)
         self.add_middleware(
@@ -156,25 +155,15 @@ class HTTPApplication(FastAPI):
             settings=self.data_manager_settings
         )
         await self.agent_manager.initialize()
-        self.mcp_session_router = RedisMCPSessionRouter(
-            self.broker.client,
-            partial(v1.mcp_interaction.local_mcp_response, self),
-            invalidate_sessions=self.mcp_server_pool.invalidate_sessions,
-            session_ttl=self.settings.mcp_session_idle_ttl_seconds,
-            max_request_bytes=self.settings.mcp_max_request_bytes,
-            max_response_bytes=self.settings.mcp_max_response_bytes,
-        )
+        self.mcp_sessions = MCPSessionStore(self.broker.client)
         for load_module in self.settings.load_modules:
             try:
                 scan(load_module)
                 load_all_configurations(load_module)
             except ImportError:
                 logger.error(f"Module {load_module} could not be loaded")
-        await self.mcp_session_router.start()
 
     async def shutdown(self) -> None:
-        if self.mcp_session_router is not None:
-            await self.mcp_session_router.shutdown()
         if hasattr(self, "mcp_server_pool"):
             await self.mcp_server_pool.shutdown()
         if hasattr(self, "agent_manager"):

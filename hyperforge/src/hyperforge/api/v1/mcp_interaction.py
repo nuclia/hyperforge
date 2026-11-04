@@ -1,16 +1,13 @@
 import asyncio
 import json
 import uuid
-from contextlib import asynccontextmanager
 from functools import partial
-from typing import TYPE_CHECKING, Any, AsyncIterator, Iterable, Sequence, TypeAlias
+from typing import TYPE_CHECKING, Any, Iterable, Sequence, TypeAlias
 
 from fastapi import Header, HTTPException
 from mcp.server.fastmcp.exceptions import ResourceError
 from mcp.server.lowlevel.helper_types import ReadResourceContents
 from mcp.server.lowlevel.server import Server as MCPServer
-from mcp.server.lowlevel.server import lifespan as default_lifespan
-from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from mcp.types import (
     EmbeddedResource,
     GetPromptResult,
@@ -34,6 +31,7 @@ from hyperforge.api.mcp_server_pool import (
     MCPRequestLease,
     MCPServerKey,
 )
+from hyperforge.api.mcp_transport import MCPTransport, control_response
 from hyperforge.api.models import InteractionRequest
 from hyperforge.api.settings import Settings as ApiSettings
 from hyperforge.api.v1.interaction import WebsocketReceiver, stream_response
@@ -216,7 +214,7 @@ async def call_tool(
                 websocket.queue.put_nowait(
                     UserToAgentInteraction(
                         request_id=feedback.request_id,
-                        response=result.content,  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
+                        response=json.dumps(result.content),
                     )
                 )
         elif msg.operation == AnswerOperation.ANSWER:
@@ -297,21 +295,10 @@ def _get_first_enabled_mcp_auth_config(app: "HTTPApplication"):
 async def _create_mcp_server(
     app: "MCPApplication",
     request: Request,
-    agent_id: str,
-    session: str,
-    account: str,
-    max_request_bytes: int,
+    key: MCPServerKey,
 ) -> ManagedMCPServer:
+    account, _, _, agent_id, session = key
     runtime_settings = app.mcp_settings
-
-    @asynccontextmanager
-    async def mcp_lifespan(server: MCPServer) -> AsyncIterator[dict[str, Any]]:
-        managed_server.active_sessions += 1
-        try:
-            async with default_lifespan(server) as context:
-                yield context
-        finally:
-            managed_server.release_session()
 
     agent_manager: AgentManager = request.app.agent_manager
     workflows, agent_config, prompts = await asyncio.gather(
@@ -323,7 +310,6 @@ async def _create_mcp_server(
         name=agent_id,
         version="1.0.0",
         instructions=agent_config.instructions,
-        lifespan=mcp_lifespan,
     )
     mcp_server.list_tools()(partial(list_tools, workflows))
     mcp_server.call_tool()(
@@ -339,17 +325,15 @@ async def _create_mcp_server(
     )
     mcp_server.list_prompts()(partial(list_prompts, prompts=prompts))
     mcp_server.get_prompt()(partial(get_prompt, prompts))
-    manager = StreamableHTTPSessionManager(
+    manager = MCPTransport(
         app=mcp_server,
-        json_response=True,
-        stateless=False,
-        security_settings=None,
-        session_idle_timeout=runtime_settings.mcp_session_idle_ttl_seconds,
-        max_request_body_size=max_request_bytes,
+        store=app.mcp_sessions,
+        key=key,
+        session_ttl=runtime_settings.mcp_session_idle_ttl_seconds,
+        max_sessions=runtime_settings.mcp_max_sessions_per_server,
+        max_response_bytes=runtime_settings.mcp_max_response_bytes,
     )
-    managed_server = ManagedMCPServer(
-        manager, max_sessions=runtime_settings.mcp_max_sessions_per_server
-    )
+    managed_server = ManagedMCPServer(manager)
     await managed_server.start()
     return managed_server
 
@@ -357,17 +341,13 @@ async def _create_mcp_server(
 class _MCPTransportResponse(Response):
     def __init__(
         self,
-        request: Request,
         lease: MCPRequestLease,
         body: bytes,
-        max_response_bytes: int,
     ):
         super().__init__()
-        self.request = request
         self.lease = lease
         self.managed_server = lease.server
         self.body = body
-        self.max_response_bytes = max_response_bytes
 
     async def __call__(self, scope, receive, send) -> None:
         try:
@@ -389,47 +369,7 @@ class _MCPTransportResponse(Response):
                 }
             return await receive()
 
-        if self.request.method == "GET":
-            await self.managed_server.handle_request(scope, patched_receive, send)
-            return
-
-        response_status = 200
-        response_headers: dict[str, str] = {}
-        body_chunks: list[bytes] = []
-        response_bytes = 0
-        response_too_large = False
-
-        async def intercepting_send(message) -> None:
-            nonlocal response_status, response_bytes, response_too_large
-            if message["type"] == "http.response.start":
-                response_status = message["status"]
-                response_headers.update(
-                    {
-                        key.decode(): value.decode()
-                        for key, value in message.get("headers", [])
-                    }
-                )
-            elif message["type"] == "http.response.body":
-                chunk = message.get("body", b"")
-                response_bytes += len(chunk)
-                if response_bytes > self.max_response_bytes:
-                    response_too_large = True
-                    body_chunks.clear()
-                elif not response_too_large:
-                    body_chunks.append(chunk)
-
-        await self.managed_server.handle_request(
-            scope, patched_receive, intercepting_send
-        )
-        if response_too_large:
-            response = Response(content="MCP response is too large", status_code=502)
-        else:
-            response = Response(
-                content=b"".join(body_chunks),
-                status_code=response_status,
-                headers=response_headers,
-            )
-        await response(scope, receive, send)
+        await self.managed_server.handle_request(scope, patched_receive, send)
 
 
 @router.get("/.well-known/oauth-protected-resource")
@@ -554,8 +494,6 @@ async def interaction_mcp_handler(
         session,
     )
 
-    if app.mcp_session_router is not None:
-        return app.mcp_session_router.response(key, request, bytes(body_bytes))
     return await local_mcp_response(app, key, request, bytes(body_bytes))
 
 
@@ -563,18 +501,19 @@ async def local_mcp_response(
     app: "MCPApplication", key: MCPServerKey, request: Request, body: bytes
 ) -> Response:
     request.scope["app"] = app
-    account, _, _, agent_id, session = key
     settings = app.mcp_settings
+    response = await control_response(
+        app.mcp_sessions, key, request, body, settings.mcp_session_idle_ttl_seconds
+    )
+    if response is not None:
+        return response
 
     async def create_server() -> ManagedMCPServer:
         return await _create_mcp_server(
             app,
             request,
-            agent_id,
-            session,
-            account,
-            settings.mcp_max_request_bytes,
+            key,
         )
 
-    lease = await app.mcp_server_pool.acquire(key, request, body, create_server)
-    return _MCPTransportResponse(request, lease, body, settings.mcp_max_response_bytes)
+    lease = await app.mcp_server_pool.acquire(key, create_server)
+    return _MCPTransportResponse(lease, body)
