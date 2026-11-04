@@ -19,7 +19,6 @@ from hyperforge import logger
 from hyperforge.api.authentication import requires_one
 from hyperforge.api.models import AgentRole, InteractionRequest
 from hyperforge.api.session import create_session_resource, resolve_session_id
-from hyperforge.api.settings import Settings
 from hyperforge.api.utils import agent_has_nucliadb_memory
 from hyperforge.api.v1.router import router
 from hyperforge.api.v1.utils import tracer
@@ -43,6 +42,7 @@ from hyperforge.pubsub import (
 
 if TYPE_CHECKING:
     from hyperforge.api.app import HTTPApplication
+    from hyperforge.standalone.app import StandaloneApplication
 
 
 async def ensure_session_exists(
@@ -174,7 +174,7 @@ class WebsocketReceiver:
 
 
 async def stream_response(
-    app: "HTTPApplication",
+    app: "HTTPApplication | StandaloneApplication",
     websocket: Optional[WebsocketReceiver],
     account: str,
     agent_id: str,
@@ -182,7 +182,7 @@ async def stream_response(
     interaction: InteractionRequest,
     workflow_id: str = "default",
 ) -> AsyncIterator[AragAnswer]:
-    settings: Settings = app.settings
+    settings = app.settings
     agent_manager: AgentManager = app.agent_manager
 
     try:

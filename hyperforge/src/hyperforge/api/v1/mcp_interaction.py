@@ -3,7 +3,7 @@ import json
 import uuid
 from contextlib import asynccontextmanager
 from functools import partial
-from typing import TYPE_CHECKING, Any, AsyncIterator, Iterable, Sequence
+from typing import TYPE_CHECKING, Any, AsyncIterator, Iterable, Sequence, TypeAlias
 
 from fastapi import Header, HTTPException
 from mcp.server.fastmcp.exceptions import ResourceError
@@ -46,6 +46,9 @@ from hyperforge.workflows import WorkflowData
 
 if TYPE_CHECKING:
     from hyperforge.api.app import HTTPApplication
+    from hyperforge.standalone.app import StandaloneApplication
+
+    MCPApplication: TypeAlias = HTTPApplication | StandaloneApplication
 from hyperforge.api import logger
 from hyperforge.api.models import (
     AgentRole,
@@ -77,7 +80,7 @@ async def list_prompts(prompts: list[PromptConfig]) -> list[Prompt]:
 
 
 async def call_tool(
-    app: "HTTPApplication",
+    app: "MCPApplication",
     mcp_server: MCPServer,
     x_stf_account: str,
     agent_id: str,
@@ -263,7 +266,7 @@ async def read_resource(
 
 
 def _prepare_interaction_headers(
-    app: "HTTPApplication", agent_id: str, headers: Headers
+    app: "MCPApplication", agent_id: str, headers: Headers
 ) -> dict[str, str]:
     interaction_headers = dict(headers.items())
     authorization = headers.get("authorization")
@@ -292,7 +295,7 @@ def _get_first_enabled_mcp_auth_config(app: "HTTPApplication"):
 
 
 async def _create_mcp_server(
-    app: "HTTPApplication",
+    app: "MCPApplication",
     request: Request,
     agent_id: str,
     session: str,
@@ -527,7 +530,6 @@ async def interaction_mcp_handler(
         raise HTTPException(status_code=400, detail="Missing Mcp-Session-Id")
     runtime_settings = app.mcp_settings
     max_request_bytes = runtime_settings.mcp_max_request_bytes
-    max_response_bytes = runtime_settings.mcp_max_response_bytes
     content_length = request.headers.get("content-length")
     if content_length is not None:
         try:
@@ -552,17 +554,27 @@ async def interaction_mcp_handler(
         session,
     )
 
+    if app.mcp_session_router is not None:
+        return app.mcp_session_router.response(key, request, bytes(body_bytes))
+    return await local_mcp_response(app, key, request, bytes(body_bytes))
+
+
+async def local_mcp_response(
+    app: "MCPApplication", key: MCPServerKey, request: Request, body: bytes
+) -> Response:
+    request.scope["app"] = app
+    account, _, _, agent_id, session = key
+    settings = app.mcp_settings
+
     async def create_server() -> ManagedMCPServer:
         return await _create_mcp_server(
             app,
             request,
             agent_id,
             session,
-            x_stf_account,
-            max_request_bytes,
+            account,
+            settings.mcp_max_request_bytes,
         )
 
-    lease = await app.mcp_server_pool.acquire(
-        key, request, bytes(body_bytes), create_server
-    )
-    return _MCPTransportResponse(request, lease, bytes(body_bytes), max_response_bytes)
+    lease = await app.mcp_server_pool.acquire(key, request, body, create_server)
+    return _MCPTransportResponse(request, lease, body, settings.mcp_max_response_bytes)

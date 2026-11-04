@@ -101,11 +101,53 @@ after a 404, not reuse the expired ID.
 Managers whose last connection has closed can be evicted immediately when the
 pool is full.
 
-MCP transports remain process-local. Multi-replica deployments must route an
-authenticated user's initialization and subsequent requests to the same API
-replica using a stable, trusted identity header. Hashing only `Mcp-Session-Id`
-does not work because initialization has no session ID. Pod restarts or changes
-to the replica set can still require reinitialization.
+API replicas share an identity-bound MCP owner registry through the existing
+Redis/Valkey broker. SDK transports remain in their owning process; requests
+arriving on another replica are relayed through bounded Redis Streams, including
+GET/SSE, elicitation replies, cancellation and DELETE. No sticky sessions or Istio
+DestinationRule is required. Standalone uses this routing when
+`BROKER_REDIS_DSN` is configured; without Redis it remains process-local.
+
+One supervisor owns each process's 30-second lease, heartbeat, inbox listeners
+and relayed requests. The same monotonic lease deadline gates admission and is
+watched independently of Redis: a blocked renewal cannot keep the owner alive.
+Successful renewals include their Redis round-trip time in that deadline; a late
+acknowledgement never revives an expired owner. Registration and revocation also
+have a lease-sized timeout, independent of the broker client's retry settings.
+A lost lease, stopped worker or unrecoverable relay failure
+immediately disables admission and retires that owner: workers and HTTP requests
+are cancelled, the lease is revoked and SDK sessions are invalidated. Recovery
+waits for cleanup before registering a new owner identity and restarting workers;
+it never renews the failed owner's lease. SDK invalidation and lease revocation
+run independently, so Redis delays cannot postpone cancelling local tools.
+If revocation cannot reach Redis, the old lease expires naturally, so callers do
+not depend on receiving a final error frame. Clients must initialize again after
+a 404. This deliberately resets all MCP connections owned by the affected
+process, not those owned by other replicas.
+Ordinary request errors, exhausted capacity and disconnected callers do not
+retire a healthy owner.
+
+Live Python tasks are not migrated and tool calls are never automatically replayed:
+after a connection failure, their completion may be unknown. Redis failures
+return 503 (or terminate an already-started response), with no local fallback.
+Use a private, trusted Redis deployment: relayed requests carry the current
+request headers and body in short-lived keys, removed when accepted/completed.
+Registry keys contain only hashed session identities and owner IDs.
+
+Each owner has separate bounded queues and capacity for calls, GET/SSE streams
+and control messages (notifications, elicitation replies and DELETE), with at
+most 100 queued and 100 active requests per category. Calls and long-lived SSE
+connections cannot exhaust the capacity needed to cancel or complete calls.
+Request payloads are claimed atomically before capacity checks, so duplicate
+queue entries cannot reject the original request or execute it again.
+If a relay consumer's lease expires, the request returns 503 or its response
+stream is terminated if headers were already sent. Each reply stream
+buffers at most 16 frames of up to 64 KiB, applying backpressure instead of
+dropping unread events. Complete response messages are serialized so concurrent
+SSE heartbeats cannot overtake or interleave with a fragmented event.
+Relay keys expire after at most 60 seconds without
+activity; session records use `MCP_SESSION_IDLE_TTL_SECONDS`. All coordination
+commands are single-key to support the existing Redis Cluster client.
 
 ### Standalone A2A
 

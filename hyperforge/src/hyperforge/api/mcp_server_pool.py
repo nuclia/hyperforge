@@ -257,6 +257,23 @@ class MCPServerPool:
             shutdown_task = self._shutdown_task
         await asyncio.shield(shutdown_task)
 
+    async def invalidate_sessions(self) -> None:
+        """Stop live SDK tasks after losing ownership, keeping the pool reusable."""
+        async with self._lock:
+            servers = list(self._servers.values())
+            self._servers.clear()
+            creating_tasks = list(self._creating.values())
+            self._creating.clear()
+            for server in servers:
+                server.close()
+            for task in creating_tasks:
+                task.cancel()
+        await asyncio.gather(
+            *(server.task for server in servers if server.task is not None),
+            *creating_tasks,
+            return_exceptions=True,
+        )
+
     async def _finish_shutdown(
         self,
         servers: list[ManagedMCPServer],

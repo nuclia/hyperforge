@@ -9,6 +9,7 @@ NucliaDB required.
 import base64
 import secrets
 from contextlib import asynccontextmanager
+from functools import partial
 from pathlib import Path
 from typing import Any
 
@@ -33,6 +34,7 @@ from starlette.responses import PlainTextResponse
 from hyperforge.a2a.server import build_grpc_server_from_runtime
 from hyperforge.api import v1
 from hyperforge.api.authentication import User
+from hyperforge.api.mcp_redis import RedisMCPSessionRouter
 from hyperforge.api.mcp_server_pool import MCPServerPool
 from hyperforge.api.models import AgentRole, StashRoles
 from hyperforge.api.v1 import oauth as v1_oauth
@@ -272,6 +274,7 @@ class StandaloneApplication(FastAPI):
         )
         self._agents_cfg = agents_cfg
         self._standalone_settings = settings
+        self.mcp_session_router: RedisMCPSessionRouter | None = None
 
         # Only the interaction and MCP routes — no management endpoints.
         self.include_router(v1.interaction.router)
@@ -368,6 +371,15 @@ class StandaloneApplication(FastAPI):
         # Agent manager backed by the JSON config — no PostgreSQL.
         agent_manager_class = resolve_dotted_name(s.agent_manager_class)
         self.agent_manager: Any = agent_manager_class(self._agents_cfg)
+        if isinstance(self.broker, RedisBroker):
+            self.mcp_session_router = RedisMCPSessionRouter(
+                self.broker.client,
+                partial(v1.mcp_interaction.local_mcp_response, self),
+                invalidate_sessions=self.mcp_server_pool.invalidate_sessions,
+                session_ttl=s.mcp_session_idle_ttl_seconds,
+                max_request_bytes=s.mcp_max_request_bytes,
+                max_response_bytes=s.mcp_max_response_bytes,
+            )
 
         # Build a ServerSettings instance so SessionManager and the subject
         # format strings work unchanged.  Redis settings are present but
@@ -407,6 +419,8 @@ class StandaloneApplication(FastAPI):
         self.a2a_server = None
         try:
             await self.session_manager.initialize()
+            if self.mcp_session_router is not None:
+                await self.mcp_session_router.start()
             if s.a2a_enabled:
                 if not isinstance(self.broker, RedisBroker):
                     raise ValueError("A2A_ENABLED requires BROKER_REDIS_DSN")
@@ -420,12 +434,16 @@ class StandaloneApplication(FastAPI):
                     s.a2a_grpc_port,
                 )
         except BaseException:
+            if self.mcp_session_router is not None:
+                await self.mcp_session_router.shutdown()
             if self.a2a_server is not None:
                 await self.a2a_server.stop(grace=0)
             await self.session_manager.finalize()
             raise
 
     async def _shutdown(self) -> None:
+        if self.mcp_session_router is not None:
+            await self.mcp_session_router.shutdown()
         await self.mcp_server_pool.shutdown()
         if self.a2a_server is not None:
             await self.a2a_server.stop(grace=5)
