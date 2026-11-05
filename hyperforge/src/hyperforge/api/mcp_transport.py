@@ -174,9 +174,11 @@ class MCPTransport:
         token = None
         pending: dict[str, types.RequestId] = {}
         try:
-            token = await self.store.start(
-                self.key, session_id, rpc.id, self.session_ttl
-            )
+            token = getattr(request.state, "mcp_call_token", None)
+            if token is None:
+                token = await self.store.start(
+                    self.key, session_id, rpc.id, self.session_ttl
+                )
             initialized = await self._serve(
                 request, rpc, session, session_id, token, pending, send
             )
@@ -208,6 +210,9 @@ class MCPTransport:
         pending: dict[str, types.RequestId],
         send: Send,
     ) -> bool:
+        update = await self.store.poll(
+            self.key, session_id, rpc.id, token, [], self.session_ttl
+        )
         bootstrap = uuid.uuid4().hex
         initialized = False
 
@@ -333,13 +338,28 @@ class MCPTransport:
                 await sdk_input.send(
                     wrapped({"jsonrpc": "2.0", "method": "notifications/initialized"})
                 )
-            await sdk_input.send(
-                SessionMessage(
-                    types.JSONRPCMessage(rpc),
-                    ServerMessageMetadata(request_context=request),
+            if update.cancelled:
+                await sdk_write.send(
+                    SessionMessage(
+                        types.JSONRPCMessage(
+                            types.JSONRPCError(
+                                jsonrpc="2.0",
+                                id=rpc.id,
+                                error=types.ErrorData(
+                                    code=-32800, message="Request cancelled"
+                                ),
+                            )
+                        )
+                    )
                 )
-            )
-            group.start_soon(poll)
+            else:
+                await sdk_input.send(
+                    SessionMessage(
+                        types.JSONRPCMessage(rpc),
+                        ServerMessageMetadata(request_context=request),
+                    )
+                )
+                group.start_soon(poll)
             headers = {"Mcp-Session-Id": session_id}
             try:
                 if rpc.method == "tools/call":

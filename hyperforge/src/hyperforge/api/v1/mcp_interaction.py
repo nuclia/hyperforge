@@ -1,9 +1,11 @@
 import asyncio
 import json
 import uuid
+from collections.abc import Awaitable, Callable
 from functools import partial
 from typing import TYPE_CHECKING, Any, Iterable, Sequence, TypeAlias
 
+import anyio
 from fastapi import Header, HTTPException
 from mcp.server.fastmcp.exceptions import ResourceError
 from mcp.server.lowlevel.helper_types import ReadResourceContents
@@ -13,6 +15,8 @@ from mcp.types import (
     EmbeddedResource,
     GetPromptResult,
     ImageContent,
+    JSONRPCMessage,
+    JSONRPCRequest,
     Prompt,
     PromptMessage,
     Resource,
@@ -213,6 +217,10 @@ async def call_tool(
                     requestedSchema=feedback.response_schema,
                     related_request_id=mcp_server.request_context.request_id,
                 )
+                if result.action != "accept":
+                    raise ResourceError(
+                        f"Form elicitation was {result.action} by the user"
+                    )
                 websocket.queue.put_nowait(
                     UserToAgentInteraction(
                         request_id=feedback.request_id,
@@ -355,17 +363,21 @@ class _MCPTransportResponse(Response):
         self,
         lease: MCPRequestLease,
         body: bytes,
+        cleanup: Callable[[], Awaitable[None]] | None = None,
     ):
         super().__init__()
         self.lease = lease
         self.managed_server = lease.server
         self.body = body
+        self.cleanup = cleanup
 
     async def __call__(self, scope, receive, send) -> None:
         try:
             await self._handle_request(scope, receive, send)
         finally:
             self.lease.release()
+            if self.cleanup is not None:
+                await self.cleanup()
 
     async def _handle_request(self, scope, receive, send) -> None:
         body_sent = False
@@ -514,12 +526,30 @@ async def local_mcp_response(
 ) -> Response:
     request.scope["app"] = app
     settings = app.mcp_settings
+    cleanup = None
     if app.mcp_sessions is not None:
         response = await control_response(
             app.mcp_sessions, key, request, body, settings.mcp_session_idle_ttl_seconds
         )
         if response is not None:
             return response
+        session_id = request.headers.get("mcp-session-id")
+        rpc = JSONRPCMessage.model_validate_json(body).root
+        if session_id is not None and isinstance(rpc, JSONRPCRequest):
+            store = app.mcp_sessions
+            ttl = settings.mcp_session_idle_ttl_seconds
+            token = await store.start(key, session_id, rpc.id, ttl)
+            request.state.mcp_call_token = token
+
+            async def finish_call() -> None:
+                with anyio.CancelScope(shield=True):
+                    try:
+                        await store.finish(key, session_id, rpc.id, token, [], ttl)
+                    except HTTPException as exc:
+                        if exc.status_code != 404:
+                            logger.warning("MCP request cleanup failed: %s", exc.detail)
+
+            cleanup = finish_call
 
     async def create_server() -> ManagedMCPServer:
         return await _create_mcp_server(
@@ -528,5 +558,10 @@ async def local_mcp_response(
             key,
         )
 
-    lease = await app.mcp_server_pool.acquire(key, create_server)
-    return _MCPTransportResponse(lease, body)
+    try:
+        lease = await app.mcp_server_pool.acquire(key, create_server)
+    except BaseException:
+        if cleanup is not None:
+            await cleanup()
+        raise
+    return _MCPTransportResponse(lease, body, cleanup)

@@ -3,6 +3,7 @@ import json
 import socket
 import uuid
 from contextlib import asynccontextmanager
+from functools import partial
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
@@ -287,6 +288,9 @@ async def test_sse_and_elicitation_cross_replicas_with_real_mcp_client(
     replicas, workflow
 ):
     apps, redis = replicas
+    identity = (KEY[0], apps[0].state.mcp_headers["X-STF-USER"], *KEY[2:])
+    _, prefix = apps[0].mcp_sessions.keys(identity, "")
+    reply_pattern = prefix + "*:reply:*"
     for app in apps:
         app.mcp_settings.mcp_session_idle_ttl_seconds = 1
     entered = [asyncio.Event(), asyncio.Event()]
@@ -305,13 +309,16 @@ async def test_sse_and_elicitation_cross_replicas_with_real_mcp_client(
             async with asyncio.timeout(10):
                 await asyncio.gather(*(event.wait() for event in entered))
                 await asyncio.sleep(1.3)
-                identity = (KEY[0], urls.headers["X-STF-USER"], *KEY[2:])
                 for client in (first, second):
                     assert await redis.exists(
                         apps[0].mcp_sessions.keys(identity, client[1])[1]
                     )
                 assert not workflow.completed
                 assert not any(task.done() for task in calls)
+                assert (
+                    len([key async for key in redis.scan_iter(match=reply_pattern)])
+                    == 2
+                )
                 release.set()
                 assert [
                     value(result)["choice"] for result in await asyncio.gather(*calls)
@@ -334,7 +341,7 @@ async def test_sse_and_elicitation_cross_replicas_with_real_mcp_client(
             if message.get("method") == "tools/call"
         )
     assert len(workflow.started) == len(workflow.completed) == 2
-    assert not await redis.keys("mcp.inbox.*")
+    assert not [key async for key in redis.scan_iter(match=reply_pattern)]
 
 
 async def test_parallel_calls_share_identity_and_session_without_id_collisions(
@@ -434,6 +441,80 @@ async def test_session_limit_is_atomic_and_deleted_sessions_free_capacity(
     assert await store.session_count(identity, 60) == 2
 
 
+async def test_session_renewal_keeps_registry_and_admission_consistent(
+    replicas, monkeypatch
+):
+    apps, redis = replicas
+    identity = (KEY[0], apps[0].state.mcp_headers["X-STF-USER"], *KEY[2:])
+    store = apps[0].mcp_sessions
+    params = types.InitializeRequestParams(
+        protocolVersion="2025-11-25",
+        capabilities=types.ClientCapabilities(),
+        clientInfo=types.Implementation(name="test", version="1"),
+    )
+    session_id = await store.create(identity, params, 1, 1)
+    registry, record = store.keys(identity, session_id)
+    renewed, release = asyncio.Event(), asyncio.Event()
+    original_pipeline = redis.pipeline
+
+    def pipeline(*args, **kwargs):
+        pipe = original_pipeline(*args, **kwargs)
+        original_execute = pipe.execute
+
+        async def delayed_execute(*args, **kwargs):
+            renews_session = any(
+                command[:2] == ("GETEX", record) for command, _ in pipe.command_stack
+            )
+            result = await original_execute(*args, **kwargs)
+            if renews_session:
+                renewed.set()
+                await release.wait()
+            return result
+
+        monkeypatch.setattr(pipe, "execute", delayed_execute)
+        return pipe
+
+    monkeypatch.setattr(redis, "pipeline", pipeline)
+    task = asyncio.create_task(store.get(identity, session_id, 60))
+    try:
+        await asyncio.wait_for(renewed.wait(), 3)
+        await asyncio.sleep(1.1)
+        release.set()
+        assert (await asyncio.wait_for(task, 3)).params == params
+    finally:
+        release.set()
+        task.cancel()
+        await asyncio.gather(task, return_exceptions=True)
+    assert await redis.exists(record)
+    assert await store.session_count(identity, 60) == 1
+    assert await redis.sismember(registry, session_id)
+    with pytest.raises(HTTPException) as exhausted:
+        await store.create(identity, params, 60, 1)
+    assert exhausted.value.status_code == 503
+
+
+async def test_short_session_renewal_does_not_shorten_registry_ttl(replicas):
+    apps, redis = replicas
+    identity = (KEY[0], apps[0].state.mcp_headers["X-STF-USER"], *KEY[2:])
+    store = apps[0].mcp_sessions
+    params = types.InitializeRequestParams(
+        protocolVersion="2025-11-25",
+        capabilities=types.ClientCapabilities(),
+        clientInfo=types.Implementation(name="test", version="1"),
+    )
+    long_session = await store.create(identity, params, 60, 2)
+    short_session = await store.create(identity, params, 1, 2)
+    registry, _ = store.keys(identity, long_session)
+    assert (await store.get(identity, short_session, 1)).params == params
+    assert await redis.ttl(registry) > 1
+    await asyncio.sleep(1.1)
+    assert await store.session_count(identity, 60) == 1
+    assert (await store.get(identity, long_session, 60)).params == params
+    with pytest.raises(HTTPException) as expired:
+        await store.get(identity, short_session, 60)
+    assert expired.value.status_code == 404
+
+
 async def test_redis_failure_returns_503_without_local_fallback(replicas, monkeypatch):
     apps, redis = replicas
     async with clients(apps) as (first, second):
@@ -510,6 +591,133 @@ async def test_control_on_another_replica_cancels_only_its_call(
     assert len(workflow.cancelled) == 1
 
 
+@pytest.mark.parametrize("waiting_for", ["pool", "creation"])
+async def test_cancellation_before_handler_acquisition_does_not_start_tool(
+    replicas, workflow, monkeypatch, waiting_for
+):
+    apps, redis = replicas
+    entered, release = asyncio.Event(), asyncio.Event()
+    if waiting_for == "pool":
+        target = apps[1].mcp_server_pool
+        attribute = "acquire"
+    else:
+        target = mcp_interaction
+        attribute = "_create_mcp_server"
+    original = getattr(target, attribute)
+
+    async def blocked(*args, **kwargs):
+        entered.set()
+        await release.wait()
+        return await original(*args, **kwargs)
+
+    async with clients(apps) as (first, second):
+        session_id = await initialize(first)
+        monkeypatch.setattr(target, attribute, blocked)
+        async with serving(apps) as network:
+
+            async def call():
+                async with raw_call(network, session_id) as (_, events):
+                    return await anext(events)
+
+            task = asyncio.create_task(call())
+            try:
+                await asyncio.wait_for(entered.wait(), 3)
+                response = await first.post(
+                    URL,
+                    headers={"Mcp-Session-Id": session_id},
+                    json={
+                        "jsonrpc": "2.0",
+                        "method": "notifications/cancelled",
+                        "params": {"requestId": 7},
+                    },
+                )
+                assert response.status_code == 202
+                release.set()
+                result = await asyncio.wait_for(task, 3)
+                assert result.get("error", {}).get("message") == "Request cancelled"
+                assert not workflow.started
+            finally:
+                release.set()
+                task.cancel()
+                await asyncio.gather(task, return_exceptions=True)
+        identity = (KEY[0], apps[0].state.mcp_headers["X-STF-USER"], *KEY[2:])
+        assert not await redis.exists(
+            apps[0].mcp_sessions._call_key(identity, session_id, 7)
+        )
+        response = await second.post(
+            URL,
+            headers={"Mcp-Session-Id": session_id},
+            json={"jsonrpc": "2.0", "id": 7, "method": "tools/list"},
+        )
+        assert response.status_code == 200
+
+
+@pytest.mark.parametrize("failure", ["error", "cancel"])
+async def test_interrupted_admission_releases_call_and_rejects_duplicate(
+    replicas, monkeypatch, failure
+):
+    apps, redis = replicas
+    entered, release = asyncio.Event(), asyncio.Event()
+    pool = apps[1].mcp_server_pool
+    original = pool.acquire
+
+    async def blocked(*args, **kwargs):
+        entered.set()
+        await release.wait()
+        raise HTTPException(503, "Server creation failed")
+
+    async with clients(apps) as (first, second):
+        session_id = await initialize(first)
+        monkeypatch.setattr(pool, "acquire", blocked)
+        identity = (KEY[0], apps[0].state.mcp_headers["X-STF-USER"], *KEY[2:])
+        call_key = apps[0].mcp_sessions._call_key(identity, session_id, 1)
+        task = asyncio.create_task(tools(second, session_id))
+        try:
+            await asyncio.wait_for(entered.wait(), 3)
+            assert await redis.exists(call_key)
+            assert (await tools(second, session_id)).status_code == 409
+            assert await redis.exists(call_key)
+            if failure == "cancel":
+                task.cancel()
+                with pytest.raises(asyncio.CancelledError):
+                    await task
+            else:
+                release.set()
+                assert (await asyncio.wait_for(task, 3)).status_code == 503
+            assert not await redis.exists(call_key)
+        finally:
+            release.set()
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+        monkeypatch.setattr(pool, "acquire", original)
+        assert (await tools(second, session_id)).status_code == 200
+
+
+async def test_coordination_failure_before_dispatch_does_not_start_tool(
+    replicas, workflow, monkeypatch
+):
+    apps, _ = replicas
+    async with clients(apps) as (first, second):
+        session_id = await initialize(first)
+        monkeypatch.setattr(
+            apps[1].mcp_sessions,
+            "poll",
+            AsyncMock(side_effect=HTTPException(503, "Coordination unavailable")),
+        )
+        response = await second.post(
+            URL,
+            headers={"Mcp-Session-Id": session_id},
+            json={
+                "jsonrpc": "2.0",
+                "id": 7,
+                "method": "tools/call",
+                "params": {"name": "ask", "arguments": {}},
+            },
+        )
+        assert response.status_code == 503
+        assert not workflow.started
+
+
 async def test_replies_can_complete_a_tool_at_full_request_capacity(
     replicas, workflow, monkeypatch
 ):
@@ -551,12 +759,18 @@ async def test_coordination_loss_cancels_running_tool_without_replay(
     apps, redis = replicas
     release = asyncio.Event()
     original = redis.execute_command
+    original_pipeline = redis.pipeline
 
-    async def unavailable(*args, **kwargs):
+    async def unavailable(operation, *args, **kwargs):
         if stalled:
             await release.wait()
-            return await original(*args, **kwargs)
+            return await operation(*args, **kwargs)
         raise ConnectionError("offline")
+
+    def pipeline(*args, **kwargs):
+        pipe = original_pipeline(*args, **kwargs)
+        monkeypatch.setattr(pipe, "execute", partial(unavailable, pipe.execute))
+        return pipe
 
     async with clients(apps) as (first, _):
         for app in apps:
@@ -567,7 +781,10 @@ async def test_coordination_loss_cancels_running_tool_without_replay(
             raw_call(network, session_id) as (_, events),
         ):
             assert (await anext(events))["method"] == "elicitation/create"
-            monkeypatch.setattr(redis, "execute_command", unavailable)
+            monkeypatch.setattr(
+                redis, "execute_command", partial(unavailable, original)
+            )
+            monkeypatch.setattr(redis, "pipeline", pipeline)
             try:
                 async with asyncio.timeout(6):
                     while not workflow.cancelled:
@@ -576,6 +793,7 @@ async def test_coordination_loss_cancels_running_tool_without_replay(
             finally:
                 release.set()
                 monkeypatch.setattr(redis, "execute_command", original)
+                monkeypatch.setattr(redis, "pipeline", original_pipeline)
             with pytest.raises((httpx.RemoteProtocolError, StopAsyncIteration)):
                 await asyncio.wait_for(anext(events), 6)
     assert len(workflow.started) == 1

@@ -143,11 +143,15 @@ class MCPSessionStore:
 
     async def get(self, key: MCPServerKey, sid: str, ttl: int) -> MCPSession:
         registry, name = self.keys(key, sid)
-        value = (await self._read([name], ttl))[0]
+        async with (
+            self._available(ttl),
+            self.client.pipeline(transaction=True) as pipe,
+        ):
+            pipe.getex(name, ex=ttl)
+            pipe.expire(registry, ttl, gt=True)
+            value, _ = await pipe.execute()
         if value is None:
             raise HTTPException(404, "MCP session not found")
-        async with self._available(ttl):
-            await self.client.expire(registry, ttl, gt=True)
         return MCPSession.model_validate_json(value)
 
     async def ready(self, key: MCPServerKey, sid: str, ttl: int) -> None:

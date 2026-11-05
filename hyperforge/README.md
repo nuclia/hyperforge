@@ -127,11 +127,20 @@ authenticated account/user/account-type/agent/session identity, not to an access
 token or a pod. Deleting a session cancels its requests on all replicas without
 affecting other clients.
 
+Declined or cancelled URL/form elicitations fail the tool instead of resuming
+the workflow with an empty response.
+
+Requests are registered before waiting for a local handler, so cancellation
+received during handler creation prevents the tool from starting. Failed or
+interrupted admission releases that request's cancellation marker.
+
 Requests renew their session and reply/cancellation mailboxes while active,
 including while waiting for user input. Mailboxes use ordinary Redis keys with
 TTLs, not execution leases or a distributed execution registry. Small
 WATCH/MULTI transactions protect session admission and mailbox updates; there
-are no custom Lua scripts. Store operations have bounded timeouts;
+are no custom Lua scripts. Session and registry TTLs are renewed atomically so
+valid sessions remain included in admission accounting.
+Store operations have bounded timeouts;
 failed coordination stops the local execution instead of falling back to
 uncoordinated state. Redis failures return 503 before a response starts, or
 terminate an already-started stream. Idle sessions expire independently using
