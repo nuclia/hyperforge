@@ -28,6 +28,16 @@ from hyperforge.api.mcp_sessions import (
 )
 
 
+def reserve_request(store: MCPSessionStore) -> asyncio.Task[Any]:
+    task = asyncio.current_task()
+    if task is None:
+        raise HTTPException(503, "MCP transport is shutting down")
+    if len(store.active_requests) >= MAX_ACTIVE_CALLS:
+        raise HTTPException(503, "MCP request capacity is exhausted")
+    store.active_requests.add(task)
+    return task
+
+
 async def control_response(
     store: MCPSessionStore,
     key: MCPServerKey,
@@ -144,15 +154,16 @@ class MCPTransport:
         task = asyncio.current_task()
         if self._closed or task is None:
             raise HTTPException(503, "MCP transport is shutting down")
-        if len(self.store.active_requests) >= MAX_ACTIVE_CALLS:
-            raise HTTPException(503, "MCP request capacity is exhausted")
+        reserved = task in self.store.active_requests
+        if not reserved:
+            reserve_request(self.store)
         self._tasks.add(task)
-        self.store.active_requests.add(task)
         try:
             await self._handle_request(scope, receive, send)
         finally:
             self._tasks.discard(task)
-            self.store.active_requests.discard(task)
+            if not reserved:
+                self.store.active_requests.discard(task)
 
     async def _handle_request(self, scope: Scope, receive: Receive, send: Send) -> None:
         request = Request(scope, receive)
@@ -210,6 +221,9 @@ class MCPTransport:
         pending: dict[str, types.RequestId],
         send: Send,
     ) -> bool:
+        admission_renewal = getattr(request.state, "mcp_admission_renewal", None)
+        if admission_renewal is not None and admission_renewal.done():
+            await admission_renewal
         update = await self.store.poll(
             self.key, session_id, rpc.id, token, [], self.session_ttl
         )
@@ -269,6 +283,7 @@ class MCPTransport:
                         return
 
             async def poll() -> None:
+                nonlocal admission_renewal
                 await anyio.sleep(0)
                 while True:
                     try:
@@ -284,6 +299,11 @@ class MCPTransport:
                         if exc.status_code not in {404, 409}:
                             raise
                         update = MCPUpdates(cancelled=True)
+                    if admission_renewal is not None:
+                        if admission_renewal.done():
+                            await admission_renewal
+                        admission_renewal.cancel()
+                        admission_renewal = None
                     if update.cancelled:
                         await sdk_input.send(
                             wrapped(

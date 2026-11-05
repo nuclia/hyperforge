@@ -523,6 +523,7 @@ async def test_redis_failure_returns_503_without_local_fallback(replicas, monkey
             redis, "execute_command", AsyncMock(side_effect=ConnectionError("offline"))
         )
         assert (await tools(second, session_id)).status_code == 503
+        assert not apps[1].mcp_sessions.active_requests
 
 
 async def test_shutdown_keeps_shared_session_available_on_other_replica(replicas):
@@ -675,8 +676,10 @@ async def test_interrupted_admission_releases_call_and_rejects_duplicate(
         try:
             await asyncio.wait_for(entered.wait(), 3)
             assert await redis.exists(call_key)
+            assert len(apps[1].mcp_sessions.active_requests) == 1
             assert (await tools(second, session_id)).status_code == 409
             assert await redis.exists(call_key)
+            assert len(apps[1].mcp_sessions.active_requests) == 1
             if failure == "cancel":
                 task.cancel()
                 with pytest.raises(asyncio.CancelledError):
@@ -685,11 +688,197 @@ async def test_interrupted_admission_releases_call_and_rejects_duplicate(
                 release.set()
                 assert (await asyncio.wait_for(task, 3)).status_code == 503
             assert not await redis.exists(call_key)
+            assert not apps[1].mcp_sessions.active_requests
         finally:
             release.set()
             task.cancel()
             await asyncio.gather(task, return_exceptions=True)
         monkeypatch.setattr(pool, "acquire", original)
+        assert (await tools(second, session_id)).status_code == 200
+        assert not apps[1].mcp_sessions.active_requests
+
+
+@pytest.mark.parametrize("waiting_for", ["pool", "creation"])
+async def test_cold_handler_waiters_reserve_request_capacity(
+    replicas, monkeypatch, waiting_for
+):
+    apps, redis = replicas
+    entered, release = asyncio.Event(), asyncio.Event()
+    if waiting_for == "pool":
+        target, attribute = apps[1].mcp_server_pool, "acquire"
+    else:
+        target, attribute = mcp_interaction, "_create_mcp_server"
+    original = getattr(target, attribute)
+    acquisitions = 0
+
+    async def blocked(*args, **kwargs):
+        nonlocal acquisitions
+        acquisitions += 1
+        entered.set()
+        await release.wait()
+        return await original(*args, **kwargs)
+
+    async with clients(apps) as (first, second):
+        session_id = await initialize(first)
+        store = apps[1].mcp_sessions
+        identity = (KEY[0], apps[0].state.mcp_headers["X-STF-USER"], *KEY[2:])
+        monkeypatch.setattr(mcp_transport, "MAX_ACTIVE_CALLS", 1)
+        monkeypatch.setattr(target, attribute, blocked)
+        task = asyncio.create_task(tools(second, session_id))
+        try:
+            await asyncio.wait_for(entered.wait(), 3)
+            assert len(store.active_requests) == 1
+            response = await asyncio.wait_for(
+                second.post(
+                    URL,
+                    headers={"Mcp-Session-Id": session_id},
+                    json={"jsonrpc": "2.0", "id": 2, "method": "tools/list"},
+                ),
+                3,
+            )
+            assert response.status_code == 503
+            assert not await redis.exists(store._call_key(identity, session_id, 2))
+            response = await second.post(
+                URL,
+                headers={"X-STF-USER": "another-user"},
+                json={
+                    "jsonrpc": "2.0",
+                    "id": 0,
+                    "method": "initialize",
+                    "params": {
+                        "protocolVersion": "2025-11-25",
+                        "capabilities": {},
+                        "clientInfo": {"name": "test", "version": "1"},
+                    },
+                },
+            )
+            assert response.status_code == 503
+            assert acquisitions == 1
+            for message in (
+                {
+                    "jsonrpc": "2.0",
+                    "method": "notifications/cancelled",
+                    "params": {"requestId": 1},
+                },
+                {"jsonrpc": "2.0", "id": "unknown", "result": {}},
+            ):
+                response = await second.post(
+                    URL, headers={"Mcp-Session-Id": session_id}, json=message
+                )
+                assert response.status_code == 202
+            assert len(store.active_requests) == 1
+            release.set()
+            response = await asyncio.wait_for(task, 3)
+            assert response.status_code == 200
+            assert response.json()["error"]["message"] == "Request cancelled"
+        finally:
+            release.set()
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+        assert not store.active_requests
+        assert not await redis.exists(store._call_key(identity, session_id, 1))
+        assert (await tools(second, session_id)).status_code == 200
+        assert not store.active_requests
+
+
+@pytest.mark.parametrize("other_request_keeps_session_alive", [False, True])
+@pytest.mark.parametrize("waiting_for", ["pool", "creation"])
+async def test_cold_handler_admission_renews_session_and_call(
+    replicas, workflow, monkeypatch, other_request_keeps_session_alive, waiting_for
+):
+    apps, redis = replicas
+    for app in apps:
+        app.mcp_settings.mcp_session_idle_ttl_seconds = 1
+    entered, release = asyncio.Event(), asyncio.Event()
+    if waiting_for == "pool":
+        target, attribute = apps[1].mcp_server_pool, "acquire"
+    else:
+        target, attribute = mcp_interaction, "_create_mcp_server"
+    original = getattr(target, attribute)
+
+    async def blocked(*args, **kwargs):
+        entered.set()
+        await release.wait()
+        return await original(*args, **kwargs)
+
+    async with (
+        serving(apps) as network,
+        mcp_client(network, "confirmed") as client,
+    ):
+        monkeypatch.setattr(target, attribute, blocked)
+        identity = (KEY[0], apps[0].state.mcp_headers["X-STF-USER"], *KEY[2:])
+        store = apps[1].mcp_sessions
+        session_id = client[1]
+        task = asyncio.create_task(client[0].call_tool("ask", {}))
+
+        async def keep_session_alive():
+            while True:
+                await apps[0].mcp_sessions.get(identity, session_id, 1)
+                await asyncio.sleep(0.2)
+
+        keeper = None
+        try:
+            await asyncio.wait_for(entered.wait(), 3)
+            if other_request_keeps_session_alive:
+                keeper = asyncio.create_task(keep_session_alive())
+            await asyncio.sleep(1.3)
+            assert await redis.exists(store.keys(identity, session_id)[1])
+            assert await redis.exists(store._call_key(identity, session_id, 1))
+            release.set()
+            result = await asyncio.wait_for(task, 5)
+            assert not result.isError
+            assert value(result)["choice"] == "confirmed"
+        finally:
+            release.set()
+            task.cancel()
+            if keeper is not None:
+                keeper.cancel()
+                await asyncio.gather(keeper, return_exceptions=True)
+            await asyncio.gather(task, return_exceptions=True)
+        async with asyncio.timeout(3):
+            while store.active_requests:
+                await asyncio.sleep(0.01)
+        assert not await redis.exists(store._call_key(identity, session_id, 1))
+    assert len(workflow.started) == len(workflow.completed) == 1
+
+
+async def test_admission_renewal_failure_stops_waiting_and_releases_capacity(
+    replicas, monkeypatch
+):
+    apps, redis = replicas
+    entered, release = asyncio.Event(), asyncio.Event()
+    pool = apps[1].mcp_server_pool
+    original_acquire = pool.acquire
+    store = apps[1].mcp_sessions
+    original_poll = store.poll
+
+    async def blocked(*args, **kwargs):
+        entered.set()
+        await release.wait()
+        return await original_acquire(*args, **kwargs)
+
+    async with clients(apps) as (first, second):
+        session_id = await initialize(first)
+        identity = (KEY[0], apps[0].state.mcp_headers["X-STF-USER"], *KEY[2:])
+        monkeypatch.setattr(pool, "acquire", blocked)
+        task = asyncio.create_task(tools(second, session_id))
+        try:
+            await asyncio.wait_for(entered.wait(), 3)
+            monkeypatch.setattr(
+                store,
+                "poll",
+                AsyncMock(side_effect=HTTPException(503, "Coordination unavailable")),
+            )
+            response = await asyncio.wait_for(task, 3)
+            assert response.status_code == 503
+            assert not store.active_requests
+            assert not await redis.exists(store._call_key(identity, session_id, 1))
+        finally:
+            release.set()
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+            monkeypatch.setattr(store, "poll", original_poll)
+            monkeypatch.setattr(pool, "acquire", original_acquire)
         assert (await tools(second, session_id)).status_code == 200
 
 

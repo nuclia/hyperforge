@@ -36,7 +36,11 @@ from hyperforge.api.mcp_server_pool import (
     MCPRequestLease,
     MCPServerKey,
 )
-from hyperforge.api.mcp_transport import MCPTransport, control_response
+from hyperforge.api.mcp_transport import (
+    MCPTransport,
+    control_response,
+    reserve_request,
+)
 from hyperforge.api.models import InteractionRequest
 from hyperforge.api.settings import Settings as ApiSettings
 from hyperforge.api.v1.interaction import WebsocketReceiver, stream_response
@@ -527,29 +531,39 @@ async def local_mcp_response(
     request.scope["app"] = app
     settings = app.mcp_settings
     cleanup = None
-    if app.mcp_sessions is not None:
+    store = app.mcp_sessions
+    session_id = request.headers.get("mcp-session-id")
+    rpc: JSONRPCRequest | None = None
+    token = None
+    renewal: asyncio.Task[None] | None = None
+    acquisition: asyncio.Task[MCPRequestLease] | None = None
+    if store is not None:
         response = await control_response(
-            app.mcp_sessions, key, request, body, settings.mcp_session_idle_ttl_seconds
+            store, key, request, body, settings.mcp_session_idle_ttl_seconds
         )
         if response is not None:
             return response
-        session_id = request.headers.get("mcp-session-id")
-        rpc = JSONRPCMessage.model_validate_json(body).root
-        if session_id is not None and isinstance(rpc, JSONRPCRequest):
-            store = app.mcp_sessions
-            ttl = settings.mcp_session_idle_ttl_seconds
-            token = await store.start(key, session_id, rpc.id, ttl)
-            request.state.mcp_call_token = token
+        message = JSONRPCMessage.model_validate_json(body).root
+        if isinstance(message, JSONRPCRequest):
+            rpc = message
+        task = reserve_request(store)
+        ttl = settings.mcp_session_idle_ttl_seconds
 
-            async def finish_call() -> None:
-                with anyio.CancelScope(shield=True):
-                    try:
+        async def finish_call() -> None:
+            with anyio.CancelScope(shield=True):
+                try:
+                    if renewal is not None:
+                        renewal.cancel()
+                        await asyncio.gather(renewal, return_exceptions=True)
+                    if token is not None and session_id is not None and rpc is not None:
                         await store.finish(key, session_id, rpc.id, token, [], ttl)
-                    except HTTPException as exc:
-                        if exc.status_code != 404:
-                            logger.warning("MCP request cleanup failed: %s", exc.detail)
+                except HTTPException as exc:
+                    if exc.status_code != 404:
+                        logger.warning("MCP request cleanup failed: %s", exc.detail)
+                finally:
+                    store.active_requests.discard(task)
 
-            cleanup = finish_call
+        cleanup = finish_call
 
     async def create_server() -> ManagedMCPServer:
         return await _create_mcp_server(
@@ -559,8 +573,35 @@ async def local_mcp_response(
         )
 
     try:
-        lease = await app.mcp_server_pool.acquire(key, create_server)
+        if store is not None and session_id is not None and rpc is not None:
+            token = await store.start(key, session_id, rpc.id, ttl)
+            request.state.mcp_call_token = token
+
+            async def renew_call() -> None:
+                while True:
+                    await store.poll(key, session_id, rpc.id, token, [], ttl)
+                    await asyncio.sleep(min(0.25, ttl / 3))
+
+            renewal = asyncio.create_task(renew_call())
+            request.state.mcp_admission_renewal = renewal
+            acquisition = asyncio.create_task(
+                app.mcp_server_pool.acquire(key, create_server)
+            )
+            done, _ = await asyncio.wait(
+                (renewal, acquisition), return_when=asyncio.FIRST_COMPLETED
+            )
+            if renewal in done:
+                await renewal
+            lease = await acquisition
+        else:
+            lease = await app.mcp_server_pool.acquire(key, create_server)
     except BaseException:
+        if acquisition is not None:
+            with anyio.CancelScope(shield=True):
+                acquisition.cancel()
+                await asyncio.gather(acquisition, return_exceptions=True)
+                if not acquisition.cancelled() and acquisition.exception() is None:
+                    acquisition.result().release()
         if cleanup is not None:
             await cleanup()
         raise

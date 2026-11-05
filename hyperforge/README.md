@@ -133,6 +133,8 @@ the workflow with an empty response.
 Requests are registered before waiting for a local handler, so cancellation
 received during handler creation prevents the tool from starting. Failed or
 interrupted admission releases that request's cancellation marker.
+Session and call TTLs are renewed during admission until transport polling
+takes over; a slow handler startup does not expire an active request.
 
 Requests renew their session and reply/cancellation mailboxes while active,
 including while waiting for user input. Mailboxes use ordinary Redis keys with
@@ -155,7 +157,9 @@ when deploying this version. Drain the previous version before admitting traffic
 to the new replicas; do not mix both session implementations behind one service.
 
 With the Redis adapter, admission is bounded to 100 active HTTP requests per
-process and 100 pending server requests per HTTP request. There is no distributed
+process, including requests waiting for handler creation, and 100 pending server
+requests per HTTP request. Slots are reserved before Redis call registration and
+released on admission failure or response cleanup. There is no distributed
 concurrent-call quota.
 Control messages and replies
 bypass that admission limit so full capacity cannot prevent completing or
