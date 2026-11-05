@@ -66,6 +66,7 @@ def setup_call(monkeypatch, events):
     )
     server = SimpleNamespace(
         request_context=SimpleNamespace(
+            request_id="client-request",
             session=session,
             request=Request(
                 {
@@ -151,6 +152,39 @@ async def test_mcp_elicits_url_and_persists_sharefile_credentials(monkeypatch):
             )
         },
     )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("action", ["accept", "decline", "cancel"])
+async def test_mcp_form_elicitation_only_enqueues_accepted_content(monkeypatch, action):
+    events = [
+        AragAnswer(
+            operation=AnswerOperation.AGENT_REQUEST,
+            feedback=feedback(),
+        )
+    ]
+    app, server, workflow, _, session, _ = setup_call(monkeypatch, events)
+    receiver = SimpleNamespace(queue=asyncio.Queue())
+    monkeypatch.setattr(
+        mcp_interaction, "WebsocketReceiver", lambda websocket: receiver
+    )
+    content = {"choice": "confirmed"} if action == "accept" else None
+    session.elicit_form.return_value = ElicitResult(action=action, content=content)
+
+    if action == "accept":
+        await mcp_interaction.call_tool(
+            app, server, "account", "agent", "session", [workflow], "ask", {}
+        )
+        response = receiver.queue.get_nowait()
+        assert response.request_id == "request"
+        assert json.loads(response.response) == content
+    else:
+        with pytest.raises(ResourceError, match=f"Form elicitation was {action}"):
+            await mcp_interaction.call_tool(
+                app, server, "account", "agent", "session", [workflow], "ask", {}
+            )
+    assert receiver.queue.empty()
+    session.elicit_form.assert_awaited_once()
 
 
 @pytest.mark.asyncio
@@ -389,10 +423,8 @@ async def test_mcp_transport_releases_lease_when_handling_fails():
 
     managed_server.release_request = release_request
     response = mcp_interaction._MCPTransportResponse(
-        Request({"type": "http", "method": "POST", "headers": []}),
         MCPRequestLease(managed_server),
         b"",
-        1024,
     )
 
     with pytest.raises(RuntimeError, match="transport failed"):

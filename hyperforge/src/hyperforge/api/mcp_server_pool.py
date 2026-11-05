@@ -5,27 +5,28 @@ from typing import Any
 
 import anyio
 from fastapi import HTTPException
-from mcp.server.streamable_http import MCP_SESSION_ID_HEADER
 from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
-from starlette.requests import Request
-from starlette.responses import Response
-from starlette.types import Message, Receive, Scope, Send
+from starlette.datastructures import Headers
+from starlette.types import Receive, Scope, Send
 
 from hyperforge.api import logger
+from hyperforge.api.mcp_sessions import MCPServerKey
+from hyperforge.api.mcp_transport import MCPTransport
 
-MCPServerKey = tuple[str, str, str, str, str]
 MCPServerFactory = Callable[[], Awaitable["ManagedMCPServer"]]
 
 
 class ManagedMCPServer:
-    def __init__(self, manager: StreamableHTTPSessionManager, max_sessions: int = 100):
+    def __init__(
+        self,
+        manager: MCPTransport | StreamableHTTPSessionManager,
+        max_sessions: int = 100,
+    ):
         self.manager = manager
+        self.max_sessions = max_sessions
+        self._initialization_lock = anyio.Lock()
         self.started = asyncio.Event()
         self.task: asyncio.Task[None] | None = None
-        self.active_sessions = 0
-        self.max_sessions = max_sessions
-        self._session_creation_lock = anyio.Lock()
-        self._session_closed = anyio.Event()
         self.has_been_leased = False
         self.active_requests = 0
         self.last_used = time.monotonic()
@@ -73,42 +74,27 @@ class ManagedMCPServer:
         self.active_requests -= 1
         self.last_used = time.monotonic()
 
-    def release_session(self) -> None:
-        self.active_sessions -= 1
-        self._session_closed.set()
-        self._session_closed = anyio.Event()
-
     async def handle_request(self, scope: Scope, receive: Receive, send: Send) -> None:
-        request = Request(scope)
-        if request.method == "POST" and not request.headers.get(MCP_SESSION_ID_HEADER):
-            async with self._session_creation_lock:
-                if self.active_sessions >= self.max_sessions:
-                    response = Response(
-                        "MCP session capacity is exhausted", status_code=503
-                    )
-                    await response(scope, receive, send)
-                    return
+        if (
+            isinstance(self.manager, StreamableHTTPSessionManager)
+            and scope["method"] == "POST"
+            and not Headers(scope=scope).get("mcp-session-id")
+        ):
+            async with self._initialization_lock:
+                if await self.session_count() >= self.max_sessions:
+                    raise HTTPException(503, "MCP session capacity is exhausted")
                 await self.manager.handle_request(scope, receive, send)
-        elif request.method == "DELETE":
-            async with self._session_creation_lock:
-                session_closed = self._session_closed
-                status: int | None = None
+            return
+        await self.manager.handle_request(scope, receive, send)
 
-                async def observe_send(message: Message) -> None:
-                    nonlocal status
-                    if message["type"] == "http.response.start":
-                        status = message["status"]
-                    await send(message)
-
-                await self.manager.handle_request(scope, receive, observe_send)
-                if status == 200:
-                    await session_closed.wait()
-                    # SDK 1.x retains explicitly terminated transports.
-                    session_id = request.headers["mcp-session-id"]
-                    self.manager._server_instances.pop(session_id, None)
-                    self.manager._session_owners.pop(session_id, None)
-        else:
-            await self.manager.handle_request(scope, receive, send)
+    async def session_count(self) -> int:
+        if isinstance(self.manager, MCPTransport):
+            return await self.manager.session_count()
+        # SDK 1.x has no public session counter; exclude transports awaiting teardown.
+        return sum(
+            not transport.is_terminated
+            for transport in self.manager._server_instances.values()
+        )
 
 
 class MCPRequestLease:
@@ -143,8 +129,6 @@ class MCPServerPool:
     async def acquire(
         self,
         key: MCPServerKey,
-        request: Request,
-        body: bytes,
         factory: MCPServerFactory,
     ) -> MCPRequestLease:
         stale_server = None
@@ -163,13 +147,9 @@ class MCPServerPool:
                 server = None
             if server is not None:
                 return self._lease(server)
-            if request.headers.get(MCP_SESSION_ID_HEADER):
-                raise HTTPException(status_code=404, detail="MCP session not found")
-            if request.method != "POST":
-                raise HTTPException(status_code=400, detail="Missing Mcp-Session-Id")
             creating_task = self._creating.get(key)
             if creating_task is None:
-                self._reserve_capacity()
+                await self._reserve_capacity()
                 creating_task = asyncio.create_task(
                     self._create_server(key, factory, stale_server)
                 )
@@ -201,7 +181,7 @@ class MCPServerPool:
 
             async with self._lock:
                 self._ensure_running()
-                self._evict_for_capacity()
+                await self._evict_for_capacity()
                 self._servers[key] = candidate
                 self._creating.pop(key, None)
                 registered = True
@@ -298,22 +278,22 @@ class MCPServerPool:
         server.reserve_request()
         return MCPRequestLease(server)
 
-    def _evict_for_capacity(self) -> None:
+    async def _evict_for_capacity(self) -> None:
         while len(self._servers) >= self._max_servers:
-            self._evict_one()
+            await self._evict_one()
 
-    def _reserve_capacity(self) -> None:
+    async def _reserve_capacity(self) -> None:
         while len(self._servers) + len(self._creating) >= self._max_servers:
-            self._evict_one()
+            await self._evict_one()
 
-    def _evict_one(self) -> None:
+    async def _evict_one(self) -> None:
         now = time.monotonic()
         candidates = [
             (key, server)
             for key, server in self._servers.items()
             if server.active_requests == 0
             and (
-                (server.has_been_leased and server.active_sessions == 0)
+                (server.has_been_leased and await server.session_count() == 0)
                 or now - server.last_used >= self._idle_ttl_seconds
             )
         ]

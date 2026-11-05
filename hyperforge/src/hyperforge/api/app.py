@@ -15,6 +15,7 @@ from hyperforge.api import SERVICE_NAME, logger, v1
 from hyperforge.api.authentication import RaoAuthenticationBackend
 from hyperforge.api.logging import set_sentry
 from hyperforge.api.mcp_server_pool import MCPServerPool
+from hyperforge.api.mcp_sessions import MCPSessionStore
 from hyperforge.api.settings import Settings
 from hyperforge.broker import Broker
 from hyperforge.broker.redis import RedisBroker
@@ -45,6 +46,7 @@ async def health_alive():
 
 
 class HTTPApplication(FastAPI):
+    mcp_sessions: MCPSessionStore
     agent_manager: AgentManager
     arag_search: NucliaDBAsync
     arag_writer: NucliaDBAsync
@@ -153,7 +155,7 @@ class HTTPApplication(FastAPI):
             settings=self.data_manager_settings
         )
         await self.agent_manager.initialize()
-
+        self.mcp_sessions = MCPSessionStore(self.broker.client)
         for load_module in self.settings.load_modules:
             try:
                 scan(load_module)
