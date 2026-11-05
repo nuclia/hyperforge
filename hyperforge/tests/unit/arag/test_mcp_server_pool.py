@@ -43,8 +43,6 @@ def test_standalone_mcp_settings_do_not_depend_on_server_startup():
 class FakeManagedServer:
     def __init__(self):
         self.active_sessions = 1
-        self.manager = AsyncMock()
-        self.manager.session_count.side_effect = lambda: self.active_sessions
         self.has_been_leased = False
         self.active_requests = 0
         self.last_used = time.monotonic()
@@ -55,6 +53,9 @@ class FakeManagedServer:
         self.has_been_leased = True
         self.active_requests += 1
         self.last_used = time.monotonic()
+
+    async def session_count(self) -> int:
+        return self.active_sessions
 
     def release_request(self) -> None:
         self.active_requests -= 1

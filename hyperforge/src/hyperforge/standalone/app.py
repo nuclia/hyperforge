@@ -273,7 +273,7 @@ class StandaloneApplication(FastAPI):
         )
         self._agents_cfg = agents_cfg
         self._standalone_settings = settings
-        self.mcp_sessions = MCPSessionStore()
+        self.mcp_sessions: MCPSessionStore | None = None
 
         # Only the interaction and MCP routes — no management endpoints.
         self.include_router(v1.interaction.router)
@@ -372,6 +372,8 @@ class StandaloneApplication(FastAPI):
         self.agent_manager: Any = agent_manager_class(self._agents_cfg)
         if isinstance(self.broker, RedisBroker):
             self.mcp_sessions = MCPSessionStore(self.broker.client)
+        else:
+            self.mcp_sessions = None
 
         # Build a ServerSettings instance so SessionManager and the subject
         # format strings work unchanged.  Redis settings are present but

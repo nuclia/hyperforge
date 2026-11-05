@@ -106,13 +106,17 @@ broker. Each HTTP request runs in the receiving process, reconstructing the
 SDK's initialization context from the stored client capabilities. No HTTP request,
 authorization header, tool result or SSE frame is relayed between replicas.
 This uses the existing MCP 2025 protocol and SDK 1.x, not MRTR. Standalone uses
-the same adapter with Redis when `BROKER_REDIS_DSN` is configured, or an in-memory
-store for single-process deployments.
+the same adapter only when `BROKER_REDIS_DSN` is configured. Without Redis it uses
+the SDK's native stateful transport, restricted to a single process/instance;
+there is no in-memory implementation of the shared session store.
 
-Tool calls use their original POST's SSE connection for elicitation, progress and
-the final result. Standalone GET streams and SSE reconnection using Last-Event-ID
-are not supported (GET returns 405); clients must accept both JSON and SSE.
-Initialization, tools/prompts listings and prompt retrieval retain JSON responses.
+With Redis, tool calls use their original POST's SSE connection for elicitation,
+progress and the final result. Separate GET streams and SSE reconnection using
+Last-Event-ID are not supported (GET returns 405); clients must accept both JSON
+and SSE. Initialization, tools/prompts listings and prompt retrieval retain JSON
+responses. Standalone without Redis follows native SDK transport behavior:
+request responses use SSE and GET streams are supported, without an event store
+for replay.
 
 Elicitation replies may arrive on any replica. Unique wire request IDs prevent
 collisions even when concurrent calls in one MCP session execute in different
@@ -141,15 +145,17 @@ connections from the previous owner/relay implementation require reinitializatio
 when deploying this version. Drain the previous version before admitting traffic
 to the new replicas; do not mix both session implementations behind one service.
 
-Admission is bounded to 100 active HTTP requests per process and 100 pending
-server requests per HTTP request. There is no distributed concurrent-call quota.
+With the Redis adapter, admission is bounded to 100 active HTTP requests per
+process and 100 pending server requests per HTTP request. There is no distributed
+concurrent-call quota.
 Control messages and replies
 bypass that admission limit so full capacity cannot prevent completing or
 cancelling a tool. `MCP_MAX_SESSIONS_PER_SERVER` limits shared sessions per
 authenticated server identity, while `MCP_MAX_SERVERS` bounds each process's
 cached handlers. Native SDK streams provide bounded in-process buffering.
-`MCP_MAX_REQUEST_BYTES` limits incoming messages and `MCP_MAX_RESPONSE_BYTES`
-limits each outgoing protocol message.
+`MCP_MAX_REQUEST_BYTES` limits incoming messages in both modes.
+`MCP_MAX_RESPONSE_BYTES` limits each outgoing protocol message in the Redis
+adapter; the native standalone transport uses SDK defaults for outgoing messages.
 
 Use a private, trusted Redis deployment: pending elicitation replies may contain
 sensitive user input. They are deleted after delivery or request cleanup; all

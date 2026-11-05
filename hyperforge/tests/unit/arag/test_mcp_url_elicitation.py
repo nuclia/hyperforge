@@ -66,6 +66,7 @@ def setup_call(monkeypatch, events):
     )
     server = SimpleNamespace(
         request_context=SimpleNamespace(
+            request_id="client-request",
             session=session,
             request=Request(
                 {

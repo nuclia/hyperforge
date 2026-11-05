@@ -359,13 +359,12 @@ async def test_parallel_calls_share_identity_and_session_without_id_collisions(
     assert len(workflow.started) == len(workflow.completed) == 20
 
 
-@pytest.mark.parametrize("redis_backend", [False, True])
 async def test_pending_response_delivery_is_retained_and_idempotent(
-    replicas, redis_backend
+    replicas,
 ):
     apps, redis = replicas
     identity = (KEY[0], apps[0].state.mcp_headers["X-STF-USER"], *KEY[2:])
-    store = apps[0].mcp_sessions if redis_backend else MCPSessionStore()
+    store = apps[0].mcp_sessions
     params = types.InitializeRequestParams(
         protocolVersion="2025-11-25",
         capabilities=types.ClientCapabilities(),
@@ -402,19 +401,17 @@ async def test_pending_response_delivery_is_retained_and_idempotent(
     await store.finish(identity, session_id, 1, abandoned, [], 60)
     assert (await store.poll(identity, session_id, 1, replacement, [], 60)).cancelled
     await store.finish(identity, session_id, 1, replacement, [], 60)
-    if redis_backend:
-        _, record = store.keys(identity, session_id)
-        assert await redis.exists(record)
-        assert await redis.exists(store._reply_key(identity, session_id, "wire")) == 0
+    _, record = store.keys(identity, session_id)
+    assert await redis.exists(record)
+    assert await redis.exists(store._reply_key(identity, session_id, "wire")) == 0
 
 
-@pytest.mark.parametrize("redis_backend", [False, True])
 async def test_session_limit_is_atomic_and_deleted_sessions_free_capacity(
-    replicas, redis_backend
+    replicas,
 ):
     apps, _ = replicas
     identity = (KEY[0], apps[0].state.mcp_headers["X-STF-USER"], *KEY[2:])
-    store = apps[0].mcp_sessions if redis_backend else MCPSessionStore()
+    store = apps[0].mcp_sessions
     params = types.InitializeRequestParams(
         protocolVersion="2025-11-25",
         capabilities=types.ClientCapabilities(),

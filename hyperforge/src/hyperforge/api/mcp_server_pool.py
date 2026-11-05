@@ -5,6 +5,8 @@ from typing import Any
 
 import anyio
 from fastapi import HTTPException
+from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
+from starlette.datastructures import Headers
 from starlette.types import Receive, Scope, Send
 
 from hyperforge.api import logger
@@ -15,8 +17,14 @@ MCPServerFactory = Callable[[], Awaitable["ManagedMCPServer"]]
 
 
 class ManagedMCPServer:
-    def __init__(self, manager: MCPTransport):
+    def __init__(
+        self,
+        manager: MCPTransport | StreamableHTTPSessionManager,
+        max_sessions: int = 100,
+    ):
         self.manager = manager
+        self.max_sessions = max_sessions
+        self._initialization_lock = anyio.Lock()
         self.started = asyncio.Event()
         self.task: asyncio.Task[None] | None = None
         self.has_been_leased = False
@@ -67,7 +75,26 @@ class ManagedMCPServer:
         self.last_used = time.monotonic()
 
     async def handle_request(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if (
+            isinstance(self.manager, StreamableHTTPSessionManager)
+            and scope["method"] == "POST"
+            and not Headers(scope=scope).get("mcp-session-id")
+        ):
+            async with self._initialization_lock:
+                if await self.session_count() >= self.max_sessions:
+                    raise HTTPException(503, "MCP session capacity is exhausted")
+                await self.manager.handle_request(scope, receive, send)
+            return
         await self.manager.handle_request(scope, receive, send)
+
+    async def session_count(self) -> int:
+        if isinstance(self.manager, MCPTransport):
+            return await self.manager.session_count()
+        # SDK 1.x has no public session counter; exclude transports awaiting teardown.
+        return sum(
+            not transport.is_terminated
+            for transport in self.manager._server_instances.values()
+        )
 
 
 class MCPRequestLease:
@@ -266,7 +293,7 @@ class MCPServerPool:
             for key, server in self._servers.items()
             if server.active_requests == 0
             and (
-                (server.has_been_leased and await server.manager.session_count() == 0)
+                (server.has_been_leased and await server.session_count() == 0)
                 or now - server.last_used >= self._idle_ttl_seconds
             )
         ]

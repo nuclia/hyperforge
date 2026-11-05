@@ -8,6 +8,7 @@ from fastapi import Header, HTTPException
 from mcp.server.fastmcp.exceptions import ResourceError
 from mcp.server.lowlevel.helper_types import ReadResourceContents
 from mcp.server.lowlevel.server import Server as MCPServer
+from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from mcp.types import (
     EmbeddedResource,
     GetPromptResult,
@@ -129,6 +130,7 @@ async def call_tool(
                 message="Authenticate with ShareFile to access the requested content.",
                 url=msg.oauth.oauth_url,
                 elicitation_id=uuid.uuid4().hex,
+                related_request_id=mcp_server.request_context.request_id,
             )
             if result.action != "accept":
                 raise ResourceError(
@@ -209,7 +211,7 @@ async def call_tool(
                 result = await mcp_session.elicit_form(
                     message=feedback.question,
                     requestedSchema=feedback.response_schema,
-                    related_request_id=feedback.request_id,
+                    related_request_id=mcp_server.request_context.request_id,
                 )
                 websocket.queue.put_nowait(
                     UserToAgentInteraction(
@@ -325,15 +327,25 @@ async def _create_mcp_server(
     )
     mcp_server.list_prompts()(partial(list_prompts, prompts=prompts))
     mcp_server.get_prompt()(partial(get_prompt, prompts))
-    manager = MCPTransport(
-        app=mcp_server,
-        store=app.mcp_sessions,
-        key=key,
-        session_ttl=runtime_settings.mcp_session_idle_ttl_seconds,
-        max_sessions=runtime_settings.mcp_max_sessions_per_server,
-        max_response_bytes=runtime_settings.mcp_max_response_bytes,
+    manager: MCPTransport | StreamableHTTPSessionManager
+    if app.mcp_sessions is not None:
+        manager = MCPTransport(
+            app=mcp_server,
+            store=app.mcp_sessions,
+            key=key,
+            session_ttl=runtime_settings.mcp_session_idle_ttl_seconds,
+            max_sessions=runtime_settings.mcp_max_sessions_per_server,
+            max_response_bytes=runtime_settings.mcp_max_response_bytes,
+        )
+    else:
+        manager = StreamableHTTPSessionManager(
+            app=mcp_server,
+            session_idle_timeout=runtime_settings.mcp_session_idle_ttl_seconds,
+            max_request_body_size=runtime_settings.mcp_max_request_bytes,
+        )
+    managed_server = ManagedMCPServer(
+        manager, max_sessions=runtime_settings.mcp_max_sessions_per_server
     )
-    managed_server = ManagedMCPServer(manager)
     await managed_server.start()
     return managed_server
 
@@ -502,11 +514,12 @@ async def local_mcp_response(
 ) -> Response:
     request.scope["app"] = app
     settings = app.mcp_settings
-    response = await control_response(
-        app.mcp_sessions, key, request, body, settings.mcp_session_idle_ttl_seconds
-    )
-    if response is not None:
-        return response
+    if app.mcp_sessions is not None:
+        response = await control_response(
+            app.mcp_sessions, key, request, body, settings.mcp_session_idle_ttl_seconds
+        )
+        if response is not None:
+            return response
 
     async def create_server() -> ManagedMCPServer:
         return await _create_mcp_server(

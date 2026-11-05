@@ -1,7 +1,6 @@
 import asyncio
 import hashlib
 import json
-import time
 import uuid
 from collections.abc import Callable
 from contextlib import asynccontextmanager
@@ -32,9 +31,8 @@ class MCPUpdates(BaseModel):
 class MCPSessionStore:
     """Session metadata and TTL-backed mailboxes; executions remain local."""
 
-    def __init__(self, client: Redis | None = None):
+    def __init__(self, client: Redis):
         self.client = client
-        self._values: dict[str, tuple[float, str]] = {}
         self.active_requests: set[asyncio.Task[Any]] = set()
 
     @staticmethod
@@ -52,103 +50,61 @@ class MCPSessionStore:
             logger.warning("MCP coordination unavailable (%s)", type(exc).__name__)
             raise HTTPException(503, "MCP coordination is unavailable") from exc
 
-    def _prune(self) -> None:
-        now = time.monotonic()
-        self._values = {
-            key: value for key, value in self._values.items() if value[0] > now
-        }
-
     async def _read(self, names: list[str], ttl: int) -> list[str | None]:
-        if self.client is not None:
-            async with (
-                self._available(ttl),
-                self.client.pipeline(transaction=True) as pipe,
-            ):
-                for name in names:
-                    pipe.getex(name, ex=ttl)
-                return await pipe.execute()
-        self._prune()
-        result = []
-        for name in names:
-            value = self._values.get(name)
-            result.append(value[1] if value else None)
-            if value:
-                self._values[name] = (time.monotonic() + ttl, value[1])
-        return result
+        async with (
+            self._available(ttl),
+            self.client.pipeline(transaction=True) as pipe,
+        ):
+            for name in names:
+                pipe.getex(name, ex=ttl)
+            return await pipe.execute()
 
     async def _add(self, name: str, value: str, ttl: int) -> None:
-        if self.client is not None:
-            async with self._available(ttl):
-                added = await self.client.set(name, value, ex=ttl, nx=True)
-        else:
-            self._prune()
-            added = name not in self._values
-            if added:
-                self._values[name] = (time.monotonic() + ttl, value)
+        async with self._available(ttl):
+            added = await self.client.set(name, value, ex=ttl, nx=True)
         if not added:
             raise HTTPException(409, "MCP request is already active")
 
     async def _change(
         self, name: str, change: Callable[[str | None], str | None], ttl: int
     ) -> str | None:
-        if self.client is not None:
-            async with (
-                self._available(ttl),
-                self.client.pipeline(transaction=True) as pipe,
-            ):
-                while True:
-                    try:
-                        await pipe.watch(name)
-                        previous = await pipe.get(name)
-                        value = change(previous)
-                        if value == previous:
-                            return previous
-                        pipe.multi()
-                        if value is None:
-                            pipe.delete(name)
-                        else:
-                            pipe.set(name, value, keepttl=True)
-                        await pipe.execute()
+        async with (
+            self._available(ttl),
+            self.client.pipeline(transaction=True) as pipe,
+        ):
+            while True:
+                try:
+                    await pipe.watch(name)
+                    previous = await pipe.get(name)
+                    value = change(previous)
+                    if value == previous:
                         return previous
-                    except WatchError:
-                        continue
-        self._prune()
-        entry = self._values.get(name)
-        previous = entry[1] if entry else None
-        value = change(previous)
-        if value is None:
-            self._values.pop(name, None)
-        elif entry:
-            self._values[name] = (entry[0], value)
-        return previous
+                    pipe.multi()
+                    if value is None:
+                        pipe.delete(name)
+                    else:
+                        pipe.set(name, value, keepttl=True)
+                    await pipe.execute()
+                    return previous
+                except WatchError:
+                    continue
 
     async def _delete(self, names: list[str], ttl: int) -> None:
-        if self.client is not None:
-            async with self._available(ttl):
-                await self.client.delete(*names)
-        else:
-            for name in names:
-                self._values.pop(name, None)
+        async with self._available(ttl):
+            await self.client.delete(*names)
 
     async def session_count(self, key: MCPServerKey, ttl: int) -> int:
         registry, prefix = self.keys(key, "")
-        if self.client is not None:
-            async with self._available(ttl):
-                ids = list(await self.client.smembers(registry))
-                if not ids:
-                    return 0
-                expired = await self._expired(prefix, ids)
-                if expired:
-                    await self.client.srem(registry, *expired)
-                return len(ids) - len(expired)
-        self._prune()
-        return sum(
-            name.startswith(prefix) and len(name) == len(prefix) + 32
-            for name in self._values
-        )
+        async with self._available(ttl):
+            ids = list(await self.client.smembers(registry))
+            if not ids:
+                return 0
+            expired = await self._expired(prefix, ids)
+            if expired:
+                await self.client.srem(registry, *expired)
+            return len(ids) - len(expired)
 
     async def _expired(self, prefix: str, ids: list[str]) -> list[str]:
-        assert self.client is not None
         async with self.client.pipeline(transaction=False) as pipe:
             for sid in ids:
                 pipe.exists(prefix + sid)
@@ -161,35 +117,28 @@ class MCPSessionStore:
         sid = uuid.uuid4().hex
         registry, name = self.keys(key, sid)
         value = MCPSession(params=params).model_dump_json(by_alias=True)
-        if self.client is not None:
-            async with (
-                self._available(ttl),
-                self.client.pipeline(transaction=True) as pipe,
-            ):
-                while True:
-                    try:
-                        await pipe.watch(registry)
-                        ids = list(await pipe.smembers(registry))
-                        expired = await self._expired(self.keys(key, "")[1], ids)
-                        if len(ids) - len(expired) >= limit:
-                            raise HTTPException(
-                                503, "MCP session capacity is exhausted"
-                            )
-                        remaining = await pipe.ttl(registry)
-                        pipe.multi()
-                        if expired:
-                            pipe.srem(registry, *expired)
-                        pipe.set(name, value, ex=ttl)
-                        pipe.sadd(registry, sid)
-                        pipe.expire(registry, max(ttl, remaining))
-                        await pipe.execute()
-                        break
-                    except WatchError:
-                        continue
-        else:
-            if await self.session_count(key, ttl) >= limit:
-                raise HTTPException(503, "MCP session capacity is exhausted")
-            self._values[name] = (time.monotonic() + ttl, value)
+        async with (
+            self._available(ttl),
+            self.client.pipeline(transaction=True) as pipe,
+        ):
+            while True:
+                try:
+                    await pipe.watch(registry)
+                    ids = list(await pipe.smembers(registry))
+                    expired = await self._expired(self.keys(key, "")[1], ids)
+                    if len(ids) - len(expired) >= limit:
+                        raise HTTPException(503, "MCP session capacity is exhausted")
+                    remaining = await pipe.ttl(registry)
+                    pipe.multi()
+                    if expired:
+                        pipe.srem(registry, *expired)
+                    pipe.set(name, value, ex=ttl)
+                    pipe.sadd(registry, sid)
+                    pipe.expire(registry, max(ttl, remaining))
+                    await pipe.execute()
+                    break
+                except WatchError:
+                    continue
         return sid
 
     async def get(self, key: MCPServerKey, sid: str, ttl: int) -> MCPSession:
@@ -197,9 +146,8 @@ class MCPSessionStore:
         value = (await self._read([name], ttl))[0]
         if value is None:
             raise HTTPException(404, "MCP session not found")
-        if self.client is not None:
-            async with self._available(ttl):
-                await self.client.expire(registry, ttl, gt=True)
+        async with self._available(ttl):
+            await self.client.expire(registry, ttl, gt=True)
         return MCPSession.model_validate_json(value)
 
     async def ready(self, key: MCPServerKey, sid: str, ttl: int) -> None:
