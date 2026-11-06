@@ -9,7 +9,7 @@ from jsonschema import ValidationError as JsonSchemaValidationError
 from jsonschema import validate as validate_json_schema
 from pydantic import BaseModel, ValidationError
 
-from ..cache import ToolCachePolicy
+from ..cache import ToolCachePolicy, digest
 from ..context import make_context
 from ..models import (
     HarnessContextReference,
@@ -99,6 +99,7 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
     input_model: type[InputT] = field(init=False)
     output_model: type[OutputT] = field(init=False)
     _parameters: dict[str, Any] = field(init=False, repr=False)
+    contract_key: str = field(init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         parameters = list(inspect.signature(self.handler).parameters.values())
@@ -126,6 +127,11 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
         object.__setattr__(self, "output_model", output_model)
         schema = self.parameters_schema or input_model.model_json_schema()
         object.__setattr__(self, "_parameters", flatten_json_schema(schema))
+        object.__setattr__(
+            self,
+            "contract_key",
+            digest([self.name, self.description, self._parameters, self.cache_policy]),
+        )
 
     @property
     def parameters(self) -> dict[str, Any]:

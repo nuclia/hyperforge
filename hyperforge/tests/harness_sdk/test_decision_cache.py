@@ -242,3 +242,30 @@ async def test_procedural_guidance_is_keyed_by_graph() -> None:
     # Same graph: the hit skips both guidance and inference despite new guidance text.
     assert await run_guided(skeleton) == (["hit", "miss"], 1, 1)
     assert await run_guided(changed) == (["miss", "miss"], 2, 2)
+
+
+def test_incremental_history_key_matches_full_rescan() -> None:
+    from hyperforge.harness_sdk.cache import _HistoryScanner
+    from hyperforge.harness_sdk.models import HarnessMessage
+
+    def policy(name: str) -> ToolCachePolicy:
+        return ToolCachePolicy.METADATA
+
+    messages = [HarnessMessage(role="user", content="count orders")]
+    scanner = _HistoryScanner(0, None)
+    keys = [scanner.state(messages, policy)]
+    for step in range(3):
+        call = HarnessToolCall(id=f"c{step}", name="describe", arguments={})
+        messages.append(HarnessMessage(role="assistant", content="", tool_calls=[call]))
+        messages.append(
+            HarnessMessage(role="tool", tool_call_id=call.id, content=str(step))
+        )
+        keys.append(scanner.state(messages, policy))
+    assert keys[-1] == _HistoryScanner(0, None).state(messages, policy)
+    assert len({key.history_key for key in keys if key}) == 4
+
+    # A rewritten list (e.g. compaction) restarts the scan.
+    rewritten = [messages[0], HarnessMessage(role="system", content="summary")]
+    assert scanner.state(rewritten, policy) == _HistoryScanner(0, None).state(
+        rewritten, policy
+    )
