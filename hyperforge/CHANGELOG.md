@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added a harness decision cache: `AgentHarness(decision_cache=DecisionCache(...))`
+  replays cached model decisions through a pluggable `DecisionCacheStorage`, with
+  per-tool `cache_policy` opt-in and per-agent cache stacks for spawned children.
+
 - Added explicit scoped Code Mode capabilities and child-tool inheritance policy.
 - Hardened scoped Code Mode with fail-closed remote execution, bounded JSON
   transport, execution limits, atomic callback cleanup, immutable sandbox
