@@ -137,11 +137,23 @@ class DecisionCache:
     ttl: timedelta = timedelta(days=7)
     timeout: float = 2.0
 
+    def __post_init__(self) -> None:
+        # Fail loudly: non-JSON values would otherwise stringify unstably and
+        # silently miss forever.
+        try:
+            digest([self.namespace, dict(self.key)])
+        except TypeError as exc:
+            raise TypeError(
+                "DecisionCache namespace and key must be JSON-serializable"
+            ) from exc
+
+
+def _dumps(value: object) -> bytes:
+    return json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
+
 
 def digest(value: object) -> str:
-    return hashlib.sha256(
-        json.dumps(value, sort_keys=True, separators=(",", ":"), default=str).encode()
-    ).hexdigest()
+    return hashlib.sha256(_dumps(value)).hexdigest()
 
 
 @dataclass(frozen=True)
@@ -151,58 +163,92 @@ class _HistoryState:
     history_key: str
 
 
-def _history_state(
-    messages: Sequence[HarnessMessage],
-    policy: Callable[[str], ToolCachePolicy],
-    *,
-    inherited_key: str | None = None,
-) -> _HistoryState | None:
-    """Return the cache identity of ``messages``, or ``None`` if uncacheable.
+class _HistoryScanner:
+    """Incrementally derives the cache identity of an append-only message list.
 
-    ``inherited_key`` is the identity of context inherited from a parent agent;
-    ``messages`` must then exclude that inherited prefix.
+    Only messages appended since the previous call are hashed, so a run costs
+    O(history) rather than O(turns * history). If the list is replaced,
+    shrinks or has its last scanned message swapped (e.g. compaction or
+    restore), the scan restarts from ``start``.
     """
-    questions: list[str] = []
-    transcript: list[object] = [["inherited", inherited_key]]
-    pending: dict[str, str] = {}
-    has_results = False
-    for message in messages:
+
+    def __init__(self, start: int, inherited_key: str | None) -> None:
+        self.start = start
+        self.inherited_key = inherited_key
+        self._reset(None)
+
+    def _reset(self, messages: Sequence[HarnessMessage] | None) -> None:
+        self.messages = messages
+        self.position = self.start
+        self.last: HarnessMessage | None = None
+        self.questions: list[str] = []
+        self.pending: dict[str, str] = {}
+        self.has_results = False
+        # Uncacheable messages are never undone by appending more, so latch
+        # until the list is rewritten.
+        self.dead = False
+        self.hasher = hashlib.sha256(_dumps(["inherited", self.inherited_key]))
+
+    def state(
+        self,
+        messages: Sequence[HarnessMessage],
+        policy: Callable[[str], ToolCachePolicy],
+    ) -> _HistoryState | None:
+        if (
+            messages is not self.messages
+            or len(messages) < self.position
+            or (self.last is not None and messages[self.position - 1] is not self.last)
+        ):
+            self._reset(messages)
+        while not self.dead and self.position < len(messages):
+            message = messages[self.position]
+            self.position += 1
+            self.last = message
+            if not self._advance(message, policy):
+                self.dead = True
+        if self.dead or self.pending or not self.questions:
+            return None
+        return _HistoryState(
+            question="\n\n".join(self.questions),
+            question_key=digest(self.questions),
+            history_key=self.hasher.copy().hexdigest(),
+        )
+
+    def _advance(
+        self, message: HarnessMessage, policy: Callable[[str], ToolCachePolicy]
+    ) -> bool:
         if message.role == "system":
-            transcript.append(["system", message.content])
+            item: object = ["system", message.content]
         elif message.role == "user":
             # A user message after tool results is steering or a new turn; the
             # earlier results can no longer be certified.
-            if pending or has_results:
-                return None
-            transcript.append(["user", len(questions)])
-            questions.append(message.content)
+            if self.pending or self.has_results:
+                return False
+            item = ["user", len(self.questions)]
+            self.questions.append(message.content)
         elif message.role == "assistant":
-            if pending:
-                return None
+            if self.pending:
+                return False
             calls = []
             for call in message.tool_calls:
                 if (
                     not call.id
-                    or call.id in pending
+                    or call.id in self.pending
                     or policy(call.name) == ToolCachePolicy.NONE
                 ):
-                    return None
-                pending[call.id] = call.name
+                    return False
+                self.pending[call.id] = call.name
                 calls.append([call.name, call.arguments])
-            transcript.append(["assistant", message.content, calls])
+            item = ["assistant", message.content, calls]
         else:
-            name = pending.pop(message.tool_call_id or "", None)
+            name = self.pending.pop(message.tool_call_id or "", None)
             if name is None or policy(name) != ToolCachePolicy.METADATA:
-                return None
-            has_results = True
-            transcript.append(["tool", name, message.content])
-    if pending or not questions:
-        return None
-    return _HistoryState(
-        question="\n\n".join(questions),
-        question_key=digest(questions),
-        history_key=digest(transcript),
-    )
+                return False
+            self.has_results = True
+            item = ["tool", name, message.content]
+        self.hasher.update(_dumps(item))
+        self.hasher.update(b"\n")
+        return True
 
 
 def _replay_policy(
@@ -222,7 +268,8 @@ class DecisionCacheRuntime:
     Every spawned agent gets its own runtime. A child that inherits its parent's
     history builds on the parent's cache identity at spawn time; if that
     context was not cacheable, neither is anything the child decides on top of
-    it. A fresh child starts an independent stack.
+    it. A fresh child starts an independent stack. Pending writes are shared
+    across the tree so flushing the root also flushes children.
     """
 
     cache: DecisionCache
@@ -232,6 +279,19 @@ class DecisionCacheRuntime:
     enabled: bool = True
     unavailable: bool = False
     _writes: set[asyncio.Task[None]] = field(default_factory=set)
+    _scanner: _HistoryScanner = field(init=False, repr=False)
+    _namespace_key: str = field(init=False, repr=False)
+    _static_key: str = field(init=False, repr=False)
+    _config_keys: dict[tuple[Any, ...], str] = field(
+        init=False, repr=False, default_factory=dict
+    )
+
+    def __post_init__(self) -> None:
+        self._scanner = _HistoryScanner(self.prefix_length, self.inherited_key)
+        self._namespace_key = digest(self.cache.namespace)
+        self._static_key = digest(
+            [POLICY_VERSION, dict(self.cache.key), list(self.lineage)]
+        )
 
     def child(
         self,
@@ -241,8 +301,14 @@ class DecisionCacheRuntime:
         policy: Callable[[str], ToolCachePolicy],
     ) -> DecisionCacheRuntime:
         if not include_history:
-            return DecisionCacheRuntime(self.cache, lineage=(*self.lineage, "fresh"))
-        state = self._state(messages, policy) if self.enabled else None
+            return DecisionCacheRuntime(
+                self.cache, lineage=(*self.lineage, "fresh"), _writes=self._writes
+            )
+        state = None
+        if self.enabled:
+            # One-off scan of the child's copy; keep our own scanner on our list.
+            scanner = _HistoryScanner(self.prefix_length, self.inherited_key)
+            state = scanner.state(messages, policy)
         return DecisionCacheRuntime(
             self.cache,
             lineage=(*self.lineage, "history"),
@@ -251,16 +317,29 @@ class DecisionCacheRuntime:
             ),
             prefix_length=len(messages),
             enabled=state is not None,
+            _writes=self._writes,
         )
 
-    def _state(
+    def _config_key(
         self,
-        messages: Sequence[HarnessMessage],
-        policy: Callable[[str], ToolCachePolicy],
-    ) -> _HistoryState | None:
-        return _history_state(
-            messages[self.prefix_length :], policy, inherited_key=self.inherited_key
+        model: str,
+        reasoning_effort: str | None,
+        tools: Sequence[Any],
+        procedural: Mapping[str, Any] | None,
+    ) -> str:
+        procedural_key = digest(procedural) if procedural is not None else None
+        memo = (
+            model,
+            reasoning_effort,
+            procedural_key,
+            tuple(tool.contract_key for tool in tools),
         )
+        key = self._config_keys.get(memo)
+        if key is None:
+            key = self._config_keys[memo] = digest(
+                [self._static_key, *memo[:3], memo[3]]
+            )
+        return key
 
     def query(
         self,
@@ -274,26 +353,12 @@ class DecisionCacheRuntime:
     ) -> DecisionCacheQuery | None:
         if self.unavailable or not self.enabled:
             return None
-        state = self._state(messages, policy)
+        state = self._scanner.state(messages, policy)
         if state is None:
             return None
-        config_key = digest(
-            {
-                "policy": POLICY_VERSION,
-                "key": self.cache.key,
-                "lineage": self.lineage,
-                "model": model,
-                "reasoning_effort": reasoning_effort,
-                "procedural": procedural,
-                "tools": [
-                    [tool.name, tool.description, tool.parameters, tool.cache_policy]
-                    for tool in tools
-                ],
-            }
-        )
         return DecisionCacheQuery(
-            namespace=digest(self.cache.namespace),
-            config_key=config_key,
+            namespace=self._namespace_key,
+            config_key=self._config_key(model, reasoning_effort, tools, procedural),
             history_key=state.history_key,
             question_key=state.question_key,
             question=state.question,
@@ -324,6 +389,8 @@ class DecisionCacheRuntime:
                     text=entry.decision.text if exact else "",
                     reasoning=entry.decision.reasoning if exact else "",
                     tool_calls=[
+                        # Ids are cleared; the harness assigns fresh ones before
+                        # executing tool calls.
                         call.model_copy(update={"id": None})
                         for call in entry.decision.tool_calls
                     ],

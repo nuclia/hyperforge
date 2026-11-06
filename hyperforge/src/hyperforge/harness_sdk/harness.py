@@ -795,6 +795,8 @@ class AgentHarness:
                 policy=self._tool_cache_policy,
             )
             if entry is not None:
+                # Unblocks spawn_agent's _wait_until_started like a live call.
+                self._model_started.set()
                 history_head_event_id = self._last_event_id
                 await self._emit_llm_started(
                     call_id, history_head_event_id, len(self.messages), selected
