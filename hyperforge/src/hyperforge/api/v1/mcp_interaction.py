@@ -63,7 +63,9 @@ from hyperforge.api.models import (
 from hyperforge.api.v1.mcp_content import convert_arag_answer_to_content
 from hyperforge.api.v1.router import router
 
-SUPPORTED_OAUTH_CREDENTIAL_PROVIDERS = frozenset({Provider.SHAREFILE_OAUTH})
+SUPPORTED_OAUTH_CREDENTIAL_PROVIDERS = frozenset(
+    {Provider.SHAREFILE_OAUTH, Provider.GOOGLE_OAUTH, Provider.AZURE_OAUTH}
+)
 
 
 async def list_tools(workflows: list[WorkflowData]) -> list[Tool]:
@@ -135,14 +137,14 @@ async def call_tool(
     ):
         if msg.operation == AnswerOperation.AGENT_REQUEST and msg.oauth:
             result = await mcp_session.elicit_url(
-                message="Authenticate with ShareFile to access the requested content.",
+                message="Authenticate with the data source to access the requested content.",
                 url=msg.oauth.oauth_url,
                 elicitation_id=uuid.uuid4().hex,
                 related_request_id=mcp_server.request_context.request_id,
             )
             if result.action != "accept":
                 raise ResourceError(
-                    f"ShareFile authentication was {result.action} by the user"
+                    f"Data source authentication was {result.action} by the user"
                 )
         elif msg.operation == AnswerOperation.AGENT_REQUEST and msg.feedback:
             feedback = msg.feedback

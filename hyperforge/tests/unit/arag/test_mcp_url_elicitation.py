@@ -21,6 +21,12 @@ from hyperforge.interaction import (
     Provider,
 )
 
+OAUTH_PROVIDERS = (
+    Provider.SHAREFILE_OAUTH,
+    Provider.GOOGLE_OAUTH,
+    Provider.AZURE_OAUTH,
+)
+
 
 def feedback(**kwargs) -> Feedback:
     return Feedback(
@@ -103,17 +109,17 @@ async def test_mcp_propagates_agent_error(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_mcp_elicits_url_and_persists_sharefile_credentials(monkeypatch):
+@pytest.mark.parametrize("provider", OAUTH_PROVIDERS)
+async def test_mcp_elicits_url_and_persists_credentials(monkeypatch, provider):
+    oauth_url = f"https://{provider.value}.example/authorize"
     events = [
         AragAnswer(
             operation=AnswerOperation.AGENT_REQUEST,
-            feedback=feedback(
-                get_credentials={"sync-config": Provider.SHAREFILE_OAUTH}
-            ),
+            feedback=feedback(get_credentials={"sync-config": provider}),
         ),
         AragAnswer(
             operation=AnswerOperation.AGENT_REQUEST,
-            oauth=OAuthAuthenticateURL(oauth_url="https://sharefile.example/authorize"),
+            oauth=OAuthAuthenticateURL(oauth_url=oauth_url),
         ),
         AragAnswer(
             operation=AnswerOperation.AGENT_REQUEST,
@@ -138,8 +144,9 @@ async def test_mcp_elicits_url_and_persists_sharefile_credentials(monkeypatch):
     )
 
     session.elicit_url.assert_awaited_once()
-    assert session.elicit_url.await_args.kwargs["url"] == (
-        "https://sharefile.example/authorize"
+    assert session.elicit_url.await_args.kwargs["url"] == oauth_url
+    assert session.elicit_url.await_args.kwargs["message"] == (
+        "Authenticate with the data source to access the requested content."
     )
     agent_manager.upsert_sync_oauth_credentials_batch.assert_awaited_once_with(
         account="account",
@@ -147,7 +154,7 @@ async def test_mcp_elicits_url_and_persists_sharefile_credentials(monkeypatch):
         agent_id="agent",
         credentials_by_config={
             "sync-config": (
-                "sharefile_oauth",
+                provider.value,
                 {"external-connection": "secret"},
             )
         },
@@ -188,13 +195,14 @@ async def test_mcp_form_elicitation_only_enqueues_accepted_content(monkeypatch, 
 
 
 @pytest.mark.asyncio
-async def test_mcp_returns_stored_credentials_without_elicitation(monkeypatch):
+@pytest.mark.parametrize("provider", OAUTH_PROVIDERS)
+async def test_mcp_returns_stored_credentials_without_elicitation(
+    monkeypatch, provider
+):
     events = [
         AragAnswer(
             operation=AnswerOperation.AGENT_REQUEST,
-            feedback=feedback(
-                get_credentials={"sync-config": Provider.SHAREFILE_OAUTH}
-            ),
+            feedback=feedback(get_credentials={"sync-config": provider}),
         )
     ]
     app, server, workflow, headers, session, agent_manager = setup_call(
@@ -203,6 +211,10 @@ async def test_mcp_returns_stored_credentials_without_elicitation(monkeypatch):
     agent_manager.get_sync_oauth_credentials.return_value = {
         "external-connection": "secret"
     }
+    receiver = SimpleNamespace(queue=asyncio.Queue())
+    monkeypatch.setattr(
+        mcp_interaction, "WebsocketReceiver", lambda websocket: receiver
+    )
 
     await mcp_interaction.call_tool(
         app,
@@ -216,6 +228,80 @@ async def test_mcp_returns_stored_credentials_without_elicitation(monkeypatch):
     )
 
     session.elicit_url.assert_not_awaited()
+    session.elicit_form.assert_not_awaited()
+    agent_manager.get_sync_oauth_credentials.assert_awaited_once_with(
+        account="account",
+        user_id="user",
+        agent_id="agent",
+        provider=provider.value,
+        sync_config_id="sync-config",
+    )
+    response = receiver.queue.get_nowait()
+    assert response.request_id == "request"
+    assert json.loads(response.response) == {
+        "existing_credentials": {"sync-config": {"external-connection": "secret"}}
+    }
+    agent_manager.upsert_sync_oauth_credentials_batch.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_mcp_authenticates_mixed_providers(monkeypatch):
+    providers = {provider.value: provider for provider in OAUTH_PROVIDERS}
+    credentials = {
+        config: {f"{config}-connection": f"{config}-secret"} for config in providers
+    }
+    oauth_urls = [f"https://{config}.example/authorize" for config in providers]
+    events = [
+        AragAnswer(
+            operation=AnswerOperation.AGENT_REQUEST,
+            feedback=feedback(get_credentials=providers),
+        ),
+        *[
+            AragAnswer(
+                operation=AnswerOperation.AGENT_REQUEST,
+                oauth=OAuthAuthenticateURL(oauth_url=url),
+            )
+            for url in oauth_urls
+        ],
+        AragAnswer(
+            operation=AnswerOperation.AGENT_REQUEST,
+            feedback=feedback(credentials=credentials),
+        ),
+    ]
+    app, server, workflow, _, session, agent_manager = setup_call(monkeypatch, events)
+    receiver = SimpleNamespace(queue=asyncio.Queue())
+    monkeypatch.setattr(
+        mcp_interaction, "WebsocketReceiver", lambda websocket: receiver
+    )
+
+    await mcp_interaction.call_tool(
+        app, server, "account", "agent", "session", [workflow], "ask", {}
+    )
+
+    assert [
+        call.kwargs["url"] for call in session.elicit_url.await_args_list
+    ] == oauth_urls
+    assert [
+        call.kwargs["provider"]
+        for call in agent_manager.get_sync_oauth_credentials.await_args_list
+    ] == list(providers)
+    agent_manager.upsert_sync_oauth_credentials_batch.assert_awaited_once_with(
+        account="account",
+        user_id="user",
+        agent_id="agent",
+        credentials_by_config={
+            config: (provider.value, credentials[config])
+            for config, provider in providers.items()
+        },
+    )
+    assert json.loads(receiver.queue.get_nowait().response) == {
+        "existing_credentials": {}
+    }
+    assert json.loads(receiver.queue.get_nowait().response) == {
+        "existing_credentials": credentials
+    }
+    assert receiver.queue.empty()
+    session.elicit_form.assert_not_awaited()
 
 
 @pytest.mark.asyncio
@@ -226,7 +312,7 @@ async def test_mcp_discards_partial_stored_credentials(monkeypatch):
             feedback=feedback(
                 get_credentials={
                     "stored": Provider.SHAREFILE_OAUTH,
-                    "missing": Provider.SHAREFILE_OAUTH,
+                    "missing": Provider.GOOGLE_OAUTH,
                 }
             ),
         )
@@ -438,11 +524,19 @@ async def test_mcp_transport_releases_lease_when_handling_fails():
 
 
 @pytest.mark.asyncio
-async def test_mcp_rejects_provider_not_in_allowlist(monkeypatch):
+@pytest.mark.parametrize(
+    "provider",
+    (
+        Provider.MCP_OAUTH,
+        Provider.AZURE_CERTIFICATE_CREDENTIALS,
+        Provider.AWS_S3_ACCESS_KEYS,
+    ),
+)
+async def test_mcp_rejects_provider_not_in_allowlist(monkeypatch, provider):
     events = [
         AragAnswer(
             operation=AnswerOperation.AGENT_REQUEST,
-            feedback=feedback(get_credentials={"server": Provider.MCP_OAUTH}),
+            feedback=feedback(get_credentials={"server": provider}),
         )
     ]
     app, server, workflow, headers, session, agent_manager = setup_call(
@@ -466,20 +560,37 @@ async def test_mcp_rejects_provider_not_in_allowlist(monkeypatch):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("provider", OAUTH_PROVIDERS)
 @pytest.mark.parametrize("action", ["decline", "cancel"])
-async def test_mcp_stops_when_url_elicitation_is_rejected(monkeypatch, action):
+async def test_mcp_stops_when_url_elicitation_is_rejected(
+    monkeypatch, action, provider
+):
     events = [
         AragAnswer(
             operation=AnswerOperation.AGENT_REQUEST,
-            oauth=OAuthAuthenticateURL(oauth_url="https://sharefile.example/authorize"),
-        )
+            feedback=feedback(get_credentials={"sync-config": provider}),
+        ),
+        AragAnswer(
+            operation=AnswerOperation.AGENT_REQUEST,
+            oauth=OAuthAuthenticateURL(
+                oauth_url=f"https://{provider.value}.example/authorize"
+            ),
+        ),
+        AragAnswer(
+            operation=AnswerOperation.AGENT_REQUEST,
+            feedback=feedback(
+                credentials={"sync-config": {"external-connection": "secret"}}
+            ),
+        ),
     ]
     app, server, workflow, headers, session, agent_manager = setup_call(
         monkeypatch, events
     )
     session.elicit_url.return_value = ElicitResult(action=action)
 
-    with pytest.raises(ResourceError, match=f"authentication was {action}"):
+    with pytest.raises(
+        ResourceError, match=f"^Data source authentication was {action} by the user$"
+    ):
         await mcp_interaction.call_tool(
             app,
             server,

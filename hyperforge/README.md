@@ -130,6 +130,17 @@ affecting other clients.
 Declined or cancelled URL/form elicitations fail the tool instead of resuming
 the workflow with an empty response.
 
+Sync Service Ask Agent OAuth is supported over MCP for ShareFile
+(`sharefile_oauth`), Google Drive (`google_oauth`) and SharePoint/OneDrive
+(`azure_oauth`). The MCP client must support URL elicitation. Authentication
+uses the existing Sync service authorization flow and Hyperforge OAuth callback;
+the client receives the authorization URL, not the credentials.
+Credentials are encrypted and scoped by account, user, agent, provider and Sync
+configuration. API deployments persist them in PostgreSQL; standalone keeps them
+in process memory, so a restart requires authentication again. SharePoint
+certificate connections (`azure_certificate_credentials`) are not supported by
+this interactive OAuth flow.
+
 Requests are registered before waiting for a local handler, so cancellation
 received during handler creation prevents the tool from starting. Failed or
 interrupted admission releases that request's cancellation marker.
