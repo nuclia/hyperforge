@@ -115,9 +115,7 @@ async def test_mcp_elicits_url_and_persists_credentials(monkeypatch, provider):
     events = [
         AragAnswer(
             operation=AnswerOperation.AGENT_REQUEST,
-            feedback=feedback(
-                get_credentials={"sync-config": provider}
-            ),
+            feedback=feedback(get_credentials={"sync-config": provider}),
         ),
         AragAnswer(
             operation=AnswerOperation.AGENT_REQUEST,
@@ -198,13 +196,13 @@ async def test_mcp_form_elicitation_only_enqueues_accepted_content(monkeypatch, 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("provider", OAUTH_PROVIDERS)
-async def test_mcp_returns_stored_credentials_without_elicitation(monkeypatch, provider):
+async def test_mcp_returns_stored_credentials_without_elicitation(
+    monkeypatch, provider
+):
     events = [
         AragAnswer(
             operation=AnswerOperation.AGENT_REQUEST,
-            feedback=feedback(
-                get_credentials={"sync-config": provider}
-            ),
+            feedback=feedback(get_credentials={"sync-config": provider}),
         )
     ]
     app, server, workflow, headers, session, agent_manager = setup_call(
@@ -241,9 +239,7 @@ async def test_mcp_returns_stored_credentials_without_elicitation(monkeypatch, p
     response = receiver.queue.get_nowait()
     assert response.request_id == "request"
     assert json.loads(response.response) == {
-        "existing_credentials": {
-            "sync-config": {"external-connection": "secret"}
-        }
+        "existing_credentials": {"sync-config": {"external-connection": "secret"}}
     }
     agent_manager.upsert_sync_oauth_credentials_batch.assert_not_awaited()
 
@@ -530,7 +526,11 @@ async def test_mcp_transport_releases_lease_when_handling_fails():
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "provider",
-    (Provider.MCP_OAUTH, Provider.AZURE_CERTIFICATE_CREDENTIALS, Provider.AWS_S3_ACCESS_KEYS),
+    (
+        Provider.MCP_OAUTH,
+        Provider.AZURE_CERTIFICATE_CREDENTIALS,
+        Provider.AWS_S3_ACCESS_KEYS,
+    ),
 )
 async def test_mcp_rejects_provider_not_in_allowlist(monkeypatch, provider):
     events = [
@@ -562,7 +562,9 @@ async def test_mcp_rejects_provider_not_in_allowlist(monkeypatch, provider):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("provider", OAUTH_PROVIDERS)
 @pytest.mark.parametrize("action", ["decline", "cancel"])
-async def test_mcp_stops_when_url_elicitation_is_rejected(monkeypatch, action, provider):
+async def test_mcp_stops_when_url_elicitation_is_rejected(
+    monkeypatch, action, provider
+):
     events = [
         AragAnswer(
             operation=AnswerOperation.AGENT_REQUEST,

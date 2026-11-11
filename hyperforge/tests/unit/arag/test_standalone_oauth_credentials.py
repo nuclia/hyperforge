@@ -4,7 +4,9 @@ from hyperforge.standalone.agent import StaticAgentManager
 
 
 @pytest.mark.parametrize("provider", ["sharefile_oauth", "google_oauth", "azure_oauth"])
-async def test_standalone_oauth_credentials_are_encrypted_and_scoped(monkeypatch, provider):
+async def test_standalone_oauth_credentials_are_encrypted_and_scoped(
+    monkeypatch, provider
+):
     monkeypatch.delenv("ENCRYPTION_SECRET_KEY", raising=False)
     manager = StaticAgentManager({})
 
