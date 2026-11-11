@@ -8,7 +8,8 @@ from hyperforge.db.agents import AgentManager
 
 
 @pytest.mark.asyncio
-async def test_upsert_sync_oauth_credentials_encrypts_payload(monkeypatch):
+@pytest.mark.parametrize("provider", ["sharefile_oauth", "google_oauth", "azure_oauth"])
+async def test_upsert_sync_oauth_credentials_encrypts_payload(monkeypatch, provider):
     database = AsyncMock()
     manager = AgentManager(database=database, settings=SimpleNamespace())  # type: ignore[arg-type]
     encrypt = Mock(return_value="ciphertext")
@@ -18,7 +19,7 @@ async def test_upsert_sync_oauth_credentials_encrypts_payload(monkeypatch):
         account="account",
         user_id="user",
         agent_id="agent",
-        provider="sharefile_oauth",
+        provider=provider,
         sync_config_id="sync-config",
         credentials={"external-connection": "secret"},
     )
@@ -30,7 +31,8 @@ async def test_upsert_sync_oauth_credentials_encrypts_payload(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_get_sync_oauth_credentials_is_scoped_and_decrypts(monkeypatch):
+@pytest.mark.parametrize("provider", ["sharefile_oauth", "google_oauth", "azure_oauth"])
+async def test_get_sync_oauth_credentials_is_scoped_and_decrypts(monkeypatch, provider):
     database = AsyncMock()
     database.fetch_one.return_value = {"encrypted_credentials": "ciphertext"}
     manager = AgentManager(database=database, settings=SimpleNamespace())  # type: ignore[arg-type]
@@ -43,7 +45,7 @@ async def test_get_sync_oauth_credentials_is_scoped_and_decrypts(monkeypatch):
         account="account",
         user_id="user",
         agent_id="agent",
-        provider="sharefile_oauth",
+        provider=provider,
         sync_config_id="sync-config",
     )
 
@@ -53,7 +55,7 @@ async def test_get_sync_oauth_credentials_is_scoped_and_decrypts(monkeypatch):
         "account",
         "user",
         "agent",
-        "sharefile_oauth",
+        provider,
         "sync-config",
     }
 
