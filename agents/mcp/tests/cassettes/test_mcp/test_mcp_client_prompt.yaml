@@ -49,7 +49,7 @@ interactions:
       false, "citation_threshold": null, "generative_model": "chatgpt-4.1", "max_tokens":
       8192, "query_context_images": {}, "prefer_markdown": null, "json_schema": {"type":
       "object", "title": "PromptSelection", "description": "Select the most appropriate
-      prompt for the task", "properties": {"prompt_id": {"type": "string", "description":
+      prompt for the task", "properties": {"name": {"type": "string", "description":
       "id of the prompt to use"}, "reason": {"type": "string", "description": "reason
       for selecting the prompt"}}}, "format_prompt": false, "rerank_context": false,
       "tools": [], "tool_choice": {"type": "required"}, "reasoning": false, "seed":
@@ -85,7 +85,7 @@ interactions:
     uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
-      string: '{"chunk":{"type":"object","object":{"prompt_id":"multiplication_tool_advice","reason":"The
+      string: '{"chunk":{"type":"object","object":{"name":"multiplication_tool_advice","reason":"The
         task is to multiply two numbers (2 and 5), which matches the scenario described
         in the ''multiplication_tool_advice'' prompt. The prompt also provides a clear
         way to explain the answer using a fruit basket example."}}}

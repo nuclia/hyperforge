@@ -58,6 +58,12 @@ members = [
 default-groups = "all"
 managed = true
 
+[tool.pytest.ini_options]
+# Load each package's conftest during initialization so its plugins are registered.
+testpaths = ["hyperforge/tests", "agents/*/tests"]
+addopts = "--import-mode=importlib"
+asyncio_mode = "auto"
+
 
 [tool.uv.sources]
 hyperforge = { workspace = true }

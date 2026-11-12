@@ -90,29 +90,47 @@ class SyncDriver(NucliaDBDriver):
     async def init(cls, driver: Any) -> "SyncDriver":
         sync_driver = cast(SyncDriverConfig, driver)
         client = await sync_connect(sync_driver.config)
-        information = {}
-        sync_configs: Dict[str, list[str]] = {}
-        for sync_config_id in sync_driver.config.connection_ids:
-            response = await client.get(f"/sync_config/{sync_config_id}")
-            response.raise_for_status()
-            data = response.json()
-            connection_id = data["external_connection"]["id"]
-            response = await client.get(f"/external_connection/{connection_id}")
-            response.raise_for_status()
-            sync_configs.setdefault(sync_config_id, []).append(connection_id)
-            data = response.json()
-            information[connection_id] = ExternalConnectionOutput(**data)
-        return cls(
+        instance = cls(
             provider=sync_driver.provider,
             name=sync_driver.name,
             async_driver=client,
-            information=information,
-            sync_configs=sync_configs,
+            information={},
+            sync_configs={},
             config=sync_driver.config,
             driver=await connect(cast(NucliaDBConnection, sync_driver.config)),
             manager=await manager_connect(cast(NucliaDBConnection, sync_driver.config)),
             _synonyms=None,
         )
+        for sync_config_id in sync_driver.config.connection_ids:
+            await instance.resolve_sync_config(sync_config_id)
+        return instance
+
+    async def resolve_sync_config(
+        self, sync_config_id: str
+    ) -> ExternalConnectionOutput:
+        if (
+            self.config.connection_ids
+            and sync_config_id not in self.config.connection_ids
+        ):
+            raise ValueError(
+                f"Sync configuration {sync_config_id} is not configured for this driver"
+            )
+
+        existing_connection_ids = self.sync_configs.get(sync_config_id, [])
+        if existing_connection_ids:
+            return self.information[existing_connection_ids[0]]
+
+        UUID(sync_config_id)
+        response = await self.async_driver.get(f"/sync_config/{sync_config_id}")
+        response.raise_for_status()
+        connection_id = response.json()["external_connection"]["id"]
+
+        response = await self.async_driver.get(f"/external_connection/{connection_id}")
+        response.raise_for_status()
+        information = ExternalConnectionOutput(**response.json())
+        self.sync_configs[sync_config_id] = [connection_id]
+        self.information[connection_id] = information
+        return information
 
     async def get_oauth_url(
         self,

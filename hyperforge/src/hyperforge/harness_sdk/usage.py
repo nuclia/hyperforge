@@ -32,6 +32,10 @@ class HarnessUsage:
     turns: int = 0
     input_tokens: float = 0
     output_tokens: float = 0
+    nuclia_input_tokens: float = 0
+    nuclia_output_tokens: float = 0
+    model_input_tokens: float = 0
+    model_output_tokens: float = 0
 
 
 class UsageLimitExceeded(RuntimeError):

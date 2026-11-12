@@ -191,8 +191,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                 resp,
                 input_tokens,
                 output_tokens,
-                reasoning,
-            ) = await manager.execute_json_reasoning(
+            ) = await manager.execute_json(
                 model=self.config.tool_choice_model,
                 prompt=prompt_feedback_str,
                 user_id="mcp_no_feedback",
@@ -201,7 +200,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                     "title": "PromptSelection",
                     "description": "Select the most appropriate prompt for the task",
                     "properties": {
-                        "prompt_id": {
+                        "name": {
                             "type": "string",
                             "description": "id of the prompt to use",
                         },
@@ -214,7 +213,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                 tracking=memory.get_tracking_info(),
             )
 
-            prompt_id: str = resp["prompt_id"]
+            prompt_id: str = resp["name"]
             reason: str = resp.get("reason", "")
             await memory.add_step(
                 step_module=self.config.module,
@@ -565,7 +564,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                     step_value=error_overflow.trace_value(),
                     timeit=time() - t0,
                 )
-            logger.error(f"Tool {tool_name} encountered an error: {error_message}")
+            logger.warning(f"Tool {tool_name} encountered an error: {error_message}")
             context.chunks.append(
                 Chunk(
                     chunk_id=f"mcp_{self.config.id}_{tool_name}_error_{_short_uid()}",
@@ -832,7 +831,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                         session=session,
                     )
             except Exception as e:
-                logger.error(
+                logger.warning(
                     f"MCPAgent {self.agent_id!r}: error calling tool {tool_name!r}: {e}"
                 )
             return context

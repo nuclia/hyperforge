@@ -11,6 +11,12 @@ from typing import Any, Literal, NamedTuple
 
 from pydantic import BaseModel
 
+from hyperforge.procedural.guidance import (
+    ProceduralGuidance,
+    ProceduralGuidanceConfig,
+    ProcedureStep,
+)
+
 from .agents import published_agent_to_tools
 from .clients import ModelClient, ReasoningEffort
 from .context import format_context
@@ -23,7 +29,7 @@ from .models import (
     HarnessToolCall,
 )
 from .storage import HarnessStorageProtocol, InMemoryHarnessStorage
-from .tools import HarnessTool, ToolCallContext
+from .tools import HarnessTool, ToolCallContext, ToolInheritancePolicy
 from .tools.core import DictOutput, SendMessageInput, SpawnAgentInput, create_core_tools
 from .usage import HarnessUsage, UsageLimitExceeded, UsageLimits
 
@@ -42,6 +48,13 @@ EMPTY_RESPONSE_RETRY_PROMPT = (
 MAX_EMPTY_RETRIES = 2
 
 
+class _CurrentTurn:
+    pass
+
+
+_CURRENT_TURN = _CurrentTurn()
+
+
 @dataclass
 class AgentResult:
     text: str
@@ -49,6 +62,10 @@ class AgentResult:
     tool_calls: list[HarnessToolCall] = field(default_factory=list)
     input_tokens: float = 0
     output_tokens: float = 0
+    nuclia_input_tokens: float = 0
+    nuclia_output_tokens: float = 0
+    model_input_tokens: float = 0
+    model_output_tokens: float = 0
 
 
 @dataclass(frozen=True)
@@ -293,6 +310,8 @@ class AgentHarness:
         spawn_depth: int = 0,
         parent_agent_id: str | None = None,
         event_queue_size: int = DEFAULT_EVENT_QUEUE_SIZE,
+        procedural_guidance: ProceduralGuidanceConfig | None = None,
+        guidance_client: ModelClient | None = None,
     ) -> None:
         if event_queue_size <= 0:
             raise ValueError("event_queue_size must be positive")
@@ -353,6 +372,7 @@ class AgentHarness:
         self._interrupted = asyncio.Event()
         self._model_started = asyncio.Event()
         self._run_lock = asyncio.Lock()
+        self._lazy_tools_lock = asyncio.Lock()
         self._active_task: asyncio.Task[Any] | None = None
         self._turn_id: str | None = None
         self._last_event_id: str | None = None
@@ -362,6 +382,21 @@ class AgentHarness:
         if len(self._tools) != len(self._external_tools):
             raise ValueError("Tool names must be unique")
         self._install_core_tools(self._config.feedback_enabled)
+        self._procedural = (
+            ProceduralGuidance(procedural_guidance) if procedural_guidance else None
+        )
+        self._guidance_client = guidance_client or model_client
+        self._failed_procedural_calls: set[str] = set()
+        if self._procedural:
+            self._procedural.config.graph.check_tools(self._tools)
+
+    @property
+    def procedural_guidance(self) -> ProceduralGuidanceConfig | None:
+        return self._procedural.config if self._procedural else None
+
+    @property
+    def procedural_trajectory(self) -> tuple[ProcedureStep, ...]:
+        return tuple(self._procedural.steps) if self._procedural else ()
 
     @property
     def children(self) -> dict[str, ChildAgent]:
@@ -373,6 +408,20 @@ class AgentHarness:
 
     async def load(self, *, create: bool = True) -> None:
         conversation = await self.storage.get_conversation(self.conversation_id)
+        if (
+            conversation is not None
+            and self._procedural
+            and conversation.metadata.get("procedural_graph_version")
+            != self._procedural.version
+        ):
+            logger.warning(
+                "Disabling procedural guidance: conversation=%s expected_graph=%s stored_graph=%s",
+                self.conversation_id,
+                self._procedural.version,
+                conversation.metadata.get("procedural_graph_version"),
+            )
+            self._procedural = None
+            self._failed_procedural_calls.clear()
         if conversation is None:
             if not create:
                 raise ValueError("Conversation not found")
@@ -386,11 +435,29 @@ class AgentHarness:
             await self.storage.create_conversation(conversation)
         self.conversation = conversation
         self.messages = []
+        self._active_lazy_tools.clear()
+        lazy_tool_names = {tool.name for tool in self._external_tools if tool.lazy_load}
+        if self._procedural:
+            self._procedural.steps.clear()
         pending_tool_outputs: dict[str, HarnessMessage] = {}
         async for event in self.storage.iter_events(self.conversation_id):
             self._last_event_id = event.id
             if event.parent_agent_id is not None:
                 continue
+            if event.type == HarnessEventType.PROCEDURAL_STEP and self._procedural:
+                step = ProcedureStep.model_validate(event.payload)
+                if step.graph_version != self._procedural.version:
+                    logger.warning(
+                        "Disabling procedural guidance: conversation=%s event=%s expected_graph=%s stored_graph=%s",
+                        self.conversation_id,
+                        event.id,
+                        self._procedural.version,
+                        step.graph_version,
+                    )
+                    self._procedural = None
+                    self._failed_procedural_calls.clear()
+                else:
+                    self._procedural.steps.append(step)
             if event.type in {
                 HarnessEventType.MESSAGE_ADDED,
                 HarnessEventType.MESSAGES_ADDED,
@@ -420,6 +487,14 @@ class AgentHarness:
                     for item in event.payload["messages"]
                 ]
                 pending_tool_outputs.clear()
+            elif event.type == HarnessEventType.TOOLS_ACTIVATED:
+                names = event.payload.get("names", [])
+                if isinstance(names, list):
+                    self._active_lazy_tools.update(
+                        name
+                        for name in names
+                        if isinstance(name, str) and name in lazy_tool_names
+                    )
         if pending_tool_outputs:
             logger.warning(
                 "Ignoring orphaned tool outputs while loading conversation: conversation=%s call_ids=%s",
@@ -434,7 +509,10 @@ class AgentHarness:
 
     def _persisted_metadata(self) -> dict[str, Any]:
         metadata = self.execution_context.get("conversation_metadata", {})
-        return dict(metadata) if isinstance(metadata, Mapping) else {}
+        result = dict(metadata) if isinstance(metadata, Mapping) else {}
+        if self._procedural:
+            result["procedural_graph_version"] = self._procedural.version
+        return result
 
     def add_messages(self, messages: Iterable[HarnessMessage | dict[str, Any]]) -> None:
         self._pending_messages.extend(
@@ -460,6 +538,54 @@ class AgentHarness:
             or not tool.lazy_load
             or tool.name in self._active_lazy_tools
         )
+
+    def iter_lazy_tools(self) -> Iterable[HarnessTool]:
+        """Iterate over registered external lazy tools."""
+        return (tool for tool in self._external_tools if tool.lazy_load)
+
+    def is_tool_active(self, name: str) -> bool:
+        return name in self._active_lazy_tools
+
+    async def activate_tools(self, names: Iterable[str]) -> list[HarnessTool]:
+        """Activate registered lazy tools and persist newly activated names."""
+        requested_names = list(dict.fromkeys(names))
+        lazy_tools = {tool.name: tool for tool in self.iter_lazy_tools()}
+        unknown = [name for name in requested_names if name not in lazy_tools]
+        if unknown:
+            raise ValueError(f"Unknown lazy tools: {', '.join(unknown)}")
+        async with self._lazy_tools_lock:
+            newly_activated = [
+                name for name in requested_names if name not in self._active_lazy_tools
+            ]
+            if newly_activated:
+                await self.emit(
+                    HarnessEventType.TOOLS_ACTIVATED,
+                    {"names": newly_activated},
+                )
+                self._active_lazy_tools.update(newly_activated)
+        return [lazy_tools[name] for name in requested_names]
+
+    async def call_tool(
+        self, name: str, arguments: dict[str, Any], *, call_id: str | None = None
+    ) -> BaseModel:
+        """Execute an active external lazy tool by name."""
+        tool = next(
+            (
+                candidate
+                for candidate in self.iter_lazy_tools()
+                if candidate.name == name
+            ),
+            None,
+        )
+        if tool is None:
+            raise ValueError(f"Unknown lazy tool: {name}")
+        async with self._lazy_tools_lock:
+            if name not in self._active_lazy_tools:
+                raise ValueError(f"Tool is not active: {name}")
+        output = await tool.execute(
+            ToolCallContext(harness=self, name=name, id=call_id), arguments
+        )
+        return output
 
     async def save_messages(self) -> None:
         await self._flush_pending_messages()
@@ -587,13 +713,19 @@ class AgentHarness:
         payload: dict[str, Any],
         *,
         persist: bool = True,
+        parent_call_id: str | None = None,
+        turn_id: str | None | _CurrentTurn = _CURRENT_TURN,
     ) -> HarnessEvent:
+        resolved_turn_id = (
+            self._turn_id if isinstance(turn_id, _CurrentTurn) else turn_id
+        )
         event = HarnessEvent(
             id=uuid.uuid4().hex,
             conversation_id=self.conversation_id,
-            turn_id=self._turn_id,
+            turn_id=resolved_turn_id,
             agent_id=self.agent_id,
             parent_agent_id=self.parent_agent_id,
+            parent_call_id=parent_call_id,
             category=self.category,
             tags=self.tags,
             metadata=self._persisted_metadata(),
@@ -609,7 +741,7 @@ class AgentHarness:
     async def llm(self, tools: Iterable[HarnessTool] | None = None) -> AgentResult:
         await self._flush_pending_messages()
         if tools is None:
-            selected = list(self.iter_tools())
+            selected = [tool for tool in self.iter_tools() if not tool.lazy_load]
         else:
             selected = []
             seen: set[str] = set()
@@ -618,10 +750,7 @@ class AgentHarness:
                 if (
                     registered is not None
                     and registered.name not in seen
-                    and (
-                        not registered.lazy_load
-                        or registered.name in self._active_lazy_tools
-                    )
+                    and not registered.lazy_load
                 ):
                     selected.append(registered)
                     seen.add(registered.name)
@@ -629,13 +758,19 @@ class AgentHarness:
         self._check_limit("max_turns", self.usage.turns)
         result = AgentResult(text="")
         call_id = uuid.uuid4().hex
+        request_messages = self.messages
+        if self._procedural:
+            self._procedural.decision_id = call_id
+            request_messages = await self._procedural.messages(
+                self, self._guidance_client
+            )
         history_head_event_id = self._last_event_id
         await self.emit(
             HarnessEventType.LLM_STARTED,
             {
                 "call_id": call_id,
                 "history_head_event_id": history_head_event_id,
-                "message_count": len(self.messages),
+                "message_count": len(request_messages),
                 "model": self.model,
                 "reasoning_effort": self.reasoning_effort,
                 "tools": [tool.name for tool in selected],
@@ -649,7 +784,7 @@ class AgentHarness:
             async for delta in self.model_client.stream(
                 model=self.model,
                 reasoning_effort=self.reasoning_effort,
-                messages=self.messages,
+                messages=request_messages,
                 tools=selected,
                 execution_context=self.execution_context,
             ):
@@ -658,6 +793,18 @@ class AgentHarness:
                 result.tool_calls.extend(delta.tool_calls)
                 result.input_tokens = max(result.input_tokens, delta.input_tokens)
                 result.output_tokens = max(result.output_tokens, delta.output_tokens)
+                result.nuclia_input_tokens = max(
+                    result.nuclia_input_tokens, delta.nuclia_input_tokens
+                )
+                result.nuclia_output_tokens = max(
+                    result.nuclia_output_tokens, delta.nuclia_output_tokens
+                )
+                result.model_input_tokens = max(
+                    result.model_input_tokens, delta.model_input_tokens
+                )
+                result.model_output_tokens = max(
+                    result.model_output_tokens, delta.model_output_tokens
+                )
                 trace_id = delta.trace_id or trace_id
                 resolved_model = delta.model or resolved_model
                 if delta.text:
@@ -672,6 +819,10 @@ class AgentHarness:
                     )
             self.usage.input_tokens += result.input_tokens
             self.usage.output_tokens += result.output_tokens
+            self.usage.nuclia_input_tokens += result.nuclia_input_tokens
+            self.usage.nuclia_output_tokens += result.nuclia_output_tokens
+            self.usage.model_input_tokens += result.model_input_tokens
+            self.usage.model_output_tokens += result.model_output_tokens
             usage_recorded = True
             self._check_limit("max_input_tokens", self.usage.input_tokens)
             self._check_limit("max_output_tokens", self.usage.output_tokens)
@@ -692,6 +843,10 @@ class AgentHarness:
             if not usage_recorded:
                 self.usage.input_tokens += result.input_tokens
                 self.usage.output_tokens += result.output_tokens
+                self.usage.nuclia_input_tokens += result.nuclia_input_tokens
+                self.usage.nuclia_output_tokens += result.nuclia_output_tokens
+                self.usage.model_input_tokens += result.model_input_tokens
+                self.usage.model_output_tokens += result.model_output_tokens
             await self._emit_llm_result(
                 HarnessEventType.LLM_FAILED,
                 call_id,
@@ -732,6 +887,10 @@ class AgentHarness:
             "call_id": call_id,
             "input_tokens": result.input_tokens,
             "output_tokens": result.output_tokens,
+            "nuclia_input_tokens": result.nuclia_input_tokens,
+            "nuclia_output_tokens": result.nuclia_output_tokens,
+            "model_input_tokens": result.model_input_tokens,
+            "model_output_tokens": result.model_output_tokens,
             "history_head_event_id": history_head_event_id,
             "trace_id": trace_id,
             "model": resolved_model or self.model,
@@ -810,6 +969,8 @@ class AgentHarness:
             await self.load()
         self._start_usage()
         self._turn_id = uuid.uuid4().hex
+        if self._procedural:
+            self._procedural.query = prompt
         await self.emit(HarnessEventType.TURN_STARTED, {"prompt": prompt})
         latest_system = next(
             (
@@ -826,6 +987,7 @@ class AgentHarness:
         await self._flush_pending_messages()
         await self._append_message(HarnessMessage(role="user", content=prompt))
         loop_state = TurnLoopState()
+        multi_action_retries = 0
         try:
             if self._interrupted.is_set():
                 await self.emit(HarnessEventType.TURN_INTERRUPTED, {})
@@ -833,6 +995,24 @@ class AgentHarness:
             while not self._interrupted.is_set():
                 await self._consume_inbox()
                 result = await self._with_time_limit(self.llm())
+                if (
+                    self._procedural
+                    and self._procedural.config.single_action
+                    and len(result.tool_calls) > 1
+                ):
+                    multi_action_retries += 1
+                    if multi_action_retries > MAX_EMPTY_RETRIES:
+                        raise ValueError(
+                            "Solver repeatedly requested multiple actions in single_action mode"
+                        )
+                    await self._append_message(
+                        HarnessMessage(
+                            role="user",
+                            content="No calls were executed. Request exactly one tool action per decision, or answer when done.",
+                        )
+                    )
+                    continue
+                multi_action_retries = 0
                 if result.tool_calls:
                     await self._with_time_limit(
                         self._execute_tool_calls(result.tool_calls, result.text)
@@ -945,6 +1125,14 @@ class AgentHarness:
         messages = await asyncio.gather(
             *(self._execute_tool_call(call) for call in calls)
         )
+        if self._procedural:
+            # gather preserves requested order, independently of completion order.
+            for call, message in zip(calls, messages, strict=True):
+                step = self._procedural.record(
+                    call, message, failed=call.id in self._failed_procedural_calls
+                )
+                self._failed_procedural_calls.discard(call.id or "")
+                await self.emit(HarnessEventType.PROCEDURAL_STEP, step.model_dump())
         await self._append_messages(
             [
                 HarnessMessage(role="assistant", content=text, tool_calls=calls),
@@ -1000,6 +1188,8 @@ class AgentHarness:
                 },
             )
             result = {"error": str(exc)}
+            if self._procedural:
+                self._failed_procedural_calls.add(call.id)
             await self.emit(
                 HarnessEventType.TOOL_FAILED,
                 {"call_id": call.id, "tool": call.name, "result": result},
@@ -1036,7 +1226,11 @@ class AgentHarness:
             model=self._config.model,
             model_client=self._config.model_client,
             reasoning_effort=self._config.reasoning_effort,
-            tools=self._config.tools,
+            tools=(
+                tool
+                for tool in self._config.tools
+                if tool.inheritance == ToolInheritancePolicy.INHERIT
+            ),
             system_prompt=self._config.system_prompt,
             title=self._config.title,
             conversation_id=self.conversation_id,
@@ -1056,6 +1250,11 @@ class AgentHarness:
         child._usage_started_at = self._usage_started_at
         child._owns_usage = False
         child.conversation = self.conversation
+        child._active_lazy_tools = {
+            name
+            for name in self._active_lazy_tools
+            if name in {tool.name for tool in child._external_tools if tool.lazy_load}
+        }
         if include_history:
             child.messages = list(self.messages)
         return child

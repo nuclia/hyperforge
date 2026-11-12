@@ -54,6 +54,11 @@ class ActivateToolsInput(BaseModel):
     names: list[str]
 
 
+class CallToolInput(BaseModel):
+    tool_name: str
+    arguments: dict[str, Any]
+
+
 class DictOutput(BaseModel):
     value: dict[str, Any]
 
@@ -80,9 +85,7 @@ async def search_tools(
     harness = context.harness
     terms = _search_terms(input_value.query)
     candidates: list[tuple[int, HarnessTool[Any, Any]]] = []
-    for candidate in harness._external_tools:
-        if not candidate.lazy_load or candidate.name in harness._active_lazy_tools:
-            continue
+    for candidate in harness.iter_lazy_tools():
         name_terms = _search_terms(candidate.name)
         searchable_terms = name_terms | _search_terms(candidate.description)
         matching_terms = terms & searchable_terms
@@ -94,7 +97,11 @@ async def search_tools(
     limit = max(1, min(input_value.limit, 50))
     return ListOutput(
         items=[
-            {"name": candidate.name, "description": candidate.description}
+            {
+                "name": candidate.name,
+                "description": candidate.description,
+                "active": harness.is_tool_active(candidate.name),
+            }
             for _, candidate in candidates[:limit]
         ]
     )
@@ -104,17 +111,34 @@ async def search_tools(
 async def activate_tools(
     context: ToolCallContext, input_value: ActivateToolsInput
 ) -> DictOutput:
-    harness = context.harness
-    names = list(dict.fromkeys(input_value.names))
-    unknown = [
-        name
-        for name in names
-        if name not in harness._tools or not harness._tools[name].lazy_load
-    ]
-    if unknown:
-        raise ValueError(f"Unknown lazy tools: {', '.join(unknown)}")
-    harness._active_lazy_tools.update(names)
-    return DictOutput(value={"activated": names})
+    tools = await context.harness.activate_tools(input_value.names)
+    return DictOutput(
+        value={
+            "activated": [
+                {
+                    "name": tool.name,
+                    "description": tool.description,
+                    "parameters": tool.parameters,
+                }
+                for tool in tools
+            ]
+        }
+    )
+
+
+@tool(
+    description=(
+        "Execute an activated tool. Use the exact tool_name and arguments schema "
+        "returned by activate_tools."
+    )
+)
+async def call_tool(context: ToolCallContext, input_value: CallToolInput) -> DictOutput:
+    output = await context.harness.call_tool(
+        input_value.tool_name,
+        input_value.arguments,
+        call_id=context.id,
+    )
+    return DictOutput(value=output.model_dump(mode="json"))
 
 
 @tool()
@@ -213,6 +237,7 @@ def create_core_tools(*, feedback_enabled: bool) -> dict[str, HarnessTool[Any, A
             compact,
             search_tools,
             activate_tools,
+            call_tool,
         )
     }
     if feedback_enabled:
@@ -223,6 +248,7 @@ def create_core_tools(*, feedback_enabled: bool) -> dict[str, HarnessTool[Any, A
 __all__ = [
     "ActivateToolsInput",
     "AgentIdInput",
+    "CallToolInput",
     "CompactInput",
     "DictOutput",
     "FeedbackInput",
@@ -234,6 +260,7 @@ __all__ = [
     "SendMessageInput",
     "SpawnAgentInput",
     "activate_tools",
+    "call_tool",
     "compact",
     "create_core_tools",
     "feedback",

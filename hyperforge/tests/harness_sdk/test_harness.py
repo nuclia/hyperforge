@@ -19,9 +19,11 @@ from hyperforge.harness_sdk import (
     ModelDelta,
     NucliaModelClient,
     ToolCallContext,
+    ToolInheritancePolicy,
     UsageLimitExceeded,
     UsageLimits,
     codemode,
+    create_codemode_tool,
     tool,
 )
 from hyperforge.harness_sdk.harness import (
@@ -30,9 +32,13 @@ from hyperforge.harness_sdk.harness import (
     TurnLoopState,
 )
 from hyperforge.harness_sdk.tools.core import (
+    ActivateToolsInput,
     AgentIdInput,
+    CallToolInput,
     SearchToolsInput,
     SpawnAgentInput,
+    activate_tools,
+    call_tool,
     search_tools,
     spawn_agent,
     wait_agent,
@@ -92,6 +98,26 @@ def test_codemode_can_be_registered_explicitly() -> None:
     )
 
     assert "codemode" in {tool.name for tool in harness.iter_tools()}
+
+
+def test_scoped_codemode_is_not_inherited_by_default() -> None:
+    async def execute(_context: ToolCallContext, value: ToolInput) -> ToolOutput:
+        return ToolOutput(value=value.value)
+
+    ordinary = HarnessTool("ordinary", execute)
+    scoped = create_codemode_tool(capabilities=())
+    harness = AgentHarness(
+        model="test-model",
+        model_client=Model(),
+        tools=[ordinary, scoped],
+    )
+
+    child = harness._create_child("child", include_history=False)
+
+    assert ordinary.inheritance == ToolInheritancePolicy.INHERIT
+    assert scoped.inheritance == ToolInheritancePolicy.DO_NOT_INHERIT
+    assert "ordinary" in child._tools
+    assert "codemode" not in child._tools
 
 
 def test_turn_loop_clears_pending_tool_result_after_non_empty_response() -> None:
@@ -232,8 +258,12 @@ async def test_agent_loop_streams_direct_answer_and_records_usage() -> None:
             yield ModelDelta(text="Hello")
             yield ModelDelta(
                 text=" world",
-                input_tokens=5,
-                output_tokens=2,
+                input_tokens=4,
+                output_tokens=1,
+                nuclia_input_tokens=0.005,
+                nuclia_output_tokens=0.002,
+                model_input_tokens=4,
+                model_output_tokens=1,
                 model="resolved-model",
             )
 
@@ -254,8 +284,19 @@ async def test_agent_loop_streams_direct_answer_and_records_usage() -> None:
     assert events[-1].type == HarnessEventType.TURN_COMPLETED
     assert harness.usage.turns == 1
     assert harness.usage.tool_calls == 0
-    assert harness.usage.input_tokens == 5
-    assert harness.usage.output_tokens == 2
+    assert harness.usage.input_tokens == 4
+    assert harness.usage.output_tokens == 1
+    assert harness.usage.nuclia_input_tokens == 0.005
+    assert harness.usage.nuclia_output_tokens == 0.002
+    assert harness.usage.model_input_tokens == 4
+    assert harness.usage.model_output_tokens == 1
+    completed = next(
+        event for event in events if event.type == HarnessEventType.LLM_COMPLETED
+    )
+    assert completed.payload["model_input_tokens"] == 4
+    assert completed.payload["model_output_tokens"] == 1
+    assert completed.payload["nuclia_input_tokens"] == 0.005
+    assert completed.payload["nuclia_output_tokens"] == 0.002
 
 
 @pytest.mark.asyncio
@@ -296,6 +337,20 @@ async def test_iter_events_discards_events_from_unconsumed_previous_turn() -> No
 
     assert {event.turn_id for event in events} == {harness._turn_id}
     assert events[-1].payload == {"text": "answer-2"}
+
+
+@pytest.mark.asyncio
+async def test_emit_distinguishes_explicit_no_turn_from_current_turn() -> None:
+    harness = AgentHarness(model="test-model", model_client=Model())
+    harness._turn_id = "current-turn"
+
+    current = await harness.emit(HarnessEventType.TURN_STARTED, {}, persist=False)
+    no_turn = await harness.emit(
+        HarnessEventType.TURN_STARTED, {}, persist=False, turn_id=None
+    )
+
+    assert current.turn_id == "current-turn"
+    assert no_turn.turn_id is None
 
 
 @pytest.mark.asyncio
@@ -1322,15 +1377,37 @@ async def test_llm_does_not_expose_inactive_lazy_tool_explicitly() -> None:
     await harness.llm([lazy])
     assert model.tools == []
 
+    await harness.activate_tools(["lazy"])
+    await harness.llm([lazy])
+    assert model.tools == []
+
+
+@pytest.mark.asyncio
+async def test_activated_lazy_tool_can_execute_directly() -> None:
+    async def execute(_context: ToolCallContext, value: ToolInput) -> ToolOutput:
+        return ToolOutput(value=value.value.upper())
+
+    lazy = HarnessTool("lazy", execute, lazy_load=True)
+    harness = AgentHarness(model="test-model", model_client=Model(), tools=[lazy])
+    await harness.activate_tools(["lazy"])
+
+    message = await harness._execute_tool_call(
+        HarnessToolCall(id="call-1", name="lazy", arguments={"value": "hi"})
+    )
+
+    assert message.content == '{"value":"HI"}'
+
 
 @pytest.mark.asyncio
 async def test_lazy_tool_can_be_searched_activated_and_used() -> None:
     class LazyModel:
         def __init__(self) -> None:
             self.calls = 0
+            self.tool_sets: list[tuple[str, ...]] = []
 
         async def stream(self, **kwargs) -> AsyncIterator[ModelDelta]:
             names = {tool.name for tool in kwargs["tools"]}
+            self.tool_sets.append(tuple(tool.name for tool in kwargs["tools"]))
             self.calls += 1
             if self.calls == 1:
                 assert "upper" not in names
@@ -1358,10 +1435,25 @@ async def test_lazy_tool_can_be_searched_activated_and_used() -> None:
                     ]
                 )
             elif self.calls == 3:
-                assert "upper" in names
+                assert "upper" not in names
+                assert "call_tool" in names
+                activated = next(
+                    message
+                    for message in kwargs["messages"]
+                    if message.tool_name == "activate_tools"
+                )
+                assert '"name":"upper"' in activated.content
+                assert '"description":"Convert text to uppercase."' in activated.content
+                assert '"parameters"' in activated.content
                 yield ModelDelta(
                     tool_calls=[
-                        HarnessToolCall(name="upper", arguments={"value": "hi"})
+                        HarnessToolCall(
+                            name="call_tool",
+                            arguments={
+                                "tool_name": "upper",
+                                "arguments": {"value": "hi"},
+                            },
+                        )
                     ]
                 )
             else:
@@ -1370,9 +1462,10 @@ async def test_lazy_tool_can_be_searched_activated_and_used() -> None:
     async def upper(_context: ToolCallContext, value: ToolInput) -> ToolOutput:
         return ToolOutput(value=value.value.upper())
 
+    model = LazyModel()
     harness = AgentHarness(
         model="test-model",
-        model_client=LazyModel(),
+        model_client=model,
         tools=[
             HarnessTool(
                 "upper",
@@ -1384,6 +1477,95 @@ async def test_lazy_tool_can_be_searched_activated_and_used() -> None:
     )
 
     assert await run_harness(harness, "Uppercase hi") == "HI"
+    assert len(set(model.tool_sets)) == 1
+
+
+@pytest.mark.asyncio
+async def test_lazy_tool_activation_is_persisted_and_restored() -> None:
+    async def upper(_context: ToolCallContext, value: ToolInput) -> ToolOutput:
+        return ToolOutput(value=value.value.upper())
+
+    storage = InMemoryHarnessStorage()
+    lazy = HarnessTool(
+        "upper",
+        upper,
+        description="Convert text to uppercase.",
+        lazy_load=True,
+    )
+    harness = AgentHarness(
+        model="test-model",
+        model_client=Model(),
+        tools=[lazy],
+        storage=storage,
+        conversation_id="lazy-resume",
+    )
+    await harness.load()
+
+    activation = await activate_tools.execute(
+        ToolCallContext(harness=harness, name="activate_tools", id="activate-1"),
+        ActivateToolsInput(names=["upper"]).model_dump(),
+    )
+    repeated = await activate_tools.execute(
+        ToolCallContext(harness=harness, name="activate_tools", id="activate-2"),
+        ActivateToolsInput(names=["upper"]).model_dump(),
+    )
+
+    definition = activation.value["activated"][0]
+    assert definition == {
+        "name": "upper",
+        "description": "Convert text to uppercase.",
+        "parameters": lazy.parameters,
+    }
+    assert repeated == activation
+    activation_events = [
+        event
+        async for event in harness.history()
+        if event.type == HarnessEventType.TOOLS_ACTIVATED
+    ]
+    assert [event.payload for event in activation_events] == [{"names": ["upper"]}]
+
+    resumed = AgentHarness(
+        model="test-model",
+        model_client=Model(),
+        tools=[lazy],
+        storage=storage,
+        conversation_id="lazy-resume",
+    )
+    await resumed.load(create=False)
+
+    assert resumed._active_lazy_tools == {"upper"}
+    output = await call_tool.execute(
+        ToolCallContext(harness=resumed, name="call_tool", id="call-1"),
+        CallToolInput(tool_name="upper", arguments={"value": "hi"}).model_dump(),
+    )
+    assert output.value == {"value": "HI"}
+
+
+@pytest.mark.asyncio
+async def test_call_tool_rejects_inactive_and_non_lazy_tools() -> None:
+    async def execute(_context: ToolCallContext, value: ToolInput) -> ToolOutput:
+        return ToolOutput(value=value.value)
+
+    harness = AgentHarness(
+        model="test-model",
+        model_client=Model(),
+        tools=[
+            HarnessTool("lazy", execute, lazy_load=True),
+            HarnessTool("regular", execute),
+        ],
+    )
+    context = ToolCallContext(harness=harness, name="call_tool")
+
+    with pytest.raises(ValueError, match="Tool is not active: lazy"):
+        await call_tool.execute(
+            context,
+            CallToolInput(tool_name="lazy", arguments={"value": "x"}).model_dump(),
+        )
+    with pytest.raises(ValueError, match="Unknown lazy tool: regular"):
+        await call_tool.execute(
+            context,
+            CallToolInput(tool_name="regular", arguments={"value": "x"}).model_dump(),
+        )
 
 
 @pytest.mark.asyncio
