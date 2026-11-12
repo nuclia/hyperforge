@@ -159,24 +159,31 @@ jobs:
     if: (failure() || cancelled()) && github.event_name == 'push'
     runs-on: ubuntu-24.04
     steps:
+      # nuclia/tooling is private, and a public repository can only use its actions
+      # from a checkout.
+      - name: Generate a token
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ secrets.NUCLIA_EXTERNAL_GHAPP_ID }}
+          private-key: ${{ secrets.NUCLIA_EXTERNAL_GHAPP_PK }}
+          owner: nuclia
+          repositories: tooling
+          permission-contents: read
+
+      - name: Checkout tooling repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: nuclia/tooling
+          ref: main
+          path: tooling
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
+
       - name: Send Teams notification
-        env:
-          REF_NAME: ${{ github.ref_name }}
-          RUN_NUMBER: ${{ github.run_number }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          COMMIT_SHA: ${{ github.sha }}
-          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
-        run: |
-          curl -s -o /dev/null -w "%{http_code}" \
-            -H "Content-Type: application/json" \
-            -d "{
-              \"@type\": \"MessageCard\",
-              \"@context\": \"http://schema.org/extensions\",
-              \"themeColor\": \"FF0000\",
-              \"summary\": \"Hyperforge CI failed\",
-              \"sections\": [{
-                \"activityTitle\": \"**Hyperforge CI failed on \`${REF_NAME}\`**\",
-                \"activityText\": \"Run [#${RUN_NUMBER}](${RUN_URL}) failed for commit \`${COMMIT_SHA}\`.\"
-              }]
-            }" \
-            "$TEAMS_WEBHOOK_URL"
+        uses: ./tooling/.github/actions/notify-microsoft-teams
+        with:
+          client-secret: ${{ secrets.PDPBOT_CLIENT_SECRET }}
+          channel-id: ${{ vars.MS_TEAMS_CHANNEL_HYPERFORGE_CI }}
+          title: "Hyperforge CI failed on ${{ github.ref_name }}"
+          message: "Run #${{ github.run_number }} failed for commit ${{ github.sha }}."
