@@ -1,4 +1,5 @@
 import datetime
+import json
 from typing import Any, List
 from uuid import UUID
 
@@ -21,7 +22,9 @@ from hyperforge.configure import (
 from hyperforge.database import metadata
 from hyperforge.db import exceptions, logger
 from hyperforge.db.encryption import (
+    decrypt_data,
     decrypt_fields,
+    encrypt_data,
     encrypt_fields,
     fernet_key_from_passphrase,
 )
@@ -129,6 +132,34 @@ retrieval_agent_config = sa.Table(
     sa.Column("description", sa.String, nullable=True),
     sa.Column("title", sa.String, nullable=True),
     sa.Column("instructions", sa.String, nullable=True),
+)
+
+
+sync_oauth_credentials = sa.Table(
+    "sync_oauth_credentials",
+    metadata,
+    sa.Column("account", sa.String, primary_key=True, nullable=False),
+    sa.Column("user_id", sa.String, primary_key=True, nullable=False),
+    sa.Column("agent_id", sa.String, primary_key=True, nullable=False),
+    sa.Column("provider", sa.String, primary_key=True, nullable=False),
+    sa.Column("sync_config_id", sa.String, primary_key=True, nullable=False),
+    sa.Column("encrypted_credentials", sa.Text, nullable=False),
+    sa.Column(
+        "created", sa.DateTime(timezone=True), nullable=False, default=sa.func.now()
+    ),
+    sa.Column(
+        "modified",
+        sa.DateTime(timezone=True),
+        nullable=False,
+        default=sa.func.now(),
+        onupdate=sa.func.now(),
+    ),
+    sa.ForeignKeyConstraint(
+        ["account", "agent_id"],
+        ["retrieval_agent_config.account", "retrieval_agent_config.agent_id"],
+        onupdate="CASCADE",
+        ondelete="CASCADE",
+    ),
 )
 
 
@@ -358,6 +389,95 @@ class AgentManager:
 
     async def finalize(self):
         await self.database.disconnect()
+
+    async def get_sync_oauth_credentials(
+        self,
+        *,
+        account: str,
+        user_id: str,
+        agent_id: str,
+        provider: str,
+        sync_config_id: str,
+    ) -> dict[str, str] | None:
+        statement = sa.select(sync_oauth_credentials.c.encrypted_credentials).where(
+            sync_oauth_credentials.c.account == account,
+            sync_oauth_credentials.c.user_id == user_id,
+            sync_oauth_credentials.c.agent_id == agent_id,
+            sync_oauth_credentials.c.provider == provider,
+            sync_oauth_credentials.c.sync_config_id == sync_config_id,
+        )
+        row = await self.database.fetch_one(statement)
+        if row is None:
+            return None
+
+        try:
+            credentials = json.loads(decrypt_data(row["encrypted_credentials"]))
+        except (ValueError, json.JSONDecodeError) as exc:
+            raise ValueError("Invalid stored Sync OAuth credentials") from exc
+        if not isinstance(credentials, dict) or not all(
+            isinstance(key, str) and isinstance(value, str)
+            for key, value in credentials.items()
+        ):
+            raise ValueError("Invalid stored Sync OAuth credentials")
+        return credentials
+
+    async def upsert_sync_oauth_credentials(
+        self,
+        *,
+        account: str,
+        user_id: str,
+        agent_id: str,
+        provider: str,
+        sync_config_id: str,
+        credentials: dict[str, str],
+    ) -> None:
+        encrypted_credentials = encrypt_data(
+            json.dumps(credentials, sort_keys=True, separators=(",", ":"))
+        )
+        statement = pg_dialect.insert(sync_oauth_credentials).values(
+            account=account,
+            user_id=user_id,
+            agent_id=agent_id,
+            provider=provider,
+            sync_config_id=sync_config_id,
+            encrypted_credentials=encrypted_credentials,
+        )
+        statement = statement.on_conflict_do_update(
+            index_elements=[
+                sync_oauth_credentials.c.account,
+                sync_oauth_credentials.c.user_id,
+                sync_oauth_credentials.c.agent_id,
+                sync_oauth_credentials.c.provider,
+                sync_oauth_credentials.c.sync_config_id,
+            ],
+            set_={
+                "encrypted_credentials": encrypted_credentials,
+                "modified": sa.func.now(),
+            },
+        )
+        await self.database.execute(statement)
+
+    async def upsert_sync_oauth_credentials_batch(
+        self,
+        *,
+        account: str,
+        user_id: str,
+        agent_id: str,
+        credentials_by_config: dict[str, tuple[str, dict[str, str]]],
+    ) -> None:
+        async with self.database.transaction():
+            for sync_config_id, (
+                provider,
+                credentials,
+            ) in credentials_by_config.items():
+                await self.upsert_sync_oauth_credentials(
+                    account=account,
+                    user_id=user_id,
+                    agent_id=agent_id,
+                    provider=provider,
+                    sync_config_id=sync_config_id,
+                    credentials=credentials,
+                )
 
     async def patch_driver(
         self,

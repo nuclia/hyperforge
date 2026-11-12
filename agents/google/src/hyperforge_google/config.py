@@ -26,7 +26,7 @@ class GoogleDriverConfig(DriverConfig[GoogleInnerConfig]):
 class GoogleAgentConfig(ContextAgentConfig):
     model_config = ConfigDict(title="Google Gemini")
     module: Literal["google"] = "google"
-    gen_model_id: str = "gemini-2.5-flash"
+    gen_model_id: str = "gemini-3.6-flash"
     source: str = "google"
     published_functions: Optional[Tuple[str, ...]] = Field(
         default=("internet_search",),

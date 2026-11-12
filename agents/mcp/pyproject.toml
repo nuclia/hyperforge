@@ -38,6 +38,7 @@ Repository = "https://github.com/nuclia/hyperforge"
 Changelog = "https://github.com/nuclia/hyperforge/blob/main/agents/mcp/CHANGELOG.md"
 
 [tool.pytest.ini_options]
+addopts = "--import-mode=importlib"
 asyncio_mode = "auto"
 
 [tool.uv.build-backend]

@@ -1554,6 +1554,17 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
             logger.info(
                 f"No labels selected for faceted search on question {question}, skipping."
             )
+            context = Context(
+                agent_id=self.agent_id,
+                original_question_uuid=memory.original_question_uuid,
+                actual_question_uuid=None,
+                missing=question,
+                question=question,
+                source=source.id,
+                chunks=[],
+                agent="basic_ask_facets",
+                title=f"Faceted search on {source.id} Knowledge Box",
+            )
         else:
             # We are assuming resources equals fields here
             facets, total = await ndb.field_labels(labelsets=labels_selected)
@@ -1593,7 +1604,11 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
         await memory.add_step(
             step_module=self.config.module,
             step_title=self.step_title("Faceted count"),
-            step_reason="Faceted search performed",
+            step_reason=(
+                "Faceted search performed"
+                if labels_selected
+                else "Faceted search skipped"
+            ),
             step_value=selected_labels.get("reasoning", ""),
             timeit=time() - t0,
             input_nuclia_tokens=input_nt,

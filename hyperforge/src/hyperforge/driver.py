@@ -23,6 +23,7 @@ class DriverConfig(BaseModel, Generic[T]):
 class Driver(BaseModel):
     name: str
     provider: str
+    allow_private_network_endpoints: bool = False
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 

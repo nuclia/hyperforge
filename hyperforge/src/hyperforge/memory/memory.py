@@ -380,7 +380,9 @@ class SessionMemory(BaseSessionMemory):
         )
         if not all and self.id:
             request.resource_filters = [self.id]
-        return await self.nucliadb_search.find(kbid=self.kbid, content=request)
+        return await self.nucliadb_search.find(
+            kbid=self.kbid, content=request, headers={"X-NDB-Client": "agentic"}
+        )
 
     async def qa_history(self) -> list[HistoryQuestionAnswer]:
         if self.kbid is None:
@@ -639,6 +641,7 @@ class QuestionMemory:
         self.data_visualizations = []
         self.final_answer_urls = []
         self.agent_contexts = {}
+        self.generation_rules = OrderedDict()
 
         self.set_actual_question(question, question_id)
 

@@ -31,7 +31,13 @@ from hyperforge.definition import FunctionDefinition
 from hyperforge.memory import Chunk
 from hyperforge.memory.memory import Context
 
-from .model import RestrictedPythonTask, WorkerError
+from .model import (
+    MAX_PROTOCOL_BYTES,
+    RestrictedPythonTask,
+    WorkerError,
+    decode_protocol_value,
+    encode_protocol_value,
+)
 
 BLOCKED_EXCEPTIONS = {
     "BaseException",
@@ -39,6 +45,7 @@ BLOCKED_EXCEPTIONS = {
     "KeyboardInterrupt",
     "SystemExit",
 }
+REDACTED_EXECUTION_ERROR = "Generated code execution failed"
 
 
 def _set_memory_limit(max_memory_bytes: int | None) -> None:
@@ -106,10 +113,16 @@ def guarded_inplace(operator: str, left: Any, right: Any) -> Any:
 class PythonAgentWorker:
     context: Optional[Context] = None
 
-    def __init__(self, pipe: Connection, debug: bool = False):
+    def __init__(
+        self, pipe: Connection, debug: bool = False, json_protocol: bool = True
+    ):
         self.pipe = pipe
         self.functions_agent_id: Dict[str, List[str]] = {}
         self.debug = debug
+        self.json_protocol = json_protocol
+        self._redact_errors = False
+        self._output_attempted = False
+        self._output_send_failed = False
 
     def _process_question_context_sync(
         self,
@@ -119,7 +132,11 @@ class PythonAgentWorker:
         global_vars: Dict[str, Any],
         function_names: Dict[str, Dict[str, FunctionDefinition]],
         max_memory_bytes: int | None = None,
+        redact_errors: bool = False,
     ):
+        self._redact_errors = redact_errors
+        self._output_attempted = False
+        self._output_send_failed = False
         try:
             _harden_process(max_memory_bytes)
             for agent, functions in function_names.items():
@@ -161,24 +178,40 @@ class PythonAgentWorker:
             if self.debug:
                 global_vars["pdb"] = __import__("pdb")
             exec(byte_code, global_vars, local_vars)
+            if self._output_attempted and self._output_send_failed:
+                raise RuntimeError(REDACTED_EXECUTION_ERROR)
         except BaseException as exc:
-            self.pipe.send(
-                RestrictedPythonTask(
-                    function="_error",
-                    agent="_controller",
-                    args=(str(exc),),
-                    keyword_args={},
-                )
+            error = REDACTED_EXECUTION_ERROR if redact_errors else str(exc)
+            task = RestrictedPythonTask(
+                function="_error",
+                agent="_controller",
+                args=(error,),
+                keyword_args={},
             )
+            if redact_errors:
+                self._send_or_close(task)
+            else:
+                self._send(task)
         finally:
-            self.pipe.send(
-                RestrictedPythonTask(
-                    function="_close",
-                    agent="_controller",
-                    args=(None,),
-                    keyword_args={},
-                )
+            task = RestrictedPythonTask(
+                function="_close",
+                agent="_controller",
+                args=(None,),
+                keyword_args={},
             )
+            if redact_errors:
+                self._send_or_close(task)
+            else:
+                self._send(task)
+
+    def _send_or_close(self, task: RestrictedPythonTask) -> None:
+        try:
+            self._send(task)
+        except BaseException:
+            try:
+                self.pipe.close()
+            except BaseException:
+                pass
 
     def save(
         self,
@@ -188,7 +221,7 @@ class PythonAgentWorker:
         question: str = "",
         final_answer: Optional[str] = None,
     ):
-        self.pipe.send(
+        self._send(
             RestrictedPythonTask(
                 function="save",
                 agent="_controller",
@@ -224,18 +257,40 @@ class PythonAgentWorker:
                 )
             agent_id = agents[0]
 
-        self.pipe.send(
-            RestrictedPythonTask(
-                function=function_name,
-                agent=agent_id,
-                args=args,
-                keyword_args=kwargs,
-            )
+        task = RestrictedPythonTask(
+            function=function_name,
+            agent=agent_id,
+            args=args,
+            keyword_args=kwargs,
         )
+        output_attempt = self._redact_errors and function_name == "output"
+        if output_attempt:
+            self._output_attempted = True
+        try:
+            self._send(task)
+        except BaseException:
+            if output_attempt:
+                self._output_send_failed = True
+            raise
         return self._receive()
 
+    def _send(self, task: RestrictedPythonTask) -> None:
+        if self.json_protocol:
+            self.pipe.send_bytes(
+                encode_protocol_value(
+                    task, "Local sandbox request", max_bytes=MAX_PROTOCOL_BYTES
+                )
+            )
+        else:
+            self.pipe.send(task)
+
     def _receive(self) -> Any:
-        result = self.pipe.recv()
+        if self.json_protocol:
+            result = decode_protocol_value(
+                self.pipe.recv_bytes(MAX_PROTOCOL_BYTES), "Local sandbox response"
+            )
+        else:
+            result = self.pipe.recv()
         if isinstance(result, WorkerError):
             raise RuntimeError(result.error)
         return result

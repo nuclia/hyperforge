@@ -303,9 +303,13 @@ class NucliaDBDriver(Driver):
                 result.append(word)
         return " ".join(result)
 
-    async def ask(self, item: AskRequest, headers={}) -> SyncAskResponse:
+    async def ask(
+        self, item: AskRequest, headers: dict[str, str] | None = None
+    ) -> SyncAskResponse:
+        request_headers = httpx.Headers(headers)
+        request_headers["X-NDB-Client"] = "agentic"
         return await self.driver.ask(
-            kbid=self.config.kbid, content=item, headers=headers
+            kbid=self.config.kbid, content=item, headers=dict(request_headers)
         )
 
     async def find(
@@ -313,6 +317,7 @@ class NucliaDBDriver(Driver):
     ) -> KnowledgeboxFindResults:
         return await self.driver.find(
             kbid=self.config.kbid,
+            headers={"X-NDB-Client": "agentic"},
             content=FindRequest(
                 query=q,
                 resource_filters=rids,
@@ -326,6 +331,7 @@ class NucliaDBDriver(Driver):
         return await self.driver.find(
             kbid=self.config.kbid,
             content=q,
+            headers={"X-NDB-Client": "agentic"},
         )
 
     async def graph_relations(
