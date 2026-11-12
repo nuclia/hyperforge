@@ -10,7 +10,12 @@ from jsonschema import validate as validate_json_schema
 from pydantic import BaseModel, ValidationError
 
 from ..context import make_context
-from ..models import HarnessContextReference, HarnessContextType
+from ..models import (
+    HarnessContextReference,
+    HarnessContextType,
+    HarnessEvent,
+    HarnessEventType,
+)
 from ..schema import flatten_json_schema
 
 if TYPE_CHECKING:
@@ -20,6 +25,13 @@ type ToolHandler[InputT: BaseModel, OutputT: BaseModel] = Callable[
     [ToolCallContext, InputT], Awaitable[OutputT]
 ]
 type ContextFactory[OutputT: BaseModel] = Callable[[OutputT], HarnessContextReference]
+
+
+class _CurrentTurn:
+    pass
+
+
+_CURRENT_TURN = _CurrentTurn()
 
 
 class ToolInheritancePolicy(StrEnum):
@@ -38,6 +50,38 @@ class ToolCallContext:
     harness: "AgentHarness"
     name: str
     id: str | None = None
+    turn_id: str | None | _CurrentTurn = _CURRENT_TURN
+    _emit_failure: Callable[[], Exception] | None = field(
+        default=None, repr=False, compare=False
+    )
+
+    async def emit(
+        self,
+        event_type: HarnessEventType,
+        payload: dict[str, Any],
+        *,
+        persist: bool = True,
+    ) -> "HarnessEvent":
+        """Emit an event attributed to this tool call."""
+        try:
+            if not isinstance(self.turn_id, _CurrentTurn):
+                return await self.harness.emit(
+                    event_type,
+                    payload,
+                    persist=persist,
+                    parent_call_id=self.id,
+                    turn_id=self.turn_id,
+                )
+            return await self.harness.emit(
+                event_type,
+                payload,
+                persist=persist,
+                parent_call_id=self.id,
+            )
+        except Exception:
+            if self._emit_failure is None:
+                raise
+            raise self._emit_failure() from None
 
 
 @dataclass(frozen=True)

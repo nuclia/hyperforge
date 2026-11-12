@@ -5,49 +5,57 @@ from unittest.mock import AsyncMock
 
 import pytest
 from fastapi import HTTPException
-from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from pydantic import ValidationError
-from starlette.requests import Request
 
+from hyperforge.api.app import HTTPApplication
 from hyperforge.api.mcp_server_pool import ManagedMCPServer, MCPServerPool
+from hyperforge.api.mcp_transport import MCPTransport
 from hyperforge.api.settings import Settings as ApiSettings
+from hyperforge.db.settings import DataManagerSettings
+from hyperforge.standalone.app import StandaloneApplication
 from hyperforge.standalone.settings import StandaloneSettings
 
 KEY = ("account", "user", "type", "agent", "session")
 OTHER_KEY = ("other-account", "user", "type", "agent", "session")
 
 
-def request(*, session_id: str | None = None) -> Request:
-    headers = [] if session_id is None else [(b"mcp-session-id", session_id.encode())]
-    return Request({"type": "http", "method": "POST", "headers": headers})
+def test_api_mcp_settings_use_the_original_configuration_before_startup():
+    settings = ApiSettings(mcp_max_sessions_per_server=2)
+    app = HTTPApplication(
+        settings=settings,
+        data_manager_settings=DataManagerSettings(
+            postgresql_dsn="postgresql://localhost/test"
+        ),
+    )
+    assert app.mcp_settings is settings
+    settings.mcp_max_sessions_per_server = 3
+    assert app.mcp_settings.mcp_max_sessions_per_server == 3
+
+
+def test_standalone_mcp_settings_do_not_depend_on_server_startup():
+    settings = StandaloneSettings(mcp_max_sessions_per_server=2)
+    app = StandaloneApplication(agents_cfg={}, settings=settings)
+    assert app.mcp_settings is settings
+    settings.mcp_max_sessions_per_server = 3
+    assert app.mcp_settings.mcp_max_sessions_per_server == 3
 
 
 class FakeManagedServer:
     def __init__(self):
-        self.session_created = False
+        self.active_sessions = 1
+        self.has_been_leased = False
         self.active_requests = 0
         self.last_used = time.monotonic()
         self.task = None
         self.stopped = False
 
-    def accept_request(self, current_request: Request) -> bool:
-        if current_request.headers.get("mcp-session-id"):
-            return True
-        if self.session_created:
-            return False
-        self.session_created = True
-        return True
-
-    def is_reinitialization(self, current_request: Request, body: bytes) -> bool:
-        return (
-            self.session_created
-            and current_request.headers.get("mcp-session-id") is None
-            and b'"method":"initialize"' in body
-        )
-
     def reserve_request(self) -> None:
+        self.has_been_leased = True
         self.active_requests += 1
         self.last_used = time.monotonic()
+
+    async def session_count(self) -> int:
+        return self.active_sessions
 
     def release_request(self) -> None:
         self.active_requests -= 1
@@ -69,12 +77,10 @@ async def test_pool_reuses_server_and_lease_releases_once():
     pool = MCPServerPool(2, 1800, 30)
     server = FakeManagedServer()
 
-    lease = await pool.acquire(KEY, request(), b"", lambda: factory(server))
+    lease = await pool.acquire(KEY, lambda: factory(server))
     lease.release()
     lease.release()
-    reused = await pool.acquire(
-        KEY, request(session_id="session-id"), b"", lambda: factory(FakeManagedServer())
-    )
+    reused = await pool.acquire(KEY, lambda: factory(FakeManagedServer()))
 
     assert reused.server is server
     assert server.active_requests == 1
@@ -83,26 +89,29 @@ async def test_pool_reuses_server_and_lease_releases_once():
 
 
 @pytest.mark.asyncio
-async def test_pool_rejects_concurrent_creation_for_same_key():
+async def test_pool_shares_concurrent_creation_for_same_key():
     pool = MCPServerPool(2, 1800, 30)
     creation_started = asyncio.Event()
     release_creation = asyncio.Event()
+    shared_server = FakeManagedServer()
 
     async def slow_factory():
         creation_started.set()
         await release_creation.wait()
-        return FakeManagedServer()
+        return shared_server
 
-    first = asyncio.create_task(pool.acquire(KEY, request(), b"", slow_factory))
+    first = asyncio.create_task(pool.acquire(KEY, slow_factory))
     await creation_started.wait()
-
-    with pytest.raises(HTTPException, match="already in progress") as error:
-        await pool.acquire(KEY, request(), b"", lambda: factory(FakeManagedServer()))
-
-    assert error.value.status_code == 409
+    unused_factory = AsyncMock()
+    second = asyncio.create_task(pool.acquire(KEY, unused_factory))
+    await asyncio.sleep(0)
     release_creation.set()
-    lease = await first
-    lease.release()
+    leases = await asyncio.gather(first, second)
+    assert all(lease.server is shared_server for lease in leases)
+    assert shared_server.active_requests == 2
+    unused_factory.assert_not_awaited()
+    for lease in leases:
+        lease.release()
     await pool.shutdown()
 
 
@@ -120,10 +129,8 @@ async def test_pool_creates_different_keys_concurrently():
         await both_started.wait()
         return FakeManagedServer()
 
-    first = asyncio.create_task(pool.acquire(KEY, request(), b"", concurrent_factory))
-    second = asyncio.create_task(
-        pool.acquire(OTHER_KEY, request(), b"", concurrent_factory)
-    )
+    first = asyncio.create_task(pool.acquire(KEY, concurrent_factory))
+    second = asyncio.create_task(pool.acquire(OTHER_KEY, concurrent_factory))
     first_lease, second_lease = await asyncio.gather(first, second)
 
     first_lease.release()
@@ -143,11 +150,11 @@ async def test_pool_counts_pending_creations_toward_capacity():
         await release_creation.wait()
         return FakeManagedServer()
 
-    first = asyncio.create_task(pool.acquire(KEY, request(), b"", slow_factory))
+    first = asyncio.create_task(pool.acquire(KEY, slow_factory))
     await creation_started.wait()
 
     with pytest.raises(HTTPException) as error:
-        await pool.acquire(OTHER_KEY, request(), b"", second_factory)
+        await pool.acquire(OTHER_KEY, second_factory)
 
     assert error.value.status_code == 503
     second_factory.assert_not_awaited()
@@ -158,23 +165,35 @@ async def test_pool_counts_pending_creations_toward_capacity():
 
 
 @pytest.mark.asyncio
+async def test_pool_does_not_evict_a_manager_before_its_first_lease():
+    pool = MCPServerPool(1, 1800, 30)
+    server = FakeManagedServer()
+    server.active_sessions = 0
+    pool._servers[KEY] = server
+    unused_factory = AsyncMock()
+    with pytest.raises(HTTPException) as error:
+        await pool.acquire(OTHER_KEY, unused_factory)
+    assert error.value.status_code == 503
+    assert pool._servers[KEY] is server
+    assert server.stopped is False
+    unused_factory.assert_not_awaited()
+    await pool.shutdown()
+
+
+@pytest.mark.asyncio
 async def test_pool_preserves_recent_session_and_evicts_expired_session():
     pool = MCPServerPool(1, 60, 30)
     current = FakeManagedServer()
-    lease = await pool.acquire(KEY, request(), b"", lambda: factory(current))
+    lease = await pool.acquire(KEY, lambda: factory(current))
     lease.release()
 
     with pytest.raises(HTTPException) as error:
-        await pool.acquire(
-            OTHER_KEY, request(), b"", lambda: factory(FakeManagedServer())
-        )
+        await pool.acquire(OTHER_KEY, lambda: factory(FakeManagedServer()))
     assert error.value.status_code == 503
 
     current.last_used = time.monotonic() - 60
     replacement = FakeManagedServer()
-    replacement_lease = await pool.acquire(
-        OTHER_KEY, request(), b"", lambda: factory(replacement)
-    )
+    replacement_lease = await pool.acquire(OTHER_KEY, lambda: factory(replacement))
 
     assert current.stopped is True
     assert replacement_lease.server is replacement
@@ -186,14 +205,12 @@ async def test_pool_preserves_recent_session_and_evicts_expired_session():
 async def test_pool_replaces_expired_session_on_same_key():
     pool = MCPServerPool(2, 60, 30)
     expired = FakeManagedServer()
-    lease = await pool.acquire(KEY, request(), b"", lambda: factory(expired))
+    lease = await pool.acquire(KEY, lambda: factory(expired))
     lease.release()
     expired.last_used = time.monotonic() - 60
     replacement = FakeManagedServer()
 
-    replacement_lease = await pool.acquire(
-        KEY, request(), b"", lambda: factory(replacement)
-    )
+    replacement_lease = await pool.acquire(KEY, lambda: factory(replacement))
 
     assert expired.stopped is True
     assert replacement_lease.server is replacement
@@ -212,7 +229,7 @@ async def test_pool_reaps_idle_server_without_another_acquire():
         stopped.set()
 
     server.stop = stop
-    lease = await pool.acquire(KEY, request(), b"", lambda: factory(server))
+    lease = await pool.acquire(KEY, lambda: factory(server))
     lease.release()
 
     await asyncio.wait_for(stopped.wait(), timeout=1)
@@ -233,9 +250,7 @@ async def test_pool_cleans_candidate_when_cancelled_waiting_for_lock():
         factory_completed.set()
         return candidate
 
-    acquire_task = asyncio.create_task(
-        pool.acquire(KEY, request(), b"", controlled_factory)
-    )
+    acquire_task = asyncio.create_task(pool.acquire(KEY, controlled_factory))
     await asyncio.sleep(0)
     async with pool._lock:
         release_factory.set()
@@ -245,8 +260,8 @@ async def test_pool_cleans_candidate_when_cancelled_waiting_for_lock():
     with pytest.raises(asyncio.CancelledError):
         await acquire_task
 
-    assert candidate.stopped is True
     await pool.shutdown()
+    assert candidate.stopped is True
 
 
 @pytest.mark.asyncio
@@ -258,15 +273,13 @@ async def test_pool_shutdown_cancels_pending_creation():
         creation_started.set()
         await asyncio.Event().wait()
 
-    acquire_task = asyncio.create_task(
-        pool.acquire(KEY, request(), b"", blocked_factory)
-    )
+    acquire_task = asyncio.create_task(pool.acquire(KEY, blocked_factory))
     await creation_started.wait()
     await pool.shutdown()
 
     assert acquire_task.cancelled()
     with pytest.raises(HTTPException) as error:
-        await pool.acquire(KEY, request(), b"", lambda: factory(FakeManagedServer()))
+        await pool.acquire(KEY, lambda: factory(FakeManagedServer()))
     assert error.value.status_code == 503
 
 
@@ -279,15 +292,13 @@ async def test_pool_remove_cancels_pending_creation():
         creation_started.set()
         await asyncio.Event().wait()
 
-    acquire_task = asyncio.create_task(
-        pool.acquire(KEY, request(), b"", blocked_factory)
-    )
+    acquire_task = asyncio.create_task(pool.acquire(KEY, blocked_factory))
     await creation_started.wait()
     await pool.remove(KEY)
 
     assert acquire_task.cancelled()
     replacement = FakeManagedServer()
-    lease = await pool.acquire(KEY, request(), b"", lambda: factory(replacement))
+    lease = await pool.acquire(KEY, lambda: factory(replacement))
     lease.release()
     await pool.shutdown()
 
@@ -308,17 +319,13 @@ async def test_pool_remove_keeps_capacity_reserved_during_creation_cleanup():
             await release_cleanup.wait()
             raise
 
-    acquire_task = asyncio.create_task(
-        pool.acquire(KEY, request(), b"", slow_cleanup_factory)
-    )
+    acquire_task = asyncio.create_task(pool.acquire(KEY, slow_cleanup_factory))
     await creation_started.wait()
     remove_task = asyncio.create_task(pool.remove(KEY))
     await cleanup_started.wait()
 
     with pytest.raises(HTTPException) as error:
-        await pool.acquire(
-            OTHER_KEY, request(), b"", lambda: factory(FakeManagedServer())
-        )
+        await pool.acquire(OTHER_KEY, lambda: factory(FakeManagedServer()))
 
     assert error.value.status_code == 503
     release_cleanup.set()
@@ -339,7 +346,7 @@ async def test_concurrent_shutdown_calls_wait_for_same_cleanup():
         await release_cleanup.wait()
 
     server.task = asyncio.create_task(stop())
-    lease = await pool.acquire(KEY, request(), b"", lambda: factory(server))
+    lease = await pool.acquire(KEY, lambda: factory(server))
     lease.release()
     first_shutdown = asyncio.create_task(pool.shutdown())
     await cleanup_started.wait()
@@ -353,41 +360,74 @@ async def test_concurrent_shutdown_calls_wait_for_same_cleanup():
 
 
 @pytest.mark.asyncio
-async def test_pool_reinitializes_inactive_session():
+async def test_pool_reuses_manager_for_another_initialization():
     pool = MCPServerPool(2, 1800, 30)
     original = FakeManagedServer()
-    lease = await pool.acquire(KEY, request(), b"", lambda: factory(original))
+    lease = await pool.acquire(KEY, lambda: factory(original))
     lease.release()
-    replacement = FakeManagedServer()
+    unused_factory = AsyncMock()
 
     replacement_lease = await pool.acquire(
         KEY,
-        request(),
-        b'{"jsonrpc":"2.0","method":"initialize","id":1}',
-        lambda: factory(replacement),
+        unused_factory,
     )
 
-    assert original.stopped is True
-    assert replacement_lease.server is replacement
+    assert original.stopped is False
+    assert replacement_lease.server is original
+    unused_factory.assert_not_awaited()
     replacement_lease.release()
     await pool.shutdown()
 
 
 @pytest.mark.asyncio
-async def test_pool_rejects_reinitialization_while_session_is_active():
+async def test_pool_accepts_initialization_while_another_request_is_active():
     pool = MCPServerPool(2, 1800, 30)
     server = FakeManagedServer()
-    lease = await pool.acquire(KEY, request(), b"", lambda: factory(server))
+    lease = await pool.acquire(KEY, lambda: factory(server))
 
-    with pytest.raises(HTTPException, match="still active") as error:
-        await pool.acquire(
-            KEY,
-            request(),
-            b'{"jsonrpc":"2.0","method":"initialize","id":1}',
-            lambda: factory(FakeManagedServer()),
-        )
+    second = await pool.acquire(
+        KEY,
+        lambda: factory(FakeManagedServer()),
+    )
+    assert second.server is server
+    assert server.active_requests == 2
+    second.release()
+    lease.release()
+    await pool.shutdown()
 
-    assert error.value.status_code == 409
+
+@pytest.mark.asyncio
+async def test_pool_can_create_a_manager_for_a_shared_session():
+    pool = MCPServerPool(1, 1800, 30)
+    server = FakeManagedServer()
+    lease = await pool.acquire(KEY, lambda: factory(server))
+    assert lease.server is server
+    lease.release()
+    await pool.shutdown()
+
+
+@pytest.mark.asyncio
+async def test_cancelling_one_waiter_does_not_cancel_shared_creation():
+    pool = MCPServerPool(1, 1800, 30)
+    started = asyncio.Event()
+    proceed = asyncio.Event()
+    server = FakeManagedServer()
+
+    async def create():
+        started.set()
+        await proceed.wait()
+        return server
+
+    first = asyncio.create_task(pool.acquire(KEY, create))
+    await started.wait()
+    second = asyncio.create_task(pool.acquire(KEY, AsyncMock()))
+    await asyncio.sleep(0)
+    first.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await first
+    proceed.set()
+    lease = await second
+    assert lease.server is server
     lease.release()
     await pool.shutdown()
 
@@ -400,17 +440,17 @@ async def test_pool_timeout_cleans_pending_creation():
         await asyncio.Event().wait()
 
     with pytest.raises(TimeoutError):
-        await pool.acquire(KEY, request(), b"", blocked_factory)
+        await pool.acquire(KEY, blocked_factory)
 
     server = FakeManagedServer()
-    lease = await pool.acquire(KEY, request(), b"", lambda: factory(server))
+    lease = await pool.acquire(KEY, lambda: factory(server))
     lease.release()
     await pool.shutdown()
 
 
 @pytest.mark.asyncio
 async def test_managed_server_start_propagates_failure_and_cancellation():
-    manager = cast(StreamableHTTPSessionManager, object())
+    manager = cast(MCPTransport, object())
     server = ManagedMCPServer(manager)
 
     async def fail_startup():
@@ -443,6 +483,7 @@ async def test_managed_server_start_propagates_failure_and_cancellation():
         "mcp_max_request_bytes",
         "mcp_max_response_bytes",
         "mcp_max_servers",
+        "mcp_max_sessions_per_server",
         "mcp_session_idle_ttl_seconds",
         "mcp_startup_timeout_seconds",
     ],

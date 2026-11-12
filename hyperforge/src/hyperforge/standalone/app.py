@@ -34,6 +34,7 @@ from hyperforge.a2a.server import build_grpc_server_from_runtime
 from hyperforge.api import v1
 from hyperforge.api.authentication import User
 from hyperforge.api.mcp_server_pool import MCPServerPool
+from hyperforge.api.mcp_sessions import MCPSessionStore
 from hyperforge.api.models import AgentRole, StashRoles
 from hyperforge.api.v1 import oauth as v1_oauth
 from hyperforge.broker import Broker
@@ -272,6 +273,7 @@ class StandaloneApplication(FastAPI):
         )
         self._agents_cfg = agents_cfg
         self._standalone_settings = settings
+        self.mcp_sessions: MCPSessionStore | None = None
 
         # Only the interaction and MCP routes — no management endpoints.
         self.include_router(v1.interaction.router)
@@ -321,6 +323,10 @@ class StandaloneApplication(FastAPI):
     def settings(self) -> ServerSettings:
         return self._server_settings
 
+    @property
+    def mcp_settings(self) -> StandaloneSettings:
+        return self._standalone_settings
+
     # ------------------------------------------------------------------
     # Lifecycle
     # ------------------------------------------------------------------
@@ -364,6 +370,10 @@ class StandaloneApplication(FastAPI):
         # Agent manager backed by the JSON config — no PostgreSQL.
         agent_manager_class = resolve_dotted_name(s.agent_manager_class)
         self.agent_manager: Any = agent_manager_class(self._agents_cfg)
+        if isinstance(self.broker, RedisBroker):
+            self.mcp_sessions = MCPSessionStore(self.broker.client)
+        else:
+            self.mcp_sessions = None
 
         # Build a ServerSettings instance so SessionManager and the subject
         # format strings work unchanged.  Redis settings are present but

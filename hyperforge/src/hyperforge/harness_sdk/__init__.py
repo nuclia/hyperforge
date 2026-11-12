@@ -43,7 +43,9 @@ from .tools import HarnessTool, ToolCallContext, ToolInheritancePolicy, tool
 from .tools.codemode import (
     CodeModeCapability,
     CodeModeDispatch,
+    CodeModeExecutionLimiter,
     CodemodeInput,
+    CodeModeLimits,
     CodemodeOutput,
     CodeModeResultAdapter,
     CodeModeRunner,
@@ -69,6 +71,8 @@ __all__ = [
     "ChatCompletionUsage",
     "CodeModeCapability",
     "CodeModeDispatch",
+    "CodeModeExecutionLimiter",
+    "CodeModeLimits",
     "CodeModeResultAdapter",
     "CodeModeRunner",
     "CodemodeInput",
