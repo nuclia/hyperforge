@@ -2,6 +2,7 @@ import asyncio
 from time import time
 from typing import Any, Dict, List, Optional, cast
 
+from hyperforge import logger
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.context.agent import ContextAgent
@@ -10,7 +11,6 @@ from hyperforge.memory import Chunk, Context, QuestionMemory, Source
 from nucliadb_models import filters as ndb_filters
 from nucliadb_models.search import AskRequest
 
-from hyperforge import logger
 from hyperforge_nucliadb.advanced_ask_config import (
     AdvancedAskAgentConfig,
 )
@@ -85,7 +85,7 @@ class AdvancedAskAgent(ContextAgent, Agent[AdvancedAskAgentConfig]):
         nucliadb_driver = get_ndb_driver(manager, source)
 
         context = Context(
-            agent_id=self.config.id,
+            agent_id=self.config.id,  # ty: ignore[invalid-argument-type]
             original_question_uuid=memory.original_question_uuid,
             actual_question_uuid=question_uuid,
             question=question,
@@ -190,7 +190,7 @@ def build_ask_request(
     filter_expression = parse_filter_expression(agent, driver)
     ask_request = AskRequest(
         query=question,
-        generative_model=agent.generative_model,
+        generative_model=agent.generative_model.model_id,
         citations=True,
         filters=driver.filters,
     )

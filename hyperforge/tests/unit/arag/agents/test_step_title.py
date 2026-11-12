@@ -1,5 +1,4 @@
 import pytest
-from hyperforge.agent import Agent, AgentConfig
 from hyperforge_generate.config import GenerateAgentConfig
 from hyperforge_mcp.config import MCPAgentConfig
 from hyperforge_nucliadb.ask.config import AskAgentConfig
@@ -7,6 +6,8 @@ from hyperforge_remi.config import RemiAgentConfig
 from hyperforge_rephrase.config import RephraseAgentConfig
 from hyperforge_smart.config import SmartAgentConfig
 from hyperforge_summarize.config import SummarizeAgentConfig
+
+from hyperforge.agent import Agent, AgentConfig
 
 
 class StubAgent(Agent):

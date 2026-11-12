@@ -4,6 +4,7 @@ import json
 from time import time
 from typing import Any, ClassVar, Dict, List, Literal, Optional, cast
 
+from hyperforge import PROMPT_ENVIRONMENT, logger
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.context.agent import ContextAgent
@@ -36,7 +37,6 @@ from nucliadb_models.search import (
     SyncAskResponse,
 )
 
-from hyperforge import PROMPT_ENVIRONMENT, logger
 from hyperforge_nucliadb.ask.multi import choose_source
 from hyperforge_nucliadb.ask_utils import (
     combine_catalog_filter_expressions,
@@ -584,7 +584,7 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
 
                 if len(images_urls) > 0:
                     context = Context(
-                        agent_id=self.config.id,
+                        agent_id=self.config.id,  # ty: ignore[invalid-argument-type]
                         original_question_uuid=memory.original_question_uuid,
                         actual_question_uuid=None,
                         question="Search images by title. Title: "
@@ -626,8 +626,8 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
             for resource_id in resource_ids:
                 resource = await nucliadb_driver.get_resource_by_id(
                     query_params={
-                        "show": ["basic", "extracted"],  # type: ignore
-                        "extracted": ["metadata", "file"],  # type: ignore
+                        "show": ["basic", "extracted"],
+                        "extracted": ["metadata", "file"],
                     },
                     rid=resource_id,
                 )
@@ -637,7 +637,7 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
                 images_urls = await self.get_all_images(resource=resource)
                 if len(images_urls) > 0:
                     context = Context(
-                        agent_id=self.config.id,
+                        agent_id=self.config.id,  # ty: ignore[invalid-argument-type]
                         original_question_uuid=memory.original_question_uuid,
                         actual_question_uuid=None,
                         question="All images by title. Title: " + title,
@@ -709,7 +709,7 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
         # Use full resource strategy by requesting title and summary fields
         ask_request = AskRequest(
             query=question,
-            generative_model=self.config.generative_model,
+            generative_model=self.config.generative_model.model_id,
             # TODO: Consider what to do when multiple resources match
             filter_expression=filter_expression,
             rag_strategies=[
@@ -1132,7 +1132,7 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
             query=question,
             show=[ResourceProperties.BASIC, ResourceProperties.ORIGIN],
             citations=CitationsType.LLM_FOOTNOTES,
-            generative_model=self.config.generative_model,
+            generative_model=self.config.generative_model.model_id,
             filter_expression=filter_expression,
             rag_strategies=rag_strategies,
         )
@@ -1244,7 +1244,7 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
         ask_request = AskRequest(
             query=question,
             citations=True,
-            generative_model=self.config.generative_model,
+            generative_model=self.config.generative_model.model_id,
             filters=nucliadb_driver.config.filters,
         )
         paragraphs = await nucliadb_driver.ask(
@@ -1554,6 +1554,17 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
             logger.info(
                 f"No labels selected for faceted search on question {question}, skipping."
             )
+            context = Context(
+                agent_id=self.agent_id,
+                original_question_uuid=memory.original_question_uuid,
+                actual_question_uuid=None,
+                missing=question,
+                question=question,
+                source=source.id,
+                chunks=[],
+                agent="basic_ask_facets",
+                title=f"Faceted search on {source.id} Knowledge Box",
+            )
         else:
             # We are assuming resources equals fields here
             facets, total = await ndb.field_labels(labelsets=labels_selected)
@@ -1593,7 +1604,11 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
         await memory.add_step(
             step_module=self.config.module,
             step_title=self.step_title("Faceted count"),
-            step_reason="Faceted search performed",
+            step_reason=(
+                "Faceted search performed"
+                if labels_selected
+                else "Faceted search skipped"
+            ),
             step_value=selected_labels.get("reasoning", ""),
             timeit=time() - t0,
             input_nuclia_tokens=input_nt,

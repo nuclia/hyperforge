@@ -9,13 +9,13 @@ interactions:
       Connection:
       - keep-alive
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-nuclia-nuakey:
       - DUMMY
     method: GET
-    uri: https://europe-1.nuclia.cloud/api/authorizer/info
+    uri: https://europe-1.dp.progress.cloud/api/authorizer/info
   response:
     body:
       string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"03d47998-f672-4a9b-a57b-bde3a9c3ee8c","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
@@ -106,7 +106,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -122,7 +122,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"status":"plan","reasoning":"The
@@ -236,7 +236,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -252,7 +252,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}]}}}
@@ -357,7 +357,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -373,7 +373,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}]}}}
@@ -482,7 +482,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -498,7 +498,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}]}}}
@@ -611,7 +611,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -627,7 +627,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}]}}}
@@ -744,7 +744,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -760,7 +760,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}]}}}
@@ -893,7 +893,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -909,7 +909,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"status":"plan","reasoning":"We
@@ -1016,7 +1016,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -1032,7 +1032,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f":[{"function":{"name":"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f","arguments":{"question":"current
@@ -1216,7 +1216,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -1232,7 +1232,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f":[{"function":{"name":"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f","arguments":{"question":"current
@@ -1417,7 +1417,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -1433,7 +1433,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f":[{"function":{"name":"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f","arguments":{"question":"current
@@ -1622,7 +1622,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -1638,7 +1638,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f":[{"function":{"name":"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f","arguments":{"question":"current
@@ -1831,7 +1831,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -1847,7 +1847,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f":[{"function":{"name":"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f","arguments":{"question":"current
@@ -2079,7 +2079,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -2095,7 +2095,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"status":"done","reasoning":"All
@@ -2226,7 +2226,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-origin:
@@ -2236,7 +2236,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
@@ -2317,7 +2317,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -2333,7 +2333,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"text","text":"S"}}
@@ -2497,13 +2497,13 @@ interactions:
       Connection:
       - keep-alive
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-nuclia-nuakey:
       - DUMMY
     method: GET
-    uri: https://europe-1.nuclia.cloud/api/authorizer/info
+    uri: https://europe-1.dp.progress.cloud/api/authorizer/info
   response:
     body:
       string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"03d47998-f672-4a9b-a57b-bde3a9c3ee8c","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
@@ -2594,7 +2594,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -2610,7 +2610,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"status":"plan","reasoning":"The
@@ -2734,7 +2734,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -2750,7 +2750,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}]}}}
@@ -2862,7 +2862,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -2878,7 +2878,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f":[{"function":{"name":"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f","arguments":{"question":"current
@@ -3075,7 +3075,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -3091,7 +3091,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}],"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f":[{"function":{"name":"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f","arguments":{"question":"current
@@ -3293,7 +3293,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -3309,7 +3309,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}]}}}
@@ -3437,7 +3437,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -3453,7 +3453,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}]}}}
@@ -3591,7 +3591,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -3607,7 +3607,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"status":"plan","reasoning":"We
@@ -3714,7 +3714,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -3730,7 +3730,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f":[{"function":{"name":"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f","arguments":{"question":"current
@@ -3911,7 +3911,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -3927,7 +3927,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c":[{"function":{"name":"static_context__269192da-f5b6-4196-8c9a-bd77e32f237c","arguments":{}}}],"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f":[{"function":{"name":"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f","arguments":{"question":"current
@@ -4116,7 +4116,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -4132,7 +4132,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f":[{"function":{"name":"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f","arguments":{"question":"current
@@ -4325,7 +4325,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -4341,7 +4341,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f":[{"function":{"name":"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f","arguments":{"question":"current
@@ -4538,7 +4538,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -4554,7 +4554,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"tools","tools":{"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f":[{"function":{"name":"internet_search__0f5487c8-432d-4205-b5e0-d5c06b7a638f","arguments":{"question":"current
@@ -4796,7 +4796,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -4812,7 +4812,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"status":"done","reasoning":"All
@@ -4943,7 +4943,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-origin:
@@ -4953,7 +4953,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"object","object":{"reason":"The context provides
@@ -5035,7 +5035,7 @@ interactions:
       Content-Type:
       - application/json
       Host:
-      - europe-1.nuclia.cloud
+      - europe-1.dp.progress.cloud
       User-Agent:
       - nuclia.py/4.9.25
       x-client-ident:
@@ -5051,7 +5051,7 @@ interactions:
       x-stf-nuakey:
       - DUMMY
     method: POST
-    uri: https://europe-1.nuclia.cloud/api/v1/predict/chat
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
       string: '{"chunk":{"type":"text","text":"S"}}

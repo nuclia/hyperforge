@@ -2,10 +2,11 @@ from typing import Any, Dict, List
 
 import pytest
 from httpx import AsyncClient
+from nucliadb_models.resource import KnowledgeBoxObj
+
 from hyperforge.api.models import InteractionRequest
 from hyperforge.interaction import AragAnswer
 from hyperforge.server.session import SessionManager
-from nucliadb_models.resource import KnowledgeBoxObj
 
 pytestmark = [
     pytest.mark.vcr(

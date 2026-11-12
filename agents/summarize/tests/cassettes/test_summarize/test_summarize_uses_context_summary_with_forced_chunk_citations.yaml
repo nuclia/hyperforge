@@ -1,0 +1,157 @@
+interactions:
+- request:
+    body: '{"question": "", "retrieval": true, "user_id": "summarize", "system": "You
+      are a helpful AI assistant. Your role is to provide accurate, clear, and well-structured
+      answers based strictly on the information provided to you.\nKey principles:\n-
+      Answer only using the information in the provided context\n- Do not use external
+      knowledge, assumptions, or prior experience\n- Maintain a professional and informative
+      tone\n- Be concise yet thorough\n- If information is insufficient, acknowledge
+      this clearly\n\nAlways follow any additional instructions provided about format,
+      style, or domain-specific behavior.", "chat_history": [], "context": [], "query_context":
+      {}, "query_context_order": {}, "truncate": true, "user_prompt": {"prompt": "\n##
+      Question\nWhat is the launch code for the Aurora project?\n\n## Provided Context\n[START
+      OF CONTEXT]\n## Context [block-AA]\n\n### Existing context summary\n\nThe Aurora
+      project launch code is LANTERN-47.\n\n### Context chunks\n\n\n\n\n#### Chunk:
+      [block-AA-0] chunk-1\n``` The Aurora project launch code is documented in the
+      deployment runbook. ```\n\n\n[END OF CONTEXT]\n\n## Answering Guidelines\n-
+      Carefully read all context; it may be lengthy or detailed\n- Do not omit or
+      overlook any relevant information\n- If the context is incomplete or insufficient,
+      state: \"Not enough data to answer this.\"\n- Read carefully any extra instructions
+      below if provided and use them to answer\n\nNow provide your answer to the question:
+      What is the launch code for the Aurora project?\nYou are given source blocks
+      with IDs like: block-AB, block-BA, block-CD, etc. or block-AB-1, block-BA-2,
+      block-CD-3, etc.\nWhen producing an answer, cite these sources precisely using
+      markdown footnotes.\n\nCITATION RULES\n\n1. In the main body, cite sources only
+      with bracketed Arabic numerals: [1], [2], [3], etc.\n  - Never put a block ID
+      directly in brackets (e.g. NO: [AB], [block-AB], [BA]).\n  - Never mix styles
+      (no superscripts, no inline block names, no [Ref 1], etc.).\n2. Numbering is
+      assigned in order of FIRST USE of a unique block ID.\n  - The first time you
+      need info from a block, assign it [1].\n  - The first time you need info from
+      a never-before-used block, assign it the next unused number (e.g. [2]).\n  -
+      If you later cite the SAME block again, REUSE its existing number (do NOT create
+      a new one).\n  - This guarantees there are no duplicate footnote definitions
+      and no gaps.\n3. If facts in a sentence come from different blocks, you may
+      concatenate citations WITH spaces: like [1] [3]. Do NOT merge them (no ranges
+      like [1-3]) or output them without spaces (no [1][3]).\n4. At the end, output
+      section consisting ONLY of the unique citation mappings, one per line, in ascending
+      numeric order\n  - Don''t title this section or add any extra text, just the
+      mappings.\n  - No duplicates.\n  - No skipped numbers.\n  - ONLY include blocks
+      actually cited in the body.\n5. Do NOT hallucinate block IDs. Only use those
+      provided in the context.\n\nFORMATTING CONTRACT\n\n* Body: free text with numeric
+      citations as specified.\n* A blank line.\n* References section (if any) exactly
+      as described, no heading.\n\n\nExample format:\n\n---\n\"The OP-1 has a built-in
+      tape feature with 6 minutes of recording time [1] [2]. You can record to any
+      of the 4 individual tracks [1].\"\n\n[1]: block-AB\n[2]: block-FZ-2\n---\n\n"},
+      "citations": null, "citation_threshold": null, "generative_model": "chatgpt-azure-4o-mini",
+      "max_tokens": 5000, "query_context_images": {}, "prefer_markdown": null, "json_schema":
+      null, "format_prompt": false, "rerank_context": false, "tools": [], "tool_choice":
+      {"type": "auto"}, "reasoning": false, "seed": null}'
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '3624'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nuclia.py/4.11.5
+      x-client-ident:
+      - test
+      x-message:
+      - 997a1e3ea61d4a9c87cc558006fbd969
+      x-origin:
+      - RAO
+      x-session:
+      - test_test-session
+      x-show-consumption:
+      - 'true'
+      x-stf-nuakey:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"text","text":"The"}}
+
+        {"chunk":{"type":"text","text":" launch"}}
+
+        {"chunk":{"type":"text","text":" code"}}
+
+        {"chunk":{"type":"text","text":" for"}}
+
+        {"chunk":{"type":"text","text":" the"}}
+
+        {"chunk":{"type":"text","text":" Aurora"}}
+
+        {"chunk":{"type":"text","text":" project"}}
+
+        {"chunk":{"type":"text","text":" is"}}
+
+        {"chunk":{"type":"text","text":" L"}}
+
+        {"chunk":{"type":"text","text":"ANT"}}
+
+        {"chunk":{"type":"text","text":"ERN"}}
+
+        {"chunk":{"type":"text","text":"-"}}
+
+        {"chunk":{"type":"text","text":"47"}}
+
+        {"chunk":{"type":"text","text":" ["}}
+
+        {"chunk":{"type":"text","text":"1"}}
+
+        {"chunk":{"type":"text","text":"].\n\n"}}
+
+        {"chunk":{"type":"text","text":"["}}
+
+        {"chunk":{"type":"text","text":"1"}}
+
+        {"chunk":{"type":"text","text":"]:"}}
+
+        {"chunk":{"type":"text","text":" block"}}
+
+        {"chunk":{"type":"text","text":"-AA"}}
+
+        {"chunk":{"type":"text","text":"-"}}
+
+        {"chunk":{"type":"text","text":"0"}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":22,"output_tokens":3,"timings":{"generative_first_chunk":0.704585230036173,"generative":1.0569175260025077},"input_nuclia_tokens":0.022,"output_nuclia_tokens":0.003}}
+
+        {"chunk":{"normalized_tokens":{"input":0.0222,"output":0.00288,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Mon, 27 Jul 2026 08:10:59 GMT
+      nuclia-learning-id:
+      - ac067b5af38d4ec59938c99d796c86af
+      nuclia-learning-model:
+      - chatgpt-azure-4o-mini
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '712'
+      x-nuclia-trace-id:
+      - 6f6f8096ea0db6eec5809e6d4b6c9cda
+    status:
+      code: 200
+      message: OK
+version: 1

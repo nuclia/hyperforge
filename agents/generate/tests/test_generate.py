@@ -6,6 +6,7 @@ from hyperforge.manager import Manager
 from hyperforge.memory import Chunk, Context
 from hyperforge.memory.memory import EphemeralSessionMemory
 from hyperforge.models import MemoryConfig, Rules
+
 from hyperforge_generate.agent import GenerateAgent
 from hyperforge_generate.config import GenerateAgentConfig
 

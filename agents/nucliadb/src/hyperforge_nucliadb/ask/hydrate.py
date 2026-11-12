@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Tuple
 
+from hyperforge import logger
 from hyperforge.models import Chunk, Context, FieldTypes
 from nuclia.lib.nua_responses import Image
 from nucliadb_models import PagePositions
@@ -24,7 +25,6 @@ from nucliadb_models.hydration import (
 from nucliadb_models.resource import FileFieldExtractedData, LinkFieldExtractedData
 from nucliadb_models.search import KnowledgeboxFindResults
 
-from hyperforge import logger
 from hyperforge_nucliadb.ask.models import NDBChunk, SearchResults
 from hyperforge_nucliadb.driver import NucliaDBDriver
 

@@ -4,7 +4,7 @@ import threading
 from functools import cached_property
 from typing import Any, Optional
 
-import mrflagly  # type: ignore
+import mrflagly
 import pydantic
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -40,9 +40,9 @@ class FlagService:
     def __init__(self):
         self.settings = Settings()
         if self.settings.flag_settings_url is None:
-            self.flag_service = mrflagly.FlagService(data=json.dumps(DEFAULT_FLAG_DATA))
+            self.flag_service = mrflagly.FlagService(data=json.dumps(DEFAULT_FLAG_DATA))  # ty: ignore[unresolved-attribute]
         else:
-            self.flag_service = mrflagly.FlagService(
+            self.flag_service = mrflagly.FlagService(  # ty: ignore[unresolved-attribute]
                 url=self.settings.flag_settings_url
             )
 

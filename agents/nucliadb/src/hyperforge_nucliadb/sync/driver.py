@@ -1,9 +1,20 @@
+import asyncio
 import datetime
+import random
+import time
 from typing import Any, Dict, List, cast
 from urllib.parse import urlencode
 from uuid import UUID
 
-from httpx import AsyncClient
+from httpx import (
+    AsyncClient,
+    ConnectError,
+    ConnectTimeout,
+    ReadTimeout,
+    RemoteProtocolError,
+    Response,
+)
+from hyperforge import logger
 from hyperforge.configure import driver
 from hyperforge.interaction import Provider
 from hyperforge.utils.http import SafeTransport
@@ -19,8 +30,20 @@ from hyperforge_nucliadb.driver_config import (
     NucliaDBConnection,
 )
 from hyperforge_nucliadb.sync.config_driver import (
+    SYNC_HTTP_TIMEOUT,
     SyncConnection,
     SyncDriverConfig,
+)
+
+SYNC_VALIDATE_ATTEMPTS = 2
+SYNC_VALIDATE_RETRY_BASE_SECONDS = 0.5
+SYNC_VALIDATE_RETRY_JITTER_SECONDS = 0.25
+SYNC_VALIDATE_RETRY_STATUS_CODES = frozenset({502, 503, 504})
+SYNC_VALIDATE_RETRY_EXCEPTIONS = (
+    ConnectError,
+    ConnectTimeout,
+    ReadTimeout,
+    RemoteProtocolError,
 )
 
 
@@ -35,6 +58,7 @@ async def sync_connect(conn: SyncConnection):
     return AsyncClient(
         headers=headers,
         base_url=conn.kb_url,
+        timeout=SYNC_HTTP_TIMEOUT,
         transport=SafeTransport(),
     )
 
@@ -58,7 +82,7 @@ class ExternalConnectionOutput(BaseModel):
 )
 class SyncDriver(NucliaDBDriver):
     async_driver: AsyncClient
-    config: SyncConnection  # type: ignore
+    config: SyncConnection
     information: Dict[str, ExternalConnectionOutput]
     sync_configs: Dict[str, list[str]]
 
@@ -66,29 +90,47 @@ class SyncDriver(NucliaDBDriver):
     async def init(cls, driver: Any) -> "SyncDriver":
         sync_driver = cast(SyncDriverConfig, driver)
         client = await sync_connect(sync_driver.config)
-        information = {}
-        sync_configs: Dict[str, list[str]] = {}
-        for sync_config_id in sync_driver.config.connection_ids:
-            response = await client.get(f"/sync_config/{sync_config_id}")
-            response.raise_for_status()
-            data = response.json()
-            connection_id = data["external_connection"]["id"]
-            response = await client.get(f"/external_connection/{connection_id}")
-            response.raise_for_status()
-            sync_configs.setdefault(sync_config_id, []).append(connection_id)
-            data = response.json()
-            information[connection_id] = ExternalConnectionOutput(**data)
-        return cls(
+        instance = cls(
             provider=sync_driver.provider,
             name=sync_driver.name,
             async_driver=client,
-            information=information,
-            sync_configs=sync_configs,
+            information={},
+            sync_configs={},
             config=sync_driver.config,
             driver=await connect(cast(NucliaDBConnection, sync_driver.config)),
             manager=await manager_connect(cast(NucliaDBConnection, sync_driver.config)),
             _synonyms=None,
         )
+        for sync_config_id in sync_driver.config.connection_ids:
+            await instance.resolve_sync_config(sync_config_id)
+        return instance
+
+    async def resolve_sync_config(
+        self, sync_config_id: str
+    ) -> ExternalConnectionOutput:
+        if (
+            self.config.connection_ids
+            and sync_config_id not in self.config.connection_ids
+        ):
+            raise ValueError(
+                f"Sync configuration {sync_config_id} is not configured for this driver"
+            )
+
+        existing_connection_ids = self.sync_configs.get(sync_config_id, [])
+        if existing_connection_ids:
+            return self.information[existing_connection_ids[0]]
+
+        UUID(sync_config_id)
+        response = await self.async_driver.get(f"/sync_config/{sync_config_id}")
+        response.raise_for_status()
+        connection_id = response.json()["external_connection"]["id"]
+
+        response = await self.async_driver.get(f"/external_connection/{connection_id}")
+        response.raise_for_status()
+        information = ExternalConnectionOutput(**response.json())
+        self.sync_configs[sync_config_id] = [connection_id]
+        self.information[connection_id] = information
+        return information
 
     async def get_oauth_url(
         self,
@@ -123,16 +165,97 @@ class SyncDriver(NucliaDBDriver):
         sync_config_id: str,
         sync_metadata_by_resource: Dict[str, SyncMetadata],
     ) -> List[str]:
-        response = await self.async_driver.post(
-            f"/sync_config/{sync_config_id}/validate_resources",
-            json={
-                "resources": [
-                    x.model_dump() for x in sync_metadata_by_resource.values()
-                ],
-                "credentials": credentials,
+        path = f"/sync_config/{sync_config_id}/validate_resources"
+        payload = {
+            "resources": [x.model_dump() for x in sync_metadata_by_resource.values()],
+            "credentials": credentials,
+        }
+
+        response: Response | None = None
+        attempt = 0
+        overall_started_at = time.monotonic()
+        for attempt in range(1, SYNC_VALIDATE_ATTEMPTS + 1):
+            attempt_started_at = time.monotonic()
+            try:
+                response = await self.async_driver.post(path, json=payload)
+                if (
+                    response.status_code not in SYNC_VALIDATE_RETRY_STATUS_CODES
+                    or attempt == SYNC_VALIDATE_ATTEMPTS
+                ):
+                    if response.status_code in SYNC_VALIDATE_RETRY_STATUS_CODES:
+                        logger.warning(
+                            "Sync resource validation got retriable status but reached max attempts",
+                            extra={
+                                "sync_config_id": sync_config_id,
+                                "connection_id": connection_id,
+                                "resource_count": len(resource_ids),
+                                "attempt": attempt,
+                                "duration_seconds": time.monotonic()
+                                - attempt_started_at,
+                                "status_code": response.status_code,
+                            },
+                        )
+                    else:
+                        logger.info(
+                            "Sync resource validation received non-retriable status",
+                            extra={
+                                "sync_config_id": sync_config_id,
+                                "connection_id": connection_id,
+                                "resource_count": len(resource_ids),
+                                "attempt": attempt,
+                                "duration_seconds": time.monotonic()
+                                - attempt_started_at,
+                                "status_code": response.status_code,
+                            },
+                        )
+                    break
+                error_type = f"HTTP {response.status_code}"
+            except SYNC_VALIDATE_RETRY_EXCEPTIONS as exc:
+                if attempt == SYNC_VALIDATE_ATTEMPTS:
+                    logger.warning(
+                        "Sync resource validation failed after retries",
+                        extra={
+                            "sync_config_id": sync_config_id,
+                            "connection_id": connection_id,
+                            "resource_count": len(resource_ids),
+                            "attempt": attempt,
+                            "duration_seconds": time.monotonic() - attempt_started_at,
+                            "exception_type": type(exc).__name__,
+                        },
+                    )
+                    raise
+                error_type = type(exc).__name__
+
+            logger.warning(
+                "Transient Sync resource validation failure, retrying",
+                extra={
+                    "sync_config_id": sync_config_id,
+                    "connection_id": connection_id,
+                    "resource_count": len(resource_ids),
+                    "attempt": attempt,
+                    "duration_seconds": time.monotonic() - attempt_started_at,
+                    "exception_type": error_type,
+                },
+            )
+            delay = SYNC_VALIDATE_RETRY_BASE_SECONDS + random.uniform(
+                0, SYNC_VALIDATE_RETRY_JITTER_SECONDS
+            )
+            await asyncio.sleep(delay)
+
+        if response is None:
+            raise RuntimeError("Sync resource validation made no request attempts")
+
+        response.raise_for_status()
+        logger.info(
+            "Sync resource validation completed",
+            extra={
+                "sync_config_id": sync_config_id,
+                "connection_id": connection_id,
+                "resource_count": len(resource_ids),
+                "attempt": attempt,
+                "duration_seconds": time.monotonic() - overall_started_at,
             },
         )
-        response.raise_for_status()
         data = response.json()
         # The API validates by file_id (origin storage identifier) and returns those back,
         # but resource_filters in AskRequest requires NucliaDB resource UUIDs, which are

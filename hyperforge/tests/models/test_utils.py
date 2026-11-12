@@ -3,11 +3,11 @@ from __future__ import annotations
 from enum import Enum
 from typing import List, Optional, Union
 
-import pytest
-from hyperforge.api.utils import to_strict_json_schema
-from hyperforge.models import Context, JSONObject
 from inline_snapshot import snapshot
 from pydantic import BaseModel, Field
+
+from hyperforge.api.utils import to_strict_json_schema
+from hyperforge.models import Context, JSONObject
 
 
 class Table(str, Enum):

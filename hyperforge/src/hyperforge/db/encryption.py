@@ -51,16 +51,16 @@ def fernet_key_from_passphrase(
 def dump_without_encrypted_fields(
     model: DriverConfig[EncryptedPayload],
 ) -> dict[str, Any]:
-    data = model.model_dump()  # type: ignore
-    for field in model.config.encrypted_fields:  # type: ignore
+    data = model.model_dump()
+    for field in model.config.encrypted_fields:
         if field in data["config"]:
             del data["config"][field]
     return {"config": data}
 
 
 def encrypt_fields(model: EncryptedPayload) -> dict[str, Any]:
-    data = model.model_dump()  # type: ignore
-    for field in model.encrypted_fields:  # type: ignore
+    data = model.model_dump()
+    for field in model.encrypted_fields:
         if field in data:
             if isinstance(data[field], str):
                 data[field] = encrypt_data(data=data[field])

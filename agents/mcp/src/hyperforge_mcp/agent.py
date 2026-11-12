@@ -10,15 +10,6 @@ from uuid import uuid4
 import mcp.shared.exceptions as exceptions
 import mcp.types as types
 from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
-from mcp import ClientSession, CreateMessageResult, ErrorData
-from mcp.client.streamable_http import GetSessionIdCallback
-from mcp.shared.context import RequestContext
-from mcp.shared.message import SessionMessage
-from mcp.shared.session import RequestResponder
-from nuclia.lib.nua_responses import Author, ChatModel, Image, Message, Tool, UserPrompt
-from nuclia_models.predict.generative_responses import GenerativeFullResponse
-from pydantic import FileUrl
-
 from hyperforge import logger
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
@@ -29,18 +20,50 @@ from hyperforge.interaction import (
     PromptFeedbackSchema,
     ValidationFeedbackSchema,
 )
-from hyperforge.manager import Manager
+from hyperforge.manager import Manager, build_reasoning
 from hyperforge.memory import QuestionMemory
 from hyperforge.models import Chunk, Context, Prompt, TrackingInfo
+from hyperforge.result_payload import budget_from_config, inspect_text_blocks
 from hyperforge.utils import iterate_tools_resp
+from mcp import ClientSession, CreateMessageResult, ErrorData
+from mcp.client.streamable_http import GetSessionIdCallback
+from mcp.shared.context import RequestContext
+from mcp.shared.message import SessionMessage
+from mcp.shared.session import RequestResponder
+from nuclia.lib.nua_responses import (
+    Author,
+    ChatModel,
+    Image,
+    Message,
+    Tool,
+    ToolChoiceAuto,
+    UserPrompt,
+)
+from nuclia_models.predict.generative_responses import GenerativeFullResponse
+from pydantic import FileUrl
+
 from hyperforge_mcp.config import MCPAgentConfig, Transport
 from hyperforge_mcp.http import MCPHTTPDriver
+from hyperforge_mcp.schema import IncompatibleToolSchema, normalize_tool_schema
 from hyperforge_mcp.stdio import MCPStdioDriver
 from hyperforge_mcp.tools import (
     MCP_ROUTER_PROMPT_TEMPLATE,
     PROMPT_CHOOSE_TEMPLATE,
     SIMPLE_TOOL_CHOICE_PROMPT,
 )
+
+
+def _tool_parameters(input_schema: Any) -> Dict[str, Any]:
+    properties = (
+        input_schema.get("properties", {}) if isinstance(input_schema, dict) else {}
+    )
+    if not isinstance(properties, dict):
+        return {}
+    return {
+        name: dict(schema) if isinstance(schema, dict) else {"type": "string"}
+        for name, schema in properties.items()
+    }
+
 
 MAX_NUM_TURNS = 10
 
@@ -62,6 +85,21 @@ def _short_uid() -> str:
     return uuid4().hex[:4]
 
 
+def _content_payload(content: Any) -> str | None:
+    if isinstance(content, (types.TextContent, types.TextResourceContents)):
+        payload = content.text
+        if content.meta is not None:
+            payload += "\nMetadata: " + json.dumps(content.meta)
+        return payload
+    if isinstance(content, (types.ImageContent, types.AudioContent)):
+        return content.data
+    if isinstance(content, types.BlobResourceContents):
+        return content.blob
+    if isinstance(content, types.EmbeddedResource):
+        return _content_payload(content.resource)
+    return None
+
+
 @agent(
     id="mcp",
     agent_type="context",
@@ -70,7 +108,7 @@ def _short_uid() -> str:
     config_schema=MCPAgentConfig,
 )
 class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
-    __published_functions__: Dict[str, FunctionDefinition]  # type: ignore[misc]  # instance-level, not ClassVar
+    __published_functions__: Dict[str, FunctionDefinition]  # type: ignore[misc] # ty: ignore[invalid-attribute-override]  # instance-level, not ClassVar
     driver: Union[MCPStdioDriver, MCPHTTPDriver, None]
     resources: List[types.Resource]
     prompts: List[types.Prompt]
@@ -110,7 +148,6 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         if self.session is None:
             raise Exception("MCP session not initialized")
         t0 = time()
-        description = "Choose a tool for the task"
         messages = []
         images: List[Any] = []
         audios = []
@@ -147,8 +184,14 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
 
         if final_prompt is None:
             # We will use LLM to choose the prompt
-            prompt_feedback_str = PROMPT_CHOOSE_TEMPLATE.render(prompts=self.prompts)
-            resp, input_tokens, output_tokens = await manager.execute_json(
+            prompt_feedback_str = PROMPT_CHOOSE_TEMPLATE.render(
+                prompts=self.prompts, task_description=question
+            )
+            (
+                resp,
+                input_tokens,
+                output_tokens,
+            ) = await manager.execute_json(
                 model=self.config.tool_choice_model,
                 prompt=prompt_feedback_str,
                 user_id="mcp_no_feedback",
@@ -157,19 +200,25 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                     "title": "PromptSelection",
                     "description": "Select the most appropriate prompt for the task",
                     "properties": {
-                        "prompt_id": {
+                        "name": {
                             "type": "string",
                             "description": "id of the prompt to use",
+                        },
+                        "reason": {
+                            "type": "string",
+                            "description": "reason for selecting the prompt",
                         },
                     },
                 },
                 tracking=memory.get_tracking_info(),
             )
-            prompt_id: str = resp["prompt_id"]
+
+            prompt_id: str = resp["name"]
+            reason: str = resp.get("reason", "")
             await memory.add_step(
                 step_module=self.config.module,
                 step_title=self.step_title("Prompt selection"),
-                step_reason="",
+                step_reason=reason,
                 step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
                 step_value="mcp prompt selected: " + prompt_id
                 if prompt_id
@@ -213,7 +262,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                     step_title=self.step_title("Prompt arguments"),
                     step_reason="",
                     step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
-                    step_value="mcp_no_feedback_arguments",
+                    step_value=json.dumps(resp),
                     timeit=time() - t0,
                     input_nuclia_tokens=input_tokens,
                     output_nuclia_tokens=output_tokens,
@@ -230,13 +279,8 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
 
             logger.debug("No user feedback received, continuing without it")
 
-        description = (
-            final_prompt.description
-            if final_prompt and final_prompt.description
-            else "No description available"
-        )
         if final_prompt:
-            description += " Any partial answer or summary should  use the information in the prompt."
+            # Append the selected prompt to the context after processing all message contents so summarize can have access to it
             selected_prompt = Prompt(
                 prompt="",
                 description=final_prompt.description,
@@ -300,24 +344,35 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                                 b64encoded=message.content.resource.blob,
                             )
                         )
+            # Append the selected prompt to the context after processing all message contents so summarize can have access to it
             context.prompts.append(selected_prompt)
 
-        await memory.add_step(
-            step_module=self.config.module,
-            step_title=self.step_title("Prompt completion"),
-            step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
-            step_value=description,
-            timeit=time() - t0,
-        )
+            await memory.add_step(
+                step_module=self.config.module,
+                step_title=self.step_title("Prompt selected"),
+                step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
+                step_value=final_prompt.description,
+                timeit=time() - t0,
+            )
+        else:
+            await memory.add_step(
+                step_module=self.config.module,
+                step_title=self.step_title("No prompt selected"),
+                step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
+                step_value="",
+                timeit=time() - t0,
+            )
         return messages, images
 
     async def choose_tool(
         self,
         manager: Manager,
+        memory: QuestionMemory,
         images: List[Image],
         messages: List[Message],
         extra_tools: List[Tool] = [],
         tracking: TrackingInfo | None = None,
+        system: Optional[str] = None,
     ) -> Tuple[GenerativeFullResponse, float, float]:
         # Convert MCP tools into a format the LLM can understand and use
         tools = [
@@ -336,21 +391,63 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             question="",
             user_id="mcp_agent",
             query_context_images=images,
-            generative_model=self.config.tool_choice_model,
+            generative_model=self.config.tool_choice_model.model_id,
+            reasoning=build_reasoning(self.config.tool_choice_model),
             tools=tools,
+            tool_choice=ToolChoiceAuto(),
             user_prompt=UserPrompt(
                 prompt="Choose the best tool or tools for the task, select task_complete if no more tools are needed according to the user request and previous interactions"
             ),
             format_prompt=False,
-            system=SIMPLE_TOOL_CHOICE_PROMPT,
+            system=system or SIMPLE_TOOL_CHOICE_PROMPT,
             chat_history=messages,
         )
-        resp, input_tokens, output_tokens = await manager.execute_raw(
-            item, tracking=tracking
+        try:
+            resp, input_tokens, output_tokens = await manager.execute_raw(
+                item, tracking=tracking
+            )
+        except Exception as e:
+            logger.error(f"Error choosing tool: {e}")
+            await memory.add_step(
+                step_module=self.config.module,
+                step_title=self.step_title("Error on tool choose:"),
+                step_reason="Error on Parsing the tools at LLM side",
+                step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
+                error=str(e),
+                timeit=0,
+            )
+            raise
+
+        await memory.add_step(
+            step_module=self.config.module,
+            step_title=self.step_title("Chosen tool:"),
+            step_reason="Chosen tool at LLM side",
+            step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
+            step_value=f"*{', '.join(resp.tools.keys() if resp.tools else [])}* {resp.reasoning}",
+            input_nuclia_tokens=input_tokens,
+            output_nuclia_tokens=output_tokens,
+            timeit=0,
         )
 
         logger.debug(f"Tool and parameters to use: {resp}")
         return resp, input_tokens, output_tokens
+
+    def _compatible_tools(self, tools: List[types.Tool]) -> List[types.Tool]:
+        compatible = []
+        for tool in tools:
+            try:
+                schema = normalize_tool_schema(tool.inputSchema)
+            except IncompatibleToolSchema as error:
+                logger.warning(
+                    "Ignoring incompatible MCP tool: server=%r tool=%r path=%r reason=%r",
+                    self.config.source,
+                    tool.name,
+                    error.json_path,
+                    error.reason,
+                )
+                continue
+            compatible.append(tool.model_copy(update={"inputSchema": schema}))
+        return compatible
 
     async def progress_callback(
         self,
@@ -378,12 +475,36 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         messages: List[Message],
         images: List[Image],
         session: Optional[ClientSession] = None,
+        mutation_tools: list[str] = [],
     ) -> None:
         active_session = session or self.session
         if active_session is None:
             raise Exception("MCP session not initialized")
 
         t0 = time()
+
+        async def reject_overflow(overflow) -> None:
+            error_text = overflow.render()
+            context.chunks.append(
+                Chunk(
+                    chunk_id=f"mcp_{self.config.id}_{tool_name}_oversized_{_short_uid()}",
+                    title=f"MCP tool result too large: {tool_name}",
+                    text=error_text,
+                    origin_agent=self.config.module,
+                )
+            )
+            messages.append(Message(author=Author.NUCLIA, text=error_text))
+            await memory.add_step(
+                step_module=self.config.module,
+                step_title=self.step_title("Tool result rejected"),
+                step_reason=(
+                    f"Tool {tool_name} exceeded the configured LLM context safety budget."
+                ),
+                step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
+                step_value=overflow.trace_value(),
+                timeit=time() - t0,
+            )
+
         if self.config.interaction:
             feedback = Feedback(
                 request_id=memory.get_session_id(),
@@ -415,6 +536,9 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         )
         logger.debug(f"Tool {tool_name} results: {tool_result}")
 
+        if tool_name in mutation_tools:
+            logger.debug(f"Tool {tool_name} is a mutation tool")
+
         if tool_result.isError:
             # Extract error text from content blocks; fall back to meta if none present
             error_texts = [
@@ -425,13 +549,34 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             error_message = (
                 "; ".join(error_texts) if error_texts else str(tool_result.meta)
             )
-            logger.error(f"Tool {tool_name} encountered an error: {error_message}")
+            error_overflow = inspect_text_blocks(
+                [error_message], budget_from_config(self.config)
+            )
+            if error_overflow is not None:
+                error_message = error_overflow.render()
+                await memory.add_step(
+                    step_module=self.config.module,
+                    step_title=self.step_title("Tool result rejected"),
+                    step_reason=(
+                        f"Tool {tool_name} exceeded the configured LLM context safety budget."
+                    ),
+                    step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
+                    step_value=error_overflow.trace_value(),
+                    timeit=time() - t0,
+                )
+            logger.warning(f"Tool {tool_name} encountered an error: {error_message}")
             context.chunks.append(
                 Chunk(
                     chunk_id=f"mcp_{self.config.id}_{tool_name}_error_{_short_uid()}",
                     title=f"MCP tool error: {tool_name}",
                     text=(f"Tool: {tool_name}\nError: {error_message}"),
                     origin_agent=self.config.module,
+                )
+            )
+            messages.append(
+                Message(
+                    author=Author.NUCLIA,
+                    text=f"Tool {tool_name} failed: {error_message}",
                 )
             )
             await memory.add_step(
@@ -459,20 +604,53 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             f"image_blocks: {image_blocks}",
             f"resource_links: {resource_blocks}",
         ]
-        if tool_result.structuredContent is not None:
-            structured = json.dumps(
-                tool_result.structuredContent, indent=2, default=str
-            )
-            trace_lines.append("Structured content (truncated):")
-            trace_lines.append(
-                structured[:2000] + ("...(truncated)" if len(structured) > 2000 else "")
-            )
+        structured = (
+            json.dumps(tool_result.structuredContent, indent=2, default=str)
+            if tool_result.structuredContent is not None
+            else None
+        )
+        direct_texts = [
+            payload
+            for block in tool_result.content
+            if not isinstance(block, types.ResourceLink)
+            if (payload := _content_payload(block)) is not None
+        ]
+        if structured is not None:
+            direct_texts.append(structured)
+        direct_overflow = inspect_text_blocks(
+            direct_texts, budget_from_config(self.config)
+        )
+        if direct_overflow is not None:
+            await reject_overflow(direct_overflow)
+            return
+        linked_resources = []
+        for block in tool_result.content:
+            if isinstance(block, types.ResourceLink):
+                resource = await active_session.read_resource(block.uri)
+                linked_resources.append(resource)
+                direct_texts.extend(
+                    payload
+                    for content in resource.contents
+                    if (payload := _content_payload(content)) is not None
+                )
+        resource_overflow = inspect_text_blocks(
+            direct_texts, budget_from_config(self.config)
+        )
+        if resource_overflow is not None:
+            await reject_overflow(resource_overflow)
+            return
+        if structured is not None:
             context.structured.append(structured)
+            trace_lines.append(f"structured_bytes: {len(structured.encode('utf-8'))}")
         messages.append(
             Message(author=Author.NUCLIA, text=f"Tool {tool_name} executed")
         )
+        resource_results = iter(linked_resources)
         for block in tool_result.content:
             if isinstance(block, types.TextContent):
+                block_text = block.text
+                if block.meta is not None:
+                    block_text += "\nMetadata: " + json.dumps(block.meta)
                 context.chunks.append(
                     Chunk(
                         chunk_id=f"mcp_{self.config.id}_{tool_name}_{_short_uid()}",
@@ -482,9 +660,6 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                         origin_agent=self.config.module,
                     )
                 )
-                block_text = block.text
-                if block.meta is not None:
-                    block_text += "\nMetadata: " + json.dumps(block.meta)
                 messages.append(Message(author=Author.NUCLIA, text=block_text))
             elif isinstance(block, types.ImageContent):
                 context.images[f"mcp_{self.config.id}_{tool_name}"] = Image(
@@ -494,11 +669,14 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             elif isinstance(block, types.AudioContent):
                 pass
             elif isinstance(block, types.ResourceLink):
-                resource = await active_session.read_resource(block.uri)
+                resource = next(resource_results)
                 for index, content in enumerate(resource.contents):
                     if isinstance(content, types.TextResourceContents):
                         # Use the resource URI as the chunk URL source
-                        resource_urls = [content.uri] if content.uri else []
+                        resource_urls = [str(content.uri)] if content.uri else []
+                        block_text = content.text
+                        if content.meta is not None:
+                            block_text += "\nMetadata: " + json.dumps(content.meta)
                         context.chunks.append(
                             Chunk(
                                 chunk_id=f"mcp_{self.config.id}_{tool_name}_{index}",
@@ -509,9 +687,6 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                                 url=resource_urls,
                             )
                         )
-                        block_text = content.text
-                        if content.meta is not None:
-                            block_text += "\nMetadata: " + json.dumps(content.meta)
                         messages.append(Message(author=Author.NUCLIA, text=block_text))
                     elif isinstance(content, types.BlobResourceContents):
                         context.images[f"mcp_{self.config.id}_{tool_name}_{index}"] = (
@@ -534,7 +709,12 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             elif isinstance(block, types.EmbeddedResource):
                 if isinstance(block.resource, types.TextResourceContents):
                     # Use the embedded resource URI as the chunk URL source
-                    embedded_urls = [block.resource.uri] if block.resource.uri else []
+                    embedded_urls = (
+                        [str(block.resource.uri)] if block.resource.uri else []
+                    )
+                    block_text = block.resource.text
+                    if block.resource.meta is not None:
+                        block_text += "\nMetadata: " + json.dumps(block.resource.meta)
                     context.chunks.append(
                         Chunk(
                             chunk_id=f"mcp_{self.config.id}_{tool_name}_{_short_uid()}",
@@ -545,10 +725,6 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                             url=embedded_urls,
                         )
                     )
-                    # add also metadata to the messages so the LLM can use it if needed
-                    block_text = block.resource.text
-                    if block.resource.meta is not None:
-                        block_text += "\nMetadata: " + json.dumps(block.resource.meta)
                     messages.append(
                         Message(
                             author=Author.NUCLIA,
@@ -573,16 +749,11 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
 
         messages.append(Message(author=Author.NUCLIA, text="\n".join(trace_lines)))
 
-        step_value = (
-            f"Used tool: {tool_name} with arguments: {tool_arguments}"
-            if tool_arguments
-            else "No tool used"
-        )
         await memory.add_step(
             step_module=self.config.module,
             step_title=self.step_title("Tool result"),
             step_agent_path=f"/context/{self.config.id if self.config.id else 'default'}",
-            step_value=step_value,
+            step_value=f"Used tool: {tool_name} ",
             timeit=time() - t0,
         )
 
@@ -660,7 +831,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
                         session=session,
                     )
             except Exception as e:
-                logger.error(
+                logger.warning(
                     f"MCPAgent {self.agent_id!r}: error calling tool {tool_name!r}: {e}"
                 )
             return context
@@ -785,27 +956,11 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         published: Dict[str, FunctionDefinition] = {}
 
         for tool in self.tools:
-            input_schema = tool.inputSchema or {}
-            properties = (
-                input_schema.get("properties", {})
-                if isinstance(input_schema, dict)
-                else {}
-            )
-            params: Dict[str, Any] = {
-                name: {
-                    "type": info.get("type", "string")
-                    if isinstance(info, dict)
-                    else "string",
-                    "description": info.get("description", "")
-                    if isinstance(info, dict)
-                    else "",
-                }
-                for name, info in properties.items()
-            }
             published[tool.name] = FunctionDefinition(
                 name=tool.name,
                 description=tool.description or tool.name,
-                parameters=params,
+                parameters=_tool_parameters(tool.inputSchema),
+                input_schema=tool.inputSchema,
             )
             setattr(self, tool.name, self._make_tool_caller(tool.name))
 
@@ -834,7 +989,13 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         )
 
     async def mcp_interaction(
-        self, memory: QuestionMemory, manager: Manager, question: str, context: Context
+        self,
+        memory: QuestionMemory,
+        manager: Manager,
+        question: str,
+        context: Context,
+        system: Optional[str] = None,
+        mutation_tools: list[str] = [],
     ) -> Tuple[float, float]:
         """
         Interact with the MCP server to get the context for the question.
@@ -848,21 +1009,30 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         )
         resp, input_tokens, output_tokens = await self.choose_tool(
             manager,
+            memory,
             images,
             messages,
             tracking=memory.get_tracking_info(),
+            system=system,
         )
-
         total_input_tokens += input_tokens
         total_output_tokens += output_tokens
-        for tool_name, tool_arguments in iterate_tools_resp(resp):
+        tool_calls = list(iterate_tools_resp(resp))
+
+        for tool_name, tool_arguments in tool_calls:
             await self.process_tool(
-                memory, tool_name, tool_arguments, context, messages, images
+                memory,
+                tool_name,
+                tool_arguments,
+                context,
+                messages,
+                images,
+                mutation_tools=mutation_tools,
             )
 
-        if self.config.work_chain is False:
+        if self.config.work_chain is False or not tool_calls:
             logger.debug("Exiting loop on tool")
-            return input_tokens, output_tokens
+            return total_input_tokens, total_output_tokens
 
         count = 0
         finished = False
@@ -870,20 +1040,32 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             count += 1
             resp, input_tokens, output_tokens = await self.choose_tool(
                 manager,
+                memory,
                 images,
                 messages,
-                EXIT_LOOP_TOOLS,
+                extra_tools=EXIT_LOOP_TOOLS,
+                system=system,
                 tracking=memory.get_tracking_info(),
             )
             total_input_tokens += input_tokens
             total_output_tokens += output_tokens
-            for tool_name, tool_arguments in iterate_tools_resp(resp):
+            tool_calls = list(iterate_tools_resp(resp))
+            if not tool_calls:
+                logger.debug("Exiting loop because no tool was selected")
+                break
+            for tool_name, tool_arguments in tool_calls:
                 if tool_name == "task_complete":
                     logger.debug("Exiting loop on task_complete tool")
                     finished = True
                     break
                 await self.process_tool(
-                    memory, tool_name, tool_arguments, context, messages, images
+                    memory,
+                    tool_name,
+                    tool_arguments,
+                    context,
+                    messages,
+                    images,
+                    mutation_tools=mutation_tools,
                 )
 
         return total_input_tokens, total_output_tokens
@@ -920,7 +1102,8 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
             question="",
             user_id=self.config.id or "mcp_agent",
             query_context_images=images,
-            generative_model=self.config.sampling_model,
+            generative_model=self.config.sampling_model.model_id,
+            reasoning=build_reasoning(self.config.sampling_model),
             format_prompt=False,
             system=params.systemPrompt,
             context=new_messages,
@@ -945,7 +1128,7 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         return CreateMessageResult(
             role="user",
             content=types.TextContent(type="text", text=resp.answer),
-            model=self.config.sampling_model,
+            model=self.config.sampling_model.model_id,
         )
 
     async def elicitation_callback(
@@ -1058,13 +1241,13 @@ class MCPAgent(ContextAgent, Agent[MCPAgentConfig]):
         # Context: There are many tools available for a user. However, the number of tools can be large, and it is not always practical to present all of them at once. We need to create a summary of them that accurately reflects the capabilities they provide.
         # The user presents you with the tools available to them, and you must create a summary of the tools that is accurate and comprehensive. The summary should include the capabilities of the tools and when they should be used.
 
-        self.tools.extend(tools.tools)
+        self.tools.extend(self._compatible_tools(tools.tools))
         while tools.nextCursor:
             params: types.PaginatedRequestParams = types.PaginatedRequestParams(
                 cursor=tools.nextCursor
             )
             tools = await self.session.list_tools(params=params)
-            self.tools.extend(tools.tools)
+            self.tools.extend(self._compatible_tools(tools.tools))
 
     async def preload_prompts(self):
         if self.session is None:

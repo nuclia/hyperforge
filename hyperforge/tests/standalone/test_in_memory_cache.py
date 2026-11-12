@@ -4,6 +4,7 @@ from unittest.mock import patch
 import pytest
 from httpx import AsyncClient
 from httpx._transports.asgi import ASGITransport
+
 from hyperforge.api.models import InteractionRequest
 from hyperforge.context.agent import ContextAgent
 from hyperforge.context.config import ContextAgentConfig

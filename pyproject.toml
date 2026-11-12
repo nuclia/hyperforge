@@ -1,10 +1,11 @@
 [project]
 name = "hyperforge_workspace"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 version = "1.0.0"
 dependencies = [
     "hyperforge",
     "hyperforge_nucliadb",
+    "hyperforge_a2a",
     "hyperforge_rephrase",
     "hyperforge_summarize",
     "hyperforge_static",
@@ -31,6 +32,7 @@ dependencies = [
 members = [
     "hyperforge",
     "agents/nucliadb",
+    "agents/a2a",
     "agents/rephrase",
     "agents/summarize",
     "agents/static",
@@ -56,10 +58,17 @@ members = [
 default-groups = "all"
 managed = true
 
+[tool.pytest.ini_options]
+# Load each package's conftest during initialization so its plugins are registered.
+testpaths = ["hyperforge/tests", "agents/*/tests"]
+addopts = "--import-mode=importlib"
+asyncio_mode = "auto"
+
 
 [tool.uv.sources]
 hyperforge = { workspace = true }
 hyperforge_nucliadb = { workspace = true }
+hyperforge_a2a = { workspace = true }
 hyperforge_rephrase = { workspace = true }
 hyperforge_summarize = { workspace = true }
 hyperforge_static = { workspace = true }
@@ -85,7 +94,6 @@ dev = [
     # Linting
     "mypy-protobuf>=3.6.0",
     "mypy",
-    "pre-commit",
     "ruff",
     # Testing
     "aioresponses",
@@ -106,7 +114,7 @@ dev = [
     "requests",
     "requests-mock>=1.12.1",
     "types-PyYAML>=6.0.12.20240808",
-    "ty>=0.0.34",
+    "ty>=0.0.59",
     "sqlalchemy_utils",
     "inline_snapshot",
 ]

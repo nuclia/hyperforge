@@ -19,7 +19,7 @@ from hyperforge_conditional.conditional import (
 class ContextConditionalAgentConfig(ConditionalAgentConfig, ContextAgentConfig):
     model_config = ConfigDict(title="Condition")
     module: Literal["context_conditional"] = "context_conditional"
-    on: Literal["QUESTION", "CONTEXT"] = Field(  # type: ignore
+    on: Literal["QUESTION", "CONTEXT"] = Field(
         default="QUESTION",
         title="Evaluate condition on",
         description="Source to evaluate the condition on. CONTEXT is only valid when this agent is used as a next agent in a chain.",
@@ -58,7 +58,7 @@ class ContextConditional(
         flow_id: str,
         extra_context: Optional[Dict[str, Any]] = None,
     ):
-        self.config: ContextConditionalAgentConfig  # type: ignore
+        self.config: ContextConditionalAgentConfig
         if extra_context is not None:
             question, question_uuid = await self.rephrase(
                 memory=memory,
@@ -137,17 +137,17 @@ class ContextConditional(
 
         if self.next_agent is not None:
             extra_context = extra_context or {}
-            for agent in (  # type: ignore
+            for nagent in (
                 selected_agents + [self.fallback]
                 if self.fallback is not None
                 else selected_agents
             ):
-                if agent:
+                if nagent:
                     answer_summaries = memory.get_agent_answer_summaries(
-                        flow_id=flow_id, agent_id=agent.agent_id
+                        flow_id=flow_id, agent_id=nagent.agent_id
                     )
                     if answer_summaries:
-                        extra_context[agent.agent_id] = "\n".join(answer_summaries)
+                        extra_context[nagent.agent_id] = "\n".join(answer_summaries)
 
             await self.next_agent.get_question_context(
                 memory,

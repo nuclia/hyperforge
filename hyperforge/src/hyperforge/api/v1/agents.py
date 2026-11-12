@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     "/api/v1/agent/{agent_id}/rules",
     status_code=200,
     description="Set Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Workflows"],
 )
 @requires_one([StashRoles.OWNER])
 async def set_rules(
@@ -49,7 +49,7 @@ async def set_rules(
     "/api/v1/agent/{agent_id}/rules",
     status_code=200,
     description="Set Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Workflows"],
 )
 @requires_one([StashRoles.OWNER])
 async def get_rules(
@@ -69,7 +69,7 @@ async def get_rules(
     "/api/v1/agent/{agent_id}/drivers",
     status_code=200,
     description="Set Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Drivers"],
 )
 @requires_one([StashRoles.OWNER])
 async def add_driver(
@@ -93,7 +93,7 @@ async def add_driver(
     "/api/v1/agent/{agent_id}/driver/{driver}",
     status_code=200,
     description="Set Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Drivers"],
 )
 @requires_one([StashRoles.OWNER])
 async def patch_driver(
@@ -116,7 +116,7 @@ async def patch_driver(
     "/api/v1/agent/{agent_id}/driver/{driver}",
     status_code=200,
     description="Set Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Drivers"],
 )
 @requires_one([StashRoles.OWNER])
 async def delete_driver(
@@ -138,7 +138,7 @@ async def delete_driver(
     "/api/v1/agent/{agent_id}/drivers",
     status_code=200,
     description="Get Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Drivers"],
 )
 @requires_one([StashRoles.OWNER])
 async def get_drivers(
@@ -164,7 +164,7 @@ async def get_drivers(
     "/api/v1/agent/{agent_id}/preprocess",
     status_code=200,
     description="Add PreProcess Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Workflow Agents"],
 )
 @requires_one([StashRoles.OWNER])
 async def add_preprocess(
@@ -189,7 +189,7 @@ async def add_preprocess(
     "/api/v1/agent/{agent_id}/preprocess/{preprocess}",
     status_code=200,
     description="Set PreProcess Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Workflow Agents"],
 )
 @requires_one([StashRoles.OWNER])
 async def patch_preprocess(
@@ -212,7 +212,7 @@ async def patch_preprocess(
     "/api/v1/agent/{agent_id}/preprocess/{preprocess}",
     status_code=200,
     description="Delete PreProcess Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Workflow Agents"],
 )
 @requires_one([StashRoles.OWNER])
 async def delete_preprocess(
@@ -234,7 +234,7 @@ async def delete_preprocess(
     "/api/v1/agent/{agent_id}/preprocess",
     status_code=200,
     description="Set Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Workflow Agents"],
 )
 @requires_one([StashRoles.OWNER])
 async def get_preprocess(
@@ -256,7 +256,7 @@ async def get_preprocess(
     "/api/v1/agent/{agent_id}/generation",
     status_code=200,
     description="Add Generation Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Workflow Agents"],
 )
 @requires_one([StashRoles.OWNER])
 async def add_generation(
@@ -281,7 +281,7 @@ async def add_generation(
     "/api/v1/agent/{agent_id}/generation/{generation}",
     status_code=200,
     description="Set PreProcess Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Workflow Agents"],
 )
 @requires_one([StashRoles.OWNER])
 async def patch_generation(
@@ -303,7 +303,7 @@ async def patch_generation(
     "/api/v1/agent/{agent_id}/generation/{generation}",
     status_code=200,
     description="Delete Generation Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Workflow Agents"],
 )
 @requires_one([StashRoles.OWNER])
 async def delete_generation(
@@ -325,7 +325,7 @@ async def delete_generation(
     "/api/v1/agent/{agent_id}/generation",
     status_code=200,
     description="Set Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Workflow Agents"],
 )
 @requires_one([StashRoles.OWNER])
 async def get_generation(
@@ -347,7 +347,7 @@ async def get_generation(
     "/api/v1/agent/{agent_id}/postprocess",
     status_code=200,
     description="Add PostProcess Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Workflow Agents"],
 )
 @requires_one([StashRoles.OWNER])
 async def add_postprocess(
@@ -372,7 +372,7 @@ async def add_postprocess(
     "/api/v1/agent/{agent_id}/postprocess/{postprocess}",
     status_code=200,
     description="Set PostProcess Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Workflow Agents"],
 )
 @requires_one([StashRoles.OWNER])
 async def patch_postprocess(
@@ -395,7 +395,7 @@ async def patch_postprocess(
     "/api/v1/agent/{agent_id}/postprocess/{postprocess}",
     status_code=200,
     description="Delete PreProcess Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Workflow Agents"],
 )
 @requires_one([StashRoles.OWNER])
 async def delete_postprocess(
@@ -417,7 +417,7 @@ async def delete_postprocess(
     "/api/v1/agent/{agent_id}/postprocess",
     status_code=200,
     description="Set Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Workflow Agents"],
 )
 @requires_one([StashRoles.OWNER])
 async def get_postprocess(
@@ -439,7 +439,7 @@ async def get_postprocess(
     "/api/v1/agent/{agent_id}/context",
     status_code=200,
     description="Add Context Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Workflow Agents"],
     include_in_schema=False,
 )
 @requires_one([StashRoles.OWNER])
@@ -465,7 +465,7 @@ async def add_context(
     "/api/v1/agent/{agent_id}/context/{context}",
     status_code=200,
     description="Set Context Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Workflow Agents"],
     include_in_schema=False,
 )
 @requires_one([StashRoles.OWNER])
@@ -489,7 +489,7 @@ async def patch_context(
     "/api/v1/agent/{agent_id}/context/{context}",
     status_code=200,
     description="Delete Context Agent Configuration",
-    tags=["Retrieval Agent"],
+    tags=["Workflow Agents"],
     include_in_schema=False,
 )
 @requires_one([StashRoles.OWNER])
@@ -512,7 +512,7 @@ async def delete_context(
     "/api/v1/agent/{agent_id}/context",
     status_code=200,
     description="Get list of Context Agents",
-    tags=["Retrieval Agent"],
+    tags=["Workflow Agents"],
     include_in_schema=False,
 )
 @requires_one([StashRoles.OWNER])

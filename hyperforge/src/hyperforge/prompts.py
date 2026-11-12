@@ -117,6 +117,90 @@ VALIDATE_JSON_SCHEMA = {
 }
 
 
+VALIDATE_MULTIPLE_CONTEXTS_PROMPT = """
+Based on the provided contexts and user question, decide what each context can contribute to the answer.
+
+For every relevant context:
+- Return its exact `context_id`.
+- Write an `answer` containing the partial or complete answer supported by that context.
+- Return only the block IDs from that context that contain relevant supporting information in `citations`.
+
+The existing summary is first-class evidence, just like the blocks:
+- Always consider the existing summary when deciding whether a context is relevant.
+- If the existing summary answers the question but none of the blocks do, include the context, generate its `answer` from the summary, and return an empty `citations` list.
+- Do not report information as missing when it is present in an existing summary.
+- Citations refer only to blocks. An empty citations list is valid when the answer is supported only by the existing summary.
+
+Omit irrelevant contexts from the `contexts` list. Do not invent context IDs or block IDs.
+
+`missing_info_query` is global across all contexts. Leave it empty when the contexts together contain enough information. Otherwise, return the query needed to retrieve the missing information.
+
+<QUESTION>
+{{ question }}
+
+<CONTEXTS>
+{% for context in contexts %}
+<CONTEXT id="{{ context.context_id }}">
+{% if context.title %}Title: {{ context.title }}{% endif %}
+{% if context.summary %}
+Existing summary:
+{{ context.summary }}
+{% endif %}
+{% for block_id, block in context.blocks.items() %}
+**{{ block_id }}**
+{{ block }}
+{% endfor %}
+</CONTEXT>
+{% endfor %}
+</CONTEXTS>
+"""
+
+VALIDATE_MULTIPLE_CONTEXTS_PROMPT_TEMPLATE = PROMPT_ENVIRONMENT.from_string(
+    VALIDATE_MULTIPLE_CONTEXTS_PROMPT
+)
+
+VALIDATE_MULTIPLE_CONTEXTS_JSON_SCHEMA = {
+    "title": "validate_multiple_contexts",
+    "description": "Validate several contexts and summarize each relevant one",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "missing_info_query": {
+                "type": "string",
+                "description": "Query needed to retrieve information missing across all contexts, or an empty string.",
+            },
+            "contexts": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "context_id": {
+                            "type": "string",
+                            "description": "Exact ID of a relevant input context.",
+                        },
+                        "answer": {
+                            "type": "string",
+                            "description": "Partial or complete answer supported by this context.",
+                        },
+                        "citations": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Relevant block IDs belonging to this context.",
+                        },
+                    },
+                    "required": [
+                        "context_id",
+                        "answer",
+                        "citations",
+                    ],
+                },
+            },
+        },
+        "required": ["missing_info_query", "contexts"],
+    },
+}
+
+
 NEXT_REPHRASE_JSON_SCHEMA = {
     "title": "next_rephrase",
     "description": "Rephrase the question if needed given info about previous contexts and the current agent",

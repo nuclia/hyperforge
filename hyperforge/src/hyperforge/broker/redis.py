@@ -8,13 +8,21 @@ from pydantic import TypeAdapter
 from redis.asyncio import Redis, ResponseError
 from redis.asyncio.retry import Retry
 from redis.backoff import ExponentialBackoff
-from redis.exceptions import ConnectionError as RedisConnectionError
+from redis.exceptions import (
+    ClusterDownError,
+    SlotNotCoveredError,
+)
+from redis.exceptions import (
+    ConnectionError as RedisConnectionError,
+)
+from redis.exceptions import (
+    TimeoutError as RedisTimeoutError,
+)
 
 from hyperforge import logger
 from hyperforge.broker import AgentTimeoutError, Broker
 from hyperforge.pubsub import AgentMessage, StartInteraction
 from hyperforge.redis_utils import ManualStreamKeysRedisCluster
-
 
 _REDIS_CONNECT_TIMEOUT_SECONDS = 5
 _REDIS_HEALTH_CHECK_INTERVAL_SECONDS = 30
@@ -23,17 +31,30 @@ _REDIS_RETRY_BACKOFF_BASE_SECONDS = 0.1
 _REDIS_RETRY_BACKOFF_CAP_SECONDS = 1.0
 _REDIS_SUBSCRIBE_ACTIVATIONS_RETRY_SLEEP_SECONDS = 1
 _REPLY_READ_BLOCK_MAX_MS = 2000
+_DEFAULT_STREAM_TTL_SECONDS = 300
 
 
 class RedisBroker(Broker):
-    def __init__(self, client: Redis, activate_subject: str, keepalive_ms: int):
+    def __init__(
+        self,
+        client: Redis,
+        activate_subject: str,
+        keepalive_ms: int,
+        stream_ttl_seconds: int = _DEFAULT_STREAM_TTL_SECONDS,
+    ):
         self._client = client
         self._activate_subject = activate_subject
         self._keepalive_ms = int(keepalive_ms)
+        self._stream_ttl_seconds = int(stream_ttl_seconds)
 
     @property
     def keepalive_seconds(self) -> float:
         return self._keepalive_ms / 1000
+
+    @property
+    def client(self) -> Redis:
+        """Expose the shared Redis client for tightly coupled runtime stores."""
+        return self._client
 
     @classmethod
     def from_url(
@@ -42,6 +63,7 @@ class RedisBroker(Broker):
         activate_subject: str,
         keepalive_ms: int,
         cluster_mode: bool = False,
+        stream_ttl_seconds: int = _DEFAULT_STREAM_TTL_SECONDS,
     ) -> "RedisBroker":
         client_kwargs = cls._client_kwargs(keepalive_ms)
         if cluster_mode:
@@ -60,7 +82,12 @@ class RedisBroker(Broker):
                 url,
                 **client_kwargs,
             )  # type: ignore[call-overload]
-        return cls(client, activate_subject, keepalive_ms)
+        return cls(
+            client,
+            activate_subject,
+            keepalive_ms,
+            stream_ttl_seconds=stream_ttl_seconds,
+        )
 
     @staticmethod
     def _client_kwargs(keepalive_ms: int) -> dict[str, Any]:
@@ -147,7 +174,7 @@ class RedisBroker(Broker):
         async with self._client.pipeline() as pipe:
             await (
                 pipe.xadd(topic, {"msg": message.model_dump_json()}, maxlen=100)
-                .expire(topic, 300)
+                .expire(topic, self._stream_ttl_seconds)
                 .execute()
             )
 
@@ -190,11 +217,24 @@ class RedisBroker(Broker):
     async def send_reply(self, key: str, payload: str) -> None:
         trace_headers: dict[str, str] = {}
         opentelemetry.propagate.inject(trace_headers)
-        await self._client.xadd(
-            key, {"msg": payload, "trace": json.dumps(trace_headers)}, maxlen=100
-        )
+        async with self._client.pipeline() as pipe:
+            await (
+                pipe.xadd(
+                    key,
+                    {"msg": payload, "trace": json.dumps(trace_headers)},
+                    maxlen=100,
+                )
+                .expire(key, self._stream_ttl_seconds)
+                .execute()
+            )
 
-    async def receive_reply(self, key: str, timeout_ms: int) -> str | None:
+    async def receive_reply(
+        self, key: str, timeout_ms: int, lookback_seconds: int = 60
+    ) -> str | None:
+        # Keep a stable cursor across blocking-read retries. Recomputing the
+        # cursor as "$" on every XREAD can skip a reply that is published after
+        # one block expires but before the next XREAD starts.
+        cursor = f"{int((time.time() - lookback_seconds) * 1000)}-0"
         deadline = time.monotonic() + (timeout_ms / 1000)
         reconnect_attempts = 0
 
@@ -209,11 +249,16 @@ class RedisBroker(Broker):
 
             try:
                 response = await self._client.xread(
-                    {key: "$"},
+                    {key: cursor},
                     block=block_ms,
                     count=1,
                 )
-            except RedisConnectionError:
+            except (
+                RedisConnectionError,
+                RedisTimeoutError,
+                ClusterDownError,
+                SlotNotCoveredError,
+            ):
                 reconnect_attempts += 1
                 backoff_s = min(1.0, 0.1 * reconnect_attempts)
                 logger.warning(
@@ -226,10 +271,19 @@ class RedisBroker(Broker):
 
             if not response:
                 continue
-            return response[0][1][0][1]["msg"]
+            message = response[0][1][0][1]["msg"]
+            try:
+                await self._client.delete(key)
+            except Exception:
+                logger.warning(
+                    "Failed to delete Redis reply stream key=%s",
+                    key,
+                    exc_info=True,
+                )
+            return message
 
     async def initialize(self) -> None:
         pass
 
     async def finalize(self) -> None:
-        await self._client.aclose()  # type: ignore[attr-defined]
+        await self._client.aclose()  # type: ignore[attr-defined]  # ty: ignore[unresolved-attribute]

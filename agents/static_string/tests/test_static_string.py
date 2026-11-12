@@ -5,6 +5,7 @@ import pytest
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import EphemeralSessionMemory
 from hyperforge.models import MemoryConfig, Rules
+
 from hyperforge_static_string.agent import StaticStringAgent, StaticStringAgentConfig
 
 pytestmark = pytest.mark.asyncio

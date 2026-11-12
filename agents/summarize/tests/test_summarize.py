@@ -3,22 +3,34 @@ from copy import deepcopy
 
 import pytest
 from hyperforge.engine import main as arag_main
+from hyperforge.manager import Manager
+from hyperforge.memory import Chunk, Context
+from hyperforge.memory.memory import EphemeralSessionMemory
 from hyperforge.minimal_fixtures import cassette_nua_key
+from hyperforge.models import MemoryConfig, Rules
+from nuclia.lib.nua import AsyncNuaClient
+
+from hyperforge_summarize.agent import (
+    SummarizeAgent,
+    build_answer_citations,
+    normalize_chunk_level_citations,
+)
+from hyperforge_summarize.config import SummarizeAgentConfig
 
 # Real key used when recording; the stub is sufficient for cassette replay.
 NUA_KEY = os.environ.get(
     "NUA_KEY",
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 
 pytestmark = [pytest.mark.vcr(ignore_localhost=True), pytest.mark.asyncio]
 
 DE48CFAA_3209_4041_BB64_8604AFF061FB = os.environ.get(
     "KB_DE48CFAA_3209_4041_BB64_8604AFF061FB"
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 
 DF8B4C24_2807_4888_AD6C_AE97357A638B = os.environ.get(
     "KB_DF8B4C24_2807_4888_AD6C_AE97357A638B"
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 
 CONFIG = {
     "drivers": [
@@ -41,8 +53,8 @@ CONFIG = {
             "identifier": "nucliadb-2",
             "config": {
                 "identifier": "nucliadb-2",
-                "url": "https://europe-1.nuclia.cloud/api",
-                "manager": "https://europe-1.nuclia.cloud/api",
+                "url": "https://europe-1.dp.progress.cloud/api",
+                "manager": "https://europe-1.dp.progress.cloud/api",
                 "kbid": "df8b4c24-2807-4888-ad6c-ae97357a638b",
                 "key": DF8B4C24_2807_4888_AD6C_AE97357A638B,
                 "filters": [],
@@ -70,6 +82,127 @@ CONFIG = {
     "generation": [],
     "postprocess": [],
 }
+
+
+async def test_summarize_uses_context_summary_with_forced_chunk_citations():
+    manager = await Manager.from_config(
+        drivers=[],
+        nua=AsyncNuaClient(region="europe-1", account="test", token=NUA_KEY),
+    )
+    agent = SummarizeAgent(
+        SummarizeAgentConfig(
+            citations=True,
+            force_chunk_level_citations=True,
+        )
+    )
+    session = EphemeralSessionMemory.from_config(
+        config=MemoryConfig(),
+        agent_id="test",
+        workflow_id="test",
+        rules=Rules(),
+    )
+    session.init("test-session")
+    memory = session.start_question("What is the launch code for the Aurora project?")
+    memory.contexts.append(
+        Context(
+            original_question_uuid="question-1",
+            actual_question_uuid="question-1",
+            question="What is the launch code for the Aurora project?",
+            source="test-source",
+            agent="upstream",
+            summary="The Aurora project launch code is LANTERN-47.",
+            chunks=[
+                Chunk(
+                    chunk_id="chunk-1",
+                    text="The Aurora project launch code is documented in the deployment runbook.",
+                )
+            ],
+        )
+    )
+
+    await agent(memory, manager)
+
+    answer, citations = memory.answers[-1]
+    assert "lantern-47" in answer.lower()
+    assert citations is not None
+    assert citations.metadata["block-AA-0"].chunk_index == 0
+
+
+async def test_normalize_chunk_level_citations_expands_context_references():
+    contexts = [
+        Context(
+            original_question_uuid="question-1",
+            actual_question_uuid="question-1",
+            question="What is the answer?",
+            source="test-source",
+            agent="upstream",
+            citations_id="block-AA",
+            chunks=[
+                Chunk(chunk_id="chunk-1", text="First source"),
+                Chunk(chunk_id="chunk-2", text="Second source"),
+            ],
+        ),
+        Context(
+            original_question_uuid="question-1",
+            actual_question_uuid="question-1",
+            question="What is the answer?",
+            source="test-source",
+            agent="upstream",
+            citations_id="block-AB",
+            chunks=[Chunk(chunk_id="chunk-3", text="Third source")],
+        ),
+        Context(
+            original_question_uuid="question-1",
+            actual_question_uuid="question-1",
+            question="What is the answer?",
+            source="test-source",
+            agent="upstream",
+            citations_id="block-AC",
+        ),
+    ]
+
+    answer = normalize_chunk_level_citations(
+        "Aurora [1]. Beta [2]. Gamma [3]. Aurora again [1].\n\n"
+        "[1]: block-AA\n[2]: block-AB\n[3]: block-AC",
+        contexts,
+    )
+
+    assert answer == (
+        "Aurora [1] [2]. Beta [3]. Gamma [4]. Aurora again [1] [2].\n\n"
+        "[1]: block-AA-0\n[2]: block-AA-1\n[3]: block-AB-0\n[4]: block-AC"
+    )
+    citations = build_answer_citations(answer, contexts)
+    assert {
+        citation_id: metadata.chunk_index
+        for citation_id, metadata in citations.metadata.items()
+    } == {
+        "block-AA-0": 0,
+        "block-AA-1": 1,
+        "block-AB-0": 0,
+        "block-AC": None,
+    }
+
+
+async def test_normalize_chunk_level_citations_uses_source_citations():
+    context = Context(
+        original_question_uuid="question-1",
+        actual_question_uuid="question-1",
+        question="What is the answer?",
+        source="test-source",
+        agent="upstream",
+        citations_id="block-AA",
+        citations=["chunk-2"],
+        chunks=[
+            Chunk(chunk_id="chunk-1", text="Unrelated"),
+            Chunk(chunk_id="chunk-2", text="Relevant"),
+        ],
+    )
+
+    answer = normalize_chunk_level_citations(
+        "The answer is here [1].\n\n[1]: block-AA", [context]
+    )
+
+    assert answer == "The answer is here [1].\n\n[1]: block-AA-1"
 
 
 async def test_summarize_answers():

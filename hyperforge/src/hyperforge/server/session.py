@@ -10,7 +10,6 @@ if TYPE_CHECKING:
 import nucliadb_telemetry.context
 import nucliadb_telemetry.metrics
 import prometheus_client
-from hyperforge.server.web import WebServer
 from lru import LRU
 from nucliadb_telemetry import errors
 from nucliadb_telemetry.utils import get_telemetry
@@ -20,6 +19,7 @@ from hyperforge.broker import Broker
 from hyperforge.configure import load_all_configurations, scan
 from hyperforge.db.agents import AgentManager
 from hyperforge.engine import State, get_state
+from hyperforge.errors import actionable_exception_group, exception_detail
 from hyperforge.interaction import (
     AnswerOperation,
     AragAnswer,
@@ -42,7 +42,7 @@ from hyperforge.server import SERVICE_NAME, logger
 from hyperforge.server.cache import Cache
 from hyperforge.server.settings import Settings
 from hyperforge.server.utils import get_memory
-from hyperforge.server.web import start_health_check
+from hyperforge.server.web import WebServer, start_health_check
 
 HOSTNAME = os.environ.get("HOSTNAME", "arag-server").encode()
 
@@ -97,9 +97,9 @@ class SessionManager:
             except (asyncio.CancelledError, KeyboardInterrupt):
                 logger.info("Activation listener cancelled, exiting...")
                 break
-            except Exception:
+            except Exception as e:
                 logger.exception("Error processing activation message")
-                errors.capture_exception()
+                errors.capture_exception(e)
 
     async def initialize(self, health_check: bool = True) -> None:
 
@@ -171,6 +171,7 @@ class SessionManager:
                 external_nua_api_key=self.settings.external_nua_api_key,
                 account=message.account,
                 kbid=None if self.settings.standalone else message.agent_id,
+                allow_private_network_endpoints=self.settings.allow_private_network_endpoints,
             )
 
             if message.session not in self.memory:
@@ -214,6 +215,20 @@ class SessionManager:
             task.add_done_callback(self._remove_task)
             self.tasks.append(task)
 
+        except BaseExceptionGroup as exc:
+            error_group = actionable_exception_group(exc)
+            logger.exception("Activation exception")
+            errors.capture_exception(error_group)
+            observation.set_status("error")
+            if topic:
+                await self.callback(
+                    topic,
+                    AragAnswer(
+                        exception=ARAGException(detail=exception_detail(error_group)),
+                        operation=AnswerOperation.ERROR,
+                    ),
+                )
+                await self.send_message(topic, AgentDone())
         except Exception as e:
             logger.exception("Activation exception")
             errors.capture_exception(e)
@@ -222,7 +237,7 @@ class SessionManager:
                 await self.callback(
                     topic,
                     AragAnswer(
-                        exception=ARAGException(detail="Unable to start agent"),
+                        exception=ARAGException(detail=exception_detail(e)),
                         operation=AnswerOperation.ERROR,
                     ),
                 )
@@ -375,15 +390,27 @@ class SessionManager:
             async with asyncio.timeout(self.settings.question_timeout_seconds):
                 await state.agent(question_memory, state.manager)
 
+        except BaseExceptionGroup as exc:
+            error_group = actionable_exception_group(exc)
+            logger.exception("Answering exception")
+            errors.capture_exception(error_group)
+            error = ARAGException(detail=exception_detail(error_group))
+            observation.set_status("error")
         except Exception as e:
             logger.exception("Answering exception")
             errors.capture_exception(e)
-            error = ARAGException(detail=str(e))
+            error = ARAGException(detail=exception_detail(e))
             observation.set_status("error")
-
-        observation.end()
-        answer_running.dec()
-        keepalive.cancel()
+        finally:
+            if state.manager is not None:
+                try:
+                    await state.manager.aclose()
+                except Exception as e:
+                    logger.exception("Error closing Manager")
+                    errors.capture_exception(e)
+            observation.end()
+            answer_running.dec()
+            keepalive.cancel()
 
         await self.callback(
             topic,

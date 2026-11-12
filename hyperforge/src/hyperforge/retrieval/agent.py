@@ -70,7 +70,7 @@ class RetrievalAgent(Agent):
         context: list[ContextAgent] = []
         for context_agent_obj in config.context:
             agent_class = get_agent_klass(context_agent_obj.module)
-            context.append(await agent_class.from_config(context_agent_obj))  # type: ignore[arg-type]
+            context.append(await agent_class.from_config(context_agent_obj))  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
 
         generation = []
         for generation_agent_obj in config.generation:

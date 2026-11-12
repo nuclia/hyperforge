@@ -4,6 +4,7 @@ from functools import reduce
 from typing import Dict, List, Optional, Union
 
 import httpx
+from hyperforge import logger
 from hyperforge.configure import driver
 from hyperforge.driver import Driver
 from hyperforge.models import Facets
@@ -37,7 +38,6 @@ from nucliadb_models.search import (
 )
 from nucliadb_sdk.v2 import NucliaDBAsync
 
-from hyperforge import logger
 from hyperforge_nucliadb.driver_config import (
     ManagerConnection,
     NucliaDBConfig,
@@ -111,14 +111,10 @@ class NucliaDBDriver(Driver):
 
     async def labels(self) -> Dict[str, List[str]]:
         labelsets = await self.driver.get_labelsets(kbid=self.config.kbid)
-        result = {}
-        for labelset in labelsets.labelsets:
-            labels = await self.driver.get_labelset(
-                kbid=self.config.kbid, labelset=labelset
-            )
-            result[labelset] = [x.title for x in labels.labels]
-
-        return result
+        return {
+            labelset_id: [label.title for label in labelset.labels]
+            for labelset_id, labelset in labelsets.labelsets.items()
+        }
 
     async def field_facets(self) -> Dict[str, int]:
         field_labels = {}
@@ -307,9 +303,13 @@ class NucliaDBDriver(Driver):
                 result.append(word)
         return " ".join(result)
 
-    async def ask(self, item: AskRequest, headers={}) -> SyncAskResponse:
+    async def ask(
+        self, item: AskRequest, headers: dict[str, str] | None = None
+    ) -> SyncAskResponse:
+        request_headers = httpx.Headers(headers)
+        request_headers["X-NDB-Client"] = "agentic"
         return await self.driver.ask(
-            kbid=self.config.kbid, content=item, headers=headers
+            kbid=self.config.kbid, content=item, headers=dict(request_headers)
         )
 
     async def find(
@@ -317,6 +317,7 @@ class NucliaDBDriver(Driver):
     ) -> KnowledgeboxFindResults:
         return await self.driver.find(
             kbid=self.config.kbid,
+            headers={"X-NDB-Client": "agentic"},
             content=FindRequest(
                 query=q,
                 resource_filters=rids,
@@ -330,6 +331,7 @@ class NucliaDBDriver(Driver):
         return await self.driver.find(
             kbid=self.config.kbid,
             content=q,
+            headers={"X-NDB-Client": "agentic"},
         )
 
     async def graph_relations(

@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     )
     oauth_subject: str = "arag.{account}.{agent_id}.{workflow_id}.{session}.{question}.oauth.{oauth_uuid}"
     pubsub_keepalive_seconds: float = 20
+    pubsub_stream_ttl_seconds: int = 300
 
     internal_nua_api: str = "http://predict.learning.svc.cluster.local:8080"
     internal_nua: bool = False
@@ -38,6 +39,7 @@ class Settings(BaseSettings):
     running_environment: str = "stage"
     zone: str = "stashify"
     load_modules: list[str] = []
+    auth_success_logo_url: Optional[str] = None
 
     # Set to True when running as a standalone server (i.e. not inside the
     # full learning cluster).  In standalone mode the agent_id is a human-
@@ -45,5 +47,6 @@ class Settings(BaseSettings):
     # the kbid for internal NUA calls from the account_id request header
     # instead.
     standalone: bool = False
+    allow_private_network_endpoints: bool = False
 
     health_check_enabled: bool = True

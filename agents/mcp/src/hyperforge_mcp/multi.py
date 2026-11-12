@@ -1,6 +1,7 @@
 from time import time
 from typing import Any, Dict, List, Optional, Tuple
 
+from hyperforge import logger
 from hyperforge.agent import Agent
 from hyperforge.context.agent import ContextAgent
 from hyperforge.interaction import Feedback, PromptFeedbackSchema
@@ -12,7 +13,6 @@ from hyperforge.utils import iterate_tools_resp
 from mcp import types
 from nuclia.lib.nua_responses import Image, Message
 
-from hyperforge import logger
 from hyperforge_mcp.agent import EXIT_LOOP_TOOLS, MCPAgent
 from hyperforge_mcp.config import MCPAgentConfig, MultiMCPAgentConfig
 from hyperforge_mcp.tools import (
@@ -24,7 +24,7 @@ from hyperforge_mcp.tools import (
 
 
 class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
-    config: MultiMCPAgentConfig  # type: ignore
+    config: MultiMCPAgentConfig
     agents: list[MCPAgent]
     main_agent: MCPAgent
 
@@ -102,7 +102,10 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
         images: list[Image],
     ):
         t0 = time()
-        prompt_feedback = TOOLS_CHOOSE_TEMPLATE.render(tools=self.main_agent.tools)
+        prompt = " ".join([m.text for m in messages])
+        prompt_feedback = TOOLS_CHOOSE_TEMPLATE.render(
+            tools=self.main_agent.tools, task_description=prompt
+        )
         resp, input_tokens, output_tokens = await manager.execute_json(
             model=self.config.tool_choice_model,
             prompt=prompt_feedback,
@@ -136,7 +139,7 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
         if agent_obj is None:
             raise Exception(f"No tool found with id {tool_id}")
         return await agent_obj.choose_tool(
-            manager=manager, messages=messages, images=images
+            manager=manager, messages=messages, images=images, memory=memory
         )
 
     async def get_multi_tool_selection_prompt(
@@ -178,7 +181,7 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
         if agent_obj is None:
             # We will use LLM to choose the prompt
             prompt_feedback_str = PROMPT_CHOOSE_TEMPLATE.render(
-                prompts=self.main_agent.prompts
+                prompts=self.main_agent.prompts, task_description=question
             )
             resp, input_tokens, output_tokens = await manager.execute_json(
                 model=self.config.tool_choice_model,
@@ -187,7 +190,7 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
                 schema={
                     "type": "object",
                     "properties": {
-                        "prompt_id": {
+                        "name": {
                             "type": "string",
                             "description": "id of the prompt to use",
                         },
@@ -195,7 +198,7 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
                 },
                 tracking=memory.get_tracking_info(),
             )
-            prompt_id: str = resp["prompt_id"]
+            prompt_id: str = resp["name"]
 
             await memory.add_step(
                 step_module=self.config.module,
@@ -251,7 +254,11 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
         while count > self.config.max_turns is False and finished is False:
             count += 1
             resp, input_tokens, output_tokens = await self.main_agent.choose_tool(
-                manager, images, messages, EXIT_LOOP_TOOLS
+                manager=manager,
+                images=images,
+                messages=messages,
+                memory=memory,
+                extra_tools=EXIT_LOOP_TOOLS,
             )
             total_input_tokens += input_tokens
             total_output_tokens += output_tokens
@@ -293,8 +300,12 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
             global_input_tokens += input_tokens
             global_output_tokens += output_tokens
             self.main_agent.tools.append(
-                types.Tool(name=agent.config.id, description=response, inputSchema={})
-            )  # type: ignore
+                types.Tool(
+                    name=agent.config.id,
+                    description=response,
+                    inputSchema={"type": "object", "properties": {}},
+                )
+            )
 
             response, input_tokens, output_tokens = await self.summarize_prompts(
                 manager,
@@ -305,7 +316,7 @@ class MultiMCPAgent(Agent[MultiMCPAgentConfig], ContextAgent):
             global_output_tokens += output_tokens
             self.main_agent.prompts.append(
                 types.Prompt(name=agent.config.id, description=response)
-            )  # type: ignore
+            )
 
         context = Context(
             agent_id=self.agent_id,

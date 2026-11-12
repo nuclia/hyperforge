@@ -38,7 +38,14 @@ Minimal valid example
 
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, Field, TypeAdapter, field_serializer, field_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    TypeAdapter,
+    field_serializer,
+    field_validator,
+    model_validator,
+)
 
 from hyperforge.agent import AgentConfig
 from hyperforge.configure import get_agent_config_klass, get_driver_config_klass
@@ -46,6 +53,36 @@ from hyperforge.driver import DriverConfig
 from hyperforge.models import Rules
 from hyperforge.prompts import PromptConfig
 from hyperforge.workflows import WorkflowData
+
+
+class StandaloneMCPAuthConfig(BaseModel):
+    """Optional OAuth/JWT protection for the standalone MCP endpoint."""
+
+    enabled: bool = False
+    authorization_server: Optional[str] = None
+    protected_resource_metadata_url: Optional[str] = None
+    protected_resource: Optional[str] = None
+    scopes_supported: list[str] = Field(default_factory=list)
+    required_scopes: list[str] = Field(default_factory=list)
+    jwks_url: Optional[str] = None
+    issuer: Optional[str] = None
+    audience: Optional[str] = None
+
+    @model_validator(mode="after")
+    def validate_enabled_config(self):
+        if not self.enabled:
+            return self
+
+        missing = []
+        if self.authorization_server is None:
+            missing.append("authorization_server")
+        if self.jwks_url is None:
+            missing.append("jwks_url")
+        if missing:
+            raise ValueError(
+                f"Missing required MCP auth setting(s) when enabled: {', '.join(missing)}"
+            )
+        return self
 
 
 class WorkflowConfig(BaseModel):
@@ -112,6 +149,9 @@ class StandAloneAgentConfig(BaseModel):
 
     # Prompts exposed via the MCP server.
     prompts: list[PromptConfig] = Field(default_factory=list)
+
+    # Optional OAuth/JWT protection for this agent's standalone MCP endpoint.
+    mcp_auth: Optional[StandaloneMCPAuthConfig] = None
 
     @field_validator("drivers", mode="before")
     def validate_drivers(cls, value: list[Dict[str, Any]], field):

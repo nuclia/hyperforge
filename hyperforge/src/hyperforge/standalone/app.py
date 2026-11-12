@@ -6,28 +6,35 @@ process, connected via a LocalBroker.  No Redis, no gRPC, no PostgreSQL, no
 NucliaDB required.
 """
 
+import base64
+import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, Tuple
+from typing import Any
 
-import prometheus_client  # type: ignore
+import prometheus_client
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from lru import LRU
-from mcp.server.lowlevel.server import Server as MCPServer
-from mcp.server.streamable_http import StreamableHTTPServerTransport
 from nucliadb_telemetry.logs import setup_logging
 from nucliadb_telemetry.settings import LogLevel, LogSettings
-from prometheus_client import CONTENT_TYPE_LATEST  # type: ignore
+from prometheus_client import CONTENT_TYPE_LATEST
 from redis.asyncio import Redis
-from starlette.authentication import AuthCredentials, AuthenticationBackend, BaseUser
+from starlette.authentication import (
+    AuthCredentials,
+    AuthenticationBackend,
+    AuthenticationError,
+    BaseUser,
+)
 from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import HTTPConnection
 from starlette.responses import PlainTextResponse
 
+from hyperforge.a2a.server import build_grpc_server_from_runtime
 from hyperforge.api import v1
 from hyperforge.api.authentication import User
+from hyperforge.api.mcp_server_pool import MCPServerPool
+from hyperforge.api.mcp_sessions import MCPSessionStore
 from hyperforge.api.models import AgentRole, StashRoles
 from hyperforge.api.v1 import oauth as v1_oauth
 from hyperforge.broker import Broker
@@ -37,6 +44,13 @@ from hyperforge.configure import resolve_dotted_name
 from hyperforge.server.cache import InMemoryCache, ValkeyCache
 from hyperforge.server.session import SessionManager
 from hyperforge.server.settings import Settings as ServerSettings
+from hyperforge.standalone import logger
+from hyperforge.standalone.oauth import (
+    JWKSCache,
+    force_https_metadata,
+    get_enabled_mcp_auth,
+    validate_mcp_bearer,
+)
 from hyperforge.standalone.settings import StandaloneSettings
 from hyperforge.standalone.ui_router import router as ui_router
 
@@ -96,13 +110,34 @@ _ALL_ROLES = AuthCredentials(
 )
 
 
-class OpenAuthBackend(AuthenticationBackend):
-    """Authentication backend that accepts every request as a local user with
-    all roles.  Only used in the standalone single-process deployment."""
+class StandaloneAuthBackend(AuthenticationBackend):
+    """Open standalone auth, with optional OAuth protection for MCP endpoints."""
+
+    def __init__(
+        self, agents_cfg: dict[str, Any], username: str, password: str | None
+    ) -> None:
+        self._agents_cfg = agents_cfg
+        self._ui_username = username
+        self._ui_password = password
+        self._jwks_cache = JWKSCache()
 
     async def authenticate(
         self, conn: HTTPConnection
     ) -> tuple[AuthCredentials, BaseUser] | None:
+        if conn.url.path.startswith("/api/v1/ui/"):
+            self._authenticate_ui(conn)
+
+        agent_id = self._mcp_agent_id(conn)
+        if agent_id is not None:
+            auth_config = get_enabled_mcp_auth(self._agents_cfg, agent_id)
+            if auth_config is not None:
+                conn.scope["hyperforge.mcp_auth_config"] = auth_config
+                await validate_mcp_bearer(
+                    conn.headers.get("authorization"),
+                    auth_config,
+                    self._jwks_cache,
+                )
+
         # Inject the headers that interaction endpoints declare as required
         # FastAPI Header() dependencies, so they don't get rejected.
         if "x-stf-account" not in conn.headers:
@@ -123,6 +158,87 @@ class OpenAuthBackend(AuthenticationBackend):
             ]
         return _ALL_ROLES, User(username="standalone")
 
+    def _authenticate_ui(self, conn: HTTPConnection) -> None:
+        if self._ui_password is None:
+            return
+
+        authorization = conn.headers.get("authorization")
+        if authorization is None:
+            raise AuthenticationError("Missing administrator credentials")
+        scheme, _, encoded = authorization.partition(" ")
+        if scheme.lower() != "basic" or not encoded:
+            raise AuthenticationError("Invalid administrator credentials")
+        try:
+            username, separator, password = (
+                base64.b64decode(encoded, validate=True).decode("utf-8").partition(":")
+            )
+        except (ValueError, UnicodeDecodeError):
+            raise AuthenticationError("Invalid administrator credentials") from None
+        if not separator or not (
+            secrets.compare_digest(username, self._ui_username)
+            and secrets.compare_digest(password, self._ui_password)
+        ):
+            raise AuthenticationError("Invalid administrator credentials")
+
+    def _mcp_agent_id(self, conn: HTTPConnection) -> str | None:
+        parts = conn.url.path.strip("/").split("/")
+        if (
+            len(parts) == 7
+            and parts[:3] == ["api", "v1", "agent"]
+            and parts[4] == "session"
+            and parts[6] == "mcp"
+        ):
+            return parts[3]
+        return None
+
+
+def standalone_auth_error(
+    conn: HTTPConnection, exc: AuthenticationError
+) -> PlainTextResponse:
+    if conn.url.path.startswith("/api/v1/ui/"):
+        return PlainTextResponse(
+            str(exc) or "Unauthorized",
+            status_code=401,
+            headers={"WWW-Authenticate": 'Basic realm="Hyperforge administration"'},
+        )
+    authenticate = "Bearer"
+    metadata_url = _mcp_resource_metadata_url(conn)
+    if metadata_url is not None:
+        authenticate = f'Bearer resource_metadata="{metadata_url}"'
+    return PlainTextResponse(
+        str(exc) or "Unauthorized",
+        status_code=401,
+        headers={"WWW-Authenticate": authenticate},
+    )
+
+
+def _mcp_resource_metadata_url(conn: HTTPConnection) -> str | None:
+    auth_config = conn.scope.get("hyperforge.mcp_auth_config")
+    if (
+        auth_config is not None
+        and auth_config.protected_resource_metadata_url is not None
+    ):
+        return auth_config.protected_resource_metadata_url
+
+    parts = conn.url.path.strip("/").split("/")
+    if (
+        len(parts) == 7
+        and parts[:3] == ["api", "v1", "agent"]
+        and parts[4] == "session"
+        and parts[6] == "mcp"
+    ):
+        agent_id = parts[3]
+        session = parts[5]
+        replace_kwargs: dict[str, str] = {
+            "path": f"/.well-known/oauth-protected-resource/api/v1/agent/{agent_id}/session/{session}/mcp",
+            "query": "",
+            "fragment": "",
+        }
+        if force_https_metadata(conn.app):
+            replace_kwargs["scheme"] = "https"
+        return str(conn.url.replace(**replace_kwargs))
+    return None
+
 
 # ---------------------------------------------------------------------------
 # Application
@@ -131,6 +247,8 @@ class OpenAuthBackend(AuthenticationBackend):
 
 class StandaloneApplication(FastAPI):
     """Single-process arag: API + SessionManager sharing one LocalBroker."""
+
+    _agents_cfg: dict[str, Any]
 
     def __init__(
         self,
@@ -142,8 +260,10 @@ class StandaloneApplication(FastAPI):
         @asynccontextmanager
         async def lifespan(app: "StandaloneApplication"):
             await app._startup()
-            yield
-            await app._shutdown()
+            try:
+                yield
+            finally:
+                await app._shutdown()
 
         super().__init__(
             title="arag standalone",
@@ -153,19 +273,21 @@ class StandaloneApplication(FastAPI):
         )
         self._agents_cfg = agents_cfg
         self._standalone_settings = settings
+        self.mcp_sessions: MCPSessionStore | None = None
 
         # Only the interaction and MCP routes — no management endpoints.
         self.include_router(v1.interaction.router)
         self.include_router(v1.mcp_interaction.router)
         self.include_router(v1_oauth.router)
         self.include_router(router)
-        self.include_router(ui_router)
+        if settings.ui_admin_password is not None:
+            self.include_router(ui_router)
 
         # Serve the built frontend SPA if the dist directory exists.
         # In development the Vite dev server runs separately (proxied to :8080).
         # app.py lives at: arag/src/hyperforge.standalone/app.py
         # three .parent steps → arag/
-        _frontend_dist = Path(__file__).parent / "static"
+        _frontend_dist = Path(settings.static_folder).resolve()
         if _frontend_dist.is_dir():
             self.mount(
                 "/",
@@ -173,7 +295,17 @@ class StandaloneApplication(FastAPI):
                 name="frontend",
             )
 
-        self.add_middleware(AuthenticationMiddleware, backend=OpenAuthBackend())
+        self.add_middleware(
+            AuthenticationMiddleware,
+            backend=StandaloneAuthBackend(
+                agents_cfg,
+                settings.ui_admin_username,
+                settings.ui_admin_password.get_secret_value()
+                if settings.ui_admin_password is not None
+                else None,
+            ),
+            on_error=standalone_auth_error,
+        )
         self.add_middleware(
             CORSMiddleware,
             allow_credentials=True,
@@ -190,6 +322,10 @@ class StandaloneApplication(FastAPI):
     @property
     def settings(self) -> ServerSettings:
         return self._server_settings
+
+    @property
+    def mcp_settings(self) -> StandaloneSettings:
+        return self._standalone_settings
 
     # ------------------------------------------------------------------
     # Lifecycle
@@ -222,15 +358,22 @@ class StandaloneApplication(FastAPI):
                 s.broker_redis_activate_subject,
                 int(s.pubsub_keepalive_seconds * 1000),
                 cluster_mode=s.broker_redis_cluster_mode,
+                stream_ttl_seconds=s.pubsub_stream_ttl_seconds,
             )
 
-        # LRU caches for MCP server instances (mirrors HTTPApplication).
-        self.sses: LRU[Tuple[str, str], StreamableHTTPServerTransport] = LRU(size=100)
-        self.mcp_servers: LRU[str, MCPServer] = LRU(size=100)
+        self.mcp_server_pool = MCPServerPool(
+            max_servers=s.mcp_max_servers,
+            idle_ttl_seconds=s.mcp_session_idle_ttl_seconds,
+            startup_timeout_seconds=s.mcp_startup_timeout_seconds,
+        )
 
         # Agent manager backed by the JSON config — no PostgreSQL.
         agent_manager_class = resolve_dotted_name(s.agent_manager_class)
         self.agent_manager: Any = agent_manager_class(self._agents_cfg)
+        if isinstance(self.broker, RedisBroker):
+            self.mcp_sessions = MCPSessionStore(self.broker.client)
+        else:
+            self.mcp_sessions = None
 
         # Build a ServerSettings instance so SessionManager and the subject
         # format strings work unchanged.  Redis settings are present but
@@ -239,13 +382,16 @@ class StandaloneApplication(FastAPI):
             valkey_url="redis://localhost",
             question_timeout_seconds=s.question_timeout_seconds,
             pubsub_keepalive_seconds=s.pubsub_keepalive_seconds,
+            pubsub_stream_ttl_seconds=s.pubsub_stream_ttl_seconds,
             internal_nua=s.internal_nua,
             internal_nua_api=s.internal_nua_api,
             external_nua_api_key=s.external_nua_api_key,
             local_openai=s.local_openai,
             internal_nucliadb=False,
             internal_nucliadb_url=None,
+            auth_success_logo_url=s.auth_success_logo_url,
             standalone=True,
+            allow_private_network_endpoints=s.allow_private_network_endpoints,
         )
 
         # use redis as cache backend if provided
@@ -264,7 +410,29 @@ class StandaloneApplication(FastAPI):
             agent_manager=self.agent_manager,
             cache=cache,
         )
-        await self.session_manager.initialize()
+        self.a2a_server = None
+        try:
+            await self.session_manager.initialize()
+            if s.a2a_enabled:
+                if not isinstance(self.broker, RedisBroker):
+                    raise ValueError("A2A_ENABLED requires BROKER_REDIS_DSN")
+                self.a2a_server = await build_grpc_server_from_runtime(
+                    s.a2a_settings(), self.agent_manager, self.broker
+                )
+                await self.a2a_server.start()
+                logger.info(
+                    "Standalone A2A gRPC server listening on %s:%s",
+                    s.a2a_grpc_host,
+                    s.a2a_grpc_port,
+                )
+        except BaseException:
+            if self.a2a_server is not None:
+                await self.a2a_server.stop(grace=0)
+            await self.session_manager.finalize()
+            raise
 
     async def _shutdown(self) -> None:
+        await self.mcp_server_pool.shutdown()
+        if self.a2a_server is not None:
+            await self.a2a_server.stop(grace=5)
         await self.session_manager.finalize()

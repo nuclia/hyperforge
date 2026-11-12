@@ -1,8 +1,7 @@
+from hyperforge import logger
 from hyperforge.manager import Manager
 from hyperforge.models import Context
 from nuclia.lib.nua_responses import RerankModel
-
-from hyperforge import logger
 
 
 async def rerank(context: Context, manager: Manager, top_k: int) -> None:

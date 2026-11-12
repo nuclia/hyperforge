@@ -1,5 +1,6 @@
 import asyncio
 
+from hyperforge import logger
 from hyperforge.agent import Agent
 from hyperforge.configure import agent
 from hyperforge.manager import Manager
@@ -7,7 +8,6 @@ from hyperforge.memory import Chunk, Context, QuestionMemory
 from hyperforge.trace import trace_agent
 from nuclia_models.predict.remi import RemiResponse
 
-from hyperforge import logger
 from hyperforge_remi.config import (
     ContextGranularity,
     RemiAgentConfig,

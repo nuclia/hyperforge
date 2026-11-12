@@ -1,0 +1,137 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nuclia.py/4.11.5
+      x-nuclia-nuakey:
+      - DUMMY
+    method: GET
+    uri: https://europe-1.dp.progress.cloud/api/authorizer/info
+  response:
+    body:
+      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"7fe77405-a6de-43cf-ac27-ac09f80b66c6","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '227'
+      content-type:
+      - application/json
+      date:
+      - Mon, 27 Jul 2026 06:53:31 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '144'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"question": "", "retrieval": true, "user_id": "rao_answer_summary-test",
+      "system": null, "chat_history": [], "context": [], "query_context": {}, "query_context_order":
+      {}, "truncate": true, "user_prompt": {"prompt": "\nBased on the provided contexts
+      and user question, decide what each context can contribute to the answer.\n\nFor
+      every relevant context:\n- Return its exact `context_id`.\n- Write an `answer`
+      containing the partial or complete answer supported by that context.\n- Return
+      only the block IDs from that context that contain relevant supporting information
+      in `citations`.\n\nThe existing summary is first-class evidence, just like the
+      blocks:\n- Always consider the existing summary when deciding whether a context
+      is relevant.\n- If the existing summary answers the question but none of the
+      blocks do, include the context, generate its `answer` from the summary, and
+      return an empty `citations` list.\n- Do not report information as missing when
+      it is present in an existing summary.\n- Citations refer only to blocks. An
+      empty citations list is valid when the answer is supported only by the existing
+      summary.\n\nOmit irrelevant contexts from the `contexts` list. Do not invent
+      context IDs or block IDs.\n\n`missing_info_query` is global across all contexts.
+      Leave it empty when the contexts together contain enough information. Otherwise,
+      return the query needed to retrieve the missing information.\n\n<QUESTION>\nWhat
+      kind of animal is Pixel, and what color is Pixel''s collar?\n\n<CONTEXTS>\n\n<CONTEXT
+      id=\"context-animal\">\n\n\n\n**block-AA**\n## Chunk: animal-0\n``` Pixel is
+      a rescue cat. ```\n\n\n</CONTEXT>\n\n<CONTEXT id=\"context-collar\">\n\n\n\n**block-AB**\n##
+      Chunk: collar-0\n``` Pixel wears a green collar. ```\n\n\n</CONTEXT>\n\n<CONTEXT
+      id=\"context-database\">\n\n\n\n**block-AC**\n## Chunk: database-0\n``` The
+      reporting service stores data in PostgreSQL. ```\n\n\n</CONTEXT>\n\n</CONTEXTS>"},
+      "citations": false, "citation_threshold": null, "generative_model": "gemini-2.5-flash",
+      "max_tokens": 8192, "query_context_images": {}, "prefer_markdown": null, "json_schema":
+      {"title": "validate_multiple_contexts", "description": "Validate several contexts
+      and summarize each relevant one", "parameters": {"type": "object", "properties":
+      {"missing_info_query": {"type": "string", "description": "Query needed to retrieve
+      information missing across all contexts, or an empty string."}, "contexts":
+      {"type": "array", "items": {"type": "object", "properties": {"context_id": {"type":
+      "string", "description": "Exact ID of a relevant input context."}, "answer":
+      {"type": "string", "description": "Partial or complete answer supported by this
+      context."}, "citations": {"type": "array", "items": {"type": "string"}, "description":
+      "Relevant block IDs belonging to this context."}}, "required": ["context_id",
+      "answer", "citations"]}}}, "required": ["missing_info_query", "contexts"]}},
+      "format_prompt": false, "rerank_context": false, "tools": [], "tool_choice":
+      {"type": "required"}, "reasoning": false, "seed": null}'
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2956'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nuclia.py/4.11.5
+      x-origin:
+      - RAO
+      x-show-consumption:
+      - 'true'
+      x-stf-nuakey:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"object","object":{"missing_info_query":"","contexts":[{"context_id":"context-animal","answer":"Pixel
+        is a cat.","citations":["block-AA"]},{"context_id":"context-collar","answer":"Pixel''s
+        collar is green.","citations":["block-AB"]}]}}}
+
+        {"chunk":{"type":"status","code":"0"}}
+
+        {"chunk":{"type":"meta","input_tokens":28,"output_tokens":57,"timings":{"generative":1.0661035950179212},"input_nuclia_tokens":0.028,"output_nuclia_tokens":0.057}}
+
+        {"chunk":{"normalized_tokens":{"input":0.02844,"output":0.057,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Mon, 27 Jul 2026 06:53:32 GMT
+      nuclia-learning-id:
+      - 93c038d2a3854b50ab82e7c9d082bde0
+      nuclia-learning-model:
+      - gemini-2.5-flash
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1072'
+      x-nuclia-trace-id:
+      - b65a21414ab25ab6b9baf8715a083828
+    status:
+      code: 200
+      message: OK
+version: 1

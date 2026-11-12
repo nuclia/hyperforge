@@ -7,12 +7,13 @@ from hyperforge.manager import Manager
 from hyperforge.memory.memory import EphemeralSessionMemory, MemoryConfig
 from hyperforge.minimal_fixtures import cassette_nua_key
 from hyperforge.models import Rule, Rules
+
 from hyperforge_smart.agent import SmartAgent
 from hyperforge_smart.config import SmartAgentConfig
 
 NUA_KEY = os.environ.get(
     "NUA_KEY",
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 
 
 PERPLEXITY_KEY = os.environ.get("PERPLEXITY_API_KEY", "DUMMY_PERPLEXITY_KEY")
@@ -136,7 +137,7 @@ async def test_smart_with_mcp_and_perplexity(
     question = "Retrieve the document about the architecture of Agents and give me info about the authors"
     question_memory = memory.start_question(question, question_id="question_id")
 
-    context = await smart_agent.smart_planner(
+    contexts = await smart_agent.smart_planner(
         question=question,
         memory=question_memory,
         manager=manager,
@@ -160,8 +161,8 @@ async def test_smart_with_mcp_and_perplexity(
     assert "internet_search" in all_step_values
 
     # Verify contexts were gathered
-    assert context, "SmartAgent should have collected context"
-    total_chunks = len(context.chunks)
+    assert contexts, "SmartAgent should have collected context"
+    total_chunks = sum(len(context.chunks) for context in contexts)
     assert total_chunks > 0, "Should have retrieved document chunks via MCP"
 
     # Verify document content was retrieved
@@ -170,7 +171,9 @@ async def test_smart_with_mcp_and_perplexity(
         "Agentic Context Engineering",
         "Philipp SchmidHugging Face",
     ]
-    all_chunk_text = " ".join(chunk.text for chunk in context.chunks)
+    all_chunk_text = " ".join(
+        chunk.text for context in contexts for chunk in context.chunks
+    )
     assert any(text in all_chunk_text for text in expected_texts), (
         f"Expected document content not found in retrieved chunks. "
         f"Got: {all_chunk_text[:300]}"

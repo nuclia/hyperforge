@@ -1,9 +1,10 @@
 import pytest
 from httpx import AsyncClient
-from hyperforge.db.encryption import decrypt_data
 from nucliadb_models.resource import KnowledgeBoxObj
 from sqlalchemy import text
 from sqlalchemy.engine.base import Connection
+
+from hyperforge.db.encryption import decrypt_data
 
 pytestmark = [
     pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["test"]),

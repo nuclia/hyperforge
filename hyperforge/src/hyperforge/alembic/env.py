@@ -1,11 +1,12 @@
 import os
 from logging.config import fileConfig
 
-import hyperforge.db.agents  # noqa
 from alembic import context
+from sqlalchemy import engine_from_config, pool
+
+import hyperforge.db.agents  # noqa
 from hyperforge.database import metadata
 from hyperforge.db.settings import DataManagerSettings
-from sqlalchemy import engine_from_config, pool
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -14,7 +15,7 @@ config = context.config
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 migrations_dir = os.path.dirname(current_dir)

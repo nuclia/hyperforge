@@ -1,6 +1,6 @@
 from typing import Any
 
-from stashify_protos.protos import idp_pb2
+from stashify_protos.protos import idp_pb2  # ty: ignore[unresolved-import]
 
 
 class DummyIDPRegionalGRPCUtility:

@@ -2,9 +2,12 @@ import json
 from typing import Any, Optional
 from unittest.mock import AsyncMock, patch
 
-import hyperforge.engine
 import pytest
 from httpx import AsyncClient
+from nucliadb_models.resource import KnowledgeBoxObj
+from websockets.asyncio.client import connect
+
+import hyperforge.engine
 from hyperforge.agent import Agent
 from hyperforge.api.models import InteractionOperation
 from hyperforge.context.agent import ContextAgent, trace_agent
@@ -17,8 +20,6 @@ from hyperforge.manager import Manager
 from hyperforge.memory import QuestionMemory
 from hyperforge.retrieval.agent import RetrievalAgent
 from hyperforge.server.session import SessionManager
-from nucliadb_models.resource import KnowledgeBoxObj
-from websockets.asyncio.client import connect
 
 pytestmark = [
     pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["test", "127.0.0.1"]),
