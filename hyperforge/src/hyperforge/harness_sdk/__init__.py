@@ -39,13 +39,27 @@ from .models import (
     HarnessToolCall,
 )
 from .storage import HarnessStorageProtocol, InMemoryHarnessStorage
-from .tools import HarnessTool, tool
-from .tools.codemode import CodemodeInput, CodemodeOutput, codemode
+from .tools import HarnessTool, ToolCallContext, ToolInheritancePolicy, tool
+from .tools.codemode import (
+    CodeModeCapability,
+    CodeModeDispatch,
+    CodeModeExecutionLimiter,
+    CodemodeInput,
+    CodeModeLimits,
+    CodemodeOutput,
+    CodeModeResultAdapter,
+    CodeModeRunner,
+    codemode,
+    context_codemode_result_adapter,
+    create_codemode_tool,
+    raw_codemode_result_adapter,
+)
 from .usage import HarnessUsage, UsageLimitExceeded, UsageLimits
 
 __all__ = [
     "SYSTEM_PROMPT",
     "AgentHarness",
+    "ToolCallContext",
     "AgentResult",
     "ChatCompletionChunk",
     "ChatCompletionChoice",
@@ -55,6 +69,12 @@ __all__ = [
     "ChatCompletionToolCallDelta",
     "ChatCompletionToolCallFunctionDelta",
     "ChatCompletionUsage",
+    "CodeModeCapability",
+    "CodeModeDispatch",
+    "CodeModeExecutionLimiter",
+    "CodeModeLimits",
+    "CodeModeResultAdapter",
+    "CodeModeRunner",
     "CodemodeInput",
     "CodemodeOutput",
     "HarnessAgentToTool",
@@ -78,14 +98,18 @@ __all__ = [
     "NucliaChatCompletionsClient",
     "NucliaChatCompletionsError",
     "ReasoningEffort",
+    "ToolInheritancePolicy",
     "UsageLimitExceeded",
     "UsageLimits",
     "context_schema",
     "codemode",
+    "context_codemode_result_adapter",
     "create_agent",
+    "create_codemode_tool",
     "format_context",
     "make_context",
     "register_context",
+    "raw_codemode_result_adapter",
     "tool",
     "published_agent_to_tools",
     "preload_published_agent_to_tools",

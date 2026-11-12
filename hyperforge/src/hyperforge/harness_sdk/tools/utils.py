@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 from dataclasses import dataclass, field
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any, Awaitable, Callable, cast, get_type_hints
 
 from jsonschema import ValidationError as JsonSchemaValidationError
@@ -9,16 +10,78 @@ from jsonschema import validate as validate_json_schema
 from pydantic import BaseModel, ValidationError
 
 from ..context import make_context
-from ..models import HarnessContextReference, HarnessContextType
+from ..models import (
+    HarnessContextReference,
+    HarnessContextType,
+    HarnessEvent,
+    HarnessEventType,
+)
 from ..schema import flatten_json_schema
 
 if TYPE_CHECKING:
     from ..harness import AgentHarness
 
 type ToolHandler[InputT: BaseModel, OutputT: BaseModel] = Callable[
-    ["AgentHarness", InputT], Awaitable[OutputT]
+    [ToolCallContext, InputT], Awaitable[OutputT]
 ]
 type ContextFactory[OutputT: BaseModel] = Callable[[OutputT], HarnessContextReference]
+
+
+class _CurrentTurn:
+    pass
+
+
+_CURRENT_TURN = _CurrentTurn()
+
+
+class ToolInheritancePolicy(StrEnum):
+    INHERIT = "inherit"
+    DO_NOT_INHERIT = "do_not_inherit"
+
+
+@dataclass(frozen=True)
+class ToolCallContext:
+    """Execution context passed to a tool handler.
+
+    Provides the harness along with the identity of the tool call
+    currently being executed.
+    """
+
+    harness: "AgentHarness"
+    name: str
+    id: str | None = None
+    turn_id: str | None | _CurrentTurn = _CURRENT_TURN
+    _emit_failure: Callable[[], Exception] | None = field(
+        default=None, repr=False, compare=False
+    )
+
+    async def emit(
+        self,
+        event_type: HarnessEventType,
+        payload: dict[str, Any],
+        *,
+        persist: bool = True,
+    ) -> "HarnessEvent":
+        """Emit an event attributed to this tool call."""
+        try:
+            if not isinstance(self.turn_id, _CurrentTurn):
+                return await self.harness.emit(
+                    event_type,
+                    payload,
+                    persist=persist,
+                    parent_call_id=self.id,
+                    turn_id=self.turn_id,
+                )
+            return await self.harness.emit(
+                event_type,
+                payload,
+                persist=persist,
+                parent_call_id=self.id,
+            )
+        except Exception:
+            if self._emit_failure is None:
+                raise
+            raise self._emit_failure() from None
 
 
 @dataclass(frozen=True)
@@ -30,6 +93,7 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
     parameters_schema: dict[str, Any] | None = None
     context_factory: ContextFactory[OutputT] | None = None
     lazy_load: bool = False
+    inheritance: ToolInheritancePolicy = ToolInheritancePolicy.INHERIT
     input_model: type[InputT] = field(init=False)
     output_model: type[OutputT] = field(init=False)
     _parameters: dict[str, Any] = field(init=False, repr=False)
@@ -38,10 +102,11 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
         parameters = list(inspect.signature(self.handler).parameters.values())
         if len(parameters) != 2:
             raise TypeError(
-                f"Tool handler {self.name!r} must accept harness and input parameters"
+                f"Tool handler {self.name!r} must accept context and input parameters"
             )
         globalns = dict(getattr(self.handler, "__globals__", {}))
         globalns.setdefault("AgentHarness", object)
+        globalns.setdefault("ToolCallContext", ToolCallContext)
         hints = get_type_hints(self.handler, globalns=globalns)
         input_model = hints.get(parameters[1].name)
         output_model = hints.get("return")
@@ -65,12 +130,12 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
         return self._parameters
 
     def __call__(
-        self, harness: AgentHarness, input_value: InputT
+        self, context: ToolCallContext, input_value: InputT
     ) -> Awaitable[OutputT]:
-        return self.handler(harness, input_value)
+        return self.handler(context, input_value)
 
     async def execute(
-        self, harness: AgentHarness, arguments: dict[str, Any]
+        self, context: ToolCallContext, arguments: dict[str, Any]
     ) -> OutputT:
         if error := arguments.get("_tool_error"):
             raise ValueError(str(error))
@@ -85,7 +150,7 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
             value = self.input_model.model_validate(arguments)
         except ValidationError as exc:
             raise ValueError(f"Invalid {self.name} arguments: {exc}") from exc
-        result = await self.handler(harness, value)
+        result = await self.handler(context, value)
         return self.output_model.model_validate(result)
 
     def context(self, output: OutputT) -> HarnessContextReference:
@@ -102,6 +167,7 @@ def tool(
     parameters_schema: dict[str, Any] | None = None,
     context_factory: ContextFactory[Any] | None = None,
     lazy_load: bool = False,
+    inheritance: ToolInheritancePolicy = ToolInheritancePolicy.INHERIT,
 ) -> Callable[[ToolHandler[Any, Any]], HarnessTool[Any, Any]]:
     """Create a harness tool from an annotated async handler."""
 
@@ -114,6 +180,7 @@ def tool(
             parameters_schema=parameters_schema,
             context_factory=context_factory,
             lazy_load=lazy_load,
+            inheritance=inheritance,
         )
 
     return decorate
@@ -123,4 +190,11 @@ def _is_model_type(value: Any) -> bool:
     return isinstance(value, type) and issubclass(value, BaseModel)
 
 
-__all__ = ["ContextFactory", "HarnessTool", "ToolHandler", "tool"]
+__all__ = [
+    "ContextFactory",
+    "HarnessTool",
+    "ToolCallContext",
+    "ToolHandler",
+    "ToolInheritancePolicy",
+    "tool",
+]

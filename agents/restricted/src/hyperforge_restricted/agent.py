@@ -341,10 +341,13 @@ class PythonAgent(Agent[PythonAgentConfig], ContextAgent):
 
     def _runner(self, memory: QuestionMemory, manager: Manager):
         if sandbox_settings.sandbox_socket is not None:
-            # Remote mode, use a socket to communicate with the sandbox server
+            # Remote mode, use a socket to communicate with the sandbox server.
+            # Published functions may return arbitrary Pydantic models, so keep
+            # converting callback results to their legacy dictionary form.
             return SandboxRunner.remote(
                 sandbox_settings.sandbox_socket,
                 functools.partial(self.handle_queue_item, manager, memory),
+                legacy_callback_results=True,
             )
         # Process pool mode, run in a separate process for isolation
         return SandboxRunner.with_pool(

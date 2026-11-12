@@ -165,13 +165,13 @@ class LLMDefaults(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="HYPERFORGE_LLM_")
 
     # General purpose (low cost, fast)
-    default: str = "chatgpt-azure-4o-mini"
+    default: str = "chatgpt-azure-5.6-luna"
     # Smart tier (complex planning, tool use)
-    smart: str = "chatgpt-4.1"
+    smart: str = "chatgpt-azure-5.6-terra"
     # Fast tier (high throughput, configuration)
-    fast: str = "gemini-2.5-flash"
+    fast: str = "gemini-3.6-flash"
     # Reasoning tier (decision making, conditions)
-    reasoning: str = "chatgpt-o3-mini"
+    reasoning: str = "chatgpt-azure-5.6-luna"
 
 
 llm_defaults = LLMDefaults()
