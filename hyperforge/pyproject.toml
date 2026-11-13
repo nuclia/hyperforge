@@ -33,6 +33,7 @@ dependencies = [
     "httpcore>=1.0.9,<1.1",
     "urllib3>=2.8.0,<3",
     "jinja2",
+    "pyyaml",
     "jsonschema",
     "RestrictedPython>=8.5",
     "databases[asyncpg]",
@@ -96,6 +97,7 @@ hyperforge-sandbox = "hyperforge.server:sandbox.run"
 hyperforge-extract-openapi = "hyperforge.api.commands:extract_openapi"
 hyperforge-workflows-cleanup-cronjob = "hyperforge.agents.workflow_cleanup:run"
 hyperforge-standalone = "hyperforge.standalone:run.run"
+hyperforge-mcp-proxy = "hyperforge.mcp_proxy.commands:run"
 
 [tool.ruff]
 extend = "../ruff.toml"

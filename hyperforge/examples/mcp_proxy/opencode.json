@@ -1,0 +1,23 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "hyperforge-proxy": {
+        "type": "local",
+        "command": [
+          "uv", "run", "--no-sync", "--directory", "../../..",
+          "hyperforge-mcp-proxy", "--config", "hyperforge/examples/mcp_proxy/proxy.yaml"
+        ],
+        "codemode": false,
+        "timeout": { "startup": 90000 }
+      },
+      "hyperforge-proxy-http": {
+        "type": "remote",
+        "url": "http://127.0.0.1:8765/mcp",
+        "oauth": false,
+        "codemode": false,
+        "disabled": true
+      }
+    }
+  }
+}
