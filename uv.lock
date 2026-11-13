@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.12, <4"
 resolution-markers = [
     "python_full_version >= '3.14'",
@@ -184,9 +184,9 @@ name = "aiologic"
 version = "0.17.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "sniffio", marker = "python_full_version < '3.13'" },
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
-    { name = "wrapt", marker = "python_full_version < '3.13'" },
+    { name = "sniffio" },
+    { name = "typing-extensions" },
+    { name = "wrapt" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/f1/7a/d51f2fde1e8ae8a83431f8e97b7a71e9358cdb1d4d2ce6be387fa44d68de/aiologic-0.17.1.tar.gz", hash = "sha256:2e1b93b9e88ced318c2a63ad7b382688f40cbfe40e3d42258d49dc9c5aea179d", size = 252354, upload-time = "2026-06-27T20:41:33.25Z" }
 wheels = [
@@ -546,8 +546,8 @@ name = "culsans"
 version = "0.11.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "aiologic", marker = "python_full_version < '3.13'" },
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "aiologic" },
+    { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/d9/e3/49afa1bc180e0d28008ec6bcdf82a4072d1c7a41032b5b759b60814ca4b0/culsans-0.11.0.tar.gz", hash = "sha256:0b43d0d05dce6106293d114c86e3fb4bfc63088cfe8ff08ed3fe36891447fe33", size = 107546, upload-time = "2025-12-31T23:15:38.196Z" }
 wheels = [
@@ -594,11 +594,11 @@ wheels = [
 
 [[package]]
 name = "dnspython"
-version = "2.7.0"
+version = "2.9.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/b5/4a/263763cb2ba3816dd94b08ad3a33d5fdae34ecb856678773cc40a3605829/dnspython-2.7.0.tar.gz", hash = "sha256:ce9c432eda0dc91cf618a5cedf1a4e142651196bbcd2c80e89ed5a907e5cfaf1", size = 345197, upload-time = "2024-10-05T20:14:59.362Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ef/4a/50822184bd67cc6493f0fb6a880749158fcd31ab3fa07409acfd91f9fc85/dnspython-2.9.0.tar.gz", hash = "sha256:b44dc6b18f07a8b1c56676a19fbfdb5209415b046a9cece286baafa87ff3f7f1", size = 423560, upload-time = "2026-10-09T00:07:24.352Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/68/1b/e0a87d256e40e8c888847551b20a017a6b98139178505dc7ffb96f04e954/dnspython-2.7.0-py3-none-any.whl", hash = "sha256:b4c34b7d10b51bcc3a5071e7b8dee77939f1e878477eeecc965e9835f63c6c86", size = 313632, upload-time = "2024-10-05T20:14:57.687Z" },
+    { url = "https://files.pythonhosted.org/packages/10/02/cdcc9b7c051786a103c3b09e1003a82fa0c66bcb91ffbdabcfbf7b4163b9/dnspython-2.9.0-py3-none-any.whl", hash = "sha256:9a4aedb833c3c1b49214d04d44d3032ab7a9135f7c1d29a549b4ff78fd82fda9", size = 354822, upload-time = "2026-10-09T00:07:22.622Z" },
 ]
 
 [[package]]
@@ -1833,6 +1833,7 @@ dev = [
 name = "hyperforge-static-string"
 version = "0.0.1"
 source = { editable = "agents/static_string" }
+default-groups = "all"
 dependencies = [
     { name = "hyperforge" },
 ]
@@ -1893,6 +1894,7 @@ dev = [
 name = "hyperforge-workspace"
 version = "1.0.0"
 source = { virtual = "." }
+default-groups = "all"
 dependencies = [
     { name = "hyperforge" },
     { name = "hyperforge-a2a" },
