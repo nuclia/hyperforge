@@ -19,7 +19,6 @@ from hyperforge.harness_sdk import (
     ModelDelta,
     NucliaModelClient,
     ToolCallContext,
-    ToolInheritancePolicy,
     UsageLimitExceeded,
     UsageLimits,
     codemode,
@@ -100,7 +99,7 @@ def test_codemode_can_be_registered_explicitly() -> None:
     assert "codemode" in {tool.name for tool in harness.iter_tools()}
 
 
-def test_scoped_codemode_is_not_inherited_by_default() -> None:
+def test_codemode_is_inherited_like_other_tools() -> None:
     async def execute(_context: ToolCallContext, value: ToolInput) -> ToolOutput:
         return ToolOutput(value=value.value)
 
@@ -114,10 +113,8 @@ def test_scoped_codemode_is_not_inherited_by_default() -> None:
 
     child = harness._create_child("child", include_history=False)
 
-    assert ordinary.inheritance == ToolInheritancePolicy.INHERIT
-    assert scoped.inheritance == ToolInheritancePolicy.DO_NOT_INHERIT
     assert "ordinary" in child._tools
-    assert "codemode" not in child._tools
+    assert "codemode" in child._tools
 
 
 def test_turn_loop_clears_pending_tool_result_after_non_empty_response() -> None:
