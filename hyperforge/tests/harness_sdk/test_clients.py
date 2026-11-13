@@ -1,0 +1,358 @@
+from collections.abc import AsyncIterator
+
+import httpx
+import pytest
+
+from hyperforge.harness_sdk import (
+    ChatCompletionChunk,
+    ChatCompletionRequest,
+    HarnessMessage,
+    HarnessToolCall,
+    NucliaChatCompletionsClient,
+    NucliaChatCompletionsError,
+    NucliaModelClient,
+)
+
+
+class FakeResponse:
+    status_code = 200
+
+    async def aiter_lines(self):
+        yield 'data: {"id":"chunk","model":"model","choices":[{"index":0,"delta":{"content":"hello"}}]}'
+        yield "data: [DONE]"
+
+
+class ErrorResponse:
+    status_code = 200
+
+    async def aiter_lines(self):
+        yield 'data: {"type":"status","code":"ERROR","details":"transient generation failure","request_id":"req-1"}'
+
+
+@pytest.mark.asyncio
+async def test_chat_completions_transport_parses_sse() -> None:
+    class FakeNua:
+        async def chat_completions_stream(self, payload, **kwargs):
+            assert payload["stream"] is True
+            assert payload["stream_options"] == {"include_usage": True}
+            yield {
+                "id": "chunk",
+                "model": "model",
+                "choices": [{"index": 0, "delta": {"content": "hello"}}],
+            }
+
+    client = NucliaChatCompletionsClient(FakeNua())
+
+    chunks = [
+        chunk
+        async for chunk in client.stream(
+            ChatCompletionRequest(messages=[{"role": "user", "content": "hi"}])
+        )
+    ]
+
+    assert chunks[0].choices[0].delta.content == "hello"
+
+
+@pytest.mark.asyncio
+async def test_chat_completions_retries_pre_stream_generation_errors() -> None:
+    class FakeNua:
+        def __init__(self):
+            self.attempts = 0
+
+        async def chat_completions_stream(self, payload, **kwargs):
+            self.attempts += 1
+            if self.attempts < 3:
+                yield {
+                    "type": "status",
+                    "code": "ERROR",
+                    "details": "transient",
+                    "request_id": "req-1",
+                }
+            else:
+                yield {
+                    "id": "chunk",
+                    "model": "model",
+                    "choices": [{"index": 0, "delta": {"content": "hello"}}],
+                }
+
+    nua = FakeNua()
+    client = NucliaChatCompletionsClient(nua)
+
+    chunks = [
+        chunk
+        async for chunk in client.stream(
+            ChatCompletionRequest(
+                messages=[{"role": "user", "content": "hi"}], model="model"
+            )
+        )
+    ]
+
+    assert nua.attempts == 3
+    assert [chunk.choices[0].delta.content for chunk in chunks] == ["hello"]
+
+
+@pytest.mark.asyncio
+async def test_chat_completions_http_error_includes_response_detail() -> None:
+    request = httpx.Request("POST", "https://predict.example/chat")
+    response = httpx.Response(
+        408, request=request, json={"detail": "Timeout connecting to generative API"}
+    )
+
+    class FakeNua:
+        async def chat_completions_stream(self, payload, **kwargs):
+            raise httpx.HTTPStatusError("", request=request, response=response)
+            yield {}
+
+    client = NucliaChatCompletionsClient(FakeNua())
+
+    with pytest.raises(NucliaChatCompletionsError) as raised:
+        _ = [
+            chunk
+            async for chunk in client.stream(
+                ChatCompletionRequest(
+                    messages=[{"role": "user", "content": "hi"}], model="model"
+                )
+            )
+        ]
+
+    message = str(raised.value)
+    assert "status=408" in message
+    assert "Timeout connecting to generative API" in message
+    assert (
+        raised.value.provider_data["response_body"]
+        == '{"detail":"Timeout connecting to generative API"}'
+    )
+
+
+@pytest.mark.asyncio
+async def test_harness_client_keeps_usage_only_chunk() -> None:
+    class UsageClient:
+        async def stream(self, request):
+            yield ChatCompletionChunk.model_validate(
+                {
+                    "id": "usage",
+                    "model": "model",
+                    "choices": [],
+                    "usage": {
+                        "prompt_tokens": 11,
+                        "completion_tokens": 5,
+                        "nuclia_input_tokens": 0.011,
+                        "nuclia_output_tokens": 0.005,
+                        "model_input_tokens": 9,
+                        "model_output_tokens": 4,
+                    },
+                }
+            )
+
+    deltas = [
+        delta
+        async for delta in NucliaModelClient(UsageClient()).stream(
+            model="model",
+            reasoning_effort=None,
+            messages=[HarnessMessage(role="user", content="hi")],
+            tools=[],
+            execution_context={},
+        )
+    ]
+    assert (deltas[0].input_tokens, deltas[0].output_tokens) == (9, 4)
+    assert (deltas[0].nuclia_input_tokens, deltas[0].nuclia_output_tokens) == (
+        0.011,
+        0.005,
+    )
+    assert (deltas[0].model_input_tokens, deltas[0].model_output_tokens) == (9, 4)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("usage", "expected_tokens", "expected_model_tokens"),
+    [
+        ({"prompt_tokens": 11, "completion_tokens": 5}, (11, 5), (0, 0)),
+        (
+            {
+                "prompt_tokens": 11,
+                "completion_tokens": 5,
+                "model_input_tokens": None,
+                "model_output_tokens": None,
+            },
+            (11, 5),
+            (0, 0),
+        ),
+        (
+            {
+                "prompt_tokens": 11,
+                "completion_tokens": 5,
+                "model_input_tokens": 9,
+                "model_output_tokens": None,
+            },
+            (9, 5),
+            (9, 0),
+        ),
+    ],
+)
+async def test_harness_client_falls_back_to_legacy_usage(
+    usage, expected_tokens, expected_model_tokens
+) -> None:
+    class UsageClient:
+        async def stream(self, request):
+            yield ChatCompletionChunk.model_validate(
+                {
+                    "id": "usage",
+                    "model": "model",
+                    "choices": [],
+                    "usage": usage,
+                }
+            )
+
+    deltas = [
+        delta
+        async for delta in NucliaModelClient(UsageClient()).stream(
+            model="model",
+            reasoning_effort=None,
+            messages=[HarnessMessage(role="user", content="hi")],
+            tools=[],
+            execution_context={},
+        )
+    ]
+
+    assert (deltas[0].input_tokens, deltas[0].output_tokens) == expected_tokens
+    assert (
+        deltas[0].model_input_tokens,
+        deltas[0].model_output_tokens,
+    ) == expected_model_tokens
+    assert (deltas[0].nuclia_input_tokens, deltas[0].nuclia_output_tokens) == (0, 0)
+
+
+class FakeCompletionsClient:
+    async def stream(
+        self, request: ChatCompletionRequest
+    ) -> AsyncIterator[ChatCompletionChunk]:
+        assert request.messages[0] == {"role": "system", "content": "instructions"}
+        assert request.reasoning_effort == "high"
+        yield ChatCompletionChunk.model_validate(
+            {
+                "id": "chunk",
+                "model": "model",
+                "choices": [
+                    {
+                        "index": 0,
+                        "delta": {
+                            "reasoning_content": "thinking",
+                            "tool_calls": [
+                                {
+                                    "index": 0,
+                                    "id": "call-1",
+                                    "function": {
+                                        "name": "lookup",
+                                        "arguments": '{"query":',
+                                    },
+                                }
+                            ],
+                        },
+                    }
+                ],
+            }
+        )
+        yield ChatCompletionChunk.model_validate(
+            {
+                "id": "chunk",
+                "model": "model",
+                "choices": [
+                    {
+                        "index": 0,
+                        "delta": {
+                            "tool_calls": [
+                                {"index": 0, "function": {"arguments": '"x"}'}}
+                            ]
+                        },
+                        "finish_reason": "tool_calls",
+                    }
+                ],
+                "usage": {
+                    "prompt_tokens": 7,
+                    "completion_tokens": 3,
+                    "total_tokens": 10,
+                },
+            }
+        )
+
+    async def aclose(self) -> None:
+        pass
+
+
+@pytest.mark.asyncio
+async def test_harness_client_assembles_openai_tool_deltas() -> None:
+    client = NucliaModelClient(FakeCompletionsClient())
+    deltas = [
+        delta
+        async for delta in client.stream(
+            model="model",
+            reasoning_effort="high",
+            messages=[HarnessMessage(role="system", content="instructions")],
+            tools=[],
+            execution_context={"user_id": "user"},
+        )
+    ]
+
+    assert deltas[0].reasoning == "thinking"
+    assert deltas[-1].tool_calls == [
+        HarnessToolCall(id="call-1", name="lookup", arguments={"query": "x"})
+    ]
+    assert deltas[-1].input_tokens == 7
+    assert deltas[-1].output_tokens == 3
+
+
+def test_harness_client_preserves_structured_tool_history() -> None:
+    messages = NucliaModelClient._messages(
+        [
+            HarnessMessage(role="system", content="base instructions"),
+            HarnessMessage(role="user", content='{"available_tools":["lookup"]}'),
+            HarnessMessage(role="user", content='{"query":"find evidence"}'),
+            HarnessMessage(
+                role="assistant",
+                content="",
+                tool_calls=[
+                    HarnessToolCall(
+                        id="call-1", name="lookup", arguments={"query": "x"}
+                    )
+                ],
+            ),
+            HarnessMessage(
+                role="tool", content="result", tool_call_id="call-1", tool_name="lookup"
+            ),
+            HarnessMessage(role="system", content="request-local guidance"),
+        ]
+    )
+
+    assert messages[:3] == [
+        {"role": "system", "content": "base instructions"},
+        {"role": "user", "content": '{"available_tools":["lookup"]}'},
+        {"role": "user", "content": '{"query":"find evidence"}'},
+    ]
+    assert messages[3]["tool_calls"][0]["function"]["name"] == "lookup"
+    assert messages[4] == {
+        "role": "tool",
+        "content": "result",
+        "tool_call_id": "call-1",
+    }
+    assert messages[5] == {"role": "system", "content": "request-local guidance"}
+    NucliaModelClient._validate_tool_history(messages)
+
+
+def test_harness_client_rejects_unmatched_tool_history() -> None:
+    messages = [
+        {
+            "role": "assistant",
+            "content": None,
+            "tool_calls": [
+                {
+                    "id": "call-1",
+                    "type": "function",
+                    "function": {"name": "lookup", "arguments": "{}"},
+                }
+            ],
+        },
+        {"role": "user", "content": "continue"},
+    ]
+
+    with pytest.raises(ValueError, match="missing outputs.*call-1"):
+        NucliaModelClient._validate_tool_history(messages)

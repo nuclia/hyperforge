@@ -5,8 +5,14 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple, cast
 from nuclia.lib.nua import AsyncNuaClient
 
 from hyperforge.configure import GLOBAL_REGISTRY, load_all_configurations
+from hyperforge.harness import HarnessAgent, HarnessAgentConfig
 from hyperforge.interaction import AragAnswer
-from hyperforge.llm import NoopNuaClient, NuaBaseModel, NUAConnection
+from hyperforge.llm import (
+    AsyncLocalOpenAIClient,
+    NoopNuaClient,
+    NuaBaseModel,
+    NUAConnection,
+)
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import BaseSessionMemory, QuestionMemory, SessionMemory
 from hyperforge.models import HistoryQuestionAnswer
@@ -18,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class State:
-    agent: RetrievalAgent
+    agent: RetrievalAgent | HarnessAgent
     manager: Manager
 
 
@@ -31,7 +37,7 @@ async def init(
     local_openai_model: Optional[str] = None,
     external_nua_api_key: Optional[str] = None,
     loaded_modules: list[str] = [],
-    retrieval_config: Optional[RetrievalAgentConfig] = None,
+    retrieval_config: Optional[RetrievalAgentConfig | HarnessAgentConfig] = None,
     session_id: str = "default_session",
     memory_klass: type[BaseSessionMemory] = SessionMemory,
 ) -> Tuple[State, SessionMemory]:
@@ -47,7 +53,10 @@ async def init(
     if retrieval_config is None:
         if config is None:
             raise ValueError("Either config or retrieval_config must be provided")
-        retrieval_config = RetrievalAgentConfig.model_validate(config)
+        config_class = (
+            HarnessAgentConfig if "agents" in config else RetrievalAgentConfig
+        )
+        retrieval_config = config_class.model_validate(config)
 
     state = await get_state(
         agent_id=agent_id,
@@ -78,7 +87,7 @@ async def main(
     external_nua_api_key: Optional[str] = None,
     question: str = "",
     loaded_modules: list[str] = [],
-    retrieval_config: Optional[RetrievalAgentConfig] = None,
+    retrieval_config: Optional[RetrievalAgentConfig | HarnessAgentConfig] = None,
     callback: Optional[Callable[[AragAnswer], Awaitable[None]]] = None,
     session_id: str = "default_session",
     user_metadata: Optional[Dict[str, str]] = None,
@@ -132,7 +141,7 @@ async def main(
 
 async def engine(
     manager: Manager,
-    agent: RetrievalAgent,
+    agent: RetrievalAgent | HarnessAgent,
     question_memory: QuestionMemory,
     user_metadata: Optional[Dict[str, str]] = None,
 ) -> None:
@@ -147,7 +156,7 @@ async def engine(
 
 async def get_state(
     agent_id: str,
-    config: RetrievalAgentConfig,
+    config: RetrievalAgentConfig | HarnessAgentConfig,
     internal_nua_api: str = "http://predict.learning.svc.cluster.local:8080",
     internal_nua: bool = False,
     local_openai: Optional[str] = None,
@@ -156,6 +165,7 @@ async def get_state(
     account: Optional[str] = None,
     kbid: Optional[str] = None,
     local_openai_model_klass: Optional[type[NuaBaseModel]] = None,
+    allow_private_network_endpoints: bool = False,
 ) -> State:
     nua: AsyncNuaClient
     if internal_nua:
@@ -166,14 +176,24 @@ async def get_state(
             ),
         )
 
-    elif local_openai is not None and local_openai_model_klass is not None:
-        nua = await local_openai_model_klass.model_validate(
-            {
-                "key": external_nua_api_key,
-                "local_openai": local_openai,
-                "local_openai_model": local_openai_model,
-            }
-        ).connect()
+    elif local_openai is not None:
+        if local_openai_model_klass is not None:
+            nua = await local_openai_model_klass.model_validate(
+                {
+                    "key": external_nua_api_key,
+                    "local_openai": local_openai,
+                    "local_openai_model": local_openai_model,
+                }
+            ).connect()
+        else:
+            nua = cast(
+                AsyncNuaClient,
+                AsyncLocalOpenAIClient(
+                    base_url=local_openai,
+                    api_key=external_nua_api_key,
+                    model=local_openai_model,
+                ),
+            )
 
     elif external_nua_api_key is not None:
         nua = await NUAConnection.model_validate(
@@ -190,7 +210,14 @@ async def get_state(
         )
         nua = NoopNuaClient()
 
-    manager = await Manager.from_config(drivers=config.drivers, nua=nua)
-    agent = await RetrievalAgent.from_config_class(config)
+    manager = await Manager.from_config(
+        drivers=config.drivers,
+        nua=nua,
+        allow_private_network_endpoints=allow_private_network_endpoints,
+    )
+    if isinstance(config, HarnessAgentConfig):
+        agent = await HarnessAgent.from_config_class(config)
+    else:
+        agent = await RetrievalAgent.from_config_class(config)
 
     return State(manager=manager, agent=agent)

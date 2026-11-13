@@ -2,15 +2,22 @@ import pytest
 
 from hyperforge.interaction import AragAnswer
 from hyperforge.memory.memory import EphemeralSessionMemory
-from hyperforge.models import ExternalUsage, MemoryConfig, Rules
+from hyperforge.models import ExternalUsage, ExternalUsageOperation, MemoryConfig, Rules
 
 
 def test_external_usage_defaults_and_roundtrip():
-    usage = ExternalUsage(provider="google", model="gemini-2.5-flash")
+    usage = ExternalUsage(
+        operation=ExternalUsageOperation.INTERNET_SEARCH,
+        provider="perplexity",
+        model="search",
+    )
 
+    assert usage.operation == ExternalUsageOperation.INTERNET_SEARCH
     assert usage.input_tokens == 0
     assert usage.output_tokens == 0
     assert usage.requests == 1
+    assert usage.provider == "perplexity"
+    assert usage.model == "search"
     assert ExternalUsage.model_validate(usage.model_dump()) == usage
 
 
@@ -31,6 +38,7 @@ async def test_add_step_forwards_external_usage():
 
     memory.set_callback_fn(callback)
     usage = ExternalUsage(
+        operation=ExternalUsageOperation.INTERNET_SEARCH,
         provider="perplexity",
         model="sonar-pro",
         input_tokens=12,

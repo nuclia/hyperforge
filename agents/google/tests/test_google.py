@@ -1,3 +1,4 @@
+import json
 import os
 from uuid import uuid4
 
@@ -7,7 +8,7 @@ from hyperforge.manager import Manager
 from hyperforge.memory import Context
 from hyperforge.memory.memory import EphemeralSessionMemory
 from hyperforge.minimal_fixtures import cassette_nua_key
-from hyperforge.models import MemoryConfig, Rules
+from hyperforge.models import ExternalUsageOperation, MemoryConfig, Rules
 from nuclia.lib.nua import AsyncNuaClient
 
 from hyperforge_google.agent import GoogleAgent
@@ -16,6 +17,18 @@ from hyperforge_google.config import GoogleAgentConfig
 NUA_KEY = os.environ.get(
     "NUA_KEY",
 ) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
+
+VERTEX_CREDENTIALS = json.dumps(
+    {
+        "type": "authorized_user",
+        "client_id": "DUMMY",
+        "client_secret": "DUMMY",
+        "refresh_token": "DUMMY",
+        "quota_project_id": "dummy-project",
+        "token": "DUMMY",
+        "expiry": "2999-01-01T00:00:00Z",
+    }
+)
 
 pytestmark = [
     pytest.mark.vcr(
@@ -32,8 +45,8 @@ DRIVERS = [
         "identifier": "google-01",
         "name": "google",
         "config": {
-            "vertexai": False,
-            "api_key": os.environ.get("GOOGLE_API_KEY", "DUMMY_API_KEY"),
+            "vertexai": True,
+            "credentials": VERTEX_CREDENTIALS,
         },
     },
 ]
@@ -81,7 +94,8 @@ async def _run_question(
     return memory.get_agent_contexts(flow_id=flow_id, agent_id=agent.agent_id), memory
 
 
-async def test_google():
+async def test_google(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("GOOGLE_CLOUD_PROJECT", "dummy-project")
     contexts, memory = await _run_question(
         DRIVERS,
         "What is Nuclia?",
@@ -93,8 +107,9 @@ async def test_google():
     usage = next(step.external_usage for step in memory.steps if step.external_usage)
     assert len(usage) == 1
     event = usage[0]
+    assert event.operation == ExternalUsageOperation.INTERNET_SEARCH
     assert event.provider == "google"
-    assert event.model == "gemini-2.5-flash"
+    assert event.model == "gemini-3.6-flash"
     assert event.input_tokens > 0
     assert event.output_tokens > 0
     assert event.requests == 1

@@ -28,7 +28,7 @@ from hyperforge_nucliadb.driver_config import (
 
 NUA_KEY = os.environ.get(
     "NUA_KEY",
-) or cassette_nua_key("https://europe-1.nuclia.cloud/")
+) or cassette_nua_key("https://europe-1.dp.progress.cloud/")
 KB_DE48CFAA_3209_4041_BB64_8604AFF061FB = os.environ.get(
     "KB_DE48CFAA_3209_4041_BB64_8604AFF061FB"
 ) or cassette_nua_key("https://europe-1.nuclia.cloud/")
@@ -250,7 +250,7 @@ async def test_nucliadb_agent():
 
 
 @pytest.mark.asyncio
-@pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["europe-1.dp.progress.cloud"])
+@pytest.mark.vcr(ignore_localhost=True)
 async def test_nucliadb_agent_simple():
     answers = []
 
@@ -276,7 +276,7 @@ async def test_nucliadb_agent_simple():
 
 
 @pytest.mark.asyncio
-@pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["europe-1.dp.progress.cloud"])
+@pytest.mark.vcr(ignore_localhost=True)
 async def test_nucliadb_agent_simple_disable_ai_parameter_search():
     question_memory = await arag_main(
         agent_id="default",
@@ -294,7 +294,7 @@ async def test_nucliadb_agent_simple_disable_ai_parameter_search():
 
 
 @pytest.mark.asyncio
-@pytest.mark.vcr(ignore_localhost=True, ignore_hosts=["europe-1.dp.progress.cloud"])
+@pytest.mark.vcr(ignore_localhost=True)
 async def test_nucliadb_agent_basic_ask():
     config = deepcopy(CONFIG_SIMPLE)
 
@@ -475,13 +475,17 @@ def test_build_ask_request():
 
 @pytest.mark.asyncio
 async def test_nucliadb_not_localhost():
+    config = deepcopy(CONFIG_LOCAL)
+    config["preprocess"] = []
+    config["generation"] = []
+
     with pytest.raises(PrivateUrlError):
         await arag_main(
             agent_id="default",
             internal_nua=False,
-            external_nua_api_key=NUA_KEY,
+            external_nua_api_key=None,
             question="Como usar max_tokens.answer. En español y dame link a la doucmentación",
-            config=CONFIG_LOCAL,
+            config=config,
             loaded_modules=[
                 "hyperforge_nucliadb",
                 "hyperforge_summarize",

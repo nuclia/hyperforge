@@ -16,7 +16,7 @@ from hyperforge.context.agent import ContextAgent
 from hyperforge.definition import FunctionDefinition
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import Chunk, Context, QuestionMemory
-from hyperforge.models import ExternalUsage
+from hyperforge.models import ExternalUsage, ExternalUsageOperation
 from hyperforge.utils.http import safe_http_client
 
 from hyperforge_google.config import GoogleAgentConfig
@@ -161,6 +161,7 @@ class GoogleAgent(ContextAgent, Agent[GoogleAgentConfig]):
             timeit=time() - t0,
             external_usage=[
                 ExternalUsage(
+                    operation=ExternalUsageOperation.INTERNET_SEARCH,
                     provider="google",
                     model=(response.model_version if response is not None else None)
                     or self.config.gen_model_id,

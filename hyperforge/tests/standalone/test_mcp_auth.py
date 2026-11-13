@@ -230,7 +230,8 @@ async def test_enabled_mcp_auth_requires_jwks_url(load_agents):
 async def test_mcp_auth_is_optional(client: AsyncClient):
     response = await client.delete(f"/api/v1/agent/{OPEN_AGENT_ID}/session/s1/mcp")
 
-    assert response.status_code == 200
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Missing Mcp-Session-Id"
 
 
 async def test_protected_mcp_requires_bearer(client: AsyncClient):
@@ -259,7 +260,8 @@ async def test_protected_mcp_accepts_signed_bearer(client: AsyncClient, signing_
         headers={"Authorization": f"Bearer {make_token(signing_key)}"},
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Missing Mcp-Session-Id"
 
 
 async def test_protected_mcp_rejects_token_with_wrong_audience(

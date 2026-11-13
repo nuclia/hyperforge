@@ -709,7 +709,7 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
         # Use full resource strategy by requesting title and summary fields
         ask_request = AskRequest(
             query=question,
-            generative_model=self.config.generative_model,
+            generative_model=self.config.generative_model.model_id,
             # TODO: Consider what to do when multiple resources match
             filter_expression=filter_expression,
             rag_strategies=[
@@ -1132,7 +1132,7 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
             query=question,
             show=[ResourceProperties.BASIC, ResourceProperties.ORIGIN],
             citations=CitationsType.LLM_FOOTNOTES,
-            generative_model=self.config.generative_model,
+            generative_model=self.config.generative_model.model_id,
             filter_expression=filter_expression,
             rag_strategies=rag_strategies,
         )
@@ -1244,7 +1244,7 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
         ask_request = AskRequest(
             query=question,
             citations=True,
-            generative_model=self.config.generative_model,
+            generative_model=self.config.generative_model.model_id,
             filters=nucliadb_driver.config.filters,
         )
         paragraphs = await nucliadb_driver.ask(
@@ -1554,6 +1554,17 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
             logger.info(
                 f"No labels selected for faceted search on question {question}, skipping."
             )
+            context = Context(
+                agent_id=self.agent_id,
+                original_question_uuid=memory.original_question_uuid,
+                actual_question_uuid=None,
+                missing=question,
+                question=question,
+                source=source.id,
+                chunks=[],
+                agent="basic_ask_facets",
+                title=f"Faceted search on {source.id} Knowledge Box",
+            )
         else:
             # We are assuming resources equals fields here
             facets, total = await ndb.field_labels(labelsets=labels_selected)
@@ -1593,7 +1604,11 @@ class BasicAskAgent(ContextAgent, Agent[BasicAskAgentConfig]):
         await memory.add_step(
             step_module=self.config.module,
             step_title=self.step_title("Faceted count"),
-            step_reason="Faceted search performed",
+            step_reason=(
+                "Faceted search performed"
+                if labels_selected
+                else "Faceted search skipped"
+            ),
             step_value=selected_labels.get("reasoning", ""),
             timeit=time() - t0,
             input_nuclia_tokens=input_nt,

@@ -3,12 +3,12 @@ from math import ceil
 from typing import Any, Dict, List, Literal
 
 from hyperforge.context.config import ContextAgentConfig
+from hyperforge.llm_config import LLMConfig, LLMField, llm_defaults
 from hyperforge.result_payload import (
     BYTES_PER_KB,
     ResultPayloadSettings,
     migrate_legacy_byte_limits,
 )
-from hyperforge.utils import WidgetType
 from pydantic import Field, model_validator
 from pydantic.config import ConfigDict
 
@@ -54,11 +54,10 @@ class MCPAgentConfig(ContextAgentConfig):
             "show_in_node": True,
         },
     )
-    tool_choice_model: str = Field(
-        default="chatgpt-4.1",
+    tool_choice_model: LLMField = Field(
+        default=LLMConfig(model_id=llm_defaults.smart),
         title="Tool choice model",
         description="Model used to choose the tool to use",
-        json_schema_extra={"widget": WidgetType.MODEL_SELECT},
     )
     valid_headers: List[str] = Field(
         default_factory=list, title="Valid headers to forward to the agent"
@@ -76,11 +75,10 @@ class MCPAgentConfig(ContextAgentConfig):
     max_turns: int = Field(
         default=5, title="Maximum number of tool calls before stopping"
     )
-    sampling_model: str = Field(
-        default="gemini-2.5-flash",
+    sampling_model: LLMField = Field(
+        default=LLMConfig(model_id=llm_defaults.fast),
         title="Sampling model",
         description="Model used for sampling",
-        json_schema_extra={"widget": WidgetType.MODEL_SELECT},
     )
     include_mcp_prompts: bool = Field(
         default=False,
@@ -102,16 +100,19 @@ class MultiMCPAgentConfig(ContextAgentConfig):
     configs: List[MCPAgentConfig] = Field(
         default_factory=list, title="List of MCP agent configurations"
     )
-    summarize_model: str = "gemini-2.5-flash"
+    summarize_model: LLMField = Field(
+        default=LLMConfig(model_id=llm_defaults.default),
+        title="Summarize model",
+        description="Model used to summarize results",
+    )
     feedback_timeout: int = Field(
         default=10000, title="Feedback timeout in milliseconds"
     )
     interaction: bool = Field(default=True, title="Enable interaction with the user")
-    tool_choice_model: str = Field(
-        default="chatgpt-4.1",
+    tool_choice_model: LLMField = Field(
+        default=LLMConfig(model_id=llm_defaults.smart),
         title="Tool choice model",
         description="Model used to choose the tool to use",
-        json_schema_extra={"widget": WidgetType.MODEL_SELECT},
     )
     work_chain: bool = Field(default=True, title="Enable loop on tool")
     max_turns: int = Field(

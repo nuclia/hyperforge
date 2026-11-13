@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Literal, Optional, Tuple
 
 from hyperforge.configure import get_agent_config_klass
 from hyperforge.context.config import ContextAgentConfig
+from hyperforge.llm_config import LLMConfig, LLMField, llm_defaults
 from hyperforge.result_payload import (
     BYTES_PER_KB,
     ResultPayloadSettings,
@@ -105,22 +106,28 @@ class SmartAgentConfig(ContextAgentConfig):
             "widget": WidgetType.NOT_SHOWN,
         },
     )
-    planner_model: str = Field(
-        default="chatgpt-4.1",
+    planner_model: LLMField = Field(
+        default=LLMConfig(model_id=llm_defaults.smart),
         title="Planner model",
         description="Model used to plan the actions to take",
-        json_schema_extra={"widget": WidgetType.MODEL_SELECT},
     )
-    executor_model: str = Field(
-        default="chatgpt-4.1",
+    executor_model: LLMField = Field(
+        default=LLMConfig(model_id=llm_defaults.smart),
         title="Executor model",
         description=("Model used to select and execute the tools."),
-        json_schema_extra={"widget": WidgetType.MODEL_SELECT},
     )
     max_iterations: int = Field(
         default=5,
         title="Max iterations",
         description="Maximum number of planning and execution iterations before stopping",
+    )
+    parallel_tool_calls: bool = Field(
+        default=True,
+        title="Parallel tool calls",
+        description=(
+            "Execute tool calls selected in the same turn concurrently. Disable for "
+            "interactive or stateful tools that must complete in order."
+        ),
     )
     extra_prompt: Optional[str] = Field(
         None,

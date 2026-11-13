@@ -507,12 +507,19 @@ def enabled_agent(
 
 
 def create_agent_schema(agent: AgentRegistry) -> Dict[str, Any]:
+    published_functions = (
+        agent.klass.__published_functions__ if agent.klass is not None else {}
+    )
     return {
         "id": agent.id,
         "agent_type": agent.agent_type,
         "title": agent.title,
         "description": agent.description,
         "config_schema": agent.config_schema.model_json_schema(),
+        "functions": {
+            function_id: definition.description
+            for function_id, definition in published_functions.items()
+        },
     }
 
 

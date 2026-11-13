@@ -8,7 +8,7 @@ from hyperforge import logger
 from hyperforge.configure import get_agent_klass
 from hyperforge.context.config import ContextAgentConfig
 from hyperforge.definition import FunctionDefinition
-from hyperforge.manager import Manager
+from hyperforge.manager import Manager, ModelParam
 from hyperforge.memory import Context, QuestionMemory
 from hyperforge.prompts import (
     NEXT_REPHRASE_JSON_SCHEMA,
@@ -335,7 +335,7 @@ class ContextAgent:
         ident: str,
         question: str,
         question_uuid: str,
-        model: str = "",
+        model: ModelParam = "",
         module: str = "agent",
         user_id: str = "next",
         title: Optional[str] = None,

@@ -1,23 +1,22 @@
 import asyncio
-from collections.abc import MutableMapping
+import json
+import uuid
+from collections.abc import Awaitable, Callable
 from functools import partial
-from typing import TYPE_CHECKING, Any, Iterable, Sequence
+from typing import TYPE_CHECKING, Any, Iterable, Sequence, TypeAlias
 
 import anyio
-from fastapi import Header
+from fastapi import Header, HTTPException
 from mcp.server.fastmcp.exceptions import ResourceError
 from mcp.server.lowlevel.helper_types import ReadResourceContents
 from mcp.server.lowlevel.server import Server as MCPServer
-from mcp.server.lowlevel.server import lifespan as default_lifespan
-from mcp.server.streamable_http import (
-    MCP_SESSION_ID_HEADER,
-    StreamableHTTPServerTransport,
-)
-from mcp.server.transport_security import TransportSecuritySettings
+from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from mcp.types import (
     EmbeddedResource,
     GetPromptResult,
     ImageContent,
+    JSONRPCMessage,
+    JSONRPCRequest,
     Prompt,
     PromptMessage,
     Resource,
@@ -32,11 +31,21 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from hyperforge.api.authentication import requires_one
+from hyperforge.api.mcp_server_pool import (
+    ManagedMCPServer,
+    MCPRequestLease,
+    MCPServerKey,
+)
+from hyperforge.api.mcp_transport import (
+    MCPTransport,
+    control_response,
+    reserve_request,
+)
 from hyperforge.api.models import InteractionRequest
 from hyperforge.api.settings import Settings as ApiSettings
 from hyperforge.api.v1.interaction import WebsocketReceiver, stream_response
 from hyperforge.db.agents import AgentManager
-from hyperforge.interaction import AnswerOperation
+from hyperforge.interaction import AnswerOperation, Provider
 from hyperforge.prompts import PromptConfig
 from hyperforge.pubsub import UserToAgentInteraction
 from hyperforge.standalone.oauth import force_https_metadata, get_enabled_mcp_auth
@@ -44,14 +53,19 @@ from hyperforge.workflows import WorkflowData
 
 if TYPE_CHECKING:
     from hyperforge.api.app import HTTPApplication
-from anyio.abc import TaskStatus
+    from hyperforge.standalone.app import StandaloneApplication
 
+    MCPApplication: TypeAlias = HTTPApplication | StandaloneApplication
 from hyperforge.api import logger
 from hyperforge.api.models import (
     AgentRole,
 )
 from hyperforge.api.v1.mcp_content import convert_arag_answer_to_content
 from hyperforge.api.v1.router import router
+
+SUPPORTED_OAUTH_CREDENTIAL_PROVIDERS = frozenset(
+    {Provider.SHAREFILE_OAUTH, Provider.GOOGLE_OAUTH, Provider.AZURE_OAUTH}
+)
 
 
 async def list_tools(workflows: list[WorkflowData]) -> list[Tool]:
@@ -75,13 +89,12 @@ async def list_prompts(prompts: list[PromptConfig]) -> list[Prompt]:
 
 
 async def call_tool(
-    app: "HTTPApplication",
+    app: "MCPApplication",
     mcp_server: MCPServer,
     x_stf_account: str,
     agent_id: str,
     session: str,
     workflows: list[WorkflowData],
-    headers: Headers,
     name: str,
     arguments: dict[str, Any],
 ) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
@@ -95,7 +108,15 @@ async def call_tool(
             raise ResourceError(f"Missing required parameter: {parameter}")
 
     question = f"Calling tool: {workflow.description or workflow.name} with arguments: {arguments}"
-    interaction_headers = _prepare_interaction_headers(app, agent_id, headers)
+    current_request = mcp_server.request_context.request
+    if not isinstance(current_request, Request):
+        raise ResourceError("Current MCP HTTP request is unavailable")
+    interaction_headers = _prepare_interaction_headers(
+        app, agent_id, current_request.headers
+    )
+    user_id = interaction_headers.get("x-stf-user")
+    if not user_id:
+        raise ResourceError("Authenticated user identity is required")
 
     interaction = InteractionRequest(
         question=question, headers=interaction_headers, arguments=arguments
@@ -104,6 +125,7 @@ async def call_tool(
     websocket = WebsocketReceiver(websocket=None)
 
     messages = []
+    requested_credentials: dict[str, Provider] = {}
     async for msg in stream_response(
         app,
         websocket,
@@ -114,26 +136,112 @@ async def call_tool(
         workflow_id=workflow.id,
     ):
         if msg.operation == AnswerOperation.AGENT_REQUEST and msg.oauth:
-            pass
-        elif msg.operation == AnswerOperation.AGENT_REQUEST and msg.feedback:
-            # DO NOTHING FOR NOW
-            result = await mcp_session.elicit_form(
-                message=msg.feedback.question,
-                requestedSchema=msg.feedback.response_schema,
-                related_request_id=msg.feedback.request_id,
+            result = await mcp_session.elicit_url(
+                message="Authenticate with the data source to access the requested content.",
+                url=msg.oauth.oauth_url,
+                elicitation_id=uuid.uuid4().hex,
+                related_request_id=mcp_server.request_context.request_id,
             )
-            websocket.queue.put_nowait(
-                UserToAgentInteraction(
-                    request_id=msg.feedback.request_id,
-                    response=result.content,  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
+            if result.action != "accept":
+                raise ResourceError(
+                    f"Data source authentication was {result.action} by the user"
                 )
-            )
+        elif msg.operation == AnswerOperation.AGENT_REQUEST and msg.feedback:
+            feedback = msg.feedback
+            if feedback.get_credentials is not None:
+                requested_credentials = feedback.get_credentials
+                unsupported = {
+                    provider
+                    for provider in requested_credentials.values()
+                    if provider not in SUPPORTED_OAUTH_CREDENTIAL_PROVIDERS
+                }
+                if unsupported:
+                    raise ResourceError(
+                        "MCP credential storage does not support the requested provider"
+                    )
+
+                existing_credentials: dict[str, dict[str, str]] = {}
+                for sync_config_id, provider in requested_credentials.items():
+                    credentials = await app.agent_manager.get_sync_oauth_credentials(
+                        account=x_stf_account,
+                        user_id=user_id,
+                        agent_id=agent_id,
+                        provider=provider.value,
+                        sync_config_id=sync_config_id,
+                    )
+                    if credentials is not None:
+                        existing_credentials[sync_config_id] = credentials
+
+                if len(existing_credentials) != len(requested_credentials):
+                    existing_credentials.clear()
+
+                websocket.queue.put_nowait(
+                    UserToAgentInteraction(
+                        request_id=feedback.request_id,
+                        response=json.dumps(
+                            {"existing_credentials": existing_credentials}
+                        ),
+                    )
+                )
+            elif feedback.credentials is not None:
+                if set(feedback.credentials) != set(requested_credentials):
+                    raise ResourceError(
+                        "Received credentials that do not match the requested Sync configurations"
+                    )
+
+                credentials_by_config: dict[str, tuple[str, dict[str, str]]] = {}
+                for sync_config_id, credentials in feedback.credentials.items():
+                    if not isinstance(credentials, dict) or not all(
+                        isinstance(key, str) and isinstance(value, str)
+                        for key, value in credentials.items()
+                    ):
+                        raise ResourceError("Received invalid Sync OAuth credentials")
+                    provider = requested_credentials[sync_config_id]
+                    credentials_by_config[sync_config_id] = (
+                        provider.value,
+                        credentials,
+                    )
+
+                await app.agent_manager.upsert_sync_oauth_credentials_batch(
+                    account=x_stf_account,
+                    user_id=user_id,
+                    agent_id=agent_id,
+                    credentials_by_config=credentials_by_config,
+                )
+
+                websocket.queue.put_nowait(
+                    UserToAgentInteraction(
+                        request_id=feedback.request_id,
+                        response=json.dumps(
+                            {"existing_credentials": feedback.credentials}
+                        ),
+                    )
+                )
+            else:
+                result = await mcp_session.elicit_form(
+                    message=feedback.question,
+                    requestedSchema=feedback.response_schema,
+                    related_request_id=mcp_server.request_context.request_id,
+                )
+                if result.action != "accept":
+                    raise ResourceError(
+                        f"Form elicitation was {result.action} by the user"
+                    )
+                websocket.queue.put_nowait(
+                    UserToAgentInteraction(
+                        request_id=feedback.request_id,
+                        response=json.dumps(result.content),
+                    )
+                )
         elif msg.operation == AnswerOperation.ANSWER:
             result_contents = convert_arag_answer_to_content(msg)
             for content in result_contents:
                 if isinstance(content, TextContent):
                     logger.debug(f"Tool output text: {content.text}")
                 messages.append(content)
+        elif msg.operation == AnswerOperation.ERROR:
+            detail = msg.exception.detail if msg.exception else "Agent execution failed"
+            raise ResourceError(detail)
 
     return messages
 
@@ -172,7 +280,7 @@ async def read_resource(
 
 
 def _prepare_interaction_headers(
-    app: "HTTPApplication", agent_id: str, headers: Headers
+    app: "MCPApplication", agent_id: str, headers: Headers
 ) -> dict[str, str]:
     interaction_headers = dict(headers.items())
     authorization = headers.get("authorization")
@@ -193,13 +301,105 @@ def _get_mcp_auth_config(app: "HTTPApplication", agent_id: str):
 
 
 def _get_first_enabled_mcp_auth_config(app: "HTTPApplication"):
-    agents_cfg = getattr(app, "_agents_cfg", None)
-    if isinstance(agents_cfg, dict):
-        for agent_id in agents_cfg:
-            auth_config = get_enabled_mcp_auth(agents_cfg, agent_id)
-            if auth_config is not None:
-                return auth_config
+    for agent_id in app._agents_cfg:
+        auth_config = get_enabled_mcp_auth(app._agents_cfg, agent_id)
+        if auth_config is not None:
+            return auth_config
     return None
+
+
+async def _create_mcp_server(
+    app: "MCPApplication",
+    request: Request,
+    key: MCPServerKey,
+) -> ManagedMCPServer:
+    account, _, _, agent_id, session = key
+    runtime_settings = app.mcp_settings
+
+    agent_manager: AgentManager = request.app.agent_manager
+    workflows, agent_config, prompts = await asyncio.gather(
+        agent_manager.workflows_list(account=account, agent_id=agent_id),
+        agent_manager.get_agent_config_basic(account=account, agent_id=agent_id),
+        agent_manager.get_prompts(account=account, agent_id=agent_id),
+    )
+    mcp_server = MCPServer(
+        name=agent_id,
+        version="1.0.0",
+        instructions=agent_config.instructions,
+    )
+    mcp_server.list_tools()(partial(list_tools, workflows))
+    mcp_server.call_tool()(
+        partial(
+            call_tool,
+            app,
+            mcp_server,
+            account,
+            agent_id,
+            session,
+            workflows,
+        )
+    )
+    mcp_server.list_prompts()(partial(list_prompts, prompts=prompts))
+    mcp_server.get_prompt()(partial(get_prompt, prompts))
+    manager: MCPTransport | StreamableHTTPSessionManager
+    if app.mcp_sessions is not None:
+        manager = MCPTransport(
+            app=mcp_server,
+            store=app.mcp_sessions,
+            key=key,
+            session_ttl=runtime_settings.mcp_session_idle_ttl_seconds,
+            max_sessions=runtime_settings.mcp_max_sessions_per_server,
+            max_response_bytes=runtime_settings.mcp_max_response_bytes,
+        )
+    else:
+        manager = StreamableHTTPSessionManager(
+            app=mcp_server,
+            session_idle_timeout=runtime_settings.mcp_session_idle_ttl_seconds,
+            max_request_body_size=runtime_settings.mcp_max_request_bytes,
+        )
+    managed_server = ManagedMCPServer(
+        manager, max_sessions=runtime_settings.mcp_max_sessions_per_server
+    )
+    await managed_server.start()
+    return managed_server
+
+
+class _MCPTransportResponse(Response):
+    def __init__(
+        self,
+        lease: MCPRequestLease,
+        body: bytes,
+        cleanup: Callable[[], Awaitable[None]] | None = None,
+    ):
+        super().__init__()
+        self.lease = lease
+        self.managed_server = lease.server
+        self.body = body
+        self.cleanup = cleanup
+
+    async def __call__(self, scope, receive, send) -> None:
+        try:
+            await self._handle_request(scope, receive, send)
+        finally:
+            self.lease.release()
+            if self.cleanup is not None:
+                await self.cleanup()
+
+    async def _handle_request(self, scope, receive, send) -> None:
+        body_sent = False
+
+        async def patched_receive():
+            nonlocal body_sent
+            if not body_sent:
+                body_sent = True
+                return {
+                    "type": "http.request",
+                    "body": self.body,
+                    "more_body": False,
+                }
+            return await receive()
+
+        await self.managed_server.handle_request(scope, patched_receive, send)
 
 
 @router.get("/.well-known/oauth-protected-resource")
@@ -282,22 +482,6 @@ async def mcp_interaction_protected_resource_metadata(
 
 
 @router.delete("/api/v1/agent/{agent_id}/session/{session}/mcp", tags=["MCP"])
-@requires_one([AgentRole.MEMBER])
-async def mcp_handler_delete(
-    request: Request,
-    agent_id: str,
-    session: str,
-    x_stf_user: str = Header(..., include_in_schema=False),
-    x_stf_account: str = Header(..., include_in_schema=False),
-    x_stf_account_type: str = Header(..., include_in_schema=False),
-):
-    app: HTTPApplication = request.app
-    if (agent_id, session) in app.sses:
-        await app.sses[(agent_id, session)].terminate()
-    if (agent_id, session) in app.sses:
-        del app.sses[(agent_id, session)]
-
-
 @router.get("/api/v1/agent/{agent_id}/session/{session}/mcp", tags=["MCP"])
 @router.post("/api/v1/agent/{agent_id}/session/{session}/mcp", tags=["MCP"])
 @requires_one([AgentRole.MEMBER])
@@ -310,120 +494,117 @@ async def interaction_mcp_handler(
     x_stf_account_type: str = Header(..., include_in_schema=False),
 ):
     app: HTTPApplication = request.app
-    agent_manager: AgentManager = request.app.agent_manager
-    request._headers._list.append((MCP_SESSION_ID_HEADER.encode(), session.encode()))
+    if request.method in {"GET", "DELETE"} and not request.headers.get(
+        "mcp-session-id"
+    ):
+        raise HTTPException(status_code=400, detail="Missing Mcp-Session-Id")
+    runtime_settings = app.mcp_settings
+    max_request_bytes = runtime_settings.mcp_max_request_bytes
+    content_length = request.headers.get("content-length")
+    if content_length is not None:
+        try:
+            if int(content_length) > max_request_bytes:
+                raise HTTPException(status_code=413, detail="MCP request is too large")
+        except ValueError:
+            raise HTTPException(
+                status_code=400, detail="Invalid Content-Length"
+            ) from None
 
-    # No session ID needed in stateless mode
-    security_settings: TransportSecuritySettings | None = None
-    http_transport = StreamableHTTPServerTransport(
-        mcp_session_id=session,  # No session tracking in stateless mode
-        is_json_response_enabled=True,
-        event_store=None,  # No event store in stateless mode
-        security_settings=security_settings,
-    )
+    body_bytes = bytearray()
+    async for chunk in request.stream():
+        if len(body_bytes) + len(chunk) > max_request_bytes:
+            raise HTTPException(status_code=413, detail="MCP request is too large")
+        body_bytes.extend(chunk)
 
-    workflows, agent_config, prompts = await asyncio.gather(
-        agent_manager.workflows_list(account=x_stf_account, agent_id=agent_id),
-        agent_manager.get_agent_config_basic(account=x_stf_account, agent_id=agent_id),
-        agent_manager.get_prompts(account=x_stf_account, agent_id=agent_id),
-    )
-
-    mcp_server = MCPServer(
-        name=agent_id,
-        version="1.0.0",
-        instructions=agent_config.instructions,
-        lifespan=default_lifespan,
-    )
-
-    list_tools_partial = partial(list_tools, workflows)
-    mcp_server.list_tools()(list_tools_partial)
-
-    call_tool_partial = partial(
-        call_tool,
-        app,
-        mcp_server,
+    key: MCPServerKey = (
         x_stf_account,
+        x_stf_user,
+        x_stf_account_type,
         agent_id,
         session,
-        workflows,
-        request.headers,
     )
-    mcp_server.call_tool()(call_tool_partial)
 
-    list_prompts_partial = partial(list_prompts, prompts=prompts)
-    mcp_server.list_prompts()(list_prompts_partial)
+    return await local_mcp_response(app, key, request, bytes(body_bytes))
 
-    get_prompt_partial = partial(get_prompt, prompts)
-    mcp_server.get_prompt()(get_prompt_partial)
 
-    # Start server in a new task
-    async def run_stateless_server(
-        *, task_status: TaskStatus[None] = anyio.TASK_STATUS_IGNORED
-    ):
-        async with http_transport.connect() as streams:
-            read_stream, write_stream = streams
-            task_status.started()
-            try:
-                await mcp_server.run(
-                    read_stream,
-                    write_stream,
-                    mcp_server.create_initialization_options(),
-                    stateless=True,
-                )
-            except Exception:
-                logger.exception("Stateless session crashed")
+async def local_mcp_response(
+    app: "MCPApplication", key: MCPServerKey, request: Request, body: bytes
+) -> Response:
+    request.scope["app"] = app
+    settings = app.mcp_settings
+    cleanup = None
+    store = app.mcp_sessions
+    session_id = request.headers.get("mcp-session-id")
+    rpc: JSONRPCRequest | None = None
+    token = None
+    renewal: asyncio.Task[None] | None = None
+    acquisition: asyncio.Task[MCPRequestLease] | None = None
+    if store is not None:
+        response = await control_response(
+            store, key, request, body, settings.mcp_session_idle_ttl_seconds
+        )
+        if response is not None:
+            return response
+        message = JSONRPCMessage.model_validate_json(body).root
+        if isinstance(message, JSONRPCRequest):
+            rpc = message
+        task = reserve_request(store)
+        ttl = settings.mcp_session_idle_ttl_seconds
 
-    # Intercept ASGI send messages so FastAPI doesn't attempt to send a
-    # second response after the transport has already sent one (which would
-    # cause: RuntimeError: Unexpected ASGI message 'http.response.start'
-    # sent, after response already completed).
-    response_status = 200
-    response_headers: dict[str, str] = {}
-    body_chunks: list[bytes] = []
+        async def finish_call() -> None:
+            with anyio.CancelScope(shield=True):
+                try:
+                    if renewal is not None:
+                        renewal.cancel()
+                        await asyncio.gather(renewal, return_exceptions=True)
+                    if token is not None and session_id is not None and rpc is not None:
+                        await store.finish(key, session_id, rpc.id, token, [], ttl)
+                except HTTPException as exc:
+                    if exc.status_code != 404:
+                        logger.warning("MCP request cleanup failed: %s", exc.detail)
+                finally:
+                    store.active_requests.discard(task)
 
-    async def intercepting_send(message: MutableMapping[str, Any]) -> None:
-        nonlocal response_status
-        if message["type"] == "http.response.start":
-            response_status = message["status"]
-            response_headers.update(
-                {k.decode(): v.decode() for k, v in message.get("headers", [])}
-            )
-        elif message["type"] == "http.response.body":
-            body_chunks.append(message.get("body", b""))
+        cleanup = finish_call
 
-    # Pre-read the body before passing to the MCP transport.
-    # Fix for FastAPI/Starlette 1.x
-    # which consumes the ASGI receive callable internally before the route handler runs.
-    # TODO: consider rewriting this handler to use the official StreamableHTTPSessionManager
-    # This does not happen in arag due to older versions of FastAPI/Starlette.
-
-    body_bytes = await request.body()
-    body_sent = False
-
-    async def patched_receive():
-        nonlocal body_sent
-        if not body_sent:
-            body_sent = True
-            return {"type": "http.request", "body": body_bytes, "more_body": False}
-        while True:
-            msg = await request._receive()
-            if msg["type"] == "http.disconnect":
-                return msg
-
-    async with anyio.create_task_group() as tg:
-        # Start the server task
-        await tg.start(run_stateless_server)
-
-        # Handle the HTTP request via the patched receive
-        await http_transport.handle_request(
-            request.scope, patched_receive, intercepting_send
+    async def create_server() -> ManagedMCPServer:
+        return await _create_mcp_server(
+            app,
+            request,
+            key,
         )
 
-        # Terminate the transport after the request is handled
-        await http_transport.terminate()
+    try:
+        if store is not None and session_id is not None and rpc is not None:
+            token = await store.start(key, session_id, rpc.id, ttl)
+            request.state.mcp_call_token = token
 
-    return Response(
-        content=b"".join(body_chunks),
-        status_code=response_status,
-        headers=response_headers,
-    )
+            async def renew_call() -> None:
+                while True:
+                    await store.poll(key, session_id, rpc.id, token, [], ttl)
+                    await asyncio.sleep(min(0.25, ttl / 3))
+
+            renewal = asyncio.create_task(renew_call())
+            request.state.mcp_admission_renewal = renewal
+            acquisition = asyncio.create_task(
+                app.mcp_server_pool.acquire(key, create_server)
+            )
+            done, _ = await asyncio.wait(
+                (renewal, acquisition), return_when=asyncio.FIRST_COMPLETED
+            )
+            if renewal in done:
+                await renewal
+            lease = await acquisition
+        else:
+            lease = await app.mcp_server_pool.acquire(key, create_server)
+    except BaseException:
+        if acquisition is not None:
+            with anyio.CancelScope(shield=True):
+                acquisition.cancel()
+                await asyncio.gather(acquisition, return_exceptions=True)
+                if not acquisition.cancelled() and acquisition.exception() is None:
+                    acquisition.result().release()
+        if cleanup is not None:
+            await cleanup()
+        raise
+    return _MCPTransportResponse(lease, body, cleanup)
