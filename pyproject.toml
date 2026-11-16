@@ -106,6 +106,7 @@ dev = [
     "pytest-docker-fixtures[pg]>=1.4.2",
     "pytest-lazy-fixtures",
     "pytest-mock",
+    "vcrpy>=8.5.0",
     "pytest-rerunfailures>=11.1.2",
     "pytest-shard",
     "pytest-xdist>=3.6.1",
