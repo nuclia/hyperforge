@@ -21,61 +21,17 @@ interactions:
       string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"7f193356-2ec9-48b6-96dd-f7e444bc278c","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Content-Length:
       - '227'
       content-type:
       - application/json
       date:
-      - Sun, 15 Nov 2026 22:09:34 GMT
+      - Mon, 16 Nov 2026 10:47:28 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
       - '7'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"prefixes": [{"prefix": "/s/p"}]}'
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '32'
-      Host:
-      - europe-1.dp.progress.cloud
-      User-Agent:
-      - nucliadb-sdk/6.15.1.post6905
-      content-type:
-      - application/json
-      x-stf-serviceaccount:
-      - DUMMY
-    method: POST
-    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/catalog/facets
-  response:
-    body:
-      string: '{"facets":{"/s/p":1153,"/s/p/ca":4,"/s/p/cy":1,"/s/p/da":1,"/s/p/en":1131,"/s/p/eo":5,"/s/p/la":7,"/s/p/nb":1,"/s/p/tl":1,"/s/p/yo":2}}'
-    headers:
-      Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
-      Content-Length:
-      - '135'
-      access-control-expose-headers:
-      - X-NUCLIA-TRACE-ID
-      content-type:
-      - application/json
-      date:
-      - Sun, 15 Nov 2026 22:09:34 GMT
-      via:
-      - 1.1 google
-      x-envoy-upstream-service-time:
-      - '16'
-      x-nuclia-trace-id:
-      - 1e7b94a28ceb5b965d5fd6ef7fa255d5
     status:
       code: 200
       message: OK
@@ -113,13 +69,100 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sun, 15 Nov 2026 22:09:34 GMT
+      - Mon, 16 Nov 2026 10:47:27 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '15'
+      - '12'
       x-nuclia-trace-id:
-      - 5e3fa4b8a7afa22935324f3c398cd0c6
+      - 3041669ecb43bc42c163e7d196ad9694
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nucliadb-sdk/6.15.1.post6905
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: GET
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b
+  response:
+    body:
+      string: '{"slug":"nuclia-docs","uuid":"df8b4c24-2807-4888-ad6c-ae97357a638b","config":{"uuid":null,"slug":"4f9285c7-7151-4431-94e6-3f1fb0d66aca:nuclia-docs","title":"Nuclia
+        Docs","description":"","learning_configuration":null,"external_index_provider":null,"configured_external_index_provider":{"type":"unset"},"similarity":null,"hidden_resources_enabled":false,"hidden_resources_hide_on_creation":false,"enforce_security":false},"model":null}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '434'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Mon, 16 Nov 2026 10:47:27 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '14'
+      x-nuclia-trace-id:
+      - 3466ebb72e398aa1e31d53600e93b322
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"prefixes": [{"prefix": "/s/p"}]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '32'
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nucliadb-sdk/6.15.1.post6905
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/catalog/facets
+  response:
+    body:
+      string: '{"facets":{"/s/p":1153,"/s/p/ca":4,"/s/p/cy":1,"/s/p/da":1,"/s/p/en":1131,"/s/p/eo":5,"/s/p/la":7,"/s/p/nb":1,"/s/p/tl":1,"/s/p/yo":2}}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '135'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Mon, 16 Nov 2026 10:47:28 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '10'
+      x-nuclia-trace-id:
+      - c44d60927e8c5b6ca281028aa158619d
     status:
       code: 200
       message: OK
@@ -159,56 +202,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sun, 15 Nov 2026 22:09:33 GMT
+      - Mon, 16 Nov 2026 10:47:28 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '20'
+      - '23'
       x-nuclia-trace-id:
-      - ab249ee4d871b86778927fcd91b481c0
-    status:
-      code: 200
-      message: OK
-- request:
-    body: ''
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Host:
-      - europe-1.dp.progress.cloud
-      User-Agent:
-      - nucliadb-sdk/6.15.1.post6905
-      content-type:
-      - application/json
-      x-stf-serviceaccount:
-      - DUMMY
-    method: GET
-    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b
-  response:
-    body:
-      string: '{"slug":"nuclia-docs","uuid":"df8b4c24-2807-4888-ad6c-ae97357a638b","config":{"uuid":null,"slug":"4f9285c7-7151-4431-94e6-3f1fb0d66aca:nuclia-docs","title":"Nuclia
-        Docs","description":"","learning_configuration":null,"external_index_provider":null,"configured_external_index_provider":{"type":"unset"},"similarity":null,"hidden_resources_enabled":false,"hidden_resources_hide_on_creation":false,"enforce_security":false},"model":null}'
-    headers:
-      Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
-      Content-Length:
-      - '434'
-      access-control-expose-headers:
-      - X-NUCLIA-TRACE-ID
-      content-type:
-      - application/json
-      date:
-      - Sun, 15 Nov 2026 22:09:33 GMT
-      via:
-      - 1.1 google
-      x-envoy-upstream-service-time:
-      - '10'
-      x-nuclia-trace-id:
-      - 5f1571528ce7bb49e474449be02ae6f7
+      - a0fb8ebca1a5968c749750eb3f942855
     status:
       code: 200
       message: OK
@@ -247,13 +247,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sun, 15 Nov 2026 22:09:34 GMT,Sun, 15 Nov 2026 22:09:34 GMT
+      - Mon, 16 Nov 2026 10:47:28 GMT,Mon, 16 Nov 2026 10:47:28 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '36'
+      - '43'
       x-nuclia-trace-id:
-      - d771e60e45c07f8fcae84edfe0996547
+      - 1bab9e52b2c5dd89fe714c7f618ac42f
     status:
       code: 200
       message: OK
@@ -280,10 +280,10 @@ interactions:
     uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/search
   response:
     body:
-      string: '{"resources":{"50afc8b719e1492086c19238ff985691":{"id":"50afc8b719e1492086c19238ff985691","slug":"docs-develop-js-sdk-interfaces-DeleteResourcesFilter-md","title":"docs
-        > develop > js sdk > interfaces > DeleteResourcesFilter","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-26T12:22:16.882694","modified":"2026-11-13T13:01:08.735995","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"d244b3ec44e749f4adc9c16f1fde5551":{"id":"d244b3ec44e749f4adc9c16f1fde5551","slug":"docs-develop-js-sdk-interfaces-DeletedResources-md","title":"docs
-        > develop > js sdk > interfaces > DeletedResources","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-26T12:22:02.401866","modified":"2026-11-13T13:02:01.753451","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"17b4410b7baa4b4cbc19ee03ed47c0a8":{"id":"17b4410b7baa4b4cbc19ee03ed47c0a8","slug":"docs-develop-decisions-md","title":"docs
-        > develop > decisions","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T14:26:02.484985","modified":"2026-10-23T14:44:31.400770","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false}},"paragraphs":{"results":[{"score":0.0,"rid":"50afc8b719e1492086c19238ff985691","field_type":"t","field":"page","text":"@nuclia/core
+      string: '{"resources":{"17b4410b7baa4b4cbc19ee03ed47c0a8":{"id":"17b4410b7baa4b4cbc19ee03ed47c0a8","slug":"docs-develop-decisions-md","title":"docs
+        > develop > decisions","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T14:26:02.484985","modified":"2026-10-23T14:44:31.400770","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"d244b3ec44e749f4adc9c16f1fde5551":{"id":"d244b3ec44e749f4adc9c16f1fde5551","slug":"docs-develop-js-sdk-interfaces-DeletedResources-md","title":"docs
+        > develop > js sdk > interfaces > DeletedResources","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-26T12:22:02.401866","modified":"2026-11-13T13:02:01.753451","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"50afc8b719e1492086c19238ff985691":{"id":"50afc8b719e1492086c19238ff985691","slug":"docs-develop-js-sdk-interfaces-DeleteResourcesFilter-md","title":"docs
+        > develop > js sdk > interfaces > DeleteResourcesFilter","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-26T12:22:16.882694","modified":"2026-11-13T13:01:08.735995","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false}},"paragraphs":{"results":[{"score":0.0,"rid":"50afc8b719e1492086c19238ff985691","field_type":"t","field":"page","text":"@nuclia/core
         \n \n @nuclia/core / DeleteResourcesFilter \n Interface: DeleteResourcesFilter
         \n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:698 \n Properties
         \n filter_expression \n \n filter_expression: object \n \n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:699
@@ -401,13 +401,13 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sun, 15 Nov 2026 22:09:34 GMT
+      - Mon, 16 Nov 2026 10:47:28 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '35'
+      - '33'
       x-nuclia-trace-id:
-      - 63ed485e0e42584d14adc5cefdfc1673
+      - 049fd77f90285f4ef25f963abc0eab11
     status:
       code: 200
       message: OK
@@ -434,17 +434,17 @@ interactions:
     uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/search
   response:
     body:
-      string: '{"resources":{"9c4d91a2095a40238e67921e69692dd8":{"id":"9c4d91a2095a40238e67921e69692dd8","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-interfaces-Results-md","title":"docs
-        > develop > js sdk > @nuclia > namespaces > Search > interfaces > Results","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:40.393460","modified":"2026-11-13T13:03:11.248829","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"17b4410b7baa4b4cbc19ee03ed47c0a8":{"id":"17b4410b7baa4b4cbc19ee03ed47c0a8","slug":"docs-develop-decisions-md","title":"docs
-        > develop > decisions","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T14:26:02.484985","modified":"2026-10-23T14:44:31.400770","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"9dfc2da1aebf4d69a7cd387f986a54b4":{"id":"9dfc2da1aebf4d69a7cd387f986a54b4","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-enumerations-FindScoreType-md","title":"docs
-        > develop > js sdk > @nuclia > namespaces > Search > enumerations > FindScoreType","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:44.506074","modified":"2026-11-13T13:03:12.417713","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"6353c45a642e4a6aa22b9d034beaaba6":{"id":"6353c45a642e4a6aa22b9d034beaaba6","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-enumerations-Features-md","title":"docs
+      string: '{"resources":{"85e591ebd522463eb595e7d1c3ad3593":{"id":"85e591ebd522463eb595e7d1c3ad3593","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-enumerations-ResourceFeatures-md","title":"docs
+        > develop > js sdk > @nuclia > namespaces > Search > enumerations > ResourceFeatures","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:42.724911","modified":"2026-11-13T13:03:13.626019","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"c35e47034ef4405ab02cf871fe5de5f6":{"id":"c35e47034ef4405ab02cf871fe5de5f6","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-interfaces-FindField-md","title":"docs
+        > develop > js sdk > @nuclia > namespaces > Search > interfaces > FindField","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:42.155056","modified":"2026-11-13T13:03:01.441780","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"9dfc2da1aebf4d69a7cd387f986a54b4":{"id":"9dfc2da1aebf4d69a7cd387f986a54b4","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-enumerations-FindScoreType-md","title":"docs
+        > develop > js sdk > @nuclia > namespaces > Search > enumerations > FindScoreType","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:44.506074","modified":"2026-11-13T13:03:12.417713","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"50afc8b719e1492086c19238ff985691":{"id":"50afc8b719e1492086c19238ff985691","slug":"docs-develop-js-sdk-interfaces-DeleteResourcesFilter-md","title":"docs
+        > develop > js sdk > interfaces > DeleteResourcesFilter","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-26T12:22:16.882694","modified":"2026-11-13T13:01:08.735995","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"9c4d91a2095a40238e67921e69692dd8":{"id":"9c4d91a2095a40238e67921e69692dd8","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-interfaces-Results-md","title":"docs
+        > develop > js sdk > @nuclia > namespaces > Search > interfaces > Results","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:40.393460","modified":"2026-11-13T13:03:11.248829","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"be6728837a684c5d911afe9dfc472c6c":{"id":"be6728837a684c5d911afe9dfc472c6c","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-enumerations-SuggestionFeatures-md","title":"docs
+        > develop > js sdk > @nuclia > namespaces > Search > enumerations > SuggestionFeatures","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:43.915756","modified":"2026-11-13T13:03:13.017852","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"17b4410b7baa4b4cbc19ee03ed47c0a8":{"id":"17b4410b7baa4b4cbc19ee03ed47c0a8","slug":"docs-develop-decisions-md","title":"docs
+        > develop > decisions","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T14:26:02.484985","modified":"2026-10-23T14:44:31.400770","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"6353c45a642e4a6aa22b9d034beaaba6":{"id":"6353c45a642e4a6aa22b9d034beaaba6","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-enumerations-Features-md","title":"docs
         > develop > js sdk > @nuclia > namespaces > Search > enumerations > Features","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:43.319514","modified":"2026-11-13T13:03:11.830140","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"d244b3ec44e749f4adc9c16f1fde5551":{"id":"d244b3ec44e749f4adc9c16f1fde5551","slug":"docs-develop-js-sdk-interfaces-DeletedResources-md","title":"docs
-        > develop > js sdk > interfaces > DeletedResources","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-26T12:22:02.401866","modified":"2026-11-13T13:02:01.753451","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"c35e47034ef4405ab02cf871fe5de5f6":{"id":"c35e47034ef4405ab02cf871fe5de5f6","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-interfaces-FindField-md","title":"docs
-        > develop > js sdk > @nuclia > namespaces > Search > interfaces > FindField","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:42.155056","modified":"2026-11-13T13:03:01.441780","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"be6728837a684c5d911afe9dfc472c6c":{"id":"be6728837a684c5d911afe9dfc472c6c","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-enumerations-SuggestionFeatures-md","title":"docs
-        > develop > js sdk > @nuclia > namespaces > Search > enumerations > SuggestionFeatures","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:43.915756","modified":"2026-11-13T13:03:13.017852","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"ccebde9a647440018a3029f7a840c863":{"id":"ccebde9a647440018a3029f7a840c863","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-interfaces-FieldResult-md","title":"docs
-        > develop > js sdk > @nuclia > namespaces > Search > interfaces > FieldResult","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:41.491832","modified":"2026-11-13T13:03:00.878363","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"85e591ebd522463eb595e7d1c3ad3593":{"id":"85e591ebd522463eb595e7d1c3ad3593","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-enumerations-ResourceFeatures-md","title":"docs
-        > develop > js sdk > @nuclia > namespaces > Search > enumerations > ResourceFeatures","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:42.724911","modified":"2026-11-13T13:03:13.626019","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"50afc8b719e1492086c19238ff985691":{"id":"50afc8b719e1492086c19238ff985691","slug":"docs-develop-js-sdk-interfaces-DeleteResourcesFilter-md","title":"docs
-        > develop > js sdk > interfaces > DeleteResourcesFilter","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-26T12:22:16.882694","modified":"2026-11-13T13:01:08.735995","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false}},"paragraphs":{"results":[{"score":0.0,"rid":"50afc8b719e1492086c19238ff985691","field_type":"t","field":"page","text":"@nuclia/core
+        > develop > js sdk > interfaces > DeletedResources","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-26T12:22:02.401866","modified":"2026-11-13T13:02:01.753451","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"ccebde9a647440018a3029f7a840c863":{"id":"ccebde9a647440018a3029f7a840c863","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-interfaces-FieldResult-md","title":"docs
+        > develop > js sdk > @nuclia > namespaces > Search > interfaces > FieldResult","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:41.491832","modified":"2026-11-13T13:03:00.878363","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false}},"paragraphs":{"results":[{"score":0.0,"rid":"50afc8b719e1492086c19238ff985691","field_type":"t","field":"page","text":"@nuclia/core
         \n \n @nuclia/core / DeleteResourcesFilter \n Interface: DeleteResourcesFilter
         \n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:698 \n Properties
         \n filter_expression \n \n filter_expression: object \n \n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:699
@@ -562,19 +562,19 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sun, 15 Nov 2026 22:09:34 GMT
+      - Mon, 16 Nov 2026 10:47:28 GMT
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '47'
+      - '55'
       x-nuclia-trace-id:
-      - e0ab3a88fca4f362ca79393e21074be8
+      - a2085e5e3fdf7f9bd0f30f3830017637
     status:
       code: 200
       message: OK
 - request:
-    body: '{"query": "Como usar max_magic y dime como cambiar\u00e1 este parametro
-      en el futuro", "filters": [], "citations": true, "generative_model": "chatgpt-azure-5.6-luna"}'
+    body: '{"query": "How to use max_magic and tell me how you will change this parameter
+      in the future", "filters": [], "citations": true, "generative_model": "chatgpt-azure-5.6-luna"}'
     headers:
       Accept:
       - '*/*'
@@ -583,7 +583,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '155'
+      - '167'
       Host:
       - europe-1.dp.progress.cloud
       User-Agent:
@@ -598,212 +598,484 @@ interactions:
     uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/ask
   response:
     body:
-      string: "{\"item\":{\"type\":\"answer\",\"text\":\"Not\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        enough\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" data\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        to\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" answer\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\"
-        this\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\".\"}}\n{\"item\":{\"type\":\"retrieval\",\"results\":{\"resources\":{\"5013aeb36f284b3ea1cf8b59f6599682\":{\"id\":\"5013aeb36f284b3ea1cf8b59f6599682\",\"slug\":\"docs-develop-js-sdk-interfaces-ExtractConfig-md\",\"title\":\"docs
-        > develop > js sdk > interfaces > ExtractConfig\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\",\"la\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-08-26T10:03:17.003632\",\"modified\":\"2026-11-13T13:01:29.474619\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"5013aeb36f284b3ea1cf8b59f6599682/t/page/291-506\":{\"score\":0.00028021098114550114,\"score_type\":\"RERANKER\",\"order\":18,\"text\":\"
-        \\n optional max_parallel_llm_calls?: number \\n \\n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:548
-        \\n \\n name? \\n \\n optional name?: string \\n \\n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:544
-        \\n \\n split? \\n\",\"id\":\"5013aeb36f284b3ea1cf8b59f6599682/t/page/291-506\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":291,\"end\":506,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"e8525e64c5b44982b958d32cf6090613\":{\"id\":\"e8525e64c5b44982b958d32cf6090613\",\"slug\":\"docs-develop-js-sdk-interfaces-ChatOptions-md\",\"title\":\"docs
-        > develop > js sdk > interfaces > ChatOptions\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:50:37.546010\",\"modified\":\"2026-11-13T13:00:30.656055\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"e8525e64c5b44982b958d32cf6090613/t/page/3079-3299\":{\"score\":0.00043393249507062137,\"score_type\":\"RERANKER\",\"order\":13,\"text\":\"
-        \\n optional max_tokens?: number \\\\| { answer?: number; context?: number;
-        } \\n \\n Defined in: libs/sdk-core/src/lib/db/search/search.models.ts:112
-        \\n Defines the maximum number of tokens that the model will take as context.
-        \\n\",\"id\":\"e8525e64c5b44982b958d32cf6090613/t/page/3079-3299\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":3079,\"end\":3299,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"43004f553e534ffe9c9e735856bd9b23\":{\"id\":\"43004f553e534ffe9c9e735856bd9b23\",\"slug\":\"docs-develop-js-sdk-interfaces-ModelConfig-md\",\"title\":\"docs
-        > develop > js sdk > interfaces > ModelConfig\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-01-08T16:32:44.621593\",\"modified\":\"2026-11-13T12:59:44.135694\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"43004f553e534ffe9c9e735856bd9b23/t/page/746-948\":{\"score\":0.0009362827986478806,\"score_type\":\"RERANKER\",\"order\":7,\"text\":\"
-        \\n optional default_max?: number \\n \\n max \\n \\n max: number \\n \\n
-        min? \\n \\n optional min?: number \\n \\n \\n prompt_id? \\n \\n optional
-        prompt_id?: string \\n \\n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:625\",\"id\":\"43004f553e534ffe9c9e735856bd9b23/t/page/746-948\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":746,\"end\":948,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false},\"43004f553e534ffe9c9e735856bd9b23/t/page/264-490\":{\"score\":0.0004108485300093889,\"score_type\":\"RERANKER\",\"order\":14,\"text\":\"
-        \\n optional driver?: string \\n \\n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:626
-        \\n \\n input_tokens \\n \\n input_tokens: object \\n \\n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:623
-        \\n max \\n \\n max: number \\n \\n min? \\n \\n\",\"id\":\"43004f553e534ffe9c9e735856bd9b23/t/page/264-490\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":264,\"end\":490,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"e3051c443121417496c925390ef67a5c\":{\"id\":\"e3051c443121417496c925390ef67a5c\",\"slug\":\"docs-develop-js-sdk-interfaces-MagicAction-md\",\"title\":\"docs
-        > develop > js sdk > interfaces > MagicAction\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-03-10T15:05:37.080679\",\"modified\":\"2026-11-13T13:02:22.463273\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/a/title\":{\"paragraphs\":{\"e3051c443121417496c925390ef67a5c/a/title/0-50\":{\"score\":0.0008559006964787841,\"score_type\":\"RERANKER\",\"order\":8,\"text\":\"docs
-        > develop > js sdk > interfaces > MagicAction\",\"id\":\"e3051c443121417496c925390ef67a5c/a/title/0-50\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":50,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"4ffdd42c713149249892d3b643ab3c81\":{\"id\":\"4ffdd42c713149249892d3b643ab3c81\",\"slug\":\"docs-develop-js-sdk-namespaces-Widget-interfaces-RagStrategiesConfig-md\",\"title\":\"docs
-        > develop > js sdk > namespaces > Widget > interfaces > RagStrategiesConfig\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-08-26T10:03:52.988969\",\"modified\":\"2026-09-21T12:27:10.963890\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"4ffdd42c713149249892d3b643ab3c81/t/page/1081-2749\":{\"score\":0.0019494021544232965,\"score_type\":\"RERANKER\",\"order\":2,\"text\":\"
-        graph: undefined \\\\| object \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:56
-        \\n \\n graphRagStrategy \\n \\n graphRagStrategy: boolean \\n \\n Defined
-        in \\n libs/sdk-core/src/lib/db/search/widget.ts:55 \\n \\n includeNeighbouringParagraphs
-        \\n \\n includeNeighbouringParagraphs: boolean \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:70
-        \\n \\n includePageImages \\n \\n includePageImages: boolean \\n \\n Defined
-        in \\n libs/sdk-core/src/lib/db/search/widget.ts:87 \\n \\n includeParagraphImages
-        \\n \\n includeParagraphImages: boolean \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:89
-        \\n \\n includeRemaining \\n \\n includeRemaining: boolean \\n \\n Defined
-        in \\n libs/sdk-core/src/lib/db/search/widget.ts:76 \\n \\n includeTextualHierarchy
-        \\n \\n includeTextualHierarchy: boolean \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:52
-        \\n \\n maxMessages \\n \\n maxMessages: null \\\\| number \\n \\n Defined
-        in \\n libs/sdk-core/src/lib/db/search/widget.ts:86 \\n \\n maxNumberOfImages
-        \\n \\n maxNumberOfImages: null \\\\| number \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:88
-        \\n \\n maxNumberOfResources \\n \\n maxNumberOfResources: null \\\\| number
-        \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:74 \\n \\n
-        metadatas \\n \\n metadatas: undefined \\\\| object \\n \\n Defined in \\n
-        libs/sdk-core/src/lib/db/search/widget.ts:54 \\n \\n metadatasRagStrategy
-        \\n \\n metadatasRagStrategy: boolean \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:53
-        \\n \\n precedingParagraphs \\n \\n precedingParagraphs: null \\\\| number
-        \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:71 \\n \\n
-        succeedingParagraphs \\n \\n succeedingParagraphs: null \\\\| number \\n \\n
-        Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:72\",\"id\":\"4ffdd42c713149249892d3b643ab3c81/t/page/1081-2749\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":1081,\"end\":2749,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"bd8ccba0ddc341dd851891ba2cccc08f\":{\"id\":\"bd8ccba0ddc341dd851891ba2cccc08f\",\"slug\":\"docs-develop-js-sdk-type-aliases-MagicActionType-md\",\"title\":\"docs
-        > develop > js sdk > type aliases > MagicActionType\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-03-10T15:04:00.830962\",\"modified\":\"2026-11-13T13:02:41.579074\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/a/title\":{\"paragraphs\":{\"bd8ccba0ddc341dd851891ba2cccc08f/a/title/0-56\":{\"score\":0.0014953383943066,\"score_type\":\"RERANKER\",\"order\":5,\"text\":\"docs
-        > develop > js sdk > type aliases > MagicActionType\",\"id\":\"bd8ccba0ddc341dd851891ba2cccc08f/a/title/0-56\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":56,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"220eb37c167f4eb9bb8e9454e7ba8cf5\":{\"id\":\"220eb37c167f4eb9bb8e9454e7ba8cf5\",\"slug\":\"docs-develop-python-sdk-05-search-md\",\"title\":\"docs
-        > develop > python sdk > 05 search\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:48:33.723913\",\"modified\":\"2026-06-09T08:08:04.866092\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\":{\"score\":0.000758359965402633,\"score_type\":\"RERANKER\",\"order\":9,\"text\":\"
-        ::: \\n :::warning \\n Enabling reasoning can use additional tokens, which
-        may increase your usage costs. \\n You may need to increase max_tokens to
-        give the LLM enough room to reason and generate an answer. \\n\",\"id\":\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":2505,\"end\":2709,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"38ec4cc5c66e436a946ea7893b6662a3\":{\"id\":\"38ec4cc5c66e436a946ea7893b6662a3\",\"slug\":\"docs-changelog-updates-2024-10-md\",\"title\":\"docs
-        > changelog > updates > 2024 10\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:51:49.934688\",\"modified\":\"2026-06-09T08:07:26.696807\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"38ec4cc5c66e436a946ea7893b6662a3/t/page/1414-1708\":{\"score\":0.00045474793296307325,\"score_type\":\"RERANKER\",\"order\":11,\"text\":\"
-        Important API Updates (All changes will be effective as of November 11th,
-        please make your plans): \\n \\n Remember we are moving forward with better
-        parameters: \\n Farewell to page_number and page_size in /search and /find
-        endpoints as they will be discontinued on the 11th - say hello to top_k! \\n\",\"id\":\"38ec4cc5c66e436a946ea7893b6662a3/t/page/1414-1708\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":1414,\"end\":1708,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"d006bf039f294682acd86cfb49bb59df\":{\"id\":\"d006bf039f294682acd86cfb49bb59df\",\"slug\":\"docs-account-api-mdx\",\"title\":\"docs
-        > account api.\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\",\"ca\",\"la\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2024-07-18T15:30:44.738214\",\"modified\":\"2026-06-09T08:18:14.888754\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"d006bf039f294682acd86cfb49bb59df/t/page/262-339\":{\"score\":0.00019411319226492196,\"score_type\":\"RERANKER\",\"order\":19,\"text\":\"
-        } \\n [class ='docItemCol'] { \\n max-width: 100% !important; \\n } \\n }
-        \\n `} \\n \\n \",\"id\":\"d006bf039f294682acd86cfb49bb59df/t/page/262-339\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":262,\"end\":339,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"834e87b32d2b4ef7907a73e198fce807\":{\"id\":\"834e87b32d2b4ef7907a73e198fce807\",\"slug\":\"docs-develop-js-sdk-functions-getWidgetParameters-md\",\"title\":\"docs
-        > develop > js sdk > functions > getWidgetParameters\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\",\"nl\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-08-26T09:58:50.646751\",\"modified\":\"2026-11-13T12:57:04.729767\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"834e87b32d2b4ef7907a73e198fce807/t/page/0-6064\":{\"score\":0.0025909794494509697,\"score_type\":\"RERANKER\",\"order\":0,\"text\":\"@nuclia/core
-        \\n \\n @nuclia/core / getWidgetParameters \\n Function: getWidgetParameters()
-        \\n \\n getWidgetParameters(searchConfig, widgetOptions): { agentic_config_id?:
-        string; agentic_transport?: http \\\\| websocket ; chat_placeholder: string;
-        copy_disclaimer: string; fab_offset_bottom: number; fab_offset_side: number;
-        fab_position: bottom-right \\\\| bottom-left ; fab_size: medium \\\\| small
-        \\\\| large ; features: string; feedback: WidgetFeedback; lang: string; mode:
-        string; not_enough_data_message: string; panel_height: number; panel_width:
-        number; placeholder: string; search_config_id?: string; } \\\\| { agentic_config_id?:
-        string; agentic_transport?: http \\\\| websocket ; chat_placeholder: string;
-        copy_disclaimer: string; fab_offset_bottom?: undefined; fab_offset_side?:
-        undefined; fab_position?: undefined; fab_size?: undefined; features: string;
-        feedback: WidgetFeedback; lang: string; mode: string; not_enough_data_message:
-        string; panel_height?: undefined; panel_width?: undefined; placeholder: string;
-        search_config_id?: string; } \\\\| { ask_to_resource: string; chat_placeholder:
-        string; citation_threshold: string \\\\| undefined; copy_disclaimer: string;
-        fab_offset_bottom: number; fab_offset_side: number; fab_position: bottom-right
-        \\\\| bottom-left ; fab_size: medium \\\\| small \\\\| large ; features: string;
-        feedback: WidgetFeedback; filter_expression: string; filters: string; generativemodel:
-        string; initial_filters: string; json_schema: string; labelsets_excluded_from_filters:
-        string; lang: string; max_output_tokens: string \\\\| undefined; max_paragraphs:
-        string \\\\| undefined; max_tokens: string \\\\| undefined; metadata: string;
-        mode: string; not_enough_data_message: string; panel_height: number; panel_width:
-        number; placeholder: string; preselected_filters: string; prompt: string;
-        rag_images_strategies: string; rag_strategies: string; reasoning: string;
-        rephrase_prompt: string; reranker: string \\\\| undefined; routing: string;
-        rrf_boosting: string; security_groups: string \\\\| undefined; system_prompt:
-        string; vectorset: string; } \\\\| { ask_to_resource: string; chat_placeholder:
-        string; citation_threshold: string \\\\| undefined; copy_disclaimer: string;
-        fab_offset_bottom?: undefined; fab_offset_side?: undefined; fab_position?:
-        undefined; fab_size?: undefined; features: string; feedback: WidgetFeedback;
-        filter_expression: string; filters: string; generativemodel: string; initial_filters:
-        string; json_schema: string; labelsets_excluded_from_filters: string; lang:
-        string; max_output_tokens: string \\\\| undefined; max_paragraphs: string
-        \\\\| undefined; max_tokens: string \\\\| undefined; metadata: string; mode:
-        string; not_enough_data_message: string; panel_height?: undefined; panel_width?:
-        undefined; placeholder: string; preselected_filters: string; prompt: string;
-        rag_images_strategies: string; rag_strategies: string; reasoning: string;
-        rephrase_prompt: string; reranker: string \\\\| undefined; routing: string;
-        rrf_boosting: string; security_groups: string \\\\| undefined; system_prompt:
-        string; vectorset: string; } \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:590
-        \\n Parameters \\n searchConfig \\n SearchConfiguration \\n widgetOptions
-        \\n WidgetConfiguration \\n Returns \\n { agentic_config_id?: string; agentic_transport?:
-        http \\\\| websocket ; chat_placeholder: string; copy_disclaimer: string;
-        fab_offset_bottom: number; fab_offset_side: number; fab_position: bottom-right
-        \\\\| bottom-left ; fab_size: medium \\\\| small \\\\| large ; features: string;
-        feedback: WidgetFeedback; lang: string; mode: string; not_enough_data_message:
-        string; panel_height: number; panel_width: number; placeholder: string; search_config_id?:
-        string; } \\\\| { agentic_config_id?: string; agentic_transport?: http \\\\|
-        websocket ; chat_placeholder: string; copy_disclaimer: string; fab_offset_bottom?:
-        undefined; fab_offset_side?: undefined; fab_position?: undefined; fab_size?:
-        undefined; features: string; feedback: WidgetFeedback; lang: string; mode:
-        string; not_enough_data_message: string; panel_height?: undefined; panel_width?:
-        undefined; placeholder: string; search_config_id?: string; } \\\\| { ask_to_resource:
-        string; chat_placeholder: string; citation_threshold: string \\\\| undefined;
-        copy_disclaimer: string; fab_offset_bottom: number; fab_offset_side: number;
-        fab_position: bottom-right \\\\| bottom-left ; fab_size: medium \\\\| small
-        \\\\| large ; features: string; feedback: WidgetFeedback; filter_expression:
-        string; filters: string; generativemodel: string; initial_filters: string;
-        json_schema: string; labelsets_excluded_from_filters: string; lang: string;
-        max_output_tokens: string \\\\| undefined; max_paragraphs: string \\\\| undefined;
-        max_tokens: string \\\\| undefined; metadata: string; mode: string; not_enough_data_message:
-        string; panel_height: number; panel_width: number; placeholder: string; preselected_filters:
-        string; prompt: string; rag_images_strategies: string; rag_strategies: string;
-        reasoning: string; rephrase_prompt: string; reranker: string \\\\| undefined;
-        routing: string; rrf_boosting: string; security_groups: string \\\\| undefined;
-        system_prompt: string; vectorset: string; } \\\\| { ask_to_resource: string;
-        chat_placeholder: string; citation_threshold: string \\\\| undefined; copy_disclaimer:
-        string; fab_offset_bottom?: undefined; fab_offset_side?: undefined; fab_position?:
-        undefined; fab_size?: undefined; features: string; feedback: WidgetFeedback;
-        filter_expression: string; filters: string; generativemodel: string; initial_filters:
-        string; json_schema: string; labelsets_excluded_from_filters: string; lang:
-        string; max_output_tokens: string \\\\| undefined; max_paragraphs: string
-        \\\\| undefined; max_tokens: string \\\\| undefined; metadata: string; mode:
-        string; not_enough_data_message: string; panel_height?: undefined; panel_width?:
-        undefined; placeholder: string; preselected_filters: string; prompt: string;
-        rag_images_strategies: string; rag_strategies: string; reasoning: string;
-        rephrase_prompt: string; reranker: string \\\\| undefined; routing: string;
-        rrf_boosting: string; security_groups: string \\\\| undefined; system_prompt:
-        string; vectorset: string; }\",\"id\":\"834e87b32d2b4ef7907a73e198fce807/t/page/0-6064\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":6064,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"f56767f7277944a58092904d0041e207\":{\"id\":\"f56767f7277944a58092904d0041e207\",\"slug\":\"docs-develop-js-sdk-interfaces-Account-md\",\"title\":\"docs
-        > develop > js sdk > interfaces > Account\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-04-15T14:49:04.980510\",\"modified\":\"2026-11-13T13:00:40.718405\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"f56767f7277944a58092904d0041e207/t/page/1368-2157\":{\"score\":0.002099273493513465,\"score_type\":\"RERANKER\",\"order\":1,\"text\":\"
-        \\n optional eula_accepted?: boolean \\n \\n Defined in: libs/sdk-core/src/lib/db/db.models.ts:25
-        \\n \\n id \\n \\n id: string \\n \\n Defined in: libs/sdk-core/src/lib/db/db.models.ts:26
-        \\n \\n limits? \\n \\n optional limits?: AccountLimits \\n \\n Defined in:
-        libs/sdk-core/src/lib/db/db.models.ts:27 \\n \\n max_agents \\n \\n max_agents:
-        number \\n \\n Defined in: libs/sdk-core/src/lib/db/db.models.ts:28 \\n \\n
-        ~~max_arags~~ \\n \\n max_arags: number \\n \\n Defined in: libs/sdk-core/src/lib/db/db.models.ts:32
-        \\n Deprecated \\n \\n max_kbs \\n \\n max_kbs: number \\n \\n Defined in:
-        libs/sdk-core/src/lib/db/db.models.ts:29 \\n \\n max_memories \\n \\n max_memories:
-        number \\n \\n Defined in: libs/sdk-core/src/lib/db/db.models.ts:30 \\n \\n
-        max_users \\n \\n max_users: number \\\\| null \\n \\n Defined in: libs/sdk-core/src/lib/db/db.models.ts:33
-        \\n \\n saml_config? \\n\",\"id\":\"f56767f7277944a58092904d0041e207/t/page/1368-2157\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":1368,\"end\":2157,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"42a4cd5a30314e94aa079ed0cfe81381\":{\"id\":\"42a4cd5a30314e94aa079ed0cfe81381\",\"slug\":\"docs-develop-js-sdk-interfaces-SplitStrategy-md\",\"title\":\"docs
-        > develop > js sdk > interfaces > SplitStrategy\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-08-26T10:02:38.468609\",\"modified\":\"2026-11-13T13:00:03.443378\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"42a4cd5a30314e94aa079ed0cfe81381/t/page/537-748\":{\"score\":0.000737919588573277,\"score_type\":\"RERANKER\",\"order\":10,\"text\":\"
-        max_paragraph? \\n \\n optional max_paragraph?: number \\n \\n Defined in:
-        libs/sdk-core/src/lib/db/kb/kb.models.ts:572 \\n \\n name? \\n \\n optional
-        name?: string \\n \\n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:571\",\"id\":\"42a4cd5a30314e94aa079ed0cfe81381/t/page/537-748\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":537,\"end\":748,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"50aac6f34b6d47de8e3b01f8b2de6e9c\":{\"id\":\"50aac6f34b6d47de8e3b01f8b2de6e9c\",\"slug\":\"docs-develop-js-sdk-interfaces-PredictAnswerOptions-md\",\"title\":\"docs
-        > develop > js sdk > interfaces > PredictAnswerOptions\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-08-26T10:03:11.443619\",\"modified\":\"2026-11-13T13:00:54.250970\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/1034-1278\":{\"score\":0.0003640086797531694,\"score_type\":\"RERANKER\",\"order\":16,\"text\":\"
-        \\n optional max_tokens?: number \\n \\n Defined in: libs/sdk-core/src/lib/db/search/ask.models.ts:251
-        \\n \\n prefer_markdown? \\n \\n optional prefer_markdown?: boolean \\n \\n
-        Defined in: libs/sdk-core/src/lib/db/search/ask.models.ts:256 \\n \\n query_context?
-        \\n\",\"id\":\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/1034-1278\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":1034,\"end\":1278,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"221f8a48e05a4ee9a759ff195884c960\":{\"id\":\"221f8a48e05a4ee9a759ff195884c960\",\"slug\":\"docs-develop-js-sdk--nuclia-namespaces-Widget-interfaces-RagStrategiesConfig-md\",\"title\":\"docs
-        > develop > js sdk > @nuclia > namespaces > Widget > interfaces > RagStrategiesConfig\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-10-16T10:18:57.064924\",\"modified\":\"2026-11-13T13:03:19.781396\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"221f8a48e05a4ee9a759ff195884c960/t/page/2182-3872\":{\"score\":0.0018458482809364796,\"score_type\":\"RERANKER\",\"order\":3,\"text\":\"
-        top_k: number \\\\| null \\n \\n \\n undefined \\n \\n graphRagStrategy \\n
-        \\n graphRagStrategy: boolean \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:55
-        \\n \\n includeNeighbouringParagraphs \\n \\n includeNeighbouringParagraphs:
-        boolean \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:70 \\n
-        \\n includePageImages \\n \\n includePageImages: boolean \\n \\n Defined in:
-        libs/sdk-core/src/lib/db/search/widget.ts:87 \\n \\n includeParagraphImages
-        \\n \\n includeParagraphImages: boolean \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:89
-        \\n \\n includeRemaining \\n \\n includeRemaining: boolean \\n \\n Defined
-        in: libs/sdk-core/src/lib/db/search/widget.ts:76 \\n \\n includeTextualHierarchy
-        \\n \\n includeTextualHierarchy: boolean \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:52
-        \\n \\n maxMessages \\n \\n maxMessages: number \\\\| null \\n \\n Defined
-        in: libs/sdk-core/src/lib/db/search/widget.ts:86 \\n \\n maxNumberOfImages
-        \\n \\n maxNumberOfImages: number \\\\| null \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:88
-        \\n \\n maxNumberOfResources \\n \\n maxNumberOfResources: number \\\\| null
-        \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:74 \\n \\n metadatas
-        \\n \\n metadatas: { classification_labels: boolean; extra_metadata: boolean;
-        ners: boolean; origin: boolean; } \\\\| undefined \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:54
-        \\n \\n metadatasRagStrategy \\n \\n metadatasRagStrategy: boolean \\n \\n
-        Defined in: libs/sdk-core/src/lib/db/search/widget.ts:53 \\n \\n precedingParagraphs
-        \\n \\n precedingParagraphs: number \\\\| null \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:71
-        \\n \\n succeedingParagraphs \\n \\n succeedingParagraphs: number \\\\| null
-        \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:72\",\"id\":\"221f8a48e05a4ee9a759ff195884c960/t/page/2182-3872\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":2182,\"end\":3872,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"ecabb0862fa24c8fb8e01d4930a3f7a2\":{\"id\":\"ecabb0862fa24c8fb8e01d4930a3f7a2\",\"slug\":\"docs-develop-js-sdk-variables-MAX_FACETS_PER_REQUEST-md\",\"title\":\"docs
-        > develop > js sdk > variables > MAX_FACETS_PER_REQUEST\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-08-26T10:03:18.992004\",\"modified\":\"2026-11-13T13:02:38.259281\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/a/title\":{\"paragraphs\":{\"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60\":{\"score\":0.0018102111062034965,\"score_type\":\"RERANKER\",\"order\":4,\"text\":\"docs
-        > develop > js sdk > variables > MAX_FACETS_PER_REQUEST\",\"id\":\"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":60,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}},\"/t/page\":{\"paragraphs\":{\"ecabb0862fa24c8fb8e01d4930a3f7a2/t/page/0-193\":{\"score\":0.0010443859500810504,\"score_type\":\"RERANKER\",\"order\":6,\"text\":\"@nuclia/core
-        \\n \\n @nuclia/core / MAX_FACETS_PER_REQUEST \\n Variable: MAX_FACETS_PER_REQUEST
-        \\n \\n const MAX_FACETS_PER_REQUEST: 50 = 50 \\n \\n Defined in: libs/sdk-core/src/lib/db/search/filter.ts:18\",\"id\":\"ecabb0862fa24c8fb8e01d4930a3f7a2/t/page/0-193\",\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":193,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"78aebdf4ca3a4028a555552a07e10e6d\":{\"id\":\"78aebdf4ca3a4028a555552a07e10e6d\",\"slug\":\"docs-rag-advanced-score-rank-and-rerank-md\",\"title\":\"docs
-        > rag > advanced > score rank and rerank\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2024-12-02T13:02:38.557991\",\"modified\":\"2026-06-09T08:07:41.924988\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"78aebdf4ca3a4028a555552a07e10e6d/t/page/5733-6021\":{\"score\":0.00029595711384899914,\"score_type\":\"RERANKER\",\"order\":17,\"text\":\"
-        In an actual request, these are the parameters to use in /find or /ask: \\n
-        json \\n { \\n features : [ semantic , keyword ], \\n rank_fusion : { \\n
-        name : rrf , \\n boosting : { \\n semantic : 2, \\n }, \\n window : 80, \\n
-        }, \\n reranker : { \\n name : predict , \\n window : 50, \\n }, \\n top_k
-        : 20, \\n ... \\n }\",\"id\":\"78aebdf4ca3a4028a555552a07e10e6d/t/page/5733-6021\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":5733,\"end\":6021,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"fa7e8853eaf54849aecfedb5c8fc5979\":{\"id\":\"fa7e8853eaf54849aecfedb5c8fc5979\",\"slug\":\"docs-develop-js-sdk-type-aliases-MagicActionError-md\",\"title\":\"docs
-        > develop > js sdk > type aliases > MagicActionError\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-03-10T15:04:19.733786\",\"modified\":\"2026-09-08T16:49:10.276233\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/a/title\":{\"paragraphs\":{\"fa7e8853eaf54849aecfedb5c8fc5979/a/title/0-57\":{\"score\":0.00043733438360504806,\"score_type\":\"RERANKER\",\"order\":12,\"text\":\"docs
-        > develop > js sdk > type aliases > MagicActionError\",\"id\":\"fa7e8853eaf54849aecfedb5c8fc5979/a/title/0-57\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":57,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"9e6238e3377d41699643ba954dd500fa\":{\"id\":\"9e6238e3377d41699643ba954dd500fa\",\"slug\":\"docs-ingestion-how-to-extract-strategies-md\",\"title\":\"docs
-        > ingestion > how to > extract strategies\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-06-13T08:13:07.100304\",\"modified\":\"2026-06-09T08:18:12.970227\",\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"9e6238e3377d41699643ba954dd500fa/t/page/5760-6199\":{\"score\":0.00038296362617984414,\"score_type\":\"RERANKER\",\"order\":15,\"text\":\"
-        merge_pages and max_pages_to_merge: These parameters are used to control how
-        many pages of the document will be merged together to extract the tables.
-        The default value is 1, which means that each page will be processed separately.
-        If we set it to a higher value, the strategy will merge the specified number
-        of pages together and extract the tables from them. This can be useful for
-        documents that have tables that span multiple pages. \\n\",\"id\":\"9e6238e3377d41699643ba954dd500fa/t/page/5760-6199\",\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":5760,\"end\":6199,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"is_a_table\":false}}}}}},\"query\":\"Como
-        usar max_magic y dime como cambiar\xE1 este parametro en el futuro\",\"total\":20,\"page_number\":0,\"page_size\":20,\"next_page\":false,\"autofilters\":[],\"min_score\":{\"bm25\":0.0},\"best_matches\":[\"834e87b32d2b4ef7907a73e198fce807/t/page/0-6064\",\"f56767f7277944a58092904d0041e207/t/page/1368-2157\",\"4ffdd42c713149249892d3b643ab3c81/t/page/1081-2749\",\"221f8a48e05a4ee9a759ff195884c960/t/page/2182-3872\",\"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60\",\"bd8ccba0ddc341dd851891ba2cccc08f/a/title/0-56\",\"ecabb0862fa24c8fb8e01d4930a3f7a2/t/page/0-193\",\"43004f553e534ffe9c9e735856bd9b23/t/page/746-948\",\"e3051c443121417496c925390ef67a5c/a/title/0-50\",\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\",\"42a4cd5a30314e94aa079ed0cfe81381/t/page/537-748\",\"38ec4cc5c66e436a946ea7893b6662a3/t/page/1414-1708\",\"fa7e8853eaf54849aecfedb5c8fc5979/a/title/0-57\",\"e8525e64c5b44982b958d32cf6090613/t/page/3079-3299\",\"43004f553e534ffe9c9e735856bd9b23/t/page/264-490\",\"9e6238e3377d41699643ba954dd500fa/t/page/5760-6199\",\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/1034-1278\",\"78aebdf4ca3a4028a555552a07e10e6d/t/page/5733-6021\",\"5013aeb36f284b3ea1cf8b59f6599682/t/page/291-506\",\"d006bf039f294682acd86cfb49bb59df/t/page/262-339\"]},\"best_matches\":[{\"id\":\"834e87b32d2b4ef7907a73e198fce807/t/page/0-6064\"},{\"id\":\"f56767f7277944a58092904d0041e207/t/page/1368-2157\"},{\"id\":\"4ffdd42c713149249892d3b643ab3c81/t/page/1081-2749\"},{\"id\":\"221f8a48e05a4ee9a759ff195884c960/t/page/2182-3872\"},{\"id\":\"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60\"},{\"id\":\"bd8ccba0ddc341dd851891ba2cccc08f/a/title/0-56\"},{\"id\":\"ecabb0862fa24c8fb8e01d4930a3f7a2/t/page/0-193\"},{\"id\":\"43004f553e534ffe9c9e735856bd9b23/t/page/746-948\"},{\"id\":\"e3051c443121417496c925390ef67a5c/a/title/0-50\"},{\"id\":\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\"},{\"id\":\"42a4cd5a30314e94aa079ed0cfe81381/t/page/537-748\"},{\"id\":\"38ec4cc5c66e436a946ea7893b6662a3/t/page/1414-1708\"},{\"id\":\"fa7e8853eaf54849aecfedb5c8fc5979/a/title/0-57\"},{\"id\":\"e8525e64c5b44982b958d32cf6090613/t/page/3079-3299\"},{\"id\":\"43004f553e534ffe9c9e735856bd9b23/t/page/264-490\"},{\"id\":\"9e6238e3377d41699643ba954dd500fa/t/page/5760-6199\"},{\"id\":\"50aac6f34b6d47de8e3b01f8b2de6e9c/t/page/1034-1278\"},{\"id\":\"78aebdf4ca3a4028a555552a07e10e6d/t/page/5733-6021\"},{\"id\":\"5013aeb36f284b3ea1cf8b59f6599682/t/page/291-506\"},{\"id\":\"d006bf039f294682acd86cfb49bb59df/t/page/262-339\"}]}}\n{\"item\":{\"type\":\"status\",\"code\":\"-2\",\"status\":\"no_context\"}}\n{\"item\":{\"type\":\"augmented_context\",\"augmented\":{\"paragraphs\":{},\"fields\":{}}}}\n{\"item\":{\"type\":\"citations\",\"citations\":{}}}\n{\"item\":{\"type\":\"metadata\",\"tokens\":{\"input\":130,\"output\":3,\"input_nuclia\":0.13,\"output_nuclia\":0.003},\"timings\":{\"generative_first_chunk\":0.5284814859624021,\"generative_total\":0.660593231965322}}}\n{\"item\":{\"type\":\"consumption\",\"normalized_tokens\":{\"input\":0.14192,\"output\":0.00264,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0}}}\n"
+      string: "{\"item\":{\"type\":\"answer\",\"text\":\"Not\"}}\n{\"item\":{\"type\"\
+        :\"answer\",\"text\":\" enough\"}}\n{\"item\":{\"type\":\"answer\",\"text\"\
+        :\" data\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" to\"}}\n{\"item\"\
+        :{\"type\":\"answer\",\"text\":\" answer\"}}\n{\"item\":{\"type\":\"answer\"\
+        ,\"text\":\" this\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\".\"}}\n{\"\
+        item\":{\"type\":\"retrieval\",\"results\":{\"resources\":{\"40050815f407466887e03b6bb2b0be7e\"\
+        :{\"id\":\"40050815f407466887e03b6bb2b0be7e\",\"slug\":\"docs-rag-advanced-graph-md\"\
+        ,\"title\":\"docs > rag > advanced > graph\",\"summary\":\"\",\"icon\":\"\
+        text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\"\
+        :\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\"\
+        :{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\"\
+        :{\"field_classifications\":[]},\"created\":\"2025-04-03T15:30:13.057371\"\
+        ,\"modified\":\"2026-06-09T08:07:46.044204\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"40050815f407466887e03b6bb2b0be7e/t/page/7988-8282\"\
+        :{\"score\":0.01379536371678114,\"score_type\":\"RERANKER\",\"order\":0,\"\
+        text\":\" json \\n { \\n query : { \\n ... \\n }, \\n top_k : 100 \\n } \\\
+        n The current maximum K is 500, but this value can change in the future. \\\
+        n Filtering \\n Querying the whole knowledge graph is nice, but sometimes\
+        \ we have too many \\n results or we want to specify a subset of the knowledge\
+        \ graph to search into. \\n\",\"id\":\"40050815f407466887e03b6bb2b0be7e/t/page/7988-8282\"\
+        ,\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":7988,\"\
+        end\":8282,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"\
+        page_with_visual\":false,\"is_a_table\":false}}}}},\"bd8ccba0ddc341dd851891ba2cccc08f\"\
+        :{\"id\":\"bd8ccba0ddc341dd851891ba2cccc08f\",\"slug\":\"docs-develop-js-sdk-type-aliases-MagicActionType-md\"\
+        ,\"title\":\"docs > develop > js sdk > type aliases > MagicActionType\",\"\
+        summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\"\
+        :{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"\
+        PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"\
+        fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"\
+        created\":\"2026-03-10T15:04:00.830962\",\"modified\":\"2026-11-13T13:02:41.579074\"\
+        ,\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/a/title\"\
+        :{\"paragraphs\":{\"bd8ccba0ddc341dd851891ba2cccc08f/a/title/0-56\":{\"score\"\
+        :0.000487857119878754,\"score_type\":\"RERANKER\",\"order\":10,\"text\":\"\
+        docs > develop > js sdk > type aliases > MagicActionType\",\"id\":\"bd8ccba0ddc341dd851891ba2cccc08f/a/title/0-56\"\
+        ,\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\"\
+        :0,\"end\":56,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"\
+        page_with_visual\":false,\"is_a_table\":false}}}}},\"78aebdf4ca3a4028a555552a07e10e6d\"\
+        :{\"id\":\"78aebdf4ca3a4028a555552a07e10e6d\",\"slug\":\"docs-rag-advanced-score-rank-and-rerank-md\"\
+        ,\"title\":\"docs > rag > advanced > score rank and rerank\",\"summary\":\"\
+        \",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\"\
+        :{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"\
+        usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\"\
+        :[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2024-12-02T13:02:38.557991\"\
+        ,\"modified\":\"2026-06-09T08:07:41.924988\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"78aebdf4ca3a4028a555552a07e10e6d/t/page/5733-6021\"\
+        :{\"score\":0.00023413581948261708,\"score_type\":\"RERANKER\",\"order\":19,\"\
+        text\":\" In an actual request, these are the parameters to use in /find or\
+        \ /ask: \\n json \\n { \\n features : [ semantic , keyword ], \\n rank_fusion\
+        \ : { \\n name : rrf , \\n boosting : { \\n semantic : 2, \\n }, \\n window\
+        \ : 80, \\n }, \\n reranker : { \\n name : predict , \\n window : 50, \\n\
+        \ }, \\n top_k : 20, \\n ... \\n }\",\"id\":\"78aebdf4ca3a4028a555552a07e10e6d/t/page/5733-6021\"\
+        ,\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\"\
+        :5733,\"end\":6021,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\"\
+        :false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"a572ce0c7eb949e4a17babae21a03a4a\"\
+        :{\"id\":\"a572ce0c7eb949e4a17babae21a03a4a\",\"slug\":\"navigation-pages\"\
+        ,\"title\":\"navigation-pages\",\"summary\":\"\",\"icon\":\"application/json\"\
+        ,\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\"\
+        :[\"en\",\"fr\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\"\
+        :[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\"\
+        :[]},\"created\":\"2026-06-23T10:58:22.812220\",\"modified\":\"2026-06-23T10:58:22.812242\"\
+        ,\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/kb-remi-analytics\"\
+        :{\"paragraphs\":{\"a572ce0c7eb949e4a17babae21a03a4a/t/kb-remi-analytics/659-706\"\
+        :{\"score\":0.0007733057136647403,\"score_type\":\"RERANKER\",\"order\":5,\"\
+        text\":\"capabilities 4 : Change the evaluation period\\n\\n\",\"id\":\"a572ce0c7eb949e4a17babae21a03a4a/t/kb-remi-analytics/659-706\"\
+        ,\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":659,\"\
+        end\":706,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"\
+        page_with_visual\":false,\"is_a_table\":false}}}}},\"7556143e3ea6448c9a243a605b33497b\"\
+        :{\"id\":\"7556143e3ea6448c9a243a605b33497b\",\"slug\":\"docs-rag-search-strategy-md\"\
+        ,\"title\":\"docs > rag > search strategy\",\"summary\":\"\",\"icon\":\"text/markdown\"\
+        ,\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\"\
+        :[\"en\",\"cy\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\"\
+        :[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\"\
+        :[]},\"created\":\"2024-07-18T14:32:20.747541\",\"modified\":\"2026-06-15T08:57:41.577721\"\
+        ,\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\"\
+        :{\"paragraphs\":{\"7556143e3ea6448c9a243a605b33497b/t/page/1745-2116\":{\"\
+        score\":0.00027159214369021356,\"score_type\":\"RERANKER\",\"order\":18,\"\
+        text\":\" But you might want to change the default behavior. To do so, you\
+        \ can use the features parameter. \\n Typically, when searching with a different\
+        \ language than the resource's language, keyword search might be inconsistent,\
+        \ matching words that are written the same but have different meanings in\
+        \ the two languages. In this case, you can use semantic search only by passing:\
+        \ \\n\",\"id\":\"7556143e3ea6448c9a243a605b33497b/t/page/1745-2116\",\"labels\"\
+        :[],\"position\":{\"page_number\":0,\"index\":0,\"start\":1745,\"end\":2116,\"\
+        start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\"\
+        :false,\"is_a_table\":false}}}}},\"27529a0cb3c84641aee3fdc4f201402f\":{\"\
+        id\":\"27529a0cb3c84641aee3fdc4f201402f\",\"slug\":\"docs-changelog-updates-2025-03-md\"\
+        ,\"title\":\"docs > changelog > updates > 2025 03\",\"summary\":\"\",\"icon\"\
+        :\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\"\
+        :\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\"\
+        :{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\"\
+        :{\"field_classifications\":[]},\"created\":\"2025-04-15T14:51:55.770920\"\
+        ,\"modified\":\"2026-06-09T08:07:25.342909\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"27529a0cb3c84641aee3fdc4f201402f/t/page/592-1147\"\
+        :{\"score\":0.0002780309587251395,\"score_type\":\"RERANKER\",\"order\":17,\"\
+        text\":\" \U0001F6E0 API Updates: Powering Up Your Development \\n We've been\
+        \ busy making our APIs more robust and flexible: \\n The /ask endpoint is\
+        \ getting supercharged! \U0001F4AA \\n \\n Image Upload Magic: You can now\
+        \ pass images to the /ask endpoint using extra_context_images. Visual context?\
+        \ Check! \U0001F4F8 say cheese and just remember you need you use a visual\
+        \ LLM for answering \\n Search Configuration Simplification: Customize your\
+        \ API search directly from the dashboard by passing the search_configuration\
+        \ name. Less coding, more doing! \U0001F680 \\n \\n Vectorset Migration\u2014\
+        sounds fancy, right? \\n\",\"id\":\"27529a0cb3c84641aee3fdc4f201402f/t/page/592-1147\"\
+        ,\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":592,\"\
+        end\":1147,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"\
+        page_with_visual\":false,\"is_a_table\":false}}}}},\"220eb37c167f4eb9bb8e9454e7ba8cf5\"\
+        :{\"id\":\"220eb37c167f4eb9bb8e9454e7ba8cf5\",\"slug\":\"docs-develop-python-sdk-05-search-md\"\
+        ,\"title\":\"docs > develop > python sdk > 05 search\",\"summary\":\"\",\"\
+        icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"\
+        language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\"\
+        :{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\"\
+        :{\"field_classifications\":[]},\"created\":\"2025-04-15T14:48:33.723913\"\
+        ,\"modified\":\"2026-06-09T08:08:04.866092\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\"\
+        :{\"score\":0.0005815576296299696,\"score_type\":\"RERANKER\",\"order\":8,\"\
+        text\":\" ::: \\n :::warning \\n Enabling reasoning can use additional tokens,\
+        \ which may increase your usage costs. \\n You may need to increase max_tokens\
+        \ to give the LLM enough room to reason and generate an answer. \\n\",\"id\"\
+        :\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\",\"labels\":[],\"position\"\
+        :{\"page_number\":0,\"index\":0,\"start\":2505,\"end\":2709,\"start_seconds\"\
+        :[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"\
+        is_a_table\":false}}}}},\"4ffdd42c713149249892d3b643ab3c81\":{\"id\":\"4ffdd42c713149249892d3b643ab3c81\"\
+        ,\"slug\":\"docs-develop-js-sdk-namespaces-Widget-interfaces-RagStrategiesConfig-md\"\
+        ,\"title\":\"docs > develop > js sdk > namespaces > Widget > interfaces >\
+        \ RagStrategiesConfig\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\"\
+        :\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"\
+        en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"\
+        relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\"\
+        :[]},\"created\":\"2025-08-26T10:03:52.988969\",\"modified\":\"2026-09-21T12:27:10.963890\"\
+        ,\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\"\
+        :{\"paragraphs\":{\"4ffdd42c713149249892d3b643ab3c81/t/page/1081-2749\":{\"\
+        score\":0.0026010938454419374,\"score_type\":\"RERANKER\",\"order\":3,\"text\"\
+        :\" graph: undefined \\\\| object \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:56\
+        \ \\n \\n graphRagStrategy \\n \\n graphRagStrategy: boolean \\n \\n Defined\
+        \ in \\n libs/sdk-core/src/lib/db/search/widget.ts:55 \\n \\n includeNeighbouringParagraphs\
+        \ \\n \\n includeNeighbouringParagraphs: boolean \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:70\
+        \ \\n \\n includePageImages \\n \\n includePageImages: boolean \\n \\n Defined\
+        \ in \\n libs/sdk-core/src/lib/db/search/widget.ts:87 \\n \\n includeParagraphImages\
+        \ \\n \\n includeParagraphImages: boolean \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:89\
+        \ \\n \\n includeRemaining \\n \\n includeRemaining: boolean \\n \\n Defined\
+        \ in \\n libs/sdk-core/src/lib/db/search/widget.ts:76 \\n \\n includeTextualHierarchy\
+        \ \\n \\n includeTextualHierarchy: boolean \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:52\
+        \ \\n \\n maxMessages \\n \\n maxMessages: null \\\\| number \\n \\n Defined\
+        \ in \\n libs/sdk-core/src/lib/db/search/widget.ts:86 \\n \\n maxNumberOfImages\
+        \ \\n \\n maxNumberOfImages: null \\\\| number \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:88\
+        \ \\n \\n maxNumberOfResources \\n \\n maxNumberOfResources: null \\\\| number\
+        \ \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:74 \\n\
+        \ \\n metadatas \\n \\n metadatas: undefined \\\\| object \\n \\n Defined\
+        \ in \\n libs/sdk-core/src/lib/db/search/widget.ts:54 \\n \\n metadatasRagStrategy\
+        \ \\n \\n metadatasRagStrategy: boolean \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:53\
+        \ \\n \\n precedingParagraphs \\n \\n precedingParagraphs: null \\\\| number\
+        \ \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:71 \\n\
+        \ \\n succeedingParagraphs \\n \\n succeedingParagraphs: null \\\\| number\
+        \ \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:72\",\"\
+        id\":\"4ffdd42c713149249892d3b643ab3c81/t/page/1081-2749\",\"labels\":[\"\
+        /k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":1081,\"end\"\
+        :2749,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\"\
+        :false,\"is_a_table\":false}}}}},\"941df9f528b543d1a10995e2a3ff83ab\":{\"\
+        id\":\"941df9f528b543d1a10995e2a3ff83ab\",\"slug\":\"docs-changelog-updates-2024-09-md\"\
+        ,\"title\":\"docs > changelog > updates > 2024 09\",\"summary\":\"\",\"icon\"\
+        :\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\"\
+        :\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\"\
+        :{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\"\
+        :{\"field_classifications\":[]},\"created\":\"2025-04-15T14:51:54.589493\"\
+        ,\"modified\":\"2026-06-09T08:07:28.722324\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"941df9f528b543d1a10995e2a3ff83ab/t/page/871-1360\"\
+        :{\"score\":0.0007466114475391805,\"score_type\":\"RERANKER\",\"order\":6,\"\
+        text\":\" \\n For Developers and API Lovers \u2692\uFE0F \\n \\n New tools\
+        \ in the CLI and Python SDK now support moving/copying resources between KBs,\
+        \ ideal for managing development and production environments. Go the docs\
+        \ here \\n Important API change: page_number and page_size parameters are\
+        \ now deprecated in /search and /find endpoints. Instead, use the new top_k\
+        \ parameter (similar to /ask), which is equivalent to setting page_number=0\
+        \ and page_size=top_k. For more results, simply increase the top_k value.\
+        \ \\n\",\"id\":\"941df9f528b543d1a10995e2a3ff83ab/t/page/871-1360\",\"labels\"\
+        :[],\"position\":{\"page_number\":0,\"index\":0,\"start\":871,\"end\":1360,\"\
+        start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\"\
+        :false,\"is_a_table\":false}}}}},\"834e87b32d2b4ef7907a73e198fce807\":{\"\
+        id\":\"834e87b32d2b4ef7907a73e198fce807\",\"slug\":\"docs-develop-js-sdk-functions-getWidgetParameters-md\"\
+        ,\"title\":\"docs > develop > js sdk > functions > getWidgetParameters\",\"\
+        summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\"\
+        :{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\",\"nl\"],\"status\"\
+        :\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"\
+        fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"\
+        created\":\"2025-08-26T09:58:50.646751\",\"modified\":\"2026-11-13T12:57:04.729767\"\
+        ,\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\"\
+        :{\"paragraphs\":{\"834e87b32d2b4ef7907a73e198fce807/t/page/0-6064\":{\"score\"\
+        :0.005343256052583456,\"score_type\":\"RERANKER\",\"order\":1,\"text\":\"\
+        @nuclia/core \\n \\n @nuclia/core / getWidgetParameters \\n Function: getWidgetParameters()\
+        \ \\n \\n getWidgetParameters(searchConfig, widgetOptions): { agentic_config_id?:\
+        \ string; agentic_transport?: http \\\\| websocket ; chat_placeholder: string;\
+        \ copy_disclaimer: string; fab_offset_bottom: number; fab_offset_side: number;\
+        \ fab_position: bottom-right \\\\| bottom-left ; fab_size: medium \\\\| small\
+        \ \\\\| large ; features: string; feedback: WidgetFeedback; lang: string;\
+        \ mode: string; not_enough_data_message: string; panel_height: number; panel_width:\
+        \ number; placeholder: string; search_config_id?: string; } \\\\| { agentic_config_id?:\
+        \ string; agentic_transport?: http \\\\| websocket ; chat_placeholder: string;\
+        \ copy_disclaimer: string; fab_offset_bottom?: undefined; fab_offset_side?:\
+        \ undefined; fab_position?: undefined; fab_size?: undefined; features: string;\
+        \ feedback: WidgetFeedback; lang: string; mode: string; not_enough_data_message:\
+        \ string; panel_height?: undefined; panel_width?: undefined; placeholder:\
+        \ string; search_config_id?: string; } \\\\| { ask_to_resource: string; chat_placeholder:\
+        \ string; citation_threshold: string \\\\| undefined; copy_disclaimer: string;\
+        \ fab_offset_bottom: number; fab_offset_side: number; fab_position: bottom-right\
+        \ \\\\| bottom-left ; fab_size: medium \\\\| small \\\\| large ; features:\
+        \ string; feedback: WidgetFeedback; filter_expression: string; filters: string;\
+        \ generativemodel: string; initial_filters: string; json_schema: string; labelsets_excluded_from_filters:\
+        \ string; lang: string; max_output_tokens: string \\\\| undefined; max_paragraphs:\
+        \ string \\\\| undefined; max_tokens: string \\\\| undefined; metadata: string;\
+        \ mode: string; not_enough_data_message: string; panel_height: number; panel_width:\
+        \ number; placeholder: string; preselected_filters: string; prompt: string;\
+        \ rag_images_strategies: string; rag_strategies: string; reasoning: string;\
+        \ rephrase_prompt: string; reranker: string \\\\| undefined; routing: string;\
+        \ rrf_boosting: string; security_groups: string \\\\| undefined; system_prompt:\
+        \ string; vectorset: string; } \\\\| { ask_to_resource: string; chat_placeholder:\
+        \ string; citation_threshold: string \\\\| undefined; copy_disclaimer: string;\
+        \ fab_offset_bottom?: undefined; fab_offset_side?: undefined; fab_position?:\
+        \ undefined; fab_size?: undefined; features: string; feedback: WidgetFeedback;\
+        \ filter_expression: string; filters: string; generativemodel: string; initial_filters:\
+        \ string; json_schema: string; labelsets_excluded_from_filters: string; lang:\
+        \ string; max_output_tokens: string \\\\| undefined; max_paragraphs: string\
+        \ \\\\| undefined; max_tokens: string \\\\| undefined; metadata: string; mode:\
+        \ string; not_enough_data_message: string; panel_height?: undefined; panel_width?:\
+        \ undefined; placeholder: string; preselected_filters: string; prompt: string;\
+        \ rag_images_strategies: string; rag_strategies: string; reasoning: string;\
+        \ rephrase_prompt: string; reranker: string \\\\| undefined; routing: string;\
+        \ rrf_boosting: string; security_groups: string \\\\| undefined; system_prompt:\
+        \ string; vectorset: string; } \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:590\
+        \ \\n Parameters \\n searchConfig \\n SearchConfiguration \\n widgetOptions\
+        \ \\n WidgetConfiguration \\n Returns \\n { agentic_config_id?: string; agentic_transport?:\
+        \ http \\\\| websocket ; chat_placeholder: string; copy_disclaimer: string;\
+        \ fab_offset_bottom: number; fab_offset_side: number; fab_position: bottom-right\
+        \ \\\\| bottom-left ; fab_size: medium \\\\| small \\\\| large ; features:\
+        \ string; feedback: WidgetFeedback; lang: string; mode: string; not_enough_data_message:\
+        \ string; panel_height: number; panel_width: number; placeholder: string;\
+        \ search_config_id?: string; } \\\\| { agentic_config_id?: string; agentic_transport?:\
+        \ http \\\\| websocket ; chat_placeholder: string; copy_disclaimer: string;\
+        \ fab_offset_bottom?: undefined; fab_offset_side?: undefined; fab_position?:\
+        \ undefined; fab_size?: undefined; features: string; feedback: WidgetFeedback;\
+        \ lang: string; mode: string; not_enough_data_message: string; panel_height?:\
+        \ undefined; panel_width?: undefined; placeholder: string; search_config_id?:\
+        \ string; } \\\\| { ask_to_resource: string; chat_placeholder: string; citation_threshold:\
+        \ string \\\\| undefined; copy_disclaimer: string; fab_offset_bottom: number;\
+        \ fab_offset_side: number; fab_position: bottom-right \\\\| bottom-left ;\
+        \ fab_size: medium \\\\| small \\\\| large ; features: string; feedback: WidgetFeedback;\
+        \ filter_expression: string; filters: string; generativemodel: string; initial_filters:\
+        \ string; json_schema: string; labelsets_excluded_from_filters: string; lang:\
+        \ string; max_output_tokens: string \\\\| undefined; max_paragraphs: string\
+        \ \\\\| undefined; max_tokens: string \\\\| undefined; metadata: string; mode:\
+        \ string; not_enough_data_message: string; panel_height: number; panel_width:\
+        \ number; placeholder: string; preselected_filters: string; prompt: string;\
+        \ rag_images_strategies: string; rag_strategies: string; reasoning: string;\
+        \ rephrase_prompt: string; reranker: string \\\\| undefined; routing: string;\
+        \ rrf_boosting: string; security_groups: string \\\\| undefined; system_prompt:\
+        \ string; vectorset: string; } \\\\| { ask_to_resource: string; chat_placeholder:\
+        \ string; citation_threshold: string \\\\| undefined; copy_disclaimer: string;\
+        \ fab_offset_bottom?: undefined; fab_offset_side?: undefined; fab_position?:\
+        \ undefined; fab_size?: undefined; features: string; feedback: WidgetFeedback;\
+        \ filter_expression: string; filters: string; generativemodel: string; initial_filters:\
+        \ string; json_schema: string; labelsets_excluded_from_filters: string; lang:\
+        \ string; max_output_tokens: string \\\\| undefined; max_paragraphs: string\
+        \ \\\\| undefined; max_tokens: string \\\\| undefined; metadata: string; mode:\
+        \ string; not_enough_data_message: string; panel_height?: undefined; panel_width?:\
+        \ undefined; placeholder: string; preselected_filters: string; prompt: string;\
+        \ rag_images_strategies: string; rag_strategies: string; reasoning: string;\
+        \ rephrase_prompt: string; reranker: string \\\\| undefined; routing: string;\
+        \ rrf_boosting: string; security_groups: string \\\\| undefined; system_prompt:\
+        \ string; vectorset: string; }\",\"id\":\"834e87b32d2b4ef7907a73e198fce807/t/page/0-6064\"\
+        ,\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\"\
+        :0,\"end\":6064,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\"\
+        :false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"221f8a48e05a4ee9a759ff195884c960\"\
+        :{\"id\":\"221f8a48e05a4ee9a759ff195884c960\",\"slug\":\"docs-develop-js-sdk--nuclia-namespaces-Widget-interfaces-RagStrategiesConfig-md\"\
+        ,\"title\":\"docs > develop > js sdk > @nuclia > namespaces > Widget > interfaces\
+        \ > RagStrategiesConfig\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\"\
+        :\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"\
+        en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"\
+        relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\"\
+        :[]},\"created\":\"2026-10-16T10:18:57.064924\",\"modified\":\"2026-11-13T13:03:19.781396\"\
+        ,\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\"\
+        :{\"paragraphs\":{\"221f8a48e05a4ee9a759ff195884c960/t/page/2182-3872\":{\"\
+        score\":0.0031850608065724373,\"score_type\":\"RERANKER\",\"order\":2,\"text\"\
+        :\" top_k: number \\\\| null \\n \\n \\n undefined \\n \\n graphRagStrategy\
+        \ \\n \\n graphRagStrategy: boolean \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:55\
+        \ \\n \\n includeNeighbouringParagraphs \\n \\n includeNeighbouringParagraphs:\
+        \ boolean \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:70\
+        \ \\n \\n includePageImages \\n \\n includePageImages: boolean \\n \\n Defined\
+        \ in: libs/sdk-core/src/lib/db/search/widget.ts:87 \\n \\n includeParagraphImages\
+        \ \\n \\n includeParagraphImages: boolean \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:89\
+        \ \\n \\n includeRemaining \\n \\n includeRemaining: boolean \\n \\n Defined\
+        \ in: libs/sdk-core/src/lib/db/search/widget.ts:76 \\n \\n includeTextualHierarchy\
+        \ \\n \\n includeTextualHierarchy: boolean \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:52\
+        \ \\n \\n maxMessages \\n \\n maxMessages: number \\\\| null \\n \\n Defined\
+        \ in: libs/sdk-core/src/lib/db/search/widget.ts:86 \\n \\n maxNumberOfImages\
+        \ \\n \\n maxNumberOfImages: number \\\\| null \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:88\
+        \ \\n \\n maxNumberOfResources \\n \\n maxNumberOfResources: number \\\\|\
+        \ null \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:74 \\\
+        n \\n metadatas \\n \\n metadatas: { classification_labels: boolean; extra_metadata:\
+        \ boolean; ners: boolean; origin: boolean; } \\\\| undefined \\n \\n Defined\
+        \ in: libs/sdk-core/src/lib/db/search/widget.ts:54 \\n \\n metadatasRagStrategy\
+        \ \\n \\n metadatasRagStrategy: boolean \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:53\
+        \ \\n \\n precedingParagraphs \\n \\n precedingParagraphs: number \\\\| null\
+        \ \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:71 \\n \\\
+        n succeedingParagraphs \\n \\n succeedingParagraphs: number \\\\| null \\\
+        n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:72\",\"id\":\"\
+        221f8a48e05a4ee9a759ff195884c960/t/page/2182-3872\",\"labels\":[\"/k/text\"\
+        ],\"position\":{\"page_number\":0,\"index\":0,\"start\":2182,\"end\":3872,\"\
+        start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\"\
+        :false,\"is_a_table\":false}}}}},\"4c90aa2f4b77410e9d26d981d9852823\":{\"\
+        id\":\"4c90aa2f4b77410e9d26d981d9852823\",\"slug\":\"docs-develop-dotnet-sdk-ISearchService-md\"\
+        ,\"title\":\"docs > develop > dotnet sdk > ISearchService\",\"summary\":\"\
+        \",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\"\
+        :{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"\
+        usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\"\
+        :[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-02-24T16:03:50.526195\"\
+        ,\"modified\":\"2026-06-09T08:17:37.193513\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"4c90aa2f4b77410e9d26d981d9852823/t/page/6781-7029\"\
+        :{\"score\":0.000317508791340515,\"score_type\":\"RERANKER\",\"order\":15,\"\
+        text\":\" if (response.IsSuccessful) \\n { \\n var relations = response.Data;\
+        \ \\n Console.WriteLine($ Found {relations.Relations?.Count ?? 0} matching\
+        \ relations ); \\n } \\n ``` \\n \\n SendFeedbackAsync \\n Send feedback for\
+        \ a search operation to improve future results. \\n\",\"id\":\"4c90aa2f4b77410e9d26d981d9852823/t/page/6781-7029\"\
+        ,\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":6781,\"\
+        end\":7029,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"\
+        page_with_visual\":false,\"is_a_table\":false}}}}},\"ecabb0862fa24c8fb8e01d4930a3f7a2\"\
+        :{\"id\":\"ecabb0862fa24c8fb8e01d4930a3f7a2\",\"slug\":\"docs-develop-js-sdk-variables-MAX_FACETS_PER_REQUEST-md\"\
+        ,\"title\":\"docs > develop > js sdk > variables > MAX_FACETS_PER_REQUEST\"\
+        ,\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\"\
+        :{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"\
+        PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"\
+        fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"\
+        created\":\"2025-08-26T10:03:18.992004\",\"modified\":\"2026-11-13T13:02:38.259281\"\
+        ,\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/a/title\"\
+        :{\"paragraphs\":{\"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60\":{\"score\"\
+        :0.0009004466701298952,\"score_type\":\"RERANKER\",\"order\":4,\"text\":\"\
+        docs > develop > js sdk > variables > MAX_FACETS_PER_REQUEST\",\"id\":\"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60\"\
+        ,\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"\
+        end\":60,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"\
+        page_with_visual\":false,\"is_a_table\":false}}},\"/t/page\":{\"paragraphs\"\
+        :{\"ecabb0862fa24c8fb8e01d4930a3f7a2/t/page/0-193\":{\"score\":0.0005484792636707425,\"\
+        score_type\":\"RERANKER\",\"order\":9,\"text\":\"@nuclia/core \\n \\n @nuclia/core\
+        \ / MAX_FACETS_PER_REQUEST \\n Variable: MAX_FACETS_PER_REQUEST \\n \\n const\
+        \ MAX_FACETS_PER_REQUEST: 50 = 50 \\n \\n Defined in: libs/sdk-core/src/lib/db/search/filter.ts:18\"\
+        ,\"id\":\"ecabb0862fa24c8fb8e01d4930a3f7a2/t/page/0-193\",\"labels\":[\"/k/text\"\
+        ],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":193,\"start_seconds\"\
+        :[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"\
+        is_a_table\":false}}}}},\"4039d76b0fff4962900836ab3fdec9f7\":{\"id\":\"4039d76b0fff4962900836ab3fdec9f7\"\
+        ,\"slug\":\"docs-rag-advanced-consumption-mdx\",\"title\":\"docs > rag > advanced\
+        \ > consumption.\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\"\
+        :\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"\
+        en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"\
+        relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\"\
+        :[]},\"created\":\"2025-10-03T08:32:26.341394\",\"modified\":\"2026-10-16T15:17:58.179136\"\
+        ,\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\"\
+        :{\"paragraphs\":{\"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\":{\"\
+        score\":0.0007264875457622111,\"score_type\":\"RERANKER\",\"order\":7,\"text\"\
+        :\" Use the max_tokens parameter on the /ask endpoint to set hard limits on:\
+        \ \\n - Context size: Limits the amount of retrieved information sent to the\
+        \ LLM \\n - Answer length: Limits the length of the generated response \\\
+        n Important Considerations \\n Context Limitations: \\n\",\"id\":\"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\"\
+        ,\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":3075,\"\
+        end\":3340,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"\
+        page_with_visual\":false,\"is_a_table\":false}}}}},\"e3051c443121417496c925390ef67a5c\"\
+        :{\"id\":\"e3051c443121417496c925390ef67a5c\",\"slug\":\"docs-develop-js-sdk-interfaces-MagicAction-md\"\
+        ,\"title\":\"docs > develop > js sdk > interfaces > MagicAction\",\"summary\"\
+        :\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\"\
+        :{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"\
+        usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\"\
+        :[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-03-10T15:05:37.080679\"\
+        ,\"modified\":\"2026-11-13T13:02:22.463273\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/a/title\":{\"paragraphs\":{\"e3051c443121417496c925390ef67a5c/a/title/0-50\"\
+        :{\"score\":0.00035281325108371675,\"score_type\":\"RERANKER\",\"order\":14,\"\
+        text\":\"docs > develop > js sdk > interfaces > MagicAction\",\"id\":\"e3051c443121417496c925390ef67a5c/a/title/0-50\"\
+        ,\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\"\
+        :0,\"end\":50,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"\
+        page_with_visual\":false,\"is_a_table\":false}}}}},\"d986c88467d148a79cb7a4147210c33f\"\
+        :{\"id\":\"d986c88467d148a79cb7a4147210c33f\",\"slug\":\"docs-rag-unpublished-llm-agent-md\"\
+        ,\"title\":\"docs > rag > unpublished > llm agent\",\"summary\":\"\",\"icon\"\
+        :\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\"\
+        :\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\"\
+        :{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\"\
+        :{\"field_classifications\":[]},\"created\":\"2026-02-26T10:05:35.012708\"\
+        ,\"modified\":\"2026-06-26T08:59:38.785492\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"d986c88467d148a79cb7a4147210c33f/t/page/2866-3137\"\
+        :{\"score\":0.00028021098114550114,\"score_type\":\"RERANKER\",\"order\":16,\"\
+        text\":\" You could go with a very straightforward approach, and just use\
+        \ generative answer feature of Agentic RAG \\n python \\n search = sdk.NucliaSearch()\
+        \ \\n answer = search.chat(query= Tell me about the parks in Toronto ) \\\
+        n print(answer.answer) \\n You obtain the following answer: \\n\",\"id\":\"\
+        d986c88467d148a79cb7a4147210c33f/t/page/2866-3137\",\"labels\":[],\"position\"\
+        :{\"page_number\":0,\"index\":0,\"start\":2866,\"end\":3137,\"start_seconds\"\
+        :[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"\
+        is_a_table\":false}}}}},\"42a4cd5a30314e94aa079ed0cfe81381\":{\"id\":\"42a4cd5a30314e94aa079ed0cfe81381\"\
+        ,\"slug\":\"docs-develop-js-sdk-interfaces-SplitStrategy-md\",\"title\":\"\
+        docs > develop > js sdk > interfaces > SplitStrategy\",\"summary\":\"\",\"\
+        icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"\
+        language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\"\
+        :{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\"\
+        :{\"field_classifications\":[]},\"created\":\"2025-08-26T10:02:38.468609\"\
+        ,\"modified\":\"2026-11-13T13:00:03.443378\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"42a4cd5a30314e94aa079ed0cfe81381/t/page/537-748\"\
+        :{\"score\":0.00036829791497439146,\"score_type\":\"RERANKER\",\"order\":13,\"\
+        text\":\" max_paragraph? \\n \\n optional max_paragraph?: number \\n \\n Defined\
+        \ in: libs/sdk-core/src/lib/db/kb/kb.models.ts:572 \\n \\n name? \\n \\n optional\
+        \ name?: string \\n \\n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:571\"\
+        ,\"id\":\"42a4cd5a30314e94aa079ed0cfe81381/t/page/537-748\",\"labels\":[\"\
+        /k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":537,\"end\"\
+        :748,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\"\
+        :false,\"is_a_table\":false}}}}},\"43004f553e534ffe9c9e735856bd9b23\":{\"\
+        id\":\"43004f553e534ffe9c9e735856bd9b23\",\"slug\":\"docs-develop-js-sdk-interfaces-ModelConfig-md\"\
+        ,\"title\":\"docs > develop > js sdk > interfaces > ModelConfig\",\"summary\"\
+        :\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\"\
+        :{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"\
+        usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\"\
+        :[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-01-08T16:32:44.621593\"\
+        ,\"modified\":\"2026-11-13T12:59:44.135694\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"43004f553e534ffe9c9e735856bd9b23/t/page/746-948\"\
+        :{\"score\":0.00043904531048610806,\"score_type\":\"RERANKER\",\"order\":11,\"\
+        text\":\" \\n optional default_max?: number \\n \\n max \\n \\n max: number\
+        \ \\n \\n min? \\n \\n optional min?: number \\n \\n \\n prompt_id? \\n \\\
+        n optional prompt_id?: string \\n \\n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:625\"\
+        ,\"id\":\"43004f553e534ffe9c9e735856bd9b23/t/page/746-948\",\"labels\":[\"\
+        /k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":746,\"end\"\
+        :948,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\"\
+        :false,\"is_a_table\":false}}}}},\"3d73bdffb13b4fed8076a1bee384d7c0\":{\"\
+        id\":\"3d73bdffb13b4fed8076a1bee384d7c0\",\"slug\":\"docs-rag-rag-strategy-md\"\
+        ,\"title\":\"docs > rag > rag strategy\",\"summary\":\"\",\"icon\":\"text/markdown\"\
+        ,\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\"\
+        :[\"hu\",\"cy\",\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\"\
+        :[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\"\
+        :[]},\"created\":\"2024-07-18T14:32:18.060615\",\"modified\":\"2026-06-09T08:07:32.011816\"\
+        ,\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\"\
+        :{\"paragraphs\":{\"3d73bdffb13b4fed8076a1bee384d7c0/t/page/346-660\":{\"\
+        score\":0.0003874761168844998,\"score_type\":\"RERANKER\",\"order\":12,\"\
+        text\":\" The Default Context \\n The default context is the list of the 20\
+        \ best paragraphs that have been found for the question. This context is passed\
+        \ to the generative model without any transformation. \\n Note: You can change\
+        \ the number of paragraphs that are passed to the generative model by using\
+        \ the top_k parameter. \\n\",\"id\":\"3d73bdffb13b4fed8076a1bee384d7c0/t/page/346-660\"\
+        ,\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":346,\"\
+        end\":660,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"\
+        page_with_visual\":false,\"is_a_table\":false}}}}}},\"query\":\"How to use\
+        \ max_magic and tell me how you will change this parameter in the future\"\
+        ,\"total\":20,\"page_number\":0,\"page_size\":20,\"next_page\":false,\"autofilters\"\
+        :[],\"min_score\":{\"bm25\":0.0},\"best_matches\":[\"40050815f407466887e03b6bb2b0be7e/t/page/7988-8282\"\
+        ,\"834e87b32d2b4ef7907a73e198fce807/t/page/0-6064\",\"221f8a48e05a4ee9a759ff195884c960/t/page/2182-3872\"\
+        ,\"4ffdd42c713149249892d3b643ab3c81/t/page/1081-2749\",\"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60\"\
+        ,\"a572ce0c7eb949e4a17babae21a03a4a/t/kb-remi-analytics/659-706\",\"941df9f528b543d1a10995e2a3ff83ab/t/page/871-1360\"\
+        ,\"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\",\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\"\
+        ,\"ecabb0862fa24c8fb8e01d4930a3f7a2/t/page/0-193\",\"bd8ccba0ddc341dd851891ba2cccc08f/a/title/0-56\"\
+        ,\"43004f553e534ffe9c9e735856bd9b23/t/page/746-948\",\"3d73bdffb13b4fed8076a1bee384d7c0/t/page/346-660\"\
+        ,\"42a4cd5a30314e94aa079ed0cfe81381/t/page/537-748\",\"e3051c443121417496c925390ef67a5c/a/title/0-50\"\
+        ,\"4c90aa2f4b77410e9d26d981d9852823/t/page/6781-7029\",\"d986c88467d148a79cb7a4147210c33f/t/page/2866-3137\"\
+        ,\"27529a0cb3c84641aee3fdc4f201402f/t/page/592-1147\",\"7556143e3ea6448c9a243a605b33497b/t/page/1745-2116\"\
+        ,\"78aebdf4ca3a4028a555552a07e10e6d/t/page/5733-6021\"]},\"best_matches\"\
+        :[{\"id\":\"40050815f407466887e03b6bb2b0be7e/t/page/7988-8282\"},{\"id\":\"\
+        834e87b32d2b4ef7907a73e198fce807/t/page/0-6064\"},{\"id\":\"221f8a48e05a4ee9a759ff195884c960/t/page/2182-3872\"\
+        },{\"id\":\"4ffdd42c713149249892d3b643ab3c81/t/page/1081-2749\"},{\"id\":\"\
+        ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60\"},{\"id\":\"a572ce0c7eb949e4a17babae21a03a4a/t/kb-remi-analytics/659-706\"\
+        },{\"id\":\"941df9f528b543d1a10995e2a3ff83ab/t/page/871-1360\"},{\"id\":\"\
+        4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\"},{\"id\":\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\"\
+        },{\"id\":\"ecabb0862fa24c8fb8e01d4930a3f7a2/t/page/0-193\"},{\"id\":\"bd8ccba0ddc341dd851891ba2cccc08f/a/title/0-56\"\
+        },{\"id\":\"43004f553e534ffe9c9e735856bd9b23/t/page/746-948\"},{\"id\":\"\
+        3d73bdffb13b4fed8076a1bee384d7c0/t/page/346-660\"},{\"id\":\"42a4cd5a30314e94aa079ed0cfe81381/t/page/537-748\"\
+        },{\"id\":\"e3051c443121417496c925390ef67a5c/a/title/0-50\"},{\"id\":\"4c90aa2f4b77410e9d26d981d9852823/t/page/6781-7029\"\
+        },{\"id\":\"d986c88467d148a79cb7a4147210c33f/t/page/2866-3137\"},{\"id\":\"\
+        27529a0cb3c84641aee3fdc4f201402f/t/page/592-1147\"},{\"id\":\"7556143e3ea6448c9a243a605b33497b/t/page/1745-2116\"\
+        },{\"id\":\"78aebdf4ca3a4028a555552a07e10e6d/t/page/5733-6021\"}]}}\n{\"item\"\
+        :{\"type\":\"status\",\"code\":\"-2\",\"status\":\"no_context\"}}\n{\"item\"\
+        :{\"type\":\"augmented_context\",\"augmented\":{\"paragraphs\":{},\"fields\"\
+        :{}}}}\n{\"item\":{\"type\":\"citations\",\"citations\":{}}}\n{\"item\":{\"\
+        type\":\"metadata\",\"tokens\":{\"input\":130,\"output\":3,\"input_nuclia\"\
+        :0.13,\"output_nuclia\":0.003},\"timings\":{\"generative_first_chunk\":0.5527131539993206,\"\
+        generative_total\":0.7296297419998155}}}\n{\"item\":{\"type\":\"consumption\"\
+        ,\"normalized_tokens\":{\"input\":0.142344,\"output\":0.00264,\"image\":0.0},\"\
+        customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0}}}\n"
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -811,15 +1083,15 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Sun, 15 Nov 2026 22:09:34 GMT
+      - Mon, 16 Nov 2026 10:47:29 GMT
       nuclia-learning-id:
-      - d4c986ea6fe0410796e134953da0ab2d
+      - 465791c5f29c43f99e66497c7b02a405
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '1138'
+      - '1132'
       x-nuclia-trace-id:
-      - dab7e6fa0ec77568d9b48f4f85a9f6ad
+      - 1e48635783678e9ba542f0217a530baa
     status:
       code: 200
       message: OK
@@ -833,8 +1105,8 @@ interactions:
       this clearly\n\nAlways follow any additional instructions provided about format,
       style, or domain-specific behavior.", "chat_history": [], "context": [], "query_context":
       {}, "query_context_order": {}, "truncate": true, "user_prompt": {"prompt": "\n##
-      Question\nComo usar max_magic y dime como cambiar\u00e1 este parametro en el
-      futuro\n\n## Provided Context\n[START OF CONTEXT]\n\n[END OF CONTEXT]\n\n##
+      Question\nHow to use max_magic and tell me how you will change this parameter
+      in the future\n\n## Provided Context\n[START OF CONTEXT]\n\n[END OF CONTEXT]\n\n##
       Answering Guidelines\n- Carefully read all context; it may be lengthy or detailed\n-
       Do not omit or overlook any relevant information\n- Existing context summaries
       are answer attempts produced by retrieval agents. Treat them as first-class
@@ -845,8 +1117,8 @@ interactions:
       merely because one retrieved chunk is incomplete; use the chunks for supporting
       citations.\n- If the context is incomplete or insufficient, state: \"Not enough
       data to answer this.\"\n- Read carefully any extra instructions below if provided
-      and use them to answer\n\nNow provide your answer to the question: Como usar
-      max_magic y dime como cambiar\u00e1 este parametro en el futuro"}, "citations":
+      and use them to answer\n\nNow provide your answer to the question: How to use
+      max_magic and tell me how you will change this parameter in the future"}, "citations":
       null, "citation_threshold": null, "generative_model": "chatgpt-azure-5.6-luna",
       "max_tokens": 5000, "query_context_images": {}, "prefer_markdown": null, "json_schema":
       null, "format_prompt": false, "rerank_context": false, "tools": [], "tool_choice":
@@ -859,7 +1131,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '2122'
+      - '2146'
       Content-Type:
       - application/json
       Host:
@@ -869,7 +1141,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 35496e5b0903492882ede0f004538915
+      - c6d47aed167e48778364adcb06e30416
       x-origin:
       - RAO
       x-session:
@@ -882,21 +1154,64 @@ interactions:
     uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
-      string: "{\"chunk\":{\"type\":\"text\",\"text\":\"Not\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        enough\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" data\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        to\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" answer\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        this\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        No\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" se\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        ha\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" proporcion\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"ado\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        informaci\xF3n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" sobre\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        qu\xE9\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" es\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        `max\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_magic`,\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        c\xF3mo se\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" utiliza ni\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        c\xF3mo cambiar\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"\xE1 en\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        el futuro\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"-2\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":12,\"output_tokens\":8,\"model_input_tokens\":311,\"model_output_tokens\":35,\"timings\":{\"generative_first_chunk\":0.4033984530251473,\"generative\":0.7014279420254752},\"input_nuclia_tokens\":0.012,\"output_nuclia_tokens\":0.008}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.01244,\"output\":0.0084,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+      string: '{"chunk":{"type":"text","text":"Not"}}
+
+        {"chunk":{"type":"text","text":" enough"}}
+
+        {"chunk":{"type":"text","text":" data"}}
+
+        {"chunk":{"type":"text","text":" to"}}
+
+        {"chunk":{"type":"text","text":" answer"}}
+
+        {"chunk":{"type":"text","text":" this"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" The"}}
+
+        {"chunk":{"type":"text","text":" provided"}}
+
+        {"chunk":{"type":"text","text":" context"}}
+
+        {"chunk":{"type":"text","text":" contains"}}
+
+        {"chunk":{"type":"text","text":" no"}}
+
+        {"chunk":{"type":"text","text":" information"}}
+
+        {"chunk":{"type":"text","text":" about"}}
+
+        {"chunk":{"type":"text","text":" `"}}
+
+        {"chunk":{"type":"text","text":"max"}}
+
+        {"chunk":{"type":"text","text":"_magic`,"}}
+
+        {"chunk":{"type":"text","text":" how to"}}
+
+        {"chunk":{"type":"text","text":" use it"}}
+
+        {"chunk":{"type":"text","text":", or"}}
+
+        {"chunk":{"type":"text","text":" how it"}}
+
+        {"chunk":{"type":"text","text":" should be"}}
+
+        {"chunk":{"type":"text","text":" changed in"}}
+
+        {"chunk":{"type":"text","text":" the future."}}
+
+        {"chunk":{"type":"status","code":"-2"}}
+
+        {"chunk":{"type":"meta","input_tokens":13,"output_tokens":9,"model_input_tokens":317,"model_output_tokens":37,"timings":{"generative_first_chunk":0.7640616680000676,"generative":1.0469543430000385},"input_nuclia_tokens":0.013,"output_nuclia_tokens":0.009}}
+
+        {"chunk":{"normalized_tokens":{"input":0.01268,"output":0.00888,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -904,17 +1219,17 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Sun, 15 Nov 2026 22:09:36 GMT
+      - Mon, 16 Nov 2026 10:47:30 GMT
       nuclia-learning-id:
-      - 10a4e1e7f6c043ee9e5df5e4279d0ec2
+      - cece4dc412b044b5a5c4ae4230579098
       nuclia-learning-model:
       - chatgpt-azure-5.6-luna
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '409'
+      - '850'
       x-nuclia-trace-id:
-      - 07723a5bd8eb8b95d4fc693558fe5f8d
+      - 92050e49fe5794148b3e9c2ef64836f5
     status:
       code: 200
       message: OK
@@ -928,8 +1243,8 @@ interactions:
       this clearly\n\nAlways follow any additional instructions provided about format,
       style, or domain-specific behavior.", "chat_history": [], "context": [], "query_context":
       {}, "query_context_order": {}, "truncate": true, "user_prompt": {"prompt": "\n##
-      Question\nComo usar max_magic y dime como cambiar\u00e1 este parametro en el
-      futuro\n\n## Provided Context\n[START OF CONTEXT]\n\n[END OF CONTEXT]\n\n##
+      Question\nHow to use max_magic and tell me how you will change this parameter
+      in the future\n\n## Provided Context\n[START OF CONTEXT]\n\n[END OF CONTEXT]\n\n##
       Answering Guidelines\n- Carefully read all context; it may be lengthy or detailed\n-
       Do not omit or overlook any relevant information\n- Existing context summaries
       are answer attempts produced by retrieval agents. Treat them as first-class
@@ -940,9 +1255,9 @@ interactions:
       merely because one retrieved chunk is incomplete; use the chunks for supporting
       citations.\n- If the context is incomplete or insufficient, state: \"Not enough
       data to answer this.\"\n- Read carefully any extra instructions below if provided
-      and use them to answer\n\n## Additional Instructions for answering\n- \n## Question\nComo
-      usar max_magic y dime como cambiar\u00e1 este parametro en el futuro\n\n## Provided
-      Context\n[START OF CONTEXT]\n\n[END OF CONTEXT]\n\n## Answering Guidelines\n-
+      and use them to answer\n\n## Additional Instructions for answering\n- \n## Question\nHow
+      to use max_magic and tell me how you will change this parameter in the future\n\n##
+      Provided Context\n[START OF CONTEXT]\n\n[END OF CONTEXT]\n\n## Answering Guidelines\n-
       Carefully read all context; it may be lengthy or detailed\n- Do not omit or
       overlook any relevant information\n- Existing context summaries are answer attempts
       produced by retrieval agents. Treat them as first-class evidence and preserve
@@ -953,10 +1268,10 @@ interactions:
       chunk is incomplete; use the chunks for supporting citations.\n- If the context
       is incomplete or insufficient, state: \"Not enough data to answer this.\"\n-
       Read carefully any extra instructions below if provided and use them to answer\n\nNow
-      provide your answer to the question: Como usar max_magic y dime como cambiar\u00e1
-      este parametro en el futuro\nNow provide your answer to the question: Como usar
-      max_magic y dime como cambiar\u00e1 este parametro en el futuro"}, "citations":
-      null, "citation_threshold": null, "generative_model": "chatgpt-azure-5.6-luna",
+      provide your answer to the question: How to use max_magic and tell me how you
+      will change this parameter in the future\nNow provide your answer to the question:
+      How to use max_magic and tell me how you will change this parameter in the future"},
+      "citations": null, "citation_threshold": null, "generative_model": "chatgpt-azure-5.6-luna",
       "max_tokens": 5000, "query_context_images": {}, "prefer_markdown": null, "json_schema":
       null, "format_prompt": false, "rerank_context": false, "tools": [], "tool_choice":
       {"type": "auto"}, "reasoning": false, "seed": null, "image_generation": false}'
@@ -968,7 +1283,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '3256'
+      - '3304'
       Content-Type:
       - application/json
       Host:
@@ -978,7 +1293,7 @@ interactions:
       x-client-ident:
       - default
       x-message:
-      - 35496e5b0903492882ede0f004538915
+      - c6d47aed167e48778364adcb06e30416
       x-origin:
       - RAO
       x-session:
@@ -991,20 +1306,76 @@ interactions:
     uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
   response:
     body:
-      string: "{\"chunk\":{\"type\":\"text\",\"text\":\"No\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        hay\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" suficiente\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        informaci\xF3n\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" para\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        responder\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\".\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        El\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" contexto\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        no\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" explica\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        qu\xE9\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" es\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        `\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"max\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"_magic\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"`,
-        c\xF3mo\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" se usa\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        ni c\xF3mo\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" cambiar\xE1\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\"
-        en el\"}}\n{\"chunk\":{\"type\":\"text\",\"text\":\" futuro.\"}}\n{\"chunk\":{\"type\":\"status\",\"code\":\"0\"}}\n{\"chunk\":{\"type\":\"meta\",\"input_tokens\":21,\"output_tokens\":8,\"model_input_tokens\":523,\"model_output_tokens\":32,\"timings\":{\"generative_first_chunk\":0.428745728044305,\"generative\":0.6688529420061968},\"input_nuclia_tokens\":0.021,\"output_nuclia_tokens\":0.008}}\n{\"chunk\":{\"normalized_tokens\":{\"input\":0.02092,\"output\":0.00768,\"image\":0.0},\"customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0},\"type\":\"consumption\"}}\n"
+      string: '{"chunk":{"type":"text","text":"Not"}}
+
+        {"chunk":{"type":"text","text":" enough"}}
+
+        {"chunk":{"type":"text","text":" data"}}
+
+        {"chunk":{"type":"text","text":" to"}}
+
+        {"chunk":{"type":"text","text":" answer"}}
+
+        {"chunk":{"type":"text","text":" this"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" The"}}
+
+        {"chunk":{"type":"text","text":" provided"}}
+
+        {"chunk":{"type":"text","text":" context"}}
+
+        {"chunk":{"type":"text","text":" does"}}
+
+        {"chunk":{"type":"text","text":" not"}}
+
+        {"chunk":{"type":"text","text":" define"}}
+
+        {"chunk":{"type":"text","text":" `"}}
+
+        {"chunk":{"type":"text","text":"max"}}
+
+        {"chunk":{"type":"text","text":"_magic"}}
+
+        {"chunk":{"type":"text","text":"`, explain"}}
+
+        {"chunk":{"type":"text","text":" how to"}}
+
+        {"chunk":{"type":"text","text":" use it"}}
+
+        {"chunk":{"type":"text","text":", or"}}
+
+        {"chunk":{"type":"text","text":" specify how"}}
+
+        {"chunk":{"type":"text","text":" it should"}}
+
+        {"chunk":{"type":"text","text":" be changed"}}
+
+        {"chunk":{"type":"text","text":" in the future"}}
+
+        {"chunk":{"type":"text","text":". Please provide"}}
+
+        {"chunk":{"type":"text","text":" the relevant documentation"}}
+
+        {"chunk":{"type":"text","text":", configuration,"}}
+
+        {"chunk":{"type":"text","text":" or code where"}}
+
+        {"chunk":{"type":"text","text":" `max_magic"}}
+
+        {"chunk":{"type":"text","text":"` is defined."}}
+
+        {"chunk":{"type":"status","code":"-2"}}
+
+        {"chunk":{"type":"meta","input_tokens":21,"output_tokens":13,"model_input_tokens":535,"model_output_tokens":56,"timings":{"generative_first_chunk":0.5895849830003499,"generative":0.8912794400002895},"input_nuclia_tokens":0.021,"output_nuclia_tokens":0.013}}
+
+        {"chunk":{"normalized_tokens":{"input":0.0214,"output":0.01344,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Transfer-Encoding:
       - chunked
       access-control-expose-headers:
@@ -1012,24 +1383,27 @@ interactions:
       content-type:
       - application/x-ndjson
       date:
-      - Sun, 15 Nov 2026 22:09:36 GMT
+      - Mon, 16 Nov 2026 10:47:31 GMT
       nuclia-learning-id:
-      - 2e3ce019c5b340429ad8f7f90bb16012
+      - 4e334003fc5f440a9aa614c418913eac
       nuclia-learning-model:
       - chatgpt-azure-5.6-luna
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '455'
+      - '597'
       x-nuclia-trace-id:
-      - 04abb0d52a3f872d1b2d5b8ed78cf729
+      - a09fbfe590172fcf0d9c8cd9a620a11a
     status:
       code: 200
       message: OK
 - request:
-    body: '{"user_id": "arag_evaluate", "question": null, "answer": "No hay suficiente
-      informaci\u00f3n para responder. El contexto no explica qu\u00e9 es `max_magic`,
-      c\u00f3mo se usa ni c\u00f3mo cambiar\u00e1 en el futuro.", "contexts": []}'
+    body: '{"user_id": "arag_evaluate", "question": "How to use max_magic and tell
+      me how you will change this parameter in the future", "answer": "Not enough
+      data to answer this. The provided context does not define `max_magic`, explain
+      how to use it, or specify how it should be changed in the future. Please provide
+      the relevant documentation, configuration, or code where `max_magic` is defined.",
+      "contexts": null}'
     headers:
       Accept:
       - '*/*'
@@ -1038,7 +1412,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '205'
+      - '401'
       Content-Type:
       - application/json
       Host:
@@ -1055,63 +1429,10 @@ interactions:
     uri: https://europe-1.dp.progress.cloud/api/v1/predict/remi
   response:
     body:
-      string: '{"time":0.00010561943054199219,"answer_relevance":null,"context_relevance":[],"groundedness":[],"consumption":{"normalized_tokens":{"input":0.0,"output":0.0,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0}}}'
+      string: '{"time":0.5971877574920654,"answer_relevance":{"score":5,"reason":""},"context_relevance":[],"groundedness":[],"consumption":{"normalized_tokens":{"input":0.00005,"output":0.0,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0}}}'
     headers:
       Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
-      Content-Length:
-      - '232'
-      access-control-expose-headers:
-      - X-NUCLIA-TRACE-ID
-      content-type:
-      - application/json
-      date:
-      - Sun, 15 Nov 2026 22:09:37 GMT
-      nuclia-learning-model:
-      - Llama-REMi-v1
-      via:
-      - 1.1 google
-      x-envoy-upstream-service-time:
-      - '15'
-      x-nuclia-trace-id:
-      - e5379db996bc201a9f67a3affabd6049
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"user_id": "arag_evaluate", "question": "Como usar max_magic y dime como
-      cambiar\u00e1 este parametro en el futuro", "answer": "No hay suficiente informaci\u00f3n
-      para responder. El contexto no explica qu\u00e9 es `max_magic`, c\u00f3mo se
-      usa ni c\u00f3mo cambiar\u00e1 en el futuro.", "contexts": null}'
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '274'
-      Content-Type:
-      - application/json
-      Host:
-      - europe-1.dp.progress.cloud
-      User-Agent:
-      - nuclia.py/4.14.0
-      x-origin:
-      - RAO
-      x-show-consumption:
-      - 'true'
-      x-stf-nuakey:
-      - DUMMY
-    method: POST
-    uri: https://europe-1.dp.progress.cloud/api/v1/predict/remi
-  response:
-    body:
-      string: '{"time":0.6031804084777832,"answer_relevance":{"score":0,"reason":""},"context_relevance":[],"groundedness":[],"consumption":{"normalized_tokens":{"input":0.00005,"output":0.0,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0}}}'
-    headers:
-      Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      - h3=":443"; ma=2592000
       Content-Length:
       - '251'
       access-control-expose-headers:
@@ -1119,15 +1440,15 @@ interactions:
       content-type:
       - application/json
       date:
-      - Sun, 15 Nov 2026 22:09:38 GMT
+      - Mon, 16 Nov 2026 10:47:32 GMT
       nuclia-learning-model:
       - Llama-REMi-v1
       via:
       - 1.1 google
       x-envoy-upstream-service-time:
-      - '614'
+      - '610'
       x-nuclia-trace-id:
-      - 6f4847dbe01e8d384623d380f8a677e2
+      - 42687cc91cedef3bbea3e4d27414063a
     status:
       code: 200
       message: OK

@@ -1,0 +1,1455 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nuclia.py/4.14.0
+      x-nuclia-nuakey:
+      - DUMMY
+    method: GET
+    uri: https://europe-1.dp.progress.cloud/api/authorizer/info
+  response:
+    body:
+      string: '{"auth":"nua_key","user":{"identity_type":"nua_key","user_id":"7f193356-2ec9-48b6-96dd-f7e444bc278c","account_id":"4f9285c7-7151-4431-94e6-3f1fb0d66aca","account_type":"v3enterprise","allow_kb_management":false},"ip_info":null}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '227'
+      content-type:
+      - application/json
+      date:
+      - Mon, 16 Nov 2026 10:47:13 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '7'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"prefixes": [{"prefix": "/n/i"}]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '32'
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nucliadb-sdk/6.15.1.post6905
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/catalog/facets
+  response:
+    body:
+      string: '{"facets":{"/n/i":1153,"/n/i/application":1,"/n/i/application/json":1,"/n/i/text":1152,"/n/i/text/markdown":1152}}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '114'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Mon, 16 Nov 2026 10:47:14 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '11'
+      x-nuclia-trace-id:
+      - e2269831741ba0e1b05af328bbadafd7
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nucliadb-sdk/6.15.1.post6905
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: GET
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b
+  response:
+    body:
+      string: '{"slug":"nuclia-docs","uuid":"df8b4c24-2807-4888-ad6c-ae97357a638b","config":{"uuid":null,"slug":"4f9285c7-7151-4431-94e6-3f1fb0d66aca:nuclia-docs","title":"Nuclia
+        Docs","description":"","learning_configuration":null,"external_index_provider":null,"configured_external_index_provider":{"type":"unset"},"similarity":null,"hidden_resources_enabled":false,"hidden_resources_hide_on_creation":false,"enforce_security":false},"model":null}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '434'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Mon, 16 Nov 2026 10:47:14 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '17'
+      x-nuclia-trace-id:
+      - 5d70a4f8fb5cca40f04fbcf3326adea9
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nucliadb-sdk/6.15.1.post6905
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: GET
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/labelsets
+  response:
+    body:
+      string: '{"uuid":"df8b4c24-2807-4888-ad6c-ae97357a638b","labelsets":{"pmm":{"title":"pmm","color":"#DAF3E6","multiple":true,"kind":["RESOURCES"],"labels":[{"title":"Videos","related":"","text":"","uri":""},{"title":"Partner
+        Content","related":"","text":"","uri":""},{"title":"Softcat","related":"","text":"","uri":""},{"title":"Sales
+        Enablement Assets","related":"","text":"","uri":""},{"title":"KO 26","related":"","text":"","uri":""},{"title":"Data
+        Sheets","related":"","text":"","uri":""},{"title":"Progress Agentic RAG Training
+        Materials 2026","related":"","text":"","uri":""}]}}}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '575'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Mon, 16 Nov 2026 10:47:13 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '23'
+      x-nuclia-trace-id:
+      - fe8a9572a5288449f30cc636dd7522ae
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nucliadb-sdk/6.15.1.post6905
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: GET
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/configuration
+  response:
+    body:
+      string: '{"resource_labelers_models":null,"paragraph_labelers_models":null,"intent_models":null,"visual_labeling":"disabled","ner_model":"multilingual","relation_model":"base","anonymization_model":"disabled","semantic_model":"multilingual-2024-05-06","semantic_models":["multilingual-2024-05-06"],"default_semantic_model":"multilingual-2024-05-06","semantic_graph_node_models":[],"default_semantic_graph_node_model":null,"semantic_graph_edge_models":[],"default_semantic_graph_edge_model":null,"semantic_vector_similarity":"DOT","semantic_vector_size":1024,"semantic_matryoshka_dims":[],"semantic_threshold":0.4,"generative_model":"chatgpt-azure-5.6-terra","user_keys":{"openai":null,"azure_openai":null,"mistral":null,"palm":null,"anthropic":null,"claude3":null,"anthropic_vertex":null,"anthropic_bedrock":null,"azure_mistral":null,"hf_llm":null,"hf_embedding":null,"azure_aii":null,"openai_compat":null},"user_prompts":{"openai":null,"azure_openai":{"system":"You
+        are an IT expert, express yourself like one. If you do not find an answer
+        in the context, please say \"Right now I don''t have enough context to answer
+        your question. Please contact us at support@nuclia.com\". ","prompt":""},"palm":null,"anthropic":null,"claude3":null,"anthropic_vertex":null,"anthropic_bedrock":null,"text_generation":null,"mistral":null,"azure_mistral":null,"hf_llm":null,"openai_url":null,"vertex_llama":null,"deepseek":null,"openai_compat":null,"nova":null},"summary":"simple","summary_model":"claude-5-sonnet","summary_prompt":null,"prefer_markdown_generative_response":false,"allow_all_default_models":true,"semantic_model_configs":{"multilingual-2024-05-06":{"similarity":0,"size":1024,"threshold":0.4,"max_tokens":2048,"matryoshka_dims":[],"external":false}},"semantic_graph_node_model_configs":{},"semantic_graph_edge_model_configs":{}}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '1819'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Mon, 16 Nov 2026 10:47:14 GMT,Mon, 16 Nov 2026 10:47:14 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '43'
+      x-nuclia-trace-id:
+      - a2ee32747dbe1d47eef7438d025548a4
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"prefixes": [{"prefix": "/s/p"}]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '32'
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nucliadb-sdk/6.15.1.post6905
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/catalog/facets
+  response:
+    body:
+      string: '{"facets":{"/s/p":1153,"/s/p/ca":4,"/s/p/cy":1,"/s/p/da":1,"/s/p/en":1131,"/s/p/eo":5,"/s/p/la":7,"/s/p/nb":1,"/s/p/tl":1,"/s/p/yo":2}}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '135'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Mon, 16 Nov 2026 10:47:14 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '40'
+      x-nuclia-trace-id:
+      - 8b8e50ae0ce9610c99e118762dbd6601
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"features": ["keyword"], "faceted": ["/classification.labels"]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '61'
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nucliadb-sdk/6.15.1.post6905
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/search
+  response:
+    body:
+      string: '{"resources":{"17b4410b7baa4b4cbc19ee03ed47c0a8":{"id":"17b4410b7baa4b4cbc19ee03ed47c0a8","slug":"docs-develop-decisions-md","title":"docs
+        > develop > decisions","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T14:26:02.484985","modified":"2026-10-23T14:44:31.400770","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"d244b3ec44e749f4adc9c16f1fde5551":{"id":"d244b3ec44e749f4adc9c16f1fde5551","slug":"docs-develop-js-sdk-interfaces-DeletedResources-md","title":"docs
+        > develop > js sdk > interfaces > DeletedResources","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-26T12:22:02.401866","modified":"2026-11-13T13:02:01.753451","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"50afc8b719e1492086c19238ff985691":{"id":"50afc8b719e1492086c19238ff985691","slug":"docs-develop-js-sdk-interfaces-DeleteResourcesFilter-md","title":"docs
+        > develop > js sdk > interfaces > DeleteResourcesFilter","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-26T12:22:16.882694","modified":"2026-11-13T13:01:08.735995","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false}},"paragraphs":{"results":[{"score":0.0,"rid":"50afc8b719e1492086c19238ff985691","field_type":"t","field":"page","text":"@nuclia/core
+        \n \n @nuclia/core / DeleteResourcesFilter \n Interface: DeleteResourcesFilter
+        \n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:698 \n Properties
+        \n filter_expression \n \n filter_expression: object \n \n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:699
+        \n resource \n \n resource: ResourceFilterExpression \n ","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":0,"start":0,"end":325},"fuzzy_result":false},{"score":0.0,"rid":"50afc8b719e1492086c19238ff985691","field_type":"a","field":"title","text":"docs
+        > develop > js sdk > interfaces > DeleteResourcesFilter","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":0,"start":0,"end":60},"fuzzy_result":false},{"score":0.0,"rid":"d244b3ec44e749f4adc9c16f1fde5551","field_type":"t","field":"page","text":"@nuclia/core
+        \n \n @nuclia/core / DeletedResources \n Interface: DeletedResources \n Defined
+        in: libs/sdk-core/src/lib/db/kb/kb.models.ts:704 \n Properties \n delete_id
+        \n \n delete_id: string \n \n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:705
+        \n \n resources \n \n resources: string[] \n \n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:706","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":0,"start":0,"end":345},"fuzzy_result":false},{"score":0.0,"rid":"d244b3ec44e749f4adc9c16f1fde5551","field_type":"a","field":"title","text":"docs
+        > develop > js sdk > interfaces > DeletedResources","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":0,"start":0,"end":55},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        \n OpenAI-compatible contract \n The request contains: \n \n model: the enabled
+        decision model ID. \n input: a string, or a list of user messages. Message
+        content can be a string or typed input_text and input_image parts. Image input
+        is currently supported only by gpt-6-luna-decisions. \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":7,"start":2724,"end":3008},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        bash \n curl --fail-with-body \\ \n --request POST \\ \n ''https://.dp.progress.cloud/api/v1/predict/decisions''
+        \\ \n --header X-NUCLIA-NUAKEY: Bearer ${NUA_API_KEY} \\ \n --header ''X-Show-Consumption:
+        true'' \\ \n --header ''Content-Type: application/json'' \\ \n --data ''{
+        \n model : gpt-6-luna-decisions , \n input : The payment gateway is returning
+        HTTP 503 for every checkout. , \n questions : [ \n { \n type : predicate ,
+        \n name : outage , \n instructions : Is there an active checkout outage? \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":11,"start":3785,"end":4264},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        ), \n action : Choice( \n instructions= Choose the next action , \n criteria={
+        \n monitor : Continue monitoring , \n page : Page the on-call engineer , \n
+        }, \n ), \n severity : Score( \n instructions= Score the incident severity
+        , \n criteria=[ low , medium , high , critical ], \n ), \n }, \n ) \n print(result.nouls[
+        outage ].noul) \n print(result.choices[ action ].choice) \n print(result.scores[
+        severity ].score) \n asyncio.run(main()) \n ``` \n System One answers are
+        keyed by question ID: \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":24,"start":10860,"end":11340},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        Common uses include: \n \n classifying and routing support tickets, documents,
+        or events; \n checking evidence against compliance or moderation policies;
+        \n ranking a case against an ordered severity or quality scale; \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":2,"start":655,"end":871},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        To receive normalized Progress Agentic RAG billing consumption, add: \n text
+        \n X-Show-Consumption: true \n With the Python SDK, set show_consumption=True.
+        The response then includes consumption.normalized_tokens with input, output,
+        and image values. See Token consumption for details.","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":27,"start":11879,"end":12163},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        choice: a choice among the keys in the required criteria object. \n score:
+        a score across the ordered entries in the required criteria array. \n \n state,
+        instructions, and criteria values can be structured JSON, which lets you pass
+        application state without flattening it into a prompt. \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":19,"start":7855,"end":8142},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        questions: a non-empty ordered list of typed questions. \n safety_identifier:
+        an optional opaque end-user identifier forwarded only to providers that support
+        it. Do not put personal data in it. \n \n Question types are: \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":8,"start":3008,"end":3227},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        async with AsyncOpenAI( \n base_url= https://.dp.progress.cloud/api/v1/predict
+        , \n api_key=os.environ[ NUA_API_KEY ], \n ) as client: \n result = await
+        client.decisions.create( \n model= gpt-6-luna-decisions , \n input= The payment
+        gateway is returning HTTP 503 for every checkout. , \n questions=[ \n { \n
+        type : predicate , \n name : outage , \n instructions : Is there an active
+        checkout outage? , \n }, \n { \n type : choice , \n name : page_on_call ,
+        \n instructions : Should the on-call engineer be paged? , \n choices : [ \n
+        { value : False, description : Do not page }, \n { value : True, description
+        : Page immediately }, \n ], \n }, \n ], \n ) \n print(result.answers) \n asyncio.run(main())
+        \n ``` \n Response \n Answers appear in the same order as the questions. A
+        typical response contains: \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":15,"start":5912,"end":6691},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        }, \n { \n type : choice , \n name : page_on_call , \n instructions : Should
+        the on-call engineer be paged? , \n choices : [ \n { value : false, description
+        : Do not page }, \n { value : true, description : Page immediately } \n ]
+        \n } \n ] \n }'' \n Nuclia Python SDK \n Register the NUA key, build the typed
+        request, and call NucliaPredict.decision(...). This example uses the OpenAI-backed
+        gpt-6-luna-decisions model: \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":12,"start":4264,"end":4673},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        async with AsyncTypeSafeClient( \n base_url= https://.dp.progress.cloud/api
+        , \n api_key=os.environ[ NUA_API_KEY ], \n model= jev-1.13.0 , \n ) as client:
+        \n result = await client.system_one( \n state={ \n service : checkout , \n
+        status_codes : [503, 503, 503], \n affected_regions : [ us-east ], \n }, \n
+        questions={ \n outage : Noul( \n instructions= Is this evidence consistent
+        with an active outage? \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":23,"start":10467,"end":10860},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        selecting the next step in an automated workflow; and \n combining several
+        related decisions in one model call. \n \n Two request contracts are available:
+        \n | Contract | Endpoint | Best for | \n | --- | --- | --- | \n | OpenAI-compatible
+        Decisions | POST /api/v1/predict/decisions | Ordered predicate, choice, and
+        score questions, typed choice values, and applications adopting the OpenAI
+        Decisions shape | \n | System One | POST /api/v1/predict/decisions/systemone
+        | Stable question IDs, structured application state, and noul, choice, and
+        score questions | \n Both contracts provide typed outcomes. Choose the contract
+        that best matches your application data and integration; model availability
+        is listed below. \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":3,"start":871,"end":1580},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        \n The response also contains model, usage, and optional consumption, as in
+        the OpenAI-compatible response. \n Usage and consumption \n usage is always
+        part of a successful Decisions response. It reports the provider''s input,
+        output, and total token counts; supported providers can also report cache
+        and reasoning details. \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":26,"start":11557,"end":11879},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        | Model | Availability | Zone | Images | Maximum input | \n | --- | --- |
+        --- | --- | --- | \n | gpt-6-luna-decisions | Available by default | All public
+        cloud zones | Yes | 1,050,000 tokens | \n | jev-1.13.0 | Requires account
+        enablement | All public cloud zones | No | 64,000 tokens | \n | progress-decision-1.0
+        | Requires account enablement | aws-us-east-2-1 only | No | 16,384 tokens
+        | \n Choose a model based on the integration and input size you need: \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":5,"start":1957,"end":2412},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        See the generated NUA OpenAPI reference for the complete schemas. \n Authentication
+        and availability \n Authenticate with a NUA key in the X-NUCLIA-NUAKEY header.
+        \n The Decisions API is available to NUA accounts. gpt-6-luna-decisions is
+        available by default. To use jev-1.13.0 or progress-decision-1.0, request
+        that the additional Decisions models be enabled for your account. \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":4,"start":1580,"end":1957},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        ```python \n import os \n from nuclia import sdk \n from nuclia_models.predict.decisions
+        import OpenAIDecisionRequest \n sdk.NucliaAuth().nua(token=os.environ[ NUA_API_KEY
+        ]) \n request = OpenAIDecisionRequest.model_validate( \n { \n model : gpt-6-luna-decisions
+        , \n input : The payment gateway is returning HTTP 503 for every checkout.
+        , \n questions : [ \n { \n type : predicate , \n name : outage , \n instructions
+        : Is there an active checkout outage? , \n }, \n { \n type : choice , \n name
+        : page_on_call , \n instructions : Should the on-call engineer be paged? ,
+        \n choices : [ \n { value : False, description : Do not page }, \n { value
+        : True, description : Page immediately }, \n ], \n } \n ], \n } \n ) \n result
+        = sdk.NucliaPredict().decision( \n request, \n show_consumption=True, \n )
+        \n outage, action = result.answers \n print(outage.probability) \n print(action.choice,
+        action.confidence) \n ``` \n Use sdk.AsyncNucliaPredict().decision(...) and
+        await the result in asynchronous applications. \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":13,"start":4673,"end":5652},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        \n model: the enabled decision model ID. Set it explicitly so deployments
+        do not depend on a changing default. \n state: the evidence as a string, JSON
+        object, or JSON array. \n questions: a non-empty object whose keys are stable
+        question IDs. \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":17,"start":7379,"end":7622},"fuzzy_result":false}],"facets":{},"query":"","total":6202,"page_number":0,"page_size":20,"next_page":true,"min_score":0.0},"shards":["306cbabb-72a5-417c-827f-7874e205c858"]}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '14496'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Mon, 16 Nov 2026 10:47:14 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '67'
+      x-nuclia-trace-id:
+      - 057d0352503ceb74818c0097097b9602
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"faceted": ["/k"]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '18'
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nucliadb-sdk/6.15.1.post6905
+      content-type:
+      - application/json
+      x-stf-serviceaccount:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/search
+  response:
+    body:
+      string: '{"resources":{"85e591ebd522463eb595e7d1c3ad3593":{"id":"85e591ebd522463eb595e7d1c3ad3593","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-enumerations-ResourceFeatures-md","title":"docs
+        > develop > js sdk > @nuclia > namespaces > Search > enumerations > ResourceFeatures","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:42.724911","modified":"2026-11-13T13:03:13.626019","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"c35e47034ef4405ab02cf871fe5de5f6":{"id":"c35e47034ef4405ab02cf871fe5de5f6","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-interfaces-FindField-md","title":"docs
+        > develop > js sdk > @nuclia > namespaces > Search > interfaces > FindField","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:42.155056","modified":"2026-11-13T13:03:01.441780","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"9dfc2da1aebf4d69a7cd387f986a54b4":{"id":"9dfc2da1aebf4d69a7cd387f986a54b4","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-enumerations-FindScoreType-md","title":"docs
+        > develop > js sdk > @nuclia > namespaces > Search > enumerations > FindScoreType","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:44.506074","modified":"2026-11-13T13:03:12.417713","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"50afc8b719e1492086c19238ff985691":{"id":"50afc8b719e1492086c19238ff985691","slug":"docs-develop-js-sdk-interfaces-DeleteResourcesFilter-md","title":"docs
+        > develop > js sdk > interfaces > DeleteResourcesFilter","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-26T12:22:16.882694","modified":"2026-11-13T13:01:08.735995","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"9c4d91a2095a40238e67921e69692dd8":{"id":"9c4d91a2095a40238e67921e69692dd8","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-interfaces-Results-md","title":"docs
+        > develop > js sdk > @nuclia > namespaces > Search > interfaces > Results","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:40.393460","modified":"2026-11-13T13:03:11.248829","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"be6728837a684c5d911afe9dfc472c6c":{"id":"be6728837a684c5d911afe9dfc472c6c","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-enumerations-SuggestionFeatures-md","title":"docs
+        > develop > js sdk > @nuclia > namespaces > Search > enumerations > SuggestionFeatures","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:43.915756","modified":"2026-11-13T13:03:13.017852","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"17b4410b7baa4b4cbc19ee03ed47c0a8":{"id":"17b4410b7baa4b4cbc19ee03ed47c0a8","slug":"docs-develop-decisions-md","title":"docs
+        > develop > decisions","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T14:26:02.484985","modified":"2026-10-23T14:44:31.400770","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"6353c45a642e4a6aa22b9d034beaaba6":{"id":"6353c45a642e4a6aa22b9d034beaaba6","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-enumerations-Features-md","title":"docs
+        > develop > js sdk > @nuclia > namespaces > Search > enumerations > Features","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:43.319514","modified":"2026-11-13T13:03:11.830140","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"d244b3ec44e749f4adc9c16f1fde5551":{"id":"d244b3ec44e749f4adc9c16f1fde5551","slug":"docs-develop-js-sdk-interfaces-DeletedResources-md","title":"docs
+        > develop > js sdk > interfaces > DeletedResources","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-26T12:22:02.401866","modified":"2026-11-13T13:02:01.753451","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false},"ccebde9a647440018a3029f7a840c863":{"id":"ccebde9a647440018a3029f7a840c863","slug":"docs-develop-js-sdk--nuclia-namespaces-Search-interfaces-FieldResult-md","title":"docs
+        > develop > js sdk > @nuclia > namespaces > Search > interfaces > FieldResult","summary":"","icon":"text/markdown","thumbnail":"","metadata":{"metadata":{},"language":"en","languages":["en"],"status":"PROCESSED"},"usermetadata":{"classifications":[]},"fieldmetadata":[],"computedmetadata":{"field_classifications":[]},"created":"2026-10-16T10:19:41.491832","modified":"2026-11-13T13:03:00.878363","last_seqid":0,"last_account_seq":null,"queue":"private","hidden":false}},"paragraphs":{"results":[{"score":0.0,"rid":"50afc8b719e1492086c19238ff985691","field_type":"t","field":"page","text":"@nuclia/core
+        \n \n @nuclia/core / DeleteResourcesFilter \n Interface: DeleteResourcesFilter
+        \n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:698 \n Properties
+        \n filter_expression \n \n filter_expression: object \n \n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:699
+        \n resource \n \n resource: ResourceFilterExpression \n ","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":0,"start":0,"end":325},"fuzzy_result":false},{"score":0.0,"rid":"50afc8b719e1492086c19238ff985691","field_type":"a","field":"title","text":"docs
+        > develop > js sdk > interfaces > DeleteResourcesFilter","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":0,"start":0,"end":60},"fuzzy_result":false},{"score":0.0,"rid":"d244b3ec44e749f4adc9c16f1fde5551","field_type":"t","field":"page","text":"@nuclia/core
+        \n \n @nuclia/core / DeletedResources \n Interface: DeletedResources \n Defined
+        in: libs/sdk-core/src/lib/db/kb/kb.models.ts:704 \n Properties \n delete_id
+        \n \n delete_id: string \n \n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:705
+        \n \n resources \n \n resources: string[] \n \n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:706","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":0,"start":0,"end":345},"fuzzy_result":false},{"score":0.0,"rid":"d244b3ec44e749f4adc9c16f1fde5551","field_type":"a","field":"title","text":"docs
+        > develop > js sdk > interfaces > DeletedResources","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":0,"start":0,"end":55},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        \n OpenAI-compatible contract \n The request contains: \n \n model: the enabled
+        decision model ID. \n input: a string, or a list of user messages. Message
+        content can be a string or typed input_text and input_image parts. Image input
+        is currently supported only by gpt-6-luna-decisions. \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":7,"start":2724,"end":3008},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        bash \n curl --fail-with-body \\ \n --request POST \\ \n ''https://.dp.progress.cloud/api/v1/predict/decisions''
+        \\ \n --header X-NUCLIA-NUAKEY: Bearer ${NUA_API_KEY} \\ \n --header ''X-Show-Consumption:
+        true'' \\ \n --header ''Content-Type: application/json'' \\ \n --data ''{
+        \n model : gpt-6-luna-decisions , \n input : The payment gateway is returning
+        HTTP 503 for every checkout. , \n questions : [ \n { \n type : predicate ,
+        \n name : outage , \n instructions : Is there an active checkout outage? \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":11,"start":3785,"end":4264},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        ), \n action : Choice( \n instructions= Choose the next action , \n criteria={
+        \n monitor : Continue monitoring , \n page : Page the on-call engineer , \n
+        }, \n ), \n severity : Score( \n instructions= Score the incident severity
+        , \n criteria=[ low , medium , high , critical ], \n ), \n }, \n ) \n print(result.nouls[
+        outage ].noul) \n print(result.choices[ action ].choice) \n print(result.scores[
+        severity ].score) \n asyncio.run(main()) \n ``` \n System One answers are
+        keyed by question ID: \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":24,"start":10860,"end":11340},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        Common uses include: \n \n classifying and routing support tickets, documents,
+        or events; \n checking evidence against compliance or moderation policies;
+        \n ranking a case against an ordered severity or quality scale; \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":2,"start":655,"end":871},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        To receive normalized Progress Agentic RAG billing consumption, add: \n text
+        \n X-Show-Consumption: true \n With the Python SDK, set show_consumption=True.
+        The response then includes consumption.normalized_tokens with input, output,
+        and image values. See Token consumption for details.","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":27,"start":11879,"end":12163},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        choice: a choice among the keys in the required criteria object. \n score:
+        a score across the ordered entries in the required criteria array. \n \n state,
+        instructions, and criteria values can be structured JSON, which lets you pass
+        application state without flattening it into a prompt. \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":19,"start":7855,"end":8142},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        questions: a non-empty ordered list of typed questions. \n safety_identifier:
+        an optional opaque end-user identifier forwarded only to providers that support
+        it. Do not put personal data in it. \n \n Question types are: \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":8,"start":3008,"end":3227},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        async with AsyncOpenAI( \n base_url= https://.dp.progress.cloud/api/v1/predict
+        , \n api_key=os.environ[ NUA_API_KEY ], \n ) as client: \n result = await
+        client.decisions.create( \n model= gpt-6-luna-decisions , \n input= The payment
+        gateway is returning HTTP 503 for every checkout. , \n questions=[ \n { \n
+        type : predicate , \n name : outage , \n instructions : Is there an active
+        checkout outage? , \n }, \n { \n type : choice , \n name : page_on_call ,
+        \n instructions : Should the on-call engineer be paged? , \n choices : [ \n
+        { value : False, description : Do not page }, \n { value : True, description
+        : Page immediately }, \n ], \n }, \n ], \n ) \n print(result.answers) \n asyncio.run(main())
+        \n ``` \n Response \n Answers appear in the same order as the questions. A
+        typical response contains: \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":15,"start":5912,"end":6691},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        }, \n { \n type : choice , \n name : page_on_call , \n instructions : Should
+        the on-call engineer be paged? , \n choices : [ \n { value : false, description
+        : Do not page }, \n { value : true, description : Page immediately } \n ]
+        \n } \n ] \n }'' \n Nuclia Python SDK \n Register the NUA key, build the typed
+        request, and call NucliaPredict.decision(...). This example uses the OpenAI-backed
+        gpt-6-luna-decisions model: \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":12,"start":4264,"end":4673},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        async with AsyncTypeSafeClient( \n base_url= https://.dp.progress.cloud/api
+        , \n api_key=os.environ[ NUA_API_KEY ], \n model= jev-1.13.0 , \n ) as client:
+        \n result = await client.system_one( \n state={ \n service : checkout , \n
+        status_codes : [503, 503, 503], \n affected_regions : [ us-east ], \n }, \n
+        questions={ \n outage : Noul( \n instructions= Is this evidence consistent
+        with an active outage? \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":23,"start":10467,"end":10860},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        selecting the next step in an automated workflow; and \n combining several
+        related decisions in one model call. \n \n Two request contracts are available:
+        \n | Contract | Endpoint | Best for | \n | --- | --- | --- | \n | OpenAI-compatible
+        Decisions | POST /api/v1/predict/decisions | Ordered predicate, choice, and
+        score questions, typed choice values, and applications adopting the OpenAI
+        Decisions shape | \n | System One | POST /api/v1/predict/decisions/systemone
+        | Stable question IDs, structured application state, and noul, choice, and
+        score questions | \n Both contracts provide typed outcomes. Choose the contract
+        that best matches your application data and integration; model availability
+        is listed below. \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":3,"start":871,"end":1580},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        \n The response also contains model, usage, and optional consumption, as in
+        the OpenAI-compatible response. \n Usage and consumption \n usage is always
+        part of a successful Decisions response. It reports the provider''s input,
+        output, and total token counts; supported providers can also report cache
+        and reasoning details. \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":26,"start":11557,"end":11879},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        | Model | Availability | Zone | Images | Maximum input | \n | --- | --- |
+        --- | --- | --- | \n | gpt-6-luna-decisions | Available by default | All public
+        cloud zones | Yes | 1,050,000 tokens | \n | jev-1.13.0 | Requires account
+        enablement | All public cloud zones | No | 64,000 tokens | \n | progress-decision-1.0
+        | Requires account enablement | aws-us-east-2-1 only | No | 16,384 tokens
+        | \n Choose a model based on the integration and input size you need: \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":5,"start":1957,"end":2412},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        See the generated NUA OpenAPI reference for the complete schemas. \n Authentication
+        and availability \n Authenticate with a NUA key in the X-NUCLIA-NUAKEY header.
+        \n The Decisions API is available to NUA accounts. gpt-6-luna-decisions is
+        available by default. To use jev-1.13.0 or progress-decision-1.0, request
+        that the additional Decisions models be enabled for your account. \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":4,"start":1580,"end":1957},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        ```python \n import os \n from nuclia import sdk \n from nuclia_models.predict.decisions
+        import OpenAIDecisionRequest \n sdk.NucliaAuth().nua(token=os.environ[ NUA_API_KEY
+        ]) \n request = OpenAIDecisionRequest.model_validate( \n { \n model : gpt-6-luna-decisions
+        , \n input : The payment gateway is returning HTTP 503 for every checkout.
+        , \n questions : [ \n { \n type : predicate , \n name : outage , \n instructions
+        : Is there an active checkout outage? , \n }, \n { \n type : choice , \n name
+        : page_on_call , \n instructions : Should the on-call engineer be paged? ,
+        \n choices : [ \n { value : False, description : Do not page }, \n { value
+        : True, description : Page immediately }, \n ], \n } \n ], \n } \n ) \n result
+        = sdk.NucliaPredict().decision( \n request, \n show_consumption=True, \n )
+        \n outage, action = result.answers \n print(outage.probability) \n print(action.choice,
+        action.confidence) \n ``` \n Use sdk.AsyncNucliaPredict().decision(...) and
+        await the result in asynchronous applications. \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":13,"start":4673,"end":5652},"fuzzy_result":false},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","text":"
+        \n model: the enabled decision model ID. Set it explicitly so deployments
+        do not depend on a changing default. \n state: the evidence as a string, JSON
+        object, or JSON array. \n questions: a non-empty object whose keys are stable
+        question IDs. \n","labels":[],"start_seconds":null,"end_seconds":null,"position":{"page_number":0,"index":17,"start":7379,"end":7622},"fuzzy_result":false}],"facets":{"/k":{"/k/text":6202}},"query":"","total":6202,"page_number":0,"page_size":20,"next_page":true,"min_score":0.0},"fulltext":{"results":[{"score":0.0,"rid":"50afc8b719e1492086c19238ff985691","field_type":"t","field":"page","labels":[]},{"score":0.0,"rid":"50afc8b719e1492086c19238ff985691","field_type":"a","field":"title","labels":[]},{"score":0.0,"rid":"d244b3ec44e749f4adc9c16f1fde5551","field_type":"t","field":"page","labels":[]},{"score":0.0,"rid":"d244b3ec44e749f4adc9c16f1fde5551","field_type":"a","field":"title","labels":[]},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"t","field":"page","labels":[]},{"score":0.0,"rid":"17b4410b7baa4b4cbc19ee03ed47c0a8","field_type":"a","field":"title","labels":[]},{"score":0.0,"rid":"9dfc2da1aebf4d69a7cd387f986a54b4","field_type":"a","field":"title","labels":[]},{"score":0.0,"rid":"9dfc2da1aebf4d69a7cd387f986a54b4","field_type":"t","field":"page","labels":[]},{"score":0.0,"rid":"6353c45a642e4a6aa22b9d034beaaba6","field_type":"t","field":"page","labels":[]},{"score":0.0,"rid":"6353c45a642e4a6aa22b9d034beaaba6","field_type":"a","field":"title","labels":[]},{"score":0.0,"rid":"be6728837a684c5d911afe9dfc472c6c","field_type":"a","field":"title","labels":[]},{"score":0.0,"rid":"be6728837a684c5d911afe9dfc472c6c","field_type":"t","field":"page","labels":[]},{"score":0.0,"rid":"85e591ebd522463eb595e7d1c3ad3593","field_type":"a","field":"title","labels":[]},{"score":0.0,"rid":"85e591ebd522463eb595e7d1c3ad3593","field_type":"t","field":"page","labels":[]},{"score":0.0,"rid":"c35e47034ef4405ab02cf871fe5de5f6","field_type":"a","field":"title","labels":[]},{"score":0.0,"rid":"c35e47034ef4405ab02cf871fe5de5f6","field_type":"t","field":"page","labels":[]},{"score":0.0,"rid":"ccebde9a647440018a3029f7a840c863","field_type":"t","field":"page","labels":[]},{"score":0.0,"rid":"ccebde9a647440018a3029f7a840c863","field_type":"a","field":"title","labels":[]},{"score":0.0,"rid":"9c4d91a2095a40238e67921e69692dd8","field_type":"a","field":"title","labels":[]},{"score":0.0,"rid":"9c4d91a2095a40238e67921e69692dd8","field_type":"t","field":"page","labels":[]}],"facets":{},"query":"","total":2347,"page_number":0,"page_size":20,"next_page":true,"min_score":0.0},"shards":["306cbabb-72a5-417c-827f-7874e205c858"]}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '21145'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Mon, 16 Nov 2026 10:47:14 GMT
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '55'
+      x-nuclia-trace-id:
+      - d50420c4edf7dcb6b6bfa3ff14a5cd17
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"query": "How to use max_magic and tell me how you will change this parameter
+      in the future", "filters": [], "citations": true, "generative_model": "chatgpt-azure-5.6-luna"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '167'
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nucliadb-sdk/6.15.1.post6905
+      content-type:
+      - application/json
+      x-ndb-client:
+      - agentic
+      x-stf-serviceaccount:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/kb/df8b4c24-2807-4888-ad6c-ae97357a638b/ask
+  response:
+    body:
+      string: "{\"item\":{\"type\":\"answer\",\"text\":\"Not\"}}\n{\"item\":{\"type\"\
+        :\"answer\",\"text\":\" enough\"}}\n{\"item\":{\"type\":\"answer\",\"text\"\
+        :\" data\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\" to\"}}\n{\"item\"\
+        :{\"type\":\"answer\",\"text\":\" answer\"}}\n{\"item\":{\"type\":\"answer\"\
+        ,\"text\":\" this\"}}\n{\"item\":{\"type\":\"answer\",\"text\":\".\"}}\n{\"\
+        item\":{\"type\":\"retrieval\",\"results\":{\"resources\":{\"e3051c443121417496c925390ef67a5c\"\
+        :{\"id\":\"e3051c443121417496c925390ef67a5c\",\"slug\":\"docs-develop-js-sdk-interfaces-MagicAction-md\"\
+        ,\"title\":\"docs > develop > js sdk > interfaces > MagicAction\",\"summary\"\
+        :\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\"\
+        :{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"\
+        usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\"\
+        :[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-03-10T15:05:37.080679\"\
+        ,\"modified\":\"2026-11-13T13:02:22.463273\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/a/title\":{\"paragraphs\":{\"e3051c443121417496c925390ef67a5c/a/title/0-50\"\
+        :{\"score\":0.00035281325108371675,\"score_type\":\"RERANKER\",\"order\":14,\"\
+        text\":\"docs > develop > js sdk > interfaces > MagicAction\",\"id\":\"e3051c443121417496c925390ef67a5c/a/title/0-50\"\
+        ,\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\"\
+        :0,\"end\":50,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"\
+        page_with_visual\":false,\"is_a_table\":false}}}}},\"4039d76b0fff4962900836ab3fdec9f7\"\
+        :{\"id\":\"4039d76b0fff4962900836ab3fdec9f7\",\"slug\":\"docs-rag-advanced-consumption-mdx\"\
+        ,\"title\":\"docs > rag > advanced > consumption.\",\"summary\":\"\",\"icon\"\
+        :\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\"\
+        :\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\"\
+        :{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\"\
+        :{\"field_classifications\":[]},\"created\":\"2025-10-03T08:32:26.341394\"\
+        ,\"modified\":\"2026-10-16T15:17:58.179136\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\"\
+        :{\"score\":0.0007264875457622111,\"score_type\":\"RERANKER\",\"order\":7,\"\
+        text\":\" Use the max_tokens parameter on the /ask endpoint to set hard limits\
+        \ on: \\n - Context size: Limits the amount of retrieved information sent\
+        \ to the LLM \\n - Answer length: Limits the length of the generated response\
+        \ \\n Important Considerations \\n Context Limitations: \\n\",\"id\":\"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\"\
+        ,\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":3075,\"\
+        end\":3340,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"\
+        page_with_visual\":false,\"is_a_table\":false}}}}},\"941df9f528b543d1a10995e2a3ff83ab\"\
+        :{\"id\":\"941df9f528b543d1a10995e2a3ff83ab\",\"slug\":\"docs-changelog-updates-2024-09-md\"\
+        ,\"title\":\"docs > changelog > updates > 2024 09\",\"summary\":\"\",\"icon\"\
+        :\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\"\
+        :\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\"\
+        :{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\"\
+        :{\"field_classifications\":[]},\"created\":\"2025-04-15T14:51:54.589493\"\
+        ,\"modified\":\"2026-06-09T08:07:28.722324\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"941df9f528b543d1a10995e2a3ff83ab/t/page/871-1360\"\
+        :{\"score\":0.0007466114475391805,\"score_type\":\"RERANKER\",\"order\":6,\"\
+        text\":\" \\n For Developers and API Lovers \u2692\uFE0F \\n \\n New tools\
+        \ in the CLI and Python SDK now support moving/copying resources between KBs,\
+        \ ideal for managing development and production environments. Go the docs\
+        \ here \\n Important API change: page_number and page_size parameters are\
+        \ now deprecated in /search and /find endpoints. Instead, use the new top_k\
+        \ parameter (similar to /ask), which is equivalent to setting page_number=0\
+        \ and page_size=top_k. For more results, simply increase the top_k value.\
+        \ \\n\",\"id\":\"941df9f528b543d1a10995e2a3ff83ab/t/page/871-1360\",\"labels\"\
+        :[],\"position\":{\"page_number\":0,\"index\":0,\"start\":871,\"end\":1360,\"\
+        start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\"\
+        :false,\"is_a_table\":false}}}}},\"78aebdf4ca3a4028a555552a07e10e6d\":{\"\
+        id\":\"78aebdf4ca3a4028a555552a07e10e6d\",\"slug\":\"docs-rag-advanced-score-rank-and-rerank-md\"\
+        ,\"title\":\"docs > rag > advanced > score rank and rerank\",\"summary\":\"\
+        \",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\"\
+        :{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"\
+        usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\"\
+        :[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2024-12-02T13:02:38.557991\"\
+        ,\"modified\":\"2026-06-09T08:07:41.924988\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"78aebdf4ca3a4028a555552a07e10e6d/t/page/5733-6021\"\
+        :{\"score\":0.00023413581948261708,\"score_type\":\"RERANKER\",\"order\":19,\"\
+        text\":\" In an actual request, these are the parameters to use in /find or\
+        \ /ask: \\n json \\n { \\n features : [ semantic , keyword ], \\n rank_fusion\
+        \ : { \\n name : rrf , \\n boosting : { \\n semantic : 2, \\n }, \\n window\
+        \ : 80, \\n }, \\n reranker : { \\n name : predict , \\n window : 50, \\n\
+        \ }, \\n top_k : 20, \\n ... \\n }\",\"id\":\"78aebdf4ca3a4028a555552a07e10e6d/t/page/5733-6021\"\
+        ,\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\"\
+        :5733,\"end\":6021,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\"\
+        :false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"43004f553e534ffe9c9e735856bd9b23\"\
+        :{\"id\":\"43004f553e534ffe9c9e735856bd9b23\",\"slug\":\"docs-develop-js-sdk-interfaces-ModelConfig-md\"\
+        ,\"title\":\"docs > develop > js sdk > interfaces > ModelConfig\",\"summary\"\
+        :\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\"\
+        :{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"\
+        usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\"\
+        :[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-01-08T16:32:44.621593\"\
+        ,\"modified\":\"2026-11-13T12:59:44.135694\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"43004f553e534ffe9c9e735856bd9b23/t/page/746-948\"\
+        :{\"score\":0.00043904531048610806,\"score_type\":\"RERANKER\",\"order\":11,\"\
+        text\":\" \\n optional default_max?: number \\n \\n max \\n \\n max: number\
+        \ \\n \\n min? \\n \\n optional min?: number \\n \\n \\n prompt_id? \\n \\\
+        n optional prompt_id?: string \\n \\n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:625\"\
+        ,\"id\":\"43004f553e534ffe9c9e735856bd9b23/t/page/746-948\",\"labels\":[\"\
+        /k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":746,\"end\"\
+        :948,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\"\
+        :false,\"is_a_table\":false}}}}},\"220eb37c167f4eb9bb8e9454e7ba8cf5\":{\"\
+        id\":\"220eb37c167f4eb9bb8e9454e7ba8cf5\",\"slug\":\"docs-develop-python-sdk-05-search-md\"\
+        ,\"title\":\"docs > develop > python sdk > 05 search\",\"summary\":\"\",\"\
+        icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"\
+        language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\"\
+        :{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\"\
+        :{\"field_classifications\":[]},\"created\":\"2025-04-15T14:48:33.723913\"\
+        ,\"modified\":\"2026-06-09T08:08:04.866092\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\"\
+        :{\"score\":0.0005815576296299696,\"score_type\":\"RERANKER\",\"order\":8,\"\
+        text\":\" ::: \\n :::warning \\n Enabling reasoning can use additional tokens,\
+        \ which may increase your usage costs. \\n You may need to increase max_tokens\
+        \ to give the LLM enough room to reason and generate an answer. \\n\",\"id\"\
+        :\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\",\"labels\":[],\"position\"\
+        :{\"page_number\":0,\"index\":0,\"start\":2505,\"end\":2709,\"start_seconds\"\
+        :[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"\
+        is_a_table\":false}}}}},\"27529a0cb3c84641aee3fdc4f201402f\":{\"id\":\"27529a0cb3c84641aee3fdc4f201402f\"\
+        ,\"slug\":\"docs-changelog-updates-2025-03-md\",\"title\":\"docs > changelog\
+        \ > updates > 2025 03\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\"\
+        :\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"\
+        en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"\
+        relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\"\
+        :[]},\"created\":\"2025-04-15T14:51:55.770920\",\"modified\":\"2026-06-09T08:07:25.342909\"\
+        ,\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\"\
+        :{\"paragraphs\":{\"27529a0cb3c84641aee3fdc4f201402f/t/page/592-1147\":{\"\
+        score\":0.0002780309587251395,\"score_type\":\"RERANKER\",\"order\":17,\"\
+        text\":\" \U0001F6E0 API Updates: Powering Up Your Development \\n We've been\
+        \ busy making our APIs more robust and flexible: \\n The /ask endpoint is\
+        \ getting supercharged! \U0001F4AA \\n \\n Image Upload Magic: You can now\
+        \ pass images to the /ask endpoint using extra_context_images. Visual context?\
+        \ Check! \U0001F4F8 say cheese and just remember you need you use a visual\
+        \ LLM for answering \\n Search Configuration Simplification: Customize your\
+        \ API search directly from the dashboard by passing the search_configuration\
+        \ name. Less coding, more doing! \U0001F680 \\n \\n Vectorset Migration\u2014\
+        sounds fancy, right? \\n\",\"id\":\"27529a0cb3c84641aee3fdc4f201402f/t/page/592-1147\"\
+        ,\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":592,\"\
+        end\":1147,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"\
+        page_with_visual\":false,\"is_a_table\":false}}}}},\"4ffdd42c713149249892d3b643ab3c81\"\
+        :{\"id\":\"4ffdd42c713149249892d3b643ab3c81\",\"slug\":\"docs-develop-js-sdk-namespaces-Widget-interfaces-RagStrategiesConfig-md\"\
+        ,\"title\":\"docs > develop > js sdk > namespaces > Widget > interfaces >\
+        \ RagStrategiesConfig\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\"\
+        :\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"\
+        en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"\
+        relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\"\
+        :[]},\"created\":\"2025-08-26T10:03:52.988969\",\"modified\":\"2026-09-21T12:27:10.963890\"\
+        ,\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\"\
+        :{\"paragraphs\":{\"4ffdd42c713149249892d3b643ab3c81/t/page/1081-2749\":{\"\
+        score\":0.0026010938454419374,\"score_type\":\"RERANKER\",\"order\":3,\"text\"\
+        :\" graph: undefined \\\\| object \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:56\
+        \ \\n \\n graphRagStrategy \\n \\n graphRagStrategy: boolean \\n \\n Defined\
+        \ in \\n libs/sdk-core/src/lib/db/search/widget.ts:55 \\n \\n includeNeighbouringParagraphs\
+        \ \\n \\n includeNeighbouringParagraphs: boolean \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:70\
+        \ \\n \\n includePageImages \\n \\n includePageImages: boolean \\n \\n Defined\
+        \ in \\n libs/sdk-core/src/lib/db/search/widget.ts:87 \\n \\n includeParagraphImages\
+        \ \\n \\n includeParagraphImages: boolean \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:89\
+        \ \\n \\n includeRemaining \\n \\n includeRemaining: boolean \\n \\n Defined\
+        \ in \\n libs/sdk-core/src/lib/db/search/widget.ts:76 \\n \\n includeTextualHierarchy\
+        \ \\n \\n includeTextualHierarchy: boolean \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:52\
+        \ \\n \\n maxMessages \\n \\n maxMessages: null \\\\| number \\n \\n Defined\
+        \ in \\n libs/sdk-core/src/lib/db/search/widget.ts:86 \\n \\n maxNumberOfImages\
+        \ \\n \\n maxNumberOfImages: null \\\\| number \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:88\
+        \ \\n \\n maxNumberOfResources \\n \\n maxNumberOfResources: null \\\\| number\
+        \ \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:74 \\n\
+        \ \\n metadatas \\n \\n metadatas: undefined \\\\| object \\n \\n Defined\
+        \ in \\n libs/sdk-core/src/lib/db/search/widget.ts:54 \\n \\n metadatasRagStrategy\
+        \ \\n \\n metadatasRagStrategy: boolean \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:53\
+        \ \\n \\n precedingParagraphs \\n \\n precedingParagraphs: null \\\\| number\
+        \ \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:71 \\n\
+        \ \\n succeedingParagraphs \\n \\n succeedingParagraphs: null \\\\| number\
+        \ \\n \\n Defined in \\n libs/sdk-core/src/lib/db/search/widget.ts:72\",\"\
+        id\":\"4ffdd42c713149249892d3b643ab3c81/t/page/1081-2749\",\"labels\":[\"\
+        /k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":1081,\"end\"\
+        :2749,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\"\
+        :false,\"is_a_table\":false}}}}},\"d986c88467d148a79cb7a4147210c33f\":{\"\
+        id\":\"d986c88467d148a79cb7a4147210c33f\",\"slug\":\"docs-rag-unpublished-llm-agent-md\"\
+        ,\"title\":\"docs > rag > unpublished > llm agent\",\"summary\":\"\",\"icon\"\
+        :\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\"\
+        :\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\"\
+        :{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\"\
+        :{\"field_classifications\":[]},\"created\":\"2026-02-26T10:05:35.012708\"\
+        ,\"modified\":\"2026-06-26T08:59:38.785492\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"d986c88467d148a79cb7a4147210c33f/t/page/2866-3137\"\
+        :{\"score\":0.00028021098114550114,\"score_type\":\"RERANKER\",\"order\":16,\"\
+        text\":\" You could go with a very straightforward approach, and just use\
+        \ generative answer feature of Agentic RAG \\n python \\n search = sdk.NucliaSearch()\
+        \ \\n answer = search.chat(query= Tell me about the parks in Toronto ) \\\
+        n print(answer.answer) \\n You obtain the following answer: \\n\",\"id\":\"\
+        d986c88467d148a79cb7a4147210c33f/t/page/2866-3137\",\"labels\":[],\"position\"\
+        :{\"page_number\":0,\"index\":0,\"start\":2866,\"end\":3137,\"start_seconds\"\
+        :[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"\
+        is_a_table\":false}}}}},\"834e87b32d2b4ef7907a73e198fce807\":{\"id\":\"834e87b32d2b4ef7907a73e198fce807\"\
+        ,\"slug\":\"docs-develop-js-sdk-functions-getWidgetParameters-md\",\"title\"\
+        :\"docs > develop > js sdk > functions > getWidgetParameters\",\"summary\"\
+        :\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\"\
+        :{},\"language\":\"en\",\"languages\":[\"en\",\"nl\"],\"status\":\"PROCESSED\"\
+        },\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\"\
+        :[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-08-26T09:58:50.646751\"\
+        ,\"modified\":\"2026-11-13T12:57:04.729767\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"834e87b32d2b4ef7907a73e198fce807/t/page/0-6064\"\
+        :{\"score\":0.005343256052583456,\"score_type\":\"RERANKER\",\"order\":1,\"\
+        text\":\"@nuclia/core \\n \\n @nuclia/core / getWidgetParameters \\n Function:\
+        \ getWidgetParameters() \\n \\n getWidgetParameters(searchConfig, widgetOptions):\
+        \ { agentic_config_id?: string; agentic_transport?: http \\\\| websocket ;\
+        \ chat_placeholder: string; copy_disclaimer: string; fab_offset_bottom: number;\
+        \ fab_offset_side: number; fab_position: bottom-right \\\\| bottom-left ;\
+        \ fab_size: medium \\\\| small \\\\| large ; features: string; feedback: WidgetFeedback;\
+        \ lang: string; mode: string; not_enough_data_message: string; panel_height:\
+        \ number; panel_width: number; placeholder: string; search_config_id?: string;\
+        \ } \\\\| { agentic_config_id?: string; agentic_transport?: http \\\\| websocket\
+        \ ; chat_placeholder: string; copy_disclaimer: string; fab_offset_bottom?:\
+        \ undefined; fab_offset_side?: undefined; fab_position?: undefined; fab_size?:\
+        \ undefined; features: string; feedback: WidgetFeedback; lang: string; mode:\
+        \ string; not_enough_data_message: string; panel_height?: undefined; panel_width?:\
+        \ undefined; placeholder: string; search_config_id?: string; } \\\\| { ask_to_resource:\
+        \ string; chat_placeholder: string; citation_threshold: string \\\\| undefined;\
+        \ copy_disclaimer: string; fab_offset_bottom: number; fab_offset_side: number;\
+        \ fab_position: bottom-right \\\\| bottom-left ; fab_size: medium \\\\| small\
+        \ \\\\| large ; features: string; feedback: WidgetFeedback; filter_expression:\
+        \ string; filters: string; generativemodel: string; initial_filters: string;\
+        \ json_schema: string; labelsets_excluded_from_filters: string; lang: string;\
+        \ max_output_tokens: string \\\\| undefined; max_paragraphs: string \\\\|\
+        \ undefined; max_tokens: string \\\\| undefined; metadata: string; mode: string;\
+        \ not_enough_data_message: string; panel_height: number; panel_width: number;\
+        \ placeholder: string; preselected_filters: string; prompt: string; rag_images_strategies:\
+        \ string; rag_strategies: string; reasoning: string; rephrase_prompt: string;\
+        \ reranker: string \\\\| undefined; routing: string; rrf_boosting: string;\
+        \ security_groups: string \\\\| undefined; system_prompt: string; vectorset:\
+        \ string; } \\\\| { ask_to_resource: string; chat_placeholder: string; citation_threshold:\
+        \ string \\\\| undefined; copy_disclaimer: string; fab_offset_bottom?: undefined;\
+        \ fab_offset_side?: undefined; fab_position?: undefined; fab_size?: undefined;\
+        \ features: string; feedback: WidgetFeedback; filter_expression: string; filters:\
+        \ string; generativemodel: string; initial_filters: string; json_schema: string;\
+        \ labelsets_excluded_from_filters: string; lang: string; max_output_tokens:\
+        \ string \\\\| undefined; max_paragraphs: string \\\\| undefined; max_tokens:\
+        \ string \\\\| undefined; metadata: string; mode: string; not_enough_data_message:\
+        \ string; panel_height?: undefined; panel_width?: undefined; placeholder:\
+        \ string; preselected_filters: string; prompt: string; rag_images_strategies:\
+        \ string; rag_strategies: string; reasoning: string; rephrase_prompt: string;\
+        \ reranker: string \\\\| undefined; routing: string; rrf_boosting: string;\
+        \ security_groups: string \\\\| undefined; system_prompt: string; vectorset:\
+        \ string; } \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:590\
+        \ \\n Parameters \\n searchConfig \\n SearchConfiguration \\n widgetOptions\
+        \ \\n WidgetConfiguration \\n Returns \\n { agentic_config_id?: string; agentic_transport?:\
+        \ http \\\\| websocket ; chat_placeholder: string; copy_disclaimer: string;\
+        \ fab_offset_bottom: number; fab_offset_side: number; fab_position: bottom-right\
+        \ \\\\| bottom-left ; fab_size: medium \\\\| small \\\\| large ; features:\
+        \ string; feedback: WidgetFeedback; lang: string; mode: string; not_enough_data_message:\
+        \ string; panel_height: number; panel_width: number; placeholder: string;\
+        \ search_config_id?: string; } \\\\| { agentic_config_id?: string; agentic_transport?:\
+        \ http \\\\| websocket ; chat_placeholder: string; copy_disclaimer: string;\
+        \ fab_offset_bottom?: undefined; fab_offset_side?: undefined; fab_position?:\
+        \ undefined; fab_size?: undefined; features: string; feedback: WidgetFeedback;\
+        \ lang: string; mode: string; not_enough_data_message: string; panel_height?:\
+        \ undefined; panel_width?: undefined; placeholder: string; search_config_id?:\
+        \ string; } \\\\| { ask_to_resource: string; chat_placeholder: string; citation_threshold:\
+        \ string \\\\| undefined; copy_disclaimer: string; fab_offset_bottom: number;\
+        \ fab_offset_side: number; fab_position: bottom-right \\\\| bottom-left ;\
+        \ fab_size: medium \\\\| small \\\\| large ; features: string; feedback: WidgetFeedback;\
+        \ filter_expression: string; filters: string; generativemodel: string; initial_filters:\
+        \ string; json_schema: string; labelsets_excluded_from_filters: string; lang:\
+        \ string; max_output_tokens: string \\\\| undefined; max_paragraphs: string\
+        \ \\\\| undefined; max_tokens: string \\\\| undefined; metadata: string; mode:\
+        \ string; not_enough_data_message: string; panel_height: number; panel_width:\
+        \ number; placeholder: string; preselected_filters: string; prompt: string;\
+        \ rag_images_strategies: string; rag_strategies: string; reasoning: string;\
+        \ rephrase_prompt: string; reranker: string \\\\| undefined; routing: string;\
+        \ rrf_boosting: string; security_groups: string \\\\| undefined; system_prompt:\
+        \ string; vectorset: string; } \\\\| { ask_to_resource: string; chat_placeholder:\
+        \ string; citation_threshold: string \\\\| undefined; copy_disclaimer: string;\
+        \ fab_offset_bottom?: undefined; fab_offset_side?: undefined; fab_position?:\
+        \ undefined; fab_size?: undefined; features: string; feedback: WidgetFeedback;\
+        \ filter_expression: string; filters: string; generativemodel: string; initial_filters:\
+        \ string; json_schema: string; labelsets_excluded_from_filters: string; lang:\
+        \ string; max_output_tokens: string \\\\| undefined; max_paragraphs: string\
+        \ \\\\| undefined; max_tokens: string \\\\| undefined; metadata: string; mode:\
+        \ string; not_enough_data_message: string; panel_height?: undefined; panel_width?:\
+        \ undefined; placeholder: string; preselected_filters: string; prompt: string;\
+        \ rag_images_strategies: string; rag_strategies: string; reasoning: string;\
+        \ rephrase_prompt: string; reranker: string \\\\| undefined; routing: string;\
+        \ rrf_boosting: string; security_groups: string \\\\| undefined; system_prompt:\
+        \ string; vectorset: string; }\",\"id\":\"834e87b32d2b4ef7907a73e198fce807/t/page/0-6064\"\
+        ,\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\"\
+        :0,\"end\":6064,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\"\
+        :false,\"page_with_visual\":false,\"is_a_table\":false}}}}},\"4c90aa2f4b77410e9d26d981d9852823\"\
+        :{\"id\":\"4c90aa2f4b77410e9d26d981d9852823\",\"slug\":\"docs-develop-dotnet-sdk-ISearchService-md\"\
+        ,\"title\":\"docs > develop > dotnet sdk > ISearchService\",\"summary\":\"\
+        \",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\"\
+        :{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"\
+        usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\"\
+        :[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2026-02-24T16:03:50.526195\"\
+        ,\"modified\":\"2026-06-09T08:17:37.193513\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"4c90aa2f4b77410e9d26d981d9852823/t/page/6781-7029\"\
+        :{\"score\":0.000317508791340515,\"score_type\":\"RERANKER\",\"order\":15,\"\
+        text\":\" if (response.IsSuccessful) \\n { \\n var relations = response.Data;\
+        \ \\n Console.WriteLine($ Found {relations.Relations?.Count ?? 0} matching\
+        \ relations ); \\n } \\n ``` \\n \\n SendFeedbackAsync \\n Send feedback for\
+        \ a search operation to improve future results. \\n\",\"id\":\"4c90aa2f4b77410e9d26d981d9852823/t/page/6781-7029\"\
+        ,\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":6781,\"\
+        end\":7029,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"\
+        page_with_visual\":false,\"is_a_table\":false}}}}},\"40050815f407466887e03b6bb2b0be7e\"\
+        :{\"id\":\"40050815f407466887e03b6bb2b0be7e\",\"slug\":\"docs-rag-advanced-graph-md\"\
+        ,\"title\":\"docs > rag > advanced > graph\",\"summary\":\"\",\"icon\":\"\
+        text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\"\
+        :\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\"\
+        :{\"classifications\":[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\"\
+        :{\"field_classifications\":[]},\"created\":\"2025-04-03T15:30:13.057371\"\
+        ,\"modified\":\"2026-06-09T08:07:46.044204\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"40050815f407466887e03b6bb2b0be7e/t/page/7988-8282\"\
+        :{\"score\":0.01379536371678114,\"score_type\":\"RERANKER\",\"order\":0,\"\
+        text\":\" json \\n { \\n query : { \\n ... \\n }, \\n top_k : 100 \\n } \\\
+        n The current maximum K is 500, but this value can change in the future. \\\
+        n Filtering \\n Querying the whole knowledge graph is nice, but sometimes\
+        \ we have too many \\n results or we want to specify a subset of the knowledge\
+        \ graph to search into. \\n\",\"id\":\"40050815f407466887e03b6bb2b0be7e/t/page/7988-8282\"\
+        ,\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":7988,\"\
+        end\":8282,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"\
+        page_with_visual\":false,\"is_a_table\":false}}}}},\"ecabb0862fa24c8fb8e01d4930a3f7a2\"\
+        :{\"id\":\"ecabb0862fa24c8fb8e01d4930a3f7a2\",\"slug\":\"docs-develop-js-sdk-variables-MAX_FACETS_PER_REQUEST-md\"\
+        ,\"title\":\"docs > develop > js sdk > variables > MAX_FACETS_PER_REQUEST\"\
+        ,\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\"\
+        :{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"\
+        PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"\
+        fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"\
+        created\":\"2025-08-26T10:03:18.992004\",\"modified\":\"2026-11-13T13:02:38.259281\"\
+        ,\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/a/title\"\
+        :{\"paragraphs\":{\"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60\":{\"score\"\
+        :0.0009004466701298952,\"score_type\":\"RERANKER\",\"order\":4,\"text\":\"\
+        docs > develop > js sdk > variables > MAX_FACETS_PER_REQUEST\",\"id\":\"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60\"\
+        ,\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"\
+        end\":60,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"\
+        page_with_visual\":false,\"is_a_table\":false}}},\"/t/page\":{\"paragraphs\"\
+        :{\"ecabb0862fa24c8fb8e01d4930a3f7a2/t/page/0-193\":{\"score\":0.0005484792636707425,\"\
+        score_type\":\"RERANKER\",\"order\":9,\"text\":\"@nuclia/core \\n \\n @nuclia/core\
+        \ / MAX_FACETS_PER_REQUEST \\n Variable: MAX_FACETS_PER_REQUEST \\n \\n const\
+        \ MAX_FACETS_PER_REQUEST: 50 = 50 \\n \\n Defined in: libs/sdk-core/src/lib/db/search/filter.ts:18\"\
+        ,\"id\":\"ecabb0862fa24c8fb8e01d4930a3f7a2/t/page/0-193\",\"labels\":[\"/k/text\"\
+        ],\"position\":{\"page_number\":0,\"index\":0,\"start\":0,\"end\":193,\"start_seconds\"\
+        :[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\":false,\"\
+        is_a_table\":false}}}}},\"7556143e3ea6448c9a243a605b33497b\":{\"id\":\"7556143e3ea6448c9a243a605b33497b\"\
+        ,\"slug\":\"docs-rag-search-strategy-md\",\"title\":\"docs > rag > search\
+        \ strategy\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\"\
+        ,\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\",\"\
+        cy\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"\
+        relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\"\
+        :[]},\"created\":\"2024-07-18T14:32:20.747541\",\"modified\":\"2026-06-15T08:57:41.577721\"\
+        ,\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\"\
+        :{\"paragraphs\":{\"7556143e3ea6448c9a243a605b33497b/t/page/1745-2116\":{\"\
+        score\":0.00027159214369021356,\"score_type\":\"RERANKER\",\"order\":18,\"\
+        text\":\" But you might want to change the default behavior. To do so, you\
+        \ can use the features parameter. \\n Typically, when searching with a different\
+        \ language than the resource's language, keyword search might be inconsistent,\
+        \ matching words that are written the same but have different meanings in\
+        \ the two languages. In this case, you can use semantic search only by passing:\
+        \ \\n\",\"id\":\"7556143e3ea6448c9a243a605b33497b/t/page/1745-2116\",\"labels\"\
+        :[],\"position\":{\"page_number\":0,\"index\":0,\"start\":1745,\"end\":2116,\"\
+        start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\"\
+        :false,\"is_a_table\":false}}}}},\"221f8a48e05a4ee9a759ff195884c960\":{\"\
+        id\":\"221f8a48e05a4ee9a759ff195884c960\",\"slug\":\"docs-develop-js-sdk--nuclia-namespaces-Widget-interfaces-RagStrategiesConfig-md\"\
+        ,\"title\":\"docs > develop > js sdk > @nuclia > namespaces > Widget > interfaces\
+        \ > RagStrategiesConfig\",\"summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\"\
+        :\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\":[\"\
+        en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"\
+        relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\"\
+        :[]},\"created\":\"2026-10-16T10:18:57.064924\",\"modified\":\"2026-11-13T13:03:19.781396\"\
+        ,\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\"\
+        :{\"paragraphs\":{\"221f8a48e05a4ee9a759ff195884c960/t/page/2182-3872\":{\"\
+        score\":0.0031850608065724373,\"score_type\":\"RERANKER\",\"order\":2,\"text\"\
+        :\" top_k: number \\\\| null \\n \\n \\n undefined \\n \\n graphRagStrategy\
+        \ \\n \\n graphRagStrategy: boolean \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:55\
+        \ \\n \\n includeNeighbouringParagraphs \\n \\n includeNeighbouringParagraphs:\
+        \ boolean \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:70\
+        \ \\n \\n includePageImages \\n \\n includePageImages: boolean \\n \\n Defined\
+        \ in: libs/sdk-core/src/lib/db/search/widget.ts:87 \\n \\n includeParagraphImages\
+        \ \\n \\n includeParagraphImages: boolean \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:89\
+        \ \\n \\n includeRemaining \\n \\n includeRemaining: boolean \\n \\n Defined\
+        \ in: libs/sdk-core/src/lib/db/search/widget.ts:76 \\n \\n includeTextualHierarchy\
+        \ \\n \\n includeTextualHierarchy: boolean \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:52\
+        \ \\n \\n maxMessages \\n \\n maxMessages: number \\\\| null \\n \\n Defined\
+        \ in: libs/sdk-core/src/lib/db/search/widget.ts:86 \\n \\n maxNumberOfImages\
+        \ \\n \\n maxNumberOfImages: number \\\\| null \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:88\
+        \ \\n \\n maxNumberOfResources \\n \\n maxNumberOfResources: number \\\\|\
+        \ null \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:74 \\\
+        n \\n metadatas \\n \\n metadatas: { classification_labels: boolean; extra_metadata:\
+        \ boolean; ners: boolean; origin: boolean; } \\\\| undefined \\n \\n Defined\
+        \ in: libs/sdk-core/src/lib/db/search/widget.ts:54 \\n \\n metadatasRagStrategy\
+        \ \\n \\n metadatasRagStrategy: boolean \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:53\
+        \ \\n \\n precedingParagraphs \\n \\n precedingParagraphs: number \\\\| null\
+        \ \\n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:71 \\n \\\
+        n succeedingParagraphs \\n \\n succeedingParagraphs: number \\\\| null \\\
+        n \\n Defined in: libs/sdk-core/src/lib/db/search/widget.ts:72\",\"id\":\"\
+        221f8a48e05a4ee9a759ff195884c960/t/page/2182-3872\",\"labels\":[\"/k/text\"\
+        ],\"position\":{\"page_number\":0,\"index\":0,\"start\":2182,\"end\":3872,\"\
+        start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\"\
+        :false,\"is_a_table\":false}}}}},\"a572ce0c7eb949e4a17babae21a03a4a\":{\"\
+        id\":\"a572ce0c7eb949e4a17babae21a03a4a\",\"slug\":\"navigation-pages\",\"\
+        title\":\"navigation-pages\",\"summary\":\"\",\"icon\":\"application/json\"\
+        ,\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\"\
+        :[\"en\",\"fr\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\"\
+        :[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\"\
+        :[]},\"created\":\"2026-06-23T10:58:22.812220\",\"modified\":\"2026-06-23T10:58:22.812242\"\
+        ,\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/kb-remi-analytics\"\
+        :{\"paragraphs\":{\"a572ce0c7eb949e4a17babae21a03a4a/t/kb-remi-analytics/659-706\"\
+        :{\"score\":0.0007733057136647403,\"score_type\":\"RERANKER\",\"order\":5,\"\
+        text\":\"capabilities 4 : Change the evaluation period\\n\\n\",\"id\":\"a572ce0c7eb949e4a17babae21a03a4a/t/kb-remi-analytics/659-706\"\
+        ,\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":659,\"\
+        end\":706,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"\
+        page_with_visual\":false,\"is_a_table\":false}}}}},\"42a4cd5a30314e94aa079ed0cfe81381\"\
+        :{\"id\":\"42a4cd5a30314e94aa079ed0cfe81381\",\"slug\":\"docs-develop-js-sdk-interfaces-SplitStrategy-md\"\
+        ,\"title\":\"docs > develop > js sdk > interfaces > SplitStrategy\",\"summary\"\
+        :\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\":{\"metadata\"\
+        :{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"PROCESSED\"},\"\
+        usermetadata\":{\"classifications\":[],\"relations\":[]},\"fieldmetadata\"\
+        :[],\"computedmetadata\":{\"field_classifications\":[]},\"created\":\"2025-08-26T10:02:38.468609\"\
+        ,\"modified\":\"2026-11-13T13:00:03.443378\",\"last_seqid\":0,\"queue\":\"\
+        private\",\"hidden\":false,\"fields\":{\"/t/page\":{\"paragraphs\":{\"42a4cd5a30314e94aa079ed0cfe81381/t/page/537-748\"\
+        :{\"score\":0.00036829791497439146,\"score_type\":\"RERANKER\",\"order\":13,\"\
+        text\":\" max_paragraph? \\n \\n optional max_paragraph?: number \\n \\n Defined\
+        \ in: libs/sdk-core/src/lib/db/kb/kb.models.ts:572 \\n \\n name? \\n \\n optional\
+        \ name?: string \\n \\n Defined in: libs/sdk-core/src/lib/db/kb/kb.models.ts:571\"\
+        ,\"id\":\"42a4cd5a30314e94aa079ed0cfe81381/t/page/537-748\",\"labels\":[\"\
+        /k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\":537,\"end\"\
+        :748,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"page_with_visual\"\
+        :false,\"is_a_table\":false}}}}},\"3d73bdffb13b4fed8076a1bee384d7c0\":{\"\
+        id\":\"3d73bdffb13b4fed8076a1bee384d7c0\",\"slug\":\"docs-rag-rag-strategy-md\"\
+        ,\"title\":\"docs > rag > rag strategy\",\"summary\":\"\",\"icon\":\"text/markdown\"\
+        ,\"thumbnail\":\"\",\"metadata\":{\"metadata\":{},\"language\":\"en\",\"languages\"\
+        :[\"hu\",\"cy\",\"en\"],\"status\":\"PROCESSED\"},\"usermetadata\":{\"classifications\"\
+        :[],\"relations\":[]},\"fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\"\
+        :[]},\"created\":\"2024-07-18T14:32:18.060615\",\"modified\":\"2026-06-09T08:07:32.011816\"\
+        ,\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/t/page\"\
+        :{\"paragraphs\":{\"3d73bdffb13b4fed8076a1bee384d7c0/t/page/346-660\":{\"\
+        score\":0.0003874761168844998,\"score_type\":\"RERANKER\",\"order\":12,\"\
+        text\":\" The Default Context \\n The default context is the list of the 20\
+        \ best paragraphs that have been found for the question. This context is passed\
+        \ to the generative model without any transformation. \\n Note: You can change\
+        \ the number of paragraphs that are passed to the generative model by using\
+        \ the top_k parameter. \\n\",\"id\":\"3d73bdffb13b4fed8076a1bee384d7c0/t/page/346-660\"\
+        ,\"labels\":[],\"position\":{\"page_number\":0,\"index\":0,\"start\":346,\"\
+        end\":660,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"\
+        page_with_visual\":false,\"is_a_table\":false}}}}},\"bd8ccba0ddc341dd851891ba2cccc08f\"\
+        :{\"id\":\"bd8ccba0ddc341dd851891ba2cccc08f\",\"slug\":\"docs-develop-js-sdk-type-aliases-MagicActionType-md\"\
+        ,\"title\":\"docs > develop > js sdk > type aliases > MagicActionType\",\"\
+        summary\":\"\",\"icon\":\"text/markdown\",\"thumbnail\":\"\",\"metadata\"\
+        :{\"metadata\":{},\"language\":\"en\",\"languages\":[\"en\"],\"status\":\"\
+        PROCESSED\"},\"usermetadata\":{\"classifications\":[],\"relations\":[]},\"\
+        fieldmetadata\":[],\"computedmetadata\":{\"field_classifications\":[]},\"\
+        created\":\"2026-03-10T15:04:00.830962\",\"modified\":\"2026-11-13T13:02:41.579074\"\
+        ,\"last_seqid\":0,\"queue\":\"private\",\"hidden\":false,\"fields\":{\"/a/title\"\
+        :{\"paragraphs\":{\"bd8ccba0ddc341dd851891ba2cccc08f/a/title/0-56\":{\"score\"\
+        :0.000487857119878754,\"score_type\":\"RERANKER\",\"order\":10,\"text\":\"\
+        docs > develop > js sdk > type aliases > MagicActionType\",\"id\":\"bd8ccba0ddc341dd851891ba2cccc08f/a/title/0-56\"\
+        ,\"labels\":[\"/k/text\"],\"position\":{\"page_number\":0,\"index\":0,\"start\"\
+        :0,\"end\":56,\"start_seconds\":[],\"end_seconds\":[]},\"fuzzy_result\":false,\"\
+        page_with_visual\":false,\"is_a_table\":false}}}}}},\"query\":\"How to use\
+        \ max_magic and tell me how you will change this parameter in the future\"\
+        ,\"total\":20,\"page_number\":0,\"page_size\":20,\"next_page\":false,\"autofilters\"\
+        :[],\"min_score\":{\"bm25\":0.0},\"best_matches\":[\"40050815f407466887e03b6bb2b0be7e/t/page/7988-8282\"\
+        ,\"834e87b32d2b4ef7907a73e198fce807/t/page/0-6064\",\"221f8a48e05a4ee9a759ff195884c960/t/page/2182-3872\"\
+        ,\"4ffdd42c713149249892d3b643ab3c81/t/page/1081-2749\",\"ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60\"\
+        ,\"a572ce0c7eb949e4a17babae21a03a4a/t/kb-remi-analytics/659-706\",\"941df9f528b543d1a10995e2a3ff83ab/t/page/871-1360\"\
+        ,\"4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\",\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\"\
+        ,\"ecabb0862fa24c8fb8e01d4930a3f7a2/t/page/0-193\",\"bd8ccba0ddc341dd851891ba2cccc08f/a/title/0-56\"\
+        ,\"43004f553e534ffe9c9e735856bd9b23/t/page/746-948\",\"3d73bdffb13b4fed8076a1bee384d7c0/t/page/346-660\"\
+        ,\"42a4cd5a30314e94aa079ed0cfe81381/t/page/537-748\",\"e3051c443121417496c925390ef67a5c/a/title/0-50\"\
+        ,\"4c90aa2f4b77410e9d26d981d9852823/t/page/6781-7029\",\"d986c88467d148a79cb7a4147210c33f/t/page/2866-3137\"\
+        ,\"27529a0cb3c84641aee3fdc4f201402f/t/page/592-1147\",\"7556143e3ea6448c9a243a605b33497b/t/page/1745-2116\"\
+        ,\"78aebdf4ca3a4028a555552a07e10e6d/t/page/5733-6021\"]},\"best_matches\"\
+        :[{\"id\":\"40050815f407466887e03b6bb2b0be7e/t/page/7988-8282\"},{\"id\":\"\
+        834e87b32d2b4ef7907a73e198fce807/t/page/0-6064\"},{\"id\":\"221f8a48e05a4ee9a759ff195884c960/t/page/2182-3872\"\
+        },{\"id\":\"4ffdd42c713149249892d3b643ab3c81/t/page/1081-2749\"},{\"id\":\"\
+        ecabb0862fa24c8fb8e01d4930a3f7a2/a/title/0-60\"},{\"id\":\"a572ce0c7eb949e4a17babae21a03a4a/t/kb-remi-analytics/659-706\"\
+        },{\"id\":\"941df9f528b543d1a10995e2a3ff83ab/t/page/871-1360\"},{\"id\":\"\
+        4039d76b0fff4962900836ab3fdec9f7/t/page/3075-3340\"},{\"id\":\"220eb37c167f4eb9bb8e9454e7ba8cf5/t/page/2505-2709\"\
+        },{\"id\":\"ecabb0862fa24c8fb8e01d4930a3f7a2/t/page/0-193\"},{\"id\":\"bd8ccba0ddc341dd851891ba2cccc08f/a/title/0-56\"\
+        },{\"id\":\"43004f553e534ffe9c9e735856bd9b23/t/page/746-948\"},{\"id\":\"\
+        3d73bdffb13b4fed8076a1bee384d7c0/t/page/346-660\"},{\"id\":\"42a4cd5a30314e94aa079ed0cfe81381/t/page/537-748\"\
+        },{\"id\":\"e3051c443121417496c925390ef67a5c/a/title/0-50\"},{\"id\":\"4c90aa2f4b77410e9d26d981d9852823/t/page/6781-7029\"\
+        },{\"id\":\"d986c88467d148a79cb7a4147210c33f/t/page/2866-3137\"},{\"id\":\"\
+        27529a0cb3c84641aee3fdc4f201402f/t/page/592-1147\"},{\"id\":\"7556143e3ea6448c9a243a605b33497b/t/page/1745-2116\"\
+        },{\"id\":\"78aebdf4ca3a4028a555552a07e10e6d/t/page/5733-6021\"}]}}\n{\"item\"\
+        :{\"type\":\"status\",\"code\":\"-2\",\"status\":\"no_context\"}}\n{\"item\"\
+        :{\"type\":\"augmented_context\",\"augmented\":{\"paragraphs\":{},\"fields\"\
+        :{}}}}\n{\"item\":{\"type\":\"citations\",\"citations\":{}}}\n{\"item\":{\"\
+        type\":\"metadata\",\"tokens\":{\"input\":130,\"output\":3,\"input_nuclia\"\
+        :0.13,\"output_nuclia\":0.003},\"timings\":{\"generative_first_chunk\":0.5606443739998213,\"\
+        generative_total\":0.7551174919999539}}}\n{\"item\":{\"type\":\"consumption\"\
+        ,\"normalized_tokens\":{\"input\":0.142344,\"output\":0.00264,\"image\":0.0},\"\
+        customer_key_tokens\":{\"input\":0.0,\"output\":0.0,\"image\":0.0}}}\n"
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - NUCLIA-LEARNING-ID,X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Mon, 16 Nov 2026 10:47:14 GMT
+      nuclia-learning-id:
+      - 05250e4056464504969c2f5b508efb70
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '1111'
+      x-nuclia-trace-id:
+      - 906b8397310acd49ca78e43ecf97d859
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"question": "", "retrieval": true, "user_id": "summarize", "system": "You
+      are a helpful AI assistant. Your role is to provide accurate, clear, and well-structured
+      answers based strictly on the information provided to you.\nKey principles:\n-
+      Answer only using the information in the provided context\n- Do not use external
+      knowledge, assumptions, or prior experience\n- Maintain a professional and informative
+      tone\n- Be concise yet thorough\n- If information is insufficient, acknowledge
+      this clearly\n\nAlways follow any additional instructions provided about format,
+      style, or domain-specific behavior.", "chat_history": [], "context": [], "query_context":
+      {}, "query_context_order": {}, "truncate": true, "user_prompt": {"prompt": "\n##
+      Question\nHow to use max_magic and tell me how you will change this parameter
+      in the future\n\n## Provided Context\n[START OF CONTEXT]\n\n[END OF CONTEXT]\n\n##
+      Answering Guidelines\n- Carefully read all context; it may be lengthy or detailed\n-
+      Do not omit or overlook any relevant information\n- Existing context summaries
+      are answer attempts produced by retrieval agents. Treat them as first-class
+      evidence and preserve their supported facts.\n- Combine complementary summaries
+      from multiple contexts when the question has multiple parts. Do not require
+      every context to answer the whole question by itself.\n- If a context summary
+      directly answers the question, do not replace it with an insufficient-data answer
+      merely because one retrieved chunk is incomplete; use the chunks for supporting
+      citations.\n- If the context is incomplete or insufficient, state: \"Not enough
+      data to answer this.\"\n- Read carefully any extra instructions below if provided
+      and use them to answer\n\nNow provide your answer to the question: How to use
+      max_magic and tell me how you will change this parameter in the future"}, "citations":
+      null, "citation_threshold": null, "generative_model": "chatgpt-azure-5.6-luna",
+      "max_tokens": 5000, "query_context_images": {}, "prefer_markdown": null, "json_schema":
+      null, "format_prompt": false, "rerank_context": false, "tools": [], "tool_choice":
+      {"type": "auto"}, "reasoning": false, "seed": null, "image_generation": false}'
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2146'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nuclia.py/4.14.0
+      x-client-ident:
+      - default
+      x-message:
+      - 875290c24a754819bda45b598e501a88
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+      x-stf-nuakey:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"text","text":"Not"}}
+
+        {"chunk":{"type":"text","text":" enough"}}
+
+        {"chunk":{"type":"text","text":" data"}}
+
+        {"chunk":{"type":"text","text":" to"}}
+
+        {"chunk":{"type":"text","text":" answer"}}
+
+        {"chunk":{"type":"text","text":" this"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" The"}}
+
+        {"chunk":{"type":"text","text":" provided"}}
+
+        {"chunk":{"type":"text","text":" context"}}
+
+        {"chunk":{"type":"text","text":" contains"}}
+
+        {"chunk":{"type":"text","text":" no"}}
+
+        {"chunk":{"type":"text","text":" information"}}
+
+        {"chunk":{"type":"text","text":" about"}}
+
+        {"chunk":{"type":"text","text":" `"}}
+
+        {"chunk":{"type":"text","text":"max"}}
+
+        {"chunk":{"type":"text","text":"_magic`,"}}
+
+        {"chunk":{"type":"text","text":" how to"}}
+
+        {"chunk":{"type":"text","text":" use it"}}
+
+        {"chunk":{"type":"text","text":", or"}}
+
+        {"chunk":{"type":"text","text":" how its"}}
+
+        {"chunk":{"type":"text","text":" value should"}}
+
+        {"chunk":{"type":"text","text":" be changed"}}
+
+        {"chunk":{"type":"text","text":" in the future"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"status","code":"-2"}}
+
+        {"chunk":{"type":"meta","input_tokens":13,"output_tokens":9,"model_input_tokens":317,"model_output_tokens":38,"timings":{"generative_first_chunk":0.6811523779999789,"generative":1.0611418109999704},"input_nuclia_tokens":0.013,"output_nuclia_tokens":0.009}}
+
+        {"chunk":{"normalized_tokens":{"input":0.01268,"output":0.00912,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Mon, 16 Nov 2026 10:47:16 GMT
+      nuclia-learning-id:
+      - b188991c3bdb4a75882f06935c4f3d47
+      nuclia-learning-model:
+      - chatgpt-azure-5.6-luna
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '688'
+      x-nuclia-trace-id:
+      - 78511ff4da188561bbbe2040bbebcca9
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"question": "", "retrieval": true, "user_id": "summarize", "system": "You
+      are a helpful AI assistant. Your role is to provide accurate, clear, and well-structured
+      answers based strictly on the information provided to you.\nKey principles:\n-
+      Answer only using the information in the provided context\n- Do not use external
+      knowledge, assumptions, or prior experience\n- Maintain a professional and informative
+      tone\n- Be concise yet thorough\n- If information is insufficient, acknowledge
+      this clearly\n\nAlways follow any additional instructions provided about format,
+      style, or domain-specific behavior.", "chat_history": [], "context": [], "query_context":
+      {}, "query_context_order": {}, "truncate": true, "user_prompt": {"prompt": "\n##
+      Question\nHow to use max_magic and tell me how you will change this parameter
+      in the future\n\n## Provided Context\n[START OF CONTEXT]\n\n[END OF CONTEXT]\n\n##
+      Answering Guidelines\n- Carefully read all context; it may be lengthy or detailed\n-
+      Do not omit or overlook any relevant information\n- Existing context summaries
+      are answer attempts produced by retrieval agents. Treat them as first-class
+      evidence and preserve their supported facts.\n- Combine complementary summaries
+      from multiple contexts when the question has multiple parts. Do not require
+      every context to answer the whole question by itself.\n- If a context summary
+      directly answers the question, do not replace it with an insufficient-data answer
+      merely because one retrieved chunk is incomplete; use the chunks for supporting
+      citations.\n- If the context is incomplete or insufficient, state: \"Not enough
+      data to answer this.\"\n- Read carefully any extra instructions below if provided
+      and use them to answer\n\n## Additional Instructions for answering\n- \n## Question\nHow
+      to use max_magic and tell me how you will change this parameter in the future\n\n##
+      Provided Context\n[START OF CONTEXT]\n\n[END OF CONTEXT]\n\n## Answering Guidelines\n-
+      Carefully read all context; it may be lengthy or detailed\n- Do not omit or
+      overlook any relevant information\n- Existing context summaries are answer attempts
+      produced by retrieval agents. Treat them as first-class evidence and preserve
+      their supported facts.\n- Combine complementary summaries from multiple contexts
+      when the question has multiple parts. Do not require every context to answer
+      the whole question by itself.\n- If a context summary directly answers the question,
+      do not replace it with an insufficient-data answer merely because one retrieved
+      chunk is incomplete; use the chunks for supporting citations.\n- If the context
+      is incomplete or insufficient, state: \"Not enough data to answer this.\"\n-
+      Read carefully any extra instructions below if provided and use them to answer\n\nNow
+      provide your answer to the question: How to use max_magic and tell me how you
+      will change this parameter in the future\nNow provide your answer to the question:
+      How to use max_magic and tell me how you will change this parameter in the future"},
+      "citations": null, "citation_threshold": null, "generative_model": "chatgpt-azure-5.6-luna",
+      "max_tokens": 5000, "query_context_images": {}, "prefer_markdown": null, "json_schema":
+      null, "format_prompt": false, "rerank_context": false, "tools": [], "tool_choice":
+      {"type": "auto"}, "reasoning": false, "seed": null, "image_generation": false}'
+    headers:
+      Accept:
+      - application/x-ndjson
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '3304'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nuclia.py/4.14.0
+      x-client-ident:
+      - default
+      x-message:
+      - 875290c24a754819bda45b598e501a88
+      x-origin:
+      - RAO
+      x-session:
+      - default_default_session
+      x-show-consumption:
+      - 'true'
+      x-stf-nuakey:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/chat
+  response:
+    body:
+      string: '{"chunk":{"type":"text","text":"Not"}}
+
+        {"chunk":{"type":"text","text":" enough"}}
+
+        {"chunk":{"type":"text","text":" data"}}
+
+        {"chunk":{"type":"text","text":" to"}}
+
+        {"chunk":{"type":"text","text":" answer"}}
+
+        {"chunk":{"type":"text","text":" this"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"text","text":" The"}}
+
+        {"chunk":{"type":"text","text":" provided"}}
+
+        {"chunk":{"type":"text","text":" context"}}
+
+        {"chunk":{"type":"text","text":" contains"}}
+
+        {"chunk":{"type":"text","text":" no"}}
+
+        {"chunk":{"type":"text","text":" information"}}
+
+        {"chunk":{"type":"text","text":" about"}}
+
+        {"chunk":{"type":"text","text":" `"}}
+
+        {"chunk":{"type":"text","text":"max"}}
+
+        {"chunk":{"type":"text","text":"_magic`,"}}
+
+        {"chunk":{"type":"text","text":" including its"}}
+
+        {"chunk":{"type":"text","text":" purpose,"}}
+
+        {"chunk":{"type":"text","text":" syntax,"}}
+
+        {"chunk":{"type":"text","text":" valid values"}}
+
+        {"chunk":{"type":"text","text":", or"}}
+
+        {"chunk":{"type":"text","text":" how it"}}
+
+        {"chunk":{"type":"text","text":" should be changed"}}
+
+        {"chunk":{"type":"text","text":" in the future"}}
+
+        {"chunk":{"type":"text","text":". Please provide"}}
+
+        {"chunk":{"type":"text","text":" the relevant documentation"}}
+
+        {"chunk":{"type":"text","text":" or configuration example"}}
+
+        {"chunk":{"type":"text","text":"."}}
+
+        {"chunk":{"type":"status","code":"-2"}}
+
+        {"chunk":{"type":"meta","input_tokens":21,"output_tokens":12,"model_input_tokens":535,"model_output_tokens":50,"timings":{"generative_first_chunk":0.6098014130002412,"generative":1.0818083170006503},"input_nuclia_tokens":0.021,"output_nuclia_tokens":0.012}}
+
+        {"chunk":{"normalized_tokens":{"input":0.0214,"output":0.012,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0},"type":"consumption"}}
+
+        '
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Transfer-Encoding:
+      - chunked
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/x-ndjson
+      date:
+      - Mon, 16 Nov 2026 10:47:17 GMT
+      nuclia-learning-id:
+      - 35fdd6b13a0a46839e241a1374874a34
+      nuclia-learning-model:
+      - chatgpt-azure-5.6-luna
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '630'
+      x-nuclia-trace-id:
+      - 0a0bb9e769c779f5f22c22ca069c5b11
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"user_id": "arag_evaluate", "question": "How to use max_magic and tell
+      me how you will change this parameter in the future", "answer": "Not enough
+      data to answer this. The provided context contains no information about `max_magic`,
+      including its purpose, syntax, valid values, or how it should be changed in
+      the future. Please provide the relevant documentation or configuration example.",
+      "contexts": null}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '401'
+      Content-Type:
+      - application/json
+      Host:
+      - europe-1.dp.progress.cloud
+      User-Agent:
+      - nuclia.py/4.14.0
+      x-origin:
+      - RAO
+      x-show-consumption:
+      - 'true'
+      x-stf-nuakey:
+      - DUMMY
+    method: POST
+    uri: https://europe-1.dp.progress.cloud/api/v1/predict/remi
+  response:
+    body:
+      string: '{"time":9.089594841003418,"answer_relevance":{"score":1,"reason":""},"context_relevance":[],"groundedness":[],"consumption":{"normalized_tokens":{"input":0.00005,"output":0.0,"image":0.0},"customer_key_tokens":{"input":0.0,"output":0.0,"image":0.0}}}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000
+      Content-Length:
+      - '250'
+      access-control-expose-headers:
+      - X-NUCLIA-TRACE-ID
+      content-type:
+      - application/json
+      date:
+      - Mon, 16 Nov 2026 10:47:18 GMT
+      nuclia-learning-model:
+      - Llama-REMi-v1
+      via:
+      - 1.1 google
+      x-envoy-upstream-service-time:
+      - '9103'
+      x-nuclia-trace-id:
+      - c9bd17b0a3e7082907c7c2cb599527e7
+    status:
+      code: 200
+      message: OK
+version: 1

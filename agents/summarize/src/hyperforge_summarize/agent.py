@@ -306,7 +306,6 @@ class SummarizeAgent(Agent[SummarizeAgentConfig]):
                 if citations_enabled
                 else None,
             )
-        breakpoint()
         memory.is_answered = end_code != "-2"
         await memory.add_step(
             step_module=self.config.module,
