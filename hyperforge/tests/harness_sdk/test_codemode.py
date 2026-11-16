@@ -696,6 +696,58 @@ async def test_codemode_provides_statistics_itertools_and_decimal_without_import
 
 
 @pytest.mark.asyncio
+async def test_codemode_provides_datetime_without_imports() -> None:
+    scoped = local_codemode()
+    harness = AgentHarness(model="test", model_client=UnusedModel())
+    result = await scoped.execute(
+        _ctx(harness),
+        {
+            "code": (
+                "start = datetime.datetime.fromisoformat('2026-01-30T10:00:00+00:00')\n"
+                "due = start + datetime.timedelta(days=3)\n"
+                "output([due.date().isoformat(), (due - start).days, due.weekday()])"
+            )
+        },
+    )
+    assert result.value == ["2026-02-02", 3, 0]
+
+
+@pytest.mark.asyncio
+async def test_codemode_provides_collections_heapq_bisect_and_aggregate_builtins() -> (
+    None
+):
+    scoped = local_codemode()
+    harness = AgentHarness(model="test", model_client=UnusedModel())
+    result = await scoped.execute(
+        _ctx(harness),
+        {
+            "code": (
+                "rows = [{'s': 'open', 'n': 3}, {'s': 'done', 'n': 9}, {'s': 'open', 'n': 5}]\n"
+                "counts = collections.Counter(row['s'] for row in rows)\n"
+                "totals = collections.defaultdict(int)\n"
+                "for row in rows:\n"
+                "    totals[row['s']] = totals[row['s']] + row['n']\n"
+                "values = sorted(row['n'] for row in rows)\n"
+                "output([\n"
+                "    counts.most_common(1)[0][0],\n"
+                "    dict(totals),\n"
+                "    heapq.nlargest(2, values),\n"
+                "    bisect.bisect_left(values, 5),\n"
+                "    [min(values), max(values), any(v > 8 for v in values), all(v > 0 for v in values)],\n"
+                "])"
+            )
+        },
+    )
+    assert result.value == [
+        "open",
+        {"open": 8, "done": 9},
+        [9, 5],
+        1,
+        [3, 9, True, True],
+    ]
+
+
+@pytest.mark.asyncio
 async def test_codemode_supports_container_methods_and_item_writes_on_tool_results() -> (
     None
 ):

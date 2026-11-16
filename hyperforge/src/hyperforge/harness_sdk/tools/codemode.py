@@ -35,8 +35,9 @@ CODEMODE_USAGE_GUIDANCE = (
     "functions with the same names and arguments. Core agent tools are unavailable. "
     "Tool results are JSON data (dicts/lists) matching each tool's output. "
     "Supported: assignments, loops, conditionals, indexing, comprehensions, and builtins including len, "
-    "range, sum, and sorted. Imports and attributes on unapproved objects are unavailable. "
+    "range, sum, sorted, min, max, any, and all. Imports and attributes on unapproved objects are unavailable. "
     "Public list, dict, str, and tuple methods and list/dict item assignment are supported. "
+    "Augmented assignment to items (x[k] += 1) is unavailable; use x[k] = x[k] + 1. "
     "Private attributes and str.format/format_map are unavailable. "
     "Return the final result by calling output(value) exactly once; do not use print()."
 )

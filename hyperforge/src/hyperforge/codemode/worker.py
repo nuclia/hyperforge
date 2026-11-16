@@ -188,6 +188,10 @@ class PythonAgentWorker:
                             if name not in BLOCKED_EXCEPTIONS
                         },
                         "sum": sum,
+                        "min": min,
+                        "max": max,
+                        "any": any,
+                        "all": all,
                         **{value.__name__: value for value in SAFE_BUILTIN_TYPES},
                     },
                     "_getitem_": lambda obj, index: obj[index],

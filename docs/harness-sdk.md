@@ -319,16 +319,18 @@ Assign the final value to a variable and finish with `output(result)`.
 Generated code can use the provided capability functions and these common
 built-ins: `abs`, `bool`, `bytes`, `chr`, `complex`, `divmod`, `float`, `hash`,
 `hex`, `id`, `int`, `isinstance`, `issubclass`, `len`, `oct`, `ord`, `pow`,
-`range`, `repr`, `round`, `slice`, `sorted`, `str`, `sum`, `tuple`, and `zip`.
-Other helpers, including `all`, `any`, `min`, and `max`, are unavailable.
-`math`, `re`, `statistics`, `itertools`, and `decimal` are available without
+`range`, `repr`, `round`, `slice`, `sorted`, `str`, `sum`, `tuple`, `zip`, `min`,
+`max`, `any`, and `all`.
+`math`, `re`, `statistics`, `itertools`, `decimal`, `datetime`, `collections`,
+`heapq`, and `bisect` are available without
 imports. You can use their public functions, constants, and classes, as well as
 public methods and properties on objects defined by these modules:
 
 ```python
 amount = decimal.Decimal('0.1').quantize(decimal.Decimal('0.01'))
 match = re.search('(x+)', 'xxx')
-output({'amount': str(amount), 'matched': match.group(1)})
+counts = collections.Counter(['open', 'closed', 'open'])
+output({'amount': str(amount), 'matched': match.group(1), 'top': counts.most_common(1)})
 ```
 
 Imports, private attributes, and attributes on unapproved objects are unavailable.
@@ -336,7 +338,10 @@ Submodules are not automatically supported. Comprehensions and
 generator expressions are supported.
 Public methods on `list`, `dict`, `str`, and `tuple` are available, including
 `list.append()`, `dict.get()`, `dict.items()`, `dict.update()`, and `str.upper()`.
-You can also construct these types and assign or delete list/dictionary items:
+You can also construct these types and assign or delete list/dictionary items
+(including `collections` containers such as `Counter`, `defaultdict`, and
+`deque`). Augmented item assignment (`x[k] += 1`) is unavailable; write
+`x[k] = x[k] + 1`:
 
 ```python
 result = query_data(sql='SELECT status, COUNT(*) AS count FROM resources.workorder GROUP BY status')
@@ -352,9 +357,9 @@ Attribute assignment on modules, classes, and other objects is unavailable.
 `str.format()` and `str.format_map()` remain unavailable; use string
 concatenation or f-strings instead. Core agent tools remain excluded from Code Mode.
 
-Convert `decimal.Decimal` results to strings (to preserve precision) or floats
-before returning them through `output()`, which accepts JSON values rather than
-Decimal objects.
+Convert `decimal.Decimal` results to strings (to preserve precision) or floats,
+and `datetime` values to strings (for example with `.isoformat()`), before
+returning them through `output()`, which accepts JSON values only.
 Authorization, nested/global call limits, projected-result limits,
 and invalid or repeated `output` attempts remain terminal even if generated code
 catches the immediate callback error. An output attempt rejected by worker
