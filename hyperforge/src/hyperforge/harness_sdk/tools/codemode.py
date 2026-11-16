@@ -25,16 +25,15 @@ from hyperforge.codemode.sandbox import MAX_PACKET_BYTES, settings
 from hyperforge.definition import FunctionDefinition
 
 from ..models import HarnessEventType
-from ..schema import compact_model_output_type
 from ..usage import UsageLimitExceeded
 from . import HarnessTool, ToolCallContext
 
 CODEMODE_TOOL_NAME = "codemode"
 OUTPUT_FUNCTION_NAME = "output"
 CODEMODE_USAGE_GUIDANCE = (
-    "Execute restricted Python code. Active external tools listed below are available as "
+    "Execute restricted Python code. The agent's active external tools are available as "
     "functions with the same names and arguments. Core agent tools are unavailable. "
-    "Tool results are JSON data (dicts/lists); TypedDict describes their keys. "
+    "Tool results are JSON data (dicts/lists) matching each tool's output. "
     "Supported: assignments, loops, conditionals, indexing, comprehensions, and builtins including len, "
     "range, sum, and sorted. Imports and attributes on unapproved objects are unavailable. "
     "Public list, dict, str, and tuple methods and list/dict item assignment are supported. "
@@ -279,9 +278,7 @@ def create_codemode_tool(
         return _codemode_description(
             signatures,
             description,
-            tools=[
-                _tool_signature(active_tool) for active_tool in _codemode_tools(harness)
-            ],
+            example_tool=next(iter(_codemode_tools(harness)), None),
         )
 
     return HarnessTool(
@@ -300,8 +297,24 @@ def _codemode_tools(harness: Any) -> Iterable[HarnessTool[Any, Any]]:
     )
 
 
-def _tool_signature(active_tool: HarnessTool[Any, Any]) -> str:
-    return f"- def {active_tool.name}(...) -> {compact_model_output_type(active_tool.output_model)}"
+_EXAMPLE_VALUES = {
+    "string": '"..."',
+    "integer": "1",
+    "number": "1.0",
+    "boolean": "True",
+    "array": "[]",
+    "object": "{}",
+}
+
+
+def _tool_example(active_tool: HarnessTool[Any, Any]) -> str:
+    parameters = active_tool.parameters
+    properties = parameters.get("properties", {})
+    arguments = ", ".join(
+        f"{name}={_EXAMPLE_VALUES.get(properties.get(name, {}).get('type'), 'None')}"
+        for name in parameters.get("required", [])
+    )
+    return f"result = {active_tool.name}({arguments})\noutput(result)"
 
 
 def _validate_function_name(name: str) -> None:
@@ -828,7 +841,7 @@ def _codemode_description(
     signatures: list[str],
     description: str | None = None,
     *,
-    tools: list[str] | None = None,
+    example_tool: HarnessTool[Any, Any] | None = None,
 ) -> str:
     introduction = CODEMODE_USAGE_GUIDANCE
     if description:
@@ -838,11 +851,14 @@ def _codemode_description(
         + "\n".join(f"- {name}" for name in ALLOWED_GLOBAL_MODULES)
     )
     introduction += "\nPublic attributes are also available on classes and instances defined by these modules."
-    if tools:
-        introduction += "\n\nAvailable tool functions:\n" + "\n".join(tools)
     if signatures:
         introduction += "\n\nAvailable utility functions:\n" + "\n".join(signatures)
-    return introduction + "\n\nExample:\n```python\nx = 1\nx = x * 2\noutput(x)\n```"
+    example = (
+        _tool_example(example_tool)
+        if example_tool is not None
+        else "x = 1\nx = x * 2\noutput(x)"
+    )
+    return introduction + f"\n\nExample:\n```python\n{example}\n```"
 
 
 def _scoped_tool_arguments(

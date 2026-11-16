@@ -33,7 +33,6 @@ from hyperforge.harness_sdk import (
     create_codemode_tool,
     tool,
 )
-from hyperforge.harness_sdk.schema import compact_model_output_type
 from hyperforge.harness_sdk.tools import codemode as codemode_module
 
 
@@ -526,7 +525,7 @@ async def test_codemode_rejects_core_tool_callbacks() -> None:
 
 
 @pytest.mark.asyncio
-async def test_model_receives_compact_active_tool_output_signatures() -> None:
+async def test_model_receives_single_active_tool_example() -> None:
     class CatalogInput(BaseModel):
         query: str
         limit: int = 10
@@ -565,22 +564,11 @@ async def test_model_receives_compact_active_tool_output_signatures() -> None:
     )
     await harness.llm()
     description = model.descriptions[-1]
-    assert (
-        '- def list_data_catalog(...) -> TypedDict[{"name": str, "data": dict[str, Any]}]'
-        in description
-    )
+    assert 'result = list_data_catalog(query="...")\noutput(result)' in description
     assert "A long catalog description" not in description
     assert '"properties"' not in description
-    assert "- def remember(" not in description
-    assert "- def lazy_upper(" not in description
-
-    await harness.activate_tools([lazy.name])
-    await harness.llm()
-    assert (
-        '- def lazy_upper(...) -> TypedDict[{"value": str}]' in model.descriptions[-1]
-    )
-    assert "- def lazy_upper(" not in model.descriptions[0]
-    assert "- def list_data_catalog(" not in scoped.description
+    assert "remember(" not in description
+    assert "list_data_catalog(" not in scoped.description
 
     result = await scoped.execute(
         _ctx(harness),
@@ -593,7 +581,7 @@ async def test_model_receives_compact_active_tool_output_signatures() -> None:
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("by_alias", [False, True])
-async def test_codemode_signatures_describe_serialized_nested_and_root_outputs(
+async def test_codemode_returns_serialized_nested_and_root_outputs(
     by_alias: bool,
 ) -> None:
     class Empty(BaseModel):
@@ -615,41 +603,13 @@ async def test_codemode_signatures_describe_serialized_nested_and_root_outputs(
     async def records(_context: ToolCallContext, _input: Empty) -> Records:
         return Records([Record(name="sales", score=2)])
 
-    class CapturingModel(UnusedModel):
-        description = ""
-
-        async def stream(self, **kwargs: Any) -> AsyncIterator[ModelDelta]:
-            self.description = next(
-                item.description for item in kwargs["tools"] if item.name == "codemode"
-            )
-            yield ModelDelta(text="done")
-
-    model = CapturingModel()
     scoped = local_codemode()
-    harness = AgentHarness(model="test", model_client=model, tools=[scoped, records])
-    await harness.llm()
-    name_key = "public_name" if by_alias else "name"
-    assert (
-        f'- def records(...) -> list[TypedDict[{{"{name_key}": str, "score": str}}]]'
-        in model.description
+    harness = AgentHarness(
+        model="test", model_client=UnusedModel(), tools=[scoped, records]
     )
+    name_key = "public_name" if by_alias else "name"
     result = await scoped.execute(_ctx(harness), {"code": "output(records())"})
     assert result.value == [{name_key: "sales", "score": "2"}]
-
-
-def test_compact_return_types_handle_unions_and_recursive_models() -> None:
-    class Node(BaseModel):
-        name: str
-        child: "Node | None" = None
-        values: list[int | bool]
-        metrics: dict[str, float]
-
-    rendered = compact_model_output_type(Node)
-    assert '"child": Any | None' in rendered
-    assert '"values": list[int | bool]' in rendered
-    assert '"metrics": dict[str, float]' in rendered
-    assert "$ref" not in rendered
-    assert len(rendered) < 300
 
 
 @pytest.mark.asyncio
