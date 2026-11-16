@@ -320,7 +320,7 @@ Generated code can use the provided capability functions and these common
 built-ins: `abs`, `bool`, `bytes`, `chr`, `complex`, `divmod`, `float`, `hash`,
 `hex`, `id`, `int`, `isinstance`, `issubclass`, `len`, `oct`, `ord`, `pow`,
 `range`, `repr`, `round`, `slice`, `sorted`, `str`, `sum`, `tuple`, `zip`, `min`,
-`max`, `any`, and `all`.
+`max`, `any`, `all`, `map`, `filter`, `reversed`, `iter`, and `next`.
 `math`, `re`, `statistics`, `itertools`, `decimal`, `datetime`, `collections`,
 `heapq`, and `bisect` are available without
 imports. You can use their public functions, constants, and classes, as well as

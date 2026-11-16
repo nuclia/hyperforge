@@ -734,6 +734,9 @@ async def test_codemode_provides_collections_heapq_bisect_and_aggregate_builtins
                 "    heapq.nlargest(2, values),\n"
                 "    bisect.bisect_left(values, 5),\n"
                 "    [min(values), max(values), any(v > 8 for v in values), all(v > 0 for v in values)],\n"
+                "    list(map(str, filter(lambda v: v > 3, reversed(values)))),\n"
+                "    next(iter(values)),\n"
+                "    next((v for v in values if v > 100), None),\n"
                 "])"
             )
         },
@@ -744,6 +747,9 @@ async def test_codemode_provides_collections_heapq_bisect_and_aggregate_builtins
         [9, 5],
         1,
         [3, 9, True, True],
+        ["9", "5"],
+        3,
+        None,
     ]
 
 
