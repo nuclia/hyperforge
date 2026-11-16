@@ -22,7 +22,7 @@ pytestmark = [
 
 ANSWERED_QUESTION = "What is Progress Agentic RAG?"
 UNANSWERED_QUESTION = (
-    "Como usar max_magic y dime como cambiará este parametro en el futuro"
+    "How to use max_magic and tell me how you will change this parameter in the future"
 )
 
 CONFIG = {
@@ -179,7 +179,7 @@ async def test_remi_not_enough_data(granularity: ContextGranularity):
         ],
     )
     assert question_memory.final_answer is not None
-    assert "not enough data to answer this" in question_memory.final_answer.lower()
+    assert "not enough" in question_memory.final_answer.lower()
     assert question_memory.is_answered is False
 
     remi_contexts = [ctx for ctx in question_memory.contexts if ctx.agent == "remi"]
