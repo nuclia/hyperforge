@@ -8,6 +8,7 @@ on:
         paths:
             - "agents/remi/**"
             - "hyperforge.mk"
+            - "uv.lock"
             - ".github/workflows/hyperforge_remi_workflow.yaml"
             - ".github/workflows/hyperforge_agent_package_workflow.yaml"
     pull_request:
@@ -17,6 +18,7 @@ on:
         paths:
             - "agents/remi/**"
             - "hyperforge.mk"
+            - "uv.lock"
             - ".github/workflows/hyperforge_remi_workflow.yaml"
             - ".github/workflows/hyperforge_agent_package_workflow.yaml"
 
