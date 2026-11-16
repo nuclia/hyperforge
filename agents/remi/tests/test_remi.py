@@ -179,7 +179,7 @@ async def test_remi_not_enough_data(granularity: ContextGranularity):
         ],
     )
     assert question_memory.final_answer is not None
-    assert "not enough data to answer this" in question_memory.final_answer.lower()
+    assert "no hay" in question_memory.final_answer.lower()
     assert question_memory.is_answered is False
 
     remi_contexts = [ctx for ctx in question_memory.contexts if ctx.agent == "remi"]
