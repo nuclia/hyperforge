@@ -27,6 +27,9 @@ Key components:
 - **Engine** — initializes agent state, loads external modules, wires LLM connections and memory
 - **Manager** — handles agent lifecycle within a session
 - **Memory** — session-scoped memory stored in NucliaDB (`SessionMemory`, `QuestionMemory`)
+
+Internal NucliaDB history searches send the session's `account_id` as
+`X-NUCLIADB-ACCOUNT`. External connections continue to use their configured API key.
 - **Broker** — pub/sub layer (Redis or in-process) for streaming workflow events
 - **API** — FastAPI app exposing REST and WebSocket endpoints for agents, workflows, sessions, MCP, and OAuth
 - **Workflows** — structured workflow definitions with parameters, rules, and required fields

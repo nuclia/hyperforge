@@ -311,6 +311,9 @@ class SessionMemory(BaseSessionMemory):
     ):
         self.agent_id = agent_id
         self.workflow_id = workflow_id
+        self.internal_nucliadb = (
+            config.nucliadb is not None and config.nucliadb.internal
+        )
         if config.nucliadb is not None:
             self.url = config.nucliadb.url
             self.key = config.nucliadb.key
@@ -380,8 +383,11 @@ class SessionMemory(BaseSessionMemory):
         )
         if not all and self.id:
             request.resource_filters = [self.id]
+        headers = {"X-NDB-Client": "agentic"}
+        if self.internal_nucliadb:
+            headers["X-NUCLIADB-ACCOUNT"] = self.account_id
         return await self.nucliadb_search.find(
-            kbid=self.kbid, content=request, headers={"X-NDB-Client": "agentic"}
+            kbid=self.kbid, content=request, headers=headers
         )
 
     async def qa_history(self) -> list[HistoryQuestionAnswer]:
