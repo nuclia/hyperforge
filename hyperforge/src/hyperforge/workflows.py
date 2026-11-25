@@ -6,6 +6,10 @@ from pydantic import BaseModel, ConfigDict, Field
 from hyperforge.models import Rules
 
 
+def default_workflow_parameters() -> dict[str, Any]:
+    return {"query": {"type": "string", "description": "User question"}}
+
+
 class WorkflowData(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str

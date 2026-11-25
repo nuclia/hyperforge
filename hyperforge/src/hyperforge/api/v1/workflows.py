@@ -17,7 +17,12 @@ from hyperforge.configure import (
 from hyperforge.db import exceptions
 from hyperforge.db.agents import AgentManager
 from hyperforge.models import Rules
-from hyperforge.workflows import WorkflowData, WorkflowInput, WorkflowUpdate
+from hyperforge.workflows import (
+    WorkflowData,
+    WorkflowInput,
+    WorkflowUpdate,
+    default_workflow_parameters,
+)
 
 if TYPE_CHECKING:
     from hyperforge.api.app import HTTPApplication
@@ -33,7 +38,10 @@ async def _not_found_as_404(awaitable):
 @router.post(
     "/api/v1/agent/{agent_id}/workflows",
     status_code=200,
-    description="Add Workflow Configuration",
+    description=(
+        "Add Workflow Configuration. If parameters are omitted, null, or empty, "
+        "the MCP tool gets an optional string parameter `query` (User question)."
+    ),
     tags=["Workflows"],
 )
 @requires_one([StashRoles.OWNER])
@@ -47,6 +55,9 @@ async def add_workflow(
 ):
     app: HTTPApplication = request.app
     agent_manager: AgentManager = app.agent_manager
+
+    if not item.parameters:
+        item.parameters = default_workflow_parameters()
 
     await agent_manager.add_workflow(
         agent_id=agent_id, item=item, account=x_stf_account
