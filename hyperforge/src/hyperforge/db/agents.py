@@ -42,6 +42,7 @@ from hyperforge.workflows import (
     WorkflowData,
     WorkflowInput,
     WorkflowUpdate,
+    default_workflow_parameters,
 )
 
 SERVICE_NAME = "TASK_MANAGER"
@@ -617,7 +618,7 @@ class AgentManager:
             workflow_id="default",
             name="default",
             description="Default workflow",
-            parameters={},
+            parameters=default_workflow_parameters(),
             rules=Rules(rules=[]).model_dump(),
             required=[],
             is_deleted=False,

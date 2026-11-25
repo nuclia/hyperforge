@@ -23,6 +23,10 @@ HEADERS = {
     "X-STF-ACCOUNT-TYPE": "basic",
     "X-STF-ROLES": "SOWNER",
 }
+DEFAULT_MCP_PARAMETERS = {
+    "query": {"type": "string", "description": "User question"},
+}
+CUSTOM_MCP_PARAMETERS = {"user_id": {"type": "string"}}
 
 
 async def create_workflow(
@@ -38,6 +42,37 @@ async def create_workflow(
         headers=HEADERS,
     )
     assert resp.status_code == 200
+
+
+@pytest.mark.parametrize(
+    ("extra", "expected_parameters"),
+    [
+        ({}, DEFAULT_MCP_PARAMETERS),
+        ({"parameters": None}, DEFAULT_MCP_PARAMETERS),
+        ({"parameters": {}}, DEFAULT_MCP_PARAMETERS),
+        ({"parameters": CUSTOM_MCP_PARAMETERS}, CUSTOM_MCP_PARAMETERS),
+    ],
+    ids=["omitted", "null", "empty", "custom"],
+)
+async def test_arag_workflow_create_mcp_parameters(
+    arag_kb: KnowledgeBoxObj, arag_api: AsyncClient, extra, expected_parameters
+):
+    url = f"/api/v1/agent/{arag_kb.uuid}/workflows"
+    workflow_id = "mcp-parameters"
+    resp = await arag_api.post(
+        url, json={"id": workflow_id, "name": workflow_id, **extra}, headers=HEADERS
+    )
+    assert resp.status_code == 200
+
+    resp = await arag_api.get(url, headers=HEADERS)
+    assert resp.status_code == 200
+    workflow = next(item for item in resp.json() if item["id"] == workflow_id)
+    assert workflow["parameters"] == expected_parameters
+    assert workflow["required"] == []
+
+    default_workflow = next(item for item in resp.json() if item["id"] == WORKFLOW_ID)
+    assert default_workflow["parameters"] == DEFAULT_MCP_PARAMETERS
+    assert default_workflow["required"] == []
 
 
 async def test_arag_workflow_delete(
