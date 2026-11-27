@@ -11,7 +11,7 @@ from hyperforge.configure import (
 )
 from hyperforge.db.workflow_migration import transpile_stages_to_harness
 from hyperforge.harness import HarnessAgent, HarnessAgentConfig
-from hyperforge.harness_sdk import HarnessStorageProtocol
+from hyperforge.harness_sdk import HarnessAuditProtocol, HarnessStorageProtocol
 from hyperforge.interaction import AragAnswer
 from hyperforge.llm import (
     AsyncLocalOpenAIClient,
@@ -111,6 +111,7 @@ async def init(
     session_id: str = "default_session",
     memory_klass: type[BaseSessionMemory] = SessionMemory,
     storage: Optional[HarnessStorageProtocol] = None,
+    audit_sink: Optional[HarnessAuditProtocol] = None,
 ) -> Tuple[State, SessionMemory]:
     from hyperforge.configure import scan
 
@@ -138,6 +139,7 @@ async def init(
         local_openai_model=local_openai_model,
         external_nua_api_key=external_nua_api_key,
         storage=storage,
+        audit_sink=audit_sink,
     )
     session_memory = memory_klass.from_config(
         resolved_config.memory,
@@ -168,6 +170,7 @@ async def main(
     streaming: bool = False,
     chat_history: Optional[List[HistoryQuestionAnswer]] = None,
     storage: Optional[HarnessStorageProtocol] = None,
+    audit_sink: Optional[HarnessAuditProtocol] = None,
 ) -> QuestionMemory:
     state: State | None = None
     try:
@@ -184,6 +187,7 @@ async def main(
             session_id=session_id,
             memory_klass=memory_klass,
             storage=storage,
+            audit_sink=audit_sink,
         )
         question_memory = session_memory.start_question(
             question, streaming=streaming, chat_history=chat_history
@@ -241,6 +245,7 @@ async def get_state(
     local_openai_model_klass: Optional[type[NuaBaseModel]] = None,
     allow_private_network_endpoints: bool = False,
     storage: Optional[HarnessStorageProtocol] = None,
+    audit_sink: Optional[HarnessAuditProtocol] = None,
 ) -> State:
     resolved_config = ensure_harness_config(config)
     nua: AsyncNuaClient
@@ -291,5 +296,10 @@ async def get_state(
         nua=nua,
         allow_private_network_endpoints=allow_private_network_endpoints,
     )
-    agent = await HarnessAgent.from_config_class(resolved_config, storage=storage)
+    agent = await HarnessAgent.from_config_class(
+        resolved_config,
+        storage=storage,
+        audit_sink=audit_sink,
+        account=account or "default",
+    )
     return State(manager=manager, agent=agent)

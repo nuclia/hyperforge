@@ -18,6 +18,7 @@ from hyperforge.procedural.guidance import (
 )
 
 from .agents import published_agent_to_tools
+from .audit import HarnessAuditObserver, HarnessAuditProtocol
 from .cache import (
     CachedDecision,
     DecisionCache,
@@ -333,8 +334,10 @@ class AgentHarness:
         parent_agent_id: str | None = None,
         event_queue_size: int = DEFAULT_EVENT_QUEUE_SIZE,
         procedural_guidance: ProceduralGuidanceConfig | None = None,
+        procedural_graph_version_id: str | None = None,
         guidance_client: ModelClient | None = None,
         decision_cache: DecisionCache | None = None,
+        audit_sink: HarnessAuditProtocol | None = None,
     ) -> None:
         if event_queue_size <= 0:
             raise ValueError("event_queue_size must be positive")
@@ -441,7 +444,23 @@ class AgentHarness:
         self._procedural = (
             ProceduralGuidance(procedural_guidance) if procedural_guidance else None
         )
+        self._procedural_graph_version_id = procedural_graph_version_id
         self._guidance_client = guidance_client or model_client
+        self.audit_sink = audit_sink
+        conv_meta = self.execution_context.get("conversation_metadata")
+        meta_map = conv_meta if isinstance(conv_meta, Mapping) else {}
+        self._audit_observer = (
+            HarnessAuditObserver(
+                audit_sink,
+                account=str(meta_map.get("account") or "default"),
+                agent_id=str(meta_map.get("agent_id") or self.agent_id),
+                workflow_id=str(meta_map.get("workflow_id") or "default"),
+                graph=procedural_guidance.graph if procedural_guidance else None,
+                graph_version_id=procedural_graph_version_id,
+            )
+            if audit_sink is not None and parent_agent_id is None
+            else None
+        )
         self._failed_procedural_calls: set[str] = set()
         self._decision_cache = (
             DecisionCacheRuntime(decision_cache) if decision_cache else None
@@ -763,6 +782,14 @@ class AgentHarness:
             raise UsageLimitExceeded("max_time limit exceeded") from exc
 
     @property
+    def last_audit_episode_id(self) -> str | None:
+        return (
+            self._audit_observer.last_episode_id
+            if self._audit_observer is not None
+            else None
+        )
+
+    @property
     def turn_id(self) -> str | None:
         return self._turn_id
 
@@ -849,6 +876,28 @@ class AgentHarness:
         if persist and self._persist_events:
             await self.storage.append_event(event)
             self._last_event_id = event.id
+        if self._audit_observer is not None:
+            if (
+                event_type == HarnessEventType.TURN_STARTED
+                and self._procedural is None
+                and self._audit_observer.graph is not None
+            ):
+                self._audit_observer.graph = None
+                self._audit_observer.graph_version_id = None
+            exec_mode: Literal["loop", "code"] = (
+                "code" if payload.get("mode") == "code" else "loop"
+            )
+            try:
+                await self._audit_observer.on_event(
+                    event,
+                    execution_mode=exec_mode,
+                    model=self.model,
+                    available_tools=[t.name for t in self.iter_tools()],
+                    skills_loaded=sorted(self._loaded_skills),
+                    usage=self.usage,
+                )
+            except Exception:
+                logger.warning("Audit observer failed to record event", exc_info=True)
         await self._publish_event(event)
         return event
 

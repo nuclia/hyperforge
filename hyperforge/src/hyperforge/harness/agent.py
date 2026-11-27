@@ -11,6 +11,7 @@ from hyperforge.harness.config import HarnessAgentConfig
 from hyperforge.harness_sdk import (
     AgentHarness,
     BaseToolkit,
+    HarnessAuditProtocol,
     HarnessMessage,
     HarnessSkill,
     HarnessStorageProtocol,
@@ -35,11 +36,15 @@ class HarnessAgent:
         toolkits: list[BaseToolkit[Any]] | None = None,
         *,
         storage: HarnessStorageProtocol | None = None,
+        audit_sink: HarnessAuditProtocol | None = None,
+        account: str = "default",
     ) -> None:
         self.config = config
         self.agents = agents
         self.toolkits = toolkits or []
         self.storage = storage
+        self.audit_sink = audit_sink
+        self.account = account
 
     @classmethod
     async def from_config_class(
@@ -47,6 +52,8 @@ class HarnessAgent:
         config: HarnessAgentConfig,
         *,
         storage: HarnessStorageProtocol | None = None,
+        audit_sink: HarnessAuditProtocol | None = None,
+        account: str = "default",
     ) -> "HarnessAgent":
         agents = [
             await get_agent_klass(agent_config.module).from_config(agent_config)
@@ -56,7 +63,14 @@ class HarnessAgent:
             await create_toolkit_instance(toolkit_config)
             for toolkit_config in config.toolkits
         ]
-        return cls(config, agents, toolkits, storage=storage)
+        return cls(
+            config,
+            agents,
+            toolkits,
+            storage=storage,
+            audit_sink=audit_sink,
+            account=account,
+        )
 
     async def __call__(self, memory: QuestionMemory, manager: Manager) -> None:
         for agent in self.agents:
@@ -89,6 +103,7 @@ class HarnessAgent:
         execution_context: dict[str, Any] = {
             "user_id": memory.session.user_info.get("id", "system"),
             "conversation_metadata": {
+                "account": self.account,
                 "agent_id": memory.get_agent_id(),
                 "workflow_id": memory.get_workflow_id(),
                 "question_id": memory.original_question_uuid,
@@ -149,6 +164,8 @@ class HarnessAgent:
             feedback_enabled=self.config.feedback_enabled,
             usage_limits=self.config.usage_limits,
             procedural_guidance=self.config.procedural_guidance,
+            procedural_graph_version_id=self.config.procedural_graph_version_id,
+            audit_sink=self.audit_sink,
         )
         if self.storage is not None:
             await harness.load(create=True)
@@ -176,6 +193,10 @@ class HarnessAgent:
             async for event in event_stream:
                 await bridge.handle_event(event)
         await bridge.finalize()
+        if harness.last_audit_episode_id is not None:
+            memory.session.user_info["last_audit_episode_id"] = (
+                harness.last_audit_episode_id
+            )
 
     def _collect_skills(
         self, toolkit_skills: list[HarnessSkill], memory: QuestionMemory

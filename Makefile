@@ -68,3 +68,9 @@ dockers:
 
 all-tests:
 	@for dir in $(COMPONENTS); do $(MAKE) -C $$dir test || exit 1; done
+
+license-check:
+	docker run -it --rm -v $(shell pwd):/github/workspace ghcr.io/apache/skywalking-eyes/license-eye header check
+
+license-fix:
+	docker run -it --rm -v $(shell pwd):/github/workspace ghcr.io/apache/skywalking-eyes/license-eye header fix

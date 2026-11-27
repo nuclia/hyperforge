@@ -5,7 +5,8 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 import hyperforge.db.agents
-import hyperforge.db.harness_storage  # noqa: F401
+import hyperforge.db.harness_storage
+import hyperforge.db.procedural_storage  # noqa: F401
 from hyperforge.database import metadata
 from hyperforge.db.settings import DataManagerSettings
 

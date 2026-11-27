@@ -13,9 +13,15 @@ from hyperforge.configure import GLOBAL_REGISTRY
 from hyperforge.db import exceptions
 from hyperforge.db.workflow_migration import transpile_stages_to_harness
 from hyperforge.harness.config import HarnessAgentConfig
-from hyperforge.harness_sdk import SYSTEM_PROMPT, HarnessSkill, ToolkitConfig
+from hyperforge.harness_sdk import (
+    SYSTEM_PROMPT,
+    HarnessSkill,
+    InMemoryAuditStore,
+    ToolkitConfig,
+)
 from hyperforge.llm_config import llm_defaults
 from hyperforge.models import MemoryConfig, Rules
+from hyperforge.procedural import GuidanceRuntimeSettings, InMemoryProceduralGraphStore
 from hyperforge.prompts import PromptConfig
 from hyperforge.standalone.config import StandAloneAgentConfig
 from hyperforge.workflows import RetrievalAgent, WorkflowData
@@ -30,9 +36,34 @@ class StaticAgentManager:
         self._config = config
         self._oauth_fernet = Fernet(Fernet.generate_key())
         self._oauth_credentials: dict[tuple[str, str, str, str, str], str] = {}
+        self.procedural_store = InMemoryProceduralGraphStore()
+        self.audit_store = InMemoryAuditStore()
 
     async def initialize(self) -> None:
-        pass
+        for agent_id, agent_cfg in self._config.items():
+            for wf_id, wf_cfg in agent_cfg.workflows.items():
+                if wf_cfg.procedural_guidance is not None:
+                    existing = await self.procedural_store.get_binding(
+                        "standalone", agent_id, wf_id
+                    )
+                    if existing is None:
+                        await self.procedural_store.upsert_settings(
+                            "standalone",
+                            agent_id,
+                            wf_id,
+                            guidance_settings=GuidanceRuntimeSettings.from_guidance_config(
+                                wf_cfg.procedural_guidance
+                            ),
+                        )
+                        await self.procedural_store.create_version(
+                            "standalone",
+                            agent_id,
+                            wf_id,
+                            wf_cfg.procedural_guidance.graph,
+                            status="active",
+                            source="manual",
+                            promote=True,
+                        )
 
     async def finalize(self) -> None:
         pass
@@ -247,7 +278,21 @@ class StaticAgentManager:
         workflow_id: str = "default",
     ) -> HarnessAgentConfig:
         agent_config = self._get_agent(agent_id)
-        return self._build_harness_config(agent_config, workflow_id)
+        built = self._build_harness_config(agent_config, workflow_id)
+        active = await self.procedural_store.get_active_guidance_config(
+            account, agent_id, workflow_id
+        ) or await self.procedural_store.get_active_guidance_config(
+            "standalone", agent_id, workflow_id
+        )
+        if active is not None:
+            pg_ver, pg_cfg = active
+            built = built.model_copy(
+                update={
+                    "procedural_guidance": pg_cfg,
+                    "procedural_graph_version_id": pg_ver.id,
+                }
+            )
+        return built
 
     async def get_prompt(
         self, agent_id: str, account: str, prompt_id: str

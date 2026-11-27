@@ -29,6 +29,10 @@ from hyperforge.db.encryption import (
     encrypt_fields,
     fernet_key_from_passphrase,
 )
+from hyperforge.db.procedural_storage import (
+    PostgresHarnessAuditStore,
+    PostgresProceduralGraphStore,
+)
 from hyperforge.db.settings import DataManagerSettings
 from hyperforge.db.workflow_migration import transpile_stages_to_harness
 from hyperforge.driver import DriverConfig
@@ -40,6 +44,7 @@ from hyperforge.harness.config import (
 from hyperforge.harness_sdk import SYSTEM_PROMPT, HarnessSkill, ToolkitConfig
 from hyperforge.llm_config import llm_defaults
 from hyperforge.models import MemoryConfig, NucliaDBMemoryConfig, Rules
+from hyperforge.procedural import GuidanceRuntimeSettings
 from hyperforge.prompts import PromptArgument, PromptConfig
 from hyperforge.retrieval.config import RetrievalAgentConfig, RetrievalAgentExportV1
 from hyperforge.workflows import (
@@ -284,6 +289,8 @@ class AgentManager:
     ):
         self.database = database
         self.settings = settings
+        self.procedural_store = PostgresProceduralGraphStore(database)
+        self.audit_store = PostgresHarnessAuditStore(database)
 
     @classmethod
     async def from_settings(
@@ -1027,6 +1034,19 @@ class AgentManager:
             or SYSTEM_PROMPT
         )
 
+        active_pg = None
+        try:
+            active_pg = await self.procedural_store.get_active_guidance_config(
+                account, agent_id, workflow_id
+            )
+        except Exception:
+            active_pg = None
+
+        if active_pg is not None and "procedural_guidance" not in harness_settings:
+            pg_ver, pg_cfg = active_pg
+            harness_settings["procedural_guidance"] = pg_cfg
+            harness_settings["procedural_graph_version_id"] = pg_ver.id
+
         return HarnessAgentConfig.model_validate(
             {
                 "execution_mode": execution_mode,
@@ -1635,6 +1655,24 @@ class AgentManager:
                         agent_id=agent_id,
                         toolkit=tk,
                         workflow_id=wf_id,
+                    )
+                if wf_cfg.procedural_guidance is not None:
+                    await self.procedural_store.upsert_settings(
+                        account,
+                        agent_id,
+                        wf_id,
+                        guidance_settings=GuidanceRuntimeSettings.from_guidance_config(
+                            wf_cfg.procedural_guidance
+                        ),
+                    )
+                    await self.procedural_store.create_version(
+                        account,
+                        agent_id,
+                        wf_id,
+                        wf_cfg.procedural_guidance.graph,
+                        status="active",
+                        source="import",
+                        promote=True,
                     )
             if agent_rules is not None:
                 await self.set_rules(

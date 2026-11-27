@@ -179,6 +179,8 @@ class SessionManager:
                 else None
             )
 
+            audit_sink = getattr(self.agent_manager, "audit_store", None)
+
             state = await get_state(
                 agent_id=message.agent_id,
                 config=config,
@@ -190,6 +192,7 @@ class SessionManager:
                 kbid=None if self.settings.standalone else message.agent_id,
                 allow_private_network_endpoints=self.settings.allow_private_network_endpoints,
                 storage=harness_storage,
+                audit_sink=audit_sink,
             )
 
             if message.session not in self.memory:

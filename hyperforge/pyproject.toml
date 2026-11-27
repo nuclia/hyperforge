@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "hyperforge"
-version = "1.0.0"
+version = "2.0.0"
 authors = [{ name = "AI Data Team", email = "learning@nuclia.com" }]
 description = "Agentic Framework for Orchestrated Runtime, Governance, and Execution"
 readme = "README.md"

@@ -49,6 +49,7 @@ class HarnessAgentConfig(BaseModel):
     feedback_enabled: bool = False
     usage_limits: UsageLimits = Field(default_factory=UsageLimits)
     procedural_guidance: ProceduralGuidanceConfig | None = None
+    procedural_graph_version_id: str | None = None
     rules: Rules = Field(default_factory=Rules)
     memory: MemoryConfig = Field(default_factory=MemoryConfig)
 
@@ -102,6 +103,7 @@ class HarnessAgentConfig(BaseModel):
             and len(self.toolkits) == 0
             and len(self.agents) == 0
             and len(self.skills) == 0
+            and self.procedural_guidance is None
             and not (self.workflow_code and self.workflow_code.strip())
         )
 
