@@ -29,6 +29,12 @@ dev = [
     "ty",
 ]
 
+[project.entry-points."hyperforge.toolkits"]
+google = "hyperforge_google.toolkit:GoogleSearchToolkit"
+
+[project.entry-points."hyperforge.drivers"]
+google = "hyperforge_google.driver:GoogleDriver"
+
 [project.urls]
 Homepage = "https://progress.com"
 Repository = "https://github.com/nuclia/hyperforge"

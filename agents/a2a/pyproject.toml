@@ -32,6 +32,12 @@ dev = [
     "ty",
 ]
 
+[project.entry-points."hyperforge.toolkits"]
+a2a = "hyperforge_a2a.toolkit:A2AToolkit"
+
+[project.entry-points."hyperforge.drivers"]
+a2a = "hyperforge_a2a.driver:A2ADriver"
+
 [project.urls]
 Homepage = "https://progress.com"
 Repository = "https://github.com/nuclia/hyperforge"

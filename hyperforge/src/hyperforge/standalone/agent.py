@@ -1,11 +1,6 @@
 """
-StaticAgentManager — a drop-in replacement for AgentManager that serves agent
-configuration from an in-memory StandaloneConfig rather than a PostgreSQL database.
-
-Only the methods actually called at runtime (by SessionManager and the MCP/interaction
-endpoints) are implemented.  Management mutations (add/delete/patch) intentionally
-raise NotImplementedError — the standalone deployment is read-only with respect to
-agent configuration.
+StaticAgentManager — serves unified `HarnessAgentConfig` workflows from an
+in-memory `StandaloneConfig` rather than PostgreSQL.
 """
 
 import datetime
@@ -14,10 +9,14 @@ from typing import Any, List
 
 from cryptography.fernet import Fernet, InvalidToken
 
+from hyperforge.configure import GLOBAL_REGISTRY
 from hyperforge.db import exceptions
+from hyperforge.db.workflow_migration import transpile_stages_to_harness
+from hyperforge.harness.config import HarnessAgentConfig
+from hyperforge.harness_sdk import SYSTEM_PROMPT, HarnessSkill, ToolkitConfig
+from hyperforge.llm_config import llm_defaults
 from hyperforge.models import MemoryConfig, Rules
 from hyperforge.prompts import PromptConfig
-from hyperforge.retrieval.config import RetrievalAgentConfig
 from hyperforge.standalone.config import StandAloneAgentConfig
 from hyperforge.workflows import RetrievalAgent, WorkflowData
 
@@ -32,19 +31,11 @@ class StaticAgentManager:
         self._oauth_fernet = Fernet(Fernet.generate_key())
         self._oauth_credentials: dict[tuple[str, str, str, str, str], str] = {}
 
-    # ------------------------------------------------------------------
-    # Lifecycle (no-ops — nothing to connect/disconnect)
-    # ------------------------------------------------------------------
-
     async def initialize(self) -> None:
         pass
 
     async def finalize(self) -> None:
         pass
-
-    # ------------------------------------------------------------------
-    # Internal helpers
-    # ------------------------------------------------------------------
 
     def _get_agent(self, agent_id: str) -> StandAloneAgentConfig:
         agent_config = self._config.get(agent_id)
@@ -118,32 +109,85 @@ class StaticAgentManager:
         if workflow_id not in agent_config.workflows:
             raise exceptions.NotFoundError("Workflow not found")
 
-    def _build_retrieval_config(
+    def _build_harness_config(
         self, agent_config: StandAloneAgentConfig, workflow_id: str = "default"
-    ) -> RetrievalAgentConfig:
-        """Merge StandAloneAgentConfig + WorkflowConfig into a RetrievalAgentConfig."""
+    ) -> HarnessAgentConfig:
         workflow = agent_config.workflows.get(workflow_id)
         if workflow is None:
             raise exceptions.NotFoundError(
                 f"Workflow '{workflow_id}' not found in agent"
             )
-        workflow_data = workflow.as_workflow_data(workflow_id)
-        # Merge agent-level rules with workflow-level rules (workflow takes precedence).
         merged_rules = workflow.rules if workflow.rules.rules else agent_config.rules
-        return RetrievalAgentConfig(
-            drivers=agent_config.drivers,
-            rules=merged_rules,
-            memory=MemoryConfig(),
-            workflow=workflow_data,
-            preprocess=workflow.preprocess,
-            context=workflow.context,
-            generation=workflow.generation,
-            postprocess=workflow.postprocess,
+        combined_skills = [*agent_config.skills, *workflow.skills]
+
+        has_native_harness = (
+            workflow.execution_mode is not None
+            or bool(workflow.toolkits)
+            or bool(workflow.workflow_code)
+            or workflow.model is not None
+        )
+        has_legacy_stages = any(
+            (
+                workflow.preprocess,
+                workflow.context,
+                workflow.generation,
+                workflow.postprocess,
+            )
         )
 
-    # ------------------------------------------------------------------
-    # Methods used by SessionManager (session.py)
-    # ------------------------------------------------------------------
+        if has_legacy_stages and not has_native_harness:
+            ext_migrations = {
+                k: v.handler
+                for k, v in GLOBAL_REGISTRY.migrations.items()
+                if v.handler is not None
+            }
+            compiled = transpile_stages_to_harness(
+                preprocess=[x.model_dump() for x in workflow.preprocess],
+                context=[x.model_dump() for x in workflow.context],
+                generation=[x.model_dump() for x in workflow.generation],
+                postprocess=[x.model_dump() for x in workflow.postprocess],
+                external_migrations=ext_migrations,
+            )
+            harness_settings = dict(compiled["harness_config"])
+            enabled_skill_ids = harness_settings.pop("enabled_skills", []) or []
+            for sid in enabled_skill_ids:
+                reg = GLOBAL_REGISTRY.skills.get(sid)
+                if reg and reg.skill is not None:
+                    combined_skills.append(reg.skill)
+            return HarnessAgentConfig.model_validate(
+                {
+                    "execution_mode": compiled["execution_mode"],
+                    "workflow_code": compiled["workflow_code"],
+                    "toolkits": compiled["toolkits"],
+                    "drivers": agent_config.drivers,
+                    "skills": combined_skills,
+                    "prompts": agent_config.prompts,
+                    "rules": merged_rules,
+                    "memory": MemoryConfig(),
+                    **harness_settings,
+                }
+            )
+
+        exec_mode = workflow.execution_mode or "loop"
+        model_id = workflow.model or (llm_defaults.smart if exec_mode == "loop" else "")
+        return HarnessAgentConfig(
+            execution_mode=exec_mode,
+            model=model_id,
+            workflow_code=workflow.workflow_code,
+            toolkits=workflow.toolkits,
+            drivers=agent_config.drivers,
+            skills=combined_skills,
+            prompts=agent_config.prompts,
+            system_prompt=(
+                workflow.system_prompt or agent_config.instructions or SYSTEM_PROMPT
+            ),
+            feedback_enabled=workflow.feedback_enabled,
+            codemode_enabled=workflow.codemode_enabled,
+            usage_limits=workflow.usage_limits,
+            procedural_guidance=workflow.procedural_guidance,
+            rules=merged_rules,
+            memory=MemoryConfig(),
+        )
 
     async def get_driver(self, account: str, agent_id: str, driver: str) -> Any:
         agent_config = self._get_agent(agent_id)
@@ -158,6 +202,15 @@ class StaticAgentManager:
         agent_config = self._get_agent(agent_id)
         return list(agent_config.drivers)
 
+    async def get_toolkits(
+        self, account: str, agent_id: str, workflow_id: str = "default"
+    ) -> List[ToolkitConfig]:
+        cfg = self._build_harness_config(self._get_agent(agent_id), workflow_id)
+        return list(cfg.toolkits)
+
+    async def get_skills(self, account: str, agent_id: str) -> List[HarnessSkill]:
+        return list(self._get_agent(agent_id).skills)
+
     async def workflows_list(self, account: str, agent_id: str) -> List[WorkflowData]:
         agent_config = self._get_agent(agent_id)
         return [
@@ -169,7 +222,6 @@ class StaticAgentManager:
         self, account: str, agent_id: str
     ) -> RetrievalAgent:
         agent_config = self._get_agent(agent_id)
-        # Use the default workflow for description/title fallbacks.
         default_workflow = agent_config.workflows.get("default")
         description = agent_config.description or (
             default_workflow.description if default_workflow else None
@@ -193,9 +245,9 @@ class StaticAgentManager:
         internal_nucliadb_url: str | None = None,
         default_memory: bool = False,
         workflow_id: str = "default",
-    ) -> RetrievalAgentConfig:
+    ) -> HarnessAgentConfig:
         agent_config = self._get_agent(agent_id)
-        return self._build_retrieval_config(agent_config, workflow_id)
+        return self._build_harness_config(agent_config, workflow_id)
 
     async def get_prompt(
         self, agent_id: str, account: str, prompt_id: str
@@ -221,33 +273,25 @@ class StaticAgentManager:
     ) -> list:
         agent_config = self._get_agent(agent_id)
         workflow = agent_config.workflows.get(workflow_id)
-        if workflow is None:
-            return []
-        return workflow.preprocess or []
+        return (workflow.preprocess or []) if workflow else []
 
     async def get_context(
         self, account: str, agent_id: str, workflow_id: str = "default"
     ) -> list:
         agent_config = self._get_agent(agent_id)
         workflow = agent_config.workflows.get(workflow_id)
-        if workflow is None:
-            return []
-        return workflow.context or []
+        return (workflow.context or []) if workflow else []
 
     async def get_generation(
         self, account: str, agent_id: str, workflow_id: str = "default"
     ) -> list:
         agent_config = self._get_agent(agent_id)
         workflow = agent_config.workflows.get(workflow_id)
-        if workflow is None:
-            return []
-        return workflow.generation or []
+        return (workflow.generation or []) if workflow else []
 
     async def get_postprocess(
         self, account: str, agent_id: str, workflow_id: str = "default"
     ) -> list:
         agent_config = self._get_agent(agent_id)
         workflow = agent_config.workflows.get(workflow_id)
-        if workflow is None:
-            return []
-        return workflow.postprocess or []
+        return (workflow.postprocess or []) if workflow else []

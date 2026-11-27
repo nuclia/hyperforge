@@ -96,6 +96,14 @@ class PromptID(BaseModel):
     id: str
 
 
+class ToolkitID(BaseModel):
+    id: str
+
+
+class SkillID(BaseModel):
+    id: str
+
+
 class InteractionsAuditDownloadRequest(BaseModel):
     session_id: Optional[str] = Field(default=None, description="Filter by session ID")
     year: Optional[int] = Field(

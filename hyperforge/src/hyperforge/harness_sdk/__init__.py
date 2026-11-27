@@ -47,8 +47,28 @@ from .models import (
     HarnessMessage,
     HarnessToolCall,
 )
+from .skills import (
+    HarnessSkill,
+    format_loaded_skill_payload,
+    format_skill_instructions,
+    namespace_skill,
+    render_skills_system_prompt,
+)
 from .storage import HarnessStorageProtocol, InMemoryHarnessStorage
-from .tools import HarnessTool, ToolCallContext, tool
+from .toolkits import (
+    BaseToolkit,
+    ToolkitConfig,
+    ToolkitRuntime,
+    assemble_toolkits,
+)
+from .tools import (
+    HarnessTool,
+    SubAgentInput,
+    SubAgentOutput,
+    ToolCallContext,
+    create_subagent_tool,
+    tool,
+)
 from .tools.codemode import (
     CodeModeDispatch,
     CodeModeExecutionLimiter,
@@ -56,14 +76,17 @@ from .tools.codemode import (
     CodeModeLimits,
     CodemodeOutput,
     CodeModeRunner,
+    WorkflowOutput,
     codemode,
     create_codemode_tool,
+    parse_workflow_output,
 )
 from .usage import HarnessUsage, UsageLimitExceeded, UsageLimits
 
 __all__ = [
     "SYSTEM_PROMPT",
     "AgentHarness",
+    "BaseToolkit",
     "ToolCallContext",
     "AgentResult",
     "CachedDecision",
@@ -94,6 +117,7 @@ __all__ = [
     "HarnessInboxItem",
     "HarnessMemory",
     "HarnessMessage",
+    "HarnessSkill",
     "HarnessStorageProtocol",
     "HarnessTool",
     "HarnessToolCall",
@@ -107,16 +131,28 @@ __all__ = [
     "NucliaChatCompletionsClient",
     "NucliaChatCompletionsError",
     "ReasoningEffort",
+    "SubAgentInput",
+    "SubAgentOutput",
     "ToolCachePolicy",
+    "ToolkitConfig",
+    "ToolkitRuntime",
     "UsageLimitExceeded",
     "UsageLimits",
+    "WorkflowOutput",
+    "assemble_toolkits",
     "context_schema",
     "codemode",
     "create_agent",
     "create_codemode_tool",
+    "create_subagent_tool",
     "format_context",
+    "format_loaded_skill_payload",
+    "format_skill_instructions",
     "make_context",
+    "namespace_skill",
+    "parse_workflow_output",
     "register_context",
+    "render_skills_system_prompt",
     "tool",
     "published_agent_to_tools",
     "preload_published_agent_to_tools",

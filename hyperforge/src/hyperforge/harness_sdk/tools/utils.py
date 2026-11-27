@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import inspect
+import json
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Awaitable, Callable, cast, get_type_hints
 
 from jsonschema import ValidationError as JsonSchemaValidationError
 from jsonschema import validate as validate_json_schema
 from pydantic import BaseModel, ValidationError
+
+from hyperforge.result_payload import ResultPayloadBudget, inspect_text_blocks
 
 from ..cache import ToolCachePolicy, digest
 from ..context import make_context
@@ -90,6 +93,7 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
     lazy_load: bool = False
     cache_policy: ToolCachePolicy = ToolCachePolicy.NONE
     description_factory: Callable[[AgentHarness], str] | None = None
+    payload_budget: ResultPayloadBudget | None = None
     input_model: type[InputT] = field(init=False)
     output_model: type[OutputT] = field(init=False)
     _parameters: dict[str, Any] = field(init=False, repr=False)
@@ -153,7 +157,10 @@ class HarnessTool[InputT: BaseModel, OutputT: BaseModel]:
         except ValidationError as exc:
             raise ValueError(f"Invalid {self.name} arguments: {exc}") from exc
         result = await self.handler(context, value)
-        return self.output_model.model_validate(result)
+        validated = self.output_model.model_validate(result)
+        if self.payload_budget is not None:
+            _enforce_payload_budget(validated, self.payload_budget)
+        return validated
 
     def context(self, output: OutputT) -> HarnessContextReference:
         if self.context_factory is not None:
@@ -171,6 +178,7 @@ def tool(
     lazy_load: bool = False,
     cache_policy: ToolCachePolicy = ToolCachePolicy.NONE,
     description_factory: Callable[[AgentHarness], str] | None = None,
+    payload_budget: ResultPayloadBudget | None = None,
 ) -> Callable[[ToolHandler[Any, Any]], HarnessTool[Any, Any]]:
     """Create a harness tool from an annotated async handler."""
 
@@ -185,9 +193,29 @@ def tool(
             lazy_load=lazy_load,
             cache_policy=cache_policy,
             description_factory=description_factory,
+            payload_budget=payload_budget,
         )
 
     return decorate
+
+
+def _enforce_payload_budget(output: BaseModel, budget: ResultPayloadBudget) -> None:
+    dumped = output.model_dump(mode="json")
+    blocks: list[str] = []
+    if isinstance(dumped, dict):
+        for item in dumped.values():
+            if isinstance(item, list) and item:
+                blocks.extend(
+                    entry
+                    if isinstance(entry, str)
+                    else json.dumps(entry, default=str, separators=(",", ":"))
+                    for entry in item
+                )
+    if not blocks:
+        blocks = [json.dumps(dumped, default=str, separators=(",", ":"))]
+    overflow = inspect_text_blocks(blocks, budget)
+    if overflow is not None:
+        raise ValueError(overflow.render())
 
 
 def _is_model_type(value: Any) -> bool:

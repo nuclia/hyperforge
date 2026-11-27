@@ -33,6 +33,12 @@ dev = [
     "ty",
 ]
 
+[project.entry-points."hyperforge.toolkits"]
+perplexity = "hyperforge_perplexity.toolkit:PerplexityToolkit"
+
+[project.entry-points."hyperforge.drivers"]
+perplexity = "hyperforge_perplexity.driver:PerplexityDriver"
+
 [project.urls]
 Homepage = "https://progress.com"
 Repository = "https://github.com/nuclia/hyperforge"

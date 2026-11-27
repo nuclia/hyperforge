@@ -19,6 +19,7 @@ Usage in Alembic migrations:
 import json
 from typing import Any
 
+import sqlalchemy as sa
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
@@ -31,6 +32,7 @@ HYPERFORGE_LLM_TABLES: list[tuple[str, str]] = [
     ("retrieval_agent_context", "context"),
     ("retrieval_agent_generation", "generation"),
     ("retrieval_agent_postprocess", "postprocess"),
+    ("agent_workflow_toolkits", "config"),
     ("retrieval_agents_drivers", "config"),
 ]
 
@@ -89,7 +91,10 @@ def migrate_llm_models(conn: Connection, replacements: dict[str, str]) -> int:
         Number of rows modified.
     """
     total_modified = 0
+    inspector = sa.inspect(conn)
     for table, column in HYPERFORGE_LLM_TABLES:
+        if not inspector.has_table(table):
+            continue
         # Only fetch rows that contain at least one LLMConfig (pre-filter)
         rows = conn.execute(
             text(

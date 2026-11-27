@@ -59,10 +59,9 @@ class TestMigrateLLMModelsDB:
 
     @pytest.fixture(autouse=True)
     def _seed_data(self, test_db):
-        """Insert test rows into retrieval_agent_generation."""
+        """Insert test rows into agent_workflow_toolkits."""
         self.row_id = str(uuid.uuid4())
-        generation_config = {
-            "module": "summarize",
+        toolkit_config = {
             "model": {"_type": LLM_CONFIG_TYPE, "model_id": "chatgpt-4.1"},
             "nested_agents": [
                 {
@@ -74,7 +73,7 @@ class TestMigrateLLMModelsDB:
             ],
         }
         # Insert parent rows to satisfy FK chain:
-        # retrieval_agent_config -> retrieval_agent_workflow -> retrieval_agent_generation
+        # retrieval_agent_config -> retrieval_agent_workflow -> agent_workflow_toolkits
         test_db.execute(
             text(
                 "INSERT INTO retrieval_agent_config (account, agent_id, rules, memory) "
@@ -98,16 +97,18 @@ class TestMigrateLLMModelsDB:
         )
         test_db.execute(
             text(
-                "INSERT INTO retrieval_agent_generation "
-                "(id, account, agent_id, workflow_id, generation) "
-                "VALUES (:id, :account, :agent_id, :workflow_id, :generation)"
+                "INSERT INTO agent_workflow_toolkits "
+                "(id, account, agent_id, workflow_id, namespace, toolkit, config) "
+                "VALUES (:id, :account, :agent_id, :workflow_id, :namespace, :toolkit, CAST(:config AS jsonb))"
             ),
             {
                 "id": self.row_id,
                 "account": "test-account",
                 "agent_id": "test-agent",
                 "workflow_id": "test-workflow",
-                "generation": json.dumps(generation_config),
+                "namespace": "synth_test",
+                "toolkit": "synthesis",
+                "config": json.dumps(toolkit_config),
             },
         )
         test_db.commit()
@@ -123,7 +124,7 @@ class TestMigrateLLMModelsDB:
 
         # Read back and verify
         row = test_db.execute(
-            text("SELECT generation FROM retrieval_agent_generation WHERE id = :id"),
+            text("SELECT config FROM agent_workflow_toolkits WHERE id = :id"),
             {"id": self.row_id},
         ).fetchone()
         config = row[0] if isinstance(row[0], dict) else json.loads(row[0])

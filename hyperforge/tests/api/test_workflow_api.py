@@ -6,7 +6,7 @@ from nucliadb_models.resource import KnowledgeBoxObj
 
 from hyperforge.db.agents import (
     WORKFLOW_PURGE_RETENTION,
-    retrieval_agent_generation,
+    agent_workflow_toolkits,
     retrieval_agent_workflow,
 )
 from hyperforge.db.workflow_cleanup import cleanup_deleted_workflows
@@ -152,13 +152,13 @@ async def test_arag_workflow_cleanup_purges_expired_deleted_workflows(
     )
     assert workflow is None
 
-    generation = await arag_api_app.agent_manager.database.fetch_one(
-        retrieval_agent_generation.select()
-        .where(retrieval_agent_generation.c.account == HEADERS["X-STF-ACCOUNT"])
-        .where(retrieval_agent_generation.c.agent_id == arag_kb.uuid)
-        .where(retrieval_agent_generation.c.workflow_id == workflow_id)
+    toolkit_row = await arag_api_app.agent_manager.database.fetch_one(
+        agent_workflow_toolkits.select()
+        .where(agent_workflow_toolkits.c.account == HEADERS["X-STF-ACCOUNT"])
+        .where(agent_workflow_toolkits.c.agent_id == arag_kb.uuid)
+        .where(agent_workflow_toolkits.c.workflow_id == workflow_id)
     )
-    assert generation is None
+    assert toolkit_row is None
 
 
 async def test_arag_workflow_cleanup_keeps_recent_deleted_workflows(

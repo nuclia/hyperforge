@@ -8,6 +8,7 @@ and runtimes are migrated separately.
 import json
 from typing import Any
 
+import sqlalchemy as sa
 from sqlalchemy import text
 from sqlalchemy.engine import Connection
 
@@ -107,7 +108,10 @@ def wrap_legacy_llm_fields(config: Any) -> bool:
 def migrate_legacy_llm_fields(conn: Connection) -> int:
     """Convert stored agent configs, leaving unrelated and structured data alone."""
     modified = 0
+    inspector = sa.inspect(conn)
     for table, column in HYPERFORGE_LLM_TABLES:
+        if not inspector.has_table(table) or table == "agent_workflow_toolkits":
+            continue
         last_id = "00000000-0000-0000-0000-000000000000"
         while rows := conn.execute(
             text(

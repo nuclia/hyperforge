@@ -10,7 +10,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable, NoReturn, Protocol, cast
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from hyperforge.codemode import (
     RestrictedPythonTask,
@@ -30,10 +30,15 @@ from . import HarnessTool, ToolCallContext
 
 CODEMODE_TOOL_NAME = "codemode"
 OUTPUT_FUNCTION_NAME = "output"
+PARALLEL_FUNCTION_NAME = "_parallel"
+EMIT_STEP_FUNCTION_NAME = "_emit_step"
 CODEMODE_USAGE_GUIDANCE = (
     "Execute restricted Python code. The agent's active external tools are available as "
     "functions with the same names and arguments. Core agent tools are unavailable. "
     "Tool results are JSON data (dicts/lists) matching each tool's output. "
+    "Use parallel([call(tool_fn, arg=...), ...]) to run multiple tool/capability calls concurrently. "
+    "Use emit_step(title, reason='', value='') to record intermediate workflow steps, and read "
+    "workflow_context ('question', 'arguments', 'history', 'rules', 'user_info') for session state. "
     "Supported: assignments, loops, conditionals, indexing, comprehensions, and builtins including len, "
     "range, sum, sorted, min, max, any, all, map, filter, reversed, iter, and next. "
     "Imports and attributes on unapproved objects are unavailable. "
@@ -48,6 +53,10 @@ DEFAULT_MAX_CUMULATIVE_RESULT_BYTES = 4 * 1024 * 1024
 DEFAULT_MAX_OUTPUT_BYTES = 1024 * 1024
 DEFAULT_MAX_NESTED_CALLS = 20
 DEFAULT_MAX_CONCURRENT_EXECUTIONS = 4
+_MAX_WORKFLOW_CONTEXT_BYTES = 512 * 1024
+_MAX_STEP_TITLE_BYTES = 512
+_MAX_STEP_REASON_BYTES = 4096
+_MAX_STEP_VALUE_BYTES = 8192
 RESERVED_CAPABILITY_NAMES = frozenset(
     {
         "Any",
@@ -62,15 +71,19 @@ RESERVED_CAPABILITY_NAMES = frozenset(
         "_iter_unpack_sequence_",
         "_unpack_sequence_",
         "agent_id",
+        "call",
         "codemode",
         "dataclass",
+        "emit_step",
         "output",
+        "parallel",
         "pdb",
         "print",
         "printed",
         "question",
         *ALLOWED_GLOBAL_MODULES,
         "save",
+        "workflow_context",
     }
 )
 _SENSITIVE_FIELD_PARTS = (
@@ -110,6 +123,43 @@ class CodemodeInput(BaseModel):
 
 class CodemodeOutput(BaseModel):
     value: Any = None
+
+
+class WorkflowOutput(BaseModel):
+    """Structured result envelope returned by deterministic or hybrid Code Mode workflows."""
+
+    answer: str = ""
+    citations: dict[str, Any] | None = None
+    contexts: list[dict[str, Any]] = Field(default_factory=list)
+    related_questions: list[str] = Field(default_factory=list)
+    visualizations: list[dict[str, Any]] = Field(default_factory=list)
+    is_answered: bool = True
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+def parse_workflow_output(raw_value: Any) -> WorkflowOutput:
+    """Normalize a Code Mode `output(...)` value into a `WorkflowOutput` envelope."""
+    if isinstance(raw_value, WorkflowOutput):
+        return raw_value
+    if isinstance(raw_value, str):
+        return WorkflowOutput(answer=raw_value)
+    if raw_value is None:
+        return WorkflowOutput(answer="", is_answered=False)
+    if isinstance(raw_value, dict) and "answer" in raw_value:
+        known_keys = set(WorkflowOutput.model_fields)
+        extra_meta = {k: v for k, v in raw_value.items() if k not in known_keys}
+        explicit_meta = raw_value.get("metadata")
+        merged_meta = (
+            {**extra_meta, **explicit_meta}
+            if isinstance(explicit_meta, dict)
+            else extra_meta
+        )
+        payload = {k: v for k, v in raw_value.items() if k in known_keys}
+        payload["metadata"] = merged_meta
+        return WorkflowOutput.model_validate(payload)
+    return WorkflowOutput(
+        answer=json.dumps(raw_value, ensure_ascii=False, default=str),
+    )
 
 
 class CodeModeRunner(Protocol):
@@ -406,17 +456,13 @@ async def _execute_scoped_codemode(
         except Exception:
             raise event_failure() from None
 
-    async def dispatch(task: RestrictedPythonTask) -> Any:
-        nonlocal nested_calls, cumulative_result_bytes
-        if task.function == OUTPUT_FUNCTION_NAME:
-            result.value = output_state.record(task, limits.max_output_bytes)
-            return None
-
+    def _reserve_nested_call(capability_name: str) -> _CodeModeFunction:
+        nonlocal nested_calls
         invocation_state.raise_if_failed()
-        capability = capability_map.get(task.function)
+        capability = capability_map.get(capability_name)
         if capability is None:
             invocation_state.fail(
-                ValueError(f"Unknown Code Mode capability: {task.function}")
+                ValueError(f"Unknown Code Mode capability: {capability_name}")
             )
         if nested_calls >= limits.max_nested_calls:
             invocation_state.fail(
@@ -433,6 +479,12 @@ async def _execute_scoped_codemode(
             invocation_state.fail(exc)
         except Exception:
             invocation_state.fail(RuntimeError(_POLICY_CHECK_FAILURE))
+        return capability
+
+    async def _run_reserved_capability(
+        capability: _CodeModeFunction, sub_task: RestrictedPythonTask
+    ) -> Any:
+        nonlocal cumulative_result_bytes
         call_id = uuid.uuid4().hex
         marker = {
             "codemode": True,
@@ -446,7 +498,7 @@ async def _execute_scoped_codemode(
                 "call": {
                     "id": call_id,
                     "name": capability.name,
-                    "arguments": _sanitize_task_arguments(capability, task),
+                    "arguments": _sanitize_task_arguments(capability, sub_task),
                 },
                 **marker,
             },
@@ -461,7 +513,7 @@ async def _execute_scoped_codemode(
                     turn_id=turn_id,
                     _emit_failure=event_failure,
                 ),
-                task,
+                sub_task,
             )
             invocation_state.raise_if_failed()
             try:
@@ -534,9 +586,166 @@ async def _execute_scoped_codemode(
             )
             return normalized
 
+    async def _handle_parallel(task: RestrictedPythonTask) -> list[Any]:
+        nonlocal nested_calls
+        invocation_state.raise_if_failed()
+        if (
+            len(task.args) != 1
+            or task.keyword_args
+            or not isinstance(task.args[0], (list, tuple))
+        ):
+            invocation_state.fail(ValueError("Invalid Code Mode parallel batch"))
+        raw_specs = task.args[0]
+        if not raw_specs:
+            return []
+        validated_specs: list[tuple[_CodeModeFunction, RestrictedPythonTask]] = []
+        for offset, spec in enumerate(raw_specs, start=1):
+            if (
+                not isinstance(spec, dict)
+                or set(spec.keys()) != {"__call__", "args", "kwargs"}
+                or not isinstance(spec["__call__"], str)
+                or spec["__call__"]
+                in {
+                    OUTPUT_FUNCTION_NAME,
+                    PARALLEL_FUNCTION_NAME,
+                    EMIT_STEP_FUNCTION_NAME,
+                }
+                or not isinstance(spec["args"], (list, tuple))
+                or not isinstance(spec["kwargs"], dict)
+            ):
+                invocation_state.fail(
+                    ValueError("Invalid Code Mode parallel call specification")
+                )
+            capability = capability_map.get(spec["__call__"])
+            if capability is None:
+                invocation_state.fail(
+                    ValueError(f"Unknown Code Mode capability: {spec['__call__']}")
+                )
+            if nested_calls + offset > limits.max_nested_calls:
+                invocation_state.fail(
+                    RuntimeError(
+                        "Code Mode nested call limit exceeded: "
+                        f"{nested_calls + offset} > {limits.max_nested_calls}"
+                    )
+                )
+            try:
+                harness._check_limit(
+                    "max_tool_calls", harness.usage.tool_calls + offset
+                )
+            except UsageLimitExceeded as exc:
+                invocation_state.fail(exc)
+            except Exception:
+                invocation_state.fail(RuntimeError(_POLICY_CHECK_FAILURE))
+            validated_specs.append(
+                (
+                    capability,
+                    RestrictedPythonTask(
+                        function=spec["__call__"],
+                        agent="harness",
+                        args=tuple(spec["args"]),
+                        keyword_args=dict(spec["kwargs"]),
+                    ),
+                )
+            )
+
+        nested_calls += len(validated_specs)
+        harness.usage.tool_calls += len(validated_specs)
+        reserved_batch = validated_specs
+
+        outcomes = await asyncio.gather(
+            *(_run_reserved_capability(cap, sub) for cap, sub in reserved_batch),
+            return_exceptions=True,
+        )
+        invocation_state.raise_if_failed()
+        batch_results: list[Any] = []
+        for outcome in outcomes:
+            if isinstance(outcome, asyncio.CancelledError):
+                raise outcome
+        for outcome in outcomes:
+            if isinstance(outcome, BaseException):
+                raise outcome
+            batch_results.append(outcome)
+        try:
+            batch_label = "Code Mode parallel result transport"
+            if remote_required:
+                encode_sandbox_message(
+                    SandboxMessage.Response(result=batch_results),
+                    batch_label,
+                    max_bytes=MAX_PACKET_BYTES,
+                )
+            else:
+                encode_protocol_value(
+                    batch_results,
+                    batch_label,
+                    max_bytes=MAX_PACKET_BYTES,
+                )
+        except (TypeError, ValueError) as exc:
+            invocation_state.latch(exc)
+            raise
+        return batch_results
+
+    async def _handle_emit_step(task: RestrictedPythonTask) -> None:
+        nonlocal nested_calls
+        invocation_state.raise_if_failed()
+        if nested_calls >= limits.max_nested_calls:
+            invocation_state.fail(
+                RuntimeError(
+                    "Code Mode nested call limit exceeded: "
+                    f"{nested_calls + 1} > {limits.max_nested_calls}"
+                )
+            )
+        nested_calls += 1
+        title = task.keyword_args.get("title")
+        reason = task.keyword_args.get("reason", "")
+        value = task.keyword_args.get("value", "")
+        if (
+            task.args
+            or set(task.keyword_args.keys()) - {"title", "reason", "value"}
+            or not isinstance(title, str)
+            or not title.strip()
+            or not isinstance(reason, str)
+            or not isinstance(value, str)
+        ):
+            invocation_state.fail(ValueError("Invalid Code Mode emit_step arguments"))
+        if (
+            _utf8_exceeds_limit(title, _MAX_STEP_TITLE_BYTES)
+            or _utf8_exceeds_limit(reason, _MAX_STEP_REASON_BYTES)
+            or _utf8_exceeds_limit(value, _MAX_STEP_VALUE_BYTES)
+        ):
+            invocation_state.fail(
+                ValueError("Code Mode emit_step field exceeds maximum size")
+            )
+        await emit_nested(
+            HarnessEventType.WORKFLOW_STEP,
+            {
+                "module": "codemode",
+                "title": title,
+                "reason": reason,
+                "value": value,
+                "codemode": True,
+                "nested": True,
+                "parent_call_id": parent_call_id,
+                **event_context,
+            },
+        )
+
+    async def dispatch(task: RestrictedPythonTask) -> Any:
+        if task.function == OUTPUT_FUNCTION_NAME:
+            result.value = output_state.record(task, limits.max_output_bytes)
+            return None
+        if task.agent == "_controller" and task.function == PARALLEL_FUNCTION_NAME:
+            return await _handle_parallel(task)
+        if task.agent == "_controller" and task.function == EMIT_STEP_FUNCTION_NAME:
+            await _handle_emit_step(task)
+            return None
+
+        capability = _reserve_nested_call(task.function)
+        return await _run_reserved_capability(capability, task)
+
     sandbox_runner: SandboxRunner | None = None
     try:
         invocation_state.raise_if_failed()
+        global_vars = _build_worker_global_vars(harness, input_value, invocation_state)
         if runner is None:
             sandbox_runner = (
                 SandboxRunner.remote(cast(str, socket), dispatch, token=sandbox_token)
@@ -560,7 +769,7 @@ async def _execute_scoped_codemode(
             code=input_value.code,
             question=input_value.question,
             local_vars={},
-            global_vars={},
+            global_vars=global_vars,
             function_names={"harness": definitions},
             max_runtime_seconds=harness.usage_limits.max_codemode_runtime_seconds,
             max_memory_bytes=harness.usage_limits.max_codemode_memory_bytes,
@@ -893,6 +1102,36 @@ def _function_arguments(
     return arguments
 
 
+def _build_worker_global_vars(
+    harness: Any,
+    input_value: CodemodeInput,
+    invocation_state: _InvocationState,
+) -> dict[str, Any]:
+    raw_ctx = harness.execution_context.get("workflow_context")
+    if raw_ctx is None:
+        return {}
+    if not isinstance(raw_ctx, dict):
+        invocation_state.fail(
+            TypeError("execution_context['workflow_context'] must be a dictionary")
+        )
+    merged = {
+        "question": input_value.question or raw_ctx.get("question", ""),
+        "arguments": raw_ctx.get("arguments", {}),
+        "history": raw_ctx.get("history", []),
+        "rules": raw_ctx.get("rules", []),
+        "user_info": raw_ctx.get("user_info", {}),
+    }
+    try:
+        normalized, _ = _normalize_worker_value(
+            merged,
+            _MAX_WORKFLOW_CONTEXT_BYTES,
+            "Code Mode workflow_context",
+        )
+    except (TypeError, ValueError) as exc:
+        invocation_state.fail(exc)
+    return {"workflow_context": normalized}
+
+
 # The convenience tool shares the factory's dispatch, limits, and output contract.
 # Preserve automatic remote/local selection for the convenience tool; production
 # callers should use the factory's fail-closed remote default.
@@ -907,6 +1146,8 @@ __all__ = [
     "CodemodeInput",
     "CodemodeOutput",
     "RESERVED_CAPABILITY_NAMES",
+    "WorkflowOutput",
     "codemode",
     "create_codemode_tool",
+    "parse_workflow_output",
 ]

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -14,6 +14,9 @@ class WorkflowData(BaseModel):
     parameters: dict[str, Any] | None
     rules: Rules | None = Field(default_factory=Rules)
     required: list[str] = Field(default_factory=list)
+    execution_mode: Literal["loop", "code"] = "loop"
+    harness_config: dict[str, Any] = Field(default_factory=dict)
+    workflow_code: str | None = None
 
 
 class WorkflowInput(BaseModel):
@@ -23,6 +26,9 @@ class WorkflowInput(BaseModel):
     parameters: dict[str, Any] | None = None
     rules: Rules = Field(default_factory=Rules)
     required: list[str] = Field(default_factory=list)
+    execution_mode: Literal["loop", "code"] = "loop"
+    harness_config: dict[str, Any] = Field(default_factory=dict)
+    workflow_code: str | None = None
 
 
 class WorkflowUpdate(BaseModel):
@@ -31,6 +37,15 @@ class WorkflowUpdate(BaseModel):
     parameters: dict[str, Any]
     required: list[str] = Field(default_factory=list)
     rules: Rules | None = Field(default_factory=Rules)
+    execution_mode: Literal["loop", "code"] | None = None
+    harness_config: dict[str, Any] | None = None
+    workflow_code: str | None = None
+
+
+class WorkflowHarnessUpdate(BaseModel):
+    execution_mode: Literal["loop", "code"] = "loop"
+    harness_config: dict[str, Any] = Field(default_factory=dict)
+    workflow_code: str | None = None
 
 
 class RetrievalAgent(BaseModel):

@@ -80,6 +80,8 @@ async def get_schema() -> dict[str, Any]:
         get_generation_agent_schemas,
         get_postprocess_agent_schemas,
         get_preprocess_agent_schemas,
+        get_registered_skills,
+        get_toolkit_schemas,
     )
 
     stages = {
@@ -89,6 +91,8 @@ async def get_schema() -> dict[str, Any]:
         "postprocess": get_postprocess_agent_schemas(),
     }
     drivers = get_driver_agent_schemas()
+    toolkits = get_toolkit_schemas()
+    skills = [skill.model_dump(mode="json") for skill in get_registered_skills()]
 
     # Merge all $defs into a single top-level map so the frontend can resolve
     # `$ref: "#/$defs/<ClassName>"` across stages/drivers.
@@ -110,9 +114,15 @@ async def get_schema() -> dict[str, Any]:
         cfg = driver_schema.get("config_schema") or {}
         _merge_defs(merged_defs, cfg)
 
+    for toolkit_schema in toolkits.values():
+        cfg = toolkit_schema.get("config_schema") or {}
+        _merge_defs(merged_defs, cfg)
+
     return {
         **stages,
         "drivers": drivers,
+        "toolkits": toolkits,
+        "skills": skills,
         "$defs": merged_defs,
         "connectable_keys": CONNECTABLE_KEYS,
         "agent_module_to_def": agent_module_to_def,

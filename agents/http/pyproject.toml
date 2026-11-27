@@ -32,6 +32,9 @@ dev = [
     "pytest-mock",
 ]
 
+[project.entry-points."hyperforge.toolkits"]
+http = "hyperforge_http.toolkit:HTTPToolkit"
+
 [project.urls]
 Homepage = "https://progress.com"
 Repository = "https://github.com/nuclia/hyperforge"

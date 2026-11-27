@@ -1,42 +1,12 @@
 """
 Standalone agent configuration.
 
-A single JSON file describing one or more agents.  Runtime settings (NUA key,
-HTTP host/port, log level, …) live in StandaloneSettings and are loaded from
-environment variables or the command line — not from this file.
-
-The top-level keys become the agent_id values used in API paths
-(``/api/v1/agent/{agent_id}/...``).  The account is always ``"local"`` in
-standalone mode.
-
-Minimal valid example
----------------------
-{
-    "my-agent": {
-        "workflows": {
-            "default": {
-                "name": "Default",
-                "context": [
-                    {"module": "google", "title": "Google Search", "source": "google-01"}
-                ],
-                "generation": [
-                    {"module": "summarize"}
-                ]
-            }
-        },
-        "drivers": [
-            {
-                "identifier": "google-01",
-                "name": "google",
-                "provider": "google",
-                "config": {"vertexai": false, "api_key": "..."}
-            }
-        ]
-    }
-}
+Supports native Harness workflows (`execution_mode`, `model`, `toolkits`, `skills`,
+`workflow_code`, `procedural_guidance`) while transparently accepting legacy
+4-stage (`preprocess`, `context`, `generation`, `postprocess`) configurations.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Literal, Optional
 
 from pydantic import (
     BaseModel,
@@ -48,9 +18,15 @@ from pydantic import (
 )
 
 from hyperforge.agent import AgentConfig
-from hyperforge.configure import get_agent_config_klass, get_driver_config_klass
+from hyperforge.configure import (
+    get_agent_config_klass,
+    get_driver_config_klass,
+    get_toolkit_config_klass,
+)
 from hyperforge.driver import DriverConfig
+from hyperforge.harness_sdk import HarnessSkill, ToolkitConfig, UsageLimits
 from hyperforge.models import Rules
+from hyperforge.procedural import ProceduralGuidanceConfig
 from hyperforge.prompts import PromptConfig
 from hyperforge.workflows import WorkflowData
 
@@ -86,7 +62,7 @@ class StandaloneMCPAuthConfig(BaseModel):
 
 
 class WorkflowConfig(BaseModel):
-    """Pipeline steps for a single named workflow."""
+    """Configuration for a single named workflow in standalone mode."""
 
     name: str = "default"
     description: Optional[str] = None
@@ -94,6 +70,19 @@ class WorkflowConfig(BaseModel):
     required: list[str] = Field(default_factory=list)
     rules: Rules = Field(default_factory=Rules)
 
+    # Native Harness fields
+    execution_mode: Optional[Literal["loop", "code"]] = None
+    model: Optional[str] = None
+    system_prompt: Optional[str] = None
+    toolkits: list[ToolkitConfig] = Field(default_factory=list)
+    skills: list[HarnessSkill] = Field(default_factory=list)
+    workflow_code: Optional[str] = None
+    feedback_enabled: bool = False
+    codemode_enabled: bool = False
+    usage_limits: UsageLimits = Field(default_factory=UsageLimits)
+    procedural_guidance: Optional[ProceduralGuidanceConfig] = None
+
+    # Legacy 4-stage compatibility fields (auto-transpiled to Harness at load time)
     preprocess: list = Field(default_factory=list)
     context: list = Field(default_factory=list)
     generation: list = Field(default_factory=list)
@@ -107,7 +96,21 @@ class WorkflowConfig(BaseModel):
             parameters=self.parameters,
             rules=self.rules,
             required=self.required,
+            execution_mode=self.execution_mode or "loop",
+            workflow_code=self.workflow_code,
         )
+
+    @field_validator("toolkits", mode="before")
+    @classmethod
+    def validate_toolkits(cls, value: list[Any]) -> list[ToolkitConfig]:
+        if not value:
+            return []
+        return [
+            item
+            if isinstance(item, ToolkitConfig)
+            else get_toolkit_config_klass(item["toolkit"]).model_validate(item)
+            for item in value
+        ]
 
     @field_validator(
         "preprocess", "context", "generation", "postprocess", mode="before"
@@ -125,8 +128,8 @@ class WorkflowConfig(BaseModel):
 
         return result
 
-    @field_serializer("preprocess", "context", "generation", "postprocess")
-    def serialize_agents(self, agents: list[AgentConfig]) -> list[Dict[str, Any]]:
+    @field_serializer("preprocess", "context", "generation", "postprocess", "toolkits")
+    def serialize_agents(self, agents: list[BaseModel]) -> list[Dict[str, Any]]:
         return [agent.model_dump() for agent in agents]
 
 
@@ -137,20 +140,11 @@ class StandAloneAgentConfig(BaseModel):
     description: Optional[str] = None
     instructions: Optional[str] = None
 
-    # Drivers (LLM providers, search connectors, …) shared across all workflows.
-    # Use DriverConfig[Any] so the generic `config` field preserves arbitrary dicts.
     drivers: list[DriverConfig[Any]] = Field(default_factory=list)
-
-    # Top-level rules applied to all workflows.
     rules: Rules = Field(default_factory=Rules)
-
-    # Named workflows. A "default" entry is required for the default workflow.
     workflows: dict[str, WorkflowConfig] = Field(default_factory=dict)
-
-    # Prompts exposed via the MCP server.
     prompts: list[PromptConfig] = Field(default_factory=list)
-
-    # Optional OAuth/JWT protection for this agent's standalone MCP endpoint.
+    skills: list[HarnessSkill] = Field(default_factory=list)
     mcp_auth: Optional[StandaloneMCPAuthConfig] = None
 
     @field_validator("drivers", mode="before")
@@ -172,6 +166,4 @@ class StandAloneAgentConfig(BaseModel):
         return [agent.model_dump() for agent in agents]
 
 
-# The config file is a plain JSON object whose keys are agent IDs.
-# Use StandaloneConfig.validate_json(path.read_text()) to load it.
 StandaloneConfig = TypeAdapter(dict[str, StandAloneAgentConfig])

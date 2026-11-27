@@ -1,6 +1,12 @@
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any
+
 from pydantic import BaseModel
 
 from hyperforge import PROMPT_ENVIRONMENT
+
+if TYPE_CHECKING:
+    from hyperforge.harness_sdk.skills import HarnessSkill
 
 
 class PromptArgument(BaseModel):
@@ -22,6 +28,58 @@ class PromptConfig(BaseModel):
     icons: dict[str, str] | None = None
     meta: dict[str, str] | None = None
     prompt_id: str | None = None
+
+
+def render_prompt_config(
+    prompt_config: PromptConfig, arguments: Mapping[str, Any] | None = None
+) -> str:
+    """Render a `PromptConfig` using provided workflow/request arguments.
+
+    Supports Jinja2 syntax (`{{ var }}`, `{% ... %}`) as well as standard Python
+    `{var}` placeholders used by MCP prompts.
+    """
+    provided = dict(arguments or {})
+    missing = [
+        arg.name
+        for arg in (prompt_config.arguments or [])
+        if arg.required and arg.name not in provided
+    ]
+    if missing:
+        raise ValueError(
+            f"Missing required prompt argument(s) for {prompt_config.name!r}: "
+            f"{', '.join(missing)}"
+        )
+
+    template_text = prompt_config.prompt
+    if "{{" in template_text or "{%" in template_text:
+        return PROMPT_ENVIRONMENT.from_string(template_text).render(**provided)
+    if not provided:
+        return template_text
+    return template_text.format(**provided)
+
+
+def prompt_config_to_skill(
+    prompt_config: PromptConfig,
+    *,
+    arguments: Mapping[str, Any] | None = None,
+    preload: bool = False,
+) -> "HarnessSkill":
+    """Convert a stored `PromptConfig` into a `HarnessSkill`."""
+    from hyperforge.harness_sdk.skills import HarnessSkill
+
+    instructions = (
+        render_prompt_config(prompt_config, arguments)
+        if arguments is not None
+        else prompt_config.prompt
+    )
+    skill_id = prompt_config.prompt_id or prompt_config.name
+    return HarnessSkill(
+        id=skill_id,
+        name=prompt_config.name,
+        description=prompt_config.description or prompt_config.name,
+        instructions=instructions,
+        preload=preload,
+    )
 
 
 VALIDATE_OR_ANSWER_PROMPT = """

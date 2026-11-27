@@ -4,8 +4,14 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple, cast
 
 from nuclia.lib.nua import AsyncNuaClient
 
-from hyperforge.configure import GLOBAL_REGISTRY, load_all_configurations
+from hyperforge.configure import (
+    GLOBAL_REGISTRY,
+    load_all_configurations,
+    load_entry_point_plugins,
+)
+from hyperforge.db.workflow_migration import transpile_stages_to_harness
 from hyperforge.harness import HarnessAgent, HarnessAgentConfig
+from hyperforge.harness_sdk import HarnessStorageProtocol
 from hyperforge.interaction import AragAnswer
 from hyperforge.llm import (
     AsyncLocalOpenAIClient,
@@ -16,7 +22,6 @@ from hyperforge.llm import (
 from hyperforge.manager import Manager
 from hyperforge.memory.memory import BaseSessionMemory, QuestionMemory, SessionMemory
 from hyperforge.models import HistoryQuestionAnswer
-from hyperforge.retrieval.agent import RetrievalAgent
 from hyperforge.retrieval.config import RetrievalAgentConfig
 
 logger = logging.getLogger(__name__)
@@ -24,8 +29,73 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class State:
-    agent: RetrievalAgent | HarnessAgent
+    agent: Any
     manager: Manager
+
+
+def ensure_harness_config(
+    config: Dict[str, Any] | RetrievalAgentConfig | HarnessAgentConfig,
+) -> HarnessAgentConfig:
+    """Resolve any workflow config (native Harness or legacy 4-stage) into `HarnessAgentConfig`."""
+    if isinstance(config, HarnessAgentConfig):
+        return config
+    raw_dict: dict[str, Any]
+    if isinstance(config, RetrievalAgentConfig):
+        raw_dict = {
+            "drivers": [d.model_dump() for d in config.drivers],
+            "rules": config.rules.model_dump(),
+            "memory": config.memory.model_dump(),
+            "preprocess": [x.model_dump() for x in config.preprocess],
+            "context": [x.model_dump() for x in config.context],
+            "generation": [x.model_dump() for x in config.generation],
+            "postprocess": [x.model_dump() for x in config.postprocess],
+        }
+    else:
+        raw_dict = dict(config)
+
+    if any(
+        key in raw_dict
+        for key in (
+            "agents",
+            "toolkits",
+            "skills",
+            "execution_mode",
+            "workflow_code",
+        )
+    ):
+        return HarnessAgentConfig.model_validate(raw_dict)
+
+    ext_migrations = {
+        k: v.handler
+        for k, v in GLOBAL_REGISTRY.migrations.items()
+        if v.handler is not None
+    }
+    compiled = transpile_stages_to_harness(
+        preprocess=list(raw_dict.get("preprocess") or []),
+        context=list(raw_dict.get("context") or []),
+        generation=list(raw_dict.get("generation") or []),
+        postprocess=list(raw_dict.get("postprocess") or []),
+        external_migrations=ext_migrations,
+    )
+    harness_settings = dict(compiled["harness_config"])
+    enabled_skill_ids = harness_settings.pop("enabled_skills", []) or []
+    skills = [
+        reg.skill
+        for sid in enabled_skill_ids
+        if (reg := GLOBAL_REGISTRY.skills.get(sid)) and reg.skill is not None
+    ]
+    return HarnessAgentConfig.model_validate(
+        {
+            "execution_mode": compiled["execution_mode"],
+            "workflow_code": compiled["workflow_code"],
+            "toolkits": compiled["toolkits"],
+            "drivers": raw_dict.get("drivers", []),
+            "skills": skills,
+            "rules": raw_dict.get("rules", {}),
+            "memory": raw_dict.get("memory", {}),
+            **harness_settings,
+        }
+    )
 
 
 async def init(
@@ -40,6 +110,7 @@ async def init(
     retrieval_config: Optional[RetrievalAgentConfig | HarnessAgentConfig] = None,
     session_id: str = "default_session",
     memory_klass: type[BaseSessionMemory] = SessionMemory,
+    storage: Optional[HarnessStorageProtocol] = None,
 ) -> Tuple[State, SessionMemory]:
     from hyperforge.configure import scan
 
@@ -49,29 +120,30 @@ async def init(
             load_all_configurations(load_module)
         except ImportError:
             logger.error(f"Module {load_module} could not be loaded")
+    load_entry_point_plugins()
 
     if retrieval_config is None:
         if config is None:
             raise ValueError("Either config or retrieval_config must be provided")
-        config_class = (
-            HarnessAgentConfig if "agents" in config else RetrievalAgentConfig
-        )
-        retrieval_config = config_class.model_validate(config)
+        resolved_config = ensure_harness_config(config)
+    else:
+        resolved_config = ensure_harness_config(retrieval_config)
 
     state = await get_state(
         agent_id=agent_id,
-        config=retrieval_config,
+        config=resolved_config,
         internal_nua=internal_nua,
         internal_nua_api=internal_nua_api,
         local_openai=local_openai,
         local_openai_model=local_openai_model,
         external_nua_api_key=external_nua_api_key,
+        storage=storage,
     )
     session_memory = memory_klass.from_config(
-        retrieval_config.memory,
+        resolved_config.memory,
         agent_id=agent_id,
         workflow_id="default",
-        rules=retrieval_config.rules,
+        rules=resolved_config.rules,
     )
     session_memory.init(session_id)
     return state, session_memory
@@ -95,6 +167,7 @@ async def main(
     memory_klass: type[BaseSessionMemory] = SessionMemory,
     streaming: bool = False,
     chat_history: Optional[List[HistoryQuestionAnswer]] = None,
+    storage: Optional[HarnessStorageProtocol] = None,
 ) -> QuestionMemory:
     state: State | None = None
     try:
@@ -110,6 +183,7 @@ async def main(
             retrieval_config=retrieval_config,
             session_id=session_id,
             memory_klass=memory_klass,
+            storage=storage,
         )
         question_memory = session_memory.start_question(
             question, streaming=streaming, chat_history=chat_history
@@ -141,7 +215,7 @@ async def main(
 
 async def engine(
     manager: Manager,
-    agent: RetrievalAgent | HarnessAgent,
+    agent: Any,
     question_memory: QuestionMemory,
     user_metadata: Optional[Dict[str, str]] = None,
 ) -> None:
@@ -166,7 +240,9 @@ async def get_state(
     kbid: Optional[str] = None,
     local_openai_model_klass: Optional[type[NuaBaseModel]] = None,
     allow_private_network_endpoints: bool = False,
+    storage: Optional[HarnessStorageProtocol] = None,
 ) -> State:
+    resolved_config = ensure_harness_config(config)
     nua: AsyncNuaClient
     if internal_nua:
         nua = cast(
@@ -204,20 +280,16 @@ async def get_state(
 
     else:
         logger.warning(
-            "No LLM backend configured — use a no-op client.  Agents that don't"
-            " require LLM calls (e.g. the built-in ``static`` context agent) will"
-            " work fine; any agent that actually calls NUA will raise a clear error."
+            "No LLM backend configured — use a no-op client. Toolkits that don't"
+            " require LLM calls (e.g. ``static``) will work fine; any tool that"
+            " calls NUA will raise a clear error."
         )
         nua = NoopNuaClient()
 
     manager = await Manager.from_config(
-        drivers=config.drivers,
+        drivers=resolved_config.drivers,
         nua=nua,
         allow_private_network_endpoints=allow_private_network_endpoints,
     )
-    if isinstance(config, HarnessAgentConfig):
-        agent = await HarnessAgent.from_config_class(config)
-    else:
-        agent = await RetrievalAgent.from_config_class(config)
-
+    agent = await HarnessAgent.from_config_class(resolved_config, storage=storage)
     return State(manager=manager, agent=agent)

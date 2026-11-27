@@ -36,9 +36,14 @@ BUILTIN_MODULES = (
 
 
 def load_hyperforge_builtins() -> None:
-    """Load every installed built-in Hyperforge agent and driver package."""
-    from hyperforge.configure import load_all_configurations, scan
+    """Load every installed built-in Hyperforge toolkit, agent, and driver package."""
+    from hyperforge.configure import (
+        load_all_configurations,
+        load_entry_point_plugins,
+        scan,
+    )
 
+    load_entry_point_plugins()
     loaded_packages: set[str] = set()
     for module in BUILTIN_MODULES:
         package = module.partition(".")[0]
@@ -92,11 +97,16 @@ def run(
         )
         sys.exit(1)
 
-    from hyperforge.configure import load_all_configurations, scan
+    from hyperforge.configure import (
+        load_all_configurations,
+        load_entry_point_plugins,
+        scan,
+    )
 
-    # Register all built-in agents and drivers (same as the base initialize,
+    # Register all built-in agents, toolkits, and drivers (same as the base initialize,
     # but without start_health_check() — the FastAPI app handles /health/*).
     load_default_modules()
+    load_entry_point_plugins()
 
     for load_module in settings.load_modules:
         try:

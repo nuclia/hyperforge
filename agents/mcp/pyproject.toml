@@ -32,6 +32,13 @@ dev = [
     "pytest-mock",
 ]
 
+[project.entry-points."hyperforge.toolkits"]
+mcp = "hyperforge_mcp.toolkit:MCPToolkit"
+
+[project.entry-points."hyperforge.drivers"]
+mcp_http = "hyperforge_mcp.http:MCPHTTPDriver"
+mcp_stdio = "hyperforge_mcp.stdio:MCPStdioDriver"
+
 [project.urls]
 Homepage = "https://progress.com"
 Repository = "https://github.com/nuclia/hyperforge"

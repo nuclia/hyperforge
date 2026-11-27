@@ -1,3 +1,4 @@
+from .subagent import SubAgentInput, SubAgentOutput, create_subagent_tool
 from .utils import (
     ContextFactory,
     HarnessTool,
@@ -9,7 +10,10 @@ from .utils import (
 __all__ = [
     "ContextFactory",
     "HarnessTool",
+    "SubAgentInput",
+    "SubAgentOutput",
     "ToolCallContext",
     "ToolHandler",
+    "create_subagent_tool",
     "tool",
 ]

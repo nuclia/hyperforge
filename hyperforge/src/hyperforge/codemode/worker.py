@@ -145,6 +145,7 @@ class PythonAgentWorker:
     ):
         self.pipe = pipe
         self.functions_agent_id: Dict[str, List[str]] = {}
+        self._callable_names: Dict[int, str] = {}
         self._harness_functions = False
         self.debug = debug
         self.json_protocol = json_protocol
@@ -166,6 +167,7 @@ class PythonAgentWorker:
         self._harness_functions = redact_errors and set(function_names) == {"harness"}
         self._output_attempted = False
         self._output_send_failed = False
+        self._callable_names.clear()
         try:
             _harden_process(max_memory_bytes)
             for agent, functions in function_names.items():
@@ -173,12 +175,30 @@ class PythonAgentWorker:
                     if function in global_vars:
                         self.functions_agent_id[function].append(agent)
                     else:
-                        global_vars[function] = partial(
-                            self.valid_functions_call, function
-                        )
+                        stub = partial(self.valid_functions_call, function)
+                        global_vars[function] = stub
+                        self._callable_names[id(stub)] = function
                         self.functions_agent_id[function] = [agent]
 
             byte_code = compile_restricted(code, filename="<inline code>", mode="exec")
+            harness_globals: Dict[str, Any] = {}
+            if self._harness_functions:
+                existing_ctx = global_vars.get("workflow_context")
+                default_ctx = {
+                    "question": question,
+                    "arguments": {},
+                    "history": [],
+                    "rules": [],
+                    "user_info": {},
+                }
+                if isinstance(existing_ctx, dict):
+                    default_ctx.update(existing_ctx)
+                harness_globals = {
+                    "call": self.make_call_spec,
+                    "parallel": self.parallel,
+                    "emit_step": self.emit_step,
+                    "workflow_context": default_ctx,
+                }
             global_vars.update(
                 {
                     "__builtins__": {
@@ -215,6 +235,7 @@ class PythonAgentWorker:
                     "save": self.save,
                     "question": question,
                     **ALLOWED_GLOBAL_MODULES,
+                    **harness_globals,
                 }
             )
             if self.debug:
@@ -254,6 +275,80 @@ class PythonAgentWorker:
                 self.pipe.close()
             except BaseException:
                 pass
+
+    def make_call_spec(self, target: Any, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+        if isinstance(target, str):
+            fn_name = target
+        else:
+            fn_name = self._callable_names.get(id(target), "")
+        if not fn_name or fn_name == "output":
+            raise ValueError(
+                "call() requires an active Code Mode tool or capability function"
+            )
+        return {
+            "__call__": fn_name,
+            "args": list(args),
+            "kwargs": dict(kwargs),
+        }
+
+    def parallel(self, calls: Any) -> List[Any]:
+        items = list(calls)
+        if not items:
+            return []
+        validated: List[Dict[str, Any]] = []
+        for spec in items:
+            if (
+                not isinstance(spec, dict)
+                or set(spec.keys()) != {"__call__", "args", "kwargs"}
+                or not isinstance(spec["__call__"], str)
+                or not spec["__call__"]
+                or spec["__call__"] == "output"
+                or not isinstance(spec["args"], (list, tuple))
+                or not isinstance(spec["kwargs"], dict)
+            ):
+                raise ValueError(
+                    "parallel() items must be created with call(fn, *args, **kwargs)"
+                )
+            validated.append(
+                {
+                    "__call__": spec["__call__"],
+                    "args": list(spec["args"]),
+                    "kwargs": dict(spec["kwargs"]),
+                }
+            )
+        self._send(
+            RestrictedPythonTask(
+                function="_parallel",
+                agent="_controller",
+                args=(tuple(validated),),
+                keyword_args={},
+            )
+        )
+        return self._receive()
+
+    def emit_step(self, title: str, reason: str = "", value: str = "") -> None:
+        if (
+            not isinstance(title, str)
+            or not title.strip()
+            or not isinstance(reason, str)
+            or not isinstance(value, str)
+        ):
+            raise ValueError(
+                "emit_step(title, reason='', value='') requires string arguments and a non-empty title"
+            )
+        self._send(
+            RestrictedPythonTask(
+                function="_emit_step",
+                agent="_controller",
+                args=(),
+                keyword_args={
+                    "title": title,
+                    "reason": reason,
+                    "value": value,
+                },
+            )
+        )
+        self._receive()
 
     def save(
         self,

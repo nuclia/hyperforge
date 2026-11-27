@@ -7,7 +7,7 @@ from hyperforge.configure import agent
 from hyperforge.context.agent import ContextAgent
 from hyperforge.manager import Manager
 from hyperforge.memory import Chunk, Context, QuestionMemory
-from hyperforge.utils.http import read_limited_response, safe_http_client
+from hyperforge.utils import http as http_utils
 
 from hyperforge_http.config import HTTPStaticAgentConfig
 
@@ -32,7 +32,7 @@ class HTTPStaticAgent(ContextAgent, Agent[HTTPStaticAgentConfig]):
         t0 = time()
         error = None
 
-        async with safe_http_client() as client:
+        async with http_utils.safe_http_client() as client:
             if self.config.method == "GET":
                 request = client.build_request(
                     "GET",
@@ -60,7 +60,7 @@ class HTTPStaticAgent(ContextAgent, Agent[HTTPStaticAgentConfig]):
 
             response = await client.send(request, stream=True)
             try:
-                response_content = await read_limited_response(
+                response_content = await http_utils.read_limited_response(
                     response, self.config.max_response_bytes
                 )
             finally:

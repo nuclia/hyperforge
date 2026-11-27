@@ -16,8 +16,13 @@ from nucliadb_telemetry.utils import get_telemetry
 from opentelemetry import trace
 
 from hyperforge.broker import Broker
-from hyperforge.configure import load_all_configurations, scan
+from hyperforge.configure import (
+    load_all_configurations,
+    load_entry_point_plugins,
+    scan,
+)
 from hyperforge.db.agents import AgentManager
+from hyperforge.db.harness_storage import PostgresHarnessStorage
 from hyperforge.engine import State, get_state
 from hyperforge.errors import actionable_exception_group, exception_detail
 from hyperforge.interaction import (
@@ -109,6 +114,7 @@ class SessionManager:
                 load_all_configurations(load_module)
             except ImportError:
                 logger.error(f"Module {load_module} could not be loaded")
+        load_entry_point_plugins()
 
         self.activation_task = asyncio.create_task(self.activation_listener())
         if health_check and self.settings.health_check_enabled:
@@ -162,6 +168,17 @@ class SessionManager:
                 workflow_id=message.workflow_id,
             )
 
+            harness_storage = (
+                PostgresHarnessStorage(
+                    self.agent_manager.database,
+                    account=message.account,
+                    agent_id=message.agent_id,
+                )
+                if isinstance(self.agent_manager, AgentManager)
+                and message.session != "ephemeral"
+                else None
+            )
+
             state = await get_state(
                 agent_id=message.agent_id,
                 config=config,
@@ -172,6 +189,7 @@ class SessionManager:
                 account=message.account,
                 kbid=None if self.settings.standalone else message.agent_id,
                 allow_private_network_endpoints=self.settings.allow_private_network_endpoints,
+                storage=harness_storage,
             )
 
             if message.session not in self.memory:

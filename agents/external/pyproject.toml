@@ -34,6 +34,9 @@ dev = [
     "hyperforge_summarize",
 ]
 
+[project.entry-points."hyperforge.toolkits"]
+external = "hyperforge_external.toolkit:WebhookToolkit"
+
 [project.urls]
 Homepage = "https://progress.com"
 Repository = "https://github.com/nuclia/hyperforge"

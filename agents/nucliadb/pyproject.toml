@@ -31,6 +31,14 @@ dev = [
     "hyperforge_rephrase",
 ]
 
+[project.entry-points."hyperforge.toolkits"]
+nucliadb = "hyperforge_nucliadb.toolkit:NucliaDBToolkit"
+nucliadb_sync = "hyperforge_nucliadb.toolkit:NucliaDBSyncToolkit"
+
+[project.entry-points."hyperforge.drivers"]
+nucliadb = "hyperforge_nucliadb.driver:NucliaDBDriver"
+sync = "hyperforge_nucliadb.sync.driver:SyncDriver"
+
 [project.urls]
 Homepage = "https://progress.com"
 Repository = "https://github.com/nuclia/hyperforge"

@@ -34,8 +34,21 @@ from .models import (
     HarnessMessage,
     HarnessToolCall,
 )
+from .skills import (
+    HarnessSkill,
+    format_loaded_skill_payload,
+    render_skills_system_prompt,
+)
 from .storage import HarnessStorageProtocol, InMemoryHarnessStorage
 from .tools import HarnessTool, ToolCallContext
+from .tools.codemode import (
+    CodemodeInput,
+    CodemodeOutput,
+    parse_workflow_output,
+)
+from .tools.codemode import (
+    codemode as default_codemode_tool,
+)
 from .tools.core import DictOutput, SendMessageInput, SpawnAgentInput, create_core_tools
 from .usage import HarnessUsage, UsageLimitExceeded, UsageLimits
 
@@ -80,6 +93,7 @@ class HarnessConfig:
     reasoning_effort: ReasoningEffort | None
     model_client: ModelClient
     tools: tuple[HarnessTool, ...]
+    skills: tuple[HarnessSkill, ...]
     system_prompt: str
     title: str
     disabled_core_tools: frozenset[str]
@@ -304,6 +318,7 @@ class AgentHarness:
         model_client: ModelClient,
         reasoning_effort: ReasoningEffort | None = None,
         tools: Iterable[HarnessTool | Any] = (),
+        skills: Iterable[HarnessSkill] = (),
         system_prompt: str = SYSTEM_PROMPT,
         title: str = "New conversation",
         conversation_id: str | None = None,
@@ -326,6 +341,7 @@ class AgentHarness:
         normalized_tools = tuple(
             tool if isinstance(tool, HarnessTool) else tool.as_tool() for tool in tools
         )
+        normalized_skills = tuple(skills)
         normalized_storage = storage or InMemoryHarnessStorage()
         normalized_context = dict(execution_context or {})
         normalized_tags = tuple(dict.fromkeys(tags))
@@ -337,6 +353,7 @@ class AgentHarness:
             reasoning_effort=reasoning_effort,
             model_client=model_client,
             tools=normalized_tools,
+            skills=normalized_skills,
             system_prompt=system_prompt,
             title=title,
             disabled_core_tools=frozenset(disabled_core_tools),
@@ -352,7 +369,6 @@ class AgentHarness:
         self.model = self._config.model
         self.reasoning_effort = self._config.reasoning_effort
         self.model_client = self._config.model_client
-        self.system_prompt = self._config.system_prompt
         self.title = self._config.title
         self.conversation_id = conversation_id or uuid.uuid4().hex
         self.agent_id = uuid.uuid4().hex
@@ -382,6 +398,7 @@ class AgentHarness:
         self._model_started = asyncio.Event()
         self._run_lock = asyncio.Lock()
         self._lazy_tools_lock = asyncio.Lock()
+        self._skills_lock = asyncio.Lock()
         self._active_task: asyncio.Task[Any] | None = None
         self._turn_id: str | None = None
         self._last_event_id: str | None = None
@@ -390,7 +407,37 @@ class AgentHarness:
         self._active_lazy_tools: set[str] = set()
         if len(self._tools) != len(self._external_tools):
             raise ValueError("Tool names must be unique")
-        self._install_core_tools(self._config.feedback_enabled)
+        self._skills = {skill.id: skill for skill in self._config.skills}
+        if len(self._skills) != len(self._config.skills):
+            raise ValueError("Skill IDs must be unique")
+        has_catalog_skills = any(not skill.preload for skill in self._config.skills)
+        self._install_core_tools(
+            self._config.feedback_enabled,
+            skills_enabled=has_catalog_skills,
+        )
+        for skill in self._config.skills:
+            unknown_tools = [
+                name for name in skill.recommended_tools if name not in self._tools
+            ]
+            if unknown_tools:
+                raise ValueError(
+                    f"Skill {skill.id!r} references unknown recommended_tools: "
+                    f"{', '.join(unknown_tools)}"
+                )
+        self._loaded_skills: set[str] = {
+            skill.id for skill in self._config.skills if skill.preload
+        }
+        lazy_tool_names = {tool.name for tool in self._external_tools if tool.lazy_load}
+        for skill in self._config.skills:
+            if skill.preload:
+                self._active_lazy_tools.update(
+                    name for name in skill.recommended_tools if name in lazy_tool_names
+                )
+        self.system_prompt = render_skills_system_prompt(
+            self._config.system_prompt,
+            self._config.skills,
+            include_code_examples=self._has_codemode_tool(),
+        )
         self._procedural = (
             ProceduralGuidance(procedural_guidance) if procedural_guidance else None
         )
@@ -449,6 +496,14 @@ class AgentHarness:
         self.messages = []
         self._active_lazy_tools.clear()
         lazy_tool_names = {tool.name for tool in self._external_tools if tool.lazy_load}
+        self._loaded_skills = {
+            skill.id for skill in self._config.skills if skill.preload
+        }
+        for skill in self._config.skills:
+            if skill.preload:
+                self._active_lazy_tools.update(
+                    name for name in skill.recommended_tools if name in lazy_tool_names
+                )
         if self._procedural:
             self._procedural.steps.clear()
         pending_tool_outputs: dict[str, HarnessMessage] = {}
@@ -507,6 +562,14 @@ class AgentHarness:
                         for name in names
                         if isinstance(name, str) and name in lazy_tool_names
                     )
+            elif event.type == HarnessEventType.SKILLS_LOADED:
+                ids = event.payload.get("ids", [])
+                if isinstance(ids, list):
+                    self._loaded_skills.update(
+                        skill_id
+                        for skill_id in ids
+                        if isinstance(skill_id, str) and skill_id in self._skills
+                    )
         if pending_tool_outputs:
             logger.warning(
                 "Ignoring orphaned tool outputs while loading conversation: conversation=%s call_ids=%s",
@@ -559,6 +622,43 @@ class AgentHarness:
 
     def is_tool_active(self, name: str) -> bool:
         return name in self._active_lazy_tools
+
+    def iter_skills(self) -> Iterable[HarnessSkill]:
+        """Iterate over all skills registered on this harness."""
+        return iter(self._config.skills)
+
+    def is_skill_loaded(self, skill_id: str) -> bool:
+        return skill_id in self._loaded_skills
+
+    async def load_skill(self, skill_id: str) -> dict[str, Any]:
+        """Load a registered skill, persist its activation, and activate lazy tools."""
+        skill = self._skills.get(skill_id)
+        if skill is None:
+            raise ValueError(f"Unknown skill: {skill_id}")
+        lazy_names = {tool.name for tool in self.iter_lazy_tools()}
+        lazy_to_activate = [
+            name for name in skill.recommended_tools if name in lazy_names
+        ]
+        activated_tools = (
+            await self.activate_tools(lazy_to_activate) if lazy_to_activate else []
+        )
+        async with self._skills_lock:
+            if skill_id not in self._loaded_skills:
+                await self.emit(
+                    HarnessEventType.SKILLS_LOADED,
+                    {"ids": [skill_id]},
+                )
+                self._loaded_skills.add(skill_id)
+        return format_loaded_skill_payload(
+            skill,
+            include_code_examples=self._has_codemode_tool(),
+            activated_tools=activated_tools,
+        )
+
+    def _has_codemode_tool(self) -> bool:
+        return any(
+            getattr(item.handler, "_codemode", False) for item in self._external_tools
+        )
 
     async def activate_tools(self, names: Iterable[str]) -> list[HarnessTool]:
         """Activate registered lazy tools and persist newly activated names."""
@@ -1026,12 +1126,41 @@ class AgentHarness:
             await asyncio.gather(task, return_exceptions=True)
 
     async def run(self, prompt: str) -> AsyncIterator[HarnessEvent]:
+        async for event in self._stream_turn(lambda: self._execute_turn(prompt)):
+            yield event
+
+    async def run_code_workflow(
+        self,
+        code: str,
+        prompt: str,
+        *,
+        codemode_tool: HarnessTool[CodemodeInput, CodemodeOutput] | None = None,
+        arguments: Mapping[str, Any] | None = None,
+        activate_lazy_tools: bool = True,
+    ) -> AsyncIterator[HarnessEvent]:
+        """Execute a deterministic or hybrid RestrictedPython workflow in one turn.
+
+        Runs inside the standard `AgentHarness` turn, event, storage, and usage
+        lifecycle without making an outer solver LLM request.
+        """
+        async for event in self._stream_turn(
+            lambda: self._execute_code_turn(
+                code,
+                prompt,
+                codemode_tool=codemode_tool,
+                arguments=arguments,
+                activate_lazy_tools=activate_lazy_tools,
+            )
+        ):
+            yield event
+
+    async def _stream_turn(self, turn_factory: Any) -> AsyncIterator[HarnessEvent]:
         async with self._run_lock:
             if self._event_queue is not None:
                 raise RuntimeError("A turn is already running")
             self._event_queue = asyncio.Queue()
             self._model_started.clear()
-            task = asyncio.create_task(self._execute_turn(prompt))
+            task = asyncio.create_task(turn_factory())
             self._active_task = task
             try:
                 terminal = False
@@ -1043,6 +1172,8 @@ class AgentHarness:
                     if task in done and not event_task.done():
                         event_task.cancel()
                         await asyncio.gather(event_task, return_exceptions=True)
+                        while not self._event_queue.empty():
+                            yield self._event_queue.get_nowait()
                         break
                     event = event_task.result()
                     yield event
@@ -1065,6 +1196,184 @@ class AgentHarness:
                 self._active_task = None
                 self._event_queue = None
                 self._interrupted.clear()
+
+    async def _execute_code_turn(
+        self,
+        code: str,
+        prompt: str,
+        *,
+        codemode_tool: HarnessTool[CodemodeInput, CodemodeOutput] | None = None,
+        arguments: Mapping[str, Any] | None = None,
+        activate_lazy_tools: bool = True,
+    ) -> str:
+        try:
+            return await self._run_code_workflow(
+                code,
+                prompt,
+                codemode_tool=codemode_tool,
+                arguments=arguments,
+                activate_lazy_tools=activate_lazy_tools,
+            )
+        except asyncio.CancelledError:
+            current = asyncio.current_task()
+            if self._interrupted.is_set() and not (
+                current is not None and current.cancelling() > 1
+            ):
+                await self._stop_children()
+                await self.emit(HarnessEventType.TURN_INTERRUPTED, {})
+                return "interrupted"
+            raise
+
+    async def _run_code_workflow(
+        self,
+        code: str,
+        prompt: str,
+        *,
+        codemode_tool: HarnessTool[CodemodeInput, CodemodeOutput] | None = None,
+        arguments: Mapping[str, Any] | None = None,
+        activate_lazy_tools: bool = True,
+    ) -> str:
+        if self.conversation is None:
+            await self.load()
+        self._start_usage()
+        self._turn_id = uuid.uuid4().hex
+        await self.emit(
+            HarnessEventType.TURN_STARTED, {"prompt": prompt, "mode": "code"}
+        )
+
+        prior_history = [
+            {"role": msg.role, "content": msg.content}
+            for msg in [*self.messages, *self._pending_messages]
+            if msg.role in {"user", "assistant"}
+        ]
+        await self._flush_pending_messages()
+        await self._append_message(HarnessMessage(role="user", content=prompt))
+
+        if self._interrupted.is_set():
+            await self.emit(HarnessEventType.TURN_INTERRUPTED, {})
+            return "interrupted"
+
+        if activate_lazy_tools:
+            inactive = [
+                item.name
+                for item in self.iter_lazy_tools()
+                if item.name not in self._active_lazy_tools
+            ]
+            if inactive:
+                await self.activate_tools(inactive)
+
+        resolved_cm = codemode_tool or next(
+            (
+                item
+                for item in self._external_tools
+                if getattr(item.handler, "_codemode", False)
+            ),
+            default_codemode_tool,
+        )
+
+        previous_wf_ctx = self.execution_context.get("workflow_context")
+        had_wf_ctx = "workflow_context" in self.execution_context
+        base_wf_ctx = (
+            dict(previous_wf_ctx) if isinstance(previous_wf_ctx, Mapping) else {}
+        )
+        merged_args = dict(base_wf_ctx.get("arguments") or {})
+        if arguments is not None:
+            merged_args.update(arguments)
+        self.execution_context["workflow_context"] = {
+            "question": prompt,
+            "arguments": merged_args,
+            "history": base_wf_ctx.get("history") or prior_history,
+            "rules": list(base_wf_ctx.get("rules") or []),
+            "user_info": dict(base_wf_ctx.get("user_info") or {}),
+        }
+
+        call_id = uuid.uuid4().hex
+        call = HarnessToolCall(
+            id=call_id,
+            name=resolved_cm.name,
+            arguments={"code": code, "question": prompt},
+        )
+        self._model_started.set()
+        try:
+            self.usage.tool_calls += 1
+            self._check_limit("max_tool_calls", self.usage.tool_calls)
+            await self.emit(
+                HarnessEventType.TOOL_REQUESTED,
+                {"call": call.model_dump(mode="json")},
+            )
+            try:
+                cm_output = await self._with_time_limit(
+                    resolved_cm.execute(
+                        ToolCallContext(
+                            harness=self, name=resolved_cm.name, id=call_id
+                        ),
+                        call.arguments,
+                    )
+                )
+            except Exception as exc:
+                await self.emit(
+                    HarnessEventType.TOOL_FAILED,
+                    {
+                        "call_id": call_id,
+                        "tool": resolved_cm.name,
+                        "result": {"error": str(exc)},
+                    },
+                )
+                raise
+
+            await self.emit(
+                HarnessEventType.TOOL_COMPLETED,
+                {
+                    "call_id": call_id,
+                    "tool": resolved_cm.name,
+                    "code_workflow": True,
+                    "result": cm_output.model_dump(mode="json"),
+                },
+            )
+            workflow_result = parse_workflow_output(cm_output.value)
+            if workflow_result.answer:
+                await self.emit(
+                    HarnessEventType.TEXT_DELTA,
+                    {"text": workflow_result.answer},
+                    persist=False,
+                )
+            await self._append_message(
+                HarnessMessage(role="assistant", content=workflow_result.answer)
+            )
+            turn_payload: dict[str, Any] = {
+                "text": workflow_result.answer,
+                "is_answered": workflow_result.is_answered,
+            }
+            if workflow_result.citations is not None:
+                turn_payload["citations"] = workflow_result.citations
+            if workflow_result.contexts:
+                turn_payload["contexts"] = workflow_result.contexts
+            if workflow_result.related_questions:
+                turn_payload["related_questions"] = workflow_result.related_questions
+            if workflow_result.visualizations:
+                turn_payload["visualizations"] = workflow_result.visualizations
+            if workflow_result.metadata:
+                turn_payload["metadata"] = workflow_result.metadata
+            await self.emit(HarnessEventType.TURN_COMPLETED, turn_payload)
+            await self._stop_children()
+            return workflow_result.answer
+        except asyncio.CancelledError:
+            raise
+        except Exception as exc:
+            logger.exception(
+                "Code workflow turn failed: conversation=%s agent=%s turn=%s",
+                self.conversation_id,
+                self.agent_id,
+                self._turn_id,
+            )
+            await self.emit(HarnessEventType.TURN_FAILED, {"error": str(exc)})
+            await self._stop_children()
+            raise
+        finally:
+            if had_wf_ctx:
+                self.execution_context["workflow_context"] = previous_wf_ctx
+            else:
+                self.execution_context.pop("workflow_context", None)
 
     async def _execute_turn(self, prompt: str) -> str:
         try:
@@ -1316,8 +1625,13 @@ class AgentHarness:
                 content=json.dumps(result, default=str, separators=(",", ":")),
             )
 
-    def _install_core_tools(self, feedback_enabled: bool) -> None:
-        core_tools = create_core_tools(feedback_enabled=feedback_enabled)
+    def _install_core_tools(
+        self, feedback_enabled: bool, *, skills_enabled: bool = False
+    ) -> None:
+        core_tools = create_core_tools(
+            feedback_enabled=feedback_enabled,
+            skills_enabled=skills_enabled,
+        )
         enabled_core_tools = {
             name: tool
             for name, tool in core_tools.items()
@@ -1342,6 +1656,7 @@ class AgentHarness:
             model_client=self._config.model_client,
             reasoning_effort=self._config.reasoning_effort,
             tools=self._config.tools,
+            skills=self._config.skills,
             system_prompt=self._config.system_prompt,
             title=self._config.title,
             conversation_id=self.conversation_id,
@@ -1361,6 +1676,7 @@ class AgentHarness:
         child._usage_started_at = self._usage_started_at
         child._owns_usage = False
         child.conversation = self.conversation
+        child._loaded_skills = set(self._loaded_skills)
         child._active_lazy_tools = {
             name
             for name in self._active_lazy_tools

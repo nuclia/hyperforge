@@ -60,6 +60,10 @@ class CallToolInput(BaseModel):
     arguments: dict[str, Any]
 
 
+class LoadSkillInput(BaseModel):
+    skill_id: str
+
+
 class DictOutput(BaseModel):
     value: dict[str, Any]
 
@@ -140,6 +144,18 @@ async def call_tool(context: ToolCallContext, input_value: CallToolInput) -> Dic
         call_id=context.id,
     )
     return DictOutput(value=output.model_dump(mode="json"))
+
+
+@tool(
+    description=(
+        "Load detailed instructions and activate recommended tools for an available skill."
+    )
+)
+async def load_skill(
+    context: ToolCallContext, input_value: LoadSkillInput
+) -> DictOutput:
+    payload = await context.harness.load_skill(input_value.skill_id)
+    return DictOutput(value=payload)
 
 
 @tool()
@@ -225,7 +241,9 @@ async def feedback(context: ToolCallContext, input_value: FeedbackInput) -> Dict
     return DictOutput(value={"response": response})
 
 
-def create_core_tools(*, feedback_enabled: bool) -> dict[str, HarnessTool[Any, Any]]:
+def create_core_tools(
+    *, feedback_enabled: bool, skills_enabled: bool = False
+) -> dict[str, HarnessTool[Any, Any]]:
     tools = {
         item.name: item
         for item in (
@@ -243,6 +261,8 @@ def create_core_tools(*, feedback_enabled: bool) -> dict[str, HarnessTool[Any, A
     }
     if feedback_enabled:
         tools[feedback.name] = feedback
+    if skills_enabled:
+        tools[load_skill.name] = load_skill
     return tools
 
 
@@ -255,6 +275,7 @@ __all__ = [
     "FeedbackInput",
     "ForgetInput",
     "ListOutput",
+    "LoadSkillInput",
     "RecallInput",
     "RememberInput",
     "SearchToolsInput",
@@ -266,6 +287,7 @@ __all__ = [
     "create_core_tools",
     "feedback",
     "forget",
+    "load_skill",
     "recall",
     "remember",
     "search_tools",

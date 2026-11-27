@@ -19,7 +19,12 @@ from hyperforge.api.mcp_sessions import MCPSessionStore
 from hyperforge.api.settings import Settings
 from hyperforge.broker import Broker
 from hyperforge.broker.redis import RedisBroker
-from hyperforge.configure import GLOBAL_REGISTRY, load_all_configurations, scan
+from hyperforge.configure import (
+    GLOBAL_REGISTRY,
+    load_all_configurations,
+    load_entry_point_plugins,
+    scan,
+)
 from hyperforge.db.agents import AgentManager
 from hyperforge.db.settings import DataManagerSettings
 from hyperforge.feature_flag import get_flag_service
@@ -162,6 +167,7 @@ class HTTPApplication(FastAPI):
                 load_all_configurations(load_module)
             except ImportError:
                 logger.error(f"Module {load_module} could not be loaded")
+        load_entry_point_plugins()
 
     async def shutdown(self) -> None:
         if hasattr(self, "mcp_server_pool"):

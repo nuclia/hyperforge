@@ -6,18 +6,25 @@ from pydantic import BaseModel, BeforeValidator
 from starlette.requests import Request
 
 from hyperforge.api.authentication import requires_one
-from hyperforge.api.models import AgentID, StashRoles
+from hyperforge.api.models import AgentID, SkillID, StashRoles, ToolkitID
 from hyperforge.api.v1.router import router
 from hyperforge.configure import (
     validate_agent_context,
     validate_agent_generation,
     validate_agent_postprocess,
     validate_agent_preprocess,
+    validate_toolkit,
 )
 from hyperforge.db import exceptions
 from hyperforge.db.agents import AgentManager
+from hyperforge.harness_sdk import HarnessSkill, ToolkitConfig
 from hyperforge.models import Rules
-from hyperforge.workflows import WorkflowData, WorkflowInput, WorkflowUpdate
+from hyperforge.workflows import (
+    WorkflowData,
+    WorkflowHarnessUpdate,
+    WorkflowInput,
+    WorkflowUpdate,
+)
 
 if TYPE_CHECKING:
     from hyperforge.api.app import HTTPApplication
@@ -640,4 +647,251 @@ async def get_context(
             agent_id=agent_id,
             workflow_id=workflow_id,
         )
+    )
+
+
+@router.get(
+    "/api/v1/agent/{agent_id}/workflow/{workflow_id}/harness",
+    status_code=200,
+    description="Get Workflow Harness Configuration",
+    tags=["Workflows"],
+)
+@requires_one([StashRoles.OWNER])
+async def get_workflow_harness(
+    request: Request,
+    agent_id: str,
+    workflow_id: str,
+    x_stf_user: str = Header(..., include_in_schema=False),
+    x_stf_account: str = Header(..., include_in_schema=False),
+    x_stf_account_type: str = Header(..., include_in_schema=False),
+) -> WorkflowHarnessUpdate:
+    agent_manager: AgentManager = request.app.agent_manager
+    return await _not_found_as_404(
+        agent_manager.get_workflow_harness(
+            account=x_stf_account,
+            agent_id=agent_id,
+            workflow_id=workflow_id,
+        )
+    )
+
+
+@router.patch(
+    "/api/v1/agent/{agent_id}/workflow/{workflow_id}/harness",
+    status_code=200,
+    description="Update Workflow Harness Configuration",
+    tags=["Workflows"],
+)
+@requires_one([StashRoles.OWNER])
+async def patch_workflow_harness(
+    request: Request,
+    agent_id: str,
+    workflow_id: str,
+    item: WorkflowHarnessUpdate,
+    x_stf_user: str = Header(..., include_in_schema=False),
+    x_stf_account: str = Header(..., include_in_schema=False),
+    x_stf_account_type: str = Header(..., include_in_schema=False),
+) -> None:
+    agent_manager: AgentManager = request.app.agent_manager
+    await _not_found_as_404(
+        agent_manager.set_workflow_harness(
+            account=x_stf_account,
+            agent_id=agent_id,
+            workflow_id=workflow_id,
+            item=item,
+        )
+    )
+
+
+@router.post(
+    "/api/v1/agent/{agent_id}/workflow/{workflow_id}/toolkits",
+    status_code=200,
+    description="Attach Toolkit to Workflow",
+    tags=["Workflow Toolkits"],
+)
+@requires_one([StashRoles.OWNER])
+async def add_workflow_toolkit(
+    request: Request,
+    agent_id: str,
+    workflow_id: str,
+    item: Annotated[ToolkitConfig, BeforeValidator(validate_toolkit)],
+    x_stf_user: str = Header(..., include_in_schema=False),
+    x_stf_account: str = Header(..., include_in_schema=False),
+    x_stf_account_type: str = Header(..., include_in_schema=False),
+) -> ToolkitID:
+    agent_manager: AgentManager = request.app.agent_manager
+    tk_id = await _not_found_as_404(
+        agent_manager.add_toolkit(
+            account=x_stf_account,
+            agent_id=agent_id,
+            workflow_id=workflow_id,
+            toolkit=item,
+        )
+    )
+    return ToolkitID(id=tk_id)
+
+
+@router.get(
+    "/api/v1/agent/{agent_id}/workflow/{workflow_id}/toolkits",
+    status_code=200,
+    description="List Workflow Toolkits",
+    tags=["Workflow Toolkits"],
+)
+@requires_one([StashRoles.OWNER])
+async def get_workflow_toolkits(
+    request: Request,
+    agent_id: str,
+    workflow_id: str,
+    x_stf_user: str = Header(..., include_in_schema=False),
+    x_stf_account: str = Header(..., include_in_schema=False),
+    x_stf_account_type: str = Header(..., include_in_schema=False),
+) -> List[Any]:
+    agent_manager: AgentManager = request.app.agent_manager
+    return await _not_found_as_404(
+        agent_manager.get_toolkits(
+            account=x_stf_account,
+            agent_id=agent_id,
+            workflow_id=workflow_id,
+        )
+    )
+
+
+@router.patch(
+    "/api/v1/agent/{agent_id}/workflow/{workflow_id}/toolkits/{toolkit_id}",
+    status_code=200,
+    description="Update Workflow Toolkit",
+    tags=["Workflow Toolkits"],
+)
+@requires_one([StashRoles.OWNER])
+async def patch_workflow_toolkit(
+    request: Request,
+    agent_id: str,
+    workflow_id: str,
+    toolkit_id: UUID,
+    item: Annotated[ToolkitConfig, BeforeValidator(validate_toolkit)],
+    x_stf_user: str = Header(..., include_in_schema=False),
+    x_stf_account: str = Header(..., include_in_schema=False),
+    x_stf_account_type: str = Header(..., include_in_schema=False),
+) -> None:
+    agent_manager: AgentManager = request.app.agent_manager
+    await _not_found_as_404(
+        agent_manager.patch_toolkit(
+            account=x_stf_account,
+            agent_id=agent_id,
+            workflow_id=workflow_id,
+            toolkit_id=toolkit_id,
+            toolkit=item,
+        )
+    )
+
+
+@router.delete(
+    "/api/v1/agent/{agent_id}/workflow/{workflow_id}/toolkits/{toolkit_id}",
+    status_code=200,
+    description="Delete Workflow Toolkit",
+    tags=["Workflow Toolkits"],
+)
+@requires_one([StashRoles.OWNER])
+async def delete_workflow_toolkit(
+    request: Request,
+    agent_id: str,
+    workflow_id: str,
+    toolkit_id: UUID,
+    x_stf_user: str = Header(..., include_in_schema=False),
+    x_stf_account: str = Header(..., include_in_schema=False),
+    x_stf_account_type: str = Header(..., include_in_schema=False),
+) -> None:
+    agent_manager: AgentManager = request.app.agent_manager
+    await _not_found_as_404(
+        agent_manager.delete_toolkit(
+            account=x_stf_account,
+            agent_id=agent_id,
+            workflow_id=workflow_id,
+            toolkit_id=toolkit_id,
+        )
+    )
+
+
+@router.post(
+    "/api/v1/agent/{agent_id}/skills",
+    status_code=200,
+    description="Add Skill to Agent",
+    tags=["Agent Skills"],
+)
+@requires_one([StashRoles.OWNER])
+async def add_agent_skill(
+    request: Request,
+    agent_id: str,
+    item: HarnessSkill,
+    x_stf_user: str = Header(..., include_in_schema=False),
+    x_stf_account: str = Header(..., include_in_schema=False),
+    x_stf_account_type: str = Header(..., include_in_schema=False),
+) -> SkillID:
+    agent_manager: AgentManager = request.app.agent_manager
+    row_id = await agent_manager.add_skill(
+        account=x_stf_account, agent_id=agent_id, skill=item
+    )
+    return SkillID(id=row_id)
+
+
+@router.get(
+    "/api/v1/agent/{agent_id}/skills",
+    status_code=200,
+    description="List Agent Skills",
+    tags=["Agent Skills"],
+)
+@requires_one([StashRoles.OWNER])
+async def get_agent_skills(
+    request: Request,
+    agent_id: str,
+    x_stf_user: str = Header(..., include_in_schema=False),
+    x_stf_account: str = Header(..., include_in_schema=False),
+    x_stf_account_type: str = Header(..., include_in_schema=False),
+) -> List[HarnessSkill]:
+    agent_manager: AgentManager = request.app.agent_manager
+    return await agent_manager.get_skills(account=x_stf_account, agent_id=agent_id)
+
+
+@router.patch(
+    "/api/v1/agent/{agent_id}/skills/{skill_id}",
+    status_code=200,
+    description="Update Agent Skill",
+    tags=["Agent Skills"],
+)
+@requires_one([StashRoles.OWNER])
+async def patch_agent_skill(
+    request: Request,
+    agent_id: str,
+    skill_id: str,
+    item: HarnessSkill,
+    x_stf_user: str = Header(..., include_in_schema=False),
+    x_stf_account: str = Header(..., include_in_schema=False),
+    x_stf_account_type: str = Header(..., include_in_schema=False),
+) -> None:
+    agent_manager: AgentManager = request.app.agent_manager
+    await agent_manager.patch_skill(
+        account=x_stf_account,
+        agent_id=agent_id,
+        skill_id=skill_id,
+        skill=item,
+    )
+
+
+@router.delete(
+    "/api/v1/agent/{agent_id}/skills/{skill_id}",
+    status_code=200,
+    description="Delete Agent Skill",
+    tags=["Agent Skills"],
+)
+@requires_one([StashRoles.OWNER])
+async def delete_agent_skill(
+    request: Request,
+    agent_id: str,
+    skill_id: str,
+    x_stf_user: str = Header(..., include_in_schema=False),
+    x_stf_account: str = Header(..., include_in_schema=False),
+    x_stf_account_type: str = Header(..., include_in_schema=False),
+) -> None:
+    agent_manager: AgentManager = request.app.agent_manager
+    await agent_manager.delete_skill(
+        account=x_stf_account, agent_id=agent_id, skill_id=skill_id
     )

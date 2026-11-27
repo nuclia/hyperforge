@@ -1,7 +1,9 @@
 import hashlib
+import importlib.metadata
 import logging
 import sys
 import types
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from typing import (
     TYPE_CHECKING,
@@ -13,6 +15,7 @@ from typing import (
     Tuple,
     Type,
     TypeVar,
+    Union,
 )
 
 from hyperforge.feature_flag import Features, has_feature
@@ -22,8 +25,21 @@ logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from hyperforge.agent import Agent, AgentConfig
     from hyperforge.driver import Driver, DriverConfig
+    from hyperforge.harness_sdk.skills import HarnessSkill
+    from hyperforge.harness_sdk.toolkits import (
+        BaseToolkit,
+        ToolkitConfig,
+        ToolkitRuntime,
+    )
 ResolvableType = TypeVar("ResolvableType", types.ModuleType, types.FunctionType, type)
 T = TypeVar("T", bound="BaseRegistry")
+
+ENTRYPOINT_GROUPS = (
+    "hyperforge.drivers",
+    "hyperforge.toolkits",
+    "hyperforge.skills",
+    "hyperforge.migrations",
+)
 
 
 @dataclass
@@ -49,6 +65,24 @@ class DriverRegistry(BaseRegistry):
 
 
 @dataclass
+class ToolkitRegistry(BaseRegistry):
+    title: str
+    description: str
+    config_schema: Type["ToolkitConfig"]
+    klass: Optional[Type["BaseToolkit[Any]"]] = None
+
+
+@dataclass
+class SkillRegistry(BaseRegistry):
+    skill: Optional["HarnessSkill"] = None
+
+
+@dataclass
+class MigrationRegistry(BaseRegistry):
+    handler: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None
+
+
+@dataclass
 class Registration:
     klass: Any
     config: BaseRegistry
@@ -67,6 +101,9 @@ _registered_configuration_handlers = {}
 class Registry:
     agents: Dict[str, AgentRegistry] = field(default_factory=dict)
     drivers: Dict[str, DriverRegistry] = field(default_factory=dict)
+    toolkits: Dict[str, ToolkitRegistry] = field(default_factory=dict)
+    skills: Dict[str, SkillRegistry] = field(default_factory=dict)
+    migrations: Dict[str, MigrationRegistry] = field(default_factory=dict)
     preprocess_agents: Dict[str, AgentRegistry] = field(default_factory=dict)
     postprocess_agents: Dict[str, AgentRegistry] = field(default_factory=dict)
     generation_agents: Dict[str, AgentRegistry] = field(default_factory=dict)
@@ -75,6 +112,9 @@ class Registry:
     def clear(self):
         self.agents.clear()
         self.drivers.clear()
+        self.toolkits.clear()
+        self.skills.clear()
+        self.migrations.clear()
         self.preprocess_agents.clear()
         self.postprocess_agents.clear()
         self.generation_agents.clear()
@@ -163,6 +203,21 @@ class agent(_base_decorator[AgentRegistry]):
 class driver(_base_decorator[DriverRegistry]):
     configuration_type = "driver"
     config_klass = DriverRegistry
+
+
+class toolkit(_base_decorator[ToolkitRegistry]):
+    configuration_type = "toolkit"
+    config_klass = ToolkitRegistry
+
+
+class skill(_base_decorator[SkillRegistry]):
+    configuration_type = "skill"
+    config_klass = SkillRegistry
+
+
+class migration(_base_decorator[MigrationRegistry]):
+    configuration_type = "migration"
+    config_klass = MigrationRegistry
 
 
 def scan(path: str):
@@ -260,6 +315,125 @@ def load_driver(
 
 
 register_configuration_handler("driver", load_driver)
+
+
+def load_toolkit(
+    registration: ToolkitRegistry,
+    klass: ResolvableType,
+    _context: Registry = GLOBAL_REGISTRY,
+) -> Any:
+    toolkit_id = registration.id
+    registration.klass = resolve_dotted_name(klass)
+    if toolkit_id is None:
+        raise Exception("Toolkit configuration must have an 'id' field")
+    if toolkit_id in _context.toolkits:
+        return
+    _context.toolkits[toolkit_id] = registration
+
+
+register_configuration_handler("toolkit", load_toolkit)
+
+
+def load_skill_registration(
+    registration: SkillRegistry,
+    target: Any,
+    _context: Registry = GLOBAL_REGISTRY,
+) -> Any:
+    from hyperforge.harness_sdk.skills import HarnessSkill
+
+    skill_id = registration.id
+    if skill_id is None:
+        raise Exception("Skill registration must have an 'id' field")
+    if skill_id in _context.skills:
+        return
+    resolved = resolve_dotted_name(target)
+    if isinstance(resolved, HarnessSkill):
+        registration.skill = resolved
+    elif callable(resolved):
+        built = resolved()
+        if not isinstance(built, HarnessSkill):
+            raise TypeError(f"Skill factory for {skill_id!r} must return HarnessSkill")
+        registration.skill = built
+    else:
+        raise TypeError(
+            f"Skill registration {skill_id!r} must be a HarnessSkill or callable"
+        )
+    _context.skills[skill_id] = registration
+
+
+register_configuration_handler("skill", load_skill_registration)
+
+
+def load_migration_registration(
+    registration: MigrationRegistry,
+    target: Any,
+    _context: Registry = GLOBAL_REGISTRY,
+) -> Any:
+    migration_id = registration.id
+    if migration_id is None:
+        raise Exception("Migration registration must have an 'id' field")
+    if migration_id in _context.migrations:
+        return
+    resolved = resolve_dotted_name(target)
+    if not callable(resolved):
+        raise TypeError(f"Migration registration {migration_id!r} must be callable")
+    registration.handler = resolved
+    _context.migrations[migration_id] = registration
+
+
+register_configuration_handler("migration", load_migration_registration)
+
+
+def load_builtin_toolkits(_context: Registry = GLOBAL_REGISTRY) -> None:
+    """Register core Hyperforge pipeline toolkits and built-in skills."""
+    scan("hyperforge.toolkits")
+    load_all_configurations("hyperforge.toolkits", _context=_context)
+
+
+def load_entry_point_plugins(
+    _context: Registry = GLOBAL_REGISTRY,
+    groups: Sequence[str] = ENTRYPOINT_GROUPS,
+    *,
+    include_builtins: bool = True,
+) -> None:
+    """Discover built-in and external drivers, toolkits, skills, and migrations."""
+    from hyperforge.harness_sdk.skills import HarnessSkill
+
+    if include_builtins:
+        load_builtin_toolkits(_context=_context)
+
+    for group in groups:
+        for ep in importlib.metadata.entry_points(group=group):
+            try:
+                loaded = ep.load()
+                module_name = ep.value.split(":", 1)[0]
+                load_all_configurations(module_name, _context=_context)
+                if group == "hyperforge.skills" and ep.name not in _context.skills:
+                    skill_obj = (
+                        loaded
+                        if isinstance(loaded, HarnessSkill)
+                        else loaded()
+                        if callable(loaded)
+                        else None
+                    )
+                    if isinstance(skill_obj, HarnessSkill):
+                        _context.skills[ep.name] = SkillRegistry(
+                            id=ep.name, skill=skill_obj
+                        )
+                elif (
+                    group == "hyperforge.migrations"
+                    and ep.name not in _context.migrations
+                    and callable(loaded)
+                ):
+                    _context.migrations[ep.name] = MigrationRegistry(
+                        id=ep.name, handler=loaded
+                    )
+            except Exception:
+                logger.exception(
+                    "Failed loading Hyperforge entry point plugin: group=%s name=%s",
+                    group,
+                    ep.name,
+                )
 
 
 def get_agent_config_instance(
@@ -576,3 +750,120 @@ def get_generation_agent_schemas(
         for id, agent in _context.generation_agents.items()
         if enabled_agent(agent, running_environment, account_md5)
     }
+
+
+def get_toolkit_config_klass(
+    toolkit_id: str, _context: Registry = GLOBAL_REGISTRY
+) -> Type["ToolkitConfig"]:
+    entry = _context.toolkits.get(toolkit_id)
+    if entry is None and _context is GLOBAL_REGISTRY:
+        load_entry_point_plugins(_context=_context)
+        entry = _context.toolkits.get(toolkit_id)
+    if entry is None:
+        raise Exception(f"Toolkit module '{toolkit_id}' is not registered")
+    return entry.config_schema
+
+
+def get_toolkit_klass(
+    toolkit_id: str, _context: Registry = GLOBAL_REGISTRY
+) -> Type["BaseToolkit[Any]"]:
+    entry = _context.toolkits.get(toolkit_id)
+    if entry is None and _context is GLOBAL_REGISTRY:
+        load_entry_point_plugins(_context=_context)
+        entry = _context.toolkits.get(toolkit_id)
+    if entry is None or entry.klass is None:
+        raise Exception(f"Klass not found for toolkit module '{toolkit_id}'")
+    return entry.klass
+
+
+def get_toolkit_config_instance(
+    toolkit_config: Dict[str, Any], _context: Registry = GLOBAL_REGISTRY
+) -> "ToolkitConfig":
+    provider = toolkit_config.get("toolkit")
+    if provider is None:
+        raise Exception("Toolkit configuration must have a 'toolkit' field")
+    config_klass = get_toolkit_config_klass(provider, _context=_context)
+    return config_klass.model_validate(toolkit_config)
+
+
+def validate_toolkit(
+    item: Any, _context: Registry = GLOBAL_REGISTRY
+) -> "ToolkitConfig":
+    from hyperforge.harness_sdk.toolkits import ToolkitConfig
+
+    if isinstance(item, ToolkitConfig):
+        return item
+    if not isinstance(item, dict):
+        raise ValueError("Toolkit configuration must be a dictionary")
+    provider = item.get("toolkit")
+    if provider is None:
+        raise ValueError("Toolkit configuration must have a 'toolkit' field")
+    if provider not in _context.toolkits and _context is GLOBAL_REGISTRY:
+        load_entry_point_plugins(_context=_context)
+    if provider not in _context.toolkits:
+        raise ValueError(
+            f"Toolkit module '{provider}' is not registered in the toolkits registry"
+        )
+    return _context.toolkits[provider].config_schema.model_validate(item)
+
+
+async def create_toolkit_instance(
+    toolkit_config: Union[Dict[str, Any], "ToolkitConfig"],
+    *,
+    runtime: Optional["ToolkitRuntime"] = None,
+    _context: Registry = GLOBAL_REGISTRY,
+) -> "BaseToolkit[Any]":
+    from hyperforge.harness_sdk.toolkits import ToolkitConfig
+
+    config_obj = (
+        toolkit_config
+        if isinstance(toolkit_config, ToolkitConfig)
+        else get_toolkit_config_instance(toolkit_config, _context=_context)
+    )
+    klass = get_toolkit_klass(config_obj.toolkit, _context=_context)
+    return await klass.from_config(config_obj, runtime=runtime)
+
+
+def enabled_toolkit(
+    entry: ToolkitRegistry, running_environment: str, account_md5: str
+) -> bool:
+    return not has_feature(
+        flag_key=Features.FILTERED_AGENTS_FEATURE_FLAG.format(
+            environment=running_environment
+        ),
+        context={"agents": entry.id, "toolkits": entry.id},
+    ) or has_feature(
+        flag_key=Features.RAO_ACCOUNT_ENABLED_FEATURE_FLAG.format(
+            account_md5=account_md5
+        ),
+        context={"agents": entry.id, "toolkits": entry.id},
+        default=False,
+    )
+
+
+def create_toolkit_schema(entry: ToolkitRegistry) -> Dict[str, Any]:
+    return {
+        "id": entry.id,
+        "title": entry.title,
+        "description": entry.description,
+        "config_schema": entry.config_schema.model_json_schema(),
+    }
+
+
+def get_toolkit_schemas(
+    running_environment: str = "production",
+    account_id: str = "account_id",
+    _context: Registry = GLOBAL_REGISTRY,
+) -> Dict[str, Dict[str, Any]]:
+    account_md5 = hashlib.md5(account_id.encode()).hexdigest()
+    return {
+        toolkit_id: create_toolkit_schema(entry)
+        for toolkit_id, entry in _context.toolkits.items()
+        if enabled_toolkit(entry, running_environment, account_md5)
+    }
+
+
+def get_registered_skills(_context: Registry = GLOBAL_REGISTRY) -> List["HarnessSkill"]:
+    return [
+        entry.skill for entry in _context.skills.values() if entry.skill is not None
+    ]

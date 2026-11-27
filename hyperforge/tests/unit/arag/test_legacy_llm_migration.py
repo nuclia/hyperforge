@@ -68,41 +68,51 @@ def test_migrate_legacy_fields_in_stored_configs(test_db):
     row_id = str(uuid4())
     test_db.execute(
         text(
-            "INSERT INTO retrieval_agent_config (account, agent_id, rules, memory) "
-            "VALUES (:account, :agent_id, '{}'::jsonb, '{}'::jsonb)"
-        ),
-        {"account": row_id, "agent_id": row_id},
+            "CREATE TABLE IF NOT EXISTS retrieval_agent_preprocess ("
+            "id UUID PRIMARY KEY, account VARCHAR NOT NULL, agent_id VARCHAR NOT NULL, "
+            "workflow_id VARCHAR NOT NULL, preprocess JSONB NOT NULL)"
+        )
     )
-    test_db.execute(
-        text(
-            "INSERT INTO retrieval_agent_workflow (account, agent_id, workflow_id, name) "
-            "VALUES (:account, :agent_id, 'default', 'default')"
-        ),
-        {"account": row_id, "agent_id": row_id},
-    )
-    test_db.execute(
-        text(
-            "INSERT INTO retrieval_agent_preprocess "
-            "(id, account, agent_id, workflow_id, preprocess) "
-            "VALUES (:id, :account, :agent_id, 'default', CAST(:config AS jsonb))"
-        ),
-        {
-            "id": row_id,
-            "account": row_id,
-            "agent_id": row_id,
-            "config": json.dumps(
-                {"module": "rephrase", "model": "chatgpt-azure-4o-mini"}
+    try:
+        test_db.execute(
+            text(
+                "INSERT INTO retrieval_agent_config (account, agent_id, rules, memory) "
+                "VALUES (:account, :agent_id, '{}'::jsonb, '{}'::jsonb)"
             ),
-        },
-    )
+            {"account": row_id, "agent_id": row_id},
+        )
+        test_db.execute(
+            text(
+                "INSERT INTO retrieval_agent_workflow (account, agent_id, workflow_id, name) "
+                "VALUES (:account, :agent_id, 'default', 'default')"
+            ),
+            {"account": row_id, "agent_id": row_id},
+        )
+        test_db.execute(
+            text(
+                "INSERT INTO retrieval_agent_preprocess "
+                "(id, account, agent_id, workflow_id, preprocess) "
+                "VALUES (:id, :account, :agent_id, 'default', CAST(:config AS jsonb))"
+            ),
+            {
+                "id": row_id,
+                "account": row_id,
+                "agent_id": row_id,
+                "config": json.dumps(
+                    {"module": "rephrase", "model": "chatgpt-azure-4o-mini"}
+                ),
+            },
+        )
 
-    assert migrate_legacy_llm_fields(test_db) == 1
-    assert migrate_legacy_llm_fields(test_db) == 0
-    config = test_db.execute(
-        text("SELECT preprocess FROM retrieval_agent_preprocess WHERE id = :id"),
-        {"id": row_id},
-    ).scalar_one()
-    assert config["model"] == {
-        "_type": "llm_config",
-        "model_id": "chatgpt-azure-4o-mini",
-    }
+        assert migrate_legacy_llm_fields(test_db) == 1
+        assert migrate_legacy_llm_fields(test_db) == 0
+        config = test_db.execute(
+            text("SELECT preprocess FROM retrieval_agent_preprocess WHERE id = :id"),
+            {"id": row_id},
+        ).scalar_one()
+        assert config["model"] == {
+            "_type": "llm_config",
+            "model_id": "chatgpt-azure-4o-mini",
+        }
+    finally:
+        test_db.execute(text("DROP TABLE IF EXISTS retrieval_agent_preprocess"))

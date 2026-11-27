@@ -10,6 +10,8 @@ from hyperforge.configure import (
     get_generation_agent_schemas,
     get_postprocess_agent_schemas,
     get_preprocess_agent_schemas,
+    get_registered_skills,
+    get_toolkit_schemas,
 )
 
 
@@ -51,6 +53,11 @@ async def get_schema(
             running_environment=request.app.settings.running_environment,
             account_id=x_stf_account,
         ),
+        "toolkits": get_toolkit_schemas(
+            running_environment=request.app.settings.running_environment,
+            account_id=x_stf_account,
+        ),
+        "skills": [skill.model_dump(mode="json") for skill in get_registered_skills()],
     }
 
     return schema

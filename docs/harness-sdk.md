@@ -202,6 +202,24 @@ needed, registering a schema and formatter with `register_context()`.
 Tools, including Code Mode, are inherited by spawned sub-agents. Code Mode
 resolves tools against the harness executing it, not a captured parent tool list.
 
+## Skills and Toolkits
+
+Attach `HarnessSkill` instances to `AgentHarness(skills=...)` to supply domain
+playbooks and tool-selection instructions:
+
+- `preload=True` injects the skill's instructions directly into the system prompt
+  and immediately activates any matching `lazy_load` `recommended_tools`.
+- `preload=False` (the default) advertises a compact `<available_skills>` catalog
+  and exposes the `load_skill` core tool. Calling `load_skill` returns the full
+  instructions (plus `code_examples` when Code Mode is registered), activates
+  matching `lazy_load` `recommended_tools`, and persists `SKILLS_LOADED` across
+  conversation reloads.
+
+Connector packages extend `BaseToolkit` (`hyperforge.harness_sdk.toolkits`) to
+bundle `HarnessTool`s alongside connector `HarnessSkill`s. `assemble_toolkits()`
+preloads toolkits, prefixes tools and skills with `{namespace}__`, and ingests
+their bundled skills automatically when `ingest_skills=True`.
+
 ## Code Mode
 
 Use `create_codemode_tool()` to orchestrate the agent's currently active external
@@ -283,11 +301,31 @@ non-finite numbers, nested Pydantic models, and the reserved `__model__` key are
 rejected. Tool and utility results share the same serialization and size limits.
 
 Capability names must be unique ASCII public, non-keyword Python identifiers and must not
-conflict with worker names such as `codemode`, `output`, `save`, `question`,
-`agent_id`, `dataclass`, `Chunk`, `Context`, `List`, `Any`, `Dict`, `re`, or `math`.
+conflict with worker names such as `codemode`, `output`, `call`, `parallel`,
+`emit_step`, `workflow_context`, `save`, `question`, `agent_id`, `dataclass`,
+`Chunk`, `Context`, `List`, `Any`, `Dict`, `re`, or `math`.
 Utility names must not collide with active tool names; collisions fail rather
 than silently shadowing a tool. Function arguments named `agent_id` pass through
 unchanged.
+
+### Code Mode Workflow Primitives
+
+Code Mode includes built-in primitives for authoring deterministic or hybrid
+multi-stage workflows (such as preprocess $\rightarrow$ parallel retrieval $\rightarrow$
+generation $\rightarrow$ postprocess/restart loops):
+
+- `parallel([call(tool_fn, arg=...), ...])` dispatches multiple tool or
+  capability calls concurrently on the host and returns their JSON results in
+  call order while enforcing `max_nested_calls` and `UsageLimits.max_tool_calls`.
+- `emit_step(title, reason="", value="")` emits a bounded `WORKFLOW_STEP` event
+  attributed to the outer Code Mode invocation.
+- `workflow_context` provides read-only JSON session state (`question`,
+  `arguments`, `history`, `rules`, `user_info`).
+- `AgentHarness.run_code_workflow(code, prompt, ...)` (or
+  `HarnessAgentConfig(execution_mode="code", workflow_code=...)`) executes a
+  workflow script inside a normal `AgentHarness` turn without an outer solver LLM
+  request, normalizing `output({...})` through `WorkflowOutput` (`answer`,
+  `citations`, `contexts`, `related_questions`, `visualizations`, `is_answered`).
 
 `CodeModeLimits` applies source, per-call projected-result, cumulative
 projected-result, final-output, and nested-call limits to each invocation.
